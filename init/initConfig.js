@@ -1,0 +1,40 @@
+export default {
+   init: (AB) => {
+      return new Promise((resolve, reject) => {
+         var headers = new Headers();
+         var token = AB.setting("tenant");
+         if (token) {
+            headers.append("Tenant-Token", token);
+         }
+
+         //// DEV TESTING:
+         //// uncomment the api_sails/authTenant.js && index.ejs entries for these values
+         //// to test url prefix route resolutions:
+         // var prefix = AB.setting("prefix");
+         // if (prefix) {
+         //    headers.append("Tenant-Test-Prefix", prefix);
+         // }
+         //// DEV TESTING
+
+         fetch("/config", { headers })
+            .then((response) => {
+               if (response.ok) {
+                  // wait for .json()
+                  response.json().then((res) => {
+                     console.log(res);
+                     AB.config(res.data);
+                     resolve();
+                  });
+               } else {
+                  AB.error(
+                     `Error communicating with Server: ${response.status}`
+                  );
+                  reject(response.status);
+               }
+            })
+            .catch((err) => {
+               console.error("initConfig:fetch(/config):", err);
+            });
+      });
+   }
+};

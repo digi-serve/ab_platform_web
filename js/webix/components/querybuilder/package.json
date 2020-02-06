@@ -1,0 +1,49 @@
+{
+  "_from": "@xbs/querybuilder",
+  "_id": "@xbs/querybuilder@6.2.6",
+  "_inBundle": false,
+  "_integrity": "sha512-OPVEBAEOxV1dPQjYHpsMJfBasB2AfWvJqITgN1ObhxqHQ3vvpmlA2yRrK5w42iRXuGp4mTnZVIcQJhPu+yJtsw==",
+  "_location": "/@xbs/querybuilder",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "@xbs/querybuilder",
+    "name": "@xbs/querybuilder",
+    "escapedName": "@xbs%2fquerybuilder",
+    "scope": "@xbs",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://npm.webix.com/@xbs%2fquerybuilder/-/querybuilder-6.2.6.tgz",
+  "_shasum": "0511923e410ed27d5d2b57af18f25fa801916dc6",
+  "_spec": "@xbs/querybuilder",
+  "_where": "/Users/jamesduncan/Desktop",
+  "author": {
+    "name": "XB Software"
+  },
+  "bundleDependencies": false,
+  "deprecated": false,
+  "description": "Webix UI",
+  "keywords": [
+    "webix",
+    "ui",
+    "widgets"
+  ],
+  "license": "SEE LICENSE IN license.text",
+  "main": "querybuilder.js",
+  "name": "@xbs/querybuilder",
+  "publishConfig": {
+    "registry": "https://npm.webix.com"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "types": "types/querybuilder.d.ts",
+  "version": "6.2.6"
+}

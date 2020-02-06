@@ -1,0 +1,49 @@
+{
+  "_from": "@xbs/kanban",
+  "_id": "@xbs/kanban@6.2.6",
+  "_inBundle": false,
+  "_integrity": "sha512-t6VX5iCzDCYwGk6peuNVkdwMLY+5sHeW/6TkWUojEc/7MGBiYIGcg09SJ2e7+vTypPaQB2xkJvUHMqguQROMeg==",
+  "_location": "/@xbs/kanban",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "@xbs/kanban",
+    "name": "@xbs/kanban",
+    "escapedName": "@xbs%2fkanban",
+    "scope": "@xbs",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://npm.webix.com/@xbs%2fkanban/-/kanban-6.2.6.tgz",
+  "_shasum": "f1ebfe450a84d5b0008d693edc4216ed50df78aa",
+  "_spec": "@xbs/kanban",
+  "_where": "/Users/jamesduncan/Desktop",
+  "author": {
+    "name": "XB Software"
+  },
+  "bundleDependencies": false,
+  "deprecated": false,
+  "description": "Webix UI",
+  "keywords": [
+    "webix",
+    "ui",
+    "widgets"
+  ],
+  "license": "SEE LICENSE IN license.text",
+  "main": "kanban.js",
+  "name": "@xbs/kanban",
+  "publishConfig": {
+    "registry": "https://npm.webix.com"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "types": "types/kanban.d.ts",
+  "version": "6.2.6"
+}
