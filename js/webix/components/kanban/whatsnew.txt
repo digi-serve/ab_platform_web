@@ -1,3 +1,10 @@
+Version 6.4.6 (September 2019)
+
+### Fixes
+
+- moving card may trigger data saving two times
+
+
 Version 6.1 (November 2018)
 -----------------
 ### Major Features

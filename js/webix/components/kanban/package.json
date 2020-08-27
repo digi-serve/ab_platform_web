@@ -1,35 +1,57 @@
 {
-  "_from": "@xbs/kanban",
-  "_id": "@xbs/kanban@6.2.6",
-  "_inBundle": false,
-  "_integrity": "sha512-t6VX5iCzDCYwGk6peuNVkdwMLY+5sHeW/6TkWUojEc/7MGBiYIGcg09SJ2e7+vTypPaQB2xkJvUHMqguQROMeg==",
+  "_args": [
+    [
+      {
+        "raw": "@xbs/kanban",
+        "scope": "@xbs",
+        "escapedName": "@xbs%2fkanban",
+        "name": "@xbs/kanban",
+        "rawSpec": "",
+        "spec": "latest",
+        "type": "tag"
+      },
+      "/home/pong/Desktop/new-webix"
+    ]
+  ],
+  "_from": "@xbs/kanban@latest",
+  "_id": "@xbs/kanban@7.2.0",
+  "_inCache": true,
   "_location": "/@xbs/kanban",
+  "_nodeVersion": "10.16.3",
+  "_npmUser": {
+    "name": "mkozhukh",
+    "email": "cawnpm"
+  },
+  "_npmVersion": "6.9.0",
   "_phantomChildren": {},
   "_requested": {
-    "type": "tag",
-    "registry": true,
     "raw": "@xbs/kanban",
-    "name": "@xbs/kanban",
-    "escapedName": "@xbs%2fkanban",
     "scope": "@xbs",
+    "escapedName": "@xbs%2fkanban",
+    "name": "@xbs/kanban",
     "rawSpec": "",
-    "saveSpec": null,
-    "fetchSpec": "latest"
+    "spec": "latest",
+    "type": "tag"
   },
   "_requiredBy": [
-    "#USER",
-    "/"
+    "#USER"
   ],
-  "_resolved": "https://npm.webix.com/@xbs%2fkanban/-/kanban-6.2.6.tgz",
-  "_shasum": "f1ebfe450a84d5b0008d693edc4216ed50df78aa",
+  "_resolved": "http://npm.webix.com/@xbs%2fkanban/-/kanban-7.2.0.tgz",
+  "_shasum": "4a4f06d254b2a54dd0f608155b9786b51644272e",
+  "_shrinkwrap": null,
   "_spec": "@xbs/kanban",
-  "_where": "/Users/jamesduncan/Desktop",
+  "_where": "/home/pong/Desktop/new-webix",
   "author": {
     "name": "XB Software"
   },
-  "bundleDependencies": false,
-  "deprecated": false,
+  "dependencies": {},
   "description": "Webix UI",
+  "devDependencies": {},
+  "dist": {
+    "integrity": "sha512-t1QkT9WcXT5aSsvBoYdKGQr8YGCDOQBqz5ixVCge5aPs3KUDtPS8a7+e2uxxIX34i4jtRKbtyB8ZRE3G0eTskA==",
+    "shasum": "4a4f06d254b2a54dd0f608155b9786b51644272e",
+    "tarball": "https://npm.webix.com/@xbs%2fkanban/-/kanban-7.2.0.tgz"
+  },
   "keywords": [
     "webix",
     "ui",
@@ -37,13 +59,22 @@
   ],
   "license": "SEE LICENSE IN license.text",
   "main": "kanban.js",
+  "maintainers": [
+    {
+      "name": "mkozhukh",
+      "email": "cawnpm"
+    }
+  ],
   "name": "@xbs/kanban",
+  "optionalDependencies": {},
   "publishConfig": {
     "registry": "https://npm.webix.com"
   },
+  "readme": "ERROR: No README data found!",
+  "readmeFilename": "readme.txt",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "types": "types/kanban.d.ts",
-  "version": "6.2.6"
+  "version": "7.2.0"
 }

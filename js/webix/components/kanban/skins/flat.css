@@ -250,20 +250,24 @@
   color: #888;
 }
 /*Uploader*/
-.webix_kanban_uploader button.webix_img_btn {
-  background: transparent;
+.webix_kanban_uploader .webix_button.webix_img_btn {
   color: #666666;
   font-size: 15px;
   text-align: right;
 }
-.webix_kanban_uploader button.webix_img_btn:hover {
+.webix_kanban_uploader .webix_button.webix_img_btn:hover {
+  background: transparent;
   color: #3498d8;
 }
-.webix_kanban_uploader button.webix_img_btn:hover .webix_icon_btn {
+.webix_kanban_uploader .webix_button.webix_img_btn:hover .webix_kanban_icon {
   color: #3498d8;
 }
-.webix_kanban_uploader button.webix_img_btn:active {
+.webix_kanban_uploader .webix_button.webix_img_btn:active {
+  background: transparent;
   box-shadow: none;
+}
+.webix_kanban_uploader .webix_button.webix_img_btn:focus {
+  background: transparent;
 }
 .webix_kanban_uploader_label {
   display: block;

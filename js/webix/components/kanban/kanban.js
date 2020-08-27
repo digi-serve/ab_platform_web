@@ -1,6 +1,6 @@
 /**
  * @license
- * Webix Kanban v.6.2.6
+ * Webix Kanban v.7.2.0
  * This software is covered by Webix Commercial License.
  * Usage without proper license is prohibited.
  * (c) XB Software Ltd.
@@ -258,11 +258,17 @@
       var statusChange = tobj !== this;
       var kanban = this.getKanban();
       var item = kanban.getItem(sid);
+      var dp = webix.dp.$$(kanban.config.id);
 
       if (statusChange) {
         if (!kanban.callEvent("onBeforeStatusChange", [sid, tobj.config.status, tobj])) return;
         kanban.setListStatus(item, tobj);
-        kanban.updateItem(sid);
+
+        if (dp) {
+          dp.ignore(function () {
+            return kanban.updateItem(sid);
+          });
+        } else kanban.updateItem(sid);
       }
 
       item.$index = tindex - 0.1;
@@ -272,8 +278,6 @@
       tobj._fixOrder();
 
       webix.DataMove.move.call(tobj, sid, tindex); // trigger data saving
-
-      var dp = webix.dp.$$(kanban.config.id);
 
       if (dp) {
         var update = webix.copy(item);
@@ -608,8 +612,8 @@
             label: webix.i18n.kanban.editor.upload,
             upload: kanban.config.attachments,
             name: "attachments",
-            autowidth: 1,
-            css: "webix_kanban_uploader",
+            autowidth: true,
+            css: "webix_transparent webix_kanban_uploader",
             type: "icon"
           }]
         }, {

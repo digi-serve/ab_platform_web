@@ -1,35 +1,57 @@
 {
-  "_from": "@xbs/querybuilder",
-  "_id": "@xbs/querybuilder@6.2.6",
-  "_inBundle": false,
-  "_integrity": "sha512-OPVEBAEOxV1dPQjYHpsMJfBasB2AfWvJqITgN1ObhxqHQ3vvpmlA2yRrK5w42iRXuGp4mTnZVIcQJhPu+yJtsw==",
+  "_args": [
+    [
+      {
+        "raw": "@xbs/querybuilder",
+        "scope": "@xbs",
+        "escapedName": "@xbs%2fquerybuilder",
+        "name": "@xbs/querybuilder",
+        "rawSpec": "",
+        "spec": "latest",
+        "type": "tag"
+      },
+      "/home/pong/Desktop/new-webix"
+    ]
+  ],
+  "_from": "@xbs/querybuilder@latest",
+  "_id": "@xbs/querybuilder@7.2.0",
+  "_inCache": true,
   "_location": "/@xbs/querybuilder",
+  "_nodeVersion": "10.16.3",
+  "_npmUser": {
+    "name": "mkozhukh",
+    "email": "cawnpm"
+  },
+  "_npmVersion": "6.9.0",
   "_phantomChildren": {},
   "_requested": {
-    "type": "tag",
-    "registry": true,
     "raw": "@xbs/querybuilder",
-    "name": "@xbs/querybuilder",
-    "escapedName": "@xbs%2fquerybuilder",
     "scope": "@xbs",
+    "escapedName": "@xbs%2fquerybuilder",
+    "name": "@xbs/querybuilder",
     "rawSpec": "",
-    "saveSpec": null,
-    "fetchSpec": "latest"
+    "spec": "latest",
+    "type": "tag"
   },
   "_requiredBy": [
-    "#USER",
-    "/"
+    "#USER"
   ],
-  "_resolved": "https://npm.webix.com/@xbs%2fquerybuilder/-/querybuilder-6.2.6.tgz",
-  "_shasum": "0511923e410ed27d5d2b57af18f25fa801916dc6",
+  "_resolved": "http://npm.webix.com/@xbs%2fquerybuilder/-/querybuilder-7.2.0.tgz",
+  "_shasum": "686b830e0680f7b13ccad434dfb2e70d116a6397",
+  "_shrinkwrap": null,
   "_spec": "@xbs/querybuilder",
-  "_where": "/Users/jamesduncan/Desktop",
+  "_where": "/home/pong/Desktop/new-webix",
   "author": {
     "name": "XB Software"
   },
-  "bundleDependencies": false,
-  "deprecated": false,
+  "dependencies": {},
   "description": "Webix UI",
+  "devDependencies": {},
+  "dist": {
+    "integrity": "sha512-BvJYDD/6bjvEvC6Zbft3Ew8suyLoQPYPWJ2DzmRIBj9bt4QJz1xhqMdYXBedvfwjaHlh9NEcKxrifCw0uNhlhg==",
+    "shasum": "686b830e0680f7b13ccad434dfb2e70d116a6397",
+    "tarball": "https://npm.webix.com/@xbs%2fquerybuilder/-/querybuilder-7.2.0.tgz"
+  },
   "keywords": [
     "webix",
     "ui",
@@ -37,13 +59,22 @@
   ],
   "license": "SEE LICENSE IN license.text",
   "main": "querybuilder.js",
+  "maintainers": [
+    {
+      "name": "mkozhukh",
+      "email": "cawnpm"
+    }
+  ],
   "name": "@xbs/querybuilder",
+  "optionalDependencies": {},
   "publishConfig": {
     "registry": "https://npm.webix.com"
   },
+  "readme": "ERROR: No README data found!",
+  "readmeFilename": "readme.txt",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "types": "types/querybuilder.d.ts",
-  "version": "6.2.6"
+  "version": "7.2.0"
 }

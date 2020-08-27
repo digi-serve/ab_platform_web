@@ -270,20 +270,24 @@ div.webix_kanban_body {
   color: #94a1b3;
 }
 /*Uploader*/
-.webix_kanban_uploader button.webix_img_btn {
-  background: transparent;
+.webix_kanban_uploader .webix_button.webix_img_btn {
   color: #475466;
   font-size: 12px;
   text-align: right;
 }
-.webix_kanban_uploader button.webix_img_btn:hover {
+.webix_kanban_uploader .webix_button.webix_img_btn:hover {
+  background: transparent;
   color: #1CA1C1;
 }
-.webix_kanban_uploader button.webix_img_btn:hover .webix_icon_btn {
+.webix_kanban_uploader .webix_button.webix_img_btn:hover .webix_kanban_icon {
   color: #1CA1C1;
 }
-.webix_kanban_uploader button.webix_img_btn:active {
+.webix_kanban_uploader .webix_button.webix_img_btn:active {
+  background: transparent;
   box-shadow: none;
+}
+.webix_kanban_uploader .webix_button.webix_img_btn:focus {
+  background: transparent;
 }
 .webix_kanban_uploader_label {
   display: block;

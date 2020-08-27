@@ -1,5 +1,22 @@
 Check the full list of changes in Query Builder at https://docs.webix.com/querybuilder__whats_new.html
 
+Version 6.4 (June 2019)
+--------------
+### Fixes
+
+- incorrect sizing when filtering and sorting modes are used at the same time
+- incorrect sizing when columnMode is used and querybuilder is a filter in a datatable
+- queryBuilder lost state on refresh when used as a filter in a datatable
+- regression in validate API
+
+Version 6.3 (April 2019)
+--------------
+### Fixes
+
+- incorrect equal/not-equla check for numeric types in a dataset
+- getValue returns incorect data for nested rules
+- incorrect filtering for "not contains" rule
+
 Version 6.1 (November 2018)
 --------------
 ### Major Features

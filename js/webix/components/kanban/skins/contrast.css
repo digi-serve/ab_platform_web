@@ -64,7 +64,7 @@
   border-color: #a2a2a2;
   border-left-color: #1F884C;
 }
-.webix_kanban_uploader .webix_icon_btn {
+.webix_kanban_uploader .webix_button .webix_kanban_icon {
   color: #ffffff;
 }
 span.webix_kanban_add_icon {
@@ -267,20 +267,24 @@ div.webix_kanban_drop_inner {
   color: #ffffff;
 }
 /*Uploader*/
-.webix_kanban_uploader button.webix_img_btn {
-  background: transparent;
+.webix_kanban_uploader .webix_button.webix_img_btn {
   color: #ffffff;
   font-size: 15px;
   text-align: right;
 }
-.webix_kanban_uploader button.webix_img_btn:hover {
+.webix_kanban_uploader .webix_button.webix_img_btn:hover {
+  background: transparent;
   color: #ff5aff;
 }
-.webix_kanban_uploader button.webix_img_btn:hover .webix_icon_btn {
+.webix_kanban_uploader .webix_button.webix_img_btn:hover .webix_kanban_icon {
   color: #ff5aff;
 }
-.webix_kanban_uploader button.webix_img_btn:active {
+.webix_kanban_uploader .webix_button.webix_img_btn:active {
+  background: transparent;
   box-shadow: none;
+}
+.webix_kanban_uploader .webix_button.webix_img_btn:focus {
+  background: transparent;
 }
 .webix_kanban_uploader_label {
   display: block;

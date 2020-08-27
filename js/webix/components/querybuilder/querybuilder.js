@@ -1,6 +1,6 @@
 /**
  * @license
- * Webix QueryBuilder v.6.2.6
+ * Webix QueryBuilder v.7.2.0
  * This software is covered by Webix Commercial License.
  * Usage without proper license is prohibited.
  * (c) XB Software Ltd.
@@ -418,7 +418,7 @@
 	    };
 	    return select;
 	  },
-	  _inputConfig: function (config, type, value, hidden) {
+	  _inputConfig: function (config, type, value, field) {
 	    var _this3 = this;
 
 	    var input;
@@ -439,7 +439,7 @@
 	        return _this3._onChange("value");
 	      }
 	    };
-	    input.hidden = hidden;
+	    if (field.validate) input.validate = field.validate;
 
 	    if (type === "rangeslider") {
 	      input.min = 0;
@@ -537,7 +537,7 @@
 	        if (value) this.removeView(value);
 
 	        if (editor !== "none") {
-	          this.addView(this._inputConfig(this.config, editor, data.value), 2);
+	          this.addView(this._inputConfig(this.config, editor, data.value, field), 2);
 	        }
 	      }
 	    } else {
@@ -567,13 +567,11 @@
 	  _init_sorting: function () {
 	    var _this = this;
 
-	    if (!this.config.sorting) return;
 	    var locale = webix.i18n.querybuilder;
-	    this.$view.innerHTML = "<div class='webix_qb_sorting'></div>";
-	    this._sortby = webix.ui({
+	    return [{
 	      view: "multiselect",
+	      $id: "by",
 	      label: locale.sortby,
-	      container: this.$view.childNodes[0],
 	      suggest: {
 	        body: {
 	          data: this.config.fields
@@ -587,10 +585,9 @@
 	          _this._callChangeMethod();
 	        }
 	      }
-	    });
-	    this._sortorder = webix.ui(this._sortSelect = {
+	    }, {
 	      view: "richselect",
-	      container: this.$view.childNodes[0],
+	      $id: "order",
 	      options: [{
 	        id: "asc",
 	        value: locale.asc
@@ -607,43 +604,41 @@
 	          }
 	        }
 	      }
-	    });
-	    this.attachEvent("onDestruct", function () {
-	      this._sortby.destructor();
-
-	      this._sortorder.destructor();
-	    });
+	    }, {}];
 	  },
 	  _getSortingValues: function () {
+	    var els = this.getSortingElements();
 	    return {
-	      sortBy: this._sortby.getValue(),
-	      sortAs: this._sortorder.getValue()
+	      sortBy: els[0].getValue(),
+	      sortAs: els[1].getValue()
 	    };
 	  },
 	  _setSortingValues: function (value) {
-	    if (value.fields) {
-	      var list = this._sortby.getList();
+	    var els = this.getSortingElements();
 
+	    if (value.fields) {
+	      var list = els[0].getList();
 	      list.clearAll();
 	      list.parse(value.fields);
 	    }
 
-	    this._sortby.setValue(value.sortBy);
-
-	    this._sortorder.setValue(value.sortAs);
+	    els[0].setValue(value.sortBy);
+	    els[1].setValue(value.sortAs);
 	  },
 	  getSortingElements: function () {
-	    return [this._sortby, this._sortorder];
+	    return [this.queryView({
+	      $id: "by"
+	    }), this.queryView({
+	      $id: "order"
+	    })];
 	  },
 	  getSortingHelper: function () {
-	    var _this2 = this;
-
-	    var state = this._getSortingValues();
-
-	    if (!state.sortBy) return null;
-	    var values = state.sortBy.split(",").map(function (id) {
-	      var item = _this2._sortby.getList().getItem(id);
-
+	    var els = this.getSortingElements();
+	    var by = els[0].getValue();
+	    var sortAs = els[1].getValue();
+	    if (!by) return null;
+	    var values = by.split(",").map(function (id) {
+	      var item = els[0].getList().getItem(id);
 	      var type = item.type;
 	      if (type === "number") type = "int";
 	      return {
@@ -664,7 +659,7 @@
 	        if (order !== 0) break;
 	      }
 
-	      return order * (state.sortAs === "asc" ? 1 : -1);
+	      return order * (sortAs === "asc" ? 1 : -1);
 	    };
 	  }
 	};
@@ -684,6 +679,11 @@
 
 	function filters() {
 	  var locale = webix.i18n.querybuilder;
+
+	  var prepare = function (v) {
+	    return typeof v == "number" ? v.toString() : v;
+	  };
+
 	  return [{
 	    id: "less",
 	    name: locale.less,
@@ -790,7 +790,7 @@
 	    id: "equal",
 	    name: locale.equal,
 	    fn: function (a, b) {
-	      return a === b;
+	      return prepare(a) == prepare(b);
 	    },
 	    type: {
 	      any: "text",
@@ -800,7 +800,7 @@
 	    id: "not_equal",
 	    name: locale.not_equal,
 	    fn: function (a, b) {
-	      return a !== b;
+	      return prepare(a) != prepare(b);
 	    },
 	    type: {
 	      any: "text",
@@ -1036,15 +1036,37 @@
 	      margin: 5
 	    }];
 
-	    this._init_sorting();
-
 	    if (this.config.filtering === false) {
-	      this.config.padding = 0;
-	      this.cols_setter([{
+	      var ui = this.config.sorting ? this._init_sorting() : [{
 	        height: 1
-	      }]);
+	      }];
+	      this.cols_setter(ui);
 	    } else {
-	      this.cols_setter(cols);
+	      // fit width in column's mode
+	      if (this.config.columnMode) cols[1].rows[0].width = cols[1].rows[0].minWidth;
+
+	      if (this.config.sorting) {
+	        if (this.config.columnMode) {
+	          this.rows_setter([{
+	            cols: cols
+	          }, {
+	            cols: this._init_sorting()
+	          }]);
+	        } else {
+	          var _sort = this._init_sorting();
+
+	          _sort.pop();
+
+	          cols.push({
+	            rows: [{
+	              cols: _sort
+	            }, {
+	              gravity: 0.000001
+	            }]
+	          });
+	          this.cols_setter(cols);
+	        }
+	      } else this.cols_setter(cols);
 	    }
 	  },
 	  _updateGlue: function (mode) {
@@ -1123,13 +1145,6 @@
 	  _callChangeMethod: function () {
 	    this._getTopQuery().callEvent("onChange", []);
 	  },
-	  $getSize: function (dx, dy) {
-	    if (this.config.sorting && !this.config.filtering) {
-	      dy = dy + 50;
-	    }
-
-	    return webix.ui.layout.prototype.$getSize.call(this, dx, dy);
-	  },
 	  _setRules: function (rules) {
 	    var _this2 = this;
 
@@ -1155,6 +1170,13 @@
 	    for (var i = 0; i < rows.length; i++) {
 	      if (rows[i].getFilterHelper) cb(rows[i]);
 	    }
+	  },
+	  validate: function () {
+	    var result = true;
+	    this.eachLine(function (line) {
+	      result = result && line.validate();
+	    });
+	    return result;
 	  },
 	  getValue: function () {
 	    var rules = [];
@@ -1254,26 +1276,31 @@
 	}
 
 	webix.ui.datafilter.queryBuilder = webix.extend({
+	  getInputNode: function (node) {
+	    return webix.$$(node._comp_id) || null;
+	  },
 	  getValue: function (node) {
 	    var master = webix.$$(node._comp_id);
 	    return master.getValue();
 	  },
 	  setValue: function (node, value) {
 	    var master = webix.$$(node._comp_id);
-	    master.setValue(value);
+	    master.setValue(value || {});
 	  },
-	  refresh: function (master, node, value) {
+	  refresh: function (master, node, config) {
 	    var _this = this;
 
-	    master.registerFilter(node, value, this);
+	    master.registerFilter(node, config, this);
 	    node._comp_id = master._qb.config.id;
 	    var qb = webix.$$(node._comp_id).getParentView();
-	    this.setValue(node, value);
+	    this.setValue(node, config.value);
 	    webix.event(node, "click", function () {
 	      return _this._filterShow(node, qb);
 	    });
 	  },
 	  render: function (master, config) {
+	    var html = "<div class=\"webix_qb_filter\"><i class=\"webix_qb_filter_icon\" aria-hidden=\"true\"></i></div>" + (config.label || "");
+	    if (config.rendered) return html;
 	    var locale = webix.i18n.querybuilder;
 	    config.css = "webix_ss_filter";
 	    var filter;
@@ -1287,16 +1314,23 @@
 	    };
 
 	    var qb = {
-	      view: "querybuilder"
+	      view: "querybuilder",
+	      fields: config.fields
 	    };
 	    if (config.queryConfig) webix.extend(qb, config.queryConfig);
 	    var popupView;
 
 	    var buttonSave = _buttonCreate(locale.filter, function () {
 	      if (master._qb) {
-	        var helper = master._qb.getFilterHelper();
+	        var cfg = master._qb.config;
 
-	        master.filter(helper);
+	        if (cfg.sorting) {
+	          var sortconfig = master._qb.getSortingHelper();
+
+	          if (sortconfig) master.sort(sortconfig);
+	        }
+
+	        if (cfg.filtering) master.filterByAll();
 	        popupView.hide();
 	      }
 	    }, "form");
@@ -1311,19 +1345,9 @@
 	        cols: [buttonSave, buttonCancel, {}]
 	      }]
 	    };
-
-	    if (config.sorting) {
-	      body.rows.push(_buttonCreate(locale.sort, function () {
-	        if (master._qb) {
-	          master.sort(master._qb.getSortingHelper());
-	          popupView.hide();
-	        }
-	      }));
-	    }
-
 	    var popup = {
 	      view: "popup",
-	      width: 900,
+	      minWidth: 810,
 	      body: body
 	    };
 
@@ -1333,10 +1357,11 @@
 
 	    popupView = webix.ui(popup);
 	    master._qb = popupView.getBody().getChildViews()[0];
+	    config.rendered = true;
 	    master.attachEvent("onDestruct", function () {
 	      popupView.destructor();
 	    });
-	    return "<div class=\"webix_qb_filter\"><i class=\"webix_qb_filter_icon\" aria-hidden=\"true\"></i></div>" + (config.label || "");
+	    return html;
 	  },
 	  _filterShow: function (node, qb) {
 	    qb.show(node.querySelector(".webix_qb_filter"));
