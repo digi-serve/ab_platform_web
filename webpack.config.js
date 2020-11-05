@@ -6,11 +6,11 @@ module.exports = {
    mode: "development", // "production", "none"
    context: APP,
    entry: {
-      app: path.join(APP, "index.js")
+      app: path.join(APP, "index.js"),
    },
    output: {
       path: path.join(APP, "..", "..", "assets"),
-      filename: "[name].js"
+      filename: "[name].js",
    },
    module: {
       rules: [
@@ -20,14 +20,19 @@ module.exports = {
          // },
          {
             test: /\.css$/,
-            use: ["style-loader", "css-loader"]
+            use: ["style-loader", "css-loader?url=false"],
          },
          {
             test: /\.(eot|woff|woff2|svg|ttf)([\?]?.*)$/,
-            use: ["url-loader?limit=10000000"]
-         }
-      ]
+            use: ["url-loader?limit=10000000"],
+         },
+      ],
    },
    devtool: "source-map",
-   plugins: []
+   plugins: [],
+   resolve: {
+      alias: {
+         assets: path.resolve(__dirname, "..", "..", "assets"),
+      },
+   },
 };
