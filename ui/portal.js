@@ -3,9 +3,6 @@ import PortalLoading from "./portal_loading.js";
 import PortalAuth from "./portal_auth.js";
 import PortalWork from "./portal_work.js";
 
-// Resources
-import Account from "../resources/Account.js";
-
 class Portal extends ClassUI {
    constructor() {
       super();
@@ -19,8 +16,8 @@ class Portal extends ClassUI {
          body: {
             id: "portal",
             view: "multiview",
-            rows: [PortalLoading.ui(), PortalAuth.ui(), PortalWork.ui()]
-         }
+            rows: [PortalLoading.ui(), PortalAuth.ui(), PortalWork.ui()],
+         },
       };
    }
 
@@ -30,13 +27,13 @@ class Portal extends ClassUI {
       PortalAuth.init(AB);
       PortalWork.init(AB);
 
-      if (Account.isAuthenticated) {
+      if (this.AB.Account.isAuthenticated) {
          PortalLoading.show();
       } else {
          PortalAuth.show();
       }
 
-      Account.on("logout", () => {
+      this.AB.Account.on("logout", () => {
          PortalAuth.show();
       });
 

@@ -1,8 +1,6 @@
 import ClassUI from "./ClassUI.js";
 import Portal from "./portal.js";
 
-import Tenant from "../resources/Tenant.js";
-
 class UI extends ClassUI {
    constructor() {
       super();
@@ -18,24 +16,25 @@ class UI extends ClassUI {
          on: {
             onItemClick: (/* id, e */) => {
                this.portalShow();
-            }
-         }
+            },
+         },
       };
    }
 
-   init(Config) {
-      var entryLabel = Tenant.textClickToEnter;
+   init(AB) {
+      this.AB = AB;
+      var entryLabel = this.AB.Tenant.textClickToEnter;
       if (entryLabel) {
          $$("labelClickToEnter").define({
-            label: entryLabel
+            label: entryLabel,
          });
       }
 
       // by not sending an id param, this creates it's own div.
       this.popup = Portal.attach();
-      Portal.init(Config);
+      Portal.init(AB);
 
-      if (Config.setting("autoenter")) {
+      if (this.AB.Config.setting("autoenter")) {
          this.portalShow();
       } else {
          this.portalHide();

@@ -18,8 +18,8 @@ export default {
             div.id = "AppBuilder";
          }
          AB.div(div);
-         AB.settingsFromDiv(div); // set the autoEnter config
+         AB.Config.settingsFromDiv(div); // set the autoEnter config
          resolve();
       });
-   }
+   },
 };

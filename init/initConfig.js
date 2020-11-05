@@ -2,9 +2,9 @@ export default {
    init: (AB) => {
       return new Promise((resolve, reject) => {
          var headers = new Headers();
-         var token = AB.setting("tenant");
+         var token = AB.Config.setting("tenant");
          if (token) {
-            headers.append("Tenant-Token", token);
+            headers.append("tenant-token", token);
          }
 
          //// DEV TESTING:
@@ -22,7 +22,7 @@ export default {
                   // wait for .json()
                   response.json().then((res) => {
                      console.log(res);
-                     AB.config(res.data);
+                     AB.Config.config(res.data);
                      resolve();
                   });
                } else {
@@ -36,5 +36,5 @@ export default {
                console.error("initConfig:fetch(/config):", err);
             });
       });
-   }
+   },
 };

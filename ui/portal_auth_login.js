@@ -1,9 +1,5 @@
 import ClassUI from "./ClassUI.js";
 
-// Resources
-import Network from "../resources/Network.js";
-import Tenant from "../resources/Tenant.js";
-
 class PortalAuthLogin extends ClassUI {
    constructor() {
       super();
@@ -24,13 +20,13 @@ class PortalAuthLogin extends ClassUI {
                      view: "form",
                      elementsConfig: {
                         bottomPadding: 18,
-                        labelWidth: 120
+                        labelWidth: 120,
                      },
                      elements: [
                         {
                            template:
                               "<span class='webix_icon fa-user-circle-o'></span>Login",
-                           type: "header"
+                           type: "header",
                         },
                         //// TODO: James make this look pretty ...
                         {
@@ -38,7 +34,7 @@ class PortalAuthLogin extends ClassUI {
                            view: "template",
                            height: 32,
                            template:
-                              "<span class='webix_invalid'>Error Message Here</span>"
+                              "<span class='webix_invalid'>Error Message Here</span>",
                         },
                         {
                            id: "portal_auth_login_form_tenantList",
@@ -48,8 +44,8 @@ class PortalAuthLogin extends ClassUI {
                            value: 1,
                            options: [
                               { id: 1, value: "Master" },
-                              { id: 2, value: "Release" }
-                           ]
+                              { id: 2, value: "Release" },
+                           ],
                         },
                         {
                            view: "text",
@@ -60,12 +56,12 @@ class PortalAuthLogin extends ClassUI {
                            validate: webix.rules.isEmail,
                            invalidMessage: "Please enter a valid email!",
                            on: {
-                              onBlur: function() {
+                              onBlur: function () {
                                  // console.log("Validating email", this);
                                  var result = this.validate(); // validate only this field and show warning message under field if invalid
                                  if (this.$scope) this.$scope.validateForm();
-                              }
-                           }
+                              },
+                           },
                         },
                         {
                            view: "text",
@@ -77,15 +73,15 @@ class PortalAuthLogin extends ClassUI {
                            invalidMessage: "Please enter your password!",
                            validateEvent: "key",
                            on: {
-                              onBlur: function() {
+                              onBlur: function () {
                                  console.log("Validating password");
                                  this.validate();
                                  if (this.$scope) this.$scope.validateForm();
-                              }
+                              },
                               // onKeyPress: function() {
                               //    console.log("keypress in password");
                               // }
-                           }
+                           },
                         },
                         {
                            margin: 10,
@@ -99,12 +95,12 @@ class PortalAuthLogin extends ClassUI {
                                  type: "form",
                                  id: "loginFormSubmitButton",
                                  width: 150,
-                                 click: function() {
+                                 click: function () {
                                     var form = $$("portal_auth_login_form");
                                     if (form.validate()) {
                                        var values = form.getValues();
                                        self.error(); // hids the error message
-                                       Network.post(
+                                       self.AB.Network.post(
                                           { url: "/auth/login", data: values },
                                           { key: "portal_auth_login" }
                                        )
@@ -145,17 +141,17 @@ class PortalAuthLogin extends ClassUI {
                                              }
                                           });
                                     }
-                                 }
-                              }
-                           ]
-                        }
-                     ]
+                                 },
+                              },
+                           ],
+                        },
+                     ],
                   },
-                  {}
-               ]
+                  {},
+               ],
             },
-            {}
-         ]
+            {},
+         ],
       };
    }
 
@@ -172,14 +168,14 @@ class PortalAuthLogin extends ClassUI {
 
    init(AB) {
       this.AB = AB;
-      var siteConfig = AB.siteConfig();
+      var siteConfig = AB.Config.siteConfig();
       if (siteConfig) {
          // replace options in tenant list with siteConfig.tenants:
          var newOptions = [];
          siteConfig.tenants.forEach((t) => {
             var opt = {
                id: t.uuid,
-               value: t.title || t.key
+               value: t.title || t.key,
             };
             newOptions.push(opt);
          });
@@ -188,7 +184,7 @@ class PortalAuthLogin extends ClassUI {
          $$("portal_auth_login_form_tenantList").define("options", newOptions);
       }
 
-      var tID = Tenant.id();
+      var tID = this.AB.Tenant.id();
       if (tID) {
          $$("portal_auth_login_form_tenantList").define("value", tID);
       }

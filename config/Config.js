@@ -1,4 +1,4 @@
-var EventEmitter = require("events").EventEmitter;
+// var EventEmitter = require("events").EventEmitter;
 var _defaultsDeep = require("lodash/defaultsDeep");
 
 var divConfigDefaults = {
@@ -13,7 +13,7 @@ var divConfigDefaults = {
    "appbuilder-tenant": null,
    // tenant {string} the tenant uuid for this AppBuilder instance.
 
-   "appbuilder-tenant-prefix": null
+   "appbuilder-tenant-prefix": null,
    // TESTING! Remove this
 };
 
@@ -27,37 +27,30 @@ const configDefaults = {
          // the number of times we will retry sending a network request
          // when we receive a timeout error.
 
-         urlCoreServer: window.location.origin
+         urlCoreServer: window.location.origin,
          // on the web client, just record the current URL by default.
          // the site config can override this if they want.
-      }
-   }
+      },
+   },
 };
-class Config extends EventEmitter {
+class Config {
    constructor() {
-      super();
-
-      this.setMaxListeners(0);
+      // this.setMaxListeners(0);
       this._config = null;
-      this._div = null;
-      this._settings = {};
-      this._ui = null;
+      // {obj} _config
+      // these are the configuration settings returned from the server. These
+      // are more detailed configuration settings for the running of the site.
 
-      // TODO: make sure "error" s are handled and sent to logs
-      // this.on("error", ()=>{ Analytics.error })
+      this._settings = {};
+      // {obj} _settings
+      // settings are the configuration parameters found on the base <div>
+      // these settings are the minimum needed to successfully pull up the
+      // portal popup and perform the initial config request
    }
 
    config(json) {
       this._config = json;
       _defaultsDeep(this._config, configDefaults);
-   }
-
-   div(el) {
-      if (el) {
-         this._div = el;
-         return;
-      }
-      return this._div;
    }
 
    setting(key, value) {
@@ -83,7 +76,8 @@ class Config extends EventEmitter {
    }
 
    error(...args) {
-      this.emit("ab.error", args);
+      console.error("Who is calling this? -> move to AB.error() instead.");
+      // this.emit("ab.error", args);
    }
 
    siteConfig() {
@@ -105,14 +99,6 @@ class Config extends EventEmitter {
          return this._config.user;
       }
       return null;
-   }
-
-   ui(UI) {
-      if (UI) {
-         this._ui = UI;
-         return;
-      }
-      return this._ui;
    }
 }
 module.exports = new Config();

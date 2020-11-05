@@ -4,10 +4,6 @@
  * continuing on.
  */
 
-import Account from "../resources/Account.js";
-import Network from "../resources/Network.js";
-import Tenant from "../resources/Tenant.js";
-
 import webix from "../js/webix/webix.js";
 import webixCSS from "../js/webix/webix.css";
 
@@ -20,10 +16,10 @@ export default {
 
       var allInits = [];
 
-      allInits.push(Account.init());
-      allInits.push(Network.init());
-      allInits.push(Tenant.init());
+      allInits.push(AB.Account.init());
+      allInits.push(AB.Network.init());
+      allInits.push(AB.Tenant.init());
 
       return Promise.all(allInits);
-   }
+   },
 };
