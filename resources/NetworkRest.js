@@ -5,77 +5,70 @@
  */
 
 /* global navigator Connection */
-import Account from "./Account";
+// import Account from "./Account";
 // import analytics from "./Analytics";
 // import EventEmitter from "eventemitter2";
 var EventEmitter = require("events").EventEmitter;
 // import Lock from "./Lock";
 // import Log from "./Log";
 // import { storage } from "./Storage";
-import uuidv4 from "uuid/v4";
+// import Tenant from "./Tenant";
+// import { v4 as uuidv4 } from "uuid";
 
 // Temp placeholders until Resources are implemented:
-const analytics = {
-   log: () => {},
-   logError: () => {}
-};
-
-class Lock {
-   constructor() {}
-
-   acquire() {
-      return Promise.resolve();
-   }
-   release() {
-      return Promise.resolve();
-   }
-}
 
 const Log = console.log;
 Log.warn = console.warn;
 Log.error = console.error;
 
-const storage = {
-   get: () => {
-      return Promise.resolve();
-   },
-   set: () => {
-      return Promise.resolve();
-   }
-};
 // End Temp
 
 const Atomic = require("atomicjs/dist/atomic.min.js");
 // Atomic : a small $.ajax() replacement
 
-import Config from "../config/Config.js";
-var config = Config.siteConfig();
+var Config = null;
+// {} Config
+// the site specific configuration information
 
 class NetworkRest extends EventEmitter {
    constructor() {
       super({
          wildcard: true,
          newListener: false,
-         maxListeners: 0
+         maxListeners: 0,
       });
 
       this.baseURL = null;
+      // {string} .baseURL
+      // the url of our site.
+
       this.numRetries = 3;
-      this.queueLock = new Lock();
+      // {int} .numRetries
+      // the number or times we should attempt to issue a network request.
+
+      this.queueLock = null;
+      // {Lock} .queueLock
+      // our semaphore for coordinating our access to our local storage.
    }
 
    /**
     * @method init
+    * @param {ABFactory} AB
     * @param {object} options
     * @param {string} options.baseURL
     * @return {Promise}
     */
-   init(options) {
+   init(AB, options) {
+      this.AB = AB;
+
+      this.queueLock = new this.AB.Lock();
+
+      Config = this.AB.Config.siteConfig();
       options = options || {};
       if (options) {
-         this.baseURL = options.baseURL || config.appbuilder.urlCoreServer;
+         this.baseURL = options.baseURL || Config.appbuilder.urlCoreServer;
          this.numRetries =
-            options.networkNumRetries || config.appbuilder.networkNumRetries;
+            options.networkNumRetries || Config.appbuilder.networkNumRetries;
       }
       return Promise.resolve();
    }
@@ -214,7 +207,8 @@ class NetworkRest extends EventEmitter {
          var err = new Error(
             `Too many retries (${this.numRetries}) for ${params.url}`
          );
-         analytics.logError(err);
+         this.AB.Analytics.logError(err);
+         this.publishResponse(jobResponse, err);
          return Promise.reject(err);
       }
 
@@ -225,8 +219,13 @@ class NetworkRest extends EventEmitter {
          }
 
          params.headers = params.headers || {};
-         if (Account.authToken) {
-            params.headers.Authorization = Account.authToken;
+         if (this.AB.Account.authToken) {
+            params.headers.Authorization = this.AB.Account.authToken;
+         }
+
+         var tenantID = this.AB.Tenant.id();
+         if (tenantID) {
+            params.headers["tenant-token"] = tenantID;
          }
 
          // params.timeout = params.timeout || 6000;
@@ -237,8 +236,13 @@ class NetworkRest extends EventEmitter {
 
             Atomic(params.url, params)
                .then((packet) => {
+                  // TODO: check if packet.status == "error"
+                  // and then .publishResponse() as an error
+
+                  //
                   var data = packet;
                   if (data.data) data = data.data;
+                  this.publishResponse(jobResponse, null, data);
                   resolve(data);
                })
                .catch((err) => {
@@ -252,7 +256,7 @@ class NetworkRest extends EventEmitter {
                      Log(
                         "*** NetworkRest._request():network connection error detected. Trying again"
                      );
-                     analytics.log(
+                     this.AB.Analytics.log(
                         "NetworkRest._request():network connection error detected. Trying again"
                      );
 
@@ -277,6 +281,8 @@ class NetworkRest extends EventEmitter {
 
                      return;
                   } else {
+                     // Else attempt to emit() some common Error types for
+                     // additional Platform Handling.
                      if (err.status == 403) {
                         this.emit("error.badAuth", err);
                      } else if (err.status >= 400 && err.status < 500) {
@@ -294,8 +300,9 @@ class NetworkRest extends EventEmitter {
                   }
                   // if this is an req.ab.error() response:
                   if (packet && packet.status == "error") {
-                     analytics.logError(packet.data);
+                     this.AB.Analytics.logError(packet.data);
                      Log.error(packet.data);
+                     this.publishResponse(jobResponse, packet);
                      reject(packet.data);
                      return;
                   } else {
@@ -304,14 +311,15 @@ class NetworkRest extends EventEmitter {
                      error.response = err.responseText;
                      error.text = err.statusText;
                      error.err = err;
-                     analytics.logError(error);
+                     this.AB.Analytics.logError(error);
                      Log.error(error);
+                     this.publishResponse(jobResponse, error);
                      reject(error);
                   }
                });
          } else {
             // now Queue this request params.
-            analytics.log(
+            this.AB.Analytics.log(
                "NetworkRest:_request(): Network is offline. Queuing request."
             );
             this.queue(params, jobResponse)
@@ -340,10 +348,11 @@ class NetworkRest extends EventEmitter {
     * publishResponse()
     * emit the requested response for this network operation.
     * @param {obj} jobResponse
+    * @param {obj} error
     * @param {obj} data
     */
-   publishResponse(jobResponse, data) {
-      this.emit(jobResponse.key, jobResponse.context, data);
+   publishResponse(jobResponse, error, data) {
+      this.emit(jobResponse.key, jobResponse.context, error, data);
    }
 
    ////
@@ -373,7 +382,7 @@ class NetworkRest extends EventEmitter {
          this.queueLock
             .acquire()
             .then(() => {
-               return storage.get(refQueue);
+               return this.AB.Storage.get(refQueue);
             })
             .then((queue) => {
                queue = queue || [];
@@ -383,7 +392,7 @@ class NetworkRest extends EventEmitter {
                      queue.length > 1 ? "s" : ""
                   } queued`
                );
-               return storage.set(refQueue, queue);
+               return this.AB.Storage.set(refQueue, queue);
             })
             .then(() => {
                this.emit("queued");
@@ -392,7 +401,7 @@ class NetworkRest extends EventEmitter {
             })
             .catch((err) => {
                Log.error("Error while queueing data", err);
-               analytics.logError(err);
+               this.AB.Analytics.logError(err);
                reject(err);
 
                this.queueLock.release();
@@ -423,7 +432,7 @@ class NetworkRest extends EventEmitter {
             // Get queue contents
             //
             .then(() => {
-               return storage.get(refQueue);
+               return this.AB.Storage.get(refQueue);
             })
 
             //
@@ -464,7 +473,7 @@ class NetworkRest extends EventEmitter {
             // Clear queue contents
             //
             .then(() => {
-               return storage.set(refQueue, []);
+               return this.AB.Storage.set(refQueue, []);
             })
 
             // release the Lock
@@ -481,7 +490,7 @@ class NetworkRest extends EventEmitter {
             // respond to errors:
             .catch((err) => {
                Log.error("commAPI queueFlush error", err);
-               analytics.logError(err);
+               this.AB.Analytics.logError(err);
 
                this.queueLock.release().then(() => {
                   reject(err);
@@ -499,9 +508,9 @@ class NetworkRest extends EventEmitter {
       return Promise.resolve();
    }
 
-   uuid() {
-      return uuidv4();
-   }
+   // uuid() {
+   //    return this.AB.uuid();
+   // }
 
    getTokens() {
       // called in appPage.js : openRelayLoader()

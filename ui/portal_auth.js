@@ -21,14 +21,16 @@ class PortalAuth extends ClassUI {
 
    init(AB) {
       this.AB = AB;
-      PortalAuthLogin.init(AB);
 
-      // decide which Auth type to display:
-      var tID = this.AB.Tenant.id();
+      var ActivePortal = null;
+      // {PortalAuthxxx} ActivePortal
+      // the UI Portal to use for Authenticating our User for this Tenant.
+
+      // decide which Auth Portal to display:
       var authType = this.AB.Tenant.setting("authType") || "login";
       switch (authType) {
          case "login":
-            PortalAuthLogin.show();
+            ActivePortal = PortalAuthLogin;
             break;
 
          case "passwordless":
@@ -40,6 +42,10 @@ class PortalAuth extends ClassUI {
          case "google":
             break;
       }
+
+      return ActivePortal.init(AB).then(() => {
+         ActivePortal.show();
+      });
    }
 
    show() {

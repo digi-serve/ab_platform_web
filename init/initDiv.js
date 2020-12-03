@@ -3,7 +3,10 @@
  * find or create an initial <div> for our Appbuilder portal
  */
 export default {
-   init: (AB) => {
+   init: (BS) => {
+      // BS {Bootstrap}
+      // The initial Bootstrap object found in "./Bootstrap.js"
+
       return new Promise((resolve, reject) => {
          // find our initial <div appbuilder-portal="default" /> tag
          var div = document.querySelector("div[appbuilder-portal]");
@@ -17,8 +20,8 @@ export default {
          if (!div.id) {
             div.id = "AppBuilder";
          }
-         AB.div(div);
-         AB.Config.settingsFromDiv(div); // set the autoEnter config
+         BS.div(div);
+         BS.Config.settingsFromDiv(div); // set the autoEnter config
          resolve();
       });
    },

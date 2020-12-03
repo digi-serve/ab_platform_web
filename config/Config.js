@@ -75,6 +75,16 @@ class Config {
       });
    }
 
+   /**
+    * definitions()
+    * return the ABDefinition(s) required to manage the interface.
+    * @return {obj}
+    *          { ABDefinition.id : {ABDefinition} }  hash of definitions.
+    */
+   definitions() {
+      return this._config.definitions;
+   }
+
    error(...args) {
       console.error("Who is calling this? -> move to AB.error() instead.");
       // this.emit("ab.error", args);

@@ -9,12 +9,14 @@ class PortalLoading extends ClassUI {
       return {
          id: "portal_loading",
          view: "label",
-         label: "loading"
+         label: "loading",
       };
    }
 
    init(AB) {
       this.AB = AB;
+
+      return Promise.resolve();
    }
 
    show() {

@@ -58,7 +58,7 @@ class PortalAuthLogin extends ClassUI {
                            on: {
                               onBlur: function () {
                                  // console.log("Validating email", this);
-                                 var result = this.validate(); // validate only this field and show warning message under field if invalid
+                                 // var result = this.validate(); // validate only this field and show warning message under field if invalid
                                  if (this.$scope) this.$scope.validateForm();
                               },
                            },
@@ -74,7 +74,7 @@ class PortalAuthLogin extends ClassUI {
                            validateEvent: "key",
                            on: {
                               onBlur: function () {
-                                 console.log("Validating password");
+                                 // console.log("Validating password");
                                  this.validate();
                                  if (this.$scope) this.$scope.validateForm();
                               },
@@ -100,46 +100,19 @@ class PortalAuthLogin extends ClassUI {
                                     if (form.validate()) {
                                        var values = form.getValues();
                                        self.error(); // hids the error message
+
+                                       // this.AB.Network.post()
+                                       // can either be a Relay or Rest operation.
+                                       // we should get the response from the
+                                       // published JobRequest initialized in
+                                       // the .init() routine.
                                        self.AB.Network.post(
                                           { url: "/auth/login", data: values },
-                                          { key: "portal_auth_login" }
-                                       )
-                                          .then((response) => {
-                                             if (
-                                                response.status == "success" &&
-                                                response.data.user
-                                             ) {
-                                                // we can .reload() from cache given that all our
-                                                // dynamic data comes from our initial /config call
-                                                window.location.reload(false);
-                                             } else {
-                                                if (
-                                                   response.status == "error"
-                                                ) {
-                                                   console.log(
-                                                      "what to do with this error:"
-                                                   );
-                                                   console.log(response);
-                                                }
-                                             }
-                                          })
-                                          .catch((err) => {
-                                             // any http 400-500 response should show up here:
-                                             if (err.code) {
-                                                switch (err.code) {
-                                                   case "EINVALIDLOGIN":
-                                                      self.error(err.message);
-                                                      break;
-
-                                                   case "EFAILEDATTEMPTS":
-                                                      self.error(err.message);
-                                                      $$(
-                                                         "loginFormSubmitButton"
-                                                      ).hide();
-                                                      break;
-                                                }
-                                             }
-                                          });
+                                          {
+                                             key:
+                                                "portal_auth_login" /*, context:{} */,
+                                          }
+                                       );
                                     }
                                  },
                               },
@@ -168,7 +141,7 @@ class PortalAuthLogin extends ClassUI {
 
    init(AB) {
       this.AB = AB;
-      var siteConfig = AB.Config.siteConfig();
+      var siteConfig = this.AB.Config.siteConfig();
       if (siteConfig) {
          // replace options in tenant list with siteConfig.tenants:
          var newOptions = [];
@@ -191,9 +164,44 @@ class PortalAuthLogin extends ClassUI {
 
       this.error(); // hides the default error message.
 
-      // Network.on("portal_auth_login", (key, context) => {
-      //    console.log("Network.on():", key, context);
-      // });
+      this.AB.Network.on("portal_auth_login", (context, err, response) => {
+         // Listen for our login responses:
+         // console.log("Network.on():", context, err, response);
+
+         if (err) {
+            // any http 400-500 response should show up here:
+            if (err.code) {
+               switch (err.code) {
+                  case "EINVALIDLOGIN":
+                     this.error(err.message);
+                     break;
+
+                  case "EFAILEDATTEMPTS":
+                     this.error(err.message);
+                     $$("loginFormSubmitButton").hide();
+                     break;
+
+                  default:
+                     this.AB.error(err);
+                     break;
+               }
+            }
+            return;
+         }
+
+         if (response.status == "success" && response.data.user) {
+            // we can .reload() from cache given that all our
+            // dynamic data comes from our initial /config call
+            window.location.reload(false);
+         } else {
+            if (response.status == "error") {
+               console.log("what to do with this error:");
+               console.error(response);
+            }
+         }
+      });
+
+      return Promise.resolve();
    }
 
    show() {

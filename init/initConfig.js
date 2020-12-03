@@ -1,8 +1,11 @@
 export default {
-   init: (AB) => {
+   init: (BS) => {
+      // BS {Bootstrap}
+      // The initial Bootstrap object found in "./Bootstrap.js"
+
       return new Promise((resolve, reject) => {
          var headers = new Headers();
-         var token = AB.Config.setting("tenant");
+         var token = BS.Config.setting("tenant");
          if (token) {
             headers.append("tenant-token", token);
          }
@@ -22,11 +25,11 @@ export default {
                   // wait for .json()
                   response.json().then((res) => {
                      console.log(res);
-                     AB.Config.config(res.data);
+                     BS.Config.config(res.data);
                      resolve();
                   });
                } else {
-                  AB.error(
+                  BS.error(
                      `Error communicating with Server: ${response.status}`
                   );
                   reject(response.status);

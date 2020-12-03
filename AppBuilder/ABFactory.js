@@ -1,21 +1,28 @@
 var EventEmitter = require("events").EventEmitter;
-
-import initConfig from "../init/initConfig.js";
-import initDiv from "../init/initDiv.js";
-import initResources from "../init/initResources.js";
-
+//
+// Our Common Resources
+//
 import Config from "../config/Config.js";
+// Config : responsible for all the configuration/settings of our instance.
 
 import Account from "../resources/Account.js";
+// Account : manages the current Logged in User and Account information.
+
 import Network from "../resources/Network.js";
+// Network: our interface for communicating to our server
+
 import Tenant from "../resources/Tenant.js";
+// Tenant: manages the Tenant information of the current instance
 
 import Webix from "../js/webix/webix.js";
 
-import UI from "../ui/ui.js";
+//
+// AppBuilder Objects
+//
+// const ABApplication = require("./platform/ABApplication");
 
 class ABFactory extends EventEmitter {
-   constructor() {
+   constructor(definitions) {
       super();
       this.setMaxListeners(0);
 
@@ -29,43 +36,48 @@ class ABFactory extends EventEmitter {
       this.Network = Network;
       this.Tenant = Tenant;
 
-      //
-      // UI Related
-      //
-      this._div = null;
-      // {el} _div
-      // the HTML element that is the where our initial [click] here button
-      // should be displayed.  Our actual portal is a popup, but the base
-      // <div> can be used for an embedded view.
+      // Temp placeholders until Resources are implemented:
+      this.Analytics = {
+         log: () => {},
+         logError: () => {},
+      };
+      this.Lock = class Lock {
+         constructor() {}
 
-      this._ui = null;
-      // {obj} ._ui
-      // the Webix Object that is our UI display
+         acquire() {
+            return Promise.resolve();
+         }
+         release() {
+            return Promise.resolve();
+         }
+      };
+      this.Storage = {
+         get: () => {
+            return Promise.resolve();
+         },
+         set: () => {
+            return Promise.resolve();
+         },
+      };
 
       // TODO: make sure "error" s are handled and sent to logs
       // this.on("error", ()=>{ Analytics.error })
    }
 
-   bootstrap() {
-      return initDiv
-         .init(this)
-         .then(() => {
-            return initConfig.init(this);
-         })
-         .then(() => {
-            return initResources.init(this);
-         })
-         .then(() => {
-            return Promise.resolve().then(() => {
-               var div = this.div();
+   /**
+    * init()
+    * prepare the ABFactory for operation. This includes parsing the
+    * definitions into useable objects, preparing the System Resources, etc.
+    * @return {Promise}
+    */
+   init() {
+      var allInits = [];
 
-               UI.attach(div.id);
-               this.ui(UI);
-               this.ui().init(this);
-            });
-            // after initAttach the UI.init() routine handles the remaining
-            // bootup/display process.
-         });
+      allInits.push(this.Account.init(this));
+      allInits.push(this.Network.init(this));
+      allInits.push(this.Tenant.init(this));
+
+      return Promise.all(allInits);
    }
 
    alert(options) {
@@ -92,6 +104,8 @@ class ABFactory extends EventEmitter {
       }
       return this._ui;
    }
+
+   uuid() {}
 }
 
-export default new ABFactory();
+export default ABFactory;

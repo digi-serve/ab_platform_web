@@ -1,7 +1,5 @@
 var EventEmitter = require("events").EventEmitter;
 
-import Config from "../config/Config.js";
-
 class Account extends EventEmitter {
    constructor() {
       super();
@@ -10,9 +8,12 @@ class Account extends EventEmitter {
       this._config = null;
    }
 
-   init() {
+   init(AB) {
+      // {ABFactory} AB
+
       debugger;
-      var UserConfig = Config.userConfig();
+      this.AB = AB;
+      var UserConfig = this.AB.Config.userConfig();
       if (UserConfig) {
          this.isAuthenticated = true;
          this._config = UserConfig;
