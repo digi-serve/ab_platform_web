@@ -7,15 +7,20 @@
 
 var EventEmitter = require("events").EventEmitter;
 
+import Webix from "../js/webix/webix.js";
+import webixCSS from "../js/webix/webix.css";
+// Make sure webix is global object
+if (!window.webix) {
+   window.webix = Webix;
+}
+
 import initConfig from "../init/initConfig.js";
 import initDiv from "../init/initDiv.js";
 // import initResources from "../init/initResources.js";
 
 import Config from "../config/Config.js";
 
-import ABFactory from "../Appbuilder/ABFactory";
-
-import Webix from "../js/webix/webix.js";
+import ABFactory from "../AppBuilder/ABFactory";
 
 import UI from "../ui/ui.js";
 
@@ -63,6 +68,13 @@ class Bootstrap extends EventEmitter {
                //    {ABFactory} that drives the rest of the AppBuilder objects
                var definitions = Config.definitions() || null;
                this.AB = new ABFactory(definitions);
+
+               if (!window.AB) window.AB = this.AB;
+               // Make our Factory Global.
+               // Transition: we still have some UI code that depends on accessing
+               // our Factory as a Global var.  So until those are rewritten we will
+               // make our factory Global.
+
                return this.AB.init();
             })
             .then(() => {
