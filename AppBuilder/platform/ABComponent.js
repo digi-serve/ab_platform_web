@@ -14,7 +14,7 @@ module.exports = class ABComponent extends ABEmitter {
 
       // Transition Code:
       // make sure we have an this.AB
-      if (App.AB) {
+      if (App && App.AB) {
          this.AB = App.AB;
       }
 
@@ -24,7 +24,7 @@ module.exports = class ABComponent extends ABEmitter {
          // {ABFactory} AB
       }
 
-      var L = this.Label;
+      var L = this.Label();
 
       if (!App) {
          App = {
@@ -207,9 +207,10 @@ module.exports = class ABComponent extends ABEmitter {
       }
    }
 
-   Label(...params) {
-      return this.AB.Multilingual.label(...params);
-      // return AD.lang.label.getLabel(key) || altText;
+   Label() {
+      return (...params) => {
+         return this.AB.Multilingual.label(...params);
+      };
    }
 
    unique(key) {

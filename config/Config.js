@@ -31,6 +31,10 @@ const configDefaults = {
          // on the web client, just record the current URL by default.
          // the site config can override this if they want.
       },
+      storage: {
+         encrypted: false,
+         // {bool} should we encrypt our data in the local browser storage?
+      },
    },
 };
 class Config {
@@ -88,6 +92,14 @@ class Config {
    error(...args) {
       console.error("Who is calling this? -> move to AB.error() instead.");
       // this.emit("ab.error", args);
+   }
+
+   labelConfig() {
+      if (this._config && this._config.labels) {
+         return this._config.labels;
+      }
+      console.error("No Label config found.");
+      return {};
    }
 
    siteConfig() {

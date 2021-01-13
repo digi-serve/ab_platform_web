@@ -22,11 +22,11 @@ module.exports = class ABViewRuleListFormRecordRules extends ABViewRuleList {
       var settings = {
          labels: {
             header: "ab.components.form.recordRules",
-            headerDefault: "*Record Rules"
-         }
+            headerDefault: "*Record Rules",
+         },
       };
       super(settings);
-      var L = this.Label;
+      var L = this.Label();
    }
 
    // must return the actual Rule object.
@@ -46,7 +46,7 @@ module.exports = class ABViewRuleListFormRecordRules extends ABViewRuleList {
             this.App,
             this.idBase + "_ruleActionUpdateConnected",
             this.currentForm
-         )
+         ),
       ];
 
       var Rule = new ABViewRule(listActions);

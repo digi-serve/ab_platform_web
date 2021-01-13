@@ -723,6 +723,7 @@ module.exports = class ABViewGrid extends ABViewGridCore {
     */
    component(App, objId) {
       let baseCom = super.component(App);
+      var L = App.Label;
 
       var idBase = objId || "ABViewGrid_" + this.id;
       var ids = {

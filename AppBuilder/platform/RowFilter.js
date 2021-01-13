@@ -4,7 +4,7 @@ module.exports = class RowFilter extends RowFilterCore {
    constructor(App, idBase, AB) {
       super(App, idBase, AB);
 
-      let L = this.Label;
+      let L = this.Label();
 
       let labels = (this.labels = {
          common: (App || {}).labels,
@@ -177,7 +177,7 @@ module.exports = class RowFilter extends RowFilterCore {
       });
 
       // Set current username
-      this.Account.username = OP.User.username();
+      this.Account.username = this.AB.Account.username();
 
       var batchName; // we need to revert to this default when switching away from a in/by query field
 
@@ -748,7 +748,7 @@ module.exports = class RowFilter extends RowFilterCore {
                      {
                         batch: "user",
                         view: "combo",
-                        options: OP.User.userlist().map((u) => {
+                        options: this.AB.Account.userlist().map((u) => {
                            return {
                               id: u.username,
                               value: u.username,

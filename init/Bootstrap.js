@@ -7,7 +7,8 @@
 
 var EventEmitter = require("events").EventEmitter;
 
-import Webix from "../js/webix/webix.js";
+var Webix = require("../js/webix/webix.js");
+// NOTE: changed to require() so switching to webix_debug.js will work.
 import webixCSS from "../js/webix/webix.css";
 // Make sure webix is global object
 if (!window.webix) {

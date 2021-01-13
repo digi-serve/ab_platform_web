@@ -29,7 +29,7 @@ module.exports = class ABViewRuleListFormSubmitRules extends ABViewRuleList {
          },
       };
       super(settings);
-      var L = this.Label;
+      var L = this.Label();
    }
 
    // must return the actual Rule object.

@@ -3,7 +3,8 @@ const _ = require("lodash");
 // prettier-ignore
 const ABApplicationCore = require("../core/ABApplicationCore.js");
 
-const ABView = require("./views/ABView");
+const ABViewPage = require("./views/ABViewPage");
+const ABViewManager = require("./ABViewManager");
 
 module.exports = class ABClassApplication extends ABApplicationCore {
    static applications(/*fn = () => true*/) {
@@ -139,7 +140,10 @@ module.exports = class ABClassApplication extends ABApplicationCore {
     * @return {ABView}
     */
    pageNew(values) {
-      return new ABView(values, this);
+      // make sure this is an ABViewPage description
+      values.key = ABViewPage.common().key;
+
+      return ABViewManager.newView(values, this, null);
    }
 
    /**

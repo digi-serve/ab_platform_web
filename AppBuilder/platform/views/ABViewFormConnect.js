@@ -46,7 +46,11 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
       super(values, application, parent, defaultValues);
 
       // Set filter value
-      this.__filterComponent = new RowFilter();
+      this.__filterComponent = new RowFilter(
+         null,
+         `${this.id}__filterComponent`,
+         this.AB
+      );
       // this.__filterComponent.applicationLoad(application);
       this.__filterComponent.fieldsLoad(
          this.datasource ? this.datasource.fields() : [],

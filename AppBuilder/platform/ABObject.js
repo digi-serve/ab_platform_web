@@ -432,7 +432,7 @@ module.exports = class ABObject extends ABObjectCore {
       var columnNameLookup = {};
 
       // get the header for each of our fields:
-      this.fields(null, true).forEach(function (f) {
+      this.fields().forEach(function (f) {
          var header = f.columnHeader({
             isObjectWorkspace: isObjectWorkspace,
             editable: isEditable,
@@ -444,7 +444,7 @@ module.exports = class ABObject extends ABObjectCore {
 
          header.alias = f.alias || undefined; // query type
          header.fieldID = f.id;
-         header.fieldURL = f.urlPointer();
+         // header.fieldURL = f.urlPointer();
 
          if (f.settings.width != 0) {
             // set column width to the customized width

@@ -21,13 +21,18 @@ import Multilingual from "../resources/Multilingual.js";
 import Network from "../resources/Network.js";
 // Network: our interface for communicating to our server
 
+import Storage from "../resources/Storage.js";
+// Storage: manages our interface for local storage
+
 import Tenant from "../resources/Tenant.js";
 // Tenant: manages the Tenant information of the current instance
 
 import UISettings from "./uiSettings/config.js";
 // UISettings: detailed settings for our common UI elements
 
-import Webix from "../js/webix/webix.js";
+var Webix = require("../js/webix/webix.js");
+// NOTE: moved to require() because using import with webix_debug.js
+// really messed things up!
 
 //
 // AppBuilder Objects
@@ -47,6 +52,7 @@ class ABFactory extends ABFactoryCore {
       this.Dialog = Dialog;
       this.Multilingual = Multilingual;
       this.Network = Network;
+      this.Storage = Storage;
       this.Tenant = Tenant;
       this.Webix = Webix;
 
@@ -66,21 +72,14 @@ class ABFactory extends ABFactoryCore {
          }
       };
 
-      this.Storage = {
-         get: () => {
-            return Promise.resolve();
-         },
-         set: () => {
-            return Promise.resolve();
-         },
-      };
-
       this.UISettings = UISettings;
 
       this.Validation = {
          validator: () => {
             console.error("ABFactory: replace .Validation with OP.Validation ");
-            return [];
+            return {
+               addError: () => {},
+            };
          },
          isGridValidationError: () => {
             console.error("ABFactory: .Validation.isGridValidationError()");
@@ -114,10 +113,16 @@ class ABFactory extends ABFactoryCore {
       allInits.push(this.Network.init(this));
       allInits.push(this.Tenant.init(this));
 
-      return Promise.all(allInits).then(() => {
-         // Now prepare the rest of the ABFactory()
-         return super.init();
-      });
+      return Promise.all(allInits)
+         .then(() => {
+            // some Resources depend on the above to be .init() before they can
+            // .init() themselves.
+            return this.Storage.init(this);
+         })
+         .then(() => {
+            // Now prepare the rest of the ABFactory()
+            return super.init();
+         });
    }
 
    /**
@@ -208,14 +213,6 @@ class ABFactory extends ABFactoryCore {
       return _.cloneDeep(value);
    }
 
-   merge(...params) {
-      return _.merge(...params);
-   }
-
-   orderBy(...params) {
-      return _.orderBy(...params);
-   }
-
    error(message, ...rest) {
       var emitData = {
          message: `ABFactory[${this.Tenant.id()}]:${message.toString()}`,
@@ -247,12 +244,34 @@ class ABFactory extends ABFactoryCore {
       this.emit("error", emitData);
    }
 
+   log(message, ...rest) {
+      console.log(message);
+      rest.forEach((r) => {
+         console.log(r);
+      });
+   }
+
+   merge(...params) {
+      return _.merge(...params);
+   }
+
+   orderBy(...params) {
+      return _.orderBy(...params);
+   }
+
    uniq(...params) {
       return _.uniq(...params);
    }
 
    uuid() {
       return uuidv4();
+   }
+
+   warn(message, ...rest) {
+      console.warn(message);
+      rest.forEach((r) => {
+         console.warn(r);
+      });
    }
 }
 

@@ -10,16 +10,12 @@
 // import EventEmitter from "eventemitter2";
 var EventEmitter = require("events").EventEmitter;
 // import Lock from "./Lock";
-// import Log from "./Log";
+
 // import { storage } from "./Storage";
 // import Tenant from "./Tenant";
 // import { v4 as uuidv4 } from "uuid";
 
 // Temp placeholders until Resources are implemented:
-
-const Log = console.log;
-Log.warn = console.warn;
-Log.error = console.error;
 
 // End Temp
 
@@ -208,7 +204,10 @@ class NetworkRest extends EventEmitter {
             `Too many retries (${this.numRetries}) for ${params.url}`
          );
          this.AB.Analytics.logError(err);
-         this.publishResponse(jobResponse, err);
+         if (jobResponse) {
+            this.publishResponse(jobResponse, err);
+         }
+
          return Promise.reject(err);
       }
 
@@ -242,7 +241,9 @@ class NetworkRest extends EventEmitter {
                   //
                   var data = packet;
                   if (data.data) data = data.data;
-                  this.publishResponse(jobResponse, null, data);
+                  if (jobResponse) {
+                     this.publishResponse(jobResponse, null, data);
+                  }
                   resolve(data);
                })
                .catch((err) => {
@@ -253,9 +254,6 @@ class NetworkRest extends EventEmitter {
                   // if this is a network connection error, send the attempt again:
                   if (err.statusText == "Request timeout") {
                      //// Network Error: conneciton refused, access denied, etc...
-                     Log(
-                        "*** NetworkRest._request():network connection error detected. Trying again"
-                     );
                      this.AB.Analytics.log(
                         "NetworkRest._request():network connection error detected. Trying again"
                      );
@@ -266,13 +264,13 @@ class NetworkRest extends EventEmitter {
                      this._request(params)
                         .then((data) => {
                            // console.log('--- timeout.then():',data);
-                           Log.warn(
+                           this.AB.warn(
                               "*** NetworkRest._request().then(): attempt resolved."
                            );
                            resolve(data);
                         })
                         .catch((_err) => {
-                           Log.error(
+                           this.AB.error(
                               "*** NetworkRest._request().catch(): retry failed:",
                               _err
                            );
@@ -301,8 +299,10 @@ class NetworkRest extends EventEmitter {
                   // if this is an req.ab.error() response:
                   if (packet && packet.status == "error") {
                      this.AB.Analytics.logError(packet.data);
-                     Log.error(packet.data);
-                     this.publishResponse(jobResponse, packet);
+                     this.AB.error(packet.data);
+                     if (jobResponse) {
+                        this.publishResponse(jobResponse, packet);
+                     }
                      reject(packet.data);
                      return;
                   } else {
@@ -312,8 +312,10 @@ class NetworkRest extends EventEmitter {
                      error.text = err.statusText;
                      error.err = err;
                      this.AB.Analytics.logError(error);
-                     Log.error(error);
-                     this.publishResponse(jobResponse, error);
+                     this.AB.error(error);
+                     if (jobResponse) {
+                        this.publishResponse(jobResponse, error);
+                     }
                      reject(error);
                   }
                });
@@ -387,7 +389,7 @@ class NetworkRest extends EventEmitter {
             .then((queue) => {
                queue = queue || [];
                queue.push({ data, jobResponse });
-               Log(
+               this.AB.log(
                   `:::: ${queue.length} request${
                      queue.length > 1 ? "s" : ""
                   } queued`
@@ -400,7 +402,7 @@ class NetworkRest extends EventEmitter {
                resolve();
             })
             .catch((err) => {
-               Log.error("Error while queueing data", err);
+               this.AB.error("Error while queueing data", err);
                this.AB.Analytics.logError(err);
                reject(err);
 
@@ -489,7 +491,7 @@ class NetworkRest extends EventEmitter {
 
             // respond to errors:
             .catch((err) => {
-               Log.error("commAPI queueFlush error", err);
+               this.AB.error("commAPI queueFlush error", err);
                this.AB.Analytics.logError(err);
 
                this.queueLock.release().then(() => {

@@ -610,6 +610,8 @@ module.exports = class ABViewTab extends ABViewTabCore {
     */
    component(App) {
       var L = App.Label;
+      var AB = this.AB;
+
       var comp = super.component(App);
       // get a UI component for each of our child views
       this._viewComponents = [];
@@ -714,7 +716,7 @@ module.exports = class ABViewTab extends ABViewTabCore {
                            $$(ids.sidebar).select(selectedItem);
                            // store this state in local storage the user preference is
                            // remembered next time they see this sidebar
-                           webix.storage.local.put(
+                           AB.Storage.set(
                               idBase + "-state",
                               $$(ids.sidebar).getState()
                            );
@@ -732,7 +734,7 @@ module.exports = class ABViewTab extends ABViewTabCore {
                            $$(ids.sidebar).select(selectedItem);
                            // store this state in local storage the user preference is
                            // remembered next time they see this sidebar
-                           webix.storage.local.put(
+                           AB.Storage.set(
                               idBase + "-state",
                               $$(ids.sidebar).getState()
                            );
@@ -916,19 +918,20 @@ module.exports = class ABViewTab extends ABViewTabCore {
          });
 
          // initialize the sidebar and figure out if it should be collased or not
-         var state = webix.storage.local.get(idBase + "-state");
-         if (state) {
-            // this will collapse or expand the sidebar
-            $$(ids.sidebar).setState(state);
+         this.AB.Storage.get(idBase + "-state").then((state) => {
+            if (state) {
+               // this will collapse or expand the sidebar
+               $$(ids.sidebar).setState(state);
 
-            // if the state is collapsed we need to make sure the expand option is available
-            if (state.collapsed) {
-               setTimeout(function () {
-                  $$(ids.sidebar).remove(ids.collapseMenu);
-                  $$(ids.sidebar).add(expandMenu);
-               }, 0);
+               // if the state is collapsed we need to make sure the expand option is available
+               if (state.collapsed) {
+                  setTimeout(function () {
+                     $$(ids.sidebar).remove(ids.collapseMenu);
+                     $$(ids.sidebar).add(expandMenu);
+                  }, 0);
+               }
             }
-         }
+         });
       };
 
       var _onShow = (viewId) => {
