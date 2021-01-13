@@ -77,6 +77,10 @@ module.exports = class ABDataCollection extends ABDataCollectionCore {
          this.emit("ab.datacollection.delete", data);
       });
 
+      this.bindParentDc();
+   }
+
+   bindParentDc() {
       // if we pass the master datacollection and the field it is linked to
       // we want to bind it witht hat field as second param so dataFeed is
       // used on the slave datacollection
