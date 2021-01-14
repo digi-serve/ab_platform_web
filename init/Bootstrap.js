@@ -15,6 +15,9 @@ if (!window.webix) {
    window.webix = Webix;
 }
 
+import Selectivity from "../js/selectivity/selectivity.min.js";
+import selectivityCSS from "../js/selectivity/selectivity.min.css";
+
 import initConfig from "../init/initConfig.js";
 import initDiv from "../init/initDiv.js";
 // import initResources from "../init/initResources.js";
