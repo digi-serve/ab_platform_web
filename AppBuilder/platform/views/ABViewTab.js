@@ -938,6 +938,14 @@ module.exports = class ABViewTab extends ABViewTabCore {
          var parent = this;
 
          var defaultViewIsSet = false;
+         // if no viewId is given, then try to get the currently selected ID
+         if (!viewId) {
+            var sidebar = $$(ids.sidebar);
+            if (sidebar) {
+               viewId = sidebar.getSelectedId().replace("_menu", "");
+            }
+         }
+
          this._viewComponents.forEach((v, index) => {
             // set default view id
             var currView = this.views((view) => {
@@ -947,7 +955,8 @@ module.exports = class ABViewTab extends ABViewTabCore {
             if (currView.length) {
                accessLevel = currView[0].getUserAccess();
             }
-            if (viewId == null && !defaultViewIsSet && accessLevel > 0) {
+            // choose the 1st View if we don't have one we are looking for.
+            if (!viewId && !defaultViewIsSet && accessLevel > 0) {
                viewId = v.view.id;
                defaultViewIsSet = true;
             }
