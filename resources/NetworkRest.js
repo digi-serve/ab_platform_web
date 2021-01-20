@@ -27,7 +27,9 @@ var Config = null;
 // the site specific configuration information
 
 class NetworkRest extends EventEmitter {
-   constructor() {
+   constructor(parent) {
+      // {Network} parent
+
       super({
          wildcard: true,
          newListener: false,
@@ -42,9 +44,10 @@ class NetworkRest extends EventEmitter {
       // {int} .numRetries
       // the number or times we should attempt to issue a network request.
 
-      this.queueLock = null;
-      // {Lock} .queueLock
-      // our semaphore for coordinating our access to our local storage.
+      this._network = parent;
+      // {Network} ._network
+      // the Parent Network Resource that the rest of the Platform actually
+      // works with.
    }
 
    /**
@@ -56,8 +59,6 @@ class NetworkRest extends EventEmitter {
     */
    init(AB, options) {
       this.AB = AB;
-
-      this.queueLock = new this.AB.Lock();
 
       Config = this.AB.Config.siteConfig();
       options = options || {};
@@ -88,7 +89,7 @@ class NetworkRest extends EventEmitter {
       params.type = params.type || "GET";
       return this._request(params, jobResponse).then((response) => {
          if (jobResponse) {
-            this.publishResponse(jobResponse, response);
+            this._network.publishResponse(jobResponse, response);
          }
          return response;
       });
@@ -110,7 +111,7 @@ class NetworkRest extends EventEmitter {
       params.type = params.type || "POST";
       return this._request(params, jobResponse).then((response) => {
          if (jobResponse) {
-            this.publishResponse(jobResponse, response);
+            this._network.publishResponse(jobResponse, response);
          }
          return response;
       });
@@ -132,7 +133,7 @@ class NetworkRest extends EventEmitter {
       params.type = params.type || "PUT";
       return this._request(params, jobResponse).then((response) => {
          if (jobResponse) {
-            this.publishResponse(jobResponse, response);
+            this._network.publishResponse(jobResponse, response);
          }
          return response;
       });
@@ -154,7 +155,7 @@ class NetworkRest extends EventEmitter {
       params.type = params.type || "DELETE";
       return this._request(params, jobResponse).then((response) => {
          if (jobResponse) {
-            this.publishResponse(jobResponse, response);
+            this._network.publishResponse(jobResponse, response);
          }
          return response;
       });
@@ -163,31 +164,6 @@ class NetworkRest extends EventEmitter {
    ////
    //// Network Utilities
    ////
-
-   /**
-    * @method networkStatus
-    * return the connection type currently registered with the network
-    * plugin.
-    * @return {string}
-    */
-   networkStatus() {
-      return navigator.connection.type;
-   }
-
-   /**
-    * @method isNetworkConnected
-    * return true/false if the device is currently connected to the
-    * internet.
-    * @return {bool}
-    */
-   isNetworkConnected() {
-      // if this isn't a Cordova Plugin, then return navigator data:
-      if (typeof Connection == "undefined") {
-         return navigator.onLine;
-      }
-
-      return this.networkStatus() != Connection.NONE;
-   }
 
    /**
     * _request()
@@ -205,7 +181,7 @@ class NetworkRest extends EventEmitter {
          );
          this.AB.Analytics.logError(err);
          if (jobResponse) {
-            this.publishResponse(jobResponse, err);
+            this._network.publishResponse(jobResponse, err);
          }
 
          return Promise.reject(err);
@@ -229,7 +205,7 @@ class NetworkRest extends EventEmitter {
 
          // params.timeout = params.timeout || 6000;
 
-         if (this.isNetworkConnected()) {
+         if (this._network.isNetworkConnected()) {
             params.method = params.method || params.type;
             params.timeout = 6000; // ??
 
@@ -242,7 +218,7 @@ class NetworkRest extends EventEmitter {
                   var data = packet;
                   if (data.data) data = data.data;
                   if (jobResponse) {
-                     this.publishResponse(jobResponse, null, data);
+                     this._network.publishResponse(jobResponse, null, data);
                   }
                   resolve(data);
                })
@@ -301,20 +277,23 @@ class NetworkRest extends EventEmitter {
                      this.AB.Analytics.logError(packet.data);
                      this.AB.error(packet.data);
                      if (jobResponse) {
-                        this.publishResponse(jobResponse, packet);
+                        this._network.publishResponse(jobResponse, packet);
                      }
                      reject(packet.data);
                      return;
                   } else {
                      // unknown/unexpected error:
-                     var error = new Error(`${err.status} ${err.statusText}`);
+                     var error = new Error(
+                        `${err.status} ${err.statusText}: ${params.method} ${params.url}`
+                     );
                      error.response = err.responseText;
                      error.text = err.statusText;
                      error.err = err;
+                     error.url = `${params.method} ${params.url}`;
                      this.AB.Analytics.logError(error);
                      this.AB.error(error);
                      if (jobResponse) {
-                        this.publishResponse(jobResponse, error);
+                        this._network.publishResponse(jobResponse, error);
                      }
                      reject(error);
                   }
@@ -324,7 +303,8 @@ class NetworkRest extends EventEmitter {
             this.AB.Analytics.log(
                "NetworkRest:_request(): Network is offline. Queuing request."
             );
-            this.queue(params, jobResponse)
+            this._network
+               .queue(params, jobResponse)
                .then(() => {
                   resolve({ status: "queued" });
                })
@@ -334,189 +314,16 @@ class NetworkRest extends EventEmitter {
    }
 
    /**
-    * _resend()
+    * resend()
     * processes messages that were queued due to network connectivity
     * issues.
     * @param {obj} params  the jQuery.ajax() formatted params
     * @param {obj} jobRequest  the information about the request's response.
     * @return {Promise}
     */
-   _resend(params, jobResponse) {
+   resend(params, jobResponse) {
       var op = params.type.toLowerCase();
       return this[op](params, jobResponse);
-   }
-
-   /**
-    * publishResponse()
-    * emit the requested response for this network operation.
-    * @param {obj} jobResponse
-    * @param {obj} error
-    * @param {obj} data
-    */
-   publishResponse(jobResponse, error, data) {
-      this.emit(jobResponse.key, jobResponse.context, error, data);
-   }
-
-   ////
-   //// Queued Requests
-   ////
-
-   /**
-    * refQueue()
-    * sub classes can override this for their own separate Queue Data
-    * @return {string}
-    */
-   refQueue() {
-      return "networkQueue";
-   }
-
-   /**
-    * Adds a request to the outgoing queue.
-    *
-    * @param {object} data
-    * @param {object} jobResponse
-    * @return {Promise}
-    */
-   queue(data, jobResponse) {
-      var refQueue = this.refQueue();
-
-      return new Promise((resolve, reject) => {
-         this.queueLock
-            .acquire()
-            .then(() => {
-               return this.AB.Storage.get(refQueue);
-            })
-            .then((queue) => {
-               queue = queue || [];
-               queue.push({ data, jobResponse });
-               this.AB.log(
-                  `:::: ${queue.length} request${
-                     queue.length > 1 ? "s" : ""
-                  } queued`
-               );
-               return this.AB.Storage.set(refQueue, queue);
-            })
-            .then(() => {
-               this.emit("queued");
-               this.queueLock.release();
-               resolve();
-            })
-            .catch((err) => {
-               this.AB.error("Error while queueing data", err);
-               this.AB.Analytics.logError(err);
-               reject(err);
-
-               this.queueLock.release();
-            });
-      });
-   }
-
-   /**
-    * queueFlush()
-    * Flush the queue and send the contents to the relay server.
-    */
-   queueFlush() {
-      var refQueue = this.refQueue();
-
-      // if we are not connected, then stop
-      if (!this.isNetworkConnected()) {
-         var error = new Error("Not connected to the internet.");
-         error.code = "E_NOTCONNECTED";
-         return Promise.reject(error);
-      }
-
-      // otherwise, attempt to flush the queue:
-      return new Promise((resolve, reject) => {
-         this.queueLock
-            .acquire()
-
-            //
-            // Get queue contents
-            //
-            .then(() => {
-               return this.AB.Storage.get(refQueue);
-            })
-
-            //
-            // Send off each queued request
-            //
-            .then((queue) => {
-               // default to [] if not found
-               queue = queue || [];
-
-               // recursively process each pending queue request
-               var processRequest = (cb) => {
-                  if (queue.length == 0) {
-                     cb();
-                  } else {
-                     var entry = queue.shift();
-                     var params = entry.data;
-                     var job = entry.jobResponse;
-                     this._resend(params, job)
-                        .then(() => {
-                           processRequest(cb);
-                        })
-                        .catch(cb);
-                  }
-               };
-
-               return new Promise((res, rej) => {
-                  processRequest((err) => {
-                     if (err) {
-                        rej(err);
-                     } else {
-                        res();
-                     }
-                  });
-               });
-            })
-
-            //
-            // Clear queue contents
-            //
-            .then(() => {
-               return this.AB.Storage.set(refQueue, []);
-            })
-
-            // release the Lock
-            .then(() => {
-               // this.emit('synced');
-               return this.queueLock.release();
-            })
-
-            // all done.
-            .then(() => {
-               resolve();
-            })
-
-            // respond to errors:
-            .catch((err) => {
-               this.AB.error("commAPI queueFlush error", err);
-               this.AB.Analytics.logError(err);
-
-               this.queueLock.release().then(() => {
-                  reject(err);
-               });
-            });
-      });
-   }
-
-   /**
-    * Reset credentials to a blank state.
-    *
-    * @return {Promise}
-    */
-   reset() {
-      return Promise.resolve();
-   }
-
-   // uuid() {
-   //    return this.AB.uuid();
-   // }
-
-   getTokens() {
-      // called in appPage.js : openRelayLoader()
-      return {};
    }
 }
 

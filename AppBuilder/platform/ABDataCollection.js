@@ -162,6 +162,12 @@ module.exports = class ABDataCollection extends ABDataCollectionCore {
     */
    processIncomingData(data) {
       // Web Platform:
+
+      // data check:
+      if (data.data && !Array.isArray(data.data)) {
+         data.data = [data.data];
+      }
+
       // standardize the heights
 
       // calculate default value of $height of rows
@@ -181,7 +187,7 @@ module.exports = class ABDataCollection extends ABDataCollectionCore {
          defaultHeight = minHeight;
       }
 
-      data.data.forEach((d) => {
+      (data.data || []).forEach((d) => {
          // define $height of rows to render in webix elements
          if (
             d.properties != null &&
