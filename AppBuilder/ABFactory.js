@@ -79,6 +79,7 @@ class ABFactory extends ABFactoryCore {
             console.error("ABFactory: replace .Validation with OP.Validation ");
             return {
                addError: () => {},
+               pass: () => true,
             };
          },
          isGridValidationError: () => {

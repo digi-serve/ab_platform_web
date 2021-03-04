@@ -65,8 +65,10 @@ module.exports = class ABDataCollection extends ABDataCollectionCore {
          this.emit("ab.datacollection.update", data);
       });
 
-      // We are subscribing to notifications from the server that an item may be stale and needs updating
-      // We will improve this later and verify that it needs updating before attempting the update on the client side
+      // We are subscribing to notifications from the server that an item may
+      // be stale and needs updating
+      // We will improve this later and verify that it needs updating before
+      // attempting the update on the client side
       this.AB.on("ab.datacollection.stale", (data) => {
          // debugger;
          this.emit("ab.datacollection.stale", data);
@@ -93,11 +95,17 @@ module.exports = class ABDataCollection extends ABDataCollectionCore {
          // defining dataFeed allows us to query the database when the table is scrolled
          dc.define("dataFeed", (value, params) => {
             // copy current wheres
-            var wheres = JSON.parse(
-               JSON.stringify(this.settings.objectWorkspace.filterConditions)
+            var wheres = this.AB.cloneDeep(
+               this.settings.objectWorkspace.filterConditions
             );
             // add bind items data as a filter to wheres
             if (value) {
+               // don't include an empty where condition in our .rules
+               // start by replacing it with null
+               if (!wheres.rules) {
+                  wheres = null;
+               }
+
                wheres = {
                   glue: "and",
                   rules: [
@@ -112,14 +120,9 @@ module.exports = class ABDataCollection extends ABDataCollectionCore {
                      },
                   ],
                };
-               // wheres.rules.push({
-               //    alias: fieldLink.alias, // ABObjectQuery
-               //    key: Object.keys(params)[0],
-               //    rule: fieldLink.alias ? "contains" : "equals", // NOTE: If object is query, then use "contains" because ABOBjectQuery return JSON
-               //    value: fieldLink.getRelationValue(
-               //       dataCollectionLink.__dataCollection.getItem(value)
-               //    )
-               // });
+
+               // remove any null in the .rules
+               wheres.rules = wheres.rules.filter((r) => r);
             }
 
             // this is the same item that was already bound...don't reload data
@@ -289,21 +292,21 @@ module.exports = class ABDataCollection extends ABDataCollectionCore {
                   );
                }
 
-               // NOTE : treetable should use .parse or TreeCollection
-               // https://forum.webix.com/discussion/1694/tree-and-treetable-using-data-from-datacollection
-               if (
-                  component.config.view == "treetable" &&
-                  !this.datasource.isGroup
-               ) {
-                  component.___AD = component.___AD || {};
-                  if (!component.___AD.onDcLoadData) {
-                     component.___AD.onDcLoadData = () => {
-                        component.parse(dc.find({}));
-                     };
+               // // NOTE : treetable should use .parse or TreeCollection
+               // // https://forum.webix.com/discussion/1694/tree-and-treetable-using-data-from-datacollection
+               // if (
+               //    component.config.view == "treetable" &&
+               //    !this.datasource.isGroup
+               // ) {
+               //    component.___AD = component.___AD || {};
+               //    if (!component.___AD.onDcLoadData) {
+               //       component.___AD.onDcLoadData = () => {
+               //          component.parse(dc.find({}));
+               //       };
 
-                     this.on("loadData", component.___AD.onDcLoadData);
-                  }
-               }
+               //       this.on("loadData", component.___AD.onDcLoadData);
+               //    }
+               // }
             }
          } else {
             component.data.unsync();

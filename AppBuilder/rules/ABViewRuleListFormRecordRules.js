@@ -10,6 +10,7 @@ const ABViewRule = require("./ABViewRule");
 const RoleUpdateExisting = require("./ruleActions/ABViewRuleActionFormRecordRuleUpdate");
 const RoleInsertConnected = require("./ruleActions/ABViewRuleActionFormRecordRuleInsertConnected");
 const RoleUpdateConnected = require("./ruleActions/ABViewRuleActionFormRecordRuleUpdateConnected");
+const RoleRemoveConnected = require("./ruleActions/ABViewRuleActionFormRecordRuleRemoveConnected");
 
 module.exports = class ABViewRuleListFormRecordRules extends ABViewRuleList {
    /**
@@ -26,7 +27,6 @@ module.exports = class ABViewRuleListFormRecordRules extends ABViewRuleList {
          },
       };
       super(settings);
-      var L = this.Label();
    }
 
    // must return the actual Rule object.
@@ -45,6 +45,11 @@ module.exports = class ABViewRuleListFormRecordRules extends ABViewRuleList {
          new RoleUpdateConnected(
             this.App,
             this.idBase + "_ruleActionUpdateConnected",
+            this.currentForm
+         ),
+         new RoleRemoveConnected(
+            this.App,
+            this.idBase + "_ruleActionRemoveConnected",
             this.currentForm
          ),
       ];

@@ -20,8 +20,9 @@ var divConfigDefaults = {
 const configDefaults = {
    site: {
       appbuilder: {
-         networkType: "rest",
-         // options: ["rest", "relay"]
+         networkType: "socket",
+         // options: ["rest", "relay", "socket"]
+         // Note: "socket" is required for realtime updates across devices.
 
          networkNumRetries: 3,
          // the number of times we will retry sending a network request

@@ -34,7 +34,7 @@ module.exports = class ABCountFooter {
       // Tell Webix :
       webix.ui.datafilter.countColumn = webix.extend(
          {
-            refresh: function(datatable, node, info) {
+            refresh: function (datatable, node, info) {
                var result = 0;
 
                var rowData = datatable.find({}) || [];
@@ -58,8 +58,8 @@ module.exports = class ABCountFooter {
                   }
                });
 
-               node.firstChild.innerHTML = result;
-            }
+               node.innerHTML = result;
+            },
          },
          webix.ui.datafilter.summColumn
       );

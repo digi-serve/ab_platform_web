@@ -34,10 +34,10 @@ module.exports = class ABTotalFooter {
       // Tell Webix :
       webix.ui.datafilter.totalColumn = webix.extend(
          {
-            refresh: function(datatable, node, info) {
+            refresh: function (datatable, node, info) {
                var result = 0;
 
-               datatable.eachRow(function(row) {
+               datatable.eachRow(function (row) {
                   var record = datatable.getItem(row);
 
                   var data = info.field.format(record);
@@ -48,8 +48,8 @@ module.exports = class ABTotalFooter {
                   }
                });
 
-               node.firstChild.innerHTML = result;
-            }
+               node.innerHTML = result;
+            },
          },
          webix.ui.datafilter.summColumn
       );

@@ -15,15 +15,15 @@ export default {
       webix.alert({
          title:
             opts.title ||
-            AB.Multilingual.Label("opp.dialog.alert.title", "*Alert"),
+            AB.Multilingual.label("opp.dialog.alert.title", "*Alert"),
          text:
             opts.text ||
             opts.message ||
-            AB.Multilingual.Label(
+            AB.Multilingual.label(
                "opp.dialog.alert.text",
                "*Something is wrong."
             ),
-         ok: opts.ok || AB.Multilingual.Label("opp.dialog.alert.ok", "*OK"),
+         ok: opts.ok || AB.Multilingual.label("opp.dialog.alert.ok", "*OK"),
       });
    },
 
@@ -32,11 +32,11 @@ export default {
    Confirm: function (opts) {
       var title =
          opts.title ||
-         AB.Multilingual.Label("opp.dialog.confirm.confirmTitle", "* Confirm");
+         AB.Multilingual.label("opp.dialog.confirm.confirmTitle", "* Confirm");
       var message =
          opts.text ||
          opts.message ||
-         AB.Multilingual.Label(
+         AB.Multilingual.label(
             "opp.dialog.confirm.confirmMsg",
             "* Are you sure you want to do this?"
          );
@@ -44,11 +44,11 @@ export default {
       var labelYes =
          opts.labelYes ||
          opts.ok ||
-         AB.Multilingual.Label("opp.common.yes", "* yes");
+         AB.Multilingual.label("opp.common.yes", "* yes");
       var labelNo =
          opts.labelNo ||
          opts.cancel ||
-         AB.Multilingual.Label("opp.common.no", "* no");
+         AB.Multilingual.label("opp.common.no", "* no");
 
       // var fnYes = opts.fnYes || function () { };
       // var fnNo = opts.fnNo || function () { };
@@ -96,18 +96,18 @@ export default {
       this.Confirm({
          title:
             opts.title ||
-            AB.Multilingual.Label(
+            AB.Multilingual.label(
                "opp.dialog.confirm.deleteTitle",
                "* Confirm Delete"
             ),
-         ok: opts.ok || AB.Multilingual.Label("opp.common.delete", "* Delete"),
+         ok: opts.ok || AB.Multilingual.label("opp.common.delete", "* Delete"),
          cancel:
             opts.cancel ||
-            AB.Multilingual.Label("opp.common.cancel", "* Cancel"),
+            AB.Multilingual.label("opp.common.cancel", "* Cancel"),
          text:
             opts.text ||
             opts.message ||
-            AB.Multilingual.Label(
+            AB.Multilingual.label(
                "opp.dialog.confirm.deleteMsg",
                "* Are you sure you want to delete this?",
                ["this"]

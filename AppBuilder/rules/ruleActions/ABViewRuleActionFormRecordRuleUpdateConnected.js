@@ -154,7 +154,7 @@ module.exports = class ABViewRuleActionFormRecordRuleUpdateConnected extends ABV
                id: ids.selectConnectedField,
                view: "richselect",
                label: this.labels.component.selectField,
-               labelWidth: this.App.config.labelWidthXXXLarge,
+               labelWidth: 300,
                value: this.selectedField,
                options: this.fieldDropList,
                on: {
@@ -219,8 +219,16 @@ module.exports = class ABViewRuleActionFormRecordRuleUpdateConnected extends ABV
                // create a new blank update form
                _logic.addDisplay(this.updateComponent.ui);
                this.updateComponent.init();
+
+               if (this.isUpdateValueDisabled) {
+                  let $updateForm = $$(this.updateComponent.ui.id);
+                  if ($updateForm) {
+                     $updateForm.disable();
+                     $updateForm.hide();
+                  }
+               }
             } else {
-               OP.Error.log("!!! No connectedObject found.", {
+               this.AB.error("!!! No connectedObject found.", {
                   fieldID: this.selectedFieldID,
                });
             }
@@ -397,15 +405,15 @@ module.exports = class ABViewRuleActionFormRecordRuleUpdateConnected extends ABV
             } else {
                model
                   .update(item.id, item)
+                  .then(() => {
+                     cb();
+                  })
                   .catch((err) => {
-                     OP.Error.log(
+                     this.AB.error(
                         "!!! ABViewRuleActionFormRecordRuleUpdateConnected.process(): update error:",
                         { error: err, data: options.data }
                      );
                      cb(err);
-                  })
-                  .then(() => {
-                     cb();
                   });
             }
          };
@@ -439,6 +447,9 @@ module.exports = class ABViewRuleActionFormRecordRuleUpdateConnected extends ABV
                      // for each entry, update it with our values:
                      list.forEach((item) => {
                         updateIt(item, (err) => {
+                           if (err) {
+                              return reject(err);
+                           }
                            done++;
                            if (done >= list.length) {
                               // now they are all updated, so continue.

@@ -669,6 +669,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
     * @return {obj} UI component
     */
    component(App) {
+      this.App = App;
       var idBase = "ABViewForm_" + this.id;
       this.uniqueInstanceID = webix.uid();
       var myUnique = (key) => {
@@ -1465,7 +1466,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
                      });
                })
                .catch((err) => {
-                  formError(err.data);
+                  formError(err.data || err);
                   reject(err);
                });
          }

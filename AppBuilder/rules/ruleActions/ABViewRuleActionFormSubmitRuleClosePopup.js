@@ -92,13 +92,16 @@ module.exports = class ABViewRuleActionFormSubmitRuleClosePopup extends ABViewRu
          if (!popup) return;
 
          // get the dom id of page. it is dom id that is generated in ABLiveTool.js
-         let pageDomId = ["ab_live_page", popup.application.id, popup.id].join(
-            "_"
-         );
+         // let pageDomId = ["ab_live_page", popup.application.id, popup.id].join(
+         //    "_"
+         // );
 
          // close current popup
-         let $popup = $$(pageDomId);
+         let $popup = $$(popup.id);
          if ($popup) $popup.hide();
+
+         // this clears the UI's record of the current form.
+         options.form.changePage(null);
 
          resolve();
       });

@@ -33,6 +33,10 @@ class UI extends ClassUI {
       // by not sending an id param, this creates it's own div.
       this.popup = Portal.attach();
 
+      AB.on("error", (error) => {
+         console.error("ui.on(error): ", error);
+      });
+
       return Portal.init(AB).then(() => {
          if (this.AB.Config.setting("autoenter")) {
             this.portalShow();

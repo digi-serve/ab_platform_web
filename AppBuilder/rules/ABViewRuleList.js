@@ -59,8 +59,10 @@ module.exports = class ABViewRuleList {
     * @param {string} idBase A unique Key used the the base of our unique ids
     */
    component(App, idBase) {
-      this.App = App;
+      this.App = this.App || App;
       this.idBase = idBase;
+
+      App = App || this.App;
 
       var L = App.Label;
 
@@ -384,6 +386,7 @@ module.exports = class ABViewRuleList {
 
    formLoad(form) {
       this.currentForm = form;
+      this.App = this.App || form.App;
    }
 
    // NOTE: Querybuilder v5.2 has a bug where it won't display the [and/or]

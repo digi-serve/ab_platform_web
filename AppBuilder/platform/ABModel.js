@@ -21,22 +21,6 @@ const ABModelCore = require("../core/ABModelCore");
 //		.limit(XX)
 //		.loadInto(DataTable);
 
-/**
- * @method triggerEvent
- * Publish a event when data in the model is changed
- *
- * @param {string} action - create, update, delete
- * @param {ABObject} object
- * @param {*} data
- */
-function triggerEvent(action, object, data) {
-   // Trigger a event to data collections of application and the live display pages
-   AD.comm.hub.publish("ab.datacollection." + action, {
-      objectId: object.id,
-      data: data,
-   });
-}
-
 function errorPopup(error) {
    // Show the pop up
    if (error && error.data && error.data.error == "READONLY") {
@@ -47,27 +31,6 @@ function errorPopup(error) {
          type: "alert-warning",
       });
    }
-}
-
-if (typeof io != "undefined") {
-   // Start listening for server events for object updates and call triggerEvent as the callback
-   io.socket.on("ab.datacollection.create", function (msg) {
-      triggerEvent("create", { id: msg.objectId }, msg.data);
-   });
-
-   io.socket.on("ab.datacollection.delete", function (msg) {
-      triggerEvent("delete", { id: msg.objectId }, msg.id);
-   });
-
-   io.socket.on("ab.datacollection.stale", function (msg) {
-      triggerEvent("stale", { id: msg.objectId }, msg.data);
-   });
-
-   io.socket.on("ab.datacollection.update", function (msg) {
-      triggerEvent("update", { id: msg.objectId }, msg.data);
-   });
-} else {
-   console.error("TODO: ABModel: implement socket.io ");
 }
 
 module.exports = class ABModel extends ABModelCore {
@@ -160,9 +123,14 @@ module.exports = class ABModel extends ABModelCore {
 
                resolve(data);
 
-               // FIX: now with sockets, the triggers are fired from socket updates.
-               // trigger a create event
-               // triggerEvent('create', this.object, data);
+               // If we do not have socket updates available, then trigger an
+               // update event with this data.
+               if (this.AB.Network.type() != "socket") {
+                  this.AB.emit("ab.datacollection.create", {
+                     objectId: this.object.id,
+                     data,
+                  });
+               }
             })
             .catch((err) => {
                errorPopup(err);
@@ -185,9 +153,14 @@ module.exports = class ABModel extends ABModelCore {
             .then((data) => {
                resolve(data);
 
-               // FIX: now with sockets, the triggers are fired from socket updates.
-               // trigger a delete event
-               // triggerEvent('delete', this.object, id);
+               // If we do not have socket updates available, then trigger an
+               // update event with this data.
+               if (this.AB.Network.type() != "socket") {
+                  this.AB.emit("ab.datacollection.delete", {
+                     objectId: this.object.id,
+                     data,
+                  });
+               }
             })
             .catch((err) => {
                errorPopup(err);
@@ -383,15 +356,18 @@ module.exports = class ABModel extends ABModelCore {
             params: values,
          })
             .then((data) => {
-               // .data is an empty object ??
-
                this.normalizeData(data);
 
                resolve(data);
 
-               // FIX: now with sockets, the triggers are fired from socket updates.
-               // trigger a update event
-               // triggerEvent('update', this.object, data);
+               // If we do not have socket updates available, then trigger an
+               // update event with this data.
+               if (this.AB.Network.type() != "socket") {
+                  this.AB.emit("ab.datacollection.update", {
+                     objectId: this.object.id,
+                     data,
+                  });
+               }
             })
             .catch((err) => {
                errorPopup(err);

@@ -189,7 +189,10 @@ class PortalAuthLogin extends ClassUI {
             return;
          }
 
-         if (response.status == "success" && response.data.user) {
+         if (
+            response.user ||
+            (response.status == "success" && response.data.user)
+         ) {
             // we can .reload() from cache given that all our
             // dynamic data comes from our initial /config call
             window.location.reload(false);

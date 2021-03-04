@@ -4,6 +4,7 @@
  */
 var EventEmitter = require("events").EventEmitter;
 import NetworkRest from "./NetworkRest";
+import NetworkRestSocket from "./NetworkRestSocket";
 // import NetworkRelay from "./NetworkRelay";
 
 class Network extends EventEmitter {
@@ -27,10 +28,19 @@ class Network extends EventEmitter {
 
       this._config = this.AB.Config.siteConfig();
       if (this._config) {
-         if (this._config.appbuilder.networkType == "relay") {
-            // this._network = new NetworkRelay();
-         } else {
-            this._network = new NetworkRest(this);
+         switch (this._config.appbuilder.networkType) {
+            case "relay":
+               // this._network = new NetworkRelay();
+               break;
+
+            case "socket":
+               this._network = new NetworkRestSocket(this);
+               break;
+
+            case "rest":
+            default:
+               this._network = new NetworkRest(this);
+               break;
          }
 
          return this._network.init(AB);
@@ -58,38 +68,14 @@ class Network extends EventEmitter {
     */
    get(...params) {
       return this._network.get(...params).then((data) => {
-         // Data returning from our server is wrapped in an outer layer of
-         // information that is for our Networking API.
-         // the outer wrapper should be:
-         // on success :
-         // {
-         // 	status: "success",
-         // 	data:{Data For App}
-         // }
-         // on Error:
-         // {
-         // 	status: "error",
-         // 	id: {int} error code
-         // 	... other data here
-         // }
-
-         // we have physically received a data packet from the server,
-         // but we are informed that our transaction was problematic
-         // (400 level USER problem?)
-         if (data.status === "error") {
-            // TODO: review Error procedure here
-            return data;
-         }
-
-         // on success
-         // make sure we return the Application Level Data packet:
-         return data.data || data;
+         return this.normalizeData(data);
       });
    }
 
    /**
     * Network.post()
     * perform an AJAX POST request to the AppBuilder server.
+    * this is a CREATE operation.
     * @param {obj} params the request parameters that need to be executed on
     *              the AppBuilder Server
     * @param {obj} jobResponse the callback info for handling the response.
@@ -100,12 +86,15 @@ class Network extends EventEmitter {
     * @return {Promise}
     */
    post(...params) {
-      return this._network.post(...params);
+      return this._network.post(...params).then((data) => {
+         return this.normalizeData(data);
+      });
    }
 
    /**
     * Network.put()
     * perform a PUT request to the AppBuilder server.
+    * This if ro UPDATE/REPLACE operations to data on the server.
     * @param {obj} params the request parameters that need to be executed on
     *              the AppBuilder Server
     * @param {obj} jobResponse the callback info for handling the response.
@@ -116,7 +105,9 @@ class Network extends EventEmitter {
     * @return {Promise}
     */
    put(...params) {
-      return this._network.put(...params);
+      return this._network.put(...params).then((data) => {
+         return this.normalizeData(data);
+      });
    }
 
    /**
@@ -132,7 +123,9 @@ class Network extends EventEmitter {
     * @return {Promise}
     */
    delete(...params) {
-      return this._network.delete(...params);
+      return this._network.delete(...params).then((data) => {
+         return this.normalizeData(data);
+      });
    }
 
    ////
@@ -173,6 +166,35 @@ class Network extends EventEmitter {
     */
    publishResponse(jobResponse, error, data) {
       this.emit(jobResponse.key, jobResponse.context, error, data);
+   }
+
+   normalizeData(data) {
+      // Data returning from our server is wrapped in an outer layer of
+      // information that is for our Networking API.
+      // the outer wrapper should be:
+      // on success :
+      // {
+      //   status: "success",
+      //   data:{Data For App}
+      // }
+      // on Error:
+      // {
+      //   status: "error",
+      //   id: {int} error code
+      //   ... other data here
+      // }
+
+      // we have physically received a data packet from the server,
+      // but we are informed that our transaction was problematic
+      // (400 level USER problem?)
+      if (data.status === "error") {
+         // TODO: review Error procedure here
+         return data;
+      }
+
+      // on success
+      // make sure we return the Application Level Data packet:
+      return data.data || data;
    }
 
    ////
@@ -322,11 +344,20 @@ class Network extends EventEmitter {
 
    /**
     * Reset credentials to a blank state.
-    *
     * @return {Promise}
     */
    reset() {
       return Promise.resolve();
+   }
+
+   /**
+    * type()
+    * return the type of network connection we are using.
+    * ["rest", "socket", "relay"]
+    * @return {string}
+    */
+   type() {
+      return this._config.appbuilder.networkType;
    }
 
    // uuid() {

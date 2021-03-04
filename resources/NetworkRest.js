@@ -87,6 +87,29 @@ class NetworkRest extends EventEmitter {
     */
    get(params, jobResponse) {
       params.type = params.type || "GET";
+
+      // data sent to params on a "GET" request need to be converted to
+      // uri querystring values:
+      var data = params.data || params.params;
+      if (data) {
+         var useThese = ["string", "number", "boolean"];
+         var search = Object.keys(data)
+            .map(function (key) {
+               var val = data[key];
+               if (useThese.indexOf(typeof val) == -1) {
+                  val = JSON.stringify(val);
+               }
+               return key + "=" + encodeURIComponent(val);
+            })
+            .join("&");
+
+         var join = "?";
+         if (params.url.indexOf("?") > -1) {
+            join = "&";
+         }
+         params.url = [params.url, search].join(join);
+      }
+
       return this._request(params, jobResponse).then((response) => {
          if (jobResponse) {
             this._network.publishResponse(jobResponse, response);
@@ -165,6 +188,20 @@ class NetworkRest extends EventEmitter {
    //// Network Utilities
    ////
 
+   isNetworkConnected() {
+      return this._network.isNetworkConnected();
+   }
+
+   salSend(params) {
+      return Atomic(params.url, params).then((packet) => {
+         // {json} packet
+         // the response from Atomic is in format:
+         // {data: {…}, xhr: XMLHttpRequest}
+         // we just want to send back our { status:"", data:xxx } packet.
+         return packet.data;
+      });
+   }
+
    /**
     * _request()
     * perform the actual AJAX request for this operation.
@@ -197,6 +234,7 @@ class NetworkRest extends EventEmitter {
          if (this.AB.Account.authToken) {
             params.headers.Authorization = this.AB.Account.authToken;
          }
+         params.headers["Content-type"] = "application/json";
 
          var tenantID = this.AB.Tenant.id();
          if (tenantID) {
@@ -205,18 +243,19 @@ class NetworkRest extends EventEmitter {
 
          // params.timeout = params.timeout || 6000;
 
-         if (this._network.isNetworkConnected()) {
+         if (this.isNetworkConnected()) {
             params.method = params.method || params.type;
             params.timeout = 6000; // ??
+            params.data = params.data || params.params;
+            delete params.params;
 
-            Atomic(params.url, params)
+            this.salSend(params)
                .then((packet) => {
                   // TODO: check if packet.status == "error"
                   // and then .publishResponse() as an error
 
                   //
                   var data = packet;
-                  if (data.data) data = data.data;
                   if (jobResponse) {
                      this._network.publishResponse(jobResponse, null, data);
                   }

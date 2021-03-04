@@ -613,7 +613,13 @@ module.exports = class ABViewChart extends ABViewChartCore {
             // Get label of the connect field
             if (labelCol.key == "connectObject") {
                var relateValues = labelCol.pullRelationValues(item);
-               if (relateValues != null) label = relateValues.text;
+               if (relateValues != null) {
+                  if (Array.isArray(relateValues))
+                     label = relateValues
+                        .map((val) => val.text || "")
+                        .join(", ");
+                  else label = relateValues.text;
+               }
             }
 
             if (this.settings.multipleSeries) {

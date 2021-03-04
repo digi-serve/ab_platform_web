@@ -54,7 +54,7 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
       };
       this._settings = settings;
 
-      var L = this.Label;
+      var L = this.Label();
       var labels = {
          common: App.labels,
          component: {
@@ -470,7 +470,7 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
                               }
                            })
                            .catch((err) => {
-                              App.AB.Error.log("Error deleting item:", {
+                              App.AB.log("Error deleting item:", {
                                  error: err,
                               });
 
@@ -960,8 +960,23 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
                   _logic.busy();
                });
                CurrentDatacollection.on("initializedData", () => {
-                  _logic.grouping();
+                  // _logic.grouping();
                   _logic.ready();
+               });
+               CurrentDatacollection.on("loadData", () => {
+                  let $treetable = $$(this.ui.id);
+                  if (
+                     $treetable &&
+                     $treetable.config.view == "treetable" &&
+                     CurrentObject &&
+                     !CurrentObject.isGroup
+                  ) {
+                     $treetable.clearAll();
+                     $treetable.parse(CurrentDatacollection.getData());
+
+                     _logic.grouping();
+                     _logic.ready();
+                  }
                });
                _logic.grouping();
             } else DataTable.unbind();
