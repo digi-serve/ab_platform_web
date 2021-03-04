@@ -1,1 +1,3701 @@
-!function(t){var e={};function i(o){if(e[o])return e[o].exports;var n=e[o]={i:o,l:!1,exports:{}};return t[o].call(n.exports,n,n.exports,i),n.l=!0,n.exports}i.m=t,i.c=e,i.d=function(t,e,o){i.o(t,e)||Object.defineProperty(t,e,{enumerable:!0,get:o})},i.r=function(t){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(t,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(t,"__esModule",{value:!0})},i.t=function(t,e){if(1&e&&(t=i(t)),8&e)return t;if(4&e&&"object"==typeof t&&t&&t.__esModule)return t;var o=Object.create(null);if(i.r(o),Object.defineProperty(o,"default",{enumerable:!0,value:t}),2&e&&"string"!=typeof t)for(var n in t)i.d(o,n,function(e){return t[e]}.bind(null,n));return o},i.n=function(t){var e=t&&t.__esModule?function(){return t.default}:function(){return t};return i.d(e,"a",e),e},i.o=function(t,e){return Object.prototype.hasOwnProperty.call(t,e)},i.p="/codebase/",i(i.s=4)}([function(t,e,i){"use strict";function o(t){return Array.isArray?Array.isArray(t):"[object Array]"===Object.prototype.toString.call(t)}function n(t){return void 0===t}function r(t,e,i){for(var o in e)t[o]&&!i||(t[o]=e[o]);return t}var a;function s(){return a||(a=(new Date).valueOf()),++a}i.d(e,"b",function(){return o}),i.d(e,"c",function(){return n}),i.d(e,"a",function(){return r}),i.d(e,"d",function(){return s})},function(t,e,i){"use strict";i.d(e,"c",function(){return s}),i.d(e,"b",function(){return l}),i.d(e,"a",function(){return u});var o=i(0),n="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(t){return typeof t}:function(t){return t&&"function"==typeof Symbol&&t.constructor===Symbol&&t!==Symbol.prototype?"symbol":typeof t};function r(t,e,i){if("object"==(void 0===t?"undefined":n(t))){for(var o=0;o<t.length;o++)if(t[o]=parseFloat(t[o]),isNaN(t[o]))return!0}else if(t=parseFloat(t),isNaN(t))return!0;return!isNaN(e)&&i(t,e)}var a={contains:function(t,e){return e.toLowerCase().indexOf(t.toString().toLowerCase())>=0},equal:function(t,e){return r(t,e,function(t,e){return t==e})},not_equal:function(t,e){return r(t,e,function(t,e){return t!=e})},less:function(t,e){return r(t,e,function(t,e){return e<t})},less_equal:function(t,e){return r(t,e,function(t,e){return e<=t})},more:function(t,e){return r(t,e,function(t,e){return e>t})},more_equal:function(t,e){return r(t,e,function(t,e){return e>=t})},multi:function(t,e){"string"==typeof t&&(t=t.split(","));for(var i=0;i<t.length;i++)if(e==t[i])return!0;return!1},range:function(t,e){return r(t,e,function(t,e){return e<t[1]&&e>=t[0]})},range_inc:function(t,e){return r(t,e,function(t,e){return e<=t[1]&&e>=t[0]})}};function s(t){t=t||[];for(var e=0;e<t.length;e++){var i=t[e],o=i.fvalue;"function"==typeof o?i.func=o:"select"==i.type||"richselect"==i.type?(i.func=function(t,e){return t==e},o=o||""):i.type.indexOf("multi")>-1?i.func=a.multi:"object"===(void 0===o?"undefined":n(o))?i.func=a.range:"="==o.substr(0,1)?(i.func=a.equal,o=o.substr(1)):"<>"==o.substr(0,2)?(i.func=a.not_equal,o=o.substr(2)):">="==o.substr(0,2)?(i.func=a.more_equal,o=o.substr(2)):">"==o.substr(0,1)?(i.func=a.more,o=o.substr(1)):"<="==o.substr(0,2)?(i.func=a.less_equal,o=o.substr(2)):"<"==o.substr(0,1)?(i.func=a.less,o=o.substr(1)):o.indexOf("...")>0?(i.func=a.range,o=o.split("...")):o.indexOf("..")>0?(i.func=a.range_inc,o=o.split("..")):"datepicker"==i.type?i.func=function(t,e){return t==e}:i.func=a.contains,i.fvalue=o}}function l(t){var e,i;for(t=t||[],e=0;e<t.length;e++)"string"==typeof(i=t[e].fvalue||t[e].value||"")&&i.trim&&(i=i.trim()),t[e].fvalue=i}function u(t,e,i){if(t){var n=void 0,r=void 0;for(n=0;n<t.length;n++)if((r=t[n]).fvalue){var a=i&&i[r.name]?i[r.name]:r.name;if(o.c(e[a]))return!1;var s=e[a];if(0!==!s&&!s)return!1;var l=s.toString();if(!r.func(r.fvalue,l))return!1}}return!0}},function(t,e,i){"use strict";var o=i(0);function n(t,e){return"$webixtotal"+t.$divider+e}function r(t,e){var i,o,n=[];for(i=0;i<e.length;i++)o=t[e[i]],isNaN(parseFloat(o))||n.push(o);return n}var a={dir:1,as:function(t,e){return u(t)&&u(e)?s.int(t,e):s.string(t,e)}},s={date:function(t,e){return(t-=0)>(e-=0)?1:t<e?-1:0},int:function(t,e){return(t*=1)>(e*=1)?1:t<e?-1:0},string:function(t,e){return e?t?(t=t.toString().toLowerCase())>(e=e.toString().toLowerCase())?1:t<e?-1:0:-1:1}};function l(t,e){var i,r,s,l,u=t.config.structure.values;for(e=function t(e,i){var o,n,r,a,s,l=[];for(n=0;n<i.length;n++)if((r=i[n]).data.length){var u=t(e,r.data);for(o=!1,a=0;a<u.length;a++)(s=u[a]).splice(0,0,{name:r.key}),o||(s[0].colspan=u.length,o=!0),l.push(s)}else{var c=i[n].key.split(e.$divider);l.push([{name:i[n].key,operation:c[0],text:c[1]}])}return l}(t,e=function t(e,i,n){var r,s,l,u,c,p=[];if(Object.keys&&!1!==e.columnSort)for(n=n||0,r=e.columns[n],c=function(t,e){var i=a;t&&(t[e]?i=t[e]:t.$default&&(i=t.$default),i.dir&&(i._dir="desc"==i.dir?-1:1),o.a(i,a));return i}(e.columnSort,r),u=Object.keys(i),n<e.columns.length&&(u=u.sort(function(t,e){return c.as(t,e)*c._dir})),n++,s=0;s<u.length;s++)l=u[s],p.push({key:l,data:t(e,i[l],n)});else for(l in i)p.push({key:l,data:t(e,i[l])});return p}(t.config.structure,e)),i=0;i<e.length;i++){var c=[];for(r=0;r<e[i].length;r++)c.push(e[i][r].name);l=null;var p=c[c.length-1].split(t.$divider);for(r=0;r<u.length&&!l;r++)if(u[r].operation)for(s=0;s<u[r].operation.length;s++)u[r].name==p[1]&&u[r].operation[s]==p[0]&&(l=u[r]);e[i]={id:c.join(t.$divider),header:e[i]},e[i].format=l&&l.format?l.format:"count"!=p[0]?t.config.format:null}return e.length&&t.view&&t.view.callEvent&&t.view.callEvent("onHeaderInit",[e]),t.config.totalColumn&&e.length&&(e=function(t,e){var i,o,r,a,s,l,u,c=[];if((l=e[0].header.length)<2)return e;for(r in o=function(t,e){var i,o,n,r,a,s={},l=0;for(o=0;o<e.length;o++)a=e[o].id.split(t.$divider),n=a.pop(),"sum"!=(r=a.pop())&&"sumOnly"==t.config.totalColumn||(i=r+t.$divider+n,s[i]||(l++,s[i]={operation:r,ids:[],format:e.format}),s[i].ids.push(e[o].id));return{groups:s,count:l}}(t,e),i=o.groups,t._pivotColumnGroups=i,i){for(a={id:n(t,r),header:[],sort:"int",width:t.config.columnWidth,format:t.config.format},s=0;s<l-1;s++)s||c.length?a.header.push(""):a.header.push({name:"total",rowspan:l-1,colspan:o.count});u=r.split(t.$divider),a.header.push({name:r,operation:u[0],text:u[1]}),c.push(a)}return e.concat(c)}(t,e)),e.splice(0,0,{id:"name",template:"{common.treetable()} #name#",header:{text:void 0}}),e}function u(t){return!isNaN(1*t)}var c="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(t){return typeof t}:function(t){return t&&"function"==typeof Symbol&&t.constructor===Symbol&&t!==Symbol.prototype?"symbol":typeof t};function p(t,e,i,o){var n,r,a=[],s=[];for(t=function t(e,i,o){o||(o=[]);for(var n=0;n<e.length;n++)i&&e[n].data?t(e[n].data,i,o):o.push(e[n]);return o}(t,o),n=0;n<t.length;n++)r=t[n][e],isNaN(parseFloat(r))||(s.push(1*r),a.push(t[n]));return i(s,e,a)}var h="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(t){return typeof t}:function(t){return t&&"function"==typeof Symbol&&t.constructor===Symbol&&t!==Symbol.prototype?"symbol":typeof t};function f(t,e,i){var o;for(o=0;o<t.length;o++)t[o].data?f(t[o].data,e,i):i.push(t[o][e])}var d=i(1),v="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(t){return typeof t}:function(t){return t&&"function"==typeof Symbol&&t.constructor===Symbol&&t!==Symbol.prototype?"symbol":typeof t},g=function(){function t(t,e){for(var i=0;i<e.length;i++){var o=e[i];o.enumerable=o.enumerable||!1,o.configurable=!0,"value"in o&&(o.writable=!0),Object.defineProperty(t,o.key,o)}}return function(e,i,o){return i&&t(e.prototype,i),o&&t(e,o),e}}();var _=function(){function t(e,i){!function(t,e){if(!(t instanceof e))throw new TypeError("Cannot call a class as a function")}(this,t),this.master=e,this.config=i,this.count=0}return t.prototype.process=function(t,e){var i,a,s,u,h;this.watch=new Date;var f=this.structure;for(f._header=[],f._header_hash={},d.b(f.filters),d.c(f.filters),u=0;u<f.values.length;u++)f.values[u].operation=f.values[u].operation||["sum"],o.b(f.values[u].operation)||(f.values[u].operation=[f.values[u].operation]);for(i=[],u=0;u<f.columns.length;u++)i[u]="object"==v(f.columns[u])?f.columns[u].id||u:f.columns[u];return a=f.rows.concat(i),h=this.group(t,e,a),s={},f.rows.length>0?h=this.processRows(h,f.rows,f,s,""):(this.processColumns(h,i,f,s),h=[]),s=l(this.master,s),h=function t(e,i){var o=e._pivotColumnGroups;if(o){var a=void 0,s=void 0,l=void 0;for(l in o)for(s=o[l].ids,a=0;a<i.length;a++){var u=void 0,c=n(e,l),p="",h=r(i[a],s);h.length&&(u=e._pivotOperations.getTotal(l.split(e.$divider)[0]))&&(p=u.call(e,h,c,i[a])),i[a][c]=p,i[a].data&&(i[a].data=t(e,i[a].data))}}return i}(this.master,h),this.config.footer&&function(t,e,i){var n,r,a,s;for(r=1;r<e.length;r++){n=null,s=(a=e[r].id.split(t.$divider))[a.length-2],"sumOnly"==t.config.footer&&"sum"!=s&&(n=" ");var l=t._pivotOperations.getTotal(s);if(!n&&l){var u=t._pivotOperations.getTotalOptions(s);n={$pivotValue:p(i,e[r].id,l,u&&u.leavesOnly),$pivotOperation:s}}else n=" ";e[r].footer=n,"object"==c(t.config.footer)&&o.a(e[r].footer,t.config.footer,!0)}}(this.master,s,h),delete f._header,delete f._header_hash,{header:s,data:h}},t.prototype.processColumns=function(t,e,i,n,r,a){var s;if(r=r||{$source:[]},e.length>0)for(var l in a=a||"",t)n[l]||(n[l]={}),t[l]=this.processColumns(t[l],e.slice(1),i,n[l],r,(a.length>0?a+this.divider:"")+l);else{var u=i.values;for(var c in t){r.$source.push(c);for(var p=0;p<u.length;p++)for(var h=0;h<u[p].operation.length;h++)s=void 0!==a?a+this.divider+u[p].operation[h]+this.divider+u[p].name:u[p].operation[h]+this.divider+u[p].name,i._header_hash[s]||(i._header.push(s),i._header_hash[s]=!0),o.c(r[s])&&(r[s]=[],n[u[p].operation[h]+this.divider+u[p].name]={}),r[s].push({value:t[c][u[p].name],id:c})}}return r},t.prototype.processRows=function(t,e,i,n,r){var a,s,l,u,c,p=[];if(e.length>1){for(a in t)t[a]=this.processRows(t[a],e.slice(1),i,n,r+"_"+a);var h=i._header;for(a in t){for(s={data:t[a]},l=0;l<s.data.length;l++)for(u=0;u<h.length;u++)c=h[u],o.c(s[c])&&(s[c]=[]),s[c].push(s.data[l][c]);this.setItemValues(s),this.master.config.stableRowId&&(s.id=r+"_"+a),s.name=a,s.open=!0,p.push(s)}}else for(a in t)(s=this.processColumns(t[a],i.columns,i,n)).name=a,this.master.config.stableRowId&&(s.id=r+"_"+a),this.setItemValues(s),p.push(s);return p},t.prototype.setItemValues=function(t){return t=function(t,e){var i,o,n,r,a,s,l,u,c=e.header,p=e.max,h=e.min,f=e.values;if(!h&&!p)return t;for(t.$cellCss||(t.$cellCss={}),i=0;i<f.length;i++){for(u=f[i],r=[],a=-99999999,s=[],l=99999999,o=0;o<c.length;o++)n=c[o],isNaN(t[n])||-1!==n.indexOf(u.name)&&(p&&t[n]>a?(r=[n],a=t[n]):t[n]==a&&r.push(n),h&&t[n]<l?(s=[n],l=t[n]):t[n]==l&&s.push(n));for(o=0;o<s.length;o++)t.$cellCss[s[o]]="webix_min";for(o=0;o<r.length;o++)t.$cellCss[r[o]]="webix_max"}return t}(t=function(t,e,i){var o,n,r,a,s,l,u,c=e.header;for(o=0;o<c.length;o++){if(s=(l=(r=c[o]).split(e.divider))[l.length-2],u=t[r],a=e.operations.getOption(s,"leavesOnly"),n=e.operations.getOption(s,"ids"),a&&t.data&&(u=[],f(t.data,r,u)),u){for(var p=[],d=[],v=0;v<u.length;v++){var g=u[v],_=null;"object"==(void 0===g?"undefined":h(g))&&(g=g.value,_=u[v].id),(g||"0"==g)&&(p.push(g),_&&d.push(_))}p.length?t[r]=e.operations.get(s)(p,r,t,n?d:null):t[r]=""}else t[r]="";i.count++}return t}(t,{header:this.structure._header,divider:this.divider,operations:this.operations},this),{header:this.structure._header,max:this.config.max,min:this.config.min,values:this.structure.values}),this.count>5e4&&(this.count=0,this.config.ping&&this.config.ping.call(this,this.watch)),t},t.prototype.group=function(t,e,i){var o,n,r={};for(o=0;o<e.length;o++)(n=t[e[o]])&&d.a(this.structure.filters,n,this.config.filterMap)&&this.groupItem(r,n,i);return r},t.prototype.groupItem=function(t,e,i){if(i.length){var n=e[i[0]];if(void 0===n)return null;o.c(t[n])&&(t[n]={}),this.groupItem(t[n],e,i.slice(1))}else t[e.id]=e},t.prototype.filterItem=function(t){for(var e=this.structure.filters||[],i=0;i<e.length;i++){var n=e[i];if(n.fvalue){if(o.c(t[n.name]))return!1;var r=t[n.name].toString().toLowerCase();if(!n.func(n.fvalue,r))return!1}}return!0},g(t,[{key:"operations",get:function(){return this.master._pivotOperations}},{key:"divider",get:function(){return this.master.$divider}},{key:"structure",get:function(){return this.config.structure}}]),t}(),b=i(3);i.d(e,"b",function(){return y}),i.d(e,"a",function(){return $});var w="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(t){return typeof t}:function(t){return t&&"function"==typeof Symbol&&t.constructor===Symbol&&t!==Symbol.prototype?"symbol":typeof t};function m(t,e){if(!(t instanceof e))throw new TypeError("Cannot call a class as a function")}var x="_'_",y=function(){function t(e,i){m(this,t),this.$divider=x,this._initOperations(),this.config=e,this.view=i,e.webWorker&&"undefined"!==!("undefined"==typeof Worker||w(Worker))&&i?this._initWorker(e,i):this._pivotData=new _(this,this.config),this.config.structure||(this.config.structure={}),o.a(this.config.structure,{rows:[],columns:[],values:[],filters:[]})}return t.prototype._initWorker=function(t,e){this._result=null,this._pivotWorker=new Worker(t.webWorker),this._pivotWorker.onmessage=function(t){"ping"===t.data.type?e._runPing(t.data.watch,e):e._result&&!e.$destructed&&(e.callEvent("onWebWorkerEnd",[]),t.data.id&&t.data.id!==e._result_id||(e._result(t.data.data),e._result=null))}},t.prototype._runPing=function(t,e){try{this.config.ping(t)}catch(t){this._pivotWorker.terminate(),this._initWorker(this.config,e),e.callEvent("onWebWorkerEnd",[])}},t.prototype._getPivotData=function(t,e,i){if(!this._pivotWorker){var o=this._pivotData.process(t,e);return i&&i(o),o}var n=this._result_id=webix.uid();this._result=i;var r=[],a=this.config.structure,s=this.config.footer,l=this._pivotOperations.serialize();if(a&&(a.rows.length||a.columns.length))for(var u=e.length-1;u>=0;u--)r[u]=t[e[u]];this.callEvent("onWebWorkerStart",[]);var c=this.config.format;if("function"==typeof c){var p="x"+webix.uid();webix.i18n[p]=c,c=p}var h=!!this.config.ping;this._pivotWorker.postMessage({footer:s,structure:a,data:r,id:n,operations:l,ping:h,format:c})},t.prototype._initOperations=function(){var t=this._pivotOperations=new b.a;this.operations=t.pull},t.prototype.addOperation=function(t,e,i){this._pivotOperations.add(t,e,i)},t.prototype.addTotalOperation=function(t,e,i){this._pivotOperations.addTotal(t,e,i)},t}(),$=function(t){function e(){return m(this,e),function(t,e){if(!t)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return!e||"object"!=typeof e&&"function"!=typeof e?t:e}(this,t.apply(this,arguments))}return function(t,e){if("function"!=typeof e&&null!==e)throw new TypeError("Super expression must either be null or a function, not "+typeof e);t.prototype=Object.create(e&&e.prototype,{constructor:{value:t,enumerable:!1,writable:!0,configurable:!0}}),e&&(Object.setPrototypeOf?Object.setPrototypeOf(t,e):t.__proto__=e)}(e,t),e.prototype.getData=function(t){var e,i,n,r,a=[],s={},l=this.config.structure.filters,u={},c={},p={},h=this.operations,f=[],d={};for(e=0;e<l.length;e++)-1!=l[e].type.indexOf("select")&&(c[l[e].name]=[],p[l[e].name]={});for(e=0;e<t.length;e++){if(u[i=t[e].id=t[e].id||o.d()]=t[e],f.push(i),e<5)for(r in t[e])s[r]||(a.push(r),s[r]=o.d());for(n in c){var v=t[e][n];o.c(v)||p[n][v]||(p[n][v]=1,c[n].push(v))}}for(i in d.options=c,d.fields=a,d.data=this._getPivotData(u,f),d.operations=[],h)d.operations.push(i);return d},e}(y)},function(module,__webpack_exports__,__webpack_require__){"use strict";__webpack_require__.d(__webpack_exports__,"a",function(){return Operations});var _helpers_js__WEBPACK_IMPORTED_MODULE_0__=__webpack_require__(0);function _classCallCheck(t,e){if(!(t instanceof e))throw new TypeError("Cannot call a class as a function")}var operations={sum:function(t){for(var e=0,i=0;i<t.length;i++){var o=t[i];o=parseFloat(o,10),isNaN(o)||(e+=o)}return e},count:function(t,e,i){var o=0;if(i.data)for(var n=0;n<i.data.length;n++)o+=i.data[n][e]||0;else o=t.length;return o},max:function(t){return 1==t.length?t[0]:Math.max.apply(this,t)},min:function(t){return 1==t.length?t[0]:Math.min.apply(this,t)}},totalOperations={sum:function(t){var e,i=0;for(e=0;e<t.length;e++)i+=t[e];return i},min:function(t){return 1==t.length?t[0]:Math.min.apply(null,t)},max:function(t){return 1==t.length?t[0]:Math.max.apply(null,t)},count:function(t){var e=totalOperations.sum.call(this,t);return e?parseInt(e,10):""}},Operations=function(){function Operations(){_classCallCheck(this,Operations),this.pull=_helpers_js__WEBPACK_IMPORTED_MODULE_0__.a({},operations),this.options={},this.pullTotal=_helpers_js__WEBPACK_IMPORTED_MODULE_0__.a({},totalOperations),this.totalOptions={}}return Operations.prototype.serialize=function(){var t={};for(var e in this.pull)t[e]=this.pull[e].toString();return t},Operations.prototype.parse=function parse(str){for(var key in str)eval("this.temp = "+str[key]),this.pull[key]=this.temp},Operations.prototype.add=function(t,e,i){this.pull[t]=e,i&&(this.options[t]=i)},Operations.prototype.addTotal=function(t,e,i){this.pullTotal[t]=e,i&&(this.totalOptions[t]=i)},Operations.prototype.get=function(t){return this.pull[t]||null},Operations.prototype.getOptions=function(t){return this.options[t]||null},Operations.prototype.getOption=function(t,e){return this.options[t]?this.options[t][e]:null},Operations.prototype.getTotal=function(t){return this.pullTotal[t]||this.pull[t]||null},Operations.prototype.getTotalOptions=function(t){return this.pullTotal[t]?this.totalOptions[t]||null:this.options[t]||null},Operations.prototype.getTotalOption=function(t,e){var i=this.getTotalOptions(t);return i?i[t][e]:null},Operations}()},function(t,e,i){"use strict";i.r(e);i(9),i(7),i(6);function o(t){t=t||[];for(var e=0;e<t.length;e++)t[e].fvalue=n(t[e].value)}function n(t){return t=t||"",webix.isDate(t)?t=t.valueOf().toString():"string"==typeof t&&t.trim&&(t=t.trim()),t}function r(t){var e,i,o,n=t.config,r=n.structure.filters||[],s=[],l={};for(e=0;e<r.length;e++){i=r[e],webix.isUndefined(l[i.type])&&(l[i.type]=[]),l[i.type].push(e);var u="multiselect"===i.type?"multicombo":"select"===i.type?"richselect":i.type;if(o={value:webix.isUndefined(i.value)?"":i.value,point:!1,field:i.name,view:u,minWidth:n.filterMinWidth,maxWidth:n.filterWidth},n.filterPlaceholder&&("boolean"==typeof n.filterPlaceholder?(o.placeholder=o.label,o.label=""):o.placeholder=n.filterPlaceholder),"multicombo"==i.type&&(o.tagMode=!1),t.filters.isSelect(i.type)&&(o.options={},o.options.data=a(t,i.name,-1==i.type.indexOf("multi")),o.options.point=!1,"select"==i.type&&(o.options.css="webix_pivot_richselect_suggest"),"multicombo"==i.type&&(o.options.css="webix_pivot_multicombo_suggest")),n.separateLabel||(o.label=t._applyMap(i.name),o.labelAlign=n.filterLabelAlign,o.labelWidth=n.filterLabelWidth),t.callEvent("onFilterCreate",[i,o]))if(n.separateLabel){var c=t._applyMap(i.name);s.push({cols:[{view:"label",autowidth:!0,label:c},{width:10},o,{width:18}]})}else s.push(o)}return s}function a(t,e,i){var o,n=[],r=t.data.pull,a={};if(i&&n.push({value:"",id:"",$empty:!0}),t._pivotOptions&&t._pivotOptions[e])return n.concat(t._pivotOptions[e]);for(var s in r)o=r[s][e],webix.isUndefined(o)||!o&&0!==o||a[o]||(n.push({value:o.toString(),id:o.toString()}),a[o]=!0);var l=function(t){return!isNaN(parseFloat(t))};return n.sort(function(t,e){var i=t.value,o=e.value;return o?i?(l(i)&&l(o)||(i=i.toString().toLowerCase(),o=o.toString().toLowerCase()),i>o?1:i<o?-1:0):-1:1}),n}function s(t,e){!function(t,e){for(var i=0;i<e.length;i++){var o=void 0,n=e[i];n.cols&&(n=n.cols[2]),o="text"==n.view?"onTimedKeyPress":"onChange",n.on={},n.on[o]=function(){var e=this.getValue();e&&this.config.separator&&!this.format_setter&&(e=e.split(this.config.separator)),l(t,this.config.field,e)}}}(t,e);var i={elements:e};t.callEvent("onViewInit",["filters",i]),i.elements&&t.getFilterView()&&(e.length>0?(t.getFilterView().show(),webix.ui(e,t.getFilterView())):t.getFilterView().hide())}function l(t,e,i){for(var o=t.config.structure.filters,n=0;n<o.length;n++)if(o[n].name==e)return o[n].value=i,t.callEvent("onFilterChange",[e,i]),!0;return!1}var u={add:function(t,e){var i=this.$$("values").getItem(e);i.operation.push("sum"),this.$$("values").updateItem(e),webix.delay(function(){for(var t=i.operation.length-1,o=this.$$("values").getItemNode(e).childNodes,n=null,r=0;r<o.length;r++)if((n=o[r]).getAttribute){var a=n.getAttribute("webix_operation");if(!webix.isUndefined(a)&&a==t)break}null!==n&&u.selector.call(this,n,e,n)},this)},"filter-selector":function(t,e,i){var o,n=webix.$$(this.config.pivot),r={view:"webix_pivot_popup",css:"webix_pivot_popup",autofit:!0,autoheight:!0,width:150,data:c(n.filters.get(),n._applyLocale)};(o=webix.ui(r)).show(i),o.attachEvent("onHide",webix.bind(function(){var t=o.getSelected();if(null!==t){var i=this.$$("filters").getItem(e);i.type=t.name,i.value="",this.$$("filters").updateItem(e)}o.close()},this))},"chart-selector":function(t,e,i){var o,n=webix.$$(this.config.pivot),r={view:"webix_pivot_popup",css:"webix_pivot_popup",autofit:!0,autoheight:!0,width:150,data:c(n.filters.get(),n._applyLocale)};(o=webix.ui(r)).show(i),o.attachEvent("onHide",webix.bind(function(){var t=o.getSelected();if(null!==t){var i=this.$$("filters").getItem(e);i.type=t.name,i.value="",this.$$("filters").updateItem(e)}o.close()},this))},selector:function(t,e,i){var o={view:"webix_pivot_popup",css:"webix_pivot_popup",autofit:!0,width:150,data:this.config.operations||[]},n=webix.ui(o);n.show(i),n.attachEvent("onHide",webix.bind(function(){var i=webix.html.locate(t,"webix_operation"),o=n.getSelected();null!==o&&(this.$$("values").getItem(e).operation[i]=o.name,this.$$("values").updateItem(e)),n.close()},this))},remove:function(t,e){var i=webix.$$(t),o=this.innerId(i.config.id),n=this.$$(o).getItem(e);if("values"==o){var r=webix.html.locate(t,"webix_operation");n.operation.length>1?(n.operation.splice(r,1),this.$$("values").updateItem(e)):this._removeListField("values",n)}else this._removeListField(o,n);return!1}};function c(t,e){var i,o,n=[];for(i=0;i<t.length;i++)o=t[i],n.push({name:o,title:e(o)});return n}var p={header:function(t){return webix.i18n.pivot[t.value]},iconHeader:function(t){return t.icon?"<span class='webix_pivot_header_icon webix_icon icon-"+t.icon+"'></span>"+webix.i18n.pivot[t.value]:"<span class='webix_pivot_header_icon'>"+t.iconContent+"</span>"+webix.i18n.pivot[t.value]},tableValues:function(t){t.operation=t.operation||["sum"],webix.isArray(t.operation)||(t.operation=[t.operation]);for(var e=[],i=webix.$$(this.config.pivot)._applyLocale,o=0;o<t.operation.length;o++){var n="<div class='webix_pivot_link' webix_operation='"+o+"'>";n+="<span>"+t.text+"</span>",n+="<span class='webix_link_selection'>"+i(t.operation[o])+"</span>",n+="<span class='webix_pivot_minus webix_icon webix_pivot_close'>&#10005;</span>",n+="</div>",e.push(n)}return e.join(" ")},chartValues:function(t){t.operation=t.operation||["sum"],t.color=t.color||[],webix.isArray(t.operation)||(t.operation=[t.operation]);for(var e=[],i=webix.$$(this.config.pivot),o=i._applyLocale,n=0;n<t.operation.length;n++){t.color&&t.color[n]||(t.color[n]=i._getColor(this._valueLength),this._valueLength++);var r="<div class='webix_pivot_link' webix_operation='"+n+"'>";r+="<div class='webix_color_selection'><div style='background-color:"+o(t.color[n])+"'></div></div>",r+="<div class='webix_link_title'>"+t.text+"</div>",r+="<div class='webix_link_selection'>"+o(t.operation[n])+"</div>",r+="<span class='webix_pivot_minus webix_icon webix_pivot_close'>&#10005;</span>",r+="</div>",e.push(r)}return e.join(" ")},filters:function(t){var e=webix.$$(this.config.pivot);t.type=t.type||e.filters.getDefault();var i="<a class='webix_pivot_link'>"+t.text;return i+=" <span class='webix_link_selection'>"+e._applyLocale(t.type)+"</span>",i+="</a> ",i+="<span class='webix_pivot_minus webix_icon webix_pivot_close'>&#10005;</span>"},rows:function(t){var e="<a class='webix_pivot_link'>"+t.text;return e+="</a> ",e+="<span class='webix_pivot_minus webix_icon webix_pivot_close'>&#10005;</span>"},columns:function(t){var e="<a class='webix_pivot_link'>"+t.text;return e+="</a> ",e+="<span class='webix_pivot_minus webix_icon webix_pivot_close'>&#10005;</span>"},groupBy:function(t){var e="<a class='webix_pivot_link'>"+t.text;return e+="</a> ",e+="<span class='webix_pivot_minus webix_icon webix_pivot_close'>&#10005;</span>"},listDrag:function(t){return"<a class='webix_pivot_link'>"+t.text+"</a> "}};webix.protoUI({name:"webix_pivot_config_common",$init:function(t){webix.extend(t,this.defaults),webix.extend(t,this._getUI(t),!0),this.$ready.push(this._afterInit)},defaults:{padding:8,height:500,width:700,cancelButtonWidth:100,applyButtonWidth:85,head:!1,modal:!0,move:!0},_getUI:function(){return{}},_afterInit:function(){},setStructure:function(t){this.define("structure",t),this.render()},getStructure:function(){return{}},_lists:[],_dndCorrection:{},data_setter:function(t){var e,i=(t=webix.copy(t)).fields,o=this._lists;for(i.forEach(function(e){o.forEach(function(i){t[i].forEach(function(t){t.name==e.name&&(e.$css=" webix_pivot_field_selected")})})}),this.$$("fields").clearAll(),this.$$("fields").parse(i),e=0;e<o.length;e++)this.$$(o[e]).clearAll(),this.$$(o[e]).parse(t[o[e]])},_dropField:function(t){var e,i=t.from,o=t.to;if(o&&o!=i)return e=webix.copy(i.getItem(t.start)),o==this.$$("fields")?this._removeListField(this.innerId(i.config.id),e):this._addListField(this.innerId(o.config.id),e,t.index),!1},_addListField:function(t,e,i){this._handlers[t].call(this,t,e,i)},_removeListField:function(t,e){this.$$(t).remove(e.id);for(var i=this._lists,o=!1,n=0;!o&&n<i.length;n++)this.$$(i[n]).data.each(function(t){t.name==e.name&&(o=t)});o||this._setPivotFieldCss(e.name,"")},_setPivotFieldCss:function(t,e){this.$$("fields").data.each(function(i){i.name==t&&(i.$css=" "+e,this.refresh(i.id))})},_handlers:{filters:function(t,e){var i=!1,o=e.name,n=this.$$(t);n.data.each(function(t){t.name==o&&(i=!0)}),i||(delete e.id,n.add(e),this._setPivotFieldCss(o,"webix_pivot_field_selected"),this._correctLists(o,t))},rows:function(t,e){var i=!1,o=e.name,n=this.$$(t);n.data.each(function(t){t.name==o&&(i=!0)}),i||(delete e.id,n.add(e),this._setPivotFieldCss(o,"webix_pivot_field_selected"),this._correctLists(o,t))},columns:function(t,e){this._handlers.rows.call(this,t,e)},values:function(t,e,i){var o=null,n=this.$$(t);n.data.each(function(t){t.name==e.name&&(o=t)}),o?u.add.call(this,{},o.id):(this._setPivotFieldCss(e.name,"webix_pivot_field_selected"),n.add(webix.copy(e),i)),this._correctLists(e.name,t)},groupBy:function(t,e){if(this.$$(t).data.order.length){var i=this.$$(t).getFirstId();this._removeListField(t,this.$$("groupBy").getItem(i))}this._setPivotFieldCss(e.name,"webix_pivot_field_selected"),delete e.id,this.$$(t).add(e),this._correctLists(e.name,t)}},_correctLists:function(t,e){var i,o,n=this._dndCorrection[e];for(i=0;n&&i<n.length;i++)o=null,this.$$(n[i]).data.each(function(e){e.name==t&&(o=e)}),o&&this.$$(n[i]).remove(o.id)},_setStructure:function(t,e){return function(t,e,i,o){var n=["rows","cols"],r=["head","body"],a=t,s=o.on?o.on.onViewInit:null;return function t(o,l){var u,c,p;for(u=0;u<r.length;u++)p=null,l[r[u]]&&("string"==typeof l[r[u]]&&(p=l[r[u]],l[r[u]]=i[p]),t(p,l[r[u]]));for(u=0;u<n.length;u++)if(l[n[u]]){var h=l[n[u]];for(c=0;c<h.length;c++)p=null,"string"==typeof h[c]&&(p=h[c],l[n[u]][c]=i[p]),t(p,l[n[u]][c])}o&&o!=e&&!l.id&&(l.id=o),o&&s&&s.apply(a,[o,l])}(e,i[e]),i[e]}(this,"popup",t,e)},_listDragHTML:function(t){if(t.start){var e=this.getItem(t.start);t.html=this.type.templateStart(e,this.type)+p.listDrag(e)+this.type.templateEnd(e,this.type)}},_getListEvents:function(){return{onBeforeDrop:webix.bind(this._dropField,this),onBeforeDrag:this._listDragHTML,onBeforeDragIn:function(){webix.html.addCss(webix.DragControl.getNode(),"webix_pivot_drag_zone",!0)}}}},webix.ui.window,webix.IdSpace),webix.protoUI({name:"webix_pivot_config",defaults:{fieldsColumnWidth:230,popupWidth:890},$init:function(){this.$view.className+=" webix_popup webix_pivot"},_getUI:function(t){var e=webix.copy(function(t,e){return{popup:{width:e.popupWidth,head:"toolbar",body:"body"},toolbar:{view:"toolbar",borderless:!0,padding:10,cols:["configTitle",{margin:6,cols:["cancel","apply"]}]},configTitle:{id:"configTitle",view:"label",label:webix.i18n.pivot.windowTitle||""},cancel:{view:"button",id:"cancel",label:webix.i18n.pivot.cancel,width:e.cancelButtonWidth},apply:{view:"button",id:"apply",type:"form",label:webix.i18n.pivot.apply,width:e.applyButtonWidth},body:{type:"wide",rows:[{css:"webix_pivot_fields_layout",type:"space",cols:["fieldsLayout",{type:"wide",rows:[{type:"wide",css:"webix_pivot_configuration",rows:[{type:"wide",cols:["filtersLayout","columnsLayout"]},{type:"wide",cols:["rowsLayout","valuesLayout"]}]}]}]}]},fieldsLayout:{width:e.fieldsColumnWidth,rows:["fieldsHeader","fields"]},filtersLayout:{rows:["filtersHeader","filters"]},columnsLayout:{rows:["columnsHeader","columns"]},rowsLayout:{rows:["rowsHeader","rows"]},valuesLayout:{rows:["valuesHeader","values"]},fieldsHeader:{id:"fieldsHeader",data:{value:"fields"},css:"webix_pivot_header_fields",template:p.header,height:40},fields:{id:"fields",css:"webix_pivot_fields",view:"list",scroll:!0,type:{height:"auto"},drag:!0,template:"<span class='webix_pivot_list_marker'></span>#text#<span class='webix_pivot_list_drag'></span>",on:t._getListEvents()},filtersHeader:{id:"filtersHeader",data:{value:"filters",icon:"filter"},template:p.iconHeader,css:"webix_pivot_popup_title",height:40},filters:{id:"filters",view:"list",drag:!0,scroll:!1,template:webix.bind(p.filters,t),type:{height:"auto"},onClick:{webix_link_selection:webix.bind(u["filter-selector"],t),webix_pivot_minus:webix.bind(u.remove,t)},on:t._getListEvents()},columnsHeader:{id:"columnsHeader",data:{value:"columns",icon:"columns"},template:p.iconHeader,css:"webix_pivot_popup_title",height:40},columns:{id:"columns",view:"list",drag:!0,scroll:!1,type:{height:"auto"},template:webix.bind(p.columns,t),on:t._getListEvents(),onClick:{webix_pivot_minus:webix.bind(u.remove,t)}},rowsHeader:{id:"rowsHeader",data:{value:"rows",icon:"list"},template:p.iconHeader,css:"webix_pivot_popup_title",height:40},rows:{id:"rows",view:"list",drag:!0,scroll:!1,template:webix.bind(p.rows,t),type:{height:"auto"},on:t._getListEvents(),onClick:{webix_pivot_minus:webix.bind(u.remove,t)}},valuesHeader:{id:"valuesHeader",data:{value:"values",icon:"values"},template:p.iconHeader,css:"webix_pivot_popup_title",height:40},values:{id:"values",view:"list",scroll:!1,drag:!0,css:"webix_pivot_values",type:{height:"auto"},template:webix.bind(p.tableValues,t),onClick:{webix_link_selection:webix.bind(u.selector,t),webix_pivot_plus:webix.bind(u.add,t),webix_pivot_minus:webix.bind(u.remove,t)},on:t._getListEvents()}}}(this,t));return this._setStructure(e,t)},_lists:["filters","columns","rows","values"],_dndCorrection:{rows:["columns","values"],columns:["rows"],values:["rows"]},_afterInit:function(){this.attachEvent("onItemClick",function(t){var e=this.innerId(t);if("cancel"==e||"apply"==e){var i=this.getStructure();webix.$$(this.config.pivot).callEvent("onBefore"+e,[i])&&(this.callEvent("on"+e,[i]),this.hide())}});for(var t=this.$view.querySelectorAll(".webix_pivot_configuration .webix_list"),e=0;e<t.length;e++)t[e].setAttribute("window-message",webix.i18n.pivot.windowMessage)},getStructure:function(){var t={rows:[],columns:[],values:[],filters:[]};this.$$("rows").data.each(function(e){t.rows.push(e.name)}),this.$$("columns").data.each(function(e){t.columns.push(e.name)}),this.$$("values").data.each(function(e){t.values.push(e)}),this.$$("filters").data.each(function(e){t.filters.push(e)});var e=webix.$$(this.config.pivot);return e.config.structure.columnSort&&(t.columnSort=e.config.structure.columnSort),t}},webix.ui.webix_pivot_config_common);var h=i(2),f={fieldMap:{},yScaleWidth:300,columnWidth:150,filterLabelAlign:"right",filterPlaceholder:!1,filterWidth:200,filterMinWidth:150,filterLabelWidth:100,separateLabel:!0,headerTemplate:function(t){return this._applyMap(t.text||t.name)+"<span class='webix_pivot_operation'> "+this._applyLocale(t.operation)+"</span>"},format:function(t){return t&&"0"!=t?parseFloat(t).toFixed(3):t}};function d(t,e){var i="";i=t.config.readonly?t.config.readonlyTitle||"":"<div class='webix_pivot_config_msg'><div class='webix_pivot_icon_settings'></div>"+webix.i18n.pivot.pivotMessage+"</div>",e.header=i,e.width=t.config.yScaleWidth,e.exportAsTree=!0,t.config.footer&&(e.footer=t._applyLocale("total"))}var v={render:function(t){this.data.silent(function(){var t=this.url;this.clearAll(),this.url=t}),o(this.config.structure.filters),t?this._setData(t):this._loadResults()},$onLoad:function(t){if(t.fields&&(this._pivotFields=t.fields),t.options&&(this._pivotOptions=t.options),t.structure&&(this.config.structure=t.structure),t.operations){this.operations={};for(var e=0;e<t.operations.length;e++)this.operations[t.operations[e]]=1}t.data.columns&&(t.data.header=t.data.columns),t.data&&this.render(t.data)},url_setter:function(t){var e=this.config.structure;if(!e||!e.rows.length&&!e.columns.length)return webix.AtomDataLoader.url_setter.call(this,t);this.data.url=t,this._loadResults()},_loadResults:function(){var t=this.config.structure,e=this.data.url;e&&(e.load?e.load(this,{success:function(t){this.parse(JSON.parse(t))}},{structure:t}):"string"==typeof e&&this.load("post->"+e,"json",{structure:t}))}};var g=function(){function t(){!function(t,e){if(!(t instanceof e))throw new TypeError("Cannot call a class as a function")}(this,t),this._filters=["multicombo","select","text","datepicker"],this._selects={multicombo:1,multiselect:1,select:1,richselect:1}}return t.prototype.add=function(t,e){this._filters.push(t),webix.isUndefined(e)||(this._selects[t]=e)},t.prototype.isSelect=function(t){return this._selects[t]},t.prototype.clear=function(){this._filters=[]},t.prototype.remove=function(t){var e=this.getIndex(t);e>=0&&this._filters.splice(e,1)},t.prototype.getIndex=function(t){for(var e=0;e<this._filters.length;e++)if(this._filters[e]==t)return e;return-1},t.prototype.getDefault=function(){return-1!=this.getIndex("select")?"select":this._filters[0]},t.prototype.get=function(){return this._filters},t}(),_="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(t){return typeof t}:function(t){return t&&"function"==typeof Symbol&&t.constructor===Symbol&&t!==Symbol.prototype?"symbol":typeof t};webix.protoUI({name:"pivot",version:"{{version}}",defaults:f,$init:function(t){!1===t.separateLabel&&(t.filterWidth=t.filterWidth||300),this.$view.className+=" webix_pivot",this.data.provideApi(this,!0),this._setConfig(t),this._initDataStore(t),this.$separator=this.$divider,this.filters=new g},$divider:"_'_",_initDataStore:function(t){var e;t.externalProcessing?(e=this,webix.extend(e,v,!0),e.attachEvent("onFilterChange",function(){o(this.config.structure.filters),this._loadResults(!0)})):(this.data.attachEvent("onStoreUpdated",webix.bind(function(){this.$$("data")&&this.render()},this)),this.attachEvent("onFilterChange",function(){this.render(!0)}),this.$ready.push(this.render))},_setConfig:function(t){t.structure||(t.structure={}),webix.extend(t.structure,{rows:[],columns:[],values:[],filters:[]}),webix.extend(t,this._getUI(t))},_getUI:function(t){var e={view:"treetable",id:"data",select:"row",navigation:!0,leftSplit:1,resizeColumn:!0,rowHeight:42,rowLineHeight:42,headerRowHeight:50,on:{onHeaderClick:function(t){var e=this.getTopParentView();0!==this.getColumnIndex(t.column)||e.config.readonly||e.configure()}},columns:[]};return t.datatable&&"object"==_(t.datatable)&&(delete t.datatable.id,webix.extend(e,t.datatable,!0)),{rows:[{id:"filters",view:"toolbar",css:"webix_pivot_configure_toolbar",borderless:!0,hidden:!0,padding:10,cols:[{}]},e]}},configure:function(){this._configPopup||this._createPopup();var t=[];for(var e in this.operations)t.push({name:e,title:this._applyLocale(e)});this._configPopup.define("operations",t);var i=webix.html.offset(this.$$("data").getNode());this._configPopup.setPosition(i.x+10,i.y+10),this._configPopup.define("data",this.getFields()),this._configPopup.show()},_createPopup:function(){var t={view:"webix_pivot_config",operations:[],pivot:this.config.id};webix.extend(t,this.config.popup||{}),this._configPopup=webix.ui(t),this.callEvent("onPopup",[this._configPopup]),this._configPopup.attachEvent("onApply",webix.bind(this.setStructure,this))},destructor:function(){this._configPopup&&(this._configPopup.destructor(),this._configPopup=null),webix.Destruction.destructor.call(this)},getFilterView:function(){return this.$$("filters")},render:function(t){var e=this;webix.debug_pivot&&window.console.time("pivot:full-processing"),this._getPivotData||webix.extend(this,new h.b(this.config,this)),o(this.config.structure.filters),this._getPivotData(this.data.pull,this.data.order,function(i){e._setData(i,t),webix.debug_pivot&&webix.delay(function(){window.console.timeEnd("pivot:full-processing"),window.console.timeEnd("pivot:rendering")})})},_setData:function(t,e){!function(t,e){for(var i=t.config.format,o=0;o<e.length;o++)if(o){webix.extend(e[o],{format:i,sort:"int",width:t.config.columnWidth});for(var n=e[o].header,r=0;r<n.length;r++){var a=n[r];a&&(r||"total"!=a.name?r==n.length-1?a.text=t.config.headerTemplate.call(t,a):a.text=a.name:a.text=t._applyLocale("total"))}var s=e[o].footer,l=e[o].format;if(s){"string"==typeof s&&(s={text:s});var u=webix.isUndefined(s.$pivotValue)?s.text:s.$pivotValue;s.text=!l||"count"==s.$pivotOperation&&l==i?u:l(u)}}else d(t,e[o])}(this,t.header),e||(t.filters=r(this)),this.callEvent("onBeforeRender",[t]),t.filters&&s(this,t.filters),this.config.readonly&&(this.$$("data").$view.className+=" webix_pivot_readonly"),this.config.totalColumn&&this.$$("data").define("math",!0),this.config.footer&&this.$$("data").define("footer",!0),webix.debug_pivot&&window.console.time("pivot:rendering"),this.$$("data").clearAll(),this.$$("data").config.rightSplit=0,this.$$("data").refreshColumns(t.header),this.$$("data").parse(t.data),function(t){if(t.config.freezeTotal){var e,i=t.$$("data").config.columns,o=function(t){var e,i=0;for(e=0;e<t.length;e++)i+=t[e].width;return i}(i),n=function(t){for(var e=0,i=t.length-1;!e&&i>=0;i--)t[i].header[0]&&"total"==t[i].header[0].name&&(e=t.length-i);return e}(i);for(e=0;e<t.$$("data").config.leftSplit;e++)o-=i[e].width;for(e=i.length-1;e>i.length-n;e--)o-=i[e].width;o>100&&(t.$$("data").config.rightSplit=n,t.$$("data").refreshColumns())}}(this)},$exportView:function(t){if(t.flatTree){"object"!==_(t.flatTree)&&(t.flatTree={});var e=t.flatTree;if(e.id=this.$$("data").config.columns[0].id,!e.columns){var i=this.config.structure.rows;e.columns=[];for(var o=0;o<i.length;o++)e.columns.push({header:this._applyMap(i[o])})}}return webix.extend(t,{filterHTML:!0}),this.$$("data")},_applyLocale:function(t){return webix.i18n.pivot[t]||t},_applyMap:function(t){return this.config.fieldMap[t]||t},getFields:function(){var t,e,i,o=[],n={},r={},a=this.config.structure,s={fields:[],rows:[],columns:[],values:[],filters:[]},l={};if(this._pivotFields)for(o=this._pivotFields,t=0;t<o.length;t++)n[o[t]]=webix.uid();else for(t=0;t<Math.min(this.data.count()||5);t++)for(e in this.data.getItem(this.data.getIdByIndex(t)))"id"===e||0===e.indexOf("$")||n[e]||(o.push(e),n[e]=webix.uid());for(t=0;t<(a.filters||[]).length;t++)e=a.filters[t],webix.isUndefined(n[e.name])||(i=this._applyMap(e.name),s.filters.push({name:e.name,text:i,type:e.type,value:e.value,id:n[e.name]}));for(t=0;t<a.rows.length;t++)e=a.rows[t],webix.isUndefined(n[e])||(s.rows.push({name:e,text:this._applyMap(e),id:n[e]}),r[e]=!0);for(t=0;t<a.columns.length;t++)e="object"==_(a.columns[t])?a.columns[t].id||t:a.columns[t],!webix.isUndefined(n[e])&&webix.isUndefined(r[e])&&s.columns.push({name:e,text:this._applyMap(e),id:n[e]});for(t=0;t<a.values.length;t++)if(e=a.values[t],!webix.isUndefined(n[e.name]))if(webix.isUndefined(l[e.name])){l[e.name]=t,i=this._applyMap(e.name);var u={name:e.name,text:i,id:n[e.name],operation:webix.isArray(e.operation)?e.operation:[e.operation]};s.values.push(u)}else{var c=l[e.name];s.values[c].operation.push(e.operation)}for(o.sort(),t=0;t<o.length;t++)e=o[t],webix.isUndefined(n[e])||s.fields.push({name:e,text:this._applyMap(e),id:n[e]});return s},setStructure:function(t){this.define("structure",t),this.render()},getStructure:function(){return this.config.structure},getConfigWindow:function(){return this._configPopup},profile_setter:function(t){var e=window.console;t&&(this.attachEvent("onBeforeLoad",function(){e.time("data loading")}),this.data.attachEvent("onParse",function(){e.timeEnd("data loading"),e.time("data parsing")}),this.data.attachEvent("onStoreLoad",function(){e.timeEnd("data parsing"),e.time("data processing")}),this.$ready.push(function(){this.$$("data").attachEvent("onBeforeRender",function(){this.count()&&(e.timeEnd("data processing"),e.time("data rendering"))}),this.$$("data").attachEvent("onAfterRender",function(){this.count()&&webix.delay(function(){e.timeEnd("data rendering")})})}))}},webix.IdSpace,webix.ui.layout,webix.DataLoader,webix.EventSystem,webix.Settings);var b=webix.extend({color:function(t,e,i){var o={view:"colorboard",borderless:!0};webix.$$(this.config.pivot).config.colorboard?webix.extend(o,webix.$$(this.config.pivot).config.colorboard):webix.extend(o,{width:150,height:150,palette:webix.$$(this.config.pivot).config.palette});var n=webix.ui({view:"popup",id:"colorsPopup",body:o});return n.show(i),n.getBody().attachEvent("onSelect",function(){n.hide()}),n.attachEvent("onHide",webix.bind(function(){var i=webix.html.locate(t,"webix_operation"),o=n.getBody().getValue();o&&(this.$$("values").getItem(e).color[i]=o,this.$$("values").updateItem(e)),n.close()},this)),!1}},u);webix.protoUI({name:"webix_pivot_chart_config",$init:function(){this.$view.className+=" webix_pivot_chart_popup webix_pivot"},defaults:{chartTypeLabelWidth:100,chartTypeWidth:302,logScaleLabelWidth:125,fieldsColumnWidth:240,popupWidth:890},_getUI:function(t){var e=webix.copy(function(t,e){var i=[],o=webix.$$(e.pivot),n=o.chartMap;for(var r in n)i.push({id:r,title:o._applyLocale(r).toLowerCase()});var a=o.config.chartType;return{popup:{width:e.popupWidth,head:"toolbar",body:"body"},toolbar:{view:"toolbar",borderless:!0,padding:10,cols:["configTitle",{margin:6,cols:["cancel","apply"]}]},configTitle:{id:"configTitle",view:"label",label:webix.i18n.pivot.windowTitle||""},cancel:{view:"button",id:"cancel",label:o._applyLocale("cancel"),width:e.cancelButtonWidth},apply:{view:"button",id:"apply",type:"form",css:"webix_pivot_apply",label:o._applyLocale("apply"),width:e.applyButtonWidth},body:{type:"wide",rows:[{css:"webix_pivot_fields_layout",type:"space",cols:["fieldsLayout",{type:"wide",rows:[{type:"wide",css:"webix_pivot_configuration",rows:[{type:"wide",cols:["filtersLayout","groupLayout"]},{type:"wide",cols:["valuesLayout","chartLayout"]}]}]}]}]},fieldsLayout:{width:e.fieldsColumnWidth,rows:["fieldsHeader","fields"]},fieldsHeader:{id:"fieldsHeader",data:{value:"fields"},css:"webix_pivot_header_fields",template:p.header,height:40},fields:{view:"list",type:{height:"auto"},css:"webix_pivot_fields",drag:!0,template:"<span class='webix_pivot_list_marker'></span>#text#<span class='webix_pivot_list_drag'></span>",on:t._getListEvents()},filtersLayout:{rows:["filtersHeader","filters"]},filtersHeader:{data:{value:"filters",icon:"filter"},template:p.iconHeader,css:"webix_pivot_popup_title",height:40},filters:{view:"list",scroll:!1,type:{height:"auto"},drag:!0,template:webix.bind(p.filters,t),onClick:{webix_link_selection:webix.bind(b["filter-selector"],t),webix_pivot_minus:webix.bind(u.remove,t)},on:t._getListEvents()},valuesLayout:{rows:["valuesHeader","values"]},valuesHeader:{id:"valuesHeader",data:{value:"values",icon:"values-chart"},template:p.iconHeader,css:"webix_pivot_popup_title",height:40},values:{view:"list",scroll:!1,drag:!0,css:"webix_pivot_chart_values",type:{height:"auto"},template:webix.bind(p.chartValues,t),onClick:{webix_link_title:webix.bind(b.selector,t),webix_link_selection:webix.bind(b.selector,t),webix_color_selection:webix.bind(b.color,t),webix_pivot_minus:webix.bind(b.remove,t)},on:t._getListEvents()},groupLayout:{rows:["groupHeader","groupBy"]},groupHeader:{data:{value:"groupBy",icon:"group"},template:p.iconHeader,css:"webix_pivot_popup_title",height:40},groupBy:{view:"list",scroll:!1,drag:!0,type:{height:"auto"},template:webix.bind(p.groupBy,t),on:t._getListEvents(),onClick:{webix_pivot_minus:webix.bind(u.remove,t)}},chartLayout:{css:"webix_pivot_popup_chart",rows:["chartHeader","chartBody"]},chartHeader:{data:{value:"chart",icon:"chart"},template:p.iconHeader,css:"webix_pivot_popup_title",height:40},chartBody:{view:"list",scroll:!1,drag:!1,borderless:!0,type:{height:"auto",markCheckbox:function(t){return void 0===t.markCheckbox&&(o.config.chart.scale&&"logarithmic"==o.config.chart.scale?t.markCheckbox=1:t.markCheckbox=0),"<span class='webix_icon fa-"+(t.markCheckbox?"check-":"")+"square-o'></span>"},getType:function(t){return t.chartType=a}},onClick:{webix_link_selection:function(t,e,o){var n,r={view:"webix_pivot_popup",css:"webix_pivot_popup",autofit:!0,autoheight:!0,width:150,data:i};(n=webix.ui(r)).show(o),n.attachEvent("onHide",webix.bind(function(){var t=n.getSelected();null!==t&&(a=t.id,this.refresh()),n.close()},this))},webix_chart_checkbox:function(t,e){var i=this.getItem(e);i.markCheckbox=i.markCheckbox?0:1,this.updateItem(e,i)}},template:function(t,e){return"logScale"===t.id?"<div class='webix_chart_checkbox'>"+e.markCheckbox(t,e)+"<span>"+t.title.toLowerCase()+"</span></div>":"<span class='webix_chart_popup_icon'></span><span>"+webix.i18n.pivot.chartType.toLowerCase()+"</span><span class='webix_link_selection'>"+webix.i18n.pivot[e.getType(t,e)]+"</span>"},data:[{title:webix.i18n.pivot.logScale,id:"logScale"},{title:webix.i18n.pivot.chartType,id:"chartType",chartType:a}]}}}(this,t));return this._setStructure(e,t)},_lists:["filters","values","groupBy"],_dndCorrection:{values:["groupBy"],groupBy:["values"]},_hidePopups:function(){webix.callEvent("onClick",[])},_afterInit:function(){this.attachEvent("onItemClick",function(t){if("button"==this.$eventSource.name){var e=this.innerId(t),i=this.getStructure();"apply"!=e||i.values.length&&i.groupBy?webix.$$(this.config.pivot).callEvent("onBefore"+e,[i])&&(this.callEvent("on"+e,[i]),this.hide()):webix.alert(webix.i18n.pivot.valuesNotDefined)}});for(var t=this.$view.querySelectorAll(".webix_pivot_configuration .webix_list"),e=0;e<t.length;e++)t[e].setAttribute("window-message",webix.i18n.pivot.windowMessage)},getStructure:function(){var t,e={groupBy:"",values:[],filters:[]},i=this.$$("groupBy");return i.count()&&(e.groupBy=i.getItem(i.getFirstId()).name),this.$$("values").data.each(webix.bind(function(i){for(var o=0;o<i.operation.length;o++)t=webix.copy(i),webix.extend(t,{operation:i.operation[o],color:i.color[o]||webix.$$(this.config.pivot).config.color},!0),e.values.push(t)},this)),this.$$("filters").data.each(function(t){e.filters.push(t)}),e}},webix.ui.webix_pivot_config_common);var w=i(1),m="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(t){return typeof t}:function(t){return t&&"function"==typeof Symbol&&t.constructor===Symbol&&t!==Symbol.prototype?"symbol":typeof t};webix.protoUI({name:"pivot-chart",version:"{{version}}",defaults:{fieldMap:{},rows:[],filterLabelAlign:"right",filterWidth:200,filterMinWidth:180,editButtonWidth:110,filterLabelWidth:100,filterPlaceholder:!1,separateLabel:!0,chartType:"bar",color:"#36abee",chart:{},singleLegendItem:1,palette:[["#e33fc7","#a244ea","#476cee","#36abee","#58dccd","#a7ee70"],["#d3ee36","#eed236","#ee9336","#ee4339","#595959","#b85981"],["#c670b8","#9984ce","#b9b9e2","#b0cdfa","#a0e4eb","#7faf1b"],["#b4d9a4","#f2f79a","#ffaa7d","#d6806f","#939393","#d9b0d1"],["#780e3b","#684da9","#242464","#205793","#5199a4","#065c27"],["#54b15a","#ecf125","#c65000","#990001","#363636","#800f3e"]]},templates:{groupNameToStr:function(t,e){return t+"_"+e},groupNameToObject:function(t){var e=t.split("_");return{name:e[0],operation:e[1]}},seriesTitle:function(t,e){var i=this.config.fieldMap[t.name]||this._capitalize(t.name),o=webix.isArray(t.operation)?t.operation[e]:t.operation;return i+" ( "+(webix.i18n.pivot[o]||o)+")"}},templates_setter:function(t){"object"==(void 0===t?"undefined":m(t))&&webix.extend(this.templates,t)},chartMap:{bar:function(t){return{border:0,alpha:1,radius:0,color:t}},line:function(t){return{alpha:1,item:{borderColor:t,color:t},line:{color:t,width:2}}},radar:function(t){return{alpha:1,fill:!1,disableItems:!0,item:{borderColor:t,color:t},line:{color:t,width:2}}}},chartMap_setter:function(t){"object"==(void 0===t?"undefined":m(t))&&webix.extend(this.chartMap,t,!0)},$init:function(t){!1===t.separateLabel&&(t.filterWidth=t.filterWidth||300),this.data.provideApi(this,!0),t.structure||(t.structure={}),webix.extend(t.structure,{groupBy:"",values:[],filters:[]}),this.$view.className+=" webix_pivot webix_pivot_chart",webix.extend(t,{editButtonWidth:this.defaults.editButtonWidth}),webix.extend(t,this.getUI(t)),this.$ready.push(webix.bind(function(){webix.delay(this.render,this)},this)),this.data.attachEvent("onStoreUpdated",webix.bind(function(){this.$$("chart")&&this.render()},this)),this.attachEvent("onFilterChange",function(){this.render(!0)}),this.filters=new g},getUI:function(){return{rows:[{view:"toolbar",id:"filters",hidden:!0,paddingY:10,paddingX:5,borderless:!0,margin:10,cols:[]},{id:"bodyLayout",type:"line",margin:10,cols:[{id:"chart",view:"chart"}]}]}},configure:function(){if(!this._pivotPopup){var t={view:"webix_pivot_chart_config",operations:[],pivot:this.config.id};webix.extend(t,this.config.popup||{}),this._pivotPopup=webix.ui(t),this.callEvent("onPopup",[this._pivotPopup]),this._pivotPopup.attachEvent("onApply",webix.bind(function(t){this.config.chartType=this._pivotPopup.$$("chartBody")?this._pivotPopup.$$("chartBody").getItem("chartType").chartType:"bar",this.config.chart.scale=this._pivotPopup.$$("chartBody").getItem("logScale").markCheckbox?"logarithmic":"linear",webix.extend(this.config.structure,t,!0),this.render()},this))}var e=[];for(var i in this.operations)e.push({name:i,title:this._applyLocale(i)});this._pivotPopup._valueLength=this._valueLength||0,this._pivotPopup.define("operations",e);var o=webix.html.offset(this.$$("chart").getNode());this._pivotPopup.setPosition(o.x+10,o.y+10),this._pivotPopup.define("data",this.getFields()),this._pivotPopup.show()},destructor:function(){this._pivotPopup&&(this._eventId&&webix.eventRemove(this._eventId),this._pivotPopup.destructor(),this._pivotPopup=null),webix.Destruction.destructor.call(this)},render:function(t){t||s(this,r(this));this._valueLength=0;var e=this.config.structure;e&&e.groupBy&&e.values&&e.values.length?(this._setChartConfig(),this._loadFilteredData()):(this.config.structure={values:[]},this._setChartConfig())},_setChartConfig:function(){for(var t=this.config,e=t.structure.values,i=0;i<e.length;i++)e[i].operation=e[i].operation||["sum"],webix.isArray(e[i].operation)||(e[i].operation=[e[i].operation]);var o=this.config.chartType||"bar",n=this.chartMap[o],r={type:n&&n("").type?n("").type:o,xAxis:webix.extend({template:"#id#"},t.chart.xAxis||{},!0),yAxis:webix.extend({},t.chart.yAxis||{})};webix.extend(r,t.chart),r.padding||(r.padding={top:17});var a=this._getSeries();for(var s in r.series=a.series,r.legend=!1,(t.singleLegendItem||this._valueLength>1)&&(r.legend=a.legend),r.scheme={$group:this._pivot_group,$sort:{by:"id"}},this.$$("chart").removeAllSeries(),r)this.$$("chart").define(s,r[s]);if(this.$$("chart")&&!this.config.readonly){var l=document.createElement("div");l.className="webix_pivot_configure",l.title=this._applyLocale("settings"),l.style.width=r.legend.width+"px",l.style.top=r.padding.top+"px",l.innerHTML="<span class='webix_pivot_icon_settings'></span><span class='webix_pivot_configure_label'>"+webix.i18n.pivot.pivotMessage+"</span>",this.$$("chart").$view.insertBefore(l,this.$$("chart").$view.querySelector("canvas")),this._eventId=webix.event(this.$$("chart").$view.querySelector(".webix_pivot_configure"),"click",function(){this.configure()}.bind(this))}},_applyLocale:function(t){return webix.i18n.pivot[t]||t},_capitalize:function(t){return t.charAt(0).toUpperCase()+t.slice(1)},_applyMap:function(t,e){return this.config.fieldMap[t]||(e?this._capitalize(t):t)},_loadFilteredData:function(){var t=this.config.structure.filters;o(t),Object(w.c)(t),this.data.silent(function(){var e=this;this.data.filter(function(i){return Object(w.a)(t,i,e.config.filterMap)})},this),this.$$("chart").data.silent(function(){this.$$("chart").clearAll()},this),this.$$("chart").parse(this.data.getRange()),this.data.silent(function(){this.data.filter("")},this)},groupNameToStr:function(t){return t.name+"_"+t.operation},groupNameToObject:function(t){var e=t.split("_");return{name:e[0],operation:e[1]}},_getSeries:function(){var t,e,i,o,n,r={},a=[],s=this.config.structure.values;for(i={valign:"middle",align:"right",width:220,layout:"y"},webix.extend(i,this.config.chart.legend||{},!0),i.values=[],i.marker||(i.marker={}),i.marker.type="line"==this.config.chartType?"item":"s",this.series_names=[],this._valueLength=0,t=0;t<s.length;t++)for(webix.isArray(s[t].operation)||(s[t].operation=[s[t].operation]),webix.isArray(s[t].color)||(s[t].color=[s[t].color||this._getColor(this._valueLength)]),e=0;e<s[t].operation.length;e++){o=this.templates.groupNameToStr(s[t].name,s[t].operation[e]),this.series_names.push(o),s[t].color[e]||(s[t].color[e]=this._getColor(this._valueLength));var l=s[t].color[e],u=this.chartMap[this.config.chartType](l)||{};u.value="#"+o+"#",u.tooltip={template:webix.bind(function(t){return t[this].toFixed(3)},o)},a.push(u),n=this.templates.seriesTitle.call(this,s[t],e),i.values.push({text:n,color:l}),r[o]=[s[t].name,s[t].operation[e]],this._valueLength++}return this._pivot_group={},s.length&&(this._pivot_group=webix.copy({by:this.config.structure.groupBy,map:r})),{series:a,legend:i}},_getColor:function(t){var e=this.config.palette,i=t/e[0].length;i=i>e.length?0:parseInt(i,10);var o=t%e[0].length;return e[i][o]},operations:{sum:1,count:1,max:1,min:1},addGroupMethod:function(t,e){this.operations[t]=1,e&&(webix.GroupMethods[t]=e)},removeGroupMethod:function(t){delete this.operations[t]},groupMethods_setter:function(t){for(var e in t)t.hasOwnProperty(e)&&this.addGroupMethod(e,t[e])},getFields:function(){var t,e=[],i={};for(t=0;t<Math.min(this.data.count()||5);t++){var o=this.data.getItem(this.data.getIdByIndex(t));for(var n in o)i[n]||(e.push(n),i[n]=webix.uid())}var r=this.config.structure,a={fields:[],groupBy:[],values:[],filters:[]},s="object"==m(r.groupBy)?r.groupBy[0]:r.groupBy;webix.isUndefined(i[s])||a.groupBy.push({name:s,text:this._applyMap(s),id:i[s]});var l,u={};for(t=0;t<r.values.length;t++)if(s=r.values[t],!webix.isUndefined(i[s.name]))if(l=this._applyMap(s.name),webix.isUndefined(u[s.name]))u[s.name]=a.values.length,a.values.push({name:s.name,text:l,operation:s.operation,color:s.color||[this._getColor(t)],id:i[s.name]});else{var c=a.values[u[s.name]];c.operation=c.operation.concat(s.operation),c.color=c.color.concat(s.color||[this._getColor(t)])}for(t=0;t<(r.filters||[]).length;t++)s=r.filters[t],webix.isUndefined(i[s.name])||(l=this._applyMap(s.name),a.filters.push({name:s.name,text:l,type:s.type,value:s.value,id:i[s]}));for(e.sort(),t=0;t<e.length;t++)s=e[t],webix.isUndefined(i[s])||a.fields.push({name:s,text:this._applyMap(s),id:i[s]});return a},setStructure:function(t){this.define("structure",t),this.render()},getStructure:function(){return this.config.structure},getConfigWindow:function(){return this._pivotPopup},getFilterView:function(){return this.$$("filters")},$exportView:function(t){return webix.extend(t,{ignore:{$group:!0,$row:!0}}),this.$$("chart")}},webix.IdSpace,webix.ui.layout,webix.DataLoader,webix.EventSystem,webix.Settings)},,function(t,e){webix.protoUI({name:"webix_pivot_popup",_selected:null,defaults:{autoheight:!0,padding:0},$init:function(t){webix.extend(t,this._get_ui(t)),this.$ready.push(this._after_init)},_get_ui:function(t){return{body:{id:"list",view:"list",borderless:!0,autoheight:!0,template:"#title#",data:t.data}}},_after_init:function(){this.attachEvent("onItemClick",function(t){this._selected=this.$eventSource.getItem(t),this.hide()})},getSelected:function(){return this._selected}},webix.ui.popup,webix.IdSpace)},function(t,e){webix.i18n.pivot=webix.extend(webix.i18n.pivot||{},{apply:"Apply",bar:"Bar",cancel:"Cancel",chart:"Chart",chartType:"Chart type",columns:"Columns",count:"count",date:"date",datepicker:"datepicker",fields:"Fields",filters:"Filters",groupBy:"Group By",line:"Line",logScale:"Logarithmic scale",max:"max",min:"min",multicombo:"multi-select",operationNotDefined:"Operation is not defined",layoutIncorrect:"pivotLayout should be an Array instance",pivotMessage:"Click to configure",popupHeader:"Pivot Settings",radar:"Radar",radarArea:"Area Radar",rows:"Rows",select:"select",settings:"Settings",stackedBar:"Stacked Bar",sum:"sum",text:"text",total:"Total",values:"Values",valuesNotDefined:"Values or Group field are not defined",windowTitle:"Pivot Configuration",windowMessage:"move fields here"})},,function(t,e,i){}]);
+/**
+ * @license
+ * Webix Pivot v.8.1.1
+ * This software is covered by Webix Commercial License.
+ * Usage without proper license is prohibited.
+ * (c) XB Software Ltd.
+ */
+
+(function (global, factory) {
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory() :
+	typeof define === 'function' && define.amd ? define(factory) :
+	(factory());
+}(this, (function () { 'use strict';
+
+	webix.i18n.pivot = webix.extend(webix.i18n.pivot || {}, {
+	  apply: "Apply",
+	  bar: "Bar",
+	  cancel: "Cancel",
+	  chart: "Chart",
+	  chartType: "Chart type",
+	  columns: "Columns",
+	  count: "count",
+	  date: "date",
+	  datepicker: "datepicker",
+	  fields: "Fields",
+	  filters: "Filters",
+	  groupBy: "Group By",
+	  line: "Line",
+	  logScale: "Logarithmic scale",
+	  max: "max",
+	  min: "min",
+	  multicombo: "multi-select",
+	  operationNotDefined: "Operation is not defined",
+	  layoutIncorrect: "pivotLayout should be an Array instance",
+	  pivotMessage: "Click to configure",
+	  popupHeader: "Pivot Settings",
+	  radar: "Radar",
+	  radarArea: "Area Radar",
+	  rows: "Rows",
+	  select: "select",
+	  settings: "Settings",
+	  stackedBar: "Stacked Bar",
+	  sum: "sum",
+	  text: "text",
+	  total: "Total",
+	  values: "Values",
+	  valuesNotDefined: "Values or Group field are not defined",
+	  windowTitle: "Pivot Configuration",
+	  windowMessage: "move fields here"
+	});
+
+	webix.protoUI({
+	  name: "webix_pivot_popup",
+	  _selected: null,
+	  defaults: {
+	    autoheight: true,
+	    padding: 0
+	  },
+	  $init: function (config) {
+	    webix.extend(config, this._get_ui(config));
+	    this.$ready.push(this._after_init);
+	  },
+	  _get_ui: function (config) {
+	    return {
+	      body: {
+	        id: "list",
+	        view: "list",
+	        borderless: true,
+	        autoheight: true,
+	        template: "#title#",
+	        data: config.data
+	      }
+	    };
+	  },
+	  _after_init: function () {
+	    this.attachEvent("onItemClick", function (id) {
+	      this._selected = this.$eventSource.getItem(id);
+	      this.hide();
+	    });
+	  },
+	  getSelected: function () {
+	    return this._selected;
+	  }
+	}, webix.ui.popup, webix.IdSpace);
+
+	function _typeof(obj) {
+	  if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+	    _typeof = function (obj) {
+	      return typeof obj;
+	    };
+	  } else {
+	    _typeof = function (obj) {
+	      return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+	    };
+	  }
+
+	  return _typeof(obj);
+	}
+
+	function _classCallCheck(instance, Constructor) {
+	  if (!(instance instanceof Constructor)) {
+	    throw new TypeError("Cannot call a class as a function");
+	  }
+	}
+
+	function _defineProperties(target, props) {
+	  for (var i = 0; i < props.length; i++) {
+	    var descriptor = props[i];
+	    descriptor.enumerable = descriptor.enumerable || false;
+	    descriptor.configurable = true;
+	    if ("value" in descriptor) descriptor.writable = true;
+	    Object.defineProperty(target, descriptor.key, descriptor);
+	  }
+	}
+
+	function _createClass(Constructor, protoProps, staticProps) {
+	  if (protoProps) _defineProperties(Constructor.prototype, protoProps);
+	  if (staticProps) _defineProperties(Constructor, staticProps);
+	  return Constructor;
+	}
+
+	function formatFilterValues(filters) {
+	  filters = filters || [];
+
+	  for (var i = 0; i < filters.length; i++) {
+	    filters[i].fvalue = getFormattedValue(filters[i].value);
+	  }
+	}
+
+	function getFormattedValue(value) {
+	  value = value || "";
+
+	  if (webix.isDate(value)) {
+	    value = value.valueOf().toString();
+	  } else if (typeof value == "string") {
+	    if (value.trim) value = value.trim();
+	  }
+
+	  return value;
+	}
+
+	function processFilters(view) {
+	  var i,
+	      f,
+	      config = view.config,
+	      filters = config.structure.filters || [],
+	      item,
+	      items = [],
+	      indexes = {};
+
+	  for (i = 0; i < filters.length; i++) {
+	    f = filters[i];
+	    if (webix.isUndefined(indexes[f.type])) indexes[f.type] = [];
+	    indexes[f.type].push(i);
+	    var type = f.type === "multiselect" ? "multicombo" : f.type === "select" ? "richselect" : f.type;
+	    item = {
+	      value: webix.isUndefined(f.value) ? "" : f.value,
+	      point: false,
+	      field: f.name,
+	      view: type,
+	      minWidth: config.filterMinWidth,
+	      maxWidth: config.filterWidth
+	    }; //placeholder API
+
+	    if (config.filterPlaceholder) {
+	      if (typeof config.filterPlaceholder === "boolean") {
+	        item.placeholder = item.label;
+	        item.label = "";
+	      } else item.placeholder = config.filterPlaceholder;
+	    }
+
+	    if (f.type == "multicombo") item.tagMode = false;
+
+	    if (view.filters.isSelect(f.type)) {
+	      item.options = {};
+	      item.options.data = distinctValues(view, f.name, f.type.indexOf("multi") == -1);
+	      item.options.point = false;
+	      if (type == "richselect") item.options.css = "webix_pivot_richselect_suggest";
+	      if (type == "multicombo") item.options.css = "webix_pivot_multicombo_suggest";
+	    }
+
+	    if (!config.separateLabel) {
+	      item.label = view._applyMap(f.name);
+	      item.labelAlign = config.filterLabelAlign;
+	      item.labelWidth = config.filterLabelWidth;
+	    }
+
+	    if (view.callEvent("onFilterCreate", [f, item])) {
+	      if (config.separateLabel) {
+	        var label = view._applyMap(f.name);
+
+	        items.push({
+	          cols: [{
+	            view: "label",
+	            autowidth: true,
+	            label: label
+	          }, {
+	            width: 10
+	          }, item, {
+	            width: 18
+	          }]
+	        });
+	      } else {
+	        items.push(item);
+	      }
+	    }
+	  }
+
+	  return items;
+	}
+
+	function distinctValues(view, field, empty) {
+	  var value,
+	      values = [],
+	      data = view.data.pull,
+	      hash = {};
+	  if (empty) values.push({
+	    value: "",
+	    id: "",
+	    $empty: true
+	  });
+	  if (view._pivotOptions && view._pivotOptions[field]) return values.concat(view._pivotOptions[field]);
+
+	  for (var obj in data) {
+	    value = data[obj][field];
+
+	    if (!webix.isUndefined(value)) {
+	      if ((value || value === 0) && !hash[value]) {
+	        values.push({
+	          value: value.toString(),
+	          id: value.toString()
+	        });
+	        hash[value] = true;
+	      }
+	    }
+	  }
+
+	  var isNumeric = function (n) {
+	    return !isNaN(parseFloat(n));
+	  };
+
+	  values.sort(function (a, b) {
+	    var val1 = a.value;
+	    var val2 = b.value;
+	    if (!val2) return 1;
+	    if (!val1) return -1;
+
+	    if (!isNumeric(val1) || !isNumeric(val2)) {
+	      val1 = val1.toString().toLowerCase();
+	      val2 = val2.toString().toLowerCase();
+	    }
+
+	    return val1 > val2 ? 1 : val1 < val2 ? -1 : 0;
+	  });
+	  return values;
+	}
+
+	function showFilters(view, filters) {
+	  setEvents(view, filters);
+	  var config = {
+	    elements: filters
+	  };
+	  view.callEvent("onViewInit", ["filters", config]);
+
+	  if (config.elements && view.getFilterView()) {
+	    if (filters.length > 0) {
+	      view.getFilterView().show();
+	      webix.ui(filters, view.getFilterView());
+	    } else {
+	      view.getFilterView().hide();
+	    }
+	  }
+	}
+
+	function setEvents(view, filters) {
+	  for (var i = 0; i < filters.length; i++) {
+	    var event = void 0,
+	        filter = filters[i];
+	    if (filter.cols) filter = filter.cols[2];
+	    event = filter.view == "text" ? "onTimedKeyPress" : "onChange";
+	    filter.on = {};
+
+	    filter.on[event] = function () {
+	      var value = this.getValue();
+	      if (value && this.config.separator && !this.format_setter) value = value.split(this.config.separator);
+	      changeFilterValue(view, this.config.field, value);
+	    };
+	  }
+	}
+
+	function changeFilterValue(view, field, value) {
+	  var filters = view.config.structure.filters;
+
+	  for (var i = 0; i < filters.length; i++) {
+	    if (filters[i].name == field) {
+	      filters[i].value = value;
+	      view.callEvent("onFilterChange", [field, value]);
+	      return true;
+	    }
+	  }
+
+	  return false;
+	}
+
+	var clickHandlers = {
+	  "add": function (e, id) {
+	    var pivot = webix.$$(this.config.pivot);
+	    var item = this.$$("values").getItem(id);
+	    item.operation.push(pivot.config.defaultOperation);
+	    this.$$("values").updateItem(id);
+	    webix.delay(function () {
+	      var index = item.operation.length - 1;
+	      var els = this.$$("values").getItemNode(id).childNodes;
+	      var el = null;
+
+	      for (var i = 0; i < els.length; i++) {
+	        el = els[i];
+	        if (!el.getAttribute) continue;
+	        var op = el.getAttribute("webix_operation");
+	        if (!webix.isUndefined(op) && op == index) break;
+	      }
+
+	      if (el !== null) clickHandlers.selector.call(this, el, id, el);
+	    }, this);
+	  },
+	  "filter-selector": function (e, id, el) {
+	    var popup,
+	        pivot = webix.$$(this.config.pivot),
+	        selector = {
+	      view: "webix_pivot_popup",
+	      css: "webix_pivot_popup",
+	      autofit: true,
+	      autoheight: true,
+	      width: 150,
+	      data: getFilterOptions(pivot.filters.get(), pivot._applyLocale)
+	    };
+	    popup = webix.ui(selector);
+	    popup.show(el);
+	    popup.attachEvent("onHide", webix.bind(function () {
+	      var sel = popup.getSelected();
+
+	      if (sel !== null) {
+	        var item = this.$$("filters").getItem(id);
+	        item.type = sel.name;
+	        item.value = "";
+	        this.$$("filters").updateItem(id);
+	      }
+
+	      popup.close();
+	    }, this));
+	  },
+	  "chart-selector": function (e, id, el) {
+	    var popup,
+	        pivot = webix.$$(this.config.pivot),
+	        selector = {
+	      view: "webix_pivot_popup",
+	      css: "webix_pivot_popup",
+	      autofit: true,
+	      autoheight: true,
+	      width: 150,
+	      data: getFilterOptions(pivot.filters.get(), pivot._applyLocale)
+	    };
+	    popup = webix.ui(selector);
+	    popup.show(el);
+	    popup.attachEvent("onHide", webix.bind(function () {
+	      var sel = popup.getSelected();
+
+	      if (sel !== null) {
+	        var item = this.$$("filters").getItem(id);
+	        item.type = sel.name;
+	        item.value = "";
+	        this.$$("filters").updateItem(id);
+	      }
+
+	      popup.close();
+	    }, this));
+	  },
+	  "selector": function (e, id, el) {
+	    var func_selector = {
+	      view: "webix_pivot_popup",
+	      css: "webix_pivot_popup",
+	      autofit: true,
+	      width: 150,
+	      data: this.config.operations || []
+	    };
+	    var p = webix.ui(func_selector);
+	    p.show(el);
+	    p.attachEvent("onHide", webix.bind(function () {
+	      var index = webix.html.locate(e, "webix_operation");
+	      var sel = p.getSelected();
+
+	      if (sel !== null) {
+	        this.$$("values").getItem(id).operation[index] = sel.name;
+	        this.$$("values").updateItem(id);
+	      }
+
+	      p.close();
+	    }, this));
+	  },
+	  "remove": function (e, id) {
+	    var list = webix.$$(e);
+	    var listId = this.innerId(list.config.id);
+	    var item = this.$$(listId).getItem(id);
+
+	    if (listId == "values") {
+	      var index = webix.html.locate(e, "webix_operation");
+
+	      if (item.operation.length > 1) {
+	        item.operation.splice(index, 1);
+	        this.$$("values").updateItem(id);
+	      } else {
+	        this._removeListField("values", item);
+	      }
+	    } else {
+	      this._removeListField(listId, item);
+	    }
+
+	    return false;
+	  }
+	};
+
+	function getFilterOptions(filters, process) {
+	  var i,
+	      name,
+	      items = [];
+
+	  for (i = 0; i < filters.length; i++) {
+	    name = filters[i];
+	    items.push({
+	      name: name,
+	      title: process(name)
+	    });
+	  }
+
+	  return items;
+	}
+
+	function setStructure(view, baseName, structure, config) {
+	  var uiArrays = ["rows", "cols"],
+	      uiViews = ["head", "body"],
+	      popup = view,
+	      eventH = config.on ? config.on.onViewInit : null;
+
+	  var checkStructure = function (id, obj) {
+	    var i, j, name;
+
+	    for (i = 0; i < uiViews.length; i++) {
+	      name = null;
+
+	      if (obj[uiViews[i]]) {
+	        if (typeof obj[uiViews[i]] == "string") {
+	          name = obj[uiViews[i]];
+	          obj[uiViews[i]] = structure[name];
+	        }
+
+	        checkStructure(name, obj[uiViews[i]]);
+	      }
+	    }
+
+	    for (i = 0; i < uiArrays.length; i++) {
+	      if (obj[uiArrays[i]]) {
+	        var elements = obj[uiArrays[i]];
+
+	        for (j = 0; j < elements.length; j++) {
+	          name = null;
+
+	          if (typeof elements[j] == "string") {
+	            name = elements[j];
+	            obj[uiArrays[i]][j] = structure[name];
+	          }
+
+	          checkStructure(name, obj[uiArrays[i]][j]);
+	        }
+	      }
+	    }
+
+	    if (id && id != baseName && !obj.id) obj.id = id;
+
+	    if (id) {
+	      if (eventH) eventH.apply(popup, [id, obj]);
+	    }
+	  };
+
+	  checkStructure(baseName, structure[baseName]);
+	  return structure[baseName];
+	}
+
+	var popupTemplates = {
+	  header: function (obj) {
+	    return webix.i18n.pivot[obj.value];
+	  },
+	  iconHeader: function (obj) {
+	    if (obj.icon) return "<span class='webix_pivot_header_icon webix_pivot_icon pt-" + obj.icon + "'></span>" + webix.i18n.pivot[obj.value];else return "<span class='webix_pivot_header_icon'>" + obj.iconContent + "</span>" + webix.i18n.pivot[obj.value];
+	  },
+	  tableValues: function (obj) {
+	    var pivot = webix.$$(this.config.pivot);
+	    obj.operation = obj.operation || [pivot.config.defaultOperation];
+	    if (!webix.isArray(obj.operation)) obj.operation = [obj.operation];
+	    var ops = [];
+	    var locale = pivot._applyLocale;
+
+	    for (var i = 0; i < obj.operation.length; i++) {
+	      var op = "<div class='webix_pivot_link' webix_operation='" + i + "'>";
+	      op += "<span>" + obj.text + "</span>";
+	      op += "<span class='webix_link_selection'>" + locale(obj.operation[i]) + "</span>";
+	      op += "<span class='webix_pivot_minus webix_icon webix_pivot_close'>&#10005;</span>";
+	      op += "</div>";
+	      ops.push(op);
+	    }
+
+	    return ops.join(" ");
+	  },
+	  chartValues: function (obj) {
+	    var pivot = webix.$$(this.config.pivot);
+	    obj.operation = obj.operation || [pivot.config.defaultOperation];
+	    obj.color = obj.color || [];
+	    if (!webix.isArray(obj.operation)) obj.operation = [obj.operation];
+	    var ops = [];
+	    var locale = pivot._applyLocale;
+
+	    for (var i = 0; i < obj.operation.length; i++) {
+	      if (!obj.color || !obj.color[i]) {
+	        obj.color[i] = pivot._getColor(this._valueLength);
+	        this._valueLength++;
+	      }
+
+	      var op = "<div class='webix_pivot_link' webix_operation='" + i + "'>";
+	      op += "<div class='webix_color_selection'><div style='background-color:" + locale(obj.color[i]) + "'></div></div>";
+	      op += "<div class='webix_link_title'>" + obj.text + "</div>";
+	      op += "<div class='webix_link_selection'>" + locale(obj.operation[i]) + "</div>";
+	      op += "<span class='webix_pivot_minus webix_icon webix_pivot_close'>&#10005;</span>";
+	      op += "</div>";
+	      ops.push(op);
+	    }
+
+	    return ops.join(" ");
+	  },
+	  filters: function (obj) {
+	    var pivot = webix.$$(this.config.pivot);
+	    obj.type = obj.type || pivot.filters.getDefault();
+	    var html = "<a class='webix_pivot_link'>" + obj.text;
+	    html += "<span class='webix_link_selection'>" + pivot._applyLocale(obj.type) + "</span>";
+	    html += "</a> ";
+	    html += "<span class='webix_pivot_minus webix_icon webix_pivot_close'>&#10005;</span>";
+	    return html;
+	  },
+	  rows: function (obj) {
+	    var html = "<a class='webix_pivot_link'>" + obj.text;
+	    html += "</a> ";
+	    html += "<span class='webix_pivot_minus webix_icon webix_pivot_close'>&#10005;</span>";
+	    return html;
+	  },
+	  columns: function (obj) {
+	    var html = "<a class='webix_pivot_link'>" + obj.text;
+	    html += "</a> ";
+	    html += "<span class='webix_pivot_minus webix_icon webix_pivot_close'>&#10005;</span>";
+	    return html;
+	  },
+	  groupBy: function (obj) {
+	    var html = "<a class='webix_pivot_link'>" + obj.text;
+	    html += "</a> ";
+	    html += "<span class='webix_pivot_minus webix_icon webix_pivot_close'>&#10005;</span>";
+	    return html;
+	  },
+	  listDrag: function (obj) {
+	    return "<a class='webix_pivot_link'>" + obj.text + "</a> ";
+	  }
+	};
+
+	webix.protoUI({
+	  name: "webix_pivot_config_common",
+	  $init: function (config) {
+	    webix.extend(config, this.defaults);
+	    webix.extend(config, this._getUI(config), true);
+	    this.$ready.push(this._afterInit);
+	  },
+	  defaults: {
+	    padding: 8,
+	    height: 500,
+	    width: 700,
+	    cancelButtonWidth: 100,
+	    applyButtonWidth: 85,
+	    head: false,
+	    modal: true,
+	    move: true
+	  },
+	  _getUI: function () {
+	    return {};
+	  },
+	  _afterInit: function () {},
+	  setStructure: function (config) {
+	    this.define("structure", config);
+	    this.render();
+	  },
+	  getStructure: function () {
+	    return {};
+	  },
+	  _lists: [],
+	  _dndCorrection: {},
+	  data_setter: function (value) {
+	    value = webix.copy(value);
+	    var data,
+	        i,
+	        fields = value.fields,
+	        lists = this._lists;
+	    fields.forEach(function (field) {
+	      lists.forEach(function (listName) {
+	        data = value[listName];
+	        data.forEach(function (item) {
+	          if (item.name == field.name) field.$css = " webix_pivot_field_selected";
+	        });
+	      });
+	    });
+	    this.$$("fields").clearAll();
+	    this.$$("fields").parse(fields);
+
+	    for (i = 0; i < lists.length; i++) {
+	      this.$$(lists[i]).clearAll();
+	      this.$$(lists[i]).parse(value[lists[i]]);
+	    }
+	  },
+	  _dropField: function (ctx) {
+	    var item,
+	        from = ctx.from,
+	        to = ctx.to;
+
+	    if (to && to != from) {
+	      item = webix.copy(from.getItem(ctx.start));
+	      if (to == this.$$("fields")) this._removeListField(this.innerId(from.config.id), item);else this._addListField(this.innerId(to.config.id), item, ctx.index);
+	      return false;
+	    }
+	  },
+	  _addListField: function (list, item, index) {
+	    this._handlers[list].call(this, list, item, index);
+	  },
+	  _removeListField: function (list, item) {
+	    this.$$(list).remove(item.id);
+	    var lists = this._lists;
+	    var found = false;
+
+	    for (var i = 0; !found && i < lists.length; i++) {
+	      this.$$(lists[i]).data.each(function (field) {
+	        if (field.name == item.name) found = field;
+	      });
+	    }
+
+	    if (!found) this._setPivotFieldCss(item.name, "");
+	  },
+	  _setPivotFieldCss: function (name, css) {
+	    this.$$("fields").data.each(function (item) {
+	      if (item.name == name) {
+	        item.$css = " " + css;
+	        this.refresh(item.id);
+	      }
+	    });
+	  },
+	  _handlers: {
+	    "filters": function (listName, item) {
+	      var found = false,
+	          name = item.name,
+	          list = this.$$(listName);
+	      list.data.each(function (field) {
+	        if (field.name == name) {
+	          found = true;
+	        }
+	      });
+
+	      if (!found) {
+	        delete item.id;
+	        list.add(item);
+
+	        this._setPivotFieldCss(name, "webix_pivot_field_selected");
+
+	        this._correctLists(name, listName);
+	      }
+	    },
+	    "rows": function (listName, item) {
+	      var found = false,
+	          name = item.name,
+	          list = this.$$(listName);
+	      list.data.each(function (field) {
+	        if (field.name == name) {
+	          found = true;
+	        }
+	      });
+
+	      if (!found) {
+	        delete item.id;
+	        list.add(item);
+
+	        this._setPivotFieldCss(name, "webix_pivot_field_selected");
+
+	        this._correctLists(name, listName);
+	      }
+	    },
+	    "columns": function (listName, item) {
+	      this._handlers.rows.call(this, listName, item);
+	    },
+	    "values": function (listName, item, index) {
+	      var targetItem = null,
+	          list = this.$$(listName);
+	      list.data.each(function (field) {
+	        if (field.name == item.name) {
+	          targetItem = field;
+	        }
+	      });
+
+	      if (targetItem) {
+	        clickHandlers.add.call(this, {}, targetItem.id);
+	      } else {
+	        this._setPivotFieldCss(item.name, "webix_pivot_field_selected");
+
+	        list.add(webix.copy(item), index);
+	      }
+
+	      this._correctLists(item.name, listName);
+	    },
+	    "groupBy": function (listName, item) {
+	      if (this.$$(listName).data.order.length) {
+	        var id = this.$$(listName).getFirstId();
+
+	        this._removeListField(listName, this.$$("groupBy").getItem(id));
+	      }
+
+	      this._setPivotFieldCss(item.name, "webix_pivot_field_selected");
+
+	      delete item.id;
+	      this.$$(listName).add(item);
+
+	      this._correctLists(item.name, listName);
+	    }
+	  },
+	  _correctLists: function (name, listName) {
+	    var i,
+	        res,
+	        lists = this._dndCorrection[listName];
+
+	    for (i = 0; lists && i < lists.length; i++) {
+	      res = null;
+	      this.$$(lists[i]).data.each(function (item) {
+	        if (item.name == name) res = item;
+	      });
+	      if (res) this.$$(lists[i]).remove(res.id);
+	    }
+	  },
+	  _setStructure: function (structure, config) {
+	    return setStructure(this, "popup", structure, config);
+	  },
+	  _listDragHTML: function (context) {
+	    if (context.start) {
+	      var item = this.getItem(context.start);
+	      context.html = this.type.templateStart(item, this.type) + popupTemplates.listDrag(item) + this.type.templateEnd(item, this.type);
+	    }
+	  },
+	  _getListEvents: function () {
+	    return {
+	      onBeforeDrop: webix.bind(this._dropField, this),
+	      onBeforeDrag: this._listDragHTML,
+	      onBeforeDragIn: function () {
+	        webix.html.addCss(webix.DragControl.getNode(), "webix_pivot_drag_zone", true);
+	      }
+	    };
+	  }
+	}, webix.ui.window, webix.IdSpace);
+
+	function getStructureMap(view, config) {
+	  return {
+	    "popup": {
+	      width: config.popupWidth,
+	      head: "toolbar",
+	      body: "body"
+	    },
+	    "toolbar": {
+	      view: "toolbar",
+	      borderless: true,
+	      padding: 10,
+	      cols: ["configTitle", {
+	        margin: 6,
+	        cols: ["cancel", "apply"]
+	      }]
+	    },
+	    "configTitle": {
+	      id: "configTitle",
+	      view: "label",
+	      label: webix.i18n.pivot.windowTitle || ""
+	    },
+	    "cancel": {
+	      view: "button",
+	      id: "cancel",
+	      label: webix.i18n.pivot.cancel,
+	      width: config.cancelButtonWidth
+	    },
+	    "apply": {
+	      view: "button",
+	      id: "apply",
+	      type: "form",
+	      label: webix.i18n.pivot.apply,
+	      width: config.applyButtonWidth
+	    },
+	    "body": {
+	      type: "wide",
+	      rows: [{
+	        css: "webix_pivot_fields_layout",
+	        type: "space",
+	        cols: ["fieldsLayout", {
+	          type: "wide",
+	          rows: [{
+	            type: "wide",
+	            css: "webix_pivot_configuration",
+	            rows: [{
+	              type: "wide",
+	              cols: ["filtersLayout", "columnsLayout"]
+	            }, {
+	              type: "wide",
+	              cols: ["rowsLayout", "valuesLayout"]
+	            }]
+	          }]
+	        }]
+	      }]
+	    },
+	    "fieldsLayout": {
+	      width: config.fieldsColumnWidth,
+	      rows: ["fieldsHeader", "fields"]
+	    },
+	    "filtersLayout": {
+	      rows: ["filtersHeader", "filters"]
+	    },
+	    "columnsLayout": {
+	      rows: ["columnsHeader", "columns"]
+	    },
+	    "rowsLayout": {
+	      rows: ["rowsHeader", "rows"]
+	    },
+	    "valuesLayout": {
+	      rows: ["valuesHeader", "values"]
+	    },
+	    "fieldsHeader": {
+	      id: "fieldsHeader",
+	      data: {
+	        value: "fields"
+	      },
+	      css: "webix_pivot_header_fields",
+	      template: popupTemplates.header,
+	      height: 40
+	    },
+	    "fields": {
+	      id: "fields",
+	      css: "webix_pivot_fields",
+	      view: "list",
+	      scroll: "auto",
+	      type: {
+	        height: "auto"
+	      },
+	      drag: true,
+	      template: "<span class='webix_pivot_list_marker'></span>#text#<span class='webix_pivot_icon pt-list-drag'></span>",
+	      on: view._getListEvents()
+	    },
+	    "filtersHeader": {
+	      id: "filtersHeader",
+	      data: {
+	        value: "filters",
+	        icon: "filter"
+	      },
+	      template: popupTemplates.iconHeader,
+	      css: "webix_pivot_popup_title",
+	      height: 40
+	    },
+	    "filters": {
+	      id: "filters",
+	      view: "list",
+	      drag: true,
+	      scroll: "auto",
+	      template: webix.bind(popupTemplates.filters, view),
+	      type: {
+	        height: "auto"
+	      },
+	      onClick: {
+	        "webix_link_selection": webix.bind(clickHandlers["filter-selector"], view),
+	        "webix_pivot_minus": webix.bind(clickHandlers.remove, view)
+	      },
+	      on: view._getListEvents()
+	    },
+	    "columnsHeader": {
+	      id: "columnsHeader",
+	      data: {
+	        value: "columns",
+	        icon: "columns"
+	      },
+	      template: popupTemplates.iconHeader,
+	      css: "webix_pivot_popup_title",
+	      height: 40
+	    },
+	    "columns": {
+	      id: "columns",
+	      view: "list",
+	      drag: true,
+	      scroll: "auto",
+	      type: {
+	        height: "auto"
+	      },
+	      template: webix.bind(popupTemplates.columns, view),
+	      on: view._getListEvents(),
+	      onClick: {
+	        "webix_pivot_minus": webix.bind(clickHandlers.remove, view)
+	      }
+	    },
+	    "rowsHeader": {
+	      id: "rowsHeader",
+	      data: {
+	        value: "rows",
+	        icon: "list"
+	      },
+	      template: popupTemplates.iconHeader,
+	      css: "webix_pivot_popup_title",
+	      height: 40
+	    },
+	    "rows": {
+	      id: "rows",
+	      view: "list",
+	      drag: true,
+	      scroll: "auto",
+	      template: webix.bind(popupTemplates.rows, view),
+	      type: {
+	        height: "auto"
+	      },
+	      on: view._getListEvents(),
+	      onClick: {
+	        "webix_pivot_minus": webix.bind(clickHandlers.remove, view)
+	      }
+	    },
+	    "valuesHeader": {
+	      id: "valuesHeader",
+	      data: {
+	        value: "values",
+	        icon: "values"
+	      },
+	      template: popupTemplates.iconHeader,
+	      css: "webix_pivot_popup_title",
+	      height: 40
+	    },
+	    "values": {
+	      id: "values",
+	      view: "list",
+	      scroll: "auto",
+	      drag: true,
+	      css: "webix_pivot_values",
+	      type: {
+	        height: "auto"
+	      },
+	      template: webix.bind(popupTemplates.tableValues, view),
+	      onClick: {
+	        "webix_link_selection": webix.bind(clickHandlers.selector, view),
+	        "webix_pivot_plus": webix.bind(clickHandlers.add, view),
+	        "webix_pivot_minus": webix.bind(clickHandlers.remove, view)
+	      },
+	      on: view._getListEvents()
+	    }
+	  };
+	}
+
+	webix.protoUI({
+	  name: "webix_pivot_config",
+	  defaults: {
+	    fieldsColumnWidth: 230,
+	    popupWidth: 890
+	  },
+	  $init: function () {
+	    this.$view.className += " webix_popup webix_pivot";
+	  },
+	  _getUI: function (config) {
+	    var structure = webix.copy(getStructureMap(this, config));
+	    return this._setStructure(structure, config);
+	  },
+	  _lists: ["filters", "columns", "rows", "values"],
+	  _dndCorrection: {
+	    "rows": ["columns", "values"],
+	    "columns": ["rows"],
+	    "values": ["rows"]
+	  },
+	  _afterInit: function () {
+	    this.attachEvent("onItemClick", function (id) {
+	      var innerId = this.innerId(id);
+
+	      if (innerId == "cancel" || innerId == "apply") {
+	        //transform button clicks to events
+	        var structure = this.getStructure();
+
+	        if (webix.$$(this.config.pivot).callEvent("onBefore" + innerId, [structure])) {
+	          this.callEvent("on" + innerId, [structure]);
+	          this.hide();
+	        }
+	      }
+	    });
+	    var popupBlocks = this.$view.querySelectorAll(".webix_pivot_configuration .webix_list");
+
+	    for (var i = 0; i < popupBlocks.length; i++) {
+	      popupBlocks[i].setAttribute("window-message", webix.i18n.pivot.windowMessage);
+	    }
+	  },
+	  getStructure: function () {
+	    var structure = {
+	      rows: [],
+	      columns: [],
+	      values: [],
+	      filters: []
+	    };
+	    var rows = this.$$("rows");
+	    rows.data.each(function (obj) {
+	      structure.rows.push(obj.name);
+	    });
+	    var columns = this.$$("columns");
+	    columns.data.each(function (obj) {
+	      structure.columns.push(obj.name);
+	    });
+	    var values = this.$$("values");
+	    values.data.each(function (obj) {
+	      structure.values.push(obj);
+	    });
+	    var filters = this.$$("filters");
+	    filters.data.each(function (obj) {
+	      structure.filters.push(obj);
+	    });
+	    var pivot = webix.$$(this.config.pivot);
+	    if (pivot.config.structure.columnSort) structure.columnSort = pivot.config.structure.columnSort;
+	    return structure;
+	  }
+	}, webix.ui.webix_pivot_config_common);
+
+	function freezeTotals(view) {
+	  if (view.config.freezeTotal) {
+	    var i,
+	        columns = view.$$("data").config.columns;
+	    var width = getWidth(columns);
+	    var totalCount = getTotalCount(columns);
+
+	    for (i = 0; i < view.$$("data").config.leftSplit; i++) {
+	      width -= columns[i].width;
+	    }
+
+	    for (i = columns.length - 1; i > columns.length - totalCount; i--) {
+	      width -= columns[i].width;
+	    }
+
+	    if (width > 100) {
+	      view.$$("data").config.rightSplit = totalCount;
+	      view.$$("data").refreshColumns();
+	    }
+	  }
+	}
+
+	function getTotalCount(columns) {
+	  var count = 0;
+
+	  for (var i = columns.length - 1; !count && i >= 0; i--) {
+	    if (columns[i].header[0] && columns[i].header[0].name == "total") count = columns.length - i;
+	  }
+
+	  return count;
+	}
+
+	function getWidth(columns) {
+	  var i,
+	      width = 0;
+
+	  for (i = 0; i < columns.length; i++) {
+	    width += columns[i].width;
+	  }
+
+	  return width;
+	}
+
+	function isArray(obj) {
+	  return Array.isArray ? Array.isArray(obj) : Object.prototype.toString.call(obj) === "[object Array]";
+	}
+	function isUndefined(a) {
+	  return typeof a == "undefined";
+	}
+	function extend(base, source, force) {
+	  //copy methods, overwrite existing ones in case of conflict
+	  for (var method in source) {
+	    if (!base[method] || force) base[method] = source[method];
+	  }
+
+	  return base;
+	}
+	var seed;
+	function uid() {
+	  if (!seed) seed = new Date().valueOf();
+	  seed++;
+	  return seed;
+	}
+
+	function getTotalColumnId(master, name) {
+	  return "$webixtotal" + master.$divider + name;
+	}
+
+	function getValues(item, ids) {
+	  var i,
+	      value,
+	      values = [];
+
+	  for (i = 0; i < ids.length; i++) {
+	    value = item[ids[i]];
+	    if (!isNaN(parseFloat(value))) values.push(value);
+	  }
+
+	  return values;
+	}
+
+	function addTotalColumns(master, header) {
+	  var groups,
+	      groupData,
+	      groupName,
+	      h,
+	      i,
+	      hRowCount,
+	      parts,
+	      totalCols = [];
+	  hRowCount = header[0].header.length; // if no selected columns
+
+	  if (hRowCount < 2) return header;
+	  groupData = getTotalGroups(master, header);
+	  groups = groupData.groups;
+	  master._pivotColumnGroups = groups;
+
+	  for (groupName in groups) {
+	    // column config
+	    h = {
+	      id: getTotalColumnId(master, groupName),
+	      header: [],
+	      sort: "int",
+	      width: master.config.columnWidth,
+	      format: master.config.format
+	    }; // set top headers
+
+	    for (i = 0; i < hRowCount - 1; i++) {
+	      if (!i && !totalCols.length) {
+	        h.header.push({
+	          name: "total",
+	          rowspan: hRowCount - 1,
+	          colspan: groupData.count
+	        });
+	      } else h.header.push("");
+	    } // set bottom header
+
+
+	    parts = groupName.split(master.$divider);
+	    h.header.push({
+	      name: groupName,
+	      operation: parts[0],
+	      text: parts[1]
+	    });
+	    totalCols.push(h);
+	  }
+
+	  return header.concat(totalCols);
+	}
+
+	function getTotalGroups(master, header) {
+	  var groupName,
+	      i,
+	      name,
+	      operation,
+	      parts,
+	      groups = {},
+	      groupCount = 0;
+
+	  for (i = 0; i < header.length; i++) {
+	    parts = header[i].id.split(master.$divider);
+	    name = parts.pop();
+	    operation = parts.pop();
+
+	    if (operation == "sum" || master.config.totalColumn != "sumOnly") {
+	      groupName = operation + master.$divider + name;
+
+	      if (!groups[groupName]) {
+	        groupCount++;
+	        groups[groupName] = {
+	          operation: operation,
+	          ids: [],
+	          format: header.format
+	        };
+	      }
+
+	      groups[groupName].ids.push(header[i].id);
+	    }
+	  }
+
+	  return {
+	    groups: groups,
+	    count: groupCount
+	  };
+	}
+
+	function addTotalData(master, items) {
+	  var groups = master._pivotColumnGroups;
+
+	  if (groups) {
+	    var group, i, ids, name;
+
+	    for (name in groups) {
+	      group = groups[name];
+	      ids = group.ids;
+
+	      for (i = 0; i < items.length; i++) {
+	        var operation = void 0,
+	            columnId = getTotalColumnId(master, name),
+	            result = "",
+	            values = getValues(items[i], ids);
+
+	        if (values.length) {
+	          if (operation = master._pivotOperations.getTotal(name.split(master.$divider)[0])) result = operation.call(master, values, columnId, items[i]);
+	        }
+
+	        items[i][columnId] = result;
+	        if (items[i].data) items[i].data = addTotalData(master, items[i].data);
+	      }
+	    }
+	  }
+
+	  return items;
+	}
+
+	var sortConfig = {
+	  dir: 1,
+	  as: function (a, b) {
+	    if (isNum(a) && isNum(b)) return sorting.int(a, b);
+	    return sorting.string(a, b);
+	  }
+	};
+	var sorting = {
+	  "date": function (a, b) {
+	    a = a - 0;
+	    b = b - 0;
+	    return a > b ? 1 : a < b ? -1 : 0;
+	  },
+	  "int": function (a, b) {
+	    a = a * 1;
+	    b = b * 1;
+	    return a > b ? 1 : a < b ? -1 : 0;
+	  },
+	  "string": function (a, b) {
+	    if (!b) return 1;
+	    if (!a) return -1;
+	    a = a.toString().toLowerCase();
+	    b = b.toString().toLowerCase();
+	    return a > b ? 1 : a < b ? -1 : 0;
+	  }
+	};
+	function processHeader(master, header) {
+	  var i,
+	      j,
+	      p,
+	      text0,
+	      vConfig,
+	      valuesConfig = master.config.structure.values;
+	  header = sortHeader(master.config.structure, header);
+	  header = getHeader(master, header);
+
+	  for (i = 0; i < header.length; i++) {
+	    var parts = [];
+
+	    for (j = 0; j < header[i].length; j++) {
+	      parts.push(header[i][j].name);
+	    } // find value configuration
+
+
+	    vConfig = null;
+	    var tmp = parts[parts.length - 1].split(master.$divider);
+
+	    for (j = 0; j < valuesConfig.length && !vConfig; j++) {
+	      if (valuesConfig[j].operation) for (p = 0; p < valuesConfig[j].operation.length; p++) {
+	        if (valuesConfig[j].name == tmp[1] && valuesConfig[j].operation[p] == tmp[0]) {
+	          vConfig = valuesConfig[j];
+	        }
+	      }
+	    }
+
+	    header[i] = {
+	      id: parts.join(master.$divider),
+	      header: header[i]
+	    };
+	    header[i].format = vConfig && vConfig.format ? vConfig.format : tmp[0] != "count" ? master.config.format : null;
+	  }
+
+	  if (header.length && master.view && master.view.callEvent) master.view.callEvent("onHeaderInit", [header]);
+	  if (master.config.totalColumn && header.length) header = addTotalColumns(master, header);
+	  header.splice(0, 0, {
+	    id: "name",
+	    template: "{common.treetable()} #name#",
+	    header: {
+	      text: text0
+	    }
+	  });
+	  return header;
+	}
+
+	function isNum(value) {
+	  return !isNaN(value * 1);
+	}
+	/*
+	* get sort properties for a column
+	* */
+
+
+	function setSortConfig(config, column) {
+	  var sorting = sortConfig;
+
+	  if (config) {
+	    // for a specific columns
+	    if (config[column]) sorting = config[column]; // for any other column
+	    else if (config.$default) sorting = config.$default;
+	    if (sorting.dir) sorting._dir = sorting.dir == "desc" ? -1 : 1;
+	    extend(sorting, sortConfig);
+	  }
+
+	  return sorting;
+	}
+
+	function sortHeader(config, header, cIndex) {
+	  var column,
+	      i,
+	      key,
+	      keys,
+	      sorting,
+	      sorted = [];
+
+	  if (Object.keys && config.columnSort !== false) {
+	    cIndex = cIndex || 0;
+	    column = config.columns[cIndex];
+	    sorting = setSortConfig(config.columnSort, column);
+	    keys = Object.keys(header);
+	    if (cIndex < config.columns.length) keys = keys.sort(function (a, b) {
+	      return sorting.as(a, b) * sorting._dir;
+	    });
+	    cIndex++;
+
+	    for (i = 0; i < keys.length; i++) {
+	      key = keys[i];
+	      sorted.push({
+	        key: key,
+	        data: sortHeader(config, header[key], cIndex)
+	      });
+	    }
+	  } else {
+	    for (key in header) {
+	      sorted.push({
+	        key: key,
+	        data: sortHeader(config, header[key])
+	      });
+	    }
+	  }
+
+	  return sorted;
+	}
+
+	function getHeader(view, data) {
+	  var first,
+	      i,
+	      item,
+	      j,
+	      h,
+	      header = [];
+
+	  for (i = 0; i < data.length; i++) {
+	    item = data[i];
+
+	    if (item.data.length) {
+	      var result = getHeader(view, item.data);
+	      first = false;
+
+	      for (j = 0; j < result.length; j++) {
+	        h = result[j];
+	        h.splice(0, 0, {
+	          name: item.key
+	        });
+
+	        if (!first) {
+	          h[0].colspan = result.length;
+	          first = true;
+	        }
+
+	        header.push(h);
+	      }
+	    } else {
+	      var keys = data[i].key.split(view.$divider);
+	      header.push([{
+	        name: data[i].key,
+	        operation: keys[0],
+	        text: keys[1]
+	      }]);
+	    }
+	  }
+
+	  return header;
+	}
+
+	function addFooter(master, columns, items) {
+	  var config, i, names, operation;
+
+	  for (i = 1; i < columns.length; i++) {
+	    config = null;
+	    names = columns[i].id.split(master.$divider);
+	    operation = names[names.length - 2];
+
+	    if (master.config.footer == "sumOnly") {
+	      if (operation != "sum") config = " ";
+	    }
+
+	    var totalMethod = master._pivotOperations.getTotal(operation);
+
+	    if (!config && totalMethod) {
+	      var options = master._pivotOperations.getTotalOptions(operation);
+
+	      var result = calculateColumn(items, columns[i].id, totalMethod, options && options.leavesOnly);
+	      config = {
+	        $pivotValue: result,
+	        $pivotOperation: operation
+	      };
+	    } else config = " ";
+
+	    columns[i].footer = config;
+
+	    if (_typeof(master.config.footer) == "object") {
+	      extend(columns[i].footer, master.config.footer, true);
+	    }
+	  }
+	}
+
+	function calculateColumn(items, columnId, totalMethod, leaves) {
+	  var i,
+	      fItems = [],
+	      value,
+	      values = []; // filter items
+
+	  items = filterItems(items, leaves); // get column values
+
+	  for (i = 0; i < items.length; i++) {
+	    value = items[i][columnId];
+
+	    if (!isNaN(parseFloat(value))) {
+	      values.push(value * 1);
+	      fItems.push(items[i]);
+	    }
+	  }
+
+	  return totalMethod(values, columnId, fItems);
+	}
+
+	function filterItems(items, leaves, selectedItems) {
+	  if (!selectedItems) selectedItems = [];
+
+	  for (var i = 0; i < items.length; i++) {
+	    if (leaves && items[i].data) filterItems(items[i].data, leaves, selectedItems);else selectedItems.push(items[i]);
+	  }
+
+	  return selectedItems;
+	}
+
+	function calculateItem(item, config, master) {
+	  var i,
+	      isIds,
+	      key,
+	      leaves,
+	      operation,
+	      tmp,
+	      values,
+	      header = config.header;
+
+	  for (i = 0; i < header.length; i++) {
+	    key = header[i];
+	    tmp = key.split(config.divider);
+	    operation = tmp[tmp.length - 2];
+	    values = item[key];
+	    leaves = config.operations.getOption(operation, "leavesOnly");
+	    isIds = config.operations.getOption(operation, "ids");
+
+	    if (leaves && item.data) {
+	      values = [];
+	      getKeyLeaves(item.data, key, values);
+	    }
+
+	    if (values) {
+	      var data = [];
+	      var ids = [];
+
+	      for (var j = 0; j < values.length; j++) {
+	        var value = values[j];
+	        var id = null;
+
+	        if (_typeof(value) == "object") {
+	          value = value.value;
+	          id = values[j].id;
+	        }
+
+	        if (value || value == "0") {
+	          data.push(value);
+	          if (id) ids.push(id);
+	        }
+	      }
+
+	      if (data.length) item[key] = config.operations.get(operation)(data, key, item, isIds ? ids : null);else item[key] = "";
+	    } else item[key] = ""; //watchdog
+
+
+	    master.count++;
+	  }
+
+	  return item;
+	}
+
+	function getKeyLeaves(data, key, result) {
+	  var i;
+
+	  for (i = 0; i < data.length; i++) {
+	    if (data[i].data) getKeyLeaves(data[i].data, key, result);else result.push(data[i][key]);
+	  }
+	}
+
+	function setMinMax(item, config) {
+	  var i,
+	      j,
+	      key,
+	      maxArr,
+	      maxValue,
+	      minArr,
+	      minValue,
+	      value,
+	      header = config.header,
+	      max = config.max,
+	      min = config.min,
+	      values = config.values; // nothing to do
+
+	  if (!min && !max) return item; //values = structure.values;
+
+	  if (!item.$cellCss) item.$cellCss = {}; // calculating for each value
+
+	  for (i = 0; i < values.length; i++) {
+	    value = values[i];
+	    maxArr = [];
+	    maxValue = -99999999;
+	    minArr = [];
+	    minValue = 99999999;
+
+	    for (j = 0; j < header.length; j++) {
+	      key = header[j];
+	      if (isNaN(item[key])) continue; // it's a another value
+
+	      if (key.indexOf(value.name) === -1) continue;
+
+	      if (max && item[key] > maxValue) {
+	        maxArr = [key];
+	        maxValue = item[key];
+	      } else if (item[key] == maxValue) {
+	        maxArr.push(key);
+	      }
+
+	      if (min && item[key] < minValue) {
+	        minArr = [key];
+	        minValue = item[key];
+	      } else if (item[key] == minValue) {
+	        minArr.push(key);
+	      }
+	    }
+
+	    for (j = 0; j < minArr.length; j++) {
+	      item.$cellCss[minArr[j]] = "webix_min";
+	    }
+
+	    for (j = 0; j < maxArr.length; j++) {
+	      item.$cellCss[maxArr[j]] = "webix_max";
+	    }
+	  }
+
+	  return item;
+	}
+
+	function numHelper(fvalue, value, func) {
+	  if (_typeof(fvalue) == "object") {
+	    for (var i = 0; i < fvalue.length; i++) {
+	      fvalue[i] = parseFloat(fvalue[i]);
+	      if (isNaN(fvalue[i])) return true;
+	    }
+	  } else {
+	    fvalue = parseFloat(fvalue); // if filter value is not a number then ignore such filter
+
+	    if (isNaN(fvalue)) return true;
+	  } // if row value is not a number then don't show this row
+
+
+	  if (isNaN(value)) return false;
+	  return func(fvalue, value);
+	}
+
+	var rules = {
+	  contains: function (fvalue, value) {
+	    return value.toLowerCase().indexOf(fvalue.toString().toLowerCase()) >= 0;
+	  },
+	  equal: function (fvalue, value) {
+	    return numHelper(fvalue, value, function (fvalue, value) {
+	      return fvalue == value;
+	    });
+	  },
+	  not_equal: function (fvalue, value) {
+	    return numHelper(fvalue, value, function (fvalue, value) {
+	      return fvalue != value;
+	    });
+	  },
+	  less: function (fvalue, value) {
+	    return numHelper(fvalue, value, function (fvalue, value) {
+	      return value < fvalue;
+	    });
+	  },
+	  less_equal: function (fvalue, value) {
+	    return numHelper(fvalue, value, function (fvalue, value) {
+	      return value <= fvalue;
+	    });
+	  },
+	  more: function (fvalue, value) {
+	    return numHelper(fvalue, value, function (fvalue, value) {
+	      return value > fvalue;
+	    });
+	  },
+	  more_equal: function (fvalue, value) {
+	    return numHelper(fvalue, value, function (fvalue, value) {
+	      return value >= fvalue;
+	    });
+	  },
+	  multi: function (fvalues, value) {
+	    if (typeof fvalues === "string") fvalues = fvalues.split(",");
+
+	    for (var i = 0; i < fvalues.length; i++) {
+	      if (value == fvalues[i]) return true;
+	    }
+
+	    return false;
+	  },
+	  range: function (fvalue, value) {
+	    return numHelper(fvalue, value, function (fvalue, value) {
+	      return value < fvalue[1] && value >= fvalue[0];
+	    });
+	  },
+	  range_inc: function (fvalue, value) {
+	    return numHelper(fvalue, value, function (fvalue, value) {
+	      return value <= fvalue[1] && value >= fvalue[0];
+	    });
+	  }
+	};
+	function setFilterValues(filters) {
+	  filters = filters || [];
+
+	  for (var i = 0; i < filters.length; i++) {
+	    var f = filters[i],
+	        fvalue = f.fvalue;
+
+	    if (typeof fvalue == "function") {
+	      f.func = fvalue;
+	    } else if (f.type == "select" || f.type == "richselect") {
+	      f.func = function (fvalue, value) {
+	        return fvalue == value;
+	      };
+
+	      fvalue = fvalue || "";
+	    } else if (f.type.indexOf("multi") > -1) {
+	      f.func = rules.multi;
+	    } else if (_typeof(fvalue) === "object") {
+	      f.func = rules.range;
+	    } else if (fvalue.substr(0, 1) == "=") {
+	      f.func = rules.equal;
+	      fvalue = fvalue.substr(1);
+	    } else if (fvalue.substr(0, 2) == "<>") {
+	      f.func = rules.not_equal;
+	      fvalue = fvalue.substr(2);
+	    } else if (fvalue.substr(0, 2) == ">=") {
+	      f.func = rules.more_equal;
+	      fvalue = fvalue.substr(2);
+	    } else if (fvalue.substr(0, 1) == ">") {
+	      f.func = rules.more;
+	      fvalue = fvalue.substr(1);
+	    } else if (fvalue.substr(0, 2) == "<=") {
+	      f.func = rules.less_equal;
+	      fvalue = fvalue.substr(2);
+	    } else if (fvalue.substr(0, 1) == "<") {
+	      f.func = rules.less;
+	      fvalue = fvalue.substr(1);
+	    } else if (fvalue.indexOf("...") > 0) {
+	      f.func = rules.range;
+	      fvalue = fvalue.split("...");
+	    } else if (fvalue.indexOf("..") > 0) {
+	      f.func = rules.range_inc;
+	      fvalue = fvalue.split("..");
+	    } else if (f.type == "datepicker") {
+	      f.func = function (fvalue, value) {
+	        return fvalue == value;
+	      };
+	    } else f.func = rules.contains;
+
+	    f.fvalue = fvalue;
+	  }
+	}
+	function formatFilterValues$1(filters) {
+	  var i, fvalue;
+	  filters = filters || [];
+
+	  for (i = 0; i < filters.length; i++) {
+	    fvalue = filters[i].fvalue || filters[i].value || "";
+
+	    if (typeof fvalue == "string") {
+	      if (fvalue.trim) fvalue = fvalue.trim();
+	    }
+
+	    filters[i].fvalue = fvalue;
+	  }
+	}
+	function filterItem(filters, item, map) {
+	  if (filters) {
+	    var i, f;
+
+	    for (i = 0; i < filters.length; i++) {
+	      f = filters[i];
+
+	      if (f.fvalue) {
+	        var field = map && map[f.name] ? map[f.name] : f.name;
+	        if (isUndefined(item[field])) return false;
+	        var raw = item[field];
+	        if (!raw !== 0 && !raw) return false;
+	        var value = raw.toString();
+	        var result = f.func(f.fvalue, value);
+	        if (!result) return false;
+	      }
+	    }
+	  }
+
+	  return true;
+	}
+
+	var Data =
+	/*#__PURE__*/
+	function () {
+	  function Data(master, config) {
+	    _classCallCheck(this, Data);
+
+	    this.master = master;
+	    this.config = config;
+	    this.count = 0;
+	  }
+
+	  _createClass(Data, [{
+	    key: "process",
+	    value: function process(data, order) {
+	      this.watch = new Date();
+	      var columns, fields, header, i, items;
+	      var structure = this.structure;
+	      structure._header = [];
+	      structure._header_hash = {};
+	      formatFilterValues$1(structure.filters);
+	      setFilterValues(structure.filters);
+
+	      for (i = 0; i < structure.values.length; i++) {
+	        structure.values[i].operation = structure.values[i].operation || [this.config.defaultOperation];
+	        if (!isArray(structure.values[i].operation)) structure.values[i].operation = [structure.values[i].operation];
+	      }
+
+	      columns = [];
+
+	      for (i = 0; i < structure.columns.length; i++) {
+	        columns[i] = _typeof(structure.columns[i]) == "object" ? structure.columns[i].id || i : structure.columns[i];
+	      }
+
+	      fields = structure.rows.concat(columns);
+	      items = this.group(data, order, fields);
+	      header = {};
+	      if (structure.rows.length > 0) items = this.processRows(items, structure.rows, structure, header, "");else {
+	        // there are no rows in structure, only columns and values
+	        this.processColumns(items, columns, structure, header);
+	        items = [];
+	      }
+	      header = processHeader(this.master, header);
+	      items = addTotalData(this.master, items);
+	      if (this.config.footer) addFooter(this.master, header, items);
+	      delete structure._header;
+	      delete structure._header_hash;
+	      return {
+	        header: header,
+	        data: items
+	      };
+	    }
+	  }, {
+	    key: "processColumns",
+	    value: function processColumns(data, columns, structure, header, item, name) {
+	      var vname;
+	      item = item || {
+	        $source: []
+	      };
+
+	      if (columns.length > 0) {
+	        name = name || "";
+
+	        for (var i in data) {
+	          if (!header[i]) header[i] = {};
+	          data[i] = this.processColumns(data[i], columns.slice(1), structure, header[i], item, (name.length > 0 ? name + this.divider : "") + i);
+	        }
+	      } else {
+	        var values = structure.values;
+
+	        for (var id in data) {
+	          item.$source.push(id);
+
+	          for (var _i = 0; _i < values.length; _i++) {
+	            for (var j = 0; j < values[_i].operation.length; j++) {
+	              if (typeof name !== "undefined") vname = name + this.divider + values[_i].operation[j] + this.divider + values[_i].name;else // if no columns
+	                vname = values[_i].operation[j] + this.divider + values[_i].name;
+
+	              if (!structure._header_hash[vname]) {
+	                structure._header.push(vname);
+
+	                structure._header_hash[vname] = true;
+	              }
+
+	              if (isUndefined(item[vname])) {
+	                item[vname] = [];
+	                header[values[_i].operation[j] + this.divider + values[_i].name] = {};
+	              }
+
+	              item[vname].push({
+	                value: data[id][values[_i].name],
+	                id: id
+	              });
+	            }
+	          }
+	        }
+	      }
+
+	      return item;
+	    }
+	  }, {
+	    key: "processRows",
+	    value: function processRows(data, rows, structure, header, prefix) {
+	      var i,
+	          item,
+	          j,
+	          k,
+	          value,
+	          items = [];
+
+	      if (rows.length > 1) {
+	        for (i in data) {
+	          data[i] = this.processRows(data[i], rows.slice(1), structure, header, prefix + "_" + i);
+	        }
+
+	        var values = structure._header;
+
+	        for (i in data) {
+	          item = {
+	            data: data[i]
+	          };
+
+	          for (j = 0; j < item.data.length; j++) {
+	            for (k = 0; k < values.length; k++) {
+	              value = values[k];
+	              if (isUndefined(item[value])) item[value] = [];
+	              item[value].push(item.data[j][value]);
+	            }
+	          }
+
+	          this.setItemValues(item);
+	          if (this.master.config.stableRowId) item.id = prefix + "_" + i;
+	          item.name = i;
+	          item.open = true;
+	          items.push(item);
+	        }
+	      } else {
+	        for (i in data) {
+	          item = this.processColumns(data[i], structure.columns, structure, header);
+	          item.name = i;
+	          if (this.master.config.stableRowId) item.id = prefix + "_" + i;
+	          this.setItemValues(item);
+	          items.push(item);
+	        }
+	      }
+
+	      return items;
+	    }
+	  }, {
+	    key: "setItemValues",
+	    value: function setItemValues(item) {
+	      item = calculateItem(item, {
+	        header: this.structure._header,
+	        divider: this.divider,
+	        operations: this.operations
+	      }, this);
+	      item = setMinMax(item, {
+	        header: this.structure._header,
+	        max: this.config.max,
+	        min: this.config.min,
+	        values: this.structure.values
+	      }); //watchdog
+
+	      if (this.count > 50000) {
+	        this.count = 0;
+	        if (this.config.ping) this.config.ping.call(this, this.watch);
+	      }
+
+	      return item;
+	    }
+	  }, {
+	    key: "group",
+	    value: function group(data, order, fields) {
+	      var i,
+	          id,
+	          item,
+	          hash = {};
+
+	      for (i = 0; i < order.length; i++) {
+	        id = order[i];
+	        item = data[id];
+
+	        if (item && filterItem(this.structure.filters, item, this.config.filterMap)) {
+	          this.groupItem(hash, item, fields);
+	        }
+	      }
+
+	      return hash;
+	    }
+	  }, {
+	    key: "groupItem",
+	    value: function groupItem(hash, item, fields) {
+	      if (fields.length) {
+	        var value = item[fields[0]];
+	        if (typeof value === "undefined") return null;
+	        if (isUndefined(hash[value])) hash[value] = {};
+	        this.groupItem(hash[value], item, fields.slice(1));
+	      } else hash[item.id] = item;
+	    }
+	  }, {
+	    key: "filterItem",
+	    value: function filterItem$$1(item) {
+	      var filters = this.structure.filters || [];
+
+	      for (var i = 0; i < filters.length; i++) {
+	        var f = filters[i];
+
+	        if (f.fvalue) {
+	          if (isUndefined(item[f.name])) return false;
+	          var value = item[f.name].toString().toLowerCase();
+	          var result = f.func(f.fvalue, value);
+	          if (!result) return false;
+	        }
+	      }
+
+	      return true;
+	    }
+	  }, {
+	    key: "operations",
+	    get: function () {
+	      return this.master._pivotOperations;
+	    }
+	  }, {
+	    key: "divider",
+	    get: function () {
+	      return this.master.$divider;
+	    }
+	  }, {
+	    key: "structure",
+	    get: function () {
+	      return this.config.structure;
+	    }
+	  }]);
+
+	  return Data;
+	}();
+
+	var operations = {
+	  sum: function (values) {
+	    var sum = 0;
+
+	    for (var i = 0; i < values.length; i++) {
+	      var value = values[i];
+	      value = parseFloat(value, 10);
+	      if (!isNaN(value)) sum += value;
+	    }
+
+	    return sum;
+	  },
+	  count: function (data, key, item) {
+	    var count = 0;
+	    if (!item.data) count = data.length;else {
+	      for (var i = 0; i < item.data.length; i++) {
+	        count += item.data[i][key] || 0;
+	      }
+	    }
+	    return count;
+	  },
+	  max: function (args) {
+	    if (args.length == 1) return args[0];
+	    return Math.max.apply(this, args);
+	  },
+	  min: function (args) {
+	    if (args.length == 1) return args[0];
+	    return Math.min.apply(this, args);
+	  }
+	};
+	var totalOperations = {
+	  "sum": function (values) {
+	    var i,
+	        sum = 0;
+
+	    for (i = 0; i < values.length; i++) {
+	      sum += values[i];
+	    }
+
+	    return sum;
+	  },
+	  "min": function (values) {
+	    if (values.length == 1) return values[0];
+	    return Math.min.apply(null, values);
+	  },
+	  "max": function (values) {
+	    if (values.length == 1) return values[0];
+	    return Math.max.apply(null, values);
+	  },
+	  "count": function (values) {
+	    var value = totalOperations.sum.call(this, values);
+	    return value ? parseInt(value, 10) : "";
+	  }
+	};
+	var Operations =
+	/*#__PURE__*/
+	function () {
+	  function Operations() {
+	    _classCallCheck(this, Operations);
+
+	    this.pull = extend({}, operations);
+	    this.options = {};
+	    this.pullTotal = extend({}, totalOperations);
+	    this.totalOptions = {};
+	  }
+
+	  _createClass(Operations, [{
+	    key: "serialize",
+	    value: function serialize() {
+	      var str = {};
+
+	      for (var key in this.pull) {
+	        str[key] = this.pull[key].toString();
+	      }
+
+	      return str;
+	    }
+	  }, {
+	    key: "parse",
+	    value: function parse(str) {
+	      for (var key in str) {
+	        eval("this.temp = " + str[key]);
+	        this.pull[key] = this.temp;
+	      }
+	    }
+	  }, {
+	    key: "add",
+	    value: function add(name, method, options) {
+	      this.pull[name] = method;
+	      if (options) this.options[name] = options;
+	    }
+	  }, {
+	    key: "addTotal",
+	    value: function addTotal(name, method, options) {
+	      this.pullTotal[name] = method;
+	      if (options) this.totalOptions[name] = options;
+	    }
+	  }, {
+	    key: "get",
+	    value: function get(name) {
+	      return this.pull[name] || null;
+	    }
+	  }, {
+	    key: "getOptions",
+	    value: function getOptions(name) {
+	      return this.options[name] || null;
+	    }
+	  }, {
+	    key: "getOption",
+	    value: function getOption(name, option) {
+	      return this.options[name] ? this.options[name][option] : null;
+	    }
+	  }, {
+	    key: "getTotal",
+	    value: function getTotal(name) {
+	      return this.pullTotal[name] || this.pull[name] || null;
+	    }
+	  }, {
+	    key: "getTotalOptions",
+	    value: function getTotalOptions(name) {
+	      return this.pullTotal[name] ? this.totalOptions[name] || null : this.options[name] || null;
+	    }
+	  }, {
+	    key: "getTotalOption",
+	    value: function getTotalOption(name, option) {
+	      var options = this.getTotalOptions(name);
+	      return options ? options[name][option] : null;
+	    }
+	  }]);
+
+	  return Operations;
+	}();
+
+	var divider = "_'_";
+	function _Pivot(config, master) {
+	  this.$divider = divider;
+
+	  this._initOperations();
+
+	  this.config = config;
+	  this.view = master;
+
+	  if (config.webWorker && !(typeof Worker === "undefined" ? "undefined" : _typeof(Worker)) !== "undefined" && master) {
+	    this._initWorker(config, master);
+	  } else this._pivotData = new Data(this, this.config);
+
+	  if (!this.config.structure) this.config.structure = {};
+	  extend(this.config.structure, {
+	    rows: [],
+	    columns: [],
+	    values: [],
+	    filters: []
+	  });
+	}
+	_Pivot.prototype = {
+	  _initWorker: function (config, master) {
+	    this._result = null;
+	    this._pivotWorker = new Worker(config.webWorker);
+
+	    this._pivotWorker.onmessage = function (e) {
+	      if (e.data.type === "ping") {
+	        master._runPing(e.data.watch, master);
+	      } else if (master._result && !master.$destructed) {
+	        master.callEvent("onWebWorkerEnd", []);
+
+	        if (!e.data.id || e.data.id === master._result_id) {
+	          master._result(e.data.data);
+
+	          master._result = null;
+	        }
+	      }
+	    };
+	  },
+	  _runPing: function (watch, master) {
+	    try {
+	      this.config.ping(watch);
+	    } catch (e) {
+	      this._pivotWorker.terminate();
+
+	      this._initWorker(this.config, master);
+
+	      master.callEvent("onWebWorkerEnd", []);
+	    }
+	  },
+	  _getPivotData: function (pull, order, next) {
+	    if (this._pivotWorker) {
+	      var id = this._result_id = webix.uid();
+	      this._result = next;
+	      var data = [];
+	      var structure = this.config.structure;
+	      var footer = this.config.footer;
+
+	      var operations = this._pivotOperations.serialize();
+
+	      if (structure && (structure.rows.length || structure.columns.length)) for (var i = order.length - 1; i >= 0; i--) {
+	        data[i] = pull[order[i]];
+	      }
+	      this.callEvent("onWebWorkerStart", []);
+	      var format = this.config.format;
+
+	      if (typeof format === "function") {
+	        var t = "x" + webix.uid();
+	        webix.i18n[t] = format;
+	        format = t;
+	      }
+
+	      var ping = !!this.config.ping;
+
+	      this._pivotWorker.postMessage({
+	        footer: footer,
+	        structure: structure,
+	        data: data,
+	        id: id,
+	        operations: operations,
+	        ping: ping,
+	        format: format
+	      });
+	    } else {
+	      var result = this._pivotData.process(pull, order);
+
+	      if (next) next(result);
+	      return result;
+	    }
+	  },
+	  _initOperations: function () {
+	    var operations = this._pivotOperations = new Operations();
+	    this.operations = operations.pull;
+	  },
+	  addOperation: function (name, method, options) {
+	    this._pivotOperations.add(name, method, options);
+	  },
+	  addTotalOperation: function (name, method, options) {
+	    this._pivotOperations.addTotal(name, method, options);
+	  }
+	};
+	function WebixPivot(config, master) {
+	  _Pivot.call(this, config, master);
+	}
+	WebixPivot.prototype = extend({
+	  getData: function (data) {
+	    var i,
+	        id,
+	        option,
+	        field,
+	        fields = [],
+	        fieldsHash = {},
+	        filters = this.config.structure.filters,
+	        pull = {},
+	        options = {},
+	        optionsHash = {},
+	        operations = this.operations,
+	        order = [],
+	        result = {};
+
+	    for (i = 0; i < filters.length; i++) {
+	      if (filters[i].type.indexOf("select") != -1) {
+	        options[filters[i].name] = [];
+	        optionsHash[filters[i].name] = {};
+	      }
+	    }
+
+	    for (i = 0; i < data.length; i++) {
+	      id = data[i].id = data[i].id || uid();
+	      pull[id] = data[i];
+	      order.push(id);
+	      if (i < 5) for (field in data[i]) {
+	        if (!fieldsHash[field]) {
+	          fields.push(field);
+	          fieldsHash[field] = uid();
+	        }
+	      }
+
+	      for (option in options) {
+	        var value = data[i][option];
+
+	        if (!isUndefined(value)) {
+	          if (!optionsHash[option][value]) {
+	            optionsHash[option][value] = 1;
+	            options[option].push(value);
+	          }
+	        }
+	      }
+	    }
+
+	    result.options = options;
+	    result.fields = fields;
+	    result.data = this._getPivotData(pull, order);
+	    result.operations = [];
+
+	    for (id in operations) {
+	      result.operations.push(id);
+	    }
+
+	    return result;
+	  }
+	}, _Pivot.prototype);
+
+	var defaults = {
+	  fieldMap: {},
+	  yScaleWidth: 300,
+	  columnWidth: 150,
+	  defaultOperation: "sum",
+	  filterLabelAlign: "right",
+	  filterPlaceholder: false,
+	  filterWidth: 200,
+	  filterMinWidth: 150,
+	  filterLabelWidth: 100,
+	  separateLabel: true,
+	  headerTemplate: function (config) {
+	    return this._applyMap(config.text || config.name) + "<span class='webix_pivot_operation'> " + this._applyLocale(config.operation) + "</span>";
+	  },
+	  format: function (value) {
+	    return value && value != "0" ? parseFloat(value).toFixed(3) : value;
+	  }
+	};
+
+	function setColumns(master, columns) {
+	  var format = master.config.format;
+
+	  for (var i = 0; i < columns.length; i++) {
+	    if (!i) {
+	      setFirstColumn(master, columns[i]);
+	    } else {
+	      webix.extend(columns[i], {
+	        format: format,
+	        sort: "int",
+	        width: master.config.columnWidth
+	      });
+	      var header = columns[i].header;
+
+	      for (var j = 0; j < header.length; j++) {
+	        var h = header[j];
+
+	        if (h) {
+	          if (!j && h.name == "total") h.text = master._applyLocale("total");else if (j == header.length - 1) {
+	            h.text = master.config.headerTemplate.call(master, h);
+	          } else h.text = h.name;
+	        }
+	      }
+
+	      var footer = columns[i].footer;
+	      var footer_format = columns[i].format;
+
+	      if (footer) {
+	        if (typeof footer === "string") footer = {
+	          text: footer
+	        };
+	        if (typeof footer_format == "string") //web worker
+	          footer_format = webix.i18n[footer_format] || window[footer_format];
+	        var text = !webix.isUndefined(footer.$pivotValue) ? footer.$pivotValue : footer.text; //format footer only when column specific format was defined
+
+	        footer.text = footer_format && (footer.$pivotOperation != "count" || footer_format != format) ? footer_format(text) : text;
+	      }
+	    }
+	  }
+	}
+
+	function setFirstColumn(master, column) {
+	  var text = "";
+	  if (master.config.readonly) text = master.config.readonlyTitle || "";else text = "<div class='webix_pivot_config_msg'><div class='webix_pivot_icon pt-settings'></div>" + webix.i18n.pivot.pivotMessage + "</div>";
+	  column.header = text;
+	  column.width = master.config.yScaleWidth;
+	  column.exportAsTree = true;
+	  if (master.config.footer) column.footer = master._applyLocale("total");
+	}
+
+	function init(view) {
+	  webix.extend(view, extRender, true); // filtering
+
+	  view.attachEvent("onFilterChange", function () {
+	    formatFilterValues(this.config.structure.filters);
+
+	    this._loadResults(true);
+	  });
+	}
+	var extRender = {
+	  render: function (data) {
+	    this.data.silent(function () {
+	      var url = this.url;
+	      this.clearAll();
+	      this.url = url;
+	    });
+	    formatFilterValues(this.config.structure.filters);
+	    if (!data) this._loadResults();else this._setData(data);
+	  },
+	  $onLoad: function (data) {
+	    if (data.fields) this._pivotFields = data.fields;
+	    if (data.options) this._pivotOptions = data.options;
+	    if (data.structure) this.config.structure = data.structure;
+
+	    if (data.operations) {
+	      this.operations = {};
+
+	      for (var i = 0; i < data.operations.length; i++) {
+	        this.operations[data.operations[i]] = 1;
+	      }
+	    }
+
+	    if (data.data.columns) data.data.header = data.data.columns;
+	    if (data.data) this.render(data.data);
+	  },
+	  url_setter: function (value) {
+	    var str = this.config.structure;
+
+	    if (str && (str.rows.length || str.columns.length)) {
+	      this.data.url = value;
+
+	      this._loadResults();
+	    } else return webix.AtomDataLoader.url_setter.call(this, value);
+	  },
+	  _loadResults: function () {
+	    var structure = this.config.structure,
+	        url = this.data.url;
+
+	    if (url) {
+	      if (url.load) url.load(this, {
+	        success: function (data) {
+	          this.parse(JSON.parse(data));
+	        }
+	      }, {
+	        structure: structure
+	      });else if (typeof url == "string") this.load("post->" + url, "json", {
+	        structure: structure
+	      });
+	    }
+	  }
+	};
+
+	var Filters =
+	/*#__PURE__*/
+	function () {
+	  function Filters() {
+	    _classCallCheck(this, Filters);
+
+	    this._filters = ["multicombo", "select", "text", "datepicker"];
+	    this._selects = {
+	      "multicombo": 1,
+	      "multiselect": 1,
+	      "select": 1,
+	      "richselect": 1
+	    };
+	  }
+
+	  _createClass(Filters, [{
+	    key: "add",
+	    value: function add(name, isSelect) {
+	      this._filters.push(name);
+
+	      if (!webix.isUndefined(isSelect)) this._selects[name] = isSelect;
+	    }
+	  }, {
+	    key: "isSelect",
+	    value: function isSelect(name) {
+	      return this._selects[name];
+	    }
+	  }, {
+	    key: "clear",
+	    value: function clear() {
+	      this._filters = [];
+	    }
+	  }, {
+	    key: "remove",
+	    value: function remove(name) {
+	      var i = this.getIndex(name);
+	      if (i >= 0) this._filters.splice(i, 1);
+	    }
+	  }, {
+	    key: "getIndex",
+	    value: function getIndex(name) {
+	      for (var i = 0; i < this._filters.length; i++) {
+	        if (this._filters[i] == name) return i;
+	      }
+
+	      return -1;
+	    }
+	  }, {
+	    key: "getDefault",
+	    value: function getDefault() {
+	      if (this.getIndex("select") != -1) return "select";
+	      return this._filters[0];
+	    }
+	  }, {
+	    key: "get",
+	    value: function get() {
+	      return this._filters;
+	    }
+	  }]);
+
+	  return Filters;
+	}();
+
+	webix.protoUI({
+	  name: "pivot",
+	  version: "{{version}}",
+	  defaults: defaults,
+	  $init: function (config) {
+	    if (config.separateLabel === false) {
+	      config.filterWidth = config.filterWidth || 300;
+	    }
+
+	    this.$view.className += " webix_pivot"; // add DataStore API
+
+	    this.data.provideApi(this, true); // add configuration properties
+
+	    this._setConfig(config); // event event handlers
+
+
+	    this._initDataStore(config); // alias for $separator
+
+
+	    this.$separator = this.$divider;
+	    this.filters = new Filters();
+	  },
+	  $divider: "_'_",
+	  _initDataStore: function (config) {
+	    if (config.externalProcessing) init(this, config);else {
+	      // render on data update
+	      this.data.attachEvent("onStoreUpdated", webix.bind(function () {
+	        // call render if pivot is initialized
+	        if (this.$$("data")) this.render();
+	      }, this)); // filtering
+
+	      this.attachEvent("onFilterChange", function () {
+	        this.render(true);
+	      }); // initial rendering
+
+	      this.$ready.push(this.render);
+	    }
+	  },
+	  _setConfig: function (config) {
+	    if (!config.structure) config.structure = {};
+	    webix.extend(config.structure, {
+	      rows: [],
+	      columns: [],
+	      values: [],
+	      filters: []
+	    });
+	    webix.extend(config, this._getUI(config));
+	  },
+	  _getUI: function (config) {
+	    var filters = {
+	      id: "filters",
+	      view: "toolbar",
+	      css: "webix_pivot_configure_toolbar",
+	      borderless: true,
+	      hidden: true,
+	      padding: 10,
+	      cols: [{}]
+	    };
+	    var active = webix.skin.$active;
+	    var table = {
+	      view: "treetable",
+	      id: "data",
+	      css: "webix_data_border",
+	      select: "row",
+	      navigation: true,
+	      leftSplit: 1,
+	      resizeColumn: true,
+	      rowHeight: active.rowHeight + 8,
+	      rowLineHeight: active.rowHeight + 8,
+	      headerRowHeight: active.barHeight + 4,
+	      on: {
+	        "onHeaderClick": function (id) {
+	          var pivot = this.getTopParentView();
+	          if (this.getColumnIndex(id.column) === 0 && !pivot.config.readonly) pivot.configure();
+	        }
+	      },
+	      columns: []
+	    };
+
+	    if (config.datatable && _typeof(config.datatable) == "object") {
+	      delete config.datatable.id;
+	      webix.extend(table, config.datatable, true);
+	    }
+
+	    return {
+	      rows: [filters, table]
+	    };
+	  },
+
+	  /*
+	  * Shows configuration popup
+	  * */
+	  configure: function () {
+	    if (!this._configPopup) this._createPopup();
+	    var functions = [];
+
+	    for (var i in this.operations) {
+	      functions.push({
+	        name: i,
+	        title: this._applyLocale(i)
+	      });
+	    }
+
+	    this._configPopup.define("operations", functions);
+
+	    var pos = webix.html.offset(this.$$("data").getNode());
+
+	    this._configPopup.setPosition(pos.x + 10, pos.y + 10);
+
+	    this._configPopup.define("data", this.getFields());
+
+	    this._configPopup.show();
+	  },
+	  _createPopup: function () {
+	    var config = {
+	      view: "webix_pivot_config",
+	      operations: [],
+	      pivot: this.config.id
+	    };
+	    webix.extend(config, this.config.popup || {});
+	    this._configPopup = webix.ui(config);
+	    this.callEvent("onPopup", [this._configPopup]);
+
+	    this._configPopup.attachEvent("onApply", webix.bind(this.setStructure, this));
+	  },
+	  destructor: function () {
+	    if (this._configPopup) {
+	      this._configPopup.destructor();
+
+	      this._configPopup = null;
+	    }
+
+	    webix.Destruction.destructor.call(this);
+	  },
+	  getFilterView: function () {
+	    return this.$$("filters");
+	  },
+
+	  /*
+	   * Renders Pivot
+	   * 
+	   */
+	  render: function (skipFilters) {
+	    var _this = this;
+
+	    if (webix.debug_pivot) window.console.time("pivot:full-processing");
+
+	    if (!this._getPivotData) {
+	      var base = new _Pivot(this.config, this);
+	      webix.extend(this, base);
+	    }
+
+	    formatFilterValues(this.config.structure.filters);
+
+	    this._getPivotData(this.data.pull, this.data.order, function (result) {
+	      _this._setData(result, skipFilters);
+
+	      if (webix.debug_pivot) webix.delay(function () {
+	        window.console.timeEnd("pivot:full-processing");
+	        window.console.timeEnd("pivot:rendering");
+	      });
+	    });
+	  },
+	  _setData: function (data, skipFilters) {
+	    setColumns(this, data.header);
+	    if (!skipFilters) data.filters = processFilters(this);
+	    this.callEvent("onBeforeRender", [data]);
+	    if (data.filters) showFilters(this, data.filters);
+	    if (this.config.readonly) this.$$("data").$view.className += " webix_pivot_readonly";
+	    if (this.config.totalColumn) this.$$("data").define("math", true);
+	    if (this.config.footer) this.$$("data").define("footer", true);
+	    if (webix.debug_pivot) window.console.time("pivot:rendering");
+	    this.$$("data").clearAll();
+	    this.$$("data").config.rightSplit = 0;
+	    this.$$("data").refreshColumns(data.header);
+	    this.$$("data").parse(data.data);
+	    freezeTotals(this);
+	  },
+	  $exportView: function (options) {
+	    if (options.flatTree) {
+	      if (_typeof(options.flatTree) !== "object") options.flatTree = {};
+	      var flat = options.flatTree;
+	      flat.id = this.$$("data").config.columns[0].id;
+
+	      if (!flat.columns) {
+	        var rows = this.config.structure.rows;
+	        flat.columns = [];
+
+	        for (var i = 0; i < rows.length; i++) {
+	          flat.columns.push({
+	            header: this._applyMap(rows[i])
+	          });
+	        }
+	      }
+	    }
+
+	    return this.$$("data").$exportView(options);
+	  },
+	  _applyLocale: function (value) {
+	    return webix.i18n.pivot[value] || value;
+	  },
+	  _applyMap: function (value) {
+	    return this.config.fieldMap[value] || value;
+	  },
+	  getFields: function () {
+	    var i,
+	        field,
+	        item,
+	        text,
+	        fields = [],
+	        fieldsHash = {},
+	        rowsHash = {},
+	        str = this.config.structure,
+	        result = {
+	      fields: [],
+	      rows: [],
+	      columns: [],
+	      values: [],
+	      filters: []
+	    },
+	        valuesHash = {};
+
+	    if (!this._pivotFields) {
+	      for (i = 0; i < Math.min(this.data.count() || 5); i++) {
+	        item = this.data.getItem(this.data.getIdByIndex(i));
+
+	        for (field in item) {
+	          if (field !== "id" && field.indexOf("$") !== 0 && !fieldsHash[field]) {
+	            fields.push(field);
+	            fieldsHash[field] = webix.uid();
+	          }
+	        }
+	      }
+	    } else {
+	      fields = this._pivotFields;
+
+	      for (i = 0; i < fields.length; i++) {
+	        fieldsHash[fields[i]] = webix.uid();
+	      }
+	    }
+
+	    for (i = 0; i < (str.filters || []).length; i++) {
+	      field = str.filters[i];
+
+	      if (!webix.isUndefined(fieldsHash[field.name])) {
+	        text = this._applyMap(field.name);
+	        result.filters.push({
+	          name: field.name,
+	          text: text,
+	          type: field.type,
+	          value: field.value,
+	          id: fieldsHash[field.name]
+	        });
+	      }
+	    }
+
+	    for (i = 0; i < str.rows.length; i++) {
+	      field = str.rows[i];
+
+	      if (!webix.isUndefined(fieldsHash[field])) {
+	        result.rows.push({
+	          name: field,
+	          text: this._applyMap(field),
+	          id: fieldsHash[field]
+	        });
+	        rowsHash[field] = true;
+	      }
+	    }
+
+	    for (i = 0; i < str.columns.length; i++) {
+	      field = _typeof(str.columns[i]) == "object" ? str.columns[i].id || i : str.columns[i];
+
+	      if (!webix.isUndefined(fieldsHash[field]) && webix.isUndefined(rowsHash[field])) {
+	        result.columns.push({
+	          name: field,
+	          text: this._applyMap(field),
+	          id: fieldsHash[field]
+	        });
+	      }
+	    }
+
+	    for (i = 0; i < str.values.length; i++) {
+	      field = str.values[i];
+
+	      if (!webix.isUndefined(fieldsHash[field.name])) {
+	        if (webix.isUndefined(valuesHash[field.name])) {
+	          valuesHash[field.name] = i;
+	          text = this._applyMap(field.name);
+	          var value = {
+	            name: field.name,
+	            text: text,
+	            id: fieldsHash[field.name],
+	            operation: webix.isArray(field.operation) ? field.operation : [field.operation]
+	          };
+	          result.values.push(value);
+	        } else {
+	          var index = valuesHash[field.name];
+	          result.values[index].operation.push(field.operation);
+	        }
+	      }
+	    }
+
+	    fields.sort();
+
+	    for (i = 0; i < fields.length; i++) {
+	      field = fields[i];
+	      if (!webix.isUndefined(fieldsHash[field])) result.fields.push({
+	        name: field,
+	        text: this._applyMap(field),
+	        id: fieldsHash[field]
+	      });
+	    }
+
+	    return result;
+	  },
+	  setStructure: function (config) {
+	    this.define("structure", config);
+	    this.render();
+	  },
+	  getStructure: function () {
+	    return this.config.structure;
+	  },
+	  getConfigWindow: function () {
+	    return this._configPopup;
+	  },
+	  profile_setter: function (value) {
+	    var c = window.console;
+
+	    if (value) {
+	      this.attachEvent("onBeforeLoad", function () {
+	        c.time("data loading");
+	      });
+	      this.data.attachEvent("onParse", function () {
+	        c.timeEnd("data loading");
+	        c.time("data parsing");
+	      });
+	      this.data.attachEvent("onStoreLoad", function () {
+	        c.timeEnd("data parsing");
+	        c.time("data processing");
+	      });
+	      this.$ready.push(function () {
+	        this.$$("data").attachEvent("onBeforeRender", function () {
+	          if (this.count()) {
+	            c.timeEnd("data processing");
+	            c.time("data rendering");
+	          }
+	        });
+	        this.$$("data").attachEvent("onAfterRender", function () {
+	          if (this.count()) webix.delay(function () {
+	            c.timeEnd("data rendering");
+	          });
+	        });
+	      });
+	    }
+	  }
+	}, webix.IdSpace, webix.ui.layout, webix.DataLoader, webix.EventSystem, webix.Settings);
+
+	var clickHandlers$1 = webix.extend({
+	  "color": function (e, id, el) {
+	    var colorboard = {
+	      view: "colorboard",
+	      borderless: true
+	    };
+
+	    if (webix.$$(this.config.pivot).config.colorboard) {
+	      webix.extend(colorboard, webix.$$(this.config.pivot).config.colorboard);
+	    } else {
+	      webix.extend(colorboard, {
+	        width: 150,
+	        height: 150,
+	        palette: webix.$$(this.config.pivot).config.palette
+	      });
+	    }
+
+	    var p = webix.ui({
+	      view: "popup",
+	      id: "colorsPopup",
+	      body: colorboard
+	    });
+	    p.show(el);
+	    p.getBody().attachEvent("onSelect", function () {
+	      p.hide();
+	    });
+	    p.attachEvent("onHide", webix.bind(function () {
+	      var index = webix.html.locate(e, "webix_operation");
+	      var value = p.getBody().getValue();
+
+	      if (value) {
+	        this.$$("values").getItem(id).color[index] = value;
+	        this.$$("values").updateItem(id);
+	      }
+
+	      p.close();
+	    }, this));
+	    return false;
+	  }
+	}, clickHandlers);
+	function getStructureMap$1(view, config) {
+	  var chartTypes = [];
+	  var pivot = webix.$$(config.pivot);
+	  var types = pivot.chartMap;
+
+	  for (var type in types) {
+	    chartTypes.push({
+	      id: type,
+	      title: pivot._applyLocale(type).toLowerCase()
+	    });
+	  }
+
+	  var chartType = pivot.config.chartType;
+	  return {
+	    "popup": {
+	      width: config.popupWidth,
+	      head: "toolbar",
+	      body: "body"
+	    },
+	    "toolbar": {
+	      view: "toolbar",
+	      borderless: true,
+	      padding: 10,
+	      cols: ["configTitle", {
+	        margin: 6,
+	        cols: ["cancel", "apply"]
+	      }]
+	    },
+	    "configTitle": {
+	      id: "configTitle",
+	      view: "label",
+	      label: webix.i18n.pivot.windowTitle || ""
+	    },
+	    "cancel": {
+	      view: "button",
+	      id: "cancel",
+	      label: pivot._applyLocale("cancel"),
+	      width: config.cancelButtonWidth
+	    },
+	    "apply": {
+	      view: "button",
+	      id: "apply",
+	      type: "form",
+	      css: "webix_pivot_apply",
+	      label: pivot._applyLocale("apply"),
+	      width: config.applyButtonWidth
+	    },
+	    "body": {
+	      type: "wide",
+	      rows: [{
+	        css: "webix_pivot_fields_layout",
+	        type: "space",
+	        cols: ["fieldsLayout", {
+	          type: "wide",
+	          rows: [{
+	            type: "wide",
+	            css: "webix_pivot_configuration",
+	            rows: [{
+	              type: "wide",
+	              cols: ["filtersLayout", "groupLayout"]
+	            }, {
+	              type: "wide",
+	              cols: ["valuesLayout", "chartLayout"]
+	            }]
+	          }]
+	        }]
+	      }]
+	    },
+	    "fieldsLayout": {
+	      width: config.fieldsColumnWidth,
+	      rows: ["fieldsHeader", "fields"]
+	    },
+	    "fieldsHeader": {
+	      id: "fieldsHeader",
+	      data: {
+	        value: "fields"
+	      },
+	      css: "webix_pivot_header_fields",
+	      template: popupTemplates.header,
+	      height: 40
+	    },
+	    "fields": {
+	      view: "list",
+	      type: {
+	        height: "auto"
+	      },
+	      css: "webix_pivot_fields",
+	      drag: true,
+	      template: "<span class='webix_pivot_list_marker'></span>#text#<span class='webix_pivot_icon pt-list-drag'></span>",
+	      on: view._getListEvents()
+	    },
+	    "filtersLayout": {
+	      rows: ["filtersHeader", "filters"]
+	    },
+	    "filtersHeader": {
+	      data: {
+	        value: "filters",
+	        icon: "filter"
+	      },
+	      template: popupTemplates.iconHeader,
+	      css: "webix_pivot_popup_title",
+	      height: 40
+	    },
+	    "filters": {
+	      view: "list",
+	      scroll: "auto",
+	      type: {
+	        height: "auto"
+	      },
+	      drag: true,
+	      template: webix.bind(popupTemplates.filters, view),
+	      onClick: {
+	        "webix_link_selection": webix.bind(clickHandlers$1["filter-selector"], view),
+	        "webix_pivot_minus": webix.bind(clickHandlers.remove, view)
+	      },
+	      on: view._getListEvents()
+	    },
+	    "valuesLayout": {
+	      rows: ["valuesHeader", "values"]
+	    },
+	    "valuesHeader": {
+	      id: "valuesHeader",
+	      data: {
+	        value: "values",
+	        icon: "values-chart"
+	      },
+	      template: popupTemplates.iconHeader,
+	      css: "webix_pivot_popup_title",
+	      height: 40
+	    },
+	    "values": {
+	      view: "list",
+	      scroll: "auto",
+	      drag: true,
+	      css: "webix_pivot_chart_values",
+	      type: {
+	        height: "auto"
+	      },
+	      template: webix.bind(popupTemplates.chartValues, view),
+	      onClick: {
+	        "webix_link_title": webix.bind(clickHandlers$1.selector, view),
+	        "webix_link_selection": webix.bind(clickHandlers$1.selector, view),
+	        "webix_color_selection": webix.bind(clickHandlers$1.color, view),
+	        "webix_pivot_minus": webix.bind(clickHandlers$1.remove, view)
+	      },
+	      on: view._getListEvents()
+	    },
+	    "groupLayout": {
+	      rows: ["groupHeader", "groupBy"]
+	    },
+	    "groupHeader": {
+	      data: {
+	        value: "groupBy",
+	        icon: "group"
+	      },
+	      template: popupTemplates.iconHeader,
+	      css: "webix_pivot_popup_title",
+	      height: 40
+	    },
+	    "groupBy": {
+	      view: "list",
+	      scroll: false,
+	      drag: true,
+	      type: {
+	        height: "auto"
+	      },
+	      template: webix.bind(popupTemplates.groupBy, view),
+	      on: view._getListEvents(),
+	      onClick: {
+	        "webix_pivot_minus": webix.bind(clickHandlers.remove, view)
+	      }
+	    },
+	    "chartLayout": {
+	      css: "webix_pivot_popup_chart",
+	      rows: ["chartHeader", "chartBody"]
+	    },
+	    "chartHeader": {
+	      data: {
+	        value: "chart",
+	        icon: "chart"
+	      },
+	      template: popupTemplates.iconHeader,
+	      css: "webix_pivot_popup_title",
+	      height: 40
+	    },
+	    "chartBody": {
+	      view: "list",
+	      scroll: false,
+	      drag: false,
+	      type: {
+	        height: "auto",
+	        markCheckbox: function (obj) {
+	          if (typeof obj.markCheckbox === "undefined") {
+	            //check for first init
+	            pivot.config.chart.scale && pivot.config.chart.scale == "logarithmic" ? obj.markCheckbox = 1 : obj.markCheckbox = 0;
+	          }
+
+	          return "<span class='webix_icon wxi-checkbox-" + (obj.markCheckbox ? "marked" : "blank") + "'></span>";
+	        },
+	        getType: function (obj) {
+	          return obj.chartType = chartType;
+	        }
+	      },
+	      onClick: {
+	        "webix_link_selection": function (e, id, el) {
+	          var popup,
+	              selector = {
+	            view: "webix_pivot_popup",
+	            css: "webix_pivot_popup",
+	            autofit: true,
+	            autoheight: true,
+	            width: 150,
+	            data: chartTypes
+	          };
+	          popup = webix.ui(selector);
+	          popup.show(el);
+	          popup.attachEvent("onHide", webix.bind(function () {
+	            var sel = popup.getSelected();
+
+	            if (sel !== null) {
+	              chartType = sel.id;
+	              this.refresh();
+	            }
+
+	            popup.close();
+	          }, this));
+	        },
+	        "webix_chart_checkbox": function (e, id) {
+	          var item = this.getItem(id);
+	          item.markCheckbox = item.markCheckbox ? 0 : 1;
+	          this.updateItem(id, item);
+	        }
+	      },
+	      template: function (obj, common) {
+	        if (obj.id === "logScale") {
+	          return "<div class='webix_chart_checkbox'>" + common.markCheckbox(obj, common) + "<span>" + obj.title.toLowerCase() + "</span></div>";
+	        } else {
+	          return "<span class='webix_pivot_icon pt-bar-chart'></span><span>" + webix.i18n.pivot.chartType.toLowerCase() + "</span><span class='webix_link_selection'>" + webix.i18n.pivot[common.getType(obj, common)] + "</span>";
+	        }
+	      },
+	      data: [{
+	        title: webix.i18n.pivot.logScale,
+	        id: "logScale"
+	      }, {
+	        title: webix.i18n.pivot.chartType,
+	        id: "chartType",
+	        chartType: chartType
+	      }]
+	    }
+	  };
+	}
+
+	webix.protoUI({
+	  name: "webix_pivot_chart_config",
+	  $init: function () {
+	    this.$view.className += " webix_pivot_chart_popup webix_pivot";
+	  },
+	  defaults: {
+	    chartTypeLabelWidth: 100,
+	    chartTypeWidth: 302,
+	    logScaleLabelWidth: 125,
+	    fieldsColumnWidth: 240,
+	    popupWidth: 890
+	  },
+	  _getUI: function (config) {
+	    var structure = webix.copy(getStructureMap$1(this, config));
+	    return this._setStructure(structure, config);
+	  },
+	  _lists: ["filters", "values", "groupBy"],
+	  _dndCorrection: {
+	    "values": ["groupBy"],
+	    "groupBy": ["values"]
+	  },
+	  _hidePopups: function () {
+	    webix.callEvent("onClick", []);
+	  },
+	  _afterInit: function () {
+	    this.attachEvent("onItemClick", function (id) {
+	      if (this.$eventSource.name == "button") {
+	        //transform button clicks to events
+	        var innerId = this.innerId(id),
+	            structure = this.getStructure();
+
+	        if (innerId == "apply" && (!structure.values.length || !structure.groupBy)) {
+	          webix.alert(webix.i18n.pivot.valuesNotDefined);
+	        } else {
+	          if (webix.$$(this.config.pivot).callEvent("onBefore" + innerId, [structure])) {
+	            this.callEvent("on" + innerId, [structure]);
+	            this.hide();
+	          }
+	        }
+	      }
+	    });
+	    var popupBlocks = this.$view.querySelectorAll(".webix_pivot_configuration .webix_list");
+
+	    for (var i = 0; i < popupBlocks.length; i++) {
+	      popupBlocks[i].setAttribute("window-message", webix.i18n.pivot.windowMessage);
+	    }
+	  },
+	  getStructure: function () {
+	    var structure = {
+	      groupBy: "",
+	      values: [],
+	      filters: []
+	    };
+	    var groupBy = this.$$("groupBy");
+	    if (groupBy.count()) structure.groupBy = groupBy.getItem(groupBy.getFirstId()).name;
+	    var values = this.$$("values");
+	    var temp;
+	    values.data.each(webix.bind(function (obj) {
+	      for (var j = 0; j < obj.operation.length; j++) {
+	        temp = webix.copy(obj);
+	        webix.extend(temp, {
+	          operation: obj.operation[j],
+	          color: obj.color[j] || webix.$$(this.config.pivot).config.color
+	        }, true);
+	        structure.values.push(temp);
+	      }
+	    }, this));
+	    var filters = this.$$("filters");
+	    filters.data.each(function (obj) {
+	      structure.filters.push(obj);
+	    });
+	    return structure;
+	  }
+	}, webix.ui.webix_pivot_config_common);
+
+	var defaults$1 = {
+	  fieldMap: {},
+	  rows: [],
+	  defaultOperation: "sum",
+	  filterLabelAlign: "right",
+	  filterWidth: 200,
+	  filterMinWidth: 180,
+	  editButtonWidth: 110,
+	  filterLabelWidth: 100,
+	  filterPlaceholder: false,
+	  separateLabel: true,
+	  chartType: "bar",
+	  color: "#36abee",
+	  chart: {},
+	  singleLegendItem: 1,
+	  palette: [["#e33fc7", "#a244ea", "#476cee", "#36abee", "#58dccd", "#a7ee70"], ["#d3ee36", "#eed236", "#ee9336", "#ee4339", "#595959", "#b85981"], ["#c670b8", "#9984ce", "#b9b9e2", "#b0cdfa", "#a0e4eb", "#7faf1b"], ["#b4d9a4", "#f2f79a", "#ffaa7d", "#d6806f", "#939393", "#d9b0d1"], ["#780e3b", "#684da9", "#242464", "#205793", "#5199a4", "#065c27"], ["#54b15a", "#ecf125", "#c65000", "#990001", "#363636", "#800f3e"]]
+	};
+
+	webix.protoUI({
+	  name: "pivot-chart",
+	  version: "{{version}}",
+	  defaults: defaults$1,
+	  templates: {
+	    groupNameToStr: function (name, operation) {
+	      return name + "_" + operation;
+	    },
+	    groupNameToObject: function (name) {
+	      var arr = name.split("_");
+	      return {
+	        name: arr[0],
+	        operation: arr[1]
+	      };
+	    },
+	    seriesTitle: function (data, i) {
+	      var name = this.config.fieldMap[data.name] || this._capitalize(data.name);
+
+	      var operation = webix.isArray(data.operation) ? data.operation[i] : data.operation;
+	      return name + " ( " + (webix.i18n.pivot[operation] || operation) + ")";
+	    }
+	  },
+	  templates_setter: function (obj) {
+	    if (_typeof(obj) == "object") webix.extend(this.templates, obj);
+	  },
+	  chartMap: {
+	    bar: function (color) {
+	      return {
+	        border: 0,
+	        alpha: 1,
+	        radius: 0,
+	        color: color
+	      };
+	    },
+	    line: function (color) {
+	      return {
+	        alpha: 1,
+	        item: {
+	          borderColor: color,
+	          color: color
+	        },
+	        line: {
+	          color: color,
+	          width: 2
+	        }
+	      };
+	    },
+	    radar: function (color) {
+	      return {
+	        alpha: 1,
+	        fill: false,
+	        disableItems: true,
+	        item: {
+	          borderColor: color,
+	          color: color
+	        },
+	        line: {
+	          color: color,
+	          width: 2
+	        }
+	      };
+	    }
+	  },
+	  chartMap_setter: function (obj) {
+	    if (_typeof(obj) == "object") webix.extend(this.chartMap, obj, true);
+	  },
+	  $init: function (config) {
+	    if (config.separateLabel === false) {
+	      config.filterWidth = config.filterWidth || 300;
+	    }
+
+	    this.data.provideApi(this, true);
+	    if (!config.structure) config.structure = {};
+	    webix.extend(config.structure, {
+	      groupBy: "",
+	      values: [],
+	      filters: []
+	    });
+	    this.$view.className += " webix_pivot webix_pivot_chart";
+	    webix.extend(config, {
+	      editButtonWidth: this.defaults.editButtonWidth
+	    });
+	    webix.extend(config, this.getUI(config));
+	    this.$ready.push(webix.bind(function () {
+	      webix.delay(this.render, this); // delay needed for correct legend rendering
+	    }, this));
+	    this.data.attachEvent("onStoreUpdated", webix.bind(function () {
+	      // call render if pivot is initialized
+	      if (this.$$("chart")) this.render();
+	    }, this));
+	    this.attachEvent("onFilterChange", function () {
+	      this.render(true);
+	    });
+	    this.filters = new Filters();
+	  },
+	  getUI: function () {
+	    var filters = {
+	      view: "toolbar",
+	      id: "filters",
+	      hidden: true,
+	      paddingY: 10,
+	      paddingX: 5,
+	      borderless: true,
+	      margin: 10,
+	      cols: []
+	    };
+	    var chart = {
+	      id: "bodyLayout",
+	      type: "line",
+	      margin: 10,
+	      cols: [{
+	        id: "chart",
+	        view: "chart"
+	      }]
+	    };
+	    return {
+	      rows: [filters, chart]
+	    };
+	  },
+	  configure: function () {
+	    if (!this._pivotPopup) {
+	      var config = {
+	        view: "webix_pivot_chart_config",
+	        operations: [],
+	        pivot: this.config.id
+	      };
+	      webix.extend(config, this.config.popup || {});
+	      this._pivotPopup = webix.ui(config);
+	      this.callEvent("onPopup", [this._pivotPopup]);
+
+	      this._pivotPopup.attachEvent("onApply", webix.bind(function (structure) {
+	        this.config.chartType = this._pivotPopup.$$("chartBody") ? this._pivotPopup.$$("chartBody").getItem("chartType").chartType : "bar";
+	        this.config.chart.scale = this._pivotPopup.$$("chartBody").getItem("logScale").markCheckbox ? "logarithmic" : "linear";
+	        webix.extend(this.config.structure, structure, true);
+	        this.render();
+	      }, this));
+	    }
+
+	    var functions = [];
+
+	    for (var i in this.operations) {
+	      functions.push({
+	        name: i,
+	        title: this._applyLocale(i)
+	      });
+	    }
+
+	    this._pivotPopup._valueLength = this._valueLength || 0;
+
+	    this._pivotPopup.define("operations", functions);
+
+	    var pos = webix.html.offset(this.$$("chart").getNode());
+
+	    this._pivotPopup.setPosition(pos.x + 10, pos.y + 10);
+
+	    this._pivotPopup.define("data", this.getFields());
+
+	    this._pivotPopup.show();
+	  },
+	  destructor: function () {
+	    if (this._pivotPopup) {
+	      if (this._eventId) {
+	        webix.eventRemove(this._eventId);
+	      }
+
+	      this._pivotPopup.destructor();
+
+	      this._pivotPopup = null;
+	    }
+
+	    webix.Destruction.destructor.call(this);
+	  },
+	  render: function (withoutFilters) {
+	    if (!withoutFilters) {
+	      // render filters
+	      var filters = processFilters(this);
+	      showFilters(this, filters);
+	    }
+
+	    this._valueLength = 0;
+	    var struct = this.config.structure;
+
+	    if (struct && struct.groupBy && struct.values && struct.values.length) {
+	      this._setChartConfig();
+
+	      this._loadFilteredData();
+	    } else {
+	      this.config.structure = {
+	        values: []
+	      };
+
+	      this._setChartConfig();
+	    }
+	  },
+	  _setChartConfig: function () {
+	    var config = this.config;
+	    var values = config.structure.values;
+
+	    for (var i = 0; i < values.length; i++) {
+	      values[i].operation = values[i].operation || [config.defaultOperation];
+	      if (!webix.isArray(values[i].operation)) values[i].operation = [values[i].operation];
+	    }
+
+	    var chartType = config.chartType || "bar";
+	    var mapConfig = this.chartMap[chartType];
+	    var chart = {
+	      "type": mapConfig && mapConfig("").type ? mapConfig("").type : chartType,
+	      "xAxis": webix.extend({
+	        template: "#id#"
+	      }, config.chart.xAxis || {}, true),
+	      "yAxis": webix.extend({}, config.chart.yAxis || {})
+	    };
+	    webix.extend(chart, config.chart);
+
+	    if (!chart.padding) {
+	      chart.padding = {
+	        top: 17
+	      };
+	    }
+
+	    var result = this._getSeries();
+
+	    chart.series = result.series;
+	    chart.legend = false;
+
+	    if (config.singleLegendItem || this._valueLength > 1) {
+	      chart.legend = result.legend;
+	    }
+
+	    chart.scheme = {
+	      $group: this._pivot_group,
+	      $sort: {
+	        by: "id"
+	      }
+	    };
+	    this.$$("chart").removeAllSeries();
+
+	    for (var c in chart) {
+	      this.$$("chart").define(c, chart[c]);
+	    }
+
+	    if (this.$$("chart") && !config.readonly) {
+	      var el = document.createElement("div");
+	      el.className = "webix_pivot_configure";
+	      el.title = this._applyLocale("settings");
+	      el.style.width = chart.legend.width + "px";
+	      el.style.top = chart.padding.top + "px";
+	      el.innerHTML = "<span class='webix_pivot_icon pt-settings'></span><span class='webix_pivot_configure_label'>" + webix.i18n.pivot.pivotMessage + "</span>";
+	      this.$$("chart").$view.insertBefore(el, this.$$("chart").$view.querySelector("canvas"));
+	      this._eventId = webix.event(this.$$("chart").$view.querySelector(".webix_pivot_configure"), "click", function () {
+	        this.configure();
+	      }.bind(this));
+	    }
+	  },
+	  _applyLocale: function (value) {
+	    return webix.i18n.pivot[value] || value;
+	  },
+	  _capitalize: function (value) {
+	    return value.charAt(0).toUpperCase() + value.slice(1);
+	  },
+	  _applyMap: function (value, capitalize) {
+	    return this.config.fieldMap[value] || (capitalize ? this._capitalize(value) : value);
+	  },
+	  _loadFilteredData: function () {
+	    var filters = this.config.structure.filters;
+	    formatFilterValues(filters);
+	    setFilterValues(filters);
+	    this.data.silent(function () {
+	      var _this = this;
+
+	      this.data.filter(function (item) {
+	        return filterItem(filters, item, _this.config.filterMap);
+	      });
+	    }, this);
+	    this.$$("chart").data.silent(function () {
+	      this.$$("chart").clearAll();
+	    }, this);
+	    this.$$("chart").parse(this.data.getRange()); // reset filtering
+
+	    this.data.silent(function () {
+	      this.data.filter("");
+	    }, this);
+	  },
+	  groupNameToStr: function (obj) {
+	    return obj.name + "_" + obj.operation;
+	  },
+	  groupNameToObject: function (name) {
+	    var arr = name.split("_");
+	    return {
+	      name: arr[0],
+	      operation: arr[1]
+	    };
+	  },
+	  _getSeries: function () {
+	    var i,
+	        j,
+	        legend,
+	        map = {},
+	        name,
+	        legendTitle,
+	        series = [],
+	        values = this.config.structure.values; // legend definition
+
+	    legend = {
+	      valign: "middle",
+	      align: "right",
+	      width: 220,
+	      layout: "y"
+	    };
+	    webix.extend(legend, this.config.chart.legend || {}, true);
+	    legend.values = [];
+	    if (!legend.marker) legend.marker = {};
+	    legend.marker.type = this.config.chartType == "line" ? "item" : "s";
+	    this.series_names = [];
+	    this._valueLength = 0;
+
+	    for (i = 0; i < values.length; i++) {
+	      if (!webix.isArray(values[i].operation)) {
+	        values[i].operation = [values[i].operation];
+	      }
+
+	      if (!webix.isArray(values[i].color)) {
+	        values[i].color = [values[i].color || this._getColor(this._valueLength)];
+	      }
+
+	      for (j = 0; j < values[i].operation.length; j++) {
+	        name = this.templates.groupNameToStr(values[i].name, values[i].operation[j]);
+	        this.series_names.push(name);
+	        if (!values[i].color[j]) values[i].color[j] = this._getColor(this._valueLength);
+	        var color = values[i].color[j];
+	        var sConfig = this.chartMap[this.config.chartType](color) || {};
+	        sConfig.value = "#" + name + "#";
+	        sConfig.tooltip = {
+	          template: webix.bind(function (obj) {
+	            return obj[this].toFixed(3);
+	          }, name)
+	        };
+	        series.push(sConfig);
+	        legendTitle = this.templates.seriesTitle.call(this, values[i], j);
+	        legend.values.push({
+	          text: legendTitle,
+	          color: color
+	        });
+	        map[name] = [values[i].name, values[i].operation[j]];
+	        this._valueLength++;
+	      }
+	    }
+
+	    this._pivot_group = {};
+	    if (values.length) this._pivot_group = webix.copy({
+	      by: this.config.structure.groupBy,
+	      map: map
+	    });
+	    return {
+	      series: series,
+	      legend: legend
+	    };
+	  },
+	  _getColor: function (i) {
+	    var palette = this.config.palette;
+	    var rowIndex = i / palette[0].length;
+	    rowIndex = rowIndex > palette.length ? 0 : parseInt(rowIndex, 10);
+	    var columnIndex = i % palette[0].length;
+	    return palette[rowIndex][columnIndex];
+	  },
+	  operations: {
+	    sum: 1,
+	    count: 1,
+	    max: 1,
+	    min: 1
+	  },
+	  addGroupMethod: function (name, method) {
+	    this.operations[name] = 1;
+	    if (method) webix.GroupMethods[name] = method;
+	  },
+	  removeGroupMethod: function (name) {
+	    delete this.operations[name];
+	  },
+	  groupMethods_setter: function (obj) {
+	    for (var a in obj) {
+	      if (obj.hasOwnProperty(a)) this.addGroupMethod(a, obj[a]);
+	    }
+	  },
+	  // fields for edit popup
+	  getFields: function () {
+	    var i,
+	        fields = [],
+	        fields_hash = {};
+
+	    for (i = 0; i < Math.min(this.data.count() || 5); i++) {
+	      var item = this.data.getItem(this.data.getIdByIndex(i));
+
+	      for (var f in item) {
+	        if (!fields_hash[f]) {
+	          fields.push(f);
+	          fields_hash[f] = webix.uid();
+	        }
+	      }
+	    }
+
+	    var str = this.config.structure;
+	    var result = {
+	      fields: [],
+	      groupBy: [],
+	      values: [],
+	      filters: []
+	    };
+	    var field = _typeof(str.groupBy) == "object" ? str.groupBy[0] : str.groupBy;
+
+	    if (!webix.isUndefined(fields_hash[field])) {
+	      result.groupBy.push({
+	        name: field,
+	        text: this._applyMap(field),
+	        id: fields_hash[field]
+	      });
+	    }
+
+	    var valueNameHash = {};
+	    var text;
+
+	    for (i = 0; i < str.values.length; i++) {
+	      field = str.values[i];
+
+	      if (!webix.isUndefined(fields_hash[field.name])) {
+	        text = this._applyMap(field.name);
+
+	        if (webix.isUndefined(valueNameHash[field.name])) {
+	          valueNameHash[field.name] = result.values.length;
+	          result.values.push({
+	            name: field.name,
+	            text: text,
+	            operation: field.operation,
+	            color: field.color || [this._getColor(i)],
+	            id: fields_hash[field.name]
+	          });
+	        } else {
+	          var value = result.values[valueNameHash[field.name]];
+	          value.operation = value.operation.concat(field.operation);
+	          value.color = value.color.concat(field.color || [this._getColor(i)]);
+	        }
+	      }
+	    }
+
+	    for (i = 0; i < (str.filters || []).length; i++) {
+	      field = str.filters[i];
+
+	      if (!webix.isUndefined(fields_hash[field.name])) {
+	        text = this._applyMap(field.name);
+	        result.filters.push({
+	          name: field.name,
+	          text: text,
+	          type: field.type,
+	          value: field.value,
+	          id: fields_hash[field]
+	        });
+	      }
+	    }
+
+	    fields.sort();
+
+	    for (i = 0; i < fields.length; i++) {
+	      field = fields[i];
+	      if (!webix.isUndefined(fields_hash[field])) result.fields.push({
+	        name: field,
+	        text: this._applyMap(field),
+	        id: fields_hash[field]
+	      });
+	    }
+
+	    return result;
+	  },
+	  setStructure: function (config) {
+	    this.define("structure", config);
+	    this.render();
+	  },
+	  getStructure: function () {
+	    return this.config.structure;
+	  },
+	  getConfigWindow: function () {
+	    return this._pivotPopup;
+	  },
+	  getFilterView: function () {
+	    return this.$$("filters");
+	  },
+	  $exportView: function (options) {
+	    webix.extend(options, {
+	      ignore: {
+	        $group: true,
+	        $row: true
+	      }
+	    });
+	    return this.$$("chart");
+	  }
+	}, webix.IdSpace, webix.ui.layout, webix.DataLoader, webix.EventSystem, webix.Settings);
+
+})));

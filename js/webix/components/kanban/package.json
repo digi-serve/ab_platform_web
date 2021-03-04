@@ -14,15 +14,15 @@
     ]
   ],
   "_from": "@xbs/kanban@latest",
-  "_id": "@xbs/kanban@7.2.0",
+  "_id": "@xbs/kanban@8.1.1",
   "_inCache": true,
   "_location": "/@xbs/kanban",
-  "_nodeVersion": "10.16.3",
+  "_nodeVersion": "12.18.3",
   "_npmUser": {
     "name": "mkozhukh",
     "email": "cawnpm"
   },
-  "_npmVersion": "6.9.0",
+  "_npmVersion": "6.14.6",
   "_phantomChildren": {},
   "_requested": {
     "raw": "@xbs/kanban",
@@ -36,8 +36,8 @@
   "_requiredBy": [
     "#USER"
   ],
-  "_resolved": "http://npm.webix.com/@xbs%2fkanban/-/kanban-7.2.0.tgz",
-  "_shasum": "4a4f06d254b2a54dd0f608155b9786b51644272e",
+  "_resolved": "http://npm.webix.com/@xbs%2fkanban/-/kanban-8.1.1.tgz",
+  "_shasum": "31e46b327606d2c6e90986ebe439670b436de6c3",
   "_shrinkwrap": null,
   "_spec": "@xbs/kanban",
   "_where": "/home/pong/Desktop/new-webix",
@@ -48,9 +48,9 @@
   "description": "Webix UI",
   "devDependencies": {},
   "dist": {
-    "integrity": "sha512-t1QkT9WcXT5aSsvBoYdKGQr8YGCDOQBqz5ixVCge5aPs3KUDtPS8a7+e2uxxIX34i4jtRKbtyB8ZRE3G0eTskA==",
-    "shasum": "4a4f06d254b2a54dd0f608155b9786b51644272e",
-    "tarball": "https://npm.webix.com/@xbs%2fkanban/-/kanban-7.2.0.tgz"
+    "integrity": "sha512-d5T1CY1sibFnBsNljeplHask+Rp/fMsQeF1guPvaZjj0lTVpsSTjzzetTjYaDMYpZniASWrq7xIk/uAcmBmZLw==",
+    "shasum": "31e46b327606d2c6e90986ebe439670b436de6c3",
+    "tarball": "https://npm.webix.com/@xbs%2fkanban/-/kanban-8.1.1.tgz"
   },
   "keywords": [
     "webix",
@@ -76,5 +76,5 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "types": "types/kanban.d.ts",
-  "version": "7.2.0"
+  "version": "8.1.1"
 }

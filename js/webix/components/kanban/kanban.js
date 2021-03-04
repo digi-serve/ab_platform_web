@@ -1,6 +1,6 @@
 /**
  * @license
- * Webix Kanban v.7.2.0
+ * Webix Kanban v.8.1.1
  * This software is covered by Webix Commercial License.
  * Usage without proper license is prohibited.
  * (c) XB Software Ltd.
@@ -271,13 +271,11 @@
         } else kanban.updateItem(sid);
       }
 
-      item.$index = tindex - 0.1;
+      webix.DataMove.move.call(tobj, sid, tindex);
 
       this._fixOrder();
 
-      tobj._fixOrder();
-
-      webix.DataMove.move.call(tobj, sid, tindex); // trigger data saving
+      if (this !== tobj) tobj._fixOrder(); // trigger data saving
 
       if (dp) {
         var update = webix.copy(item);
@@ -1184,25 +1182,22 @@
       return d;
     },
     _applyOrder: function (id, data, mode) {
-      if (!id) {
-        this._syncData();
-
-        return;
-      }
+      if (!id) return this._syncData();
 
       if (mode == "add") {
         this._assignList(data);
 
         this.getOwnerList(id).add(data);
+        data.$index = this._sublists[data.$list].count();
       } else if (mode === "delete") {
         this._sublists[data.$list].remove(id);
       } else if (mode === "update" || mode === "paint") {
-        var list = data.$list;
+        var prevList = data.$list;
 
         this._assignList(data);
 
-        if (list === data.$list) this.getOwnerList(id).updateItem(id, data);else {
-          this._sublists[list].remove(id);
+        if (prevList === data.$list) this.getOwnerList(id).updateItem(id, data);else {
+          this._sublists[prevList].remove(id);
 
           this.getOwnerList(id).add(data);
         }
@@ -1256,10 +1251,9 @@
       this._statuses.parse(statuses);
     },
     _syncData: function () {
-      var i,
-          sets = [];
+      var sets = [];
 
-      for (i = 0; i < this._sublists.length; i++) {
+      for (var i = 0; i < this._sublists.length; i++) {
         sets[i] = [];
       }
 
@@ -1269,15 +1263,17 @@
         if (j >= 0) sets[j].push(item);
       }, this);
 
-      for (i = 0; i < this._sublists.length; i++) {
-        var data = sets[i];
-        if (data.length && data[0].$index) data.sort(function (a, b) {
+      for (var _i2 = 0; _i2 < this._sublists.length; _i2++) {
+        var data = sets[_i2];
+        if (data.length > 1 && data[0].$index) data.sort(function (a, b) {
           return a.$index > b.$index ? 1 : -1;
         });
 
-        this._sublists[i].clearAll();
+        this._sublists[_i2].clearAll();
 
-        this._sublists[i].data.importData(data);
+        this._sublists[_i2].data.importData(data);
+
+        this._sublists[_i2]._fixOrder();
       }
     },
     _assignList: function (data) {

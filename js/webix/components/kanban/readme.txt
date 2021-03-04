@@ -1,4 +1,4 @@
-Webix Kanban v.7.2.0
+Webix Kanban v.8.1.1
 ================
 
 https://webix.com

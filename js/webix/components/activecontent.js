@@ -106,10 +106,10 @@ webix.ActiveContent = {
 			var object = common._active_holders?common:common.masterUI;
 
 			if (!object._active_holders[key]){
-				let d = document.createElement("DIV");
+				var d = document.createElement("DIV");
 				
 				active = active || object.config.activeContent;
-				let el = webix.ui(active[key], d);
+				var el = webix.ui(active[key], d);
 
 				if (webix.env.isIE8){
 					d.firstChild.setAttribute("onclick", "event.processed = true; event.srcElement.w_view = '"+el.config.id+"';");
@@ -128,7 +128,7 @@ webix.ActiveContent = {
 				el.$activeEl = el.$view;
 			}
 			if (object.filter && obj[key] != object._active_holders_values[key] && !webix.isUndefined(obj[key])){
-				let el = object._active_references[key];
+				var el = object._active_references[key];
 				el.blockEvent();
 				object._setActiveContentView(el,el.$activeEl);
 				//in IE we can lost content of active element during parent repainting

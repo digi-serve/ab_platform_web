@@ -1,3 +1,11 @@
+Check the full list of changes in Kanban at https://docs.webix.com/kanban__whats_new.html
+
+## Version 7.3.6 (June 2020)
+
+### Fixes
+
+- card indices after drag-n-drop
+
 Version 6.4.6 (September 2019)
 
 ### Fixes

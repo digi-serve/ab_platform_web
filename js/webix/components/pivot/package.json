@@ -1,0 +1,80 @@
+{
+  "_args": [
+    [
+      {
+        "raw": "@xbs/pivot",
+        "scope": "@xbs",
+        "escapedName": "@xbs%2fpivot",
+        "name": "@xbs/pivot",
+        "rawSpec": "",
+        "spec": "latest",
+        "type": "tag"
+      },
+      "/home/pong/Desktop/new-webix"
+    ]
+  ],
+  "_from": "@xbs/pivot@latest",
+  "_id": "@xbs/pivot@8.1.1",
+  "_inCache": true,
+  "_location": "/@xbs/pivot",
+  "_nodeVersion": "12.18.3",
+  "_npmUser": {
+    "name": "mkozhukh",
+    "email": "mkozhukh@ya.ru"
+  },
+  "_npmVersion": "6.14.6",
+  "_phantomChildren": {},
+  "_requested": {
+    "raw": "@xbs/pivot",
+    "scope": "@xbs",
+    "escapedName": "@xbs%2fpivot",
+    "name": "@xbs/pivot",
+    "rawSpec": "",
+    "spec": "latest",
+    "type": "tag"
+  },
+  "_requiredBy": [
+    "#USER"
+  ],
+  "_resolved": "http://npm.webix.com/@xbs%2fpivot/-/pivot-8.1.1.tgz",
+  "_shasum": "6a6f7ddddfc69bc785abf61ae90b08b258d059b0",
+  "_shrinkwrap": null,
+  "_spec": "@xbs/pivot",
+  "_where": "/home/pong/Desktop/new-webix",
+  "author": {
+    "name": "XB Software"
+  },
+  "dependencies": {},
+  "description": "Webix UI",
+  "devDependencies": {},
+  "dist": {
+    "integrity": "sha512-CTyrkYIXPVHgSla0RZAdgyHUlEaKEcOdbQDuo2YT3s4llRAccsD3g9BhFjQNHkgEIWbwi5LOCiw9HDstaL6PrA==",
+    "shasum": "6a6f7ddddfc69bc785abf61ae90b08b258d059b0",
+    "tarball": "https://npm.webix.com/@xbs%2fpivot/-/pivot-8.1.1.tgz"
+  },
+  "keywords": [
+    "webix",
+    "ui",
+    "widgets"
+  ],
+  "license": "SEE LICENSE IN license.text",
+  "main": "pivot.js",
+  "maintainers": [
+    {
+      "name": "mkozhukh",
+      "email": "mkozhukh@ya.ru"
+    }
+  ],
+  "name": "@xbs/pivot",
+  "optionalDependencies": {},
+  "publishConfig": {
+    "registry": "https://npm.webix.com"
+  },
+  "readme": "ERROR: No README data found!",
+  "readmeFilename": "readme.txt",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "types": "types/pivot.d.ts",
+  "version": "8.1.1"
+}

@@ -1,1 +1,1280 @@
-!function(t){var e={};function n(r){if(e[r])return e[r].exports;var o=e[r]={i:r,l:!1,exports:{}};return t[r].call(o.exports,o,o.exports,n),o.l=!0,o.exports}n.m=t,n.c=e,n.d=function(t,e,r){n.o(t,e)||Object.defineProperty(t,e,{enumerable:!0,get:r})},n.r=function(t){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(t,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(t,"__esModule",{value:!0})},n.t=function(t,e){if(1&e&&(t=n(t)),8&e)return t;if(4&e&&"object"==typeof t&&t&&t.__esModule)return t;var r=Object.create(null);if(n.r(r),Object.defineProperty(r,"default",{enumerable:!0,value:t}),2&e&&"string"!=typeof t)for(var o in t)n.d(r,o,function(e){return t[e]}.bind(null,o));return r},n.n=function(t){var e=t&&t.__esModule?function(){return t.default}:function(){return t};return n.d(e,"a",e),e},n.o=function(t,e){return Object.prototype.hasOwnProperty.call(t,e)},n.p="/codebase/",n(n.s=5)}([function(t,e,n){"use strict";function r(t){return Array.isArray?Array.isArray(t):"[object Array]"===Object.prototype.toString.call(t)}function o(t){return void 0===t}function i(t,e,n){for(var r in e)t[r]&&!n||(t[r]=e[r]);return t}var a;function u(){return a||(a=(new Date).valueOf()),++a}n.d(e,"b",function(){return r}),n.d(e,"c",function(){return o}),n.d(e,"a",function(){return i}),n.d(e,"d",function(){return u})},function(t,e,n){"use strict";n.d(e,"c",function(){return u}),n.d(e,"b",function(){return s}),n.d(e,"a",function(){return f});var r=n(0),o="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(t){return typeof t}:function(t){return t&&"function"==typeof Symbol&&t.constructor===Symbol&&t!==Symbol.prototype?"symbol":typeof t};function i(t,e,n){if("object"==(void 0===t?"undefined":o(t))){for(var r=0;r<t.length;r++)if(t[r]=parseFloat(t[r]),isNaN(t[r]))return!0}else if(t=parseFloat(t),isNaN(t))return!0;return!isNaN(e)&&n(t,e)}var a={contains:function(t,e){return e.toLowerCase().indexOf(t.toString().toLowerCase())>=0},equal:function(t,e){return i(t,e,function(t,e){return t==e})},not_equal:function(t,e){return i(t,e,function(t,e){return t!=e})},less:function(t,e){return i(t,e,function(t,e){return e<t})},less_equal:function(t,e){return i(t,e,function(t,e){return e<=t})},more:function(t,e){return i(t,e,function(t,e){return e>t})},more_equal:function(t,e){return i(t,e,function(t,e){return e>=t})},multi:function(t,e){"string"==typeof t&&(t=t.split(","));for(var n=0;n<t.length;n++)if(e==t[n])return!0;return!1},range:function(t,e){return i(t,e,function(t,e){return e<t[1]&&e>=t[0]})},range_inc:function(t,e){return i(t,e,function(t,e){return e<=t[1]&&e>=t[0]})}};function u(t){t=t||[];for(var e=0;e<t.length;e++){var n=t[e],r=n.fvalue;"function"==typeof r?n.func=r:"select"==n.type||"richselect"==n.type?(n.func=function(t,e){return t==e},r=r||""):n.type.indexOf("multi")>-1?n.func=a.multi:"object"===(void 0===r?"undefined":o(r))?n.func=a.range:"="==r.substr(0,1)?(n.func=a.equal,r=r.substr(1)):"<>"==r.substr(0,2)?(n.func=a.not_equal,r=r.substr(2)):">="==r.substr(0,2)?(n.func=a.more_equal,r=r.substr(2)):">"==r.substr(0,1)?(n.func=a.more,r=r.substr(1)):"<="==r.substr(0,2)?(n.func=a.less_equal,r=r.substr(2)):"<"==r.substr(0,1)?(n.func=a.less,r=r.substr(1)):r.indexOf("...")>0?(n.func=a.range,r=r.split("...")):r.indexOf("..")>0?(n.func=a.range_inc,r=r.split("..")):"datepicker"==n.type?n.func=function(t,e){return t==e}:n.func=a.contains,n.fvalue=r}}function s(t){var e,n;for(t=t||[],e=0;e<t.length;e++)"string"==typeof(n=t[e].fvalue||t[e].value||"")&&n.trim&&(n=n.trim()),t[e].fvalue=n}function f(t,e,n){if(t){var o=void 0,i=void 0;for(o=0;o<t.length;o++)if((i=t[o]).fvalue){var a=n&&n[i.name]?n[i.name]:i.name;if(r.c(e[a]))return!1;var u=e[a];if(0!==!u&&!u)return!1;var s=u.toString();if(!i.func(i.fvalue,s))return!1}}return!0}},function(t,e,n){"use strict";var r=n(0);function o(t,e){return"$webixtotal"+t.$divider+e}function i(t,e){var n,r,o=[];for(n=0;n<e.length;n++)r=t[e[n]],isNaN(parseFloat(r))||o.push(r);return o}var a={dir:1,as:function(t,e){return f(t)&&f(e)?u.int(t,e):u.string(t,e)}},u={date:function(t,e){return(t-=0)>(e-=0)?1:t<e?-1:0},int:function(t,e){return(t*=1)>(e*=1)?1:t<e?-1:0},string:function(t,e){return e?t?(t=t.toString().toLowerCase())>(e=e.toString().toLowerCase())?1:t<e?-1:0:-1:1}};function s(t,e){var n,i,u,s,f=t.config.structure.values;for(e=function t(e,n){var r,o,i,a,u,s=[];for(o=0;o<n.length;o++)if((i=n[o]).data.length){var f=t(e,i.data);for(r=!1,a=0;a<f.length;a++)(u=f[a]).splice(0,0,{name:i.key}),r||(u[0].colspan=f.length,r=!0),s.push(u)}else{var l=n[o].key.split(e.$divider);s.push([{name:n[o].key,operation:l[0],text:l[1]}])}return s}(t,e=function t(e,n,o){var i,u,s,f,l,c=[];if(Object.keys&&!1!==e.columnSort)for(o=o||0,i=e.columns[o],l=function(t,e){var n=a;t&&(t[e]?n=t[e]:t.$default&&(n=t.$default),n.dir&&(n._dir="desc"==n.dir?-1:1),r.a(n,a));return n}(e.columnSort,i),f=Object.keys(n),o<e.columns.length&&(f=f.sort(function(t,e){return l.as(t,e)*l._dir})),o++,u=0;u<f.length;u++)s=f[u],c.push({key:s,data:t(e,n[s],o)});else for(s in n)c.push({key:s,data:t(e,n[s])});return c}(t.config.structure,e)),n=0;n<e.length;n++){var l=[];for(i=0;i<e[n].length;i++)l.push(e[n][i].name);s=null;var c=l[l.length-1].split(t.$divider);for(i=0;i<f.length&&!s;i++)if(f[i].operation)for(u=0;u<f[i].operation.length;u++)f[i].name==c[1]&&f[i].operation[u]==c[0]&&(s=f[i]);e[n]={id:l.join(t.$divider),header:e[n]},e[n].format=s&&s.format?s.format:"count"!=c[0]?t.config.format:null}return e.length&&t.view&&t.view.callEvent&&t.view.callEvent("onHeaderInit",[e]),t.config.totalColumn&&e.length&&(e=function(t,e){var n,r,i,a,u,s,f,l=[];if((s=e[0].header.length)<2)return e;for(i in r=function(t,e){var n,r,o,i,a,u={},s=0;for(r=0;r<e.length;r++)a=e[r].id.split(t.$divider),o=a.pop(),"sum"!=(i=a.pop())&&"sumOnly"==t.config.totalColumn||(n=i+t.$divider+o,u[n]||(s++,u[n]={operation:i,ids:[],format:e.format}),u[n].ids.push(e[r].id));return{groups:u,count:s}}(t,e),n=r.groups,t._pivotColumnGroups=n,n){for(a={id:o(t,i),header:[],sort:"int",width:t.config.columnWidth,format:t.config.format},u=0;u<s-1;u++)u||l.length?a.header.push(""):a.header.push({name:"total",rowspan:s-1,colspan:r.count});f=i.split(t.$divider),a.header.push({name:i,operation:f[0],text:f[1]}),l.push(a)}return e.concat(l)}(t,e)),e.splice(0,0,{id:"name",template:"{common.treetable()} #name#",header:{text:void 0}}),e}function f(t){return!isNaN(1*t)}var l="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(t){return typeof t}:function(t){return t&&"function"==typeof Symbol&&t.constructor===Symbol&&t!==Symbol.prototype?"symbol":typeof t};function c(t,e,n,r){var o,i,a=[],u=[];for(t=function t(e,n,r){r||(r=[]);for(var o=0;o<e.length;o++)n&&e[o].data?t(e[o].data,n,r):r.push(e[o]);return r}(t,r),o=0;o<t.length;o++)i=t[o][e],isNaN(parseFloat(i))||(u.push(1*i),a.push(t[o]));return n(u,e,a)}var p="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(t){return typeof t}:function(t){return t&&"function"==typeof Symbol&&t.constructor===Symbol&&t!==Symbol.prototype?"symbol":typeof t};function h(t,e,n){var r;for(r=0;r<t.length;r++)t[r].data?h(t[r].data,e,n):n.push(t[r][e])}var d=n(1),v="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(t){return typeof t}:function(t){return t&&"function"==typeof Symbol&&t.constructor===Symbol&&t!==Symbol.prototype?"symbol":typeof t},g=function(){function t(t,e){for(var n=0;n<e.length;n++){var r=e[n];r.enumerable=r.enumerable||!1,r.configurable=!0,"value"in r&&(r.writable=!0),Object.defineProperty(t,r.key,r)}}return function(e,n,r){return n&&t(e.prototype,n),r&&t(e,r),e}}();var y=function(){function t(e,n){!function(t,e){if(!(t instanceof e))throw new TypeError("Cannot call a class as a function")}(this,t),this.master=e,this.config=n,this.count=0}return t.prototype.process=function(t,e){var n,a,u,f,p;this.watch=new Date;var h=this.structure;for(h._header=[],h._header_hash={},d.b(h.filters),d.c(h.filters),f=0;f<h.values.length;f++)h.values[f].operation=h.values[f].operation||["sum"],r.b(h.values[f].operation)||(h.values[f].operation=[h.values[f].operation]);for(n=[],f=0;f<h.columns.length;f++)n[f]="object"==v(h.columns[f])?h.columns[f].id||f:h.columns[f];return a=h.rows.concat(n),p=this.group(t,e,a),u={},h.rows.length>0?p=this.processRows(p,h.rows,h,u,""):(this.processColumns(p,n,h,u),p=[]),u=s(this.master,u),p=function t(e,n){var r=e._pivotColumnGroups;if(r){var a=void 0,u=void 0,s=void 0;for(s in r)for(u=r[s].ids,a=0;a<n.length;a++){var f=void 0,l=o(e,s),c="",p=i(n[a],u);p.length&&(f=e._pivotOperations.getTotal(s.split(e.$divider)[0]))&&(c=f.call(e,p,l,n[a])),n[a][l]=c,n[a].data&&(n[a].data=t(e,n[a].data))}}return n}(this.master,p),this.config.footer&&function(t,e,n){var o,i,a,u;for(i=1;i<e.length;i++){o=null,u=(a=e[i].id.split(t.$divider))[a.length-2],"sumOnly"==t.config.footer&&"sum"!=u&&(o=" ");var s=t._pivotOperations.getTotal(u);if(!o&&s){var f=t._pivotOperations.getTotalOptions(u);o={$pivotValue:c(n,e[i].id,s,f&&f.leavesOnly),$pivotOperation:u}}else o=" ";e[i].footer=o,"object"==l(t.config.footer)&&r.a(e[i].footer,t.config.footer,!0)}}(this.master,u,p),delete h._header,delete h._header_hash,{header:u,data:p}},t.prototype.processColumns=function(t,e,n,o,i,a){var u;if(i=i||{$source:[]},e.length>0)for(var s in a=a||"",t)o[s]||(o[s]={}),t[s]=this.processColumns(t[s],e.slice(1),n,o[s],i,(a.length>0?a+this.divider:"")+s);else{var f=n.values;for(var l in t){i.$source.push(l);for(var c=0;c<f.length;c++)for(var p=0;p<f[c].operation.length;p++)u=void 0!==a?a+this.divider+f[c].operation[p]+this.divider+f[c].name:f[c].operation[p]+this.divider+f[c].name,n._header_hash[u]||(n._header.push(u),n._header_hash[u]=!0),r.c(i[u])&&(i[u]=[],o[f[c].operation[p]+this.divider+f[c].name]={}),i[u].push({value:t[l][f[c].name],id:l})}}return i},t.prototype.processRows=function(t,e,n,o,i){var a,u,s,f,l,c=[];if(e.length>1){for(a in t)t[a]=this.processRows(t[a],e.slice(1),n,o,i+"_"+a);var p=n._header;for(a in t){for(u={data:t[a]},s=0;s<u.data.length;s++)for(f=0;f<p.length;f++)l=p[f],r.c(u[l])&&(u[l]=[]),u[l].push(u.data[s][l]);this.setItemValues(u),this.master.config.stableRowId&&(u.id=i+"_"+a),u.name=a,u.open=!0,c.push(u)}}else for(a in t)(u=this.processColumns(t[a],n.columns,n,o)).name=a,this.master.config.stableRowId&&(u.id=i+"_"+a),this.setItemValues(u),c.push(u);return c},t.prototype.setItemValues=function(t){return t=function(t,e){var n,r,o,i,a,u,s,f,l=e.header,c=e.max,p=e.min,h=e.values;if(!p&&!c)return t;for(t.$cellCss||(t.$cellCss={}),n=0;n<h.length;n++){for(f=h[n],i=[],a=-99999999,u=[],s=99999999,r=0;r<l.length;r++)o=l[r],isNaN(t[o])||-1!==o.indexOf(f.name)&&(c&&t[o]>a?(i=[o],a=t[o]):t[o]==a&&i.push(o),p&&t[o]<s?(u=[o],s=t[o]):t[o]==s&&u.push(o));for(r=0;r<u.length;r++)t.$cellCss[u[r]]="webix_min";for(r=0;r<i.length;r++)t.$cellCss[i[r]]="webix_max"}return t}(t=function(t,e,n){var r,o,i,a,u,s,f,l=e.header;for(r=0;r<l.length;r++){if(u=(s=(i=l[r]).split(e.divider))[s.length-2],f=t[i],a=e.operations.getOption(u,"leavesOnly"),o=e.operations.getOption(u,"ids"),a&&t.data&&(f=[],h(t.data,i,f)),f){for(var c=[],d=[],v=0;v<f.length;v++){var g=f[v],y=null;"object"==(void 0===g?"undefined":p(g))&&(g=g.value,y=f[v].id),(g||"0"==g)&&(c.push(g),y&&d.push(y))}c.length?t[i]=e.operations.get(u)(c,i,t,o?d:null):t[i]=""}else t[i]="";n.count++}return t}(t,{header:this.structure._header,divider:this.divider,operations:this.operations},this),{header:this.structure._header,max:this.config.max,min:this.config.min,values:this.structure.values}),this.count>5e4&&(this.count=0,this.config.ping&&this.config.ping.call(this,this.watch)),t},t.prototype.group=function(t,e,n){var r,o,i={};for(r=0;r<e.length;r++)(o=t[e[r]])&&d.a(this.structure.filters,o,this.config.filterMap)&&this.groupItem(i,o,n);return i},t.prototype.groupItem=function(t,e,n){if(n.length){var o=e[n[0]];if(void 0===o)return null;r.c(t[o])&&(t[o]={}),this.groupItem(t[o],e,n.slice(1))}else t[e.id]=e},t.prototype.filterItem=function(t){for(var e=this.structure.filters||[],n=0;n<e.length;n++){var o=e[n];if(o.fvalue){if(r.c(t[o.name]))return!1;var i=t[o.name].toString().toLowerCase();if(!o.func(o.fvalue,i))return!1}}return!0},g(t,[{key:"operations",get:function(){return this.master._pivotOperations}},{key:"divider",get:function(){return this.master.$divider}},{key:"structure",get:function(){return this.config.structure}}]),t}(),m=n(3);n.d(e,"b",function(){return w}),n.d(e,"a",function(){return S});var _="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(t){return typeof t}:function(t){return t&&"function"==typeof Symbol&&t.constructor===Symbol&&t!==Symbol.prototype?"symbol":typeof t};function b(t,e){if(!(t instanceof e))throw new TypeError("Cannot call a class as a function")}var O="_'_",w=function(){function t(e,n){b(this,t),this.$divider=O,this._initOperations(),this.config=e,this.view=n,e.webWorker&&"undefined"!==!("undefined"==typeof Worker||_(Worker))&&n?this._initWorker(e,n):this._pivotData=new y(this,this.config),this.config.structure||(this.config.structure={}),r.a(this.config.structure,{rows:[],columns:[],values:[],filters:[]})}return t.prototype._initWorker=function(t,e){this._result=null,this._pivotWorker=new Worker(t.webWorker),this._pivotWorker.onmessage=function(t){"ping"===t.data.type?e._runPing(t.data.watch,e):e._result&&!e.$destructed&&(e.callEvent("onWebWorkerEnd",[]),t.data.id&&t.data.id!==e._result_id||(e._result(t.data.data),e._result=null))}},t.prototype._runPing=function(t,e){try{this.config.ping(t)}catch(t){this._pivotWorker.terminate(),this._initWorker(this.config,e),e.callEvent("onWebWorkerEnd",[])}},t.prototype._getPivotData=function(t,e,n){if(!this._pivotWorker){var r=this._pivotData.process(t,e);return n&&n(r),r}var o=this._result_id=webix.uid();this._result=n;var i=[],a=this.config.structure,u=this.config.footer,s=this._pivotOperations.serialize();if(a&&(a.rows.length||a.columns.length))for(var f=e.length-1;f>=0;f--)i[f]=t[e[f]];this.callEvent("onWebWorkerStart",[]);var l=this.config.format;if("function"==typeof l){var c="x"+webix.uid();webix.i18n[c]=l,l=c}var p=!!this.config.ping;this._pivotWorker.postMessage({footer:u,structure:a,data:i,id:o,operations:s,ping:p,format:l})},t.prototype._initOperations=function(){var t=this._pivotOperations=new m.a;this.operations=t.pull},t.prototype.addOperation=function(t,e,n){this._pivotOperations.add(t,e,n)},t.prototype.addTotalOperation=function(t,e,n){this._pivotOperations.addTotal(t,e,n)},t}(),S=function(t){function e(){return b(this,e),function(t,e){if(!t)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return!e||"object"!=typeof e&&"function"!=typeof e?t:e}(this,t.apply(this,arguments))}return function(t,e){if("function"!=typeof e&&null!==e)throw new TypeError("Super expression must either be null or a function, not "+typeof e);t.prototype=Object.create(e&&e.prototype,{constructor:{value:t,enumerable:!1,writable:!0,configurable:!0}}),e&&(Object.setPrototypeOf?Object.setPrototypeOf(t,e):t.__proto__=e)}(e,t),e.prototype.getData=function(t){var e,n,o,i,a=[],u={},s=this.config.structure.filters,f={},l={},c={},p=this.operations,h=[],d={};for(e=0;e<s.length;e++)-1!=s[e].type.indexOf("select")&&(l[s[e].name]=[],c[s[e].name]={});for(e=0;e<t.length;e++){if(f[n=t[e].id=t[e].id||r.d()]=t[e],h.push(n),e<5)for(i in t[e])u[i]||(a.push(i),u[i]=r.d());for(o in l){var v=t[e][o];r.c(v)||c[o][v]||(c[o][v]=1,l[o].push(v))}}for(n in d.options=l,d.fields=a,d.data=this._getPivotData(f,h),d.operations=[],p)d.operations.push(n);return d},e}(w)},function(module,__webpack_exports__,__webpack_require__){"use strict";__webpack_require__.d(__webpack_exports__,"a",function(){return Operations});var _helpers_js__WEBPACK_IMPORTED_MODULE_0__=__webpack_require__(0);function _classCallCheck(t,e){if(!(t instanceof e))throw new TypeError("Cannot call a class as a function")}var operations={sum:function(t){for(var e=0,n=0;n<t.length;n++){var r=t[n];r=parseFloat(r,10),isNaN(r)||(e+=r)}return e},count:function(t,e,n){var r=0;if(n.data)for(var o=0;o<n.data.length;o++)r+=n.data[o][e]||0;else r=t.length;return r},max:function(t){return 1==t.length?t[0]:Math.max.apply(this,t)},min:function(t){return 1==t.length?t[0]:Math.min.apply(this,t)}},totalOperations={sum:function(t){var e,n=0;for(e=0;e<t.length;e++)n+=t[e];return n},min:function(t){return 1==t.length?t[0]:Math.min.apply(null,t)},max:function(t){return 1==t.length?t[0]:Math.max.apply(null,t)},count:function(t){var e=totalOperations.sum.call(this,t);return e?parseInt(e,10):""}},Operations=function(){function Operations(){_classCallCheck(this,Operations),this.pull=_helpers_js__WEBPACK_IMPORTED_MODULE_0__.a({},operations),this.options={},this.pullTotal=_helpers_js__WEBPACK_IMPORTED_MODULE_0__.a({},totalOperations),this.totalOptions={}}return Operations.prototype.serialize=function(){var t={};for(var e in this.pull)t[e]=this.pull[e].toString();return t},Operations.prototype.parse=function parse(str){for(var key in str)eval("this.temp = "+str[key]),this.pull[key]=this.temp},Operations.prototype.add=function(t,e,n){this.pull[t]=e,n&&(this.options[t]=n)},Operations.prototype.addTotal=function(t,e,n){this.pullTotal[t]=e,n&&(this.totalOptions[t]=n)},Operations.prototype.get=function(t){return this.pull[t]||null},Operations.prototype.getOptions=function(t){return this.options[t]||null},Operations.prototype.getOption=function(t,e){return this.options[t]?this.options[t][e]:null},Operations.prototype.getTotal=function(t){return this.pullTotal[t]||this.pull[t]||null},Operations.prototype.getTotalOptions=function(t){return this.pullTotal[t]?this.totalOptions[t]||null:this.options[t]||null},Operations.prototype.getTotalOption=function(t,e){var n=this.getTotalOptions(t);return n?n[t][e]:null},Operations}()},,function(t,e,n){"use strict";n.r(e);var r,o=n(2);onmessage=function(t){if(r||(r=new o.a(t.data.structure)),"error"===t.type)throw t;r.config.format=t.data.format,r.config.footer=t.data.footer,r.config.structure=t.data.structure,t.data.ping&&(r.config.ping=function(t){postMessage({type:"ping",watch:t})}),r._pivotOperations.parse(t.data.operations);var e=r.getData(t.data.data);postMessage({type:"data",data:e.data,id:t.data.id})}}]);
+/**
+ * @license
+ * Webix Pivot v.8.1.1
+ * This software is covered by Webix Commercial License.
+ * Usage without proper license is prohibited.
+ * (c) XB Software Ltd.
+ */
+
+(function (global, factory) {
+  typeof exports === 'object' && typeof module !== 'undefined' ? factory() :
+  typeof define === 'function' && define.amd ? define(factory) :
+  (factory());
+}(this, (function () { 'use strict';
+
+  function _typeof(obj) {
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof = function (obj) {
+        return typeof obj;
+      };
+    } else {
+      _typeof = function (obj) {
+        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+      };
+    }
+
+    return _typeof(obj);
+  }
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  function _defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+
+  function _createClass(Constructor, protoProps, staticProps) {
+    if (protoProps) _defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) _defineProperties(Constructor, staticProps);
+    return Constructor;
+  }
+
+  function isArray(obj) {
+    return Array.isArray ? Array.isArray(obj) : Object.prototype.toString.call(obj) === "[object Array]";
+  }
+  function isUndefined(a) {
+    return typeof a == "undefined";
+  }
+  function extend(base, source, force) {
+    //copy methods, overwrite existing ones in case of conflict
+    for (var method in source) {
+      if (!base[method] || force) base[method] = source[method];
+    }
+
+    return base;
+  }
+  var seed;
+  function uid() {
+    if (!seed) seed = new Date().valueOf();
+    seed++;
+    return seed;
+  }
+
+  function getTotalColumnId(master, name) {
+    return "$webixtotal" + master.$divider + name;
+  }
+
+  function getValues(item, ids) {
+    var i,
+        value,
+        values = [];
+
+    for (i = 0; i < ids.length; i++) {
+      value = item[ids[i]];
+      if (!isNaN(parseFloat(value))) values.push(value);
+    }
+
+    return values;
+  }
+
+  function addTotalColumns(master, header) {
+    var groups,
+        groupData,
+        groupName,
+        h,
+        i,
+        hRowCount,
+        parts,
+        totalCols = [];
+    hRowCount = header[0].header.length; // if no selected columns
+
+    if (hRowCount < 2) return header;
+    groupData = getTotalGroups(master, header);
+    groups = groupData.groups;
+    master._pivotColumnGroups = groups;
+
+    for (groupName in groups) {
+      // column config
+      h = {
+        id: getTotalColumnId(master, groupName),
+        header: [],
+        sort: "int",
+        width: master.config.columnWidth,
+        format: master.config.format
+      }; // set top headers
+
+      for (i = 0; i < hRowCount - 1; i++) {
+        if (!i && !totalCols.length) {
+          h.header.push({
+            name: "total",
+            rowspan: hRowCount - 1,
+            colspan: groupData.count
+          });
+        } else h.header.push("");
+      } // set bottom header
+
+
+      parts = groupName.split(master.$divider);
+      h.header.push({
+        name: groupName,
+        operation: parts[0],
+        text: parts[1]
+      });
+      totalCols.push(h);
+    }
+
+    return header.concat(totalCols);
+  }
+
+  function getTotalGroups(master, header) {
+    var groupName,
+        i,
+        name,
+        operation,
+        parts,
+        groups = {},
+        groupCount = 0;
+
+    for (i = 0; i < header.length; i++) {
+      parts = header[i].id.split(master.$divider);
+      name = parts.pop();
+      operation = parts.pop();
+
+      if (operation == "sum" || master.config.totalColumn != "sumOnly") {
+        groupName = operation + master.$divider + name;
+
+        if (!groups[groupName]) {
+          groupCount++;
+          groups[groupName] = {
+            operation: operation,
+            ids: [],
+            format: header.format
+          };
+        }
+
+        groups[groupName].ids.push(header[i].id);
+      }
+    }
+
+    return {
+      groups: groups,
+      count: groupCount
+    };
+  }
+
+  function addTotalData(master, items) {
+    var groups = master._pivotColumnGroups;
+
+    if (groups) {
+      var group, i, ids, name;
+
+      for (name in groups) {
+        group = groups[name];
+        ids = group.ids;
+
+        for (i = 0; i < items.length; i++) {
+          var operation = void 0,
+              columnId = getTotalColumnId(master, name),
+              result = "",
+              values = getValues(items[i], ids);
+
+          if (values.length) {
+            if (operation = master._pivotOperations.getTotal(name.split(master.$divider)[0])) result = operation.call(master, values, columnId, items[i]);
+          }
+
+          items[i][columnId] = result;
+          if (items[i].data) items[i].data = addTotalData(master, items[i].data);
+        }
+      }
+    }
+
+    return items;
+  }
+
+  var sortConfig = {
+    dir: 1,
+    as: function (a, b) {
+      if (isNum(a) && isNum(b)) return sorting.int(a, b);
+      return sorting.string(a, b);
+    }
+  };
+  var sorting = {
+    "date": function (a, b) {
+      a = a - 0;
+      b = b - 0;
+      return a > b ? 1 : a < b ? -1 : 0;
+    },
+    "int": function (a, b) {
+      a = a * 1;
+      b = b * 1;
+      return a > b ? 1 : a < b ? -1 : 0;
+    },
+    "string": function (a, b) {
+      if (!b) return 1;
+      if (!a) return -1;
+      a = a.toString().toLowerCase();
+      b = b.toString().toLowerCase();
+      return a > b ? 1 : a < b ? -1 : 0;
+    }
+  };
+  function processHeader(master, header) {
+    var i,
+        j,
+        p,
+        text0,
+        vConfig,
+        valuesConfig = master.config.structure.values;
+    header = sortHeader(master.config.structure, header);
+    header = getHeader(master, header);
+
+    for (i = 0; i < header.length; i++) {
+      var parts = [];
+
+      for (j = 0; j < header[i].length; j++) {
+        parts.push(header[i][j].name);
+      } // find value configuration
+
+
+      vConfig = null;
+      var tmp = parts[parts.length - 1].split(master.$divider);
+
+      for (j = 0; j < valuesConfig.length && !vConfig; j++) {
+        if (valuesConfig[j].operation) for (p = 0; p < valuesConfig[j].operation.length; p++) {
+          if (valuesConfig[j].name == tmp[1] && valuesConfig[j].operation[p] == tmp[0]) {
+            vConfig = valuesConfig[j];
+          }
+        }
+      }
+
+      header[i] = {
+        id: parts.join(master.$divider),
+        header: header[i]
+      };
+      header[i].format = vConfig && vConfig.format ? vConfig.format : tmp[0] != "count" ? master.config.format : null;
+    }
+
+    if (header.length && master.view && master.view.callEvent) master.view.callEvent("onHeaderInit", [header]);
+    if (master.config.totalColumn && header.length) header = addTotalColumns(master, header);
+    header.splice(0, 0, {
+      id: "name",
+      template: "{common.treetable()} #name#",
+      header: {
+        text: text0
+      }
+    });
+    return header;
+  }
+
+  function isNum(value) {
+    return !isNaN(value * 1);
+  }
+  /*
+  * get sort properties for a column
+  * */
+
+
+  function setSortConfig(config, column) {
+    var sorting = sortConfig;
+
+    if (config) {
+      // for a specific columns
+      if (config[column]) sorting = config[column]; // for any other column
+      else if (config.$default) sorting = config.$default;
+      if (sorting.dir) sorting._dir = sorting.dir == "desc" ? -1 : 1;
+      extend(sorting, sortConfig);
+    }
+
+    return sorting;
+  }
+
+  function sortHeader(config, header, cIndex) {
+    var column,
+        i,
+        key,
+        keys,
+        sorting,
+        sorted = [];
+
+    if (Object.keys && config.columnSort !== false) {
+      cIndex = cIndex || 0;
+      column = config.columns[cIndex];
+      sorting = setSortConfig(config.columnSort, column);
+      keys = Object.keys(header);
+      if (cIndex < config.columns.length) keys = keys.sort(function (a, b) {
+        return sorting.as(a, b) * sorting._dir;
+      });
+      cIndex++;
+
+      for (i = 0; i < keys.length; i++) {
+        key = keys[i];
+        sorted.push({
+          key: key,
+          data: sortHeader(config, header[key], cIndex)
+        });
+      }
+    } else {
+      for (key in header) {
+        sorted.push({
+          key: key,
+          data: sortHeader(config, header[key])
+        });
+      }
+    }
+
+    return sorted;
+  }
+
+  function getHeader(view, data) {
+    var first,
+        i,
+        item,
+        j,
+        h,
+        header = [];
+
+    for (i = 0; i < data.length; i++) {
+      item = data[i];
+
+      if (item.data.length) {
+        var result = getHeader(view, item.data);
+        first = false;
+
+        for (j = 0; j < result.length; j++) {
+          h = result[j];
+          h.splice(0, 0, {
+            name: item.key
+          });
+
+          if (!first) {
+            h[0].colspan = result.length;
+            first = true;
+          }
+
+          header.push(h);
+        }
+      } else {
+        var keys = data[i].key.split(view.$divider);
+        header.push([{
+          name: data[i].key,
+          operation: keys[0],
+          text: keys[1]
+        }]);
+      }
+    }
+
+    return header;
+  }
+
+  function addFooter(master, columns, items) {
+    var config, i, names, operation;
+
+    for (i = 1; i < columns.length; i++) {
+      config = null;
+      names = columns[i].id.split(master.$divider);
+      operation = names[names.length - 2];
+
+      if (master.config.footer == "sumOnly") {
+        if (operation != "sum") config = " ";
+      }
+
+      var totalMethod = master._pivotOperations.getTotal(operation);
+
+      if (!config && totalMethod) {
+        var options = master._pivotOperations.getTotalOptions(operation);
+
+        var result = calculateColumn(items, columns[i].id, totalMethod, options && options.leavesOnly);
+        config = {
+          $pivotValue: result,
+          $pivotOperation: operation
+        };
+      } else config = " ";
+
+      columns[i].footer = config;
+
+      if (_typeof(master.config.footer) == "object") {
+        extend(columns[i].footer, master.config.footer, true);
+      }
+    }
+  }
+
+  function calculateColumn(items, columnId, totalMethod, leaves) {
+    var i,
+        fItems = [],
+        value,
+        values = []; // filter items
+
+    items = filterItems(items, leaves); // get column values
+
+    for (i = 0; i < items.length; i++) {
+      value = items[i][columnId];
+
+      if (!isNaN(parseFloat(value))) {
+        values.push(value * 1);
+        fItems.push(items[i]);
+      }
+    }
+
+    return totalMethod(values, columnId, fItems);
+  }
+
+  function filterItems(items, leaves, selectedItems) {
+    if (!selectedItems) selectedItems = [];
+
+    for (var i = 0; i < items.length; i++) {
+      if (leaves && items[i].data) filterItems(items[i].data, leaves, selectedItems);else selectedItems.push(items[i]);
+    }
+
+    return selectedItems;
+  }
+
+  function calculateItem(item, config, master) {
+    var i,
+        isIds,
+        key,
+        leaves,
+        operation,
+        tmp,
+        values,
+        header = config.header;
+
+    for (i = 0; i < header.length; i++) {
+      key = header[i];
+      tmp = key.split(config.divider);
+      operation = tmp[tmp.length - 2];
+      values = item[key];
+      leaves = config.operations.getOption(operation, "leavesOnly");
+      isIds = config.operations.getOption(operation, "ids");
+
+      if (leaves && item.data) {
+        values = [];
+        getKeyLeaves(item.data, key, values);
+      }
+
+      if (values) {
+        var data = [];
+        var ids = [];
+
+        for (var j = 0; j < values.length; j++) {
+          var value = values[j];
+          var id = null;
+
+          if (_typeof(value) == "object") {
+            value = value.value;
+            id = values[j].id;
+          }
+
+          if (value || value == "0") {
+            data.push(value);
+            if (id) ids.push(id);
+          }
+        }
+
+        if (data.length) item[key] = config.operations.get(operation)(data, key, item, isIds ? ids : null);else item[key] = "";
+      } else item[key] = ""; //watchdog
+
+
+      master.count++;
+    }
+
+    return item;
+  }
+
+  function getKeyLeaves(data, key, result) {
+    var i;
+
+    for (i = 0; i < data.length; i++) {
+      if (data[i].data) getKeyLeaves(data[i].data, key, result);else result.push(data[i][key]);
+    }
+  }
+
+  function setMinMax(item, config) {
+    var i,
+        j,
+        key,
+        maxArr,
+        maxValue,
+        minArr,
+        minValue,
+        value,
+        header = config.header,
+        max = config.max,
+        min = config.min,
+        values = config.values; // nothing to do
+
+    if (!min && !max) return item; //values = structure.values;
+
+    if (!item.$cellCss) item.$cellCss = {}; // calculating for each value
+
+    for (i = 0; i < values.length; i++) {
+      value = values[i];
+      maxArr = [];
+      maxValue = -99999999;
+      minArr = [];
+      minValue = 99999999;
+
+      for (j = 0; j < header.length; j++) {
+        key = header[j];
+        if (isNaN(item[key])) continue; // it's a another value
+
+        if (key.indexOf(value.name) === -1) continue;
+
+        if (max && item[key] > maxValue) {
+          maxArr = [key];
+          maxValue = item[key];
+        } else if (item[key] == maxValue) {
+          maxArr.push(key);
+        }
+
+        if (min && item[key] < minValue) {
+          minArr = [key];
+          minValue = item[key];
+        } else if (item[key] == minValue) {
+          minArr.push(key);
+        }
+      }
+
+      for (j = 0; j < minArr.length; j++) {
+        item.$cellCss[minArr[j]] = "webix_min";
+      }
+
+      for (j = 0; j < maxArr.length; j++) {
+        item.$cellCss[maxArr[j]] = "webix_max";
+      }
+    }
+
+    return item;
+  }
+
+  function numHelper(fvalue, value, func) {
+    if (_typeof(fvalue) == "object") {
+      for (var i = 0; i < fvalue.length; i++) {
+        fvalue[i] = parseFloat(fvalue[i]);
+        if (isNaN(fvalue[i])) return true;
+      }
+    } else {
+      fvalue = parseFloat(fvalue); // if filter value is not a number then ignore such filter
+
+      if (isNaN(fvalue)) return true;
+    } // if row value is not a number then don't show this row
+
+
+    if (isNaN(value)) return false;
+    return func(fvalue, value);
+  }
+
+  var rules = {
+    contains: function (fvalue, value) {
+      return value.toLowerCase().indexOf(fvalue.toString().toLowerCase()) >= 0;
+    },
+    equal: function (fvalue, value) {
+      return numHelper(fvalue, value, function (fvalue, value) {
+        return fvalue == value;
+      });
+    },
+    not_equal: function (fvalue, value) {
+      return numHelper(fvalue, value, function (fvalue, value) {
+        return fvalue != value;
+      });
+    },
+    less: function (fvalue, value) {
+      return numHelper(fvalue, value, function (fvalue, value) {
+        return value < fvalue;
+      });
+    },
+    less_equal: function (fvalue, value) {
+      return numHelper(fvalue, value, function (fvalue, value) {
+        return value <= fvalue;
+      });
+    },
+    more: function (fvalue, value) {
+      return numHelper(fvalue, value, function (fvalue, value) {
+        return value > fvalue;
+      });
+    },
+    more_equal: function (fvalue, value) {
+      return numHelper(fvalue, value, function (fvalue, value) {
+        return value >= fvalue;
+      });
+    },
+    multi: function (fvalues, value) {
+      if (typeof fvalues === "string") fvalues = fvalues.split(",");
+
+      for (var i = 0; i < fvalues.length; i++) {
+        if (value == fvalues[i]) return true;
+      }
+
+      return false;
+    },
+    range: function (fvalue, value) {
+      return numHelper(fvalue, value, function (fvalue, value) {
+        return value < fvalue[1] && value >= fvalue[0];
+      });
+    },
+    range_inc: function (fvalue, value) {
+      return numHelper(fvalue, value, function (fvalue, value) {
+        return value <= fvalue[1] && value >= fvalue[0];
+      });
+    }
+  };
+  function setFilterValues(filters) {
+    filters = filters || [];
+
+    for (var i = 0; i < filters.length; i++) {
+      var f = filters[i],
+          fvalue = f.fvalue;
+
+      if (typeof fvalue == "function") {
+        f.func = fvalue;
+      } else if (f.type == "select" || f.type == "richselect") {
+        f.func = function (fvalue, value) {
+          return fvalue == value;
+        };
+
+        fvalue = fvalue || "";
+      } else if (f.type.indexOf("multi") > -1) {
+        f.func = rules.multi;
+      } else if (_typeof(fvalue) === "object") {
+        f.func = rules.range;
+      } else if (fvalue.substr(0, 1) == "=") {
+        f.func = rules.equal;
+        fvalue = fvalue.substr(1);
+      } else if (fvalue.substr(0, 2) == "<>") {
+        f.func = rules.not_equal;
+        fvalue = fvalue.substr(2);
+      } else if (fvalue.substr(0, 2) == ">=") {
+        f.func = rules.more_equal;
+        fvalue = fvalue.substr(2);
+      } else if (fvalue.substr(0, 1) == ">") {
+        f.func = rules.more;
+        fvalue = fvalue.substr(1);
+      } else if (fvalue.substr(0, 2) == "<=") {
+        f.func = rules.less_equal;
+        fvalue = fvalue.substr(2);
+      } else if (fvalue.substr(0, 1) == "<") {
+        f.func = rules.less;
+        fvalue = fvalue.substr(1);
+      } else if (fvalue.indexOf("...") > 0) {
+        f.func = rules.range;
+        fvalue = fvalue.split("...");
+      } else if (fvalue.indexOf("..") > 0) {
+        f.func = rules.range_inc;
+        fvalue = fvalue.split("..");
+      } else if (f.type == "datepicker") {
+        f.func = function (fvalue, value) {
+          return fvalue == value;
+        };
+      } else f.func = rules.contains;
+
+      f.fvalue = fvalue;
+    }
+  }
+  function formatFilterValues(filters) {
+    var i, fvalue;
+    filters = filters || [];
+
+    for (i = 0; i < filters.length; i++) {
+      fvalue = filters[i].fvalue || filters[i].value || "";
+
+      if (typeof fvalue == "string") {
+        if (fvalue.trim) fvalue = fvalue.trim();
+      }
+
+      filters[i].fvalue = fvalue;
+    }
+  }
+  function filterItem(filters, item, map) {
+    if (filters) {
+      var i, f;
+
+      for (i = 0; i < filters.length; i++) {
+        f = filters[i];
+
+        if (f.fvalue) {
+          var field = map && map[f.name] ? map[f.name] : f.name;
+          if (isUndefined(item[field])) return false;
+          var raw = item[field];
+          if (!raw !== 0 && !raw) return false;
+          var value = raw.toString();
+          var result = f.func(f.fvalue, value);
+          if (!result) return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
+  var Data =
+  /*#__PURE__*/
+  function () {
+    function Data(master, config) {
+      _classCallCheck(this, Data);
+
+      this.master = master;
+      this.config = config;
+      this.count = 0;
+    }
+
+    _createClass(Data, [{
+      key: "process",
+      value: function process(data, order) {
+        this.watch = new Date();
+        var columns, fields, header, i, items;
+        var structure = this.structure;
+        structure._header = [];
+        structure._header_hash = {};
+        formatFilterValues(structure.filters);
+        setFilterValues(structure.filters);
+
+        for (i = 0; i < structure.values.length; i++) {
+          structure.values[i].operation = structure.values[i].operation || [this.config.defaultOperation];
+          if (!isArray(structure.values[i].operation)) structure.values[i].operation = [structure.values[i].operation];
+        }
+
+        columns = [];
+
+        for (i = 0; i < structure.columns.length; i++) {
+          columns[i] = _typeof(structure.columns[i]) == "object" ? structure.columns[i].id || i : structure.columns[i];
+        }
+
+        fields = structure.rows.concat(columns);
+        items = this.group(data, order, fields);
+        header = {};
+        if (structure.rows.length > 0) items = this.processRows(items, structure.rows, structure, header, "");else {
+          // there are no rows in structure, only columns and values
+          this.processColumns(items, columns, structure, header);
+          items = [];
+        }
+        header = processHeader(this.master, header);
+        items = addTotalData(this.master, items);
+        if (this.config.footer) addFooter(this.master, header, items);
+        delete structure._header;
+        delete structure._header_hash;
+        return {
+          header: header,
+          data: items
+        };
+      }
+    }, {
+      key: "processColumns",
+      value: function processColumns(data, columns, structure, header, item, name) {
+        var vname;
+        item = item || {
+          $source: []
+        };
+
+        if (columns.length > 0) {
+          name = name || "";
+
+          for (var i in data) {
+            if (!header[i]) header[i] = {};
+            data[i] = this.processColumns(data[i], columns.slice(1), structure, header[i], item, (name.length > 0 ? name + this.divider : "") + i);
+          }
+        } else {
+          var values = structure.values;
+
+          for (var id in data) {
+            item.$source.push(id);
+
+            for (var _i = 0; _i < values.length; _i++) {
+              for (var j = 0; j < values[_i].operation.length; j++) {
+                if (typeof name !== "undefined") vname = name + this.divider + values[_i].operation[j] + this.divider + values[_i].name;else // if no columns
+                  vname = values[_i].operation[j] + this.divider + values[_i].name;
+
+                if (!structure._header_hash[vname]) {
+                  structure._header.push(vname);
+
+                  structure._header_hash[vname] = true;
+                }
+
+                if (isUndefined(item[vname])) {
+                  item[vname] = [];
+                  header[values[_i].operation[j] + this.divider + values[_i].name] = {};
+                }
+
+                item[vname].push({
+                  value: data[id][values[_i].name],
+                  id: id
+                });
+              }
+            }
+          }
+        }
+
+        return item;
+      }
+    }, {
+      key: "processRows",
+      value: function processRows(data, rows, structure, header, prefix) {
+        var i,
+            item,
+            j,
+            k,
+            value,
+            items = [];
+
+        if (rows.length > 1) {
+          for (i in data) {
+            data[i] = this.processRows(data[i], rows.slice(1), structure, header, prefix + "_" + i);
+          }
+
+          var values = structure._header;
+
+          for (i in data) {
+            item = {
+              data: data[i]
+            };
+
+            for (j = 0; j < item.data.length; j++) {
+              for (k = 0; k < values.length; k++) {
+                value = values[k];
+                if (isUndefined(item[value])) item[value] = [];
+                item[value].push(item.data[j][value]);
+              }
+            }
+
+            this.setItemValues(item);
+            if (this.master.config.stableRowId) item.id = prefix + "_" + i;
+            item.name = i;
+            item.open = true;
+            items.push(item);
+          }
+        } else {
+          for (i in data) {
+            item = this.processColumns(data[i], structure.columns, structure, header);
+            item.name = i;
+            if (this.master.config.stableRowId) item.id = prefix + "_" + i;
+            this.setItemValues(item);
+            items.push(item);
+          }
+        }
+
+        return items;
+      }
+    }, {
+      key: "setItemValues",
+      value: function setItemValues(item) {
+        item = calculateItem(item, {
+          header: this.structure._header,
+          divider: this.divider,
+          operations: this.operations
+        }, this);
+        item = setMinMax(item, {
+          header: this.structure._header,
+          max: this.config.max,
+          min: this.config.min,
+          values: this.structure.values
+        }); //watchdog
+
+        if (this.count > 50000) {
+          this.count = 0;
+          if (this.config.ping) this.config.ping.call(this, this.watch);
+        }
+
+        return item;
+      }
+    }, {
+      key: "group",
+      value: function group(data, order, fields) {
+        var i,
+            id,
+            item,
+            hash = {};
+
+        for (i = 0; i < order.length; i++) {
+          id = order[i];
+          item = data[id];
+
+          if (item && filterItem(this.structure.filters, item, this.config.filterMap)) {
+            this.groupItem(hash, item, fields);
+          }
+        }
+
+        return hash;
+      }
+    }, {
+      key: "groupItem",
+      value: function groupItem(hash, item, fields) {
+        if (fields.length) {
+          var value = item[fields[0]];
+          if (typeof value === "undefined") return null;
+          if (isUndefined(hash[value])) hash[value] = {};
+          this.groupItem(hash[value], item, fields.slice(1));
+        } else hash[item.id] = item;
+      }
+    }, {
+      key: "filterItem",
+      value: function filterItem$$1(item) {
+        var filters = this.structure.filters || [];
+
+        for (var i = 0; i < filters.length; i++) {
+          var f = filters[i];
+
+          if (f.fvalue) {
+            if (isUndefined(item[f.name])) return false;
+            var value = item[f.name].toString().toLowerCase();
+            var result = f.func(f.fvalue, value);
+            if (!result) return false;
+          }
+        }
+
+        return true;
+      }
+    }, {
+      key: "operations",
+      get: function () {
+        return this.master._pivotOperations;
+      }
+    }, {
+      key: "divider",
+      get: function () {
+        return this.master.$divider;
+      }
+    }, {
+      key: "structure",
+      get: function () {
+        return this.config.structure;
+      }
+    }]);
+
+    return Data;
+  }();
+
+  var operations = {
+    sum: function (values) {
+      var sum = 0;
+
+      for (var i = 0; i < values.length; i++) {
+        var value = values[i];
+        value = parseFloat(value, 10);
+        if (!isNaN(value)) sum += value;
+      }
+
+      return sum;
+    },
+    count: function (data, key, item) {
+      var count = 0;
+      if (!item.data) count = data.length;else {
+        for (var i = 0; i < item.data.length; i++) {
+          count += item.data[i][key] || 0;
+        }
+      }
+      return count;
+    },
+    max: function (args) {
+      if (args.length == 1) return args[0];
+      return Math.max.apply(this, args);
+    },
+    min: function (args) {
+      if (args.length == 1) return args[0];
+      return Math.min.apply(this, args);
+    }
+  };
+  var totalOperations = {
+    "sum": function (values) {
+      var i,
+          sum = 0;
+
+      for (i = 0; i < values.length; i++) {
+        sum += values[i];
+      }
+
+      return sum;
+    },
+    "min": function (values) {
+      if (values.length == 1) return values[0];
+      return Math.min.apply(null, values);
+    },
+    "max": function (values) {
+      if (values.length == 1) return values[0];
+      return Math.max.apply(null, values);
+    },
+    "count": function (values) {
+      var value = totalOperations.sum.call(this, values);
+      return value ? parseInt(value, 10) : "";
+    }
+  };
+  var Operations =
+  /*#__PURE__*/
+  function () {
+    function Operations() {
+      _classCallCheck(this, Operations);
+
+      this.pull = extend({}, operations);
+      this.options = {};
+      this.pullTotal = extend({}, totalOperations);
+      this.totalOptions = {};
+    }
+
+    _createClass(Operations, [{
+      key: "serialize",
+      value: function serialize() {
+        var str = {};
+
+        for (var key in this.pull) {
+          str[key] = this.pull[key].toString();
+        }
+
+        return str;
+      }
+    }, {
+      key: "parse",
+      value: function parse(str) {
+        for (var key in str) {
+          eval("this.temp = " + str[key]);
+          this.pull[key] = this.temp;
+        }
+      }
+    }, {
+      key: "add",
+      value: function add(name, method, options) {
+        this.pull[name] = method;
+        if (options) this.options[name] = options;
+      }
+    }, {
+      key: "addTotal",
+      value: function addTotal(name, method, options) {
+        this.pullTotal[name] = method;
+        if (options) this.totalOptions[name] = options;
+      }
+    }, {
+      key: "get",
+      value: function get(name) {
+        return this.pull[name] || null;
+      }
+    }, {
+      key: "getOptions",
+      value: function getOptions(name) {
+        return this.options[name] || null;
+      }
+    }, {
+      key: "getOption",
+      value: function getOption(name, option) {
+        return this.options[name] ? this.options[name][option] : null;
+      }
+    }, {
+      key: "getTotal",
+      value: function getTotal(name) {
+        return this.pullTotal[name] || this.pull[name] || null;
+      }
+    }, {
+      key: "getTotalOptions",
+      value: function getTotalOptions(name) {
+        return this.pullTotal[name] ? this.totalOptions[name] || null : this.options[name] || null;
+      }
+    }, {
+      key: "getTotalOption",
+      value: function getTotalOption(name, option) {
+        var options = this.getTotalOptions(name);
+        return options ? options[name][option] : null;
+      }
+    }]);
+
+    return Operations;
+  }();
+
+  var divider = "_'_";
+  function _Pivot(config, master) {
+    this.$divider = divider;
+
+    this._initOperations();
+
+    this.config = config;
+    this.view = master;
+
+    if (config.webWorker && !(typeof Worker === "undefined" ? "undefined" : _typeof(Worker)) !== "undefined" && master) {
+      this._initWorker(config, master);
+    } else this._pivotData = new Data(this, this.config);
+
+    if (!this.config.structure) this.config.structure = {};
+    extend(this.config.structure, {
+      rows: [],
+      columns: [],
+      values: [],
+      filters: []
+    });
+  }
+  _Pivot.prototype = {
+    _initWorker: function (config, master) {
+      this._result = null;
+      this._pivotWorker = new Worker(config.webWorker);
+
+      this._pivotWorker.onmessage = function (e) {
+        if (e.data.type === "ping") {
+          master._runPing(e.data.watch, master);
+        } else if (master._result && !master.$destructed) {
+          master.callEvent("onWebWorkerEnd", []);
+
+          if (!e.data.id || e.data.id === master._result_id) {
+            master._result(e.data.data);
+
+            master._result = null;
+          }
+        }
+      };
+    },
+    _runPing: function (watch, master) {
+      try {
+        this.config.ping(watch);
+      } catch (e) {
+        this._pivotWorker.terminate();
+
+        this._initWorker(this.config, master);
+
+        master.callEvent("onWebWorkerEnd", []);
+      }
+    },
+    _getPivotData: function (pull, order, next) {
+      if (this._pivotWorker) {
+        var id = this._result_id = webix.uid();
+        this._result = next;
+        var data = [];
+        var structure = this.config.structure;
+        var footer = this.config.footer;
+
+        var operations = this._pivotOperations.serialize();
+
+        if (structure && (structure.rows.length || structure.columns.length)) for (var i = order.length - 1; i >= 0; i--) {
+          data[i] = pull[order[i]];
+        }
+        this.callEvent("onWebWorkerStart", []);
+        var format = this.config.format;
+
+        if (typeof format === "function") {
+          var t = "x" + webix.uid();
+          webix.i18n[t] = format;
+          format = t;
+        }
+
+        var ping = !!this.config.ping;
+
+        this._pivotWorker.postMessage({
+          footer: footer,
+          structure: structure,
+          data: data,
+          id: id,
+          operations: operations,
+          ping: ping,
+          format: format
+        });
+      } else {
+        var result = this._pivotData.process(pull, order);
+
+        if (next) next(result);
+        return result;
+      }
+    },
+    _initOperations: function () {
+      var operations = this._pivotOperations = new Operations();
+      this.operations = operations.pull;
+    },
+    addOperation: function (name, method, options) {
+      this._pivotOperations.add(name, method, options);
+    },
+    addTotalOperation: function (name, method, options) {
+      this._pivotOperations.addTotal(name, method, options);
+    }
+  };
+  function WebixPivot(config, master) {
+    _Pivot.call(this, config, master);
+  }
+  WebixPivot.prototype = extend({
+    getData: function (data) {
+      var i,
+          id,
+          option,
+          field,
+          fields = [],
+          fieldsHash = {},
+          filters = this.config.structure.filters,
+          pull = {},
+          options = {},
+          optionsHash = {},
+          operations = this.operations,
+          order = [],
+          result = {};
+
+      for (i = 0; i < filters.length; i++) {
+        if (filters[i].type.indexOf("select") != -1) {
+          options[filters[i].name] = [];
+          optionsHash[filters[i].name] = {};
+        }
+      }
+
+      for (i = 0; i < data.length; i++) {
+        id = data[i].id = data[i].id || uid();
+        pull[id] = data[i];
+        order.push(id);
+        if (i < 5) for (field in data[i]) {
+          if (!fieldsHash[field]) {
+            fields.push(field);
+            fieldsHash[field] = uid();
+          }
+        }
+
+        for (option in options) {
+          var value = data[i][option];
+
+          if (!isUndefined(value)) {
+            if (!optionsHash[option][value]) {
+              optionsHash[option][value] = 1;
+              options[option].push(value);
+            }
+          }
+        }
+      }
+
+      result.options = options;
+      result.fields = fields;
+      result.data = this._getPivotData(pull, order);
+      result.operations = [];
+
+      for (id in operations) {
+        result.operations.push(id);
+      }
+
+      return result;
+    }
+  }, _Pivot.prototype);
+
+  var pivot;
+
+  onmessage = function (e) {
+    if (!pivot) {
+      pivot = new WebixPivot(e.data.structure);
+    }
+
+    if (e.type === "error") throw e;
+    pivot.config.format = e.data.format;
+    pivot.config.footer = e.data.footer;
+    pivot.config.structure = e.data.structure;
+
+    if (e.data.ping) {
+      pivot.config.ping = function (watch) {
+        postMessage({
+          type: "ping",
+          watch: watch
+        });
+      };
+    }
+
+    pivot._pivotOperations.parse(e.data.operations);
+
+    var result = pivot.getData(e.data.data);
+    postMessage({
+      type: "data",
+      data: result.data,
+      id: e.data.id
+    });
+  };
+
+})));

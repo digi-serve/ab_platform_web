@@ -1,6 +1,6 @@
 /**
  * @license
- * Webix QueryBuilder v.7.2.0
+ * Webix QueryBuilder v.7.4.6
  * This software is covered by Webix Commercial License.
  * Usage without proper license is prohibited.
  * (c) XB Software Ltd.

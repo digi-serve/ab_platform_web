@@ -1,4 +1,4 @@
-Webix QueryBuilder v.7.2.0
+Webix QueryBuilder v.7.4.6
 ================
 
 https://webix.com
@@ -6,7 +6,7 @@ https://webix.com
 If you don't know where to start - check 
 
 - https://webix.com/quick-start/#!/1
-- https://docs.webix.com/desktop__querybuilder.html
+- https://docs.webix.com/desktop__query_builder.html
 - https://forum.webix.com
 
 
