@@ -1403,7 +1403,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
                   text: "System could not save your data",
                   type: "error",
                });
-               thia.AB.error(err);
+               this.AB.error(err);
             }
          }
 
