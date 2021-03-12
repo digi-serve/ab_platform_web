@@ -402,10 +402,10 @@ module.exports = class ABViewComment extends ABViewCommentCore {
          },
          updateComment: (rowId, commentText) => {
             let model = this.model();
-            if (!model) return Promise.resolve();
+            if (!model) return Promise.resolve(); // already notified
 
             let commentField = this.getCommentField();
-            if (!commentField) return Promise.resolve();
+            if (!commentField) return Promise.resolve(); // already notified
 
             let values = {};
             values[commentField.columnName] = commentText || "";
