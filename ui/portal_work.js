@@ -1,6 +1,9 @@
 import ClassUI from "./ClassUI.js";
 import ClassUIPage from "./ClassUIPage.js";
 
+import PortalWorkInbox from "./portal_work_inbox.js";
+import PortalWorkInboxTaskWindow from "./portal_work_inbox_taskWindow.js";
+
 class PortalWork extends ClassUI {
    constructor() {
       super();
@@ -52,10 +55,14 @@ class PortalWork extends ClassUI {
                   },
                   {},
                   {
+                     id: "inbox_icon",
                      view: "icon",
                      icon: "fa fa-envelope",
                      width: 50,
-                     badge: 12,
+                     // badge: 12,
+                     click: () => {
+                        PortalWorkInbox.show();
+                     },
                   },
                   {
                      view: "menu",
@@ -307,6 +314,23 @@ class PortalWork extends ClassUI {
                   }
                });
             });
+         })
+         .then(() => {
+            //
+            // Step 6: Initialize the Inbox Items
+            //
+            PortalWorkInbox.on("updated", () => {
+               var count = PortalWorkInbox.count();
+               $$("inbox_icon").define({ badge: count ? count : false });
+               $$("inbox_icon").refresh();
+            });
+            return PortalWorkInbox.init(this.AB);
+         })
+         .then(() => {
+            //
+            // Step 7: As well as the Inbox Task Window
+            //
+            return PortalWorkInboxTaskWindow.init(this.AB);
          })
          .then(() => {
             this.emit("ready");

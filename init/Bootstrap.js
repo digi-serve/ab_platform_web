@@ -19,6 +19,10 @@ var QueryBuilder = require("../js/webix/components/querybuilder/querybuilder.min
 // NOTE: changed to require() since import couldn't find the global webix object.
 import querybuilderCSS from "../js/webix/components/querybuilder/querybuilder.min.css";
 
+import FormIO from "../js/formio/formio.full.min.js";
+import FormIOFormCSS from "../js/formio/formio.form.min.css";
+import FormIOBuilderCSS from "../js/formio/formio.builder.min.css";
+
 import Selectivity from "../js/selectivity/selectivity.min.js";
 import selectivityCSS from "../js/selectivity/selectivity.min.css";
 

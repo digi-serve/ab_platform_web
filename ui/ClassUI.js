@@ -26,6 +26,14 @@ class ClassUI extends EventEmitter {
       return this.el;
    }
 
+   label(key, ...params) {
+      if (this.AB) {
+         return this.AB.Multilingual.label(key, key, ...params);
+      }
+      console.error(".labels() called before .AB was set!");
+      return key;
+   }
+
    /**
     * ui()
     * return a Webix user interface definition for this UI component.

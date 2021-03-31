@@ -48,6 +48,18 @@ class Network extends EventEmitter {
          console.error("??? Why No site config ???");
       }
 
+      //
+      // Handle reconnections and flushing the Queue:
+      //
+      if (io && io.socket) {
+         // When our Socket reconnects, be sure to flush any pending transactions.
+         io.socket.on("connected", () => {
+            this.queueFlush();
+         });
+      } else {
+         window.addEventListener("online", () => this.queueFlush());
+      }
+
       return Promise.resolve();
    }
 
@@ -149,11 +161,19 @@ class Network extends EventEmitter {
     * @return {bool}
     */
    isNetworkConnected() {
+      // if this is a Web Client and using sails.socket.io
+      if (io && io.socket && io.socket.isConnected) {
+         return io.socket.isConnected();
+      }
+
       // if this isn't a Cordova Plugin, then return navigator data:
       if (typeof Connection == "undefined") {
+         // NOTE: this technically only detects if we are connected to a
+         // network.  It doesn't guarantee we can communicate across the 'net
          return navigator.onLine;
       }
 
+      // Cordova Plugin:
       return this.networkStatus() != Connection.NONE;
    }
 

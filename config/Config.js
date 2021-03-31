@@ -103,6 +103,13 @@ class Config {
       return {};
    }
 
+   inboxConfig() {
+      if (this._config && this._config.inbox) {
+         return this._config.inbox;
+      }
+      return null;
+   }
+
    siteConfig() {
       if (this._config && this._config.site) {
          return this._config.site;
