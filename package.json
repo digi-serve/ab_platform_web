@@ -23,6 +23,7 @@
     "webpack-cli": "^4.2.0"
   },
   "dependencies": {
+    "ab-utils": "github:hiro-nakamura/ab-utils",
     "atomicjs": "^4.4.1"
   }
 }
