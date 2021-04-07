@@ -112,36 +112,41 @@ class PortalWorkInboxTaskwindow extends ClassUI {
       var views = $$(this.idTaskMultiview).getChildViews();
       // if there is more than one page we need to find out what the next page should be
       if (views.length > 1) {
-         // find out if we are on the last page
-         if (
-            $$(this.idTaskMultiview).index($$("task-holder-" + uuid)) + 1 ==
-            views.length
-         ) {
-            // if we are on the last page we will go back to the previous page
-            $$(this.idTaskMultiview).setValue(
-               views[
-                  $$(this.idTaskMultiview).index($$("task-holder-" + uuid)) - 1
-               ].config.id
-            );
-         } else {
-            // if we are not on the last page we will go to the next page
-            $$(this.idTaskMultiview).setValue(
-               views[
-                  $$(this.idTaskMultiview).index($$("task-holder-" + uuid)) + 1
-               ].config.id
+         var taskHolder = $$("task-holder-" + uuid);
+         if (taskHolder) {
+            // find out if we are on the last page
+            if (
+               $$(this.idTaskMultiview).index(taskHolder) + 1 ==
+               views.length
+            ) {
+               // if we are on the last page we will go back to the previous page
+               $$(this.idTaskMultiview).setValue(
+                  views[$$(this.idTaskMultiview).index(taskHolder) - 1].config
+                     .id
+               );
+            } else {
+               // if we are not on the last page we will go to the next page
+               $$(this.idTaskMultiview).setValue(
+                  views[$$(this.idTaskMultiview).index(taskHolder) + 1].config
+                     .id
+               );
+            }
+            // once we move off of the page we can remove it
+            $$(this.idTaskMultiview).removeView(
+               views[$$(this.idTaskMultiview).index(taskHolder)]
             );
          }
-         // once we move off of the page we can remove it
-         $$(this.idTaskMultiview).removeView(
-            views[$$(this.idTaskMultiview).index($$("task-holder-" + uuid))]
-         );
 
-         // prune the item from the group of similar processes in the unit list
-         selectedItem.items = selectedItem.items.filter(function (i) {
-            return i.uuid != uuid;
-         });
-         // refresh the unit list so we can get an update badge count
-         list.refresh();
+         // // prune the item from the group of similar processes in the unit list
+         // if (this.selectedItem) {
+         //    this.selectedItem.items = this.selectedItem.items.filter(function (
+         //       i
+         //    ) {
+         //       return i.uuid != uuid;
+         //    });
+         // }
+         // // refresh the unit list so we can get an update badge count
+         // this.list.refresh();
 
          // now we update the pager
          // block events because we don't want it telling the multiview to change pages after we set the new value
@@ -164,12 +169,12 @@ class PortalWorkInboxTaskwindow extends ClassUI {
       } else {
          // no more tasks hide the modal
          $$(this.id).hide();
-         // remove the item from the unit list
-         list.remove(list.getSelectedId());
-         // if that was the last item in the unit list remove the accordion
-         if (list.count() == 0) {
-            parent.hide();
-         }
+         // // remove the item from the unit list
+         // this.list.remove(this.list.getSelectedId());
+         // // if that was the last item in the unit list remove the accordion
+         // if (this.list.count() == 0) {
+         //    parent.hide();
+         // }
       }
    }
 
@@ -181,7 +186,9 @@ class PortalWorkInboxTaskwindow extends ClassUI {
       $$(this.id).show();
    }
 
-   showTasks(selectedItem, cells) {
+   showTasks(/* unitList, */ selectedItemName, cells) {
+      // this.list = unitList;
+      // this.selectedItem = selectedItem;
       webix.ui(
          {
             id: this.idTaskMultiview,
@@ -190,7 +197,7 @@ class PortalWorkInboxTaskwindow extends ClassUI {
          $$(this.idTaskMultiview)
       );
 
-      $$(this.idTaskTitle).define("label", selectedItem.name);
+      $$(this.idTaskTitle).define("label", selectedItemName);
       $$(this.idTaskPager).define("count", cells.length);
       $$(this.idTaskPager).refresh();
       $$(this.id).show();

@@ -81,6 +81,54 @@ class PortalWork extends ClassUI {
                         },
                      ],
                   },
+                  /**
+                   * NOTE: This is NOT supposed to Stay here.
+                   * just a tempory Developer Hack to quickly load definitions.
+                   */
+                  {
+                     view: "uploader",
+                     id: "tmp_uploader",
+                     // label: labels.common.import,
+                     autowidth: true,
+                     width: 50,
+                     upload: "/definition/import",
+                     multiple: false,
+                     type: "icon",
+                     icon: "fa fa-upload",
+                     autosend: true,
+                     css: "webix_transparent",
+                     on: {
+                        onAfterFileAdd: () => {
+                           $$("tmp_uploader").disable();
+                        },
+                        onFileUpload: (item, response) => {
+                           // the file upload process has finished
+                           // reload the page:
+                           window.location.reload();
+                           return false;
+                        },
+                        onFileUploadError: (details, response) => {
+                           // {obj} details
+                           //   .file : {obj} file details hash
+                           //   .name : {string} filename
+                           //   .size : {int} file size
+                           //   .status : {string} "error"
+                           //   .xhr :  {XHR Object}
+                           //      .responseText
+                           //      .status : {int}  404
+                           //      .statusText : {string}
+
+                           this.AB.error("Error uploading file", {
+                              url: details.xhr.responseURL,
+                              status: details.status,
+                              code: details.xhr.status,
+                              response: details.xhr.responseText,
+                           });
+                           $$("tmp_uploader").enable();
+                           return false;
+                        },
+                     },
+                  },
                ],
             },
             {

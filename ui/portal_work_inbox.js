@@ -118,19 +118,21 @@ class PortalWorkInbox extends ClassUI {
          var appAccordion = new ClassAccordionEntry(app);
          $$("inbox_accordion").addView(appAccordion.ui());
          allAppAccordions[app.id] = appAccordion;
-         appAccordion.on("showTasks", (selectedItem, cells) => {
+         appAccordion.on("showTasks", (...params) => {
             // showTasks
             // indicates when the user has selected a group of Accordian Tasks
             // to process.
-            PortalWorkInboxTaskWindow.showTasks(selectedItem, cells);
+            PortalWorkInboxTaskWindow.showTasks(...params);
          });
 
          appAccordion.on("item.processed", (uuid) => {
             // item.processed
             // indicates when the specified form has been updated on the server.
             PortalWorkInboxTaskWindow.clearTask(uuid);
-            debugger;
             this.entries = this.entries.filter((e) => e.uuid != uuid);
+            if (this.entries.length == 0) {
+               $$("emptyInbox").show();
+            }
             this.emit("updated");
          });
 
@@ -144,53 +146,29 @@ class PortalWorkInbox extends ClassUI {
          // is part of?  Do we then make a special role {p.id : role.id }?
       });
 
-      var appAccordionLists = {};
+      this.appAccordionLists = {};
       // {hash}  { app.id : {accordionItemDefinition} }
 
       this.entries = this.AB.Config.inboxConfig() || [];
 
-      this.entries.forEach((item) => {
-         // item {obj}  inbox configuration item
-         //    .definition {uuid} the process.id that generated this form
-         //    .name {string} the Name of this form
-         //
+      this.entries.forEach((i) => this.addItem(i));
 
-         item.uniteLabel =
-            "{" +
-            item.definition +
-            "}" +
-            this.processLookupHash[item.definition];
-         // create our own .uniteLabel
-         // this is used within the accordion.unitlist to group the data.
+      var allInits = [];
 
-         // find the application.id for this form
-         var appId = this.appLookupHash[item.definition];
-
-         // make sure we have an appAccordionLists[appID] entry
-         if (!appAccordionLists[appId]) appAccordionLists[appId] = {};
-         if (!appAccordionLists[appId][item.definition]) {
-            appAccordionLists[appId][item.definition] = {
-               id: item.definition,
-               name: item.name,
-               uniteLabel: item.uniteLabel,
-               items: [],
-            };
-         }
-
-         // add this as one of our items
-         appAccordionLists[appId][item.definition].items.push(item);
-      });
-
-      for (var index in appAccordionLists) {
+      for (var index in this.appAccordionLists) {
          var processes = [];
-         for (var process in appAccordionLists[index]) {
-            processes.push(appAccordionLists[index][process]);
+         for (var process in this.appAccordionLists[index]) {
+            processes.push(this.appAccordionLists[index][process]);
          }
 
          var accordion = allAppAccordions[index].unitList();
          if (accordion) {
-            accordion.parse(processes);
-            accordion.show();
+            allInits.push(
+               allAppAccordions[index].init(this.AB).then(() => {
+                  accordion.parse(processes);
+                  accordion.show();
+               })
+            );
          } else {
             console.error(
                "could not find an inbox-accordion for index[" + index + "]"
@@ -198,8 +176,68 @@ class PortalWorkInbox extends ClassUI {
          }
       }
 
-      this.emit("updated");
-      return Promise.resolve();
+      return Promise.all(allInits).then(() => {
+         this.emit("updated");
+
+         this.AB.on("ab.inbox.create", (item) => {
+            var alreadyThere = this.entries.find((e) => e.uuid == item.uuid);
+            if (!alreadyThere) {
+               this.entries.push(item);
+               this.addItem(item);
+
+               var appId = this.appLookupHash[item.definition];
+               var accordion = allAppAccordions[appId];
+               if (accordion) {
+                  var ul = accordion.unitList();
+                  if (ul) {
+                     ul.parse(this.appAccordionLists[index][item.definition]);
+                     ul.refresh();
+                  }
+                  accordion.show();
+               }
+            }
+            this.emit("updated");
+         });
+
+         // Now Register for RT Updates to our Inbox
+         this.AB.Network.post(
+            {
+               url: `/process/inbox/register`,
+            },
+            {
+               key: "inbox.register",
+               context: {},
+            }
+         );
+      });
+   }
+
+   addItem(item) {
+      // item {obj}  inbox configuration item
+      //    .definition {uuid} the process.id that generated this form
+      //    .name {string} the Name of this form
+      //
+      item.uniteLabel =
+         "{" + item.definition + "}" + this.processLookupHash[item.definition];
+      // create our own .uniteLabel
+      // this is used within the accordion.unitlist to group the data.
+
+      // find the application.id for this form
+      var appId = this.appLookupHash[item.definition];
+
+      // make sure we have an appAccordionLists[appID] entry
+      if (!this.appAccordionLists[appId]) this.appAccordionLists[appId] = {};
+      if (!this.appAccordionLists[appId][item.definition]) {
+         this.appAccordionLists[appId][item.definition] = {
+            id: item.definition,
+            name: item.name,
+            uniteLabel: item.uniteLabel,
+            items: [],
+         };
+      }
+
+      // add this as one of our items
+      this.appAccordionLists[appId][item.definition].items.push(item);
    }
 
    show() {

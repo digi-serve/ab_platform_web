@@ -318,8 +318,7 @@ class NetworkRest extends EventEmitter {
                      if (jobResponse) {
                         this._network.publishResponse(jobResponse, packet);
                      }
-                     reject(packet.data);
-                     return;
+                     return reject(packet.data);
                   } else {
                      // unknown/unexpected error:
                      var error = new Error(
@@ -334,7 +333,7 @@ class NetworkRest extends EventEmitter {
                      if (jobResponse) {
                         this._network.publishResponse(jobResponse, error);
                      }
-                     reject(error);
+                     return reject(error);
                   }
                });
          } else {

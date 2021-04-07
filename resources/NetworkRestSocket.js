@@ -11,6 +11,7 @@ const listSocketEvents = [
    "ab.datacollection.update",
    "ab.datacollection.stale",
    "ab.datacollection.delete",
+   "ab.inbox.create",
 ];
 // {array}
 // The io.socket.* events we are listening for that relate to our datacollection
@@ -61,9 +62,6 @@ class NetworkRestSocket extends NetworkRest {
                // err.status
                // err.statusText
                // err.responseText
-
-               // TODO: remove this:
-               console.error("What is the format of this object?", jwres);
 
                var errStr = jwres.error ? jwres.error.toString() : jwres.body;
 

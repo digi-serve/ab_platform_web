@@ -5,6 +5,7 @@ class PortalWorkInboxAccordion extends ClassUI {
       super();
 
       this.app = app;
+      this.id = `inbox-accordion-app-holder-${this.app.id}`;
       this.idUnitList = `inbox-accordion-app-${this.app.id}`;
    }
 
@@ -14,7 +15,7 @@ class PortalWorkInboxAccordion extends ClassUI {
 
       return {
          header: this.app.label,
-         id: `inbox-accordion-app-holder-${this.app.id}`,
+         id: this.id,
          view: "accordionitem",
          css: "stayCollapsed",
          hidden: true,
@@ -66,15 +67,14 @@ class PortalWorkInboxAccordion extends ClassUI {
                            formComponents: task.ui,
                            formData: task.data,
                            onButton: function (value) {
-                              debugger;
-                              self.processItem(task, value);
+                              self.processItem(id, task, value);
                            },
                         },
                      ],
                   });
                });
 
-               self.emit("showTasks", selectedItem, cells);
+               self.emit("showTasks", /*list, */ selectedItem.name, cells);
             },
          },
       };
@@ -88,6 +88,31 @@ class PortalWorkInboxAccordion extends ClassUI {
             webix.message(err.message);
             return;
          }
+
+         var list = $$(this.idUnitList);
+         var selectedItem = list.getItem(context.unitID);
+
+         // clear out processed item from our accordion
+         // prune the item from the group of similar processes in the unit list
+         if (selectedItem) {
+            var parent = list.getParentView();
+
+            selectedItem.items = selectedItem.items.filter(function (i) {
+               return i.uuid != context.uuid;
+            });
+
+            // refresh the unit list so we can get an update badge count
+            list.refresh();
+            if (selectedItem.items.length == 0) {
+               // remove the item from the unit list
+               list.remove(list.getSelectedId());
+               // if that was the last item in the unit list remove the accordion
+               if (list.count() == 0) {
+                  parent.hide();
+               }
+            }
+         }
+
          this.emit("item.processed", context.uuid);
       });
 
@@ -106,15 +131,15 @@ class PortalWorkInboxAccordion extends ClassUI {
     * @param {string} value
     *        the value of the Form button returned.
     */
-   processItem(task, value) {
-      this.AB.Network.post(
+   processItem(unitID, task, value) {
+      this.AB.Network.put(
          {
             url: `/process/inbox/${task.uuid}`,
             data: { response: value },
          },
          {
             key: "inbox.update",
-            context: { uuid: task.uuid },
+            context: { uuid: task.uuid, unitID },
          }
       );
 
@@ -122,7 +147,7 @@ class PortalWorkInboxAccordion extends ClassUI {
    }
 
    show() {
-      $$("portal_work").show();
+      $$(this.id).show();
    }
 }
 
