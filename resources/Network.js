@@ -57,9 +57,23 @@ class Network extends EventEmitter {
             this.queueFlush();
          });
       } else {
+         console.error("!!! Network.init() : Did not find io.socket() ");
          window.addEventListener("online", () => this.queueFlush());
       }
 
+      function connCheck() {
+         if (this.isNetworkConnected()) {
+            this.queueFlush();
+            this.idConnectionCheck = null;
+         } else {
+            this.idConnectionCheck = settimeout(connCheck, 250);
+         }
+      }
+      this.on("queued", () => {
+         if (!this.idConnectionCheck) {
+            connCheck();
+         }
+      });
       return Promise.resolve();
    }
 
