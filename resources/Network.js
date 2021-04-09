@@ -17,6 +17,11 @@ class Network extends EventEmitter {
 
       this._config = null;
       this._network = null;
+
+      this._queueCount = 0;
+      // {int} _queueCount
+      // the # of network operations currently queued, pending Network
+      // reconnect.
    }
 
    init(AB) {
@@ -61,19 +66,6 @@ class Network extends EventEmitter {
          window.addEventListener("online", () => this.queueFlush());
       }
 
-      function connCheck() {
-         if (this.isNetworkConnected()) {
-            this.queueFlush();
-            this.idConnectionCheck = null;
-         } else {
-            this.idConnectionCheck = settimeout(connCheck, 250);
-         }
-      }
-      this.on("queued", () => {
-         if (!this.idConnectionCheck) {
-            connCheck();
-         }
-      });
       return Promise.resolve();
    }
 
@@ -158,6 +150,19 @@ class Network extends EventEmitter {
    //// Network Utilities
    ////
 
+   _connectionCheck() {
+      // if (!this.idConnectionCheck) {
+      if (this.isNetworkConnected()) {
+         this.queueFlush();
+         this.idConnectionCheck = null;
+      } else {
+         this.idConnectionCheck = setTimeout(() => {
+            this._connectionCheck();
+         }, 250);
+      }
+      // }
+   }
+
    /**
     * @method networkStatus
     * return the connection type currently registered with the network
@@ -199,6 +204,9 @@ class Network extends EventEmitter {
     * @param {obj} data
     */
    publishResponse(jobResponse, error, data) {
+      if (data) {
+         data = this.normalizeData(data);
+      }
       this.emit(jobResponse.key, jobResponse.context, error, data);
    }
 
@@ -245,6 +253,15 @@ class Network extends EventEmitter {
    }
 
    /**
+    * queueCount()
+    * return the # of messages in the queue.
+    * @return {int}
+    */
+   queueCount() {
+      return this._queueCount;
+   }
+
+   /**
     * Adds a request to the outgoing queue.
     *
     * @param {object} data
@@ -268,10 +285,15 @@ class Network extends EventEmitter {
                      queue.length > 1 ? "s" : ""
                   } queued`
                );
+               this._queueCount = queue.length;
                return this.AB.Storage.set(refQueue, queue);
             })
             .then(() => {
                this.emit("queued");
+               // if we are not already polling the network, start
+               if (!this.idConnectionCheck) {
+                  this._connectionCheck();
+               }
                this.queueLock.release();
                resolve();
             })
@@ -350,12 +372,13 @@ class Network extends EventEmitter {
             // Clear queue contents
             //
             .then(() => {
+               this._queueCount = 0;
                return this.AB.Storage.set(refQueue, []);
             })
 
             // release the Lock
             .then(() => {
-               // this.emit('synced');
+               this.emit("queue.synced");
                return this.queueLock.release();
             })
 

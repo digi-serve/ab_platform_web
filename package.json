@@ -26,6 +26,7 @@
     "ab-utils": "github:hiro-nakamura/ab-utils",
     "atomicjs": "^4.4.1",
     "bootstrap": "^4.6.0",
-    "formiojs": "^4.12.7"
+    "formiojs": "^4.12.7",
+    "nanoid": "^3.1.22"
   }
 }

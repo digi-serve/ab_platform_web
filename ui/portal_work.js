@@ -55,6 +55,17 @@ class PortalWork extends ClassUI {
                   },
                   {},
                   {
+                     id: "network_icon",
+                     view: "icon",
+                     icon: "fa fa-wifi",
+                     width: 40,
+                     // click: () => {
+                     //    // test out network going offline:
+                     //    this.AB.Network._testingHack = !this.AB.Network
+                     //       ._testingHack;
+                     // },
+                  },
+                  {
                      id: "inbox_icon",
                      view: "icon",
                      icon: "fa fa-envelope",
@@ -381,6 +392,25 @@ class PortalWork extends ClassUI {
             return PortalWorkInboxTaskWindow.init(this.AB);
          })
          .then(() => {
+            // Network and Queued operations Alert
+            $$("network_icon").hide();
+            this.AB.Network.on("queued", () => {
+               var count = this.AB.Network.queueCount();
+               $$("network_icon").define({ badge: count ? count : false });
+               $$("network_icon").refresh();
+               if (count > 0) {
+                  $$("network_icon").show();
+               } else {
+                  $$("network_icon").hide();
+               }
+            });
+
+            this.AB.Network.on("queue.synced", () => {
+               $$("network_icon").define({ badge: false });
+               $$("network_icon").refresh();
+               $$("network_icon").hide();
+            });
+
             this.emit("ready");
 
             // !!! HACK: Leave this for James to figure out why Menu Title isn't proper

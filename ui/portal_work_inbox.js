@@ -21,6 +21,9 @@ class PortalWorkInbox extends ClassUI {
       this.appLookupHash = {
          /* ABProcess.id : "ABApplication.id" */
       };
+
+      this.appAccordionLists = {};
+      // {hash}  { app.id : {accordionItemDefinition} }
    }
 
    ui() {
@@ -146,9 +149,6 @@ class PortalWorkInbox extends ClassUI {
          // is part of?  Do we then make a special role {p.id : role.id }?
       });
 
-      this.appAccordionLists = {};
-      // {hash}  { app.id : {accordionItemDefinition} }
-
       this.entries = this.AB.Config.inboxConfig() || [];
 
       this.entries.forEach((i) => this.addItem(i));
@@ -188,9 +188,11 @@ class PortalWorkInbox extends ClassUI {
                var appId = this.appLookupHash[item.definition];
                var accordion = allAppAccordions[appId];
                if (accordion) {
+                  // ensure a new accordion has been .init()
+                  accordion.init(this.AB);
                   var ul = accordion.unitList();
                   if (ul) {
-                     ul.parse(this.appAccordionLists[index][item.definition]);
+                     ul.parse(this.appAccordionLists[appId][item.definition]);
                      ul.refresh();
                   }
                   accordion.show();

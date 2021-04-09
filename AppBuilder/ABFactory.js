@@ -1,6 +1,7 @@
 var ABFactoryCore = require("./core/ABFactoryCore");
 
 const _ = require("lodash");
+import { nanoid } from "nanoid";
 const uuidv4 = require("uuid");
 
 //
@@ -245,6 +246,10 @@ class ABFactory extends ABFactoryCore {
       this.emit("error", emitData);
    }
 
+   jobID() {
+      return nanoid();
+   }
+
    log(message, ...rest) {
       console.log(message);
       rest.forEach((r) => {
@@ -300,7 +305,7 @@ class ABFactory extends ABFactoryCore {
          "DD/MM/YYYY",
          "MM/DD/YYYY",
          "DD-MM-YYYY",
-         "MM-DD-YYYY"
+         "MM-DD-YYYY",
       ];
 
       supportFormats.forEach((format) => {
@@ -315,9 +320,9 @@ class ABFactory extends ABFactoryCore {
     *
     * @param {Date} date
     * @param {Object} options - {
-    *                               format: "string",
-    *                               localeCode: "string"
-    *                            }
+    *           format: "string",
+    *           localeCode: "string"
+    *         }
     *
     * @return {string}
     */
@@ -341,9 +346,7 @@ class ABFactory extends ABFactoryCore {
     * @return {Date}
     */
    subtractDate(date, number, unit) {
-      return moment(date)
-         .subtract(number, unit)
-         .toDate();
+      return moment(date).subtract(number, unit).toDate();
    }
 
    /**
@@ -356,11 +359,8 @@ class ABFactory extends ABFactoryCore {
     * @return {Date}
     */
    addDate(date, number, unit) {
-      return moment(date)
-         .add(number, unit)
-         .toDate();
+      return moment(date).add(number, unit).toDate();
    }
 }
 
 export default ABFactory;
-

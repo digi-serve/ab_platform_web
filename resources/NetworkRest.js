@@ -110,12 +110,7 @@ class NetworkRest extends EventEmitter {
          params.url = [params.url, search].join(join);
       }
 
-      return this._request(params, jobResponse).then((response) => {
-         if (jobResponse) {
-            this._network.publishResponse(jobResponse, response);
-         }
-         return response;
-      });
+      return this._request(params, jobResponse);
    }
 
    /**
@@ -132,12 +127,7 @@ class NetworkRest extends EventEmitter {
     */
    post(params, jobResponse) {
       params.type = params.type || "POST";
-      return this._request(params, jobResponse).then((response) => {
-         if (jobResponse) {
-            this._network.publishResponse(jobResponse, response);
-         }
-         return response;
-      });
+      return this._request(params, jobResponse);
    }
 
    /**
@@ -154,12 +144,7 @@ class NetworkRest extends EventEmitter {
     */
    put(params, jobResponse) {
       params.type = params.type || "PUT";
-      return this._request(params, jobResponse).then((response) => {
-         if (jobResponse) {
-            this._network.publishResponse(jobResponse, response);
-         }
-         return response;
-      });
+      return this._request(params, jobResponse);
    }
 
    /**
@@ -176,12 +161,7 @@ class NetworkRest extends EventEmitter {
     */
    delete(params, jobResponse) {
       params.type = params.type || "DELETE";
-      return this._request(params, jobResponse).then((response) => {
-         if (jobResponse) {
-            this._network.publishResponse(jobResponse, response);
-         }
-         return response;
-      });
+      return this._request(params, jobResponse);
    }
 
    ////
@@ -316,7 +296,11 @@ class NetworkRest extends EventEmitter {
                      this.AB.Analytics.logError(packet.data);
                      this.AB.error(packet.data);
                      if (jobResponse) {
-                        this._network.publishResponse(jobResponse, packet);
+                        this._network.publishResponse(
+                           jobResponse,
+                           packet,
+                           null
+                        );
                      }
                      return reject(packet.data);
                   } else {
@@ -360,8 +344,8 @@ class NetworkRest extends EventEmitter {
     * @return {Promise}
     */
    resend(params, jobResponse) {
-      var op = params.type.toLowerCase();
-      return this[op](params, jobResponse);
+      // var op = params.type.toLowerCase();
+      return this._request(params, jobResponse);
    }
 }
 

@@ -81,40 +81,43 @@ class PortalWorkInboxAccordion extends ClassUI {
    }
 
    init(AB) {
-      this.AB = AB;
+      // prevent multiple .init() calls
+      if (!this.AB) {
+         this.AB = AB;
 
-      this.AB.Network.on("inbox.update", (context, err, response) => {
-         if (err && err.message) {
-            webix.message(err.message);
-            return;
-         }
+         this.AB.Network.on("inbox.update", (context, err, response) => {
+            if (err && err.message) {
+               webix.message(err.message);
+               return;
+            }
 
-         var list = $$(this.idUnitList);
-         var selectedItem = list.getItem(context.unitID);
+            var list = $$(this.idUnitList);
+            var selectedItem = list.getItem(context.unitID);
 
-         // clear out processed item from our accordion
-         // prune the item from the group of similar processes in the unit list
-         if (selectedItem) {
-            var parent = list.getParentView();
+            // clear out processed item from our accordion
+            // prune the item from the group of similar processes in the unit list
+            if (selectedItem) {
+               var parent = list.getParentView();
 
-            selectedItem.items = selectedItem.items.filter(function (i) {
-               return i.uuid != context.uuid;
-            });
+               selectedItem.items = selectedItem.items.filter(function (i) {
+                  return i.uuid != context.uuid;
+               });
 
-            // refresh the unit list so we can get an update badge count
-            list.refresh();
-            if (selectedItem.items.length == 0) {
-               // remove the item from the unit list
-               list.remove(list.getSelectedId());
-               // if that was the last item in the unit list remove the accordion
-               if (list.count() == 0) {
-                  parent.hide();
+               // refresh the unit list so we can get an update badge count
+               list.refresh();
+               if (selectedItem.items.length == 0) {
+                  // remove the item from the unit list
+                  list.remove(list.getSelectedId());
+                  // if that was the last item in the unit list remove the accordion
+                  if (list.count() == 0) {
+                     parent.hide();
+                  }
                }
             }
-         }
 
-         this.emit("item.processed", context.uuid);
-      });
+            this.emit("item.processed", context.uuid);
+         });
+      }
 
       return Promise.resolve();
    }
