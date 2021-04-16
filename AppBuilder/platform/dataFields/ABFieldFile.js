@@ -168,8 +168,9 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
                title: L("ab.dataField.file.keepFiles", "*Keep Files?"),
                message: L(
                   "ab.dataField.file.keepFIlesDescription",
-                  "*Do you want to keep the files referenced by #label#?"
-               ).replace("#label#", this.label),
+                  "*Do you want to keep the files referenced by {0}?",
+                  [this.label]
+               ),
                callback: (result) => {
                   // update this setting so the server can respond correctly in
                   // ABFieldFile.migrateDrop()
@@ -293,20 +294,8 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
             "ABFieldFile.customDisplay(): Need to refactor urls here."
          );
 
-         // 			// The Server Side action key format for this Application:
-         var actionKey =
-            "opstool.AB_" +
-            this.object.application.name.replace("_", "") +
-            ".view";
          var url =
-            "/" +
-            [
-               "opsportal",
-               "file",
-               this.object.application.name,
-               actionKey,
-               "1",
-            ].join("/");
+            "/" + ["file", "upload", this.object.id, this.id, "1"].join("/");
 
          var uploader = webix.ui({
             view: "uploader",
@@ -377,8 +366,9 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
                            node.classList.add("webix_invalid");
                            node.classList.add("webix_invalid_cell");
 
-                           this.AB.error("Error updating our entry.", {
-                              error: err,
+                           this.AB.notify.developer(err, {
+                              context:
+                                 "ABFieldFile.onFileUpload(): Error updating our entry.",
                               row: row,
                               values: values,
                            });
@@ -390,7 +380,7 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
                },
 
                // if an error was returned
-               onFileUploadError: function (item, response) {
+               onFileUploadError: (item, response) => {
                   this.AB.error("Error loading file", response);
                   webixContainer.hideProgress();
                },
@@ -524,8 +514,7 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
       if (value && name) {
          iconDisplay = "display:none;";
          fileDisplay = "";
-         fileURL =
-            "/opsportal/file/" + this.object.application.name + "/" + value;
+         fileURL = "/file/" + value;
       }
 
       var html = [
@@ -597,11 +586,7 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
          else file.removeAttribute("file-uuid");
 
          var fileLink = file.querySelector("a");
-         var fileURL =
-            "/opsportal/file/" +
-            this.object.application.name +
-            "/" +
-            (val ? val.uuid : "");
+         var fileURL = "/file/" + (val ? val.uuid : "");
          fileLink.href = fileURL;
          fileLink.innerHTML = val ? val.filename : "";
       }

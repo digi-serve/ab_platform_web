@@ -380,7 +380,7 @@ module.exports = class ABField extends ABFieldCore {
          ],
       });
       $$(Filter.ids.save).hide();
-      Filter.applicationLoad(this.object.application);
+      // Filter.applicationLoad(this.object.application);
       Filter.fieldsLoad(this.object.fields());
       if (settings && settings.rules) Filter.setValue(settings.rules);
    }
