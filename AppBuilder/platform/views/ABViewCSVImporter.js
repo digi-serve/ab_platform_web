@@ -1735,7 +1735,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                         if (typeof data[f.columnIndex] != "number") {
                            newRowData[f.field.columnName] = (
                               data[f.columnIndex] || ""
-                           ).replace(/[^0-9.]/gi, "");
+                           ).replace(/[^-0-9.]/gi, "");
                         } else {
                            newRowData[f.field.columnName] = data[f.columnIndex];
                         }
