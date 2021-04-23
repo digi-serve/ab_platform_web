@@ -1,5 +1,6 @@
 const ABViewPivotCore = require("../../core/views/ABViewPivotCore");
 const ABFieldNumber = require("../dataFields/ABFieldNumber");
+const ABObjectQuery = require("../ABObjectQuery");
 
 module.exports = class ABViewPivot extends ABViewPivotCore {
    // constructor(values, application, parent, defaultValues) {
@@ -195,6 +196,16 @@ module.exports = class ABViewPivot extends ABViewPivotCore {
 
          let object = dc.datasource;
          if (!object) return Promise.resolve();
+
+         let $pivotComp = $$(ids.component);
+         if ($pivotComp && object instanceof ABObjectQuery) {
+            let customLabels = {};
+            object.fields().forEach((f) => {
+               customLabels[f.columnName] = f.label;
+            });
+
+            $pivotComp.define("fieldMap", customLabels);
+         }
 
          let populateData = () => {
             let data = dc.getData();
