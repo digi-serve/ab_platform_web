@@ -39,7 +39,7 @@ module.exports = class AccountingFPYearClose extends AccountingFPYearCloseCore {
     */
    propertiesShow(id) {
       var ids = this.propertyIDs(id);
-      var L = this.AB.Multilingual.label;
+      var L = this.AB.Label();
 
       var processValues = [{ id: 0, value: "Select a Process Value" }];
       var processDataFields = this.process.processDataFields(this);

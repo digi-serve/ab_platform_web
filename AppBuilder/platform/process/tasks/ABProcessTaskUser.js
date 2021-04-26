@@ -69,7 +69,7 @@ module.exports = class ABProcessTaskUser extends ABProcessTaskUserCore {
     */
    propertiesShow(id) {
       // var ids = this.propertyIDs(id);
-      var L = this.AB.Multilingual.label;
+      var L = this.AB.Label();
 
       var ui = {
          id: id,

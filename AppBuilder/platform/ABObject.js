@@ -70,7 +70,7 @@ module.exports = class ABObject extends ABObjectCore {
 
    isValid() {
       var validator = this.AB.Validation.validator();
-      var L = this.AB.Multilingual.Label;
+      var L = this.AB.Label();
 
       // label/name must be unique:
       var isNameUnique =

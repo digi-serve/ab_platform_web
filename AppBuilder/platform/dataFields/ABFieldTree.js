@@ -241,7 +241,7 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
    columnHeader(options) {
       options = options || {};
 
-      var L = this.AB.Multilingual.Label;
+      var L = this.AB.Label();
 
       var config = super.columnHeader(options);
       var field = this;

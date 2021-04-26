@@ -34,7 +34,7 @@ module.exports = class AccountingJEArchive extends AccountingJEArchiveCore {
     */
    propertiesShow(id) {
       let ids = this.propertyIDs(id);
-      var L = this.AB.Multilingual.label;
+      var L = this.AB.Label();
 
       let processValues = [{ id: 0, value: "Select a Process Value" }];
       let processDataFields = this.process.processDataFields(this);

@@ -340,7 +340,7 @@ module.exports = class ABField extends ABFieldCore {
    }
 
    addValidation(ids, settings) {
-      var L = this.AB.Multilingual.Label;
+      var L = this.AB.Label();
 
       var App = this.object.application.App;
       var Filter = new FilterComplex(App, "field_validation_rules");
@@ -393,7 +393,7 @@ module.exports = class ABField extends ABFieldCore {
     * @return null or [{OP.Validation.validator()}] objects.
     */
    isValid() {
-      var L = this.AB.Multilingual.Label;
+      var L = this.AB.Label();
       var validator = this.AB.Validation.validator();
 
       // .columnName must be unique among fileds on the same object

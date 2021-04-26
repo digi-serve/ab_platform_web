@@ -158,7 +158,7 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
     * On a destroy operation, ask if the user wants to keep the related file.
     */
    destroy() {
-      var L = this.AB.Multilingual.label;
+      var L = this.AB.Label();
 
       return new Promise((resolve, reject) => {
          // verify we have been .save()d before:
@@ -238,10 +238,11 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
     * @param {HtmlDOM} node  the HTML Dom object for this field's display.
     */
    customDisplay(row, App, node, options) {
-      // 		// sanity check.
+      // sanity check.
       if (!node) {
          return;
       }
+      var L = App.Label;
 
       options = options || {};
 
@@ -315,9 +316,11 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
                      var type = item.type.toLowerCase();
                      if (acceptableTypes.indexOf(type) == -1) {
                         webix.message(
-                           "Only [" +
-                              acceptableTypes.join(", ") +
-                              "] file are supported"
+                           L(
+                              "Only [{0}] files are supported",
+                              "Only [{0}] files are supported",
+                              [acceptableTypes.join(", ")]
+                           )
                         );
                         return false;
                      }
@@ -329,7 +332,11 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
                      var acceptableSizes = maximumSize * 1000000;
                      if (item.size > acceptableSizes) {
                         webix.message(
-                           "Maximum file size is " + maximumSize + "MB"
+                           L(
+                              "Maximum file size is {0}MB",
+                              "Maximum file size is {0}MB",
+                              [maximumSize]
+                           )
                         );
                         return false;
                      }
@@ -498,6 +505,8 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
    //File Template
 
    fileTemplate(obj, editable) {
+      var L = this.AB.Label();
+
       var iconDisplay = "";
       var fileDisplay = "display:none;";
       var fileURL = "";
@@ -532,7 +541,12 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
 
       html = html.replace(
          "#drag#",
-         editable ? "<br/>Drag and drop or click here" : ""
+         editable
+            ? `<br/>${L(
+                 "Drag and drop or click here",
+                 "Drag and drop or click here"
+              )}`
+            : ""
       );
       html = html.replace(
          "#remove#",

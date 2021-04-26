@@ -24,7 +24,7 @@ module.exports = class InsertRecordTask extends InsertRecordTaskCore {
     */
    propertiesShow(id) {
       let ids = this.propertyIDs(id);
-      var L = this.AB.Multilingual.label;
+      var L = this.AB.Label();
       let objectList = this.AB.objects().map((o) => {
          return { id: o.id, value: o.label || o.name };
       });

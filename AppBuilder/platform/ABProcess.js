@@ -110,7 +110,7 @@ module.exports = class ABProcess extends ABProcessCore {
    isValid() {
       var validator = this.AB.Validation.validator();
 
-      var L = this.AB.Multilingual.label;
+      var L = this.AB.Label();
 
       // label/name must be unique:
       var isNameUnique =

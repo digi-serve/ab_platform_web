@@ -250,6 +250,12 @@ class ABFactory extends ABFactoryCore {
       return nanoid();
    }
 
+   Label() {
+      return (...params) => {
+         return this.Multilingual.label(...params);
+      };
+   }
+
    log(message, ...rest) {
       console.log(message);
       rest.forEach((r) => {

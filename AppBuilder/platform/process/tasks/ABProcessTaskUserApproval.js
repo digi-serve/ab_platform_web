@@ -71,7 +71,7 @@ module.exports = class ABProcessTaskUserApproval extends ABProcessTaskUserApprov
     */
    propertiesShow(id) {
       var ids = this.propertyIDs(id);
-      var L = this.AB.Multilingual.label;
+      var L = this.AB.Label();
 
       var toUserUI = ABProcessParticipant.selectUsersUi(
          id + "_who_",

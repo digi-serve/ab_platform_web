@@ -200,7 +200,7 @@ module.exports = class ABFieldString extends ABFieldStringCore {
          var max_length = 255;
 
          if (data[this.columnName].length > max_length) {
-            var L = this.AB.Multilingual.Label;
+            var L = this.AB.Label();
             validator.addError(
                this.columnName,
                L(

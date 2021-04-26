@@ -19,7 +19,7 @@ module.exports = class ABProcessTriggerLifecycle extends ABProcessTriggerLifecyc
     */
    propertiesShow(id) {
       var ids = this.propertyIDs(id);
-      var L = this.AB.Multilingual.label;
+      var L = this.AB.Label();
 
       var allObjects = this.application.objectsIncluded();
       var listObj = [];

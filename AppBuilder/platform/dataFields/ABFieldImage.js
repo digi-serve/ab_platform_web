@@ -348,7 +348,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
     * On a destroy operation, ask if the user wants to keep the related images.
     */
    destroy() {
-      var L = this.AB.Multilingual.Label;
+      var L = this.AB.Label();
 
       return new Promise((resolve, reject) => {
          // verify we have been .save()d before:
@@ -358,8 +358,9 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
                title: L("ab.dataField.image.keepImages", "*Keep Images?"),
                message: L(
                   "ab.dataField.image.keepImagesDescription",
-                  "*Do you want to keep the images referenced by #label#?"
-               ).replace("#label#", this.label),
+                  "*Do you want to keep the images referenced by {0}?",
+                  [this.label]
+               ),
                callback: (result) => {
                   // update this setting so the server can respond correctly in
                   // ABFieldImage.migrateDrop()
@@ -578,11 +579,12 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
                   var acceptableTypes = ["jpg", "jpeg", "bmp", "png", "gif"];
                   var type = item.type.toLowerCase();
                   if (acceptableTypes.indexOf(type) == -1) {
-                     //// TODO: multilingual
                      webix.message(
-                        "Only [" +
-                           acceptableTypes.join(", ") +
-                           "] images are supported"
+                        L(
+                           "Only [{0}] images are supported",
+                           "Only [{0}] images are supported",
+                           [acceptableTypes.join(", ")]
+                        )
                      );
                      return false;
                   }
@@ -760,6 +762,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
    }
 
    imageTemplate(obj, options) {
+      var L = this.AB.Label();
       options = options || {};
       options.height = options.height || "100%";
       options.width = options.width || "100%";
@@ -811,7 +814,12 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
 
       html = html.replace(
          "#drag#",
-         options.editable ? "<br/>Drag and drop or click here" : ""
+         options.editable
+            ? `<br/>${L(
+                 "Drag and drop or click here",
+                 "Drag and drop or click here"
+              )}`
+            : ""
       );
       html = html.replace(
          "#remove#",
