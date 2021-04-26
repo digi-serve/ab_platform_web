@@ -291,12 +291,7 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
             return;
          }
 
-         console.error(
-            "ABFieldFile.customDisplay(): Need to refactor urls here."
-         );
-
-         var url =
-            "/" + ["file", "upload", this.object.id, this.id, "1"].join("/");
+         var url = this.urlUpload(true);
 
          var uploader = webix.ui({
             view: "uploader",
@@ -604,5 +599,19 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
          fileLink.href = fileURL;
          fileLink.innerHTML = val ? val.filename : "";
       }
+   }
+
+   /**
+    * @method urlUpload()
+    * return the url for uploading a file.
+    * When used in a webix widget, the response is different than our normal
+    * API, so we can pass in a param to indicate a response compatible with
+    * webix.
+    * @param {bool} isWebix
+    *        Is this url being used by a webix component?
+    * @return {string}
+    */
+   urlUpload(isWebix = true) {
+      return `/file/upload/${this.object.id}/${this.id}/${isWebix ? "1" : "0"}`;
    }
 };

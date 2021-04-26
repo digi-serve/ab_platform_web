@@ -1508,12 +1508,8 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
                if (obj[columnName] == null) {
                   return "";
                } else {
-                  tip =
-                     "<img style='max-width: 500px; max-height: 500px;' src='/opsportal/image/" +
-                     CurrentObject.application.name +
-                     "/" +
-                     obj[columnName] +
-                     "' />";
+                  // TODO: we need to get this URL from the ABFieldImage object!
+                  tip = `<img style='max-width: 500px; max-height: 500px;' src='/file/${obj[columnName]}' />`;
                }
             } else if (common.column.editor == "date") {
                tip = common.column.format(obj[columnName]);

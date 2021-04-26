@@ -100,7 +100,7 @@ var ABFieldImageComponent = new ABFieldComponent({
                      "</div>" +
                      "</div>",
                   apiOnly: true,
-                  inputName: "image",
+                  inputName: "file",
                   multiple: false,
                   disabled: true,
                   name: "defaultImageUrl",
@@ -210,12 +210,7 @@ var ABFieldImageComponent = new ABFieldComponent({
                   ".image-data-field-image"
                );
                image.style.display = "";
-               image.style.backgroundImage =
-                  "url('/opsportal/image/" +
-                  ABFieldImageComponent.currentObject.application.name +
-                  "/" +
-                  value +
-                  "')";
+               image.style.backgroundImage = `url('/file/${value}')`;
                image.setAttribute("image-uuid", value);
 
                parentContainer.querySelector(".delete-image").style.display =
@@ -245,22 +240,7 @@ var ABFieldImageComponent = new ABFieldComponent({
          }
       },
       show: (ids) => {
-         var actionKey =
-            "opstool.AB_" +
-            ABFieldImageComponent.currentObject.application.name.replace(
-               "_",
-               ""
-            ) +
-            ".view";
-         var url =
-            "/" +
-            [
-               "opsportal",
-               "image",
-               ABFieldImageComponent.currentObject.application.name,
-               actionKey,
-               "1",
-            ].join("/");
+         var url = this.urlUpload(true);
 
          var uploader = $$(ids.defaultImageUrl);
          uploader.config.upload = url;
@@ -278,12 +258,10 @@ var ABFieldImageComponent = new ABFieldComponent({
                ".image-data-field-image"
             );
             image.style.display = "";
-            image.style.backgroundImage =
-               "url('/opsportal/image/" +
-               ABFieldImageComponent.currentObject.application.name +
-               "/" +
-               response.data.uuid +
-               "')";
+            image.style.backgroundImage = `url('${this.urlImage(
+               response.data.uuid
+            )}')`;
+
             image.setAttribute("image-uuid", response.data.uuid);
 
             parentContainer.querySelector(".delete-image").style.display =
@@ -481,6 +459,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
       if (!node) {
          return;
       }
+      var L = App.Label;
 
       options = options || {};
 
@@ -541,27 +520,14 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
             return;
          }
 
-         // The Server Side action key format for this Application:
-         var actionKey =
-            "opstool.AB_" +
-            this.object.application.name.replace("_", "") +
-            ".view";
-         var url =
-            "/" +
-            [
-               "opsportal",
-               "image",
-               this.object.application.name,
-               actionKey,
-               "1",
-            ].join("/");
+         var url = this.urlUpload();
 
          var uploader = webix.ui({
             view: "uploader",
             // id:ids.uploader,
             apiOnly: true,
             upload: url,
-            inputName: "image",
+            inputName: "file",
             multiple: false,
             // formData:{
             // 	appKey:application.name,
@@ -635,10 +601,12 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
                            node.classList.add("webix_invalid");
                            node.classList.add("webix_invalid_cell");
 
-                           this.AB.error("Error updating our entry.", {
-                              error: err,
-                              row: row,
-                              values: values,
+                           this.AB.notify.developer(err, {
+                              context:
+                                 "ABFieldImage.onFileUpload(): model.update(): error updating our entry",
+                              field: this,
+                              row,
+                              values,
                            });
                         });
                   }
@@ -649,7 +617,11 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
 
                // if an error was returned
                onFileUploadError: (item, response) => {
-                  this.AB.error("Error loading image", response);
+                  this.AB.notify.developer(new Error("Error uploading image"), {
+                     context: "ABFieldImage. uploader. onFileUploadError():",
+                     field: this,
+                     response,
+                  });
                   webixContainer.hideProgress();
                },
             },
@@ -659,7 +631,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
          // store upload id into html element (it will be used in .customEdit)
          node.dataset["uploaderId"] = uploader.config.id;
 
-         // open file upload dialog when's click
+         // open file upload dialog when clicked
          node.addEventListener("click", (e) => {
             if (e.target.className.indexOf("delete-image") > -1) {
                this.deleteImage = true;
@@ -692,7 +664,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
             title: "",
             message: L(
                "ab.dataField.image.removeImageDescription",
-               "*Are you sure you want to remove this photo?"
+               "*Are you sure you want to remove this image?"
             ),
             callback: (result) => {
                var confirmDelete = result ? 1 : 0;
@@ -713,8 +685,10 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
                         node.classList.add("webix_invalid");
                         node.classList.add("webix_invalid_cell");
 
-                        this.AB.error("Error updating our entry.", {
-                           error: err,
+                        this.AB.notify.developer(err, {
+                           context:
+                              "ABFieldImage: customEdit(): Error updating our entry",
+                           field: this,
                            row: row,
                            values: values,
                         });
@@ -786,22 +760,14 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
       if (value) {
          iconDisplay = "display:none";
          imageDisplay = "";
-         imageURL =
-            "background-image:url('/opsportal/image/" +
-            this.object.application.name +
-            "/" +
-            value +
-            "');";
+         imageURL = `background-image:url('${this.urlImage(value)}');`;
       } else {
          if (this.settings.useDefaultImage && !isRemoveDefaultImage) {
             iconDisplay = "display:none";
             imageDisplay = "";
-            imageURL =
-               "background-image:url('/opsportal/image/" +
-               this.object.application.name +
-               "/" +
-               this.settings.defaultImageUrl +
-               "');";
+            imageURL = `background-image:url('${this.urlImage(
+               this.settings.defaultImageUrl
+            )}');`;
          }
       }
 
@@ -840,12 +806,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
             "none";
          var image = parentContainer.querySelector(".image-data-field-image");
          image.style.display = "";
-         image.style.backgroundImage =
-            "url('/opsportal/image/" +
-            this.object.application.name +
-            "/" +
-            uuid +
-            "')";
+         image.style.backgroundImage = `url('${this.urlImage(uuid)}')`;
          image.setAttribute("image-uuid", uuid);
       }
    }
@@ -883,12 +844,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
          image.style.display = val ? "block" : "none";
 
          if (val) {
-            image.style.backgroundImage =
-               "url('/opsportal/image/" +
-               this.object.application.name +
-               "/" +
-               val +
-               "')";
+            image.style.backgroundImage = `url('${this.urlImage(val)}')`;
             image.setAttribute("image-uuid", val);
          } else {
             image.removeAttribute("image-uuid");
@@ -931,10 +887,33 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
             resolve(imageData);
          };
 
-         img.src = "/opsportal/image/{application}/{image}"
-            .replace("{application}", this.object.application.name)
-            .replace("{image}", rowData[this.columnName]);
+         img.src = this.urlImage(rowData[this.columnName]);
       });
       return promise;
+   }
+
+   /**
+    * @method urlImage()
+    * return the url to use to reference the image by it's id.
+    * @param {string} id
+    *        the file.uuid reference of this image.
+    * @return {string}
+    */
+   urlImage(id) {
+      return `/file/${id}`;
+   }
+
+   /**
+    * @method urlUpload()
+    * return the url for uploading a file.
+    * When used in a webix widget, the response is different than our normal
+    * API, so we can pass in a param to indicate a response compatible with
+    * webix.
+    * @param {bool} isWebix
+    *        Is this url being used by a webix component?
+    * @return {string}
+    */
+   urlUpload(isWebix = true) {
+      return `/file/upload/${this.object.id}/${this.id}/${isWebix ? "1" : "0"}`;
    }
 };
