@@ -1,9 +1,6 @@
+var ABFieldConnectCore = require("../../core/dataFields/ABFieldConnectCore");
 var ABFieldUserCore = require("../../core/dataFields/ABFieldUserCore");
 var ABFieldComponent = require("./ABFieldComponent");
-
-function L(key, altText) {
-   return AD.lang.label.getLabel(key) || altText;
-}
 
 var ids = {
    editable: "ab-user-editable",
@@ -25,6 +22,7 @@ var ABFieldUserComponent = new ABFieldComponent({
 
    elements: function (App, field) {
       ids = field.idsUnique(ids, App);
+      var L = App.Label;
 
       return [
          {
@@ -136,9 +134,9 @@ var ABFieldUserComponent = new ABFieldComponent({
 });
 
 module.exports = class ABFieldUser extends ABFieldUserCore {
-   constructor(values, object) {
-      super(values, object);
-   }
+   // constructor(values, object) {
+   //    super(values, object);
+   // }
 
    /**
     * @function propertiesComponent
@@ -160,26 +158,31 @@ module.exports = class ABFieldUser extends ABFieldUserCore {
    save() {
       // Add new
       if (this.id == null) {
-         const SITE_USER_OBJECT_ID = "228e3d91-5e42-49ec-b37c-59323ae433a1"; // TODO: How to get the id of SITE_USER object properly ?
-         const USERNAME_FIELD_ID = "5760560b-c078-47ca-98bf-e18ac492a561"; // TODO
+         var SiteUser = this.AB.objectUser();
+         const Defaults = ABFieldUserCore.defaults();
 
-         this.settings.linkObject = SITE_USER_OBJECT_ID;
+         this.settings.linkObject = SiteUser.id;
          this.settings.isCustomFK = 1;
 
          if (this.settings.isMultiple) {
-            this.settings.indexField2 = USERNAME_FIELD_ID;
+            this.settings.indexField2 = Defaults.USERNAME_FIELD_ID;
             this.settings.linkType = "many";
             this.settings.linkViaType = "many";
             this.settings.isSource = 1;
          } else {
-            this.settings.indexField = USERNAME_FIELD_ID;
+            this.settings.indexField = Defaults.USERNAME_FIELD_ID;
             this.settings.linkType = "one";
             this.settings.linkViaType = "many";
             this.settings.isSource = 1;
          }
-         let linkObject = this.datasourceLink;
-         let linkCol = linkObject.fieldNew({
-            key: ABFieldUserCore.defaults().key,
+
+         // TODO: .fieldCustomNew() for saving "local" changes.
+         // NOTE: The Object adding this Field sees it's data as a ABFieldUser
+         //       connection.
+         //       However, the SiteUser will see the data as a ABFieldConnect
+         //       connection
+         let linkCol = SiteUser.fieldNew({
+            key: ABFieldConnectCore.defaults().key,
             columnName: this.object.tableName,
             label: this.object.label,
             settings: {
@@ -194,6 +197,8 @@ module.exports = class ABFieldUser extends ABFieldUserCore {
          return (
             Promise.resolve()
                // Create definitions of the connected fields
+               // NOTE: skip directly to the ABMLClass.save() to avoid the
+               // migrations caused during the ABField.save() operations.
                .then(() => ABMLClass.prototype.save.call(this))
                .then(() => {
                   linkCol.settings.linkColumn = this.id;
@@ -206,14 +211,12 @@ module.exports = class ABFieldUser extends ABFieldUserCore {
                })
                // Add fields to Objects
                .then(() => this.object.fieldAdd(this))
-               .then(() => linkObject.fieldAdd(linkCol))
+               .then(() => SiteUser.fieldAdd(linkCol))
                // Create column to DB
                .then(() => this.migrateCreate())
                // .then(() => linkCol.migrateCreate())
                .then(() => {
-                  this.object.model().refresh();
-                  linkCol.object.model().refresh();
-                  return Promise.resolve(this);
+                  return this;
                })
          );
       } else {
@@ -222,8 +225,7 @@ module.exports = class ABFieldUser extends ABFieldUserCore {
    }
 
    // return the grid column header definition for this instance of ABFieldUser
-   columnHeader(options) {
-      options = options || {};
+   columnHeader(options = {}) {
       options.editable =
          this.settings.editable != null ? this.settings.editable : true;
       return super.columnHeader(options);
@@ -237,8 +239,7 @@ module.exports = class ABFieldUser extends ABFieldUserCore {
     *             unique id references.
     * @param {HtmlDOM} node  the HTML Dom object for this field's display.
     */
-   customDisplay(row, App, node, options) {
-      options = options || {};
+   customDisplay(row, App, node, options = {}) {
       options.editable =
          this.settings.editable != null ? this.settings.editable : true;
       return super.customDisplay(row, App, node, options);
@@ -277,7 +278,7 @@ module.exports = class ABFieldUser extends ABFieldUserCore {
 
    getUsers() {
       console.error(
-         "REFACTOR: what is the context of this OP.User.userlise()?"
+         "REFACTOR: what is the context of this OP.User.userlist()?"
       );
       return OP.User.userlist().map((u) => {
          var result = {
