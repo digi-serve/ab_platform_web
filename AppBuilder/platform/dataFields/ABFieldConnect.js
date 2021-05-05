@@ -760,6 +760,8 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                   multiple: multiselect,
                   readOnly: readOnly,
                   editPage: options.editPage,
+                  isLabelHidden: options.isLabelHidden,
+                  additionalText: options.additionalText,
                   placeholder: placeholder,
                   data: selectedData,
                },
@@ -828,6 +830,8 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             placeholder: placeholder,
             readOnly: readOnly,
             editPage: options.editPage,
+            isLabelHidden: options.isLabelHidden,
+            additionalText: options.additionalText,
             ajax: {
                url: "It will call url in .getOptions function", // require
                minimumInputLength: 0,
