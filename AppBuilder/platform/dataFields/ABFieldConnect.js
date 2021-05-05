@@ -1047,10 +1047,10 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             })
             .then((result) => {
                // cache linked object data
-               this._options = result.data;
+               this._options = result.data || result || [];
 
                // populate display text
-               this._options.forEach((opt) => {
+               (this._options || []).forEach((opt) => {
                   opt.text = linkedObj.displayData(opt);
                });
 
