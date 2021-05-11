@@ -1202,22 +1202,20 @@ module.exports = class ABViewForm extends ABViewFormCore {
          var vComponent = this.viewComponents[f.id];
          if (vComponent == null) return;
 
-         if (f.field())
-            formVals[f.field().columnName] = vComponent.logic.getValue(
-               formVals
-            );
+         let field = f.field();
+         if (field) {
+            formVals[field.columnName] = vComponent.logic.getValue(formVals);
+         }
       });
 
       // remove connected fields if they were not on the form and they are present in the formVals because it is a datacollection
-      obj.fields().forEach((f) => {
+      obj.connectFields().forEach((f) => {
          if (
-            f.key == "connectObject" &&
             visibleFields.indexOf(f.columnName) == -1 &&
             formVals[f.columnName]
          ) {
             delete formVals[f.columnName];
-            if (formVals[f.columnName + "__relation"])
-               delete formVals[f.columnName + "__relation"];
+            delete formVals[f.relationName()];
          }
       });
 
@@ -1238,7 +1236,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
       if (dcLink && dcLink.getCursor()) {
          var objectLink = dcLink.datasource;
 
-         var connectFields = obj.fields((f) => f.key == "connectObject");
+         var connectFields = obj.connectFields();
          connectFields.forEach((f) => {
             var formFieldCom = this.fieldComponents((fComp) => {
                return fComp.field && fComp.field().id == f.id;

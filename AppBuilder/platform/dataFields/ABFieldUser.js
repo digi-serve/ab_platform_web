@@ -188,7 +188,9 @@ module.exports = class ABFieldUser extends ABFieldUserCore {
                linkObject: this.object.id,
                linkType: this.settings.linkViaType,
                linkViaType: this.settings.linkType,
-               isCustomFK: false,
+               isCustomFK: this.settings.isCustomFK,
+               indexField: this.settings.indexField,
+               indexField2: this.settings.indexField2,
                isSource: 0,
             },
          });
