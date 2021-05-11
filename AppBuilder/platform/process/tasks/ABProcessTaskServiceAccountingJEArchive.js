@@ -56,7 +56,7 @@ module.exports = class AccountingJEArchive extends AccountingJEArchiveCore {
          if (!object) return [];
 
          let options = object
-            .fields((f) => f.key == "connectObject")
+            .fields((f) => f.isConnection)
             .map((f) => {
                return {
                   id: f.id,
@@ -125,10 +125,10 @@ module.exports = class AccountingJEArchive extends AccountingJEArchiveCore {
          JEArchiveObj.fields().forEach((f) => {
             let jeFields = [];
 
-            if (f.key == "connectObject") {
+            if (f.isConnection) {
                jeFields = JEObj.fields((fJe) => {
                   return (
-                     fJe.key == "connectObject" &&
+                     fJe.isConnection &&
                      fJe.settings &&
                      f.settings &&
                      fJe.settings.linkObject == f.settings.linkObject &&

@@ -1074,12 +1074,12 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                }
 
                // Add connected field options
-               if (f.key == "connectObject") {
+               if (f.isConnection) {
                   let linkFieldOptions = [];
 
                   if (f.datasourceLink) {
                      linkFieldOptions = f.datasourceLink
-                        .fields((fld) => fld.key != "connectObject")
+                        .fields((fld) => !fld.isConnection)
                         .map((fld) => {
                            return {
                               id: fld.id,
@@ -1513,7 +1513,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                   }
                }
 
-               if (field.key == "connectObject") {
+               if (field.isConnection) {
                   let $optionPanel = $selector.getParentView();
                   let $linkDataSelector = $optionPanel.queryView(
                      { abName: "columnLinkData" },
@@ -1698,8 +1698,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
 
                linkConnectFields = _currentObject.fields(
                   (f) =>
-                     f.key == "connectObject" &&
-                     f.settings.linkObject == objectLink.id
+                     f.isConnection && f.settings.linkObject == objectLink.id
                );
 
                linkValueId = dcLink.getCursor().id;
@@ -1807,11 +1806,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
             // connected entries
 
             let connectedFields = matchFields.filter(
-               (f) =>
-                  f &&
-                  f.field &&
-                  f.field.key == "connectObject" &&
-                  f.searchField
+               (f) => f && f.field && f.field.isConnection && f.searchField
             );
 
             let startUpdateTime;

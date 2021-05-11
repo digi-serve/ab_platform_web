@@ -490,7 +490,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                                  if (
                                     selectedDC &&
                                     (selectedDC.sourceType == "query" ||
-                                       field.key != "connectObject")
+                                       !field.isConnection)
                                  ) {
                                     var queryFieldOptions = [];
                                     selectedDC.datasource
@@ -588,7 +588,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
             // a relevant data view.  So, replace the fieldComponet
             // from a connectedObject field with a list of data views that
             // are based upon the same object we are connected to:
-            if (field.key == "connectObject") {
+            if (field.isConnection) {
                // find the ABObject this field connects to
                var connectedObject = field.datasourceLink;
 
@@ -690,7 +690,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
             formFieldComponent.init();
 
             // Show custom display of data field
-            if (field.key != "connectObject" && field.customDisplay) {
+            if (!field.isConnection && field.customDisplay) {
                // field.customDisplay(field, this.App, $row.getChildViews()[3].$view, {
 
                var compNodeView = $$($componentView.id).$view;
@@ -742,7 +742,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                };
 
                // now handle our special connectedObject case:
-               if (field.key == "connectObject") {
+               if (field.isConnection) {
                   setValueFn();
                } else {
                   if (data.valueType == "exist") {
@@ -801,7 +801,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                };
 
                // now handle our special connectedObject case:
-               if (field.key == "connectObject") {
+               if (field.isConnection) {
                   getValueFn();
                } else {
                   if ($$(ids.multiview).config.visibleBatch == "exist") {
@@ -948,7 +948,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
 
          // in the case of a connected Field, we use op.value to get the
          // datacollection, and find it's currently selected value:
-         if (field.key == "connectObject" || op.valueType == "exist") {
+         if (field.isConnection || op.valueType == "exist") {
             // NOTE: 30 May 2018 :current decision from Ric is to limit this
             // to only handle 1:x connections where we update the current obj
             // with the PK of the value from the DC.
@@ -984,7 +984,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                            return f.id == item.value;
                         }
                      )[0];
-                     if (valueField.key == "connectObject") {
+                     if (valueField.isConnection) {
                         item.value = valueField.format(this._formData);
                      } else {
                         item.value = this._formData[valueField.columnName];

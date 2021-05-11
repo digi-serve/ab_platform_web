@@ -139,7 +139,7 @@ var ABFieldTextFormulaComponent = new ABFieldComponent({
             if (
                field.key != "formula" &&
                field.key != "TextFormula" &&
-               field.key != "connectObject"
+               !field.isConnection
             ) {
                formulaData.unshift({
                   id: field.id,
@@ -161,7 +161,7 @@ var ABFieldTextFormulaComponent = new ABFieldComponent({
             if (
                field.key != "formula" &&
                field.key != "TextFormula" &&
-               field.key != "connectObject"
+               !field.isConnection
             ) {
                formulaData.unshift({
                   id: field.id,

@@ -927,39 +927,38 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                   }
                }
 
-               $$(DataTable.ui.id).attachEvent("onItemClick", function (
-                  id,
-                  e,
-                  node
-               ) {
-                  var item = id;
+               $$(DataTable.ui.id).attachEvent(
+                  "onItemClick",
+                  function (id, e, node) {
+                     var item = id;
 
-                  if (e == "auto") {
-                     // automatically choose the details page if a record matches
-                     // later on we can decide if we want to have the choice to select the edit page intead.
-                     _logic.changePage(dv, item, detailsPage);
-                     toggleTab(detailsTab, this);
-                  } else if (e.target.className.indexOf("eye") > -1) {
-                     _logic.changePage(dv, item, detailsPage);
-                     toggleTab(detailsTab, this);
-                  } else if (e.target.className.indexOf("pencil") > -1) {
-                     _logic.changePage(dv, item, editPage);
-                     toggleTab(editTab, this);
-                  } else if (e.target.className.indexOf("trash") > -1) {
-                     // don't do anything for delete it is handled elsewhere
-                  } else if (!isEditable && detailsPage.length) {
-                     _logic.changePage(dv, item, detailsPage);
-                     toggleTab(detailsTab, this);
-                  } else if (
-                     !isEditable &&
-                     !detailsPage.length &&
-                     editPage.length &&
-                     this.config.accessLevel == 2
-                  ) {
-                     _logic.changePage(dv, item, editPage);
-                     toggleTab(editTab, this);
+                     if (e == "auto") {
+                        // automatically choose the details page if a record matches
+                        // later on we can decide if we want to have the choice to select the edit page intead.
+                        _logic.changePage(dv, item, detailsPage);
+                        toggleTab(detailsTab, this);
+                     } else if (e.target.className.indexOf("eye") > -1) {
+                        _logic.changePage(dv, item, detailsPage);
+                        toggleTab(detailsTab, this);
+                     } else if (e.target.className.indexOf("pencil") > -1) {
+                        _logic.changePage(dv, item, editPage);
+                        toggleTab(editTab, this);
+                     } else if (e.target.className.indexOf("trash") > -1) {
+                        // don't do anything for delete it is handled elsewhere
+                     } else if (!isEditable && detailsPage.length) {
+                        _logic.changePage(dv, item, detailsPage);
+                        toggleTab(detailsTab, this);
+                     } else if (
+                        !isEditable &&
+                        !detailsPage.length &&
+                        editPage.length &&
+                        this.config.accessLevel == 2
+                     ) {
+                        _logic.changePage(dv, item, editPage);
+                        toggleTab(editTab, this);
+                     }
                   }
-               });
+               );
 
                // $$(DataTable.ui.id).attachEvent('onBeforeRender', function (data) {
                // 	_logic.clientSideDataFilter();
@@ -1396,7 +1395,7 @@ module.exports = class ABViewGrid extends ABViewGridCore {
          dv.datasource
             .fields((f) => {
                return (
-                  f.key != "connectObject" &&
+                  !f.isConnection &&
                   view.settings.objectWorkspace.hiddenFields.indexOf(
                      f.columnName
                   ) < 0

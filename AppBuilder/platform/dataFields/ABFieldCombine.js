@@ -80,7 +80,7 @@ var ABFieldCombineComponent = new ABFieldComponent({
                f.key == "user" ||
                f.key == "AutoIndex" ||
                f.key == "combined" ||
-               (f.key == "connectObject" &&
+               (f.isConnection &&
                   // 1:M
                   ((f.settings.linkType == "one" &&
                      f.settings.linkViaType == "many") ||

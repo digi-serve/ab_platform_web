@@ -47,7 +47,7 @@ module.exports = class InsertRecordTask extends InsertRecordTaskCore {
 
          object.fields().forEach((f) => {
             // Populate fields of linked data source
-            if (f.key == "connectObject") {
+            if (f.isConnection) {
                let linkDS = f.datasourceLink;
                if (linkDS) {
                   result.push({

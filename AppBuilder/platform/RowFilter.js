@@ -1115,7 +1115,7 @@ module.exports = class RowFilter extends RowFilterCore {
          })[0];
          if (Query) {
             Query.fields((f) => {
-               return f.key != "connectObject";
+               return !f.isConnection;
             }).forEach((q) => {
                options.push({
                   id: q.id,

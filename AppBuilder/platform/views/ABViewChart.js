@@ -611,7 +611,7 @@ module.exports = class ABViewChart extends ABViewChartCore {
             var label = labelKey;
 
             // Get label of the connect field
-            if (labelCol.key == "connectObject") {
+            if (labelCol.isConnection) {
                var relateValues = labelCol.pullRelationValues(item);
                if (relateValues != null) {
                   if (Array.isArray(relateValues))

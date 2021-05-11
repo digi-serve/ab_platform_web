@@ -599,7 +599,7 @@ module.exports = class ABViewDocxBuilder extends ABViewDocxBuilderCore {
                                  // format relation data
                                  if (field.datasourceLink) {
                                     field.datasourceLink
-                                       .fields((f) => f.key != "connectObject")
+                                       .fields((f) => !f.isConnection)
                                        .forEach((f) => {
                                           v[`${f.columnName}_ORIGIN`] =
                                              v[f.columnName];
@@ -734,18 +734,18 @@ module.exports = class ABViewDocxBuilder extends ABViewDocxBuilderCore {
                               new Promise((ok, bad) => {
                                  let imgUrl = `/opsportal/image/${this.application.name}/${imageVal}`;
 
-                                 JSZipUtils.getBinaryContent(imgUrl, function (
-                                    error,
-                                    content
-                                 ) {
-                                    if (error) return bad(error);
-                                    else {
-                                       // store binary of image
-                                       images[imageVal] = content;
+                                 JSZipUtils.getBinaryContent(
+                                    imgUrl,
+                                    function (error, content) {
+                                       if (error) return bad(error);
+                                       else {
+                                          // store binary of image
+                                          images[imageVal] = content;
 
-                                       ok();
+                                          ok();
+                                       }
                                     }
-                                 });
+                                 );
                               })
                            );
                         }

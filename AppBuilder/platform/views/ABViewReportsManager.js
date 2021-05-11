@@ -24,7 +24,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
    editorComponent(App, mode) {
       let idBase = "ABViewReportsManagerEditorComponent";
       let ids = {
-         component: App.unique(idBase + "_component")
+         component: App.unique(idBase + "_component"),
       };
 
       let component = this.component(App);
@@ -72,7 +72,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
 
       let idBase = "ABViewReportManager_" + this.id;
       let ids = {
-         component: App.unique(idBase + "_component")
+         component: App.unique(idBase + "_component"),
       };
 
       let compInstance = this;
@@ -184,7 +184,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                               id: dc.id,
                               name: dc.label,
                               data: reportFields,
-                              refs: []
+                              refs: [],
                            };
                         }
                      );
@@ -413,7 +413,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                     let filterElem = webix.ui({
                                        view: "query",
                                        fields: reportFields,
-                                       value: JSON.parse(config.query || "{}")
+                                       value: JSON.parse(config.query || "{}"),
                                     });
 
                                     // create a new data collection and apply the query filter
@@ -433,7 +433,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                           tempDc.sort({
                                              as: "string",
                                              dir: sort.mod || "asc",
-                                             by: `#${sort.id}#`
+                                             by: `#${sort.id}#`,
                                           });
                                     });
 
@@ -535,9 +535,9 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                      // TODO
                      return webix.promise.resolve([]);
                   }
-               }
-            ]
-         ])
+               },
+            ],
+         ]),
       };
 
       // make sure each of our child views get .init() called
@@ -570,10 +570,10 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                   options: columnFormat.options,
                   ref: "",
                   key: false,
-                  show: true
+                  show: true,
                });
 
-               if (f.key == "connectObject" && f.settings.isSource) {
+               if (f.isConnection && f.settings.isSource) {
                   let linkedDcs = compInstance.application.datacollections(
                      (dc) =>
                         dc &&
@@ -589,7 +589,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                         type: "reference",
                         ref: linkDc.id,
                         key: false,
-                        show: false
+                        show: false,
                      });
                   });
                }
@@ -646,7 +646,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                  : row[columnName];
 
                               // FK value of the connect field
-                              if (field && field.key == "connectObject") {
+                              if (field && field.isConnection) {
                                  if (Array.isArray(row[columnName])) {
                                     reportRow[`${col}.id`] = row[
                                        columnName
@@ -691,7 +691,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                         return next(reportData);
                      })
                );
-         }
+         },
       };
 
       return {
@@ -699,7 +699,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
          init: _init,
          logic: _logic,
 
-         onShow: baseCom.onShow
+         onShow: baseCom.onShow,
       };
    }
 };
