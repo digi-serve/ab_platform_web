@@ -408,12 +408,27 @@ module.exports = class ABObject extends ABObjectCore {
     * @return {Promise}
     */
    columnResize(columnName, newWidth, oldWidth) {
+      var fieldID = null;
       for (var i = 0; i < this._fields.length; i++) {
          if (this._fields[i].columnName == columnName) {
-            this._fields[i].settings.width = newWidth;
+            fieldID = this._fields[i].id;
+            break;
+            // this._fields[i].settings.width = newWidth;
          }
       }
-      return this.save();
+
+      // Johnny: This is better but still not right.  the ABObject should not be
+      // storing sizes for field widths.  That is a function of the UI and which
+      // Grid is being displayed.  THAT GRID should be storing a column width
+      // locally.
+      // TODO: once we have v2 in place.
+
+      var fieldSettings = this.AB.localSettings(fieldID);
+      fieldSettings = fieldSettings || {};
+      fieldSettings.width = newWidth;
+
+      return this.AB.localSettings(fieldID, fieldSettings);
+      // return this.save();
    }
 
    // return the column headers for this object
@@ -432,7 +447,7 @@ module.exports = class ABObject extends ABObjectCore {
       var columnNameLookup = {};
 
       // get the header for each of our fields:
-      this.fields().forEach(function (f) {
+      this.fields().forEach((f) => {
          var header = f.columnHeader({
             isObjectWorkspace: isObjectWorkspace,
             editable: isEditable,
@@ -446,10 +461,21 @@ module.exports = class ABObject extends ABObjectCore {
          header.fieldID = f.id;
          // header.fieldURL = f.urlPointer();
 
+         // if the field specifies a width
          if (f.settings.width != 0) {
-            // set column width to the customized width
             header.width = f.settings.width;
-         } else {
+         }
+
+         // if the User has already updated a local width for this
+         var fieldSettings = this.AB.localSettings(f.id);
+         if (fieldSettings && fieldSettings.width) {
+            if (!header.width || fieldSettings.width > header.width) {
+               // set column width to the customized width
+               header.width = fieldSettings.width;
+            }
+         }
+
+         if (!header.width) {
             // set column width to adjust:true by default;
             header.adjust = true;
          }

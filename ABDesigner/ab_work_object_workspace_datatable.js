@@ -1021,7 +1021,7 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
           * refresh the header for the table apart from the refresh() command
           */
          refreshHeader: function () {
-            columnSplitRight = 0;
+            // columnSplitRight = 0;
             // wait until we have an Object defined:
             if (!CurrentObject) return;
 
@@ -1200,8 +1200,13 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
                dataTable.refresh();
             }
 
+            var addedColumns = [];
+            // {array} the .id of the columnHeaders we have added
+            // this will help us pick the lastColumn that is part of the
+            // object.
+
             if (settings.labelAsField) {
-               console.log(CurrentObject);
+               // console.log(CurrentObject);
                columnHeaders.unshift({
                   id: "appbuilder_label_field",
                   header: "Label",
@@ -1211,6 +1216,7 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
                   },
                   // css: { 'text-align': 'center' }
                });
+               addedColumns.push("appbuilder_label_field");
             }
 
             if (settings.massUpdate && accessLevel == 2) {
@@ -1223,6 +1229,7 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
                   css: { "text-align": "center" },
                });
                columnSplitLeft = 1;
+               addedColumns.push("appbuilder_select_item");
             } else {
                columnSplitLeft = 0;
             }
@@ -1236,7 +1243,8 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
                   },
                   css: { "text-align": "center" },
                });
-               columnSplitRight++;
+               // columnSplitRight++;
+               addedColumns.push("appbuilder_view_detail");
             }
             if (settings.trackView != null && accessLevel == 2) {
                columnHeaders.push({
@@ -1247,7 +1255,8 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
                      "<div class='track'><span class='track fa fa-history'></span></div>",
                   css: { "text-align": "center", cursor: "pointer" },
                });
-               columnSplitRight++;
+               // columnSplitRight++;
+               addedColumns.push("appbuilder_view_track");
             }
             if (
                settings.editView != null &&
@@ -1261,7 +1270,8 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
                   template: "<div class='edit'>{common.editIcon()}</div>",
                   css: { "text-align": "center" },
                });
-               columnSplitRight++;
+               // columnSplitRight++;
+               addedColumns.push("appbuilder_view_edit");
             }
             if (settings.allowDelete && accessLevel == 2) {
                columnHeaders.push({
@@ -1271,17 +1281,29 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
                   template: "<div class='trash'>{common.trashIcon()}</div>",
                   css: { "text-align": "center" },
                });
-               columnSplitRight++;
+               // columnSplitRight++;
+               addedColumns.push("appbuilder_trash");
             }
 
             // add fillspace to last editiable column
             var hiddenFields = settings.hiddenFields
                ? settings.hiddenFields.length
                : 0;
-            var lastCol =
-               columnHeaders[
-                  columnHeaders.length - hiddenFields - columnSplitRight - 1
-               ];
+
+            // find our last displayed column (that isn't one we added);
+            var lastCol = null;
+            for (var i = columnHeaders.length - 1; i >= 0; i--) {
+               if (!lastCol) {
+                  var col = columnHeaders[i];
+                  if (!col.hidden && addedColumns.indexOf(col.id) == -1) {
+                     lastCol = col;
+                     break;
+                  }
+               }
+            }
+            // columnHeaders[
+            //    columnHeaders.length - hiddenFields - columnSplitRight - 1
+            // ];
             if (lastCol) {
                lastCol.fillspace = true;
                lastCol.minWidth = lastCol.width;

@@ -1,6 +1,7 @@
 var ABFactoryCore = require("./core/ABFactoryCore");
 
 const _ = require("lodash");
+const moment = require("moment");
 import { nanoid } from "nanoid";
 const uuidv4 = require("uuid");
 
@@ -119,7 +120,11 @@ class ABFactory extends ABFactoryCore {
          .then(() => {
             // some Resources depend on the above to be .init() before they can
             // .init() themselves.
-            return this.Storage.init(this);
+            return this.Storage.init(this).then(() => {
+               return this.Storage.get("local_settings").then((data) => {
+                  this._localSettings = data || {};
+               });
+            });
          })
          .then(() => {
             // Now prepare the rest of the ABFactory()
@@ -254,6 +259,17 @@ class ABFactory extends ABFactoryCore {
       return (...params) => {
          return this.Multilingual.label(...params);
       };
+   }
+
+   localSettings(key, value) {
+      if (typeof value == "undefined") {
+         // this is a getter:
+         return this._localSettings[key];
+      } else {
+         // setting a value:
+         this._localSettings[key] = value;
+         return this.Storage.set(`local_settings`, this._localSettings);
+      }
    }
 
    log(message, ...rest) {
