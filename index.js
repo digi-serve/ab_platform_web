@@ -1,10 +1,11 @@
 // Include these .css and .js files as part of our bundle.
 /* eslint-disable no-unused-vars */
 import cssLoader from "./styles/loader.css";
-import cssUI from "./styles/ui.css";
 
 import webix from "./js/webix/webix.js";
 import webixCSS from "./js/webix/webix.css";
+
+import cssUI from "./styles/ui.css";
 
 // NOTE: keep Font Awesome AFTER webix css so webix wont
 // override our icon styles
