@@ -748,7 +748,7 @@ module.exports = class RowFilter extends RowFilterCore {
                      {
                         batch: "user",
                         view: "combo",
-                        options: this.AB.Account.userlist().map((u) => {
+                        options: this.AB.Account.userList().map((u) => {
                            return {
                               id: u.username,
                               value: u.username,
