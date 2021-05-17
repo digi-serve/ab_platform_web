@@ -292,7 +292,7 @@ class ABFactory extends ABFactoryCore {
    }
 
    uuid() {
-      return uuidv4();
+      return uuidv4.v4();
    }
 
    warn(message, ...rest) {
