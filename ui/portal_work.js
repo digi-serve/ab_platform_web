@@ -196,6 +196,11 @@ class PortalWork extends ClassUI {
       this.storageKey = "portal_work_state";
 
       this.pageContainers = {};
+
+      var L = (...params) => {
+         return this.label(...params);
+      };
+
       // {hash}  { ABViewPage.id : ClassUIPage() }
       // track each of the page containers (instances of ClassUIPage) that
       // are responsible for displaying the proper state of each of our
@@ -220,9 +225,9 @@ class PortalWork extends ClassUI {
          body: {
             view: "list",
             data: [
-               { id: "1", label: "User Profile", icon: "user" },
-               { id: "2", label: "Switcheroo", icon: "user-secret" },
-               { id: "3", label: "Logout", icon: "ban" },
+               { id: "1", label: L("User Profile"), icon: "user" },
+               { id: "2", label: L("Switcheroo"), icon: "user-secret" },
+               { id: "3", label: L("Logout"), icon: "ban" },
             ],
             template: "<i class='fa-fw fa fa-#icon#'></i> #label#",
             autoheight: true,
