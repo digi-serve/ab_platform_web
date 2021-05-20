@@ -21,9 +21,10 @@ class PortalWork extends ClassUI {
                padding: 10,
                cols: [
                   {
-                     view: "icon",
+                     view: "button",
+                     type: "icon",
                      width: 50,
-                     icon: "fa fa-bars",
+                     icon: "fa fa-bars no-margin",
                      click: () => {
                         let navSideBar = $$("navSidebar");
                         if (navSideBar.isVisible()) {
@@ -56,8 +57,9 @@ class PortalWork extends ClassUI {
                   {},
                   {
                      id: "network_icon",
-                     view: "icon",
-                     icon: "fa fa-wifi",
+                     view: "button",
+                     type: "icon",
+                     icon: "fa fa-wifi no-margin",
                      width: 40,
                      click: () => {
                         // test out network going offline:
@@ -68,30 +70,23 @@ class PortalWork extends ClassUI {
                   },
                   {
                      id: "inbox_icon",
-                     view: "icon",
-                     icon: "fa fa-envelope",
-                     width: 50,
+                     view: "button",
+                     type: "icon",
+                     icon: "fa fa-envelope no-margin",
+                     width: 40,
                      // badge: 12,
                      click: () => {
                         PortalWorkInbox.show();
                      },
                   },
                   {
-                     view: "menu",
-                     width: 50,
-                     css: "userMenu",
-                     data: [
-                        {
-                           value: "",
-                           icon: "fa fa-user-circle",
-                           submenu: [
-                              { value: "User Profile" },
-                              { value: "Switcheroo" },
-                              { $template: "Separator" },
-                              { value: "Logout" },
-                           ],
-                        },
-                     ],
+                     id: "user_icon",
+                     view: "button",
+                     type: "icon",
+                     icon: "fa fa-user-circle no-margin",
+                     width: 40,
+                     popup: "userMenu",
+                     /* Look at Popup created below for menu options and actions */
                   },
                   /**
                    * NOTE: This is NOT supposed to Stay here.
@@ -101,12 +96,11 @@ class PortalWork extends ClassUI {
                      view: "uploader",
                      id: "tmp_uploader",
                      // label: labels.common.import,
-                     autowidth: true,
-                     width: 50,
+                     width: 40,
                      upload: "/definition/import",
                      multiple: false,
                      type: "icon",
-                     icon: "fa fa-upload",
+                     icon: "fa fa-upload no-margin",
                      autosend: true,
                      css: "webix_transparent",
                      on: {
@@ -149,6 +143,7 @@ class PortalWork extends ClassUI {
                      id: "navSidebar",
                      hidden: true,
                      autoheight: true,
+                     borderless: true,
                      rows: [
                         {
                            id: "abNavSidebarScrollView",
@@ -202,6 +197,11 @@ class PortalWork extends ClassUI {
       this.storageKey = "portal_work_state";
 
       this.pageContainers = {};
+
+      var L = (...params) => {
+         return this.label(...params);
+      };
+
       // {hash}  { ABViewPage.id : ClassUIPage() }
       // track each of the page containers (instances of ClassUIPage) that
       // are responsible for displaying the proper state of each of our
@@ -217,6 +217,37 @@ class PortalWork extends ClassUI {
 
       $$("abSidebarMenu").define("data", menu_data);
       this.sidebarResize();
+
+      // This is the User popup menu that opens when you click the user icon in the main nav
+      webix.ui({
+         view: "popup",
+         id: "userMenu",
+         width: 150,
+         body: {
+            view: "list",
+            data: [
+               { id: "1", label: L("User Profile"), icon: "user" },
+               { id: "2", label: L("Switcheroo"), icon: "user-secret" },
+               { id: "3", label: L("Logout"), icon: "ban" },
+            ],
+            template: "<i class='fa-fw fa fa-#icon#'></i> #label#",
+            autoheight: true,
+            select: true,
+            on: {
+               onItemClick: function (id, event) {
+                  var item = this.getItem(id);
+                  webix.message(
+                     "Menu item: <i>" +
+                        item.label +
+                        "</i> <br/>Menu ID: <i>" +
+                        item.id +
+                        "</i>"
+                  );
+                  $$("userMenu").hide();
+               },
+            },
+         },
+      });
 
       // Now Fill out Toolbar and Root Pages:
       return Promise.resolve()
@@ -274,9 +305,8 @@ class PortalWork extends ClassUI {
                   sideBar.select(foundMenuEntry.id);
                   this.selectApplication(foundMenuEntry.id);
 
-                  var defaultPageID = this.AppState.lastPages[
-                     foundMenuEntry.abApplication.id
-                  ];
+                  var defaultPageID =
+                     this.AppState.lastPages[foundMenuEntry.abApplication.id];
                   DefaultPage = foundMenuEntry.abApplication.pages(
                      (p) => p.id === defaultPageID
                   )[0];

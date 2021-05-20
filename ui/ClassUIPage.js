@@ -52,6 +52,7 @@ class ClassUIPage extends ClassUI {
          view: "multiview",
          // container: this.containerID,
          css: "ab-main-container ab-generated-page",
+         borderless: true,
          id: this.containerID,
          cells: [{}],
          on: {
@@ -153,13 +154,14 @@ class ClassUIPage extends ClassUI {
           *
           * @param data.rootPage {uuid} - id of the root page
           */
-         this.updatePageEventId = this.AB.on("ab.interface.update", function (
-            data
-         ) {
-            if (page.id == data.rootPageId) {
-               needToReloadPage();
+         this.updatePageEventId = this.AB.on(
+            "ab.interface.update",
+            function (data) {
+               if (page.id == data.rootPageId) {
+                  needToReloadPage();
+               }
             }
-         });
+         );
       }
 
       if (!this.updateDatacollectionEventId && page.isRoot()) {

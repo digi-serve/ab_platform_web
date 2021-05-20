@@ -13,13 +13,13 @@ module.exports = class ABViewPropertyAddPage extends ABViewProperty {
     */
    static get default() {
       return {
-         formView: "none" // id of form to add new data
+         formView: "none", // id of form to add new data
       };
    }
 
    static propertyComponent(App, idBase) {
       let ids = {
-         formView: idBase + "_formView"
+         formView: idBase + "_formView",
       };
 
       let ui = {
@@ -37,8 +37,8 @@ module.exports = class ABViewPropertyAddPage extends ABViewProperty {
                }
 
                _logic.callbacks.onSave();
-            }
-         }
+            },
+         },
       };
 
       let _init = (options) => {
@@ -49,9 +49,9 @@ module.exports = class ABViewPropertyAddPage extends ABViewProperty {
 
       let _logic = {
          callbacks: {
-            onSave: function() {
+            onSave: function () {
                console.warn("NO onSave()!");
-            }
+            },
          },
 
          setSettings: (view, settings = {}) => {
@@ -61,8 +61,8 @@ module.exports = class ABViewPropertyAddPage extends ABViewProperty {
             let editForms = [
                {
                   id: "none",
-                  value: L("ab.component.connect.no", "*No add new option")
-               }
+                  value: L("ab.component.connect.no", "*No add new option"),
+               },
             ];
 
             let pagesHasForm = view
@@ -82,7 +82,7 @@ module.exports = class ABViewPropertyAddPage extends ABViewProperty {
                .map((p) => {
                   return {
                      id: p.id,
-                     value: p.label
+                     value: p.label,
                   };
                });
 
@@ -105,14 +105,14 @@ module.exports = class ABViewPropertyAddPage extends ABViewProperty {
             settings.formView = $$(ids.formView).getValue();
 
             return settings;
-         }
+         },
       };
 
       return {
          ui: ui,
          init: _init,
          setSettings: _logic.setSettings,
-         getSettings: _logic.getSettings
+         getSettings: _logic.getSettings,
       };
    }
 
@@ -124,7 +124,7 @@ module.exports = class ABViewPropertyAddPage extends ABViewProperty {
 
    component(App, idBase) {
       let ids = {
-         popup: App.unique(idBase + "_popup_add_new")
+         popup: App.unique(idBase + "_popup_add_new"),
       };
 
       let ui = "";
@@ -153,7 +153,7 @@ module.exports = class ABViewPropertyAddPage extends ABViewProperty {
             },
             onClearOnLoad: () => {
                return true;
-            }
+            },
          },
 
          applicationLoad: (application) => {
@@ -184,7 +184,7 @@ module.exports = class ABViewPropertyAddPage extends ABViewProperty {
 
                // Clone page so we modify without causing problems
                let pageClone = page.clone(null, null, { ignoreSubPages: true });
-               pageClone.id = OP.Util.uuid(); // lets take the stored id can create a new dynamic one so our views don't duplicate
+               pageClone.id = this._application.AB.uuid(); // lets take the stored id can create a new dynamic one so our views don't duplicate
                // pageClone.id = pageClone.id + "-" + webix.uid(); // lets take the stored id can create a new dynamic one so our views don't duplicate
                let popUpComp = pageClone.component(App);
                let ui = popUpComp.ui;
@@ -210,25 +210,25 @@ module.exports = class ABViewPropertyAddPage extends ABViewProperty {
                            view: "label",
                            label: page.label,
                            css: "modal_title",
-                           align: "center"
+                           align: "center",
                         },
                         {
                            view: "button",
                            label: "Close",
                            autowidth: true,
                            align: "center",
-                           click: function() {
+                           click: function () {
                               var popup = this.getTopParentView();
                               popup.close();
-                           }
-                        }
-                     ]
+                           },
+                        },
+                     ],
                   },
                   body: {
                      view: "scrollview",
                      scroll: true,
-                     body: ui
-                  }
+                     body: ui,
+                  },
                };
 
                // Create popup
@@ -239,7 +239,7 @@ module.exports = class ABViewPropertyAddPage extends ABViewProperty {
                   popUpComp.init({
                      onSaveData: _logic.callbacks.onSaveData,
                      onCancelClick: _logic.callbacks.onCancel,
-                     clearOnLoad: _logic.callbacks.onClearOnLoad
+                     clearOnLoad: _logic.callbacks.onClearOnLoad,
                   });
 
                   popUpComp.onShow();
@@ -275,7 +275,7 @@ module.exports = class ABViewPropertyAddPage extends ABViewProperty {
                   let data = {};
                   let relationName = field.relationName();
                   data[relationName] = {
-                     id: linkedData.id
+                     id: linkedData.id,
                   };
 
                   // Add custom index values
@@ -302,7 +302,7 @@ module.exports = class ABViewPropertyAddPage extends ABViewProperty {
                   field.setValue($$(comp.ui.id), data);
                });
             });
-         }
+         },
       };
 
       let init = (options) => {
@@ -317,8 +317,7 @@ module.exports = class ABViewPropertyAddPage extends ABViewProperty {
 
          applicationLoad: _logic.applicationLoad,
          onClick: _logic.onClick,
-         openFormPopup: _logic.openFormPopup
+         openFormPopup: _logic.openFormPopup,
       };
    }
 };
-
