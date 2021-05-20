@@ -59,11 +59,12 @@ class PortalWork extends ClassUI {
                      view: "icon",
                      icon: "fa fa-wifi",
                      width: 40,
-                     // click: () => {
-                     //    // test out network going offline:
-                     //    this.AB.Network._testingHack = !this.AB.Network
-                     //       ._testingHack;
-                     // },
+                     click: () => {
+                        // test out network going offline:
+                        // this.AB.Network._testingHack = !this.AB.Network
+                        //    ._testingHack;
+                        this.AB.Network._connectionCheck();
+                     },
                   },
                   {
                      id: "inbox_icon",
@@ -187,7 +188,7 @@ class PortalWork extends ClassUI {
                   },
                   {
                      id: "abWorkPages",
-                     template: "Page content would go here.",
+                     template: "No Applications Have Been Loaded.",
                   }, // this is where content goes
                ],
             },
@@ -292,30 +293,24 @@ class PortalWork extends ClassUI {
             //
 
             var allPlaceholders = [];
-            // var buildPage = (page) => {
-            //    allPlaceholders.push({
-            //       id: this.pageID(page),
-            //       template: `Page: ${page.label || page.name}`,
-            //    });
-
-            //    (page.pages() || []).forEach((p) => {
-            //       buildPage(p);
-            //    });
-            // };
-
             (this.AB.applications() || []).forEach((app) => {
                (app.pages() || []).forEach((page) => {
-                  // buildPage(page);
                   allPlaceholders.push({
                      id: this.pageID(page),
                      template: `Page: ${page.label || page.name}`,
                   });
                });
             });
-            webix.ui(
-               { view: "multiview", keepViews: true, cells: allPlaceholders },
-               $$("abWorkPages")
-            );
+            if (allPlaceholders.length > 0) {
+               webix.ui(
+                  {
+                     view: "multiview",
+                     keepViews: true,
+                     cells: allPlaceholders,
+                  },
+                  $$("abWorkPages")
+               );
+            }
 
             //
             // Step 4: initialize the DefaultPage
@@ -330,18 +325,19 @@ class PortalWork extends ClassUI {
                   this.AB
                ).App;
             }
-            var container = new ClassUIPage(
-               this.pageID(DefaultPage),
-               DefaultPage,
-               this.App,
-               this.AB
-            );
-            this.pageContainers[DefaultPage.id] = container;
+            if (DefaultPage) {
+               var container = new ClassUIPage(
+                  this.pageID(DefaultPage),
+                  DefaultPage,
+                  this.App,
+                  this.AB
+               );
+               this.pageContainers[DefaultPage.id] = container;
 
-            container.init(this.AB, true).then(() => {
-               this.showPage(DefaultPage);
-            });
-
+               container.init(this.AB, true).then(() => {
+                  this.showPage(DefaultPage);
+               });
+            }
             // let pUI = DefaultPage.component(this.App);
 
             // webix.ui(pUI.ui, $$(this.pageID(DefaultPage)));
@@ -355,7 +351,7 @@ class PortalWork extends ClassUI {
 
             (this.AB.applications() || []).forEach((app) => {
                (app.pages() || []).forEach((page) => {
-                  if (page.id != DefaultPage.id) {
+                  if (!DefaultPage || page.id != DefaultPage.id) {
                      var cont = new ClassUIPage(
                         this.pageID(page),
                         page,

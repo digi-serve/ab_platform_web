@@ -161,7 +161,9 @@ class PortalWorkInbox extends ClassUI {
             processes.push(this.appAccordionLists[index][process]);
          }
 
-         var accordion = allAppAccordions[index].unitList();
+         var accordion = allAppAccordions[index]
+            ? allAppAccordions[index].unitList()
+            : null;
          if (accordion) {
             allInits.push(
                allAppAccordions[index].init(this.AB).then(() => {
@@ -170,6 +172,9 @@ class PortalWorkInbox extends ClassUI {
                })
             );
          } else {
+            // TODO: This can happen if the User has NO Applications, or
+            // maybe just doesn't have the Application related to the inbox
+            // approval. (see above comment)
             console.error(
                "could not find an inbox-accordion for index[" + index + "]"
             );

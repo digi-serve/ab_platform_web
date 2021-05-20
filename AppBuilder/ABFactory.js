@@ -3,7 +3,7 @@ var ABFactoryCore = require("./core/ABFactoryCore");
 const _ = require("lodash");
 const moment = require("moment");
 import { nanoid } from "nanoid";
-const uuidv4 = require("uuid");
+const uuid = require("uuid");
 
 //
 // Our Common Resources
@@ -292,7 +292,7 @@ class ABFactory extends ABFactoryCore {
    }
 
    uuid() {
-      return uuidv4();
+      return uuid.v4();
    }
 
    warn(message, ...rest) {
