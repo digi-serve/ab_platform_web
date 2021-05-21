@@ -95,13 +95,25 @@ class Bootstrap extends EventEmitter {
             .then(() => {
                // 4) Now we can create the UI and send it the {ABFactory}
                return Promise.resolve().then(() => {
-                  var div = this.div();
+                  // webix recommends wrapping any webix code in the .ready()
+                  // function that executes after page loading.
+                  webix.ready(() => {
+                     // webix pro offers a feature that hides scroll bars by
+                     // default for browsers that include them due to the user's
+                     // UI. The experience becomes more like a touch interface
+                     // with the exception that scroll bars appear when user
+                     // hovers over a scrollable area
+                     if (!webix.env.touch && webix.env.scrollSize)
+                        webix.CustomScroll.init();
 
-                  UI.attach(div.id);
-                  this.ui(UI);
-                  this.ui().init(this.AB);
-                  // this.ui().init() routine handles the remaining
-                  // bootup/display process.
+                     var div = this.div();
+
+                     UI.attach(div.id);
+                     this.ui(UI);
+                     this.ui().init(this.AB);
+                     // this.ui().init() routine handles the remaining
+                     // bootup/display process.
+                  });
                });
             })
       );
