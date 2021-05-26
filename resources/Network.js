@@ -17,6 +17,10 @@ class Network extends EventEmitter {
 
       this._config = null;
       this._network = null;
+      // {NetworkRelay | NetworkRest | NetworkSocket}
+      // the underlying Network connection object actually performing the
+      // communications with the Server.
+      // Which one is specified in the config.appbuilder.networkType setting
 
       this._queueCount = 0;
       // {int} _queueCount
@@ -60,9 +64,13 @@ class Network extends EventEmitter {
          // When our Socket reconnects, be sure to flush any pending transactions.
          io.socket.on("connected", () => {
             this.queueFlush();
+            if (this.idConnectionCheck) {
+               clearTimeout(this.idConnectionCheck);
+               this.idConnectionCheck = null;
+            }
          });
       } else {
-         console.error("!!! Network.init() : Did not find io.socket() ");
+         console.error("!!! Network.init() : Did not find io.socket");
          window.addEventListener("online", () => this.queueFlush());
       }
 
@@ -153,7 +161,12 @@ class Network extends EventEmitter {
    _connectionCheck() {
       // if (!this.idConnectionCheck) {
       if (this.isNetworkConnected()) {
-         this.queueFlush();
+         this.queueFlush().catch(() => {
+            // on an error, we are still having connection issues
+            this.idConnectionCheck = setTimeout(() => {
+               this._connectionCheck();
+            }, 250);
+         });
          this.idConnectionCheck = null;
       } else {
          this.idConnectionCheck = setTimeout(() => {
@@ -353,7 +366,15 @@ class Network extends EventEmitter {
                         .then(() => {
                            processRequest(cb);
                         })
-                        .catch(cb);
+                        .catch((err) => {
+                           // if the err was due to a network connection error
+                           if (err && err.code == "E_TOMANYRETRIES") {
+                              cb(err);
+                              return;
+                           }
+                           // otherwise, try the next
+                           processRequest(cb);
+                        });
                   }
                };
 

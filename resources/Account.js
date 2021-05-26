@@ -18,12 +18,27 @@ class Account extends EventEmitter {
          this._config = UserConfig;
       }
 
+      this.AB.Network.on("account.logout", (context, err) => {
+         if (err) {
+            console.error(err);
+            return;
+         }
+         this.emit("logout");
+      });
+
       // this isn't actually an Async operation, so just resolve()
       return Promise.resolve();
    }
 
    language() {
       return this._config.languageCode;
+   }
+
+   logout() {
+      return this.AB.Network.post(
+         { url: "/auth/logout" },
+         { key: "account.logout", context: {} }
+      );
    }
 
    roles() {

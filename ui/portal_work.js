@@ -235,14 +235,20 @@ class PortalWork extends ClassUI {
             select: true,
             on: {
                onItemClick: function (id, event) {
-                  var item = this.getItem(id);
-                  webix.message(
-                     "Menu item: <i>" +
-                        item.label +
-                        "</i> <br/>Menu ID: <i>" +
-                        item.id +
-                        "</i>"
-                  );
+                  if (id == "3") {
+                     // NOTE: "this" here is the popup window:
+                     AB.Account.logout();
+                  } else {
+                     var item = this.getItem(id);
+                     webix.message(
+                        "Menu item: <i>" +
+                           item.label +
+                           "</i> <br/>Menu ID: <i>" +
+                           item.id +
+                           "</i>"
+                     );
+                  }
+
                   $$("userMenu").hide();
                },
             },
@@ -305,8 +311,9 @@ class PortalWork extends ClassUI {
                   sideBar.select(foundMenuEntry.id);
                   this.selectApplication(foundMenuEntry.id);
 
-                  var defaultPageID =
-                     this.AppState.lastPages[foundMenuEntry.abApplication.id];
+                  var defaultPageID = this.AppState.lastPages[
+                     foundMenuEntry.abApplication.id
+                  ];
                   DefaultPage = foundMenuEntry.abApplication.pages(
                      (p) => p.id === defaultPageID
                   )[0];
@@ -418,6 +425,16 @@ class PortalWork extends ClassUI {
             return PortalWorkInboxTaskWindow.init(this.AB);
          })
          .then(() => {
+            // Account Logout Alert:
+            this.AB.Account.on("logout", () => {
+               // Force a reload
+               window.location.reload();
+            });
+
+            this.AB.Network.on("reauth", () => {
+               window.location.reload();
+            });
+
             // Network and Queued operations Alert
             $$("network_icon").hide();
             this.AB.Network.on("queued", () => {

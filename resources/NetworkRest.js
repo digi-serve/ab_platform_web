@@ -196,6 +196,7 @@ class NetworkRest extends EventEmitter {
          var err = new Error(
             `Too many retries (${this.numRetries}) for ${params.url}`
          );
+         err.code = "E_TOMANYRETRIES";
          this.AB.Analytics.logError(err);
          if (jobResponse) {
             this._network.publishResponse(jobResponse, err);
@@ -293,6 +294,12 @@ class NetworkRest extends EventEmitter {
                   }
                   // if this is an req.ab.error() response:
                   if (packet && packet.status == "error") {
+                     // check if REAUTH Error:
+                     if (packet.id == 5 || packet.code == "E_REAUTH") {
+                        this._network.emit("reauth");
+                        return;
+                     }
+
                      this.AB.Analytics.logError(packet.data);
                      this.AB.error(packet.data);
                      if (jobResponse) {
