@@ -279,6 +279,20 @@ class ABFactory extends ABFactoryCore {
       });
    }
 
+   /**
+    * @method rules.isUUID
+    * evaluate a given value to see if it matches the format of a uuid
+    * @param {string} key
+    * @return {boolean}
+    */
+   isUUID(key) {
+      var checker = RegExp(
+         "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+         "i"
+      );
+      return checker.test(key);
+   }
+   
    merge(...params) {
       return _.merge(...params);
    }

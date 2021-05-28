@@ -580,7 +580,7 @@ module.exports = class ABObject extends ABObjectCore {
          var defaultField = this.fields((f) => f.fieldUseAsLabel())[0];
          if (defaultField) labelData = "{" + defaultField.id + "}";
          else
-            labelData = `${this.AB.Rule.isUUID(rowData.id) ? "ID: " : ""}${
+            labelData = `${this.AB.isUUID(rowData.id) ? "ID: " : ""}${
                rowData.id
             }`; // show id of row
       }
@@ -603,7 +603,7 @@ module.exports = class ABObject extends ABObjectCore {
       // if label is empty, then show .id
       if (!labelData.trim())
          labelData = labelData = `${
-            this.AB.Rules.isUUID(rowData.id) ? "ID: " : ""
+            this.AB.isUUID(rowData.id) ? "ID: " : ""
          }${rowData.id}`; // show id of row
 
       return labelData;
@@ -617,6 +617,6 @@ module.exports = class ABObject extends ABObjectCore {
       console.error(
          "ABObject.isUuid(): is depreciated.  directly reference AB.Rules.isUUID() instead."
       );
-      return this.AB.Rules.isUUID(text);
+      return this.AB.isUUID(text);
    }
 };
