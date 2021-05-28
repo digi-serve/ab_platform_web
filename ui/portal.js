@@ -47,6 +47,14 @@ class Portal extends ClassUI {
             }
          });
 
+         this.AB.Network.on("reauth", () => {
+            // on logout show Auth Portal
+            if (ShownPortal != PortalAuth) {
+               PortalAuth.show();
+               ShownPortal = PortalAuth;
+            }
+         });
+
          PortalWork.on("ready", () => {
             if (ShownPortal != PortalWork) {
                // when loading portal is done move to Work Portal

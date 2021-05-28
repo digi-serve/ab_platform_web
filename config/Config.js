@@ -103,6 +103,14 @@ class Config {
       return {};
    }
 
+   metaConfig() {
+      if (this._config && this._config.meta) {
+         return this._config.meta;
+      }
+      console.error("No Meta config found.");
+      return {};
+   }
+
    inboxConfig() {
       if (this._config && this._config.inbox) {
          return this._config.inbox;

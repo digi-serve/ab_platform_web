@@ -107,13 +107,13 @@ class PortalWork extends ClassUI {
                         onAfterFileAdd: () => {
                            $$("tmp_uploader").disable();
                         },
-                        onFileUpload: (item, response) => {
+                        onFileUpload: (/*item, response */) => {
                            // the file upload process has finished
                            // reload the page:
                            window.location.reload();
                            return false;
                         },
-                        onFileUploadError: (details, response) => {
+                        onFileUploadError: (details /*, response */) => {
                            // {obj} details
                            //   .file : {obj} file details hash
                            //   .name : {string} filename
@@ -234,7 +234,7 @@ class PortalWork extends ClassUI {
             autoheight: true,
             select: true,
             on: {
-               onItemClick: function (id, event) {
+               onItemClick: function (id /*, event */) {
                   if (id == "3") {
                      // NOTE: "this" here is the popup window:
                      AB.Account.logout();
@@ -425,16 +425,6 @@ class PortalWork extends ClassUI {
             return PortalWorkInboxTaskWindow.init(this.AB);
          })
          .then(() => {
-            // Account Logout Alert:
-            this.AB.Account.on("logout", () => {
-               // Force a reload
-               window.location.reload();
-            });
-
-            this.AB.Network.on("reauth", () => {
-               window.location.reload();
-            });
-
             // Network and Queued operations Alert
             $$("network_icon").hide();
             this.AB.Network.on("queued", () => {
@@ -461,6 +451,12 @@ class PortalWork extends ClassUI {
             setTimeout(() => {
                $$("menuTitle").resize();
             }, 200);
+
+            // Now attempt to flush any pending network operations:
+
+            this.AB.Network.queueFlush().catch((err) => {
+               console.error(err);
+            });
          });
    }
 

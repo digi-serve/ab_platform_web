@@ -6,6 +6,18 @@ class Account extends EventEmitter {
 
       this.isAuthenticated = false;
       this._config = null;
+
+      this._listRoles = null;
+      // {array}
+      // a list of all the Defined Roles in the Tenant's system.
+
+      this._listScopes = null;
+      // {array | null}
+      // a list of all the Defined Scopes in the Tenant's sytem.
+
+      this._listUsers = null;
+      // {array | null}
+      // a list of all the Defined Users in the Tenant's system.
    }
 
    init(AB) {
@@ -18,6 +30,13 @@ class Account extends EventEmitter {
          this._config = UserConfig;
       }
 
+      var MetaConfig = this.AB.Config.metaConfig();
+      if (MetaConfig) {
+         this._listRoles = MetaConfig.roles || [];
+         this._listScopes = MetaConfig.scopes || [];
+         this._listUsers = MetaConfig.users || [];
+      }
+
       this.AB.Network.on("account.logout", (context, err) => {
          if (err) {
             console.error(err);
@@ -26,7 +45,6 @@ class Account extends EventEmitter {
          this.emit("logout");
       });
 
-      // this isn't actually an Async operation, so just resolve()
       return Promise.resolve();
    }
 
@@ -45,15 +63,11 @@ class Account extends EventEmitter {
       return this._config.roles || [];
    }
    rolesAll() {
-      console.error(
-         "TODO: Account.rolesAll(): pull all the roles from the system."
-      );
-      return [];
+      return this._listRoles;
    }
 
    scopes() {
-      console.error("TODO: How is Account.scopes() supposed to work?");
-      return [];
+      return this._listScopes;
    }
 
    username() {
@@ -61,16 +75,7 @@ class Account extends EventEmitter {
    }
 
    userList() {
-      console.error(
-         "TODO: Account.userList(): pull all the users from the system."
-      );
-      return [];
-   }
-   usersAll() {
-      console.error(
-         "TODO: Account.usersAll(): refactor this call to use .userList()"
-      );
-      return this.userList();
+      return this._listUsers;
    }
 
    uuid() {

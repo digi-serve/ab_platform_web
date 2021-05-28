@@ -97,6 +97,11 @@ class ABFactory extends ABFactoryCore {
       // {obj} the provided interface for working with the ABDefinition table.
       // NOTE: on the web client, we simply perform web API calls to perform
       // the actions.  These are defined below.
+
+      this.on("error", (err) => {
+         // this simply prevents thrown errors if there are no listeners.
+         console.error(err);
+      });
    }
 
    /**
