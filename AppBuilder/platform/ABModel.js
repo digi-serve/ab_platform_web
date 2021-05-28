@@ -270,7 +270,7 @@ module.exports = class ABModel extends ABModelCore {
                return;
             }
             this.normalizeData(data.data);
-            resolve(data.data);
+            resolve(data);
          });
 
          this.AB.Network.get(
