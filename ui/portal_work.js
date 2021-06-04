@@ -453,10 +453,7 @@ class PortalWork extends ClassUI {
             }, 200);
 
             // Now attempt to flush any pending network operations:
-
-            this.AB.Network.queueFlush().catch((err) => {
-               console.error(err);
-            });
+            this.AB.Network._connectionCheck();
          });
    }
 

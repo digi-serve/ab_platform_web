@@ -246,9 +246,14 @@ class NetworkRest extends EventEmitter {
                   // err.status
                   // err.statusText
                   // err.responseText
+                  // err.message  {socket}
+                  // err.stack    {socket}
 
                   // if this is a network connection error, send the attempt again:
-                  if (err.statusText == "Request timeout") {
+                  if (
+                     err.statusText == "Request timeout" ||
+                     (err.message && err.message.indexOf("disconnected") > -1)
+                  ) {
                      //// Network Error: conneciton refused, access denied, etc...
                      this.AB.Analytics.log(
                         "NetworkRest._request():network connection error detected. Trying again"
@@ -313,7 +318,9 @@ class NetworkRest extends EventEmitter {
                   } else {
                      // unknown/unexpected error:
                      var error = new Error(
-                        `${err.status} ${err.statusText}: ${params.method} ${params.url}`
+                        `${err.status} ${err.statusText || err.message}: ${
+                           params.method
+                        } ${params.url}`
                      );
                      error.response = err.responseText;
                      error.text = err.statusText;
