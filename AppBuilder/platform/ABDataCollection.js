@@ -532,7 +532,6 @@ module.exports = class ABDataCollection extends ABDataCollectionCore {
    }
 
    get userScopes() {
-      console.error("TODO: refactor ABDataCollection.userScopes()");
       return this.AB.Account.scopes();
    }
 };

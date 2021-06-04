@@ -31,8 +31,7 @@ class Multilingual extends MLClass {
    }
 
    currentLanguage() {
-      console.error("Multilingual:currentLanguage(): figure this out.");
-      return "en";
+      return this.AB.Account.language();
    }
 
    label(key, altText, values = []) {

@@ -265,11 +265,19 @@ module.exports = class ABModel extends ABModelCore {
       return new Promise((resolve, reject) => {
          var jobID = this.AB.jobID();
          this.AB.Network.once(jobID, (context, err, data) => {
+            // context : {obj} any provided context data provided on the
+            //           this.AB.Network.get() call.
+            // err: {Error} any returned error message from api
+            // data: {obj} returned data from the model-get api in format:
+            //       {data: [], total_count: 1, pos: 0, offset: 0, limit: 0}
             if (err) {
                reject(err);
                return;
             }
             this.normalizeData(data.data);
+
+            // our web client DataCollections want the additional control
+            // format {data: [], total_count: 1, pos: 0, offset: 0, limit: 0}
             resolve(data);
          });
 
