@@ -286,11 +286,11 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
                _logic.onAfterColumnDrop(sourceId, targetId, event);
             },
             onAfterColumnShow: function (id) {
-               console.warn("!! ToDo: onAfterColumnShow()");
+               // console.warn("!! ToDo: onAfterColumnShow()");
                // $$(self.webixUiId.visibleFieldsPopup).showField(id);
             },
             onAfterColumnHide: function (id) {
-               console.warn("!! ToDo: onAfterColumnHide()");
+               // console.warn("!! ToDo: onAfterColumnHide()");
                // $$(self.webixUiId.visibleFieldsPopup).hideField(id);
             },
 

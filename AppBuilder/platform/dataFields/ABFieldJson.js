@@ -112,6 +112,10 @@ module.exports = class ABFieldJson extends ABFieldJsonCore {
       config.editor = "text";
       config.css = "textCell";
 
+      // when called by ABViewFormCustom, will need a .template() fn.
+      // currently we don't need to return anything so ...
+      config.template = () => "";
+
       return config;
    }
 
