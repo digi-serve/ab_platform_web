@@ -2,9 +2,10 @@ const ABObjectQuery = require("./ABObjectQuery");
 const ABDataCollectionCore = require("../core/ABDataCollectionCore");
 
 module.exports = class ABDataCollection extends ABDataCollectionCore {
-   // constructor(attributes, AB) {
-   //    super(attributes, AB);
-   // }
+   constructor(attributes, AB) {
+      super(attributes, AB);
+      this.setMaxListeners(0);
+   }
 
    /**
     * @method save()

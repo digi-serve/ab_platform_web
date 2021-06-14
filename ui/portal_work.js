@@ -163,7 +163,7 @@ class PortalWork extends ClassUI {
                                           // this.sidebarResize();
                                        },
                                        onAfterSelect: (id) => {
-                                          this.selectApplication(id);
+                                          // this.selectApplication(id);
                                        },
                                        onItemClick: (id) => {
                                           this.selectApplication(id);
@@ -561,6 +561,27 @@ class PortalWork extends ClassUI {
 
       $$("menuTitle").setValue(row.value);
       $$("menuTitle").resize();
+
+      // now everything is displayed
+      // default initial display to current activePage:
+      var selectedPage = null;
+      $$("appPages")
+         .queryView(
+            {
+               css: "activePage",
+            },
+            "all"
+         )
+         .forEach((p) => {
+            selectedPage = p;
+         });
+      this.showPage(selectedPage.data.abPage);
+
+      // hide the sidebar menu
+      var sideBar = $$("navSidebar");
+      if (sideBar.isVisible()) {
+         sideBar.hide();
+      }
    }
 
    /**

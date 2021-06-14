@@ -56,7 +56,7 @@ function toggleColorControl(value) {
    });
 }
 
-function updateDefaultList(ids, settings = {}) {
+function updateDefaultList(ids, settings = {}, L) {
    var optList = $$(ids.options)
       .find({})
       .map(function (opt) {
@@ -142,7 +142,7 @@ var ABFieldListComponent = new ABFieldComponent({
             labelWidth: 0,
             value: false,
             on: {
-               onChange: (newV, oldV) => {
+               onChange: (newV /* , oldV */) => {
                   if (newV == true) {
                      $$(ids.default).hide();
                      $$(ids.multipleDefault).show();
@@ -151,7 +151,7 @@ var ABFieldListComponent = new ABFieldComponent({
                      $$(ids.multipleDefault).hide();
                   }
 
-                  updateDefaultList(ids, field.settings);
+                  updateDefaultList(ids, field.settings, L);
                },
             },
          },
@@ -188,7 +188,7 @@ var ABFieldListComponent = new ABFieldComponent({
             editor: "text",
             editValue: "value",
             onClick: {
-               "ab-new-field-remove": (e, itemId, trg) => {
+               "ab-new-field-remove": (e, itemId /*, trg */) => {
                   // Remove option item
                   // check that item is in saved data already
                   var matches = (
@@ -260,13 +260,13 @@ var ABFieldListComponent = new ABFieldComponent({
             },
             on: {
                onAfterAdd: () => {
-                  updateDefaultList(ids, field.settings);
+                  updateDefaultList(ids, field.settings, L);
                },
                onAfterEditStop: () => {
-                  updateDefaultList(ids, field.settings);
+                  updateDefaultList(ids, field.settings, L);
                },
                onAfterDelete: () => {
-                  updateDefaultList(ids, field.settings);
+                  updateDefaultList(ids, field.settings, L);
                },
                onAfterRender: () => {
                   toggleColorControl($$(ids.hasColors).getValue());
@@ -383,8 +383,11 @@ var ABFieldListComponent = new ABFieldComponent({
          $$(ids.options).refresh();
 
          // update single/multiple default selector
+         var L = (...params) => {
+            this.AB.Multilingual.label(...params);
+         };
          setTimeout(() => {
-            updateDefaultList(ids, field.settings);
+            updateDefaultList(ids, field.settings, L);
          }, 10);
       },
 
@@ -443,8 +446,8 @@ var ABFieldListComponent = new ABFieldComponent({
          });
 
          // Un-translate options list
-         values.settings.options.forEach(function (opt) {
-            AB.Multilingual.unTranslate(opt, opt, ["text"]);
+         values.settings.options.forEach((opt) => {
+            this.AB.Multilingual.unTranslate(opt, opt, ["text"]);
          });
 
          // Set multiple default value
@@ -603,6 +606,9 @@ module.exports = class ABFieldList extends ABFieldListCore {
       var config = super.columnHeader(options);
       var field = this;
       var App = App;
+      var L = (...params) => {
+         this.AB.Multilingual.label(...params);
+      };
 
       // Multiple select list
       if (this.settings.isMultiple == true) {
@@ -728,6 +734,7 @@ module.exports = class ABFieldList extends ABFieldListCore {
       }
 
       options = options || {};
+      var L = App.Label;
 
       if (this.settings.isMultiple == true) {
          var placeholder = L(
@@ -764,7 +771,7 @@ module.exports = class ABFieldList extends ABFieldListCore {
          if (domNode && !readOnly && row.id && node) {
             domNode.addEventListener(
                "change",
-               (e) => {
+               (/* e */) => {
                   // update just this value on our current object.model
                   var values = {};
                   values[this.columnName] = this._Selectivity.selectivityGet(
@@ -901,7 +908,7 @@ module.exports = class ABFieldList extends ABFieldListCore {
       return detailComponentSetting;
    }
 
-   getValue(item, rowData) {
+   getValue(item /*, rowData */) {
       var values = {};
 
       if (!item) return values;

@@ -298,10 +298,7 @@ module.exports = class ABFieldUser extends ABFieldUserCore {
    }
 
    getUsers() {
-      console.error(
-         "REFACTOR: what is the context of this OP.User.userlist()?"
-      );
-      return OP.User.userlist().map((u) => {
+      return this.AB.Account.userList().map((u) => {
          var result = {
             id: u.username,
             image: u.image_id,

@@ -48,13 +48,23 @@ class ClassUIPage extends ClassUI {
    ui() {
       // NOTE: the .container === .id
       // so this REPLACES the container created by the portal_work
+      var placeholder = {};
+      if (this.page && this.page.isRoot()) {
+         // some pages can take a while to initialize.
+         // I bet
+         placeholder = {
+            // James:  here ya go.
+            view: "label",
+            label: "initializing ... James can make this look good!",
+         };
+      }
       return {
          view: "multiview",
          // container: this.containerID,
          css: "ab-main-container ab-generated-page",
          borderless: true,
          id: this.containerID,
-         cells: [{}],
+         cells: [placeholder],
          on: {
             // onViewChange: (prevId, nextId) => {
             //    this.resize();
@@ -78,31 +88,30 @@ class ClassUIPage extends ClassUI {
          return Promise.resolve();
       }
 
-      return (
-         Promise.resolve()
-            // 1) make sure all Application DataCollections have started
-            //    initialization.
-            .then(() => {
-               this.page.application.datacollectionsIncluded().forEach((dc) => {
-                  if (!dc) return;
+      // .init() returns a Promise
+      return new Promise((resolve /*, reject */) => {
+         // 1) make sure all Application DataCollections have started
+         //    initialization.
+         this.page.application.datacollectionsIncluded().forEach((dc) => {
+            if (!dc) return;
 
-                  dc.init();
-               });
-            })
-            // 2) Put Page AMP here?
-            .then(() => {})
-            // 3) Render all our Pages
-            .then(() => {
-               this.renderPage(this.page);
-            })
-            // 4) Make sure our Root Page is "shown"
-            .then(() => {
-               this.showPage();
-            })
-            .then(() => {
-               this.initialized = true;
-            })
-      );
+            dc.init();
+         });
+
+         // 2) Put Page AMP here?
+
+         // 3) Render all our Pages
+         // if (this.page.id != "5fea4e7b-f6ee-42da-a702-60d6d6c48f71")
+         this.renderPage(this.page);
+
+         // 4) After we are rendered, we are technically initialized
+         this.initialized = true;
+
+         // 5) Make sure our Root Page is "shown"
+         this.showPage();
+
+         resolve();
+      });
    }
 
    /**
@@ -202,7 +211,14 @@ class ClassUIPage extends ClassUI {
       // Keep the page component
       this.pageComponents[page.id] = component;
 
+      var myContainer = $$(this.containerID);
+      // {webix.ui}
+      // Referencing our container. Since we seem to make numerous references
+      // to this below, let's just pull it 1x.
+
       // James:
+      // this is pulled in from our previous v1 code. Not sure if it is still
+      // relevant.
       // TODO: review this and how this works in context of our Webix Only
       // Portal.
       // Also, notice how we are referencing the internal data of a Page object?
@@ -268,13 +284,19 @@ class ClassUIPage extends ClassUI {
                   oldView.destructor();
                }
                // else remove the view from our multiview
-               else if ($$(this.containerID)) {
-                  $$(this.containerID).removeView(page.id);
+               else if (myContainer) {
+                  myContainer.removeView(page.id);
                }
             }
 
             // Now create the New one (hidden)
-            webix.ui(popupTemplate).hide();
+            try {
+               webix.ui(popupTemplate).hide();
+            } catch (e) {
+               console.error("Error creating Page:", page);
+               console.error(e);
+               // debugger;
+            }
             break;
 
          case "page":
@@ -290,7 +312,7 @@ class ClassUIPage extends ClassUI {
                if (oldPage.config.view == "window") {
                   oldPage.destructor();
 
-                  $$(this.containerID).addView(ui);
+                  myContainer.addView(ui);
                }
                // else we want to rebuild it.
                else {
@@ -298,7 +320,9 @@ class ClassUIPage extends ClassUI {
                }
             }
             // else this is our first time so add it
-            else if ($$(this.containerID)) $$(this.containerID).addView(ui);
+            else if (myContainer) {
+               myContainer.addView(ui);
+            }
 
             break;
       }
@@ -312,9 +336,7 @@ class ClassUIPage extends ClassUI {
       });
 
       // Initial UI components
-      setTimeout(function () {
-         component.init();
-      }, 50);
+      component.init();
    }
 
    /**
@@ -323,13 +345,25 @@ class ClassUIPage extends ClassUI {
     * container should be displayed.
     */
    show() {
-      // TODO: figure out the this.initialized, and
-      if (!this.initialized) {
-         this.init(this.AB, true);
-      }
-
       var container = $$(this.containerID);
       if (container) {
+         if (!this.initialized) {
+            // this is our 1st time to show, so wait for our initial loading
+            // container to display, before causing it to be transformed into
+            // our Page.
+            var eventID = container.attachEvent("onViewShow", () => {
+               // only 1x
+               container.detachEvent(eventID);
+               // give ourselves some additional space to make sure animations
+               // are complete or operational before the .init() which can be
+               // resource intensive.
+               setTimeout(() => {
+                  this.init(this.AB, true);
+                  container.show();
+               }, 50);
+            });
+         }
+
          container.show();
       }
    }

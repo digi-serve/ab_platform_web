@@ -9,7 +9,9 @@ const ABViewRuleActionObjectUpdater = require("./ABViewRuleActionObjectUpdater")
 const ABFieldConnect = require("../../platform/dataFields/ABFieldConnect");
 const ObjectQueryBuilder = require("../ABViewQueryBuilderObjectFieldConditions");
 
-module.exports = class ABViewRuleActionFormRecordRuleUpdateConnected extends ABViewRuleActionObjectUpdater {
+module.exports = class ABViewRuleActionFormRecordRuleUpdateConnected extends (
+   ABViewRuleActionObjectUpdater
+) {
    constructor(App, idBase, currentForm) {
       super(App, idBase, currentForm);
       var L = App.Label;
@@ -79,7 +81,7 @@ module.exports = class ABViewRuleActionFormRecordRuleUpdateConnected extends ABV
       if (this.baseObject && this.baseObject.fields) {
          return this.baseObject.fields((f) => {
             return f.key == connectKey;
-         }, true);
+         });
       } else {
          return [];
       }

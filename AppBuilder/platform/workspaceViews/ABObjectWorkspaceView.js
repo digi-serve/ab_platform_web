@@ -12,9 +12,10 @@ module.exports = class ABObjectWorkspaceView {
 	}
 
 */
-      this.fromObj(attributes || {});
-
+      // Note: keep this before .fromObj()
       this.object = object;
+
+      this.fromObj(attributes || {});
 
       // multilingual fields: label
       this.object.translate(this, this, ["label"]);

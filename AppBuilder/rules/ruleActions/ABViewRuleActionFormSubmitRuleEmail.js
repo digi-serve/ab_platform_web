@@ -7,7 +7,9 @@ const ABViewRuleAction = require("../ABViewRuleAction");
 const ABFieldConnect = require("../../platform/dataFields/ABFieldConnect");
 const ABFieldEmail = require("../../platform/dataFields/ABFieldEmail");
 
-module.exports = class ABViewRuleActionFormSubmitRuleEmail extends ABViewRuleAction {
+module.exports = class ABViewRuleActionFormSubmitRuleEmail extends (
+   ABViewRuleAction
+) {
    /**
     * @param {object} App
     *      The shared App object that is created in OP.Component
@@ -521,16 +523,14 @@ module.exports = class ABViewRuleActionFormSubmitRuleEmail extends ABViewRuleAct
             var options = [];
 
             // get data collections who is query and contains email field
-            let dcQueries = this.currentForm.application.datacollections(
-               (dc) => {
-                  let obj = dc.datasource;
-                  return (
-                     dc.settings.isQuery &&
-                     obj &&
-                     obj.fields((f) => f.key == "email").length > 0
-                  );
-               }
-            );
+            let dcQueries = this.currentForm.AB.datacollections((dc) => {
+               let obj = dc.datasource;
+               return (
+                  dc.settings.isQuery &&
+                  obj &&
+                  obj.fields((f) => f.key == "email").length > 0
+               );
+            });
 
             dcQueries.forEach((dv) => {
                if (dv.datasource) {
@@ -659,14 +659,12 @@ module.exports = class ABViewRuleActionFormSubmitRuleEmail extends ABViewRuleAct
                            var dcId = dvIdAndFieldId.split("|")[0];
                            var fieldId = dvIdAndFieldId.split("|")[1];
 
-                           var dcQuery = this.currentForm.application.datacollections(
-                              (dc) => dc.id == dcId
-                           )[0];
+                           var dcQuery = this.currentForm.AB.datacollectionByID(
+                              dcId
+                           );
                            if (!dcQuery) return next();
 
-                           var field = dcQuery.datasource.fields(
-                              (f) => f.id == fieldId
-                           )[0];
+                           var field = dcQuery.datasource.fieldByID(fieldId);
                            if (!field) return next();
 
                            // get data of data collection

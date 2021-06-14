@@ -378,16 +378,14 @@ module.exports = class ABViewDataview extends ABViewDataviewCore {
                               -1
                         ) {
                            clicked = true;
-                           $(p.parentNode.parentNode)[0].classList.forEach(
-                              (c) => {
-                                 if (c.indexOf("ab-record-") > -1) {
-                                    // var record = parseInt(c.replace("ab-record-", ""));
-                                    var record = c.replace("ab-record-", "");
-                                    linkPage.changePage(editPage, record);
-                                    // com.logic.toggleTab(detailsTab, ids.component);
-                                 }
+                           p.parentNode.parentNode.classList.forEach((c) => {
+                              if (c.indexOf("ab-record-") > -1) {
+                                 // var record = parseInt(c.replace("ab-record-", ""));
+                                 var record = c.replace("ab-record-", "");
+                                 linkPage.changePage(editPage, record);
+                                 // com.logic.toggleTab(detailsTab, ids.component);
                               }
-                           );
+                           });
                            break;
                         }
                      }
@@ -398,16 +396,14 @@ module.exports = class ABViewDataview extends ABViewDataviewCore {
                            p.className &&
                            p.className.indexOf("webix_accordionitem") > -1
                         ) {
-                           $(p.parentNode.parentNode)[0].classList.forEach(
-                              (c) => {
-                                 if (c.indexOf("ab-record-") > -1) {
-                                    // var record = parseInt(c.replace("ab-record-", ""));
-                                    var record = c.replace("ab-record-", "");
-                                    linkPage.changePage(detailsPage, record);
-                                    // com.logic.toggleTab(detailsTab, ids.component);
-                                 }
+                           p.parentNode.parentNode.classList.forEach((c) => {
+                              if (c.indexOf("ab-record-") > -1) {
+                                 // var record = parseInt(c.replace("ab-record-", ""));
+                                 var record = c.replace("ab-record-", "");
+                                 linkPage.changePage(detailsPage, record);
+                                 // com.logic.toggleTab(detailsTab, ids.component);
                               }
-                           );
+                           });
                            break;
                         }
                      }

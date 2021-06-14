@@ -9,7 +9,9 @@
 //
 const UpdateConnected = require("./ABViewRuleActionFormRecordRuleUpdateConnected");
 
-module.exports = class ABViewRuleActionFormRecordRuleInsertConnected extends UpdateConnected {
+module.exports = class ABViewRuleActionFormRecordRuleInsertConnected extends (
+   UpdateConnected
+) {
    /**
     * @param {object} App
     *      The shared App object that is created in OP.Component
@@ -67,7 +69,7 @@ module.exports = class ABViewRuleActionFormRecordRuleInsertConnected extends Upd
 
       var connectionField = this.selectedField();
 
-      var condition = null; // our lookup condition
+      // var condition = null; // our lookup condition
 
       // we are going to create a new instance of the connected object
       // and make sure our .id is in the connected object's connectionField
@@ -81,10 +83,9 @@ module.exports = class ABViewRuleActionFormRecordRuleInsertConnected extends Upd
 
       if (newObjectValues.newRecords) {
          // now add our .id to the proper field in newObjectValues
-         let connectedObjectField;
-         connectedObjectField = connObj.fields((f) => {
-            return f.id == connectionField.settings.linkColumn;
-         }, true)[0];
+         let connectedObjectField = connObj.fieldByID(
+            connectionField.settings.linkColumn
+         );
 
          if (!connectedObjectField)
             return Promise.reject("No connected object field");
@@ -96,10 +97,9 @@ module.exports = class ABViewRuleActionFormRecordRuleInsertConnected extends Upd
          });
       } else {
          // now add our .id to the proper field in newObjectValues
-         let connectedObjectField;
-         connectedObjectField = connObj.fields((f) => {
-            return f.id == connectionField.settings.linkColumn;
-         }, true)[0];
+         let connectedObjectField = connObj.fieldByID(
+            connectionField.settings.linkColumn
+         );
 
          if (!connectedObjectField)
             return Promise.reject("No connected object field");
