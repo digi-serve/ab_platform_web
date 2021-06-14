@@ -37,6 +37,14 @@ import Config from "../config/Config.js";
 
 import ABFactory from "../AppBuilder/ABFactory";
 
+import tinymce from "../js/webix/extras/tinymce";
+import "tinymce/icons/default";
+import "tinymce/themes/silver";
+import "tinymce/plugins/link";
+import "tinymce/skins/ui/oxide/skin.min.css";
+import "tinymce/skins/ui/oxide/content.css"; // content.min.css ?
+import "tinymce/skins/content/default/content.min.css";
+
 import UI from "../ui/ui.js";
 
 class Bootstrap extends EventEmitter {
