@@ -5,8 +5,6 @@
  * well the main ABFactory object that will drive the rest of the applications.
  */
 
-var EventEmitter = require("events").EventEmitter;
-
 var Webix = require("../js/webix/webix.js");
 // NOTE: changed to require() so switching to webix_debug.js will work.
 import webixCSS from "../js/webix/webix.css";
@@ -15,27 +13,31 @@ if (!window.webix) {
    window.webix = Webix;
 }
 
-var QueryBuilder = require("../js/webix/components/querybuilder/querybuilder.min.js");
-// NOTE: changed to require() since import couldn't find the global webix object.
-import querybuilderCSS from "../js/webix/components/querybuilder/querybuilder.min.css";
+import ABFactory from "../AppBuilder/ABFactory";
+
+var EventEmitter = require("events").EventEmitter;
 
 import BootstrapCSS from "../node_modules/bootstrap/dist/css/bootstrap.min.css";
+
+import Config from "../config/Config.js";
 
 import FormIO from "../node_modules/formiojs/dist/formio.full.min.js";
 import FormIOFormCSS from "../node_modules/formiojs/dist/formio.form.min.css";
 import FormIOBuilderCSS from "../node_modules/formiojs/dist/formio.builder.min.css";
 // import FormIOCSS from "../node_modules/formiojs/dist/formio.full.min.css";
 
-import Selectivity from "../js/selectivity/selectivity.min.js";
-import selectivityCSS from "../js/selectivity/selectivity.min.css";
-
 import initConfig from "../init/initConfig.js";
 import initDiv from "../init/initDiv.js";
 // import initResources from "../init/initResources.js";
 
-import Config from "../config/Config.js";
+// import JSZipUtils from "jszip-utils/dist/jszip-utils.min.js";
 
-import ABFactory from "../AppBuilder/ABFactory";
+var QueryBuilder = require("../js/webix/components/querybuilder/querybuilder.min.js");
+// NOTE: changed QB to require() since import couldn't find the global webix object.
+import querybuilderCSS from "../js/webix/components/querybuilder/querybuilder.min.css";
+
+import Selectivity from "../js/selectivity/selectivity.min.js";
+import selectivityCSS from "../js/selectivity/selectivity.min.css";
 
 import tinymce from "../js/webix/extras/tinymce";
 import "tinymce/icons/default";

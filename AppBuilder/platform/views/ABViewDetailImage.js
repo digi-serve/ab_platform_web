@@ -129,23 +129,19 @@ module.exports = class ABViewDetailImage extends ABViewDetailImageCore {
             var imageTemplate = "";
 
             if (val || (!val && defaultImageUrl)) {
-               let imageUrl = (imageUrl =
-                  "/opsportal/image/" +
-                  this.application.name +
-                  "/" +
-                  (val || defaultImageUrl));
+               let imageUrl = field.urlImage(val || defaultImageUrl);
                let width =
                   field && field.settings.imageWidth
-                     ? field.settings.imageWidth + "px"
+                     ? `${field.settings.imageWidth}px`
                      : "200px";
                let height =
                   field && field.settings.imageHeight
-                     ? field.settings.imageHeight + "px"
+                     ? `${field.settings.imageHeight}px`
                      : "100%";
 
-               if (this.settings.height) height = this.settings.height + "px";
+               if (this.settings.height) height = `${this.settings.height}px`;
 
-               if (this.settings.width) width = this.settings.width + "px";
+               if (this.settings.width) width = `${this.settings.width}px`;
 
                imageTemplate =
                   `<div class="ab-image-data-field">` +

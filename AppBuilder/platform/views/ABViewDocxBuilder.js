@@ -4,6 +4,10 @@ const ABFieldConnect = require("../dataFields/ABFieldConnect");
 const ABFieldImage = require("../dataFields/ABFieldImage");
 const ABObjectQuery = require("../ABObjectQuery");
 
+const Docxtemplater = require("docxtemplater/build/docxtemplater.min.js");
+const JSZipUtils = require("jszip-utils/dist/jszip-utils.min.js");
+const JSZip = require("../../../js/jszip.min.js");
+
 const ABViewDocxBuilderPropertyComponentDefaults = ABViewDocxBuilderCore.defaultValues();
 
 function letUserDownload(blob, filename) {
@@ -732,7 +736,7 @@ module.exports = class ABViewDocxBuilder extends ABViewDocxBuilderCore {
                         if (imageVal && !images[imageVal]) {
                            tasks.push(
                               new Promise((ok, bad) => {
-                                 let imgUrl = `/opsportal/image/${this.application.name}/${imageVal}`;
+                                 let imgUrl = fieldImage.urlImage(imageVal); // `/opsportal/image/${this.application.name}/${imageVal}`;
 
                                  JSZipUtils.getBinaryContent(
                                     imgUrl,

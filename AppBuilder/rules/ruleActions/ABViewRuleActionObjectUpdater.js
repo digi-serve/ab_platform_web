@@ -548,9 +548,9 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                                  this.App,
                                  idBase + "_filter"
                               );
-                              FilterComponent.applicationLoad(
-                                 this.currentForm.application
-                              );
+                              // FilterComponent.applicationLoad(
+                              //    this.currentForm.application
+                              // );
                               FilterComponent.init({
                                  isRecordRule: true,
                                  onChange: _logic.onFilterChange,
