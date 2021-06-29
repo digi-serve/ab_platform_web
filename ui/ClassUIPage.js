@@ -417,6 +417,11 @@ class ClassUIPage extends ClassUI {
             // add the new pageID to our stack:
             // REMEMBER: last item is what should be show()n
             this.pageStack.push(pageID);
+         } else {
+            // in this case: we have items in our .pageStack, but we are told
+            // to return to our RootPage;
+            // clear out our .pageStack and we will return to our root
+            this.pageStack = [];
          }
       }
 
