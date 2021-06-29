@@ -322,7 +322,7 @@ class ABQL extends ABQLCore {
                value: this.objectID,
                options: options,
                on: {
-                  onChange: (newValue, oldValue) => {
+                  onChange: (newValue /*, oldValue */) => {
                      this.params = this.params || {};
                      if (newValue != this.params[pDef.name]) {
                         this.params[pDef.name] = newValue;
@@ -443,7 +443,7 @@ class ABQL extends ABQLCore {
                this.params[pDef.name] = condition;
 
                var shortHand = $$(this.ids.shorthand);
-               console.log(Filter.toShortHand());
+               // console.log(Filter.toShortHand());
                shortHand.define({
                   label: Filter.toShortHand(),
                });
@@ -451,11 +451,11 @@ class ABQL extends ABQLCore {
 
                // NOTE: the hidden element is a text field, so convert the
                // {condition object} => a string
-               var condition = $$(this.ids.condition);
-               condition.define({
+               var elCondition = $$(this.ids.condition);
+               elCondition.define({
                   value: JSON.stringify(this.params[pDef.name]),
                });
-               condition.refresh();
+               elCondition.refresh();
             });
 
             // create the initial condition value from our inputs.
@@ -493,12 +493,12 @@ class ABQL extends ABQLCore {
             break;
 
          case "objectValues":
-            // objectValues : shows a condences textual representation of the
+            // objectValues : shows a condenced textual representation of the
             // field => value changes.  Clicking on the text will show a popup
             // that allows you to add/remove additional field updates for
             // the current object.
 
-            var initialCond = "";
+            var initialValue = "";
             var Updater = new RowUpdater(null, myID);
             if (this.object) {
                Updater.objectLoad(this.object);
@@ -508,7 +508,7 @@ class ABQL extends ABQLCore {
             // displayed.  See the end of popUp() below:
             if (this.params && this.params[pDef.name]) {
                Updater.setValue(this.params[pDef.name]);
-               initialCond = JSON.stringify(this.params[pDef.name]);
+               initialValue = JSON.stringify(this.params[pDef.name]);
             }
 
             var popUp = () => {
@@ -563,7 +563,7 @@ class ABQL extends ABQLCore {
                   {
                      id: this.ids.shorthand,
                      view: "label",
-                     label: initialCond,
+                     label: initialValue,
                      on: {
                         onItemClick: function () {
                            popUp();
@@ -574,7 +574,7 @@ class ABQL extends ABQLCore {
                   {
                      id: this.ids.condition,
                      view: "text",
-                     value: initialCond,
+                     value: initialValue,
                      hidden: true,
                   },
                ],
