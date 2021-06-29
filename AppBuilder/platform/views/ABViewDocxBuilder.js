@@ -4,7 +4,8 @@ const ABFieldConnect = require("../dataFields/ABFieldConnect");
 const ABFieldImage = require("../dataFields/ABFieldImage");
 const ABObjectQuery = require("../ABObjectQuery");
 
-const Docxtemplater = require("docxtemplater/build/docxtemplater.min.js");
+const Docxtemplater = require("../../../js/docxtemplater.v3.0.12.min.js");
+const ImageModule = require("../../../js/docxtemplater-image-module.v3.0.2.min.js");
 const JSZipUtils = require("jszip-utils/dist/jszip-utils.min.js");
 const JSZip = require("../../../js/jszip.min.js");
 
