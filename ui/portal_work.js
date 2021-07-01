@@ -297,23 +297,25 @@ class PortalWork extends ClassUI {
             if (sideBar) {
                // search the Menu entries to see which one matches our
                // stored AppState
-               var foundMenuEntry = null;
-               var id = sideBar.getFirstId();
-               while (!foundMenuEntry && id) {
-                  let entry = sideBar.getItem(id);
-                  if (entry.abApplication.id == this.AppState.lastSelectedApp) {
-                     foundMenuEntry = entry;
-                  }
-                  id = sideBar.getNextId(id);
+               var foundMenuEntry = this.sidebarMenuEntryByID(
+                  this.AppState.lastSelectedApp
+               );
+               if (!foundMenuEntry) {
+                  // if we couldn't find the entry then our .lastSelectedApp
+                  // must be referencing an Application we no longer have
+                  // access to.
+                  // So just pick the 1st app:
+                  foundMenuEntry = this.sidebarMenuEntryByID(
+                     menu_data[0].abApplication.id
+                  );
                }
 
                if (foundMenuEntry) {
                   sideBar.select(foundMenuEntry.id);
                   this.selectApplication(foundMenuEntry.id);
 
-                  var defaultPageID = this.AppState.lastPages[
-                     foundMenuEntry.abApplication.id
-                  ];
+                  var defaultPageID =
+                     this.AppState.lastPages[foundMenuEntry.abApplication.id];
                   DefaultPage = foundMenuEntry.abApplication.pages(
                      (p) => p.id === defaultPageID
                   )[0];
@@ -468,21 +470,6 @@ class PortalWork extends ClassUI {
       return `page_${page.id || page}`;
    }
 
-   /**
-    * generate the Webix definition for a menu entry given the ABApplication
-    * the menu entry should represent.
-    * @param {ABApplication} app
-    * @return {obj} Webix.ui definition.
-    */
-   uiSideBarMenuEntry(app) {
-      return {
-         id: app.id,
-         icon: `fa ${app.icon}`,
-         value: app.label || app.name,
-         abApplication: app,
-      };
-   }
-
    selectApplication(id) {
       var row = $$("abSidebarMenu").getItem(id);
 
@@ -612,12 +599,52 @@ class PortalWork extends ClassUI {
       }
    }
 
+   /**
+    * @method sidebarMenuEntryByID()
+    * returns the sidebar menu entry that matches the given {menuID}
+    * @param {string|uuid} menuID
+    * @return {obj}
+    */
+   sidebarMenuEntryByID(menuID) {
+      var foundMenuEntry = null;
+      var sideBar = $$("abSidebarMenu");
+      if (sideBar) {
+         // search the Menu entries to see which one matches our
+         // stored AppState
+
+         var id = sideBar.getFirstId();
+         while (!foundMenuEntry && id) {
+            let entry = sideBar.getItem(id);
+            if (entry.abApplication.id == menuID) {
+               foundMenuEntry = entry;
+            }
+            id = sideBar.getNextId(id);
+         }
+      }
+      return foundMenuEntry;
+   }
+
    sidebarResize() {
       let sidebarMenu = $$("abSidebarMenu");
       var sideBarHeight = sidebarMenu.count() * 45 + 1;
       sidebarMenu.define("height", sideBarHeight);
       sidebarMenu.resize();
       // $$("abNavSidebarScrollView").resize(true);
+   }
+
+   /**
+    * generate the Webix definition for a menu entry given the ABApplication
+    * the menu entry should represent.
+    * @param {ABApplication} app
+    * @return {obj} Webix.ui definition.
+    */
+   uiSideBarMenuEntry(app) {
+      return {
+         id: app.id,
+         icon: `fa ${app.icon}`,
+         value: app.label || app.name,
+         abApplication: app,
+      };
    }
 }
 
