@@ -21,6 +21,7 @@ class PortalWork extends ClassUI {
                padding: 10,
                cols: [
                   {
+                     id: "portal_work_menu_sidebar",
                      view: "button",
                      type: "icon",
                      width: 50,
@@ -40,19 +41,34 @@ class PortalWork extends ClassUI {
                            }
                         }
                      },
+                     on: {
+                        onAfterRender() {
+                           ClassUI.CYPRESS_REF(this);
+                        },
+                     },
                   },
                   {
                      view: "label",
                      autowidth: true,
-                     id: "menuTitle",
+                     id: "portal_work_menu_title",
                      label: "AppBuilder",
                      align: "left",
+                     on: {
+                        onAfterRender() {
+                           ClassUI.CYPRESS_REF(this);
+                        },
+                     },
                   },
                   {},
                   {
-                     id: "appPages",
+                     id: "portal_work_menu_pages",
                      css: "appPages",
                      cols: [],
+                     on: {
+                        onAfterRender() {
+                           ClassUI.CYPRESS_REF(this);
+                        },
+                     },
                   },
                   {},
                   {
@@ -78,6 +94,11 @@ class PortalWork extends ClassUI {
                      click: () => {
                         PortalWorkInbox.show();
                      },
+                     on: {
+                        onAfterRender() {
+                           ClassUI.CYPRESS_REF(this);
+                        },
+                     },
                   },
                   {
                      id: "user_icon",
@@ -87,6 +108,11 @@ class PortalWork extends ClassUI {
                      width: 40,
                      popup: "userMenu",
                      /* Look at Popup created below for menu options and actions */
+                     on: {
+                        onAfterRender() {
+                           ClassUI.CYPRESS_REF(this);
+                        },
+                     },
                   },
                   /**
                    * NOTE: This is NOT supposed to Stay here.
@@ -133,6 +159,9 @@ class PortalWork extends ClassUI {
                            $$("tmp_uploader").enable();
                            return false;
                         },
+                        onAfterRender() {
+                           ClassUI.CYPRESS_REF(this);
+                        },
                      },
                   },
                ],
@@ -159,8 +188,13 @@ class PortalWork extends ClassUI {
                                     css: "webix_dark mainSidebar",
                                     data: [],
                                     on: {
-                                       onAfterRender: () => {
-                                          // this.sidebarResize();
+                                       onAfterRender() {
+                                          this.data.each((a) => {
+                                             ClassUI.CYPRESS_REF(
+                                                this.getItemNode(a.id),
+                                                a.id
+                                             );
+                                          });
                                        },
                                        onAfterSelect: (id) => {
                                           // this.selectApplication(id);
@@ -226,16 +260,20 @@ class PortalWork extends ClassUI {
          body: {
             view: "list",
             data: [
-               { id: "1", label: L("User Profile"), icon: "user" },
-               { id: "2", label: L("Switcheroo"), icon: "user-secret" },
-               { id: "3", label: L("Logout"), icon: "ban" },
+               { id: "user_profile", label: L("User Profile"), icon: "user" },
+               {
+                  id: "user_switcheroo",
+                  label: L("Switcheroo"),
+                  icon: "user-secret",
+               },
+               { id: "user_logout", label: L("Logout"), icon: "ban" },
             ],
             template: "<i class='fa-fw fa fa-#icon#'></i> #label#",
             autoheight: true,
             select: true,
             on: {
                onItemClick: function (id /*, event */) {
-                  if (id == "3") {
+                  if (id == "user_logout") {
                      // NOTE: "this" here is the popup window:
                      AB.Account.logout();
                   } else {
@@ -250,6 +288,12 @@ class PortalWork extends ClassUI {
                   }
 
                   $$("userMenu").hide();
+               },
+
+               onAfterRender() {
+                  this.data.each((a) => {
+                     ClassUI.CYPRESS_REF(this.getItemNode(a.id), a.id);
+                  });
                },
             },
          },
@@ -314,8 +358,9 @@ class PortalWork extends ClassUI {
                   sideBar.select(foundMenuEntry.id);
                   this.selectApplication(foundMenuEntry.id);
 
-                  var defaultPageID =
-                     this.AppState.lastPages[foundMenuEntry.abApplication.id];
+                  var defaultPageID = this.AppState.lastPages[
+                     foundMenuEntry.abApplication.id
+                  ];
                   DefaultPage = foundMenuEntry.abApplication.pages(
                      (p) => p.id === defaultPageID
                   )[0];
@@ -451,11 +496,17 @@ class PortalWork extends ClassUI {
             // !!! HACK: Leave this for James to figure out why Menu Title isn't proper
             // size on initial loading.
             setTimeout(() => {
-               $$("menuTitle").resize();
+               $$("portal_work_menu_title").resize();
             }, 200);
 
             // Now attempt to flush any pending network operations:
             this.AB.Network._connectionCheck();
+
+            // Be sure our UI elements that don't respond to onAfterRender()
+            // have their cypress references set:
+            ["portal_work_menu_pages"].forEach((eid) => {
+               ClassUI.CYPRESS_REF($$(eid));
+            });
          });
    }
 
@@ -521,7 +572,7 @@ class PortalWork extends ClassUI {
                var pageButton = $$(item);
 
                // Remove any other "activePage" entries
-               $$("appPages")
+               $$("portal_work_menu_pages")
                   .queryView(
                      {
                         css: "activePage",
@@ -542,17 +593,22 @@ class PortalWork extends ClassUI {
                // now trigger the page to display:
                this.showPage(pageButton.data.abPage);
             },
+            on: {
+               onAfterRender() {
+                  ClassUI.CYPRESS_REF(this, p.id);
+               },
+            },
          });
       });
-      webix.ui(pageButtons, $$("appPages"));
+      webix.ui(pageButtons, $$("portal_work_menu_pages"));
 
-      $$("menuTitle").setValue(row.value);
-      $$("menuTitle").resize();
+      $$("portal_work_menu_title").setValue(row.value);
+      $$("portal_work_menu_title").resize();
 
       // now everything is displayed
       // default initial display to current activePage:
       var selectedPage = null;
-      $$("appPages")
+      $$("portal_work_menu_pages")
          .queryView(
             {
                css: "activePage",
@@ -644,6 +700,13 @@ class PortalWork extends ClassUI {
          icon: `fa ${app.icon}`,
          value: app.label || app.name,
          abApplication: app,
+         // This is never called:
+         // on: {
+         //    onAfterRender() {
+         //       debugger;
+         //       ClassUI.CYPRESS_REF(this, app.id);
+         //    },
+         // },
       };
    }
 }

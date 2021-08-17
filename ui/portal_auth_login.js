@@ -35,12 +35,20 @@ class PortalAuthLogin extends ClassUI {
                            height: 32,
                            template:
                               "<span class='webix_invalid'>Error Message Here</span>",
+                           on: {
+                              onAfterRender() {
+                                 ClassUI.CYPRESS_REF(this);
+                              },
+                           },
                         },
                         {
                            id: "portal_auth_login_form_tenantList",
                            view: "select",
                            label: "Tenant",
                            name: "tenant",
+                           attributes: {
+                              "data-cy": "portal_auth_login_form_tenantList",
+                           },
                            value: 1,
                            options: [
                               { id: 1, value: "Master" },
@@ -52,11 +60,14 @@ class PortalAuthLogin extends ClassUI {
                            label: "Email",
                            name: "email",
                            id: "email",
+                           attributes: {
+                              "data-cy": "portal_auth_login_form_email",
+                           },
                            required: true,
                            validate: webix.rules.isEmail,
                            invalidMessage: "Please enter a valid email!",
                            on: {
-                              onBlur: function () {
+                              onBlur() {
                                  // console.log("Validating email", this);
                                  // var result = this.validate(); // validate only this field and show warning message under field if invalid
                                  if (this.$scope) this.$scope.validateForm();
@@ -68,12 +79,15 @@ class PortalAuthLogin extends ClassUI {
                            type: "password",
                            label: "Password",
                            name: "password",
+                           attributes: {
+                              "data-cy": "portal_auth_login_form_password",
+                           },
                            required: true,
                            validate: webix.rules.isNotEmpty,
                            invalidMessage: "Please enter your password!",
                            validateEvent: "key",
                            on: {
-                              onBlur: function () {
+                              onBlur() {
                                  // console.log("Validating password");
                                  this.validate();
                                  if (this.$scope) this.$scope.validateForm();
@@ -93,9 +107,9 @@ class PortalAuthLogin extends ClassUI {
                                  view: "button",
                                  label: "Login",
                                  type: "form",
-                                 id: "loginFormSubmitButton",
+                                 id: "portal_auth_login_form_submit",
                                  width: 150,
-                                 click: function () {
+                                 click() {
                                     var form = $$("portal_auth_login_form");
                                     if (form.validate()) {
                                        var values = form.getValues();
@@ -112,8 +126,15 @@ class PortalAuthLogin extends ClassUI {
                                              key:
                                                 "portal_auth_login" /*, context:{} */,
                                           }
-                                       );
+                                       ).catch((err) => {
+                                          console.log(err);
+                                       });
                                     }
+                                 },
+                                 on: {
+                                    onAfterRender() {
+                                       ClassUI.CYPRESS_REF(this);
+                                    },
                                  },
                               },
                            ],
@@ -178,7 +199,7 @@ class PortalAuthLogin extends ClassUI {
 
                   case "EFAILEDATTEMPTS":
                      this.error(err.message);
-                     $$("loginFormSubmitButton").hide();
+                     $$("portal_auth_login_form_submit").hide();
                      break;
 
                   default:
