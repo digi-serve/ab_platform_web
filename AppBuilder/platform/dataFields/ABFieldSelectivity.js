@@ -38,6 +38,9 @@ module.exports = class ABFieldSelectivity extends ABField {
    selectivityRender(domNode, settings, App, row) {
       if (domNode == null) return;
 
+      var cypress = settings.dataCy || "";
+      domNode.setAttribute("data-cy", cypress);
+
       // setting up our specific settings:
       settings = settings || {};
       for (var dv in defaultSettings) {

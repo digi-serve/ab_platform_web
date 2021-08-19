@@ -1,6 +1,7 @@
 const ABViewFormComponentCore = require("../../core/views/ABViewFormComponentCore");
 
-const ABViewFormFieldPropertyComponentDefaults = ABViewFormComponentCore.defaultValues();
+const ABViewFormFieldPropertyComponentDefaults =
+   ABViewFormComponentCore.defaultValues();
 
 module.exports = class ABViewFormComponent extends ABViewFormComponentCore {
    // constructor(values, application, parent, defaultValues) {
@@ -114,6 +115,43 @@ module.exports = class ABViewFormComponent extends ABViewFormComponentCore {
          if (this.settings.disable == 1) {
             _ui.disabled = true;
          }
+
+         // add data-cy to form element for better testing code
+         _ui.on = {
+            onAfterRender() {
+               if (this.getList) {
+                  var popup = this.getPopup();
+                  if (!popup) return;
+                  field.settings.options.forEach((option) => {
+                     if (!option) return;
+                     var node = popup.$view.querySelector(
+                        "[webix_l_id='" + option.id + "']"
+                     );
+                     if (!node) return;
+                     node.setAttribute(
+                        "data-cy",
+                        field.key +
+                           "-options-" +
+                           option.text.replace(" ", "") +
+                           "-" +
+                           option.id +
+                           "-" +
+                           form.id
+                     );
+                  });
+               }
+               this.getInputNode().setAttribute(
+                  "data-cy",
+                  field.key +
+                     "-" +
+                     field.columnName.replace(" ", "") +
+                     "-" +
+                     field.id +
+                     "-" +
+                     form.id
+               );
+            },
+         };
 
          // this may be needed if we want to format data at this point
          // if (field.format) data = field.format(data);

@@ -1,6 +1,7 @@
 const ABViewFormButtonCore = require("../../core/views/ABViewFormButtonCore");
 
-const ABViewFormButtonPropertyComponentDefaults = ABViewFormButtonCore.defaultValues();
+const ABViewFormButtonPropertyComponentDefaults =
+   ABViewFormButtonCore.defaultValues();
 
 module.exports = class ABViewFormButton extends ABViewFormButtonCore {
    // constructor(values, application, parent, defaultValues) {
@@ -206,6 +207,8 @@ module.exports = class ABViewFormButton extends ABViewFormButtonCore {
          component: App.unique(idBase + "_component"),
       };
 
+      var form = this.parentFormComponent();
+
       var L = App.Label;
 
       var _ui = {
@@ -233,6 +236,14 @@ module.exports = class ABViewFormButton extends ABViewFormButtonCore {
                click: function () {
                   _logic.onCancel(this);
                },
+               on: {
+                  onAfterRender: function () {
+                     this.getInputNode().setAttribute(
+                        "data-cy",
+                        "button-cancel-" + form.id
+                     );
+                  },
+               },
             },
             {
                width: 10,
@@ -251,6 +262,14 @@ module.exports = class ABViewFormButton extends ABViewFormButtonCore {
                click: function () {
                   _logic.onClear(this);
                },
+               on: {
+                  onAfterRender: function () {
+                     this.getInputNode().setAttribute(
+                        "data-cy",
+                        "button-reset-" + form.id
+                     );
+                  },
+               },
             },
             {
                width: 10,
@@ -268,6 +287,14 @@ module.exports = class ABViewFormButton extends ABViewFormButtonCore {
             value: this.settings.saveLabel || L("ab.common.save", "*Save"),
             click: function () {
                _logic.callbacks.onSaveClick(this);
+            },
+            on: {
+               onAfterRender: function () {
+                  this.getInputNode().setAttribute(
+                     "data-cy",
+                     "button-save-" + form.id
+                  );
+               },
             },
          });
       }

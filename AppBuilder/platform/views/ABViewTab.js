@@ -794,6 +794,27 @@ module.exports = class ABViewTab extends ABViewTabCore {
                         height: 60,
                         type: "bottom",
                         css: this.settings.darkTheme ? "webix_dark" : "",
+                        on: {
+                           onAfterRender: () => {
+                              this.views((view) => {
+                                 var node = $$(
+                                    ids.component
+                                 ).$view.querySelector(
+                                    '[button_id="' + view.id + '"]'
+                                 );
+                                 if (!node) return;
+                                 node.setAttribute(
+                                    "data-cy",
+                                    "tab-" +
+                                       view.label.replace(" ", "") +
+                                       "-" +
+                                       view.id +
+                                       "-" +
+                                       this.id
+                                 );
+                              });
+                           },
+                        },
                      },
                      multiview: {
                         height: this.settings.height,

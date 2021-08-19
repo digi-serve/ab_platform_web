@@ -126,8 +126,7 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
                // we don't want to send a toggle event because it triggers saves to the database
                $$(ids.pages).checkItem(id);
                webix.message({
-                  text:
-                     "Item comtains submenu, please remove items in submenu before removing.",
+                  text: "Item comtains submenu, please remove items in submenu before removing.",
                   type: "error",
                   expire: 10000,
                });
@@ -986,8 +985,21 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
             this.ClearPagesInView(Menu);
             if (this.settings.order && this.settings.order.length) {
                this.AddPagesToView(Menu, this.settings.order);
-               // } else if (this.settings.pages && this.settings.pages.length) {
-               //    this.AddPagesToView(Menu, this.settings.pages);
+               var containerId = this.id;
+               Menu.data.each((item) => {
+                  var node = Menu.getItemNode(item.id);
+                  if (node) {
+                     node.setAttribute(
+                        "data-cy",
+                        "menu-item-" +
+                           item.value.replace(" ", "") +
+                           "-" +
+                           item.id +
+                           "-" +
+                           containerId
+                     );
+                  }
+               });
             }
          }
       };
