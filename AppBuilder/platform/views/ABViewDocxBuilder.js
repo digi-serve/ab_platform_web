@@ -462,6 +462,15 @@ module.exports = class ABViewDocxBuilder extends ABViewDocxBuilderCore {
                click: () => {
                   _logic.renderFile();
                },
+               on: {
+                  // Add data-cy attribute for cypress tests
+                  onAfterRender:()=>{
+                     const dataCy = `docx-${buttonLabelText.replace(/\s/g, '')}-${this.id}`
+                     document.querySelector(`[view_id=${ids.button}`)
+                        .querySelector('button')
+                        .setAttribute('data-cy', dataCy);
+                 },
+               },
             },
             {
                id: ids.noFile,
