@@ -117,6 +117,15 @@ module.exports = class ABViewDetailCustom extends ABViewDetailCustomCore {
       component.ui.borderless = true;
       component.ui.template = template;
 
+      component.ui.on = {
+         //Add data-cy attribute for Cypress Testing
+         onAfterRender: () => {
+            const dataCy = `detailCustom-${field?.label?.replace(/\s/g,'')}-${field?.id}`;
+            document.querySelector(`[view_id="${ids.component}"]`)
+               ?.setAttribute('data-cy', dataCy);
+         }
+      };
+
       // make sure each of our child views get .init() called
       component.init = (options) => {};
 
