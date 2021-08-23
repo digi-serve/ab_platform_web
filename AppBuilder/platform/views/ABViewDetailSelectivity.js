@@ -110,9 +110,8 @@ module.exports = class ABViewDetailSelectivity extends ABViewDetailSelectivityCo
       component.ui.on = {
          //Add data-cy attribute for Cypress Testing
          onAfterRender: () => {
-               const dataCy = `detailSelectivity-${field?.label?.replace(/\s/g,'')}-${field?.id}`;
-               document.querySelector(`[view_id="${ids.component}"]`)
-                  ?.setAttribute('data-cy', dataCy);
+            const dataCy = `detailSelectivity-${field?.label?.replace(/\s/g,'')}-${field?.id}`;
+            $$(ids.component)?.$view.setAttribute('data-cy', dataCy);
          }
       };
 

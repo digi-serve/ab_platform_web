@@ -94,8 +94,7 @@ module.exports = class ABViewDetailCheckbox extends ABViewDetailCheckboxCore {
          //Add data-cy attribute for Cypress Testing
          onAfterRender: () => {
             const dataCy = `detailCheckbox-${field?.label?.replace(/\s/g,'')}-${field?.id}`;
-            document.querySelector(`[view_id="${ids.component}"]`)
-               ?.setAttribute('data-cy', dataCy);
+            $$(ids.component)?.$view.setAttribute('data-cy', dataCy);
          }
       };
 
