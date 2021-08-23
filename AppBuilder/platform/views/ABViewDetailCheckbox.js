@@ -81,6 +81,7 @@ module.exports = class ABViewDetailCheckbox extends ABViewDetailCheckboxCore {
     */
    component(App, idPrefix) {
       var component = super.component(App);
+      var field = this.field();
 
       var idBase = "ABViewDetailCheckbox_" + (idPrefix || "") + this.id;
       var ids = {
@@ -88,6 +89,14 @@ module.exports = class ABViewDetailCheckbox extends ABViewDetailCheckboxCore {
       };
 
       component.ui.id = ids.component;
+
+      component.ui.on = {
+         //Add data-cy attribute for Cypress Testing
+         onAfterRender: () => {
+            const dataCy = `detailCheckbox-${field?.label?.replace(/\s/g,'')}-${field?.id}`;
+            $$(ids.component)?.$view.setAttribute('data-cy', dataCy);
+         }
+      };
 
       return {
          ui: component.ui,

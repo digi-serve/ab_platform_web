@@ -124,6 +124,14 @@ module.exports = class ABViewDetailImage extends ABViewDetailImageCore {
       // if (this.settings.width)
       // 	component.ui.width = this.settings.width;
 
+      component.ui.on = {
+         //Add data-cy attribute for Cypress Testing
+         onAfterRender: () => {
+            const dataCy = `detailImage-${field?.label?.replace(/\s/g,'')}-${field?.id}`;
+            $$(ids.component)?.$view.setAttribute('data-cy', dataCy);
+         }
+      };
+
       var _logic = {
          setValue: (val) => {
             var imageTemplate = "";

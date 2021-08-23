@@ -98,7 +98,7 @@ module.exports = class ABViewDetailText extends ABViewDetailTextCore {
     */
    component(App, idPrefix) {
       var component = super.component(App);
-
+      var field = this.field();
       var idBase = "ABViewDetailText_" + (idPrefix || "") + this.id;
       var ids = {
          component: App.unique(idBase + "_component"),
@@ -109,6 +109,14 @@ module.exports = class ABViewDetailText extends ABViewDetailTextCore {
       component.ui.css = "ab-text";
 
       if (this.settings.height) component.ui.height = this.settings.height;
+
+      component.ui.on = {
+         //Add data-cy attribute for Cypress Testing
+         onAfterRender: () => {
+            const dataCy = `detailText-${field?.label?.replace(/\s/g,'')}-${field?.id}`;
+            $$(ids.component)?.$view.setAttribute('data-cy', dataCy);
+         }
+      };
 
       return {
          ui: component.ui,
