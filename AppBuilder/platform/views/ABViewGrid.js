@@ -1354,6 +1354,17 @@ module.exports = class ABViewGrid extends ABViewGridCore {
 
          if ($$(DataTable.ui.id)) {
             $$(DataTable.ui.id).adjust();
+            //set cy data
+            $$(DataTable.ui.id).$view.setAttribute("data-cy", DataTable.idBase);
+
+            for (const key in ids) {
+              if (Object.hasOwnProperty.call(ids, key)) {
+                let element = (ids[key]).toString()
+                if ( $$(element) ) {
+                  $$(element).$view.setAttribute("data-cy", element);
+                }
+              }
+            }
          }
 
          var dv = this.datacollection;
