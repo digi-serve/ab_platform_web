@@ -412,6 +412,18 @@ module.exports = class ABViewDataview extends ABViewDataviewCore {
             }
          }
 
+         //Add data-cy attributes for cypress tests
+         Layout.$view.setAttribute('data-cy', `dataview-container-${this.id}`)
+
+         Layout.getChildViews().forEach((child, i) => {
+            const id = rows[i + this._startPos]['id'];
+            const view = child.$view;
+            view.querySelector('.webix_accordionitem_body')
+               .setAttribute('data-cy', `dataview-item-${id}`);
+            view.querySelector('.webix_accordionitem_button')
+               .setAttribute('data-cy', `dataview-item-button-${id}`);
+         });
+
          com.logic.ready();
       };
 
