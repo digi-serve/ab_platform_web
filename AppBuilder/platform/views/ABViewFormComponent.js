@@ -122,7 +122,7 @@ module.exports = class ABViewFormComponent extends ABViewFormComponentCore {
                if (this.getList) {
                   var popup = this.getPopup();
                   if (!popup) return;
-                  field.settings.options.forEach((option) => {
+                  field.settings.options?.forEach((option) => {
                      if (!option) return;
                      var node = popup.$view.querySelector(
                         "[webix_l_id='" + option.id + "']"
