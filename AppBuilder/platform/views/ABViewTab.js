@@ -806,7 +806,7 @@ module.exports = class ABViewTab extends ABViewTabCore {
                                  node.setAttribute(
                                     "data-cy",
                                     "tab " +
-                                       view.name.replace(" ", "") +
+                                       view.name +
                                        " " +
                                        view.id +
                                        " " +

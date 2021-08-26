@@ -130,19 +130,13 @@ module.exports = class ABViewFormComponent extends ABViewFormComponentCore {
                      if (!node) return;
                      node.setAttribute(
                         "data-cy",
-                        field.key + " options " + option.id + " " + form.id
+                        `${field.key} options ${option.id} ${field.id} ${form.id}`
                      );
                   });
                }
                this.getInputNode().setAttribute(
                   "data-cy",
-                  field.key +
-                     " " +
-                     field.columnName.replace(" ", "") +
-                     " " +
-                     field.id +
-                     " " +
-                     form.id
+                  `${field.key} ${field.columnName} ${field.id} ${form.id}`
                );
             },
          };

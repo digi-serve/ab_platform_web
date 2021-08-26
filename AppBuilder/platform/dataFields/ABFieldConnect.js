@@ -834,12 +834,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             editPage: options.editPage,
             isLabelHidden: options.isLabelHidden,
             additionalText: options.additionalText,
-            dataCy:
-               this.key +
-               " " +
-               this.columnName.replace(" ", "") +
-               " " +
-               this.id,
+            dataCy: this.key + " " + this.columnName + " " + this.id,
             ajax: {
                url: "It will call url in .getOptions function", // require
                minimumInputLength: 0,
