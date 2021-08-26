@@ -805,11 +805,11 @@ module.exports = class ABViewTab extends ABViewTabCore {
                                  if (!node) return;
                                  node.setAttribute(
                                     "data-cy",
-                                    "tab-" +
-                                       view.label.replace(" ", "") +
-                                       "-" +
+                                    "tab " +
+                                       view.name.replace(" ", "") +
+                                       " " +
                                        view.id +
-                                       "-" +
+                                       " " +
                                        this.id
                                  );
                               });

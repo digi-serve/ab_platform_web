@@ -985,20 +985,17 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
             this.ClearPagesInView(Menu);
             if (this.settings.order && this.settings.order.length) {
                this.AddPagesToView(Menu, this.settings.order);
-               var containerId = this.id;
                Menu.data.each((item) => {
                   var node = Menu.getItemNode(item.id);
-                  if (node) {
-                     node.setAttribute(
-                        "data-cy",
-                        "menu-item-" +
-                           item.value.replace(" ", "") +
-                           "-" +
-                           item.id +
-                           "-" +
-                           containerId
-                     );
-                  }
+                  if (!node) return;
+                  // get linked page/tab info so we can use its name in the data-cy
+                  var viewInfo = this.application.views((view) => {
+                     return view.id == item.id;
+                  })[0];
+                  node.setAttribute(
+                     "data-cy",
+                     `menu-item ${viewInfo.name} ${item.id} ${this.id}`
+                  );
                });
             }
          }

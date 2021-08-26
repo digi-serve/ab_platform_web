@@ -122,7 +122,7 @@ module.exports = class ABViewFormComponent extends ABViewFormComponentCore {
                if (this.getList) {
                   var popup = this.getPopup();
                   if (!popup) return;
-                  field.settings.options?.forEach((option) => {
+                  this.getList().data.each((option) => {
                      if (!option) return;
                      var node = popup.$view.querySelector(
                         "[webix_l_id='" + option.id + "']"
@@ -130,24 +130,18 @@ module.exports = class ABViewFormComponent extends ABViewFormComponentCore {
                      if (!node) return;
                      node.setAttribute(
                         "data-cy",
-                        field.key +
-                           "-options-" +
-                           option.text.replace(" ", "") +
-                           "-" +
-                           option.id +
-                           "-" +
-                           form.id
+                        field.key + " options " + option.id + " " + form.id
                      );
                   });
                }
                this.getInputNode().setAttribute(
                   "data-cy",
                   field.key +
-                     "-" +
+                     " " +
                      field.columnName.replace(" ", "") +
-                     "-" +
+                     " " +
                      field.id +
-                     "-" +
+                     " " +
                      form.id
                );
             },

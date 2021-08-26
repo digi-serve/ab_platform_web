@@ -240,7 +240,7 @@ module.exports = class ABViewFormButton extends ABViewFormButtonCore {
                   onAfterRender: function () {
                      this.getInputNode().setAttribute(
                         "data-cy",
-                        "button-cancel-" + form.id
+                        "button cancel " + form.id
                      );
                   },
                },
@@ -266,7 +266,7 @@ module.exports = class ABViewFormButton extends ABViewFormButtonCore {
                   onAfterRender: function () {
                      this.getInputNode().setAttribute(
                         "data-cy",
-                        "button-reset-" + form.id
+                        "button reset " + form.id
                      );
                   },
                },
@@ -292,7 +292,7 @@ module.exports = class ABViewFormButton extends ABViewFormButtonCore {
                onAfterRender: function () {
                   this.getInputNode().setAttribute(
                      "data-cy",
-                     "button-save-" + form.id
+                     "button save " + form.id
                   );
                },
             },

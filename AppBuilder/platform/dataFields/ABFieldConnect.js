@@ -836,9 +836,9 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             additionalText: options.additionalText,
             dataCy:
                this.key +
-               "-" +
+               " " +
                this.columnName.replace(" ", "") +
-               "-" +
+               " " +
                this.id,
             ajax: {
                url: "It will call url in .getOptions function", // require
