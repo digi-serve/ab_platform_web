@@ -95,9 +95,18 @@ module.exports = class ABViewFormCustom extends ABViewFormCustomCore {
       let height = 38;
       if (field instanceof ABFieldImage) {
          if (field.settings.useHeight) {
-            height = parseInt(field.settings.imageHeight) || DEFAULT_HEIGHT;
+            if (settings.labelPosition == "top") {
+               height = parseInt(field.settings.imageHeight) || DEFAULT_HEIGHT;
+               height += 38;
+            } else {
+               height = parseInt(field.settings.imageHeight) || DEFAULT_HEIGHT;
+            }
+         } else if (settings.labelPosition == "top") {
+            height = DEFAULT_HEIGHT + 38;
          } else {
-            height = DEFAULT_HEIGHT + 300;
+            if (DEFAULT_HEIGHT > 38) {
+               height = DEFAULT_HEIGHT;
+            }
          }
       } else if (
          settings.showLabel == true &&
@@ -107,7 +116,9 @@ module.exports = class ABViewFormCustom extends ABViewFormCustomCore {
       }
 
       var template = (
-         '<div class="customField">' +
+         '<div class="customField ' +
+         settings.labelPosition +
+         '">' +
          templateLabel +
          "#template#" +
          "</div>"
@@ -144,7 +155,7 @@ module.exports = class ABViewFormCustom extends ABViewFormCustomCore {
             template: template,
             height: height,
             onClick: {
-               customField: (id, e, trg) => {
+               customField: (evt, e, trg) => {
                   if (this.settings.disable == 1) return;
 
                   var rowData = {};
@@ -157,7 +168,7 @@ module.exports = class ABViewFormCustom extends ABViewFormCustomCore {
 
                   // var node = $$(ids.component).$view;
                   var node = $$(trg).getParentView().$view;
-                  field.customEdit(rowData, App, node, ids.component);
+                  field.customEdit(rowData, App, node, ids.component, evt);
                },
             },
          },

@@ -121,7 +121,7 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
          },
          dragColumn: true,
          on: {
-            onBeforeSelect: function (data, preserve) {
+            onBeforeSelect: function(data, preserve, evt) {
                var skippable = [
                   "appbuilder_select_item",
                   "appbuilder_view_detail",
@@ -352,20 +352,9 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
 
             var displayRecords = [];
 
-            let verticalScrollState = DataTable.getScrollState().y,
-               rowHeight = DataTable.config.rowHeight,
-               height = DataTable.$view.querySelector(".webix_ss_body")
-                  .clientHeight,
-               startRecIndex = Math.floor(verticalScrollState / rowHeight),
-               endRecIndex = startRecIndex + DataTable.getVisibleCount(),
-               index = 0;
-
-            DataTable.data.order.each(function (id) {
-               if (id != null && startRecIndex <= index && index <= endRecIndex)
-                  displayRecords.push(id);
-
-               index++;
-            });
+            DataTable.eachRow(function(row) {
+               displayRecords.push(row);
+            }, false);
 
             var editable = settings.isEditable;
             if (DataTable.config.accessLevel < 2) {
@@ -1527,7 +1516,7 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
             ) {
                tip = obj[columnName + "__relation"].text;
             } else if (imageFields.indexOf(columnName) != -1) {
-               if (obj[columnName] == null) {
+               if (obj[columnName] == null || obj[columnName] == "") {
                   return "";
                } else {
                   // TODO: we need to get this URL from the ABFieldImage object!
