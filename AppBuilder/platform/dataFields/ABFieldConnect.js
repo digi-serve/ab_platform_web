@@ -30,7 +30,8 @@ var defaultValues = ABFieldConnectCore.defaultValues();
 
 function populateSelect(populate, callback) {
    var options = [];
-   ABFieldConnectComponent.CurrentApplication.objectsIncluded().forEach((o) => {
+      
+   ABFieldConnectComponent.CurrentApplication.objects().forEach((o) => {
       options.push({ id: o.id, value: o.label });
    });
 
@@ -884,7 +885,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                         var filter = {
                            key: options.filterKey,
                            rule: "equals",
-                           value: parentVal.uuid
+                           value: parentVal[options.filterColumn]
                         };
                         combineFilters.rules.push(filter);
                      }

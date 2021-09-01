@@ -23,9 +23,13 @@ function _onShow(App, compId, instance, component) {
    let filterValue = null;
    // we also need the id of the field that we are going to filter on
    let filterKey = null;
-   // the value stored is hash1:hash2 hash1 = component view id of the element
-   // we want to get the value from and hash2 = the id of the field we are using
-   // to filter our options
+   // finally if this is a custom foreign key we need the stored columnName by
+   // default uuid is passed for all non CFK
+   let filterColumn = null;
+   // the value stored is hash1:hash2:columnName
+   // hash1 = component view id of the element we want to get the value from
+   // hash2 = the id of the field we are using to filter our options
+   // filterColumn = the name of the column to get the value from
    if (
       instance.settings.filterConnectedValue &&
       instance.settings.filterConnectedValue.indexOf(":") > -1
@@ -35,6 +39,7 @@ function _onShow(App, compId, instance, component) {
             instance.settings.filterConnectedValue.split(":")[0]
          ].ui.id;
       filterKey = instance.settings.filterConnectedValue.split(":")[1];
+      filterColumn = instance.settings.filterConnectedValue.split(":")[2];
    }
 
    field.customDisplay(rowData, App, node, {
@@ -43,6 +48,7 @@ function _onShow(App, compId, instance, component) {
       filters: instance.settings.objectWorkspace.filterConditions,
       filterValue: filterValue,
       filterKey: filterKey,
+      filterColumn: filterColumn,
       editable: instance.settings.disable == 1 ? false : true,
       editPage:
          !instance.settings.editForm || instance.settings.editForm == "none"
@@ -319,19 +325,19 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
       // Default set of options for filter connected combo
       let filterConnectedOptions = [{ id: "", value: "" }];
       // get the definitions for the connected field
-      let fieldDefs = view.application.definitionForID(view.settings.fieldId);
+      let fieldDefs = view.AB.definitionForID(view.settings.fieldId);
       // get the definition for the object that the field is related to
-      let objectDefs = view.application.definitionForID(
+      let objectDefs = view.AB.definitionForID(
          fieldDefs.settings.linkObject
       );
       // we need these definitions later as we check to find out which field
       // we are filtering by so push them into an array for later
       let fieldsDefs = [];
       objectDefs.fieldIDs.forEach((fld) => {
-         fieldsDefs.push(view.application.definitionForID(fld));
+         fieldsDefs.push(view.AB.definitionForID(fld));
       });
       // find out what connected objects this field has
-      let connectedObjs = view.application.connectedObjects(
+      let connectedObjs = view.AB.connectedObjects(
          fieldDefs.settings.linkObject
       );
       // loop through the form's elements (need to ensure that just looking at parent is okay in all cases)
@@ -339,7 +345,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
          // identify if element is a connected field
          if (element.key == "connect") {
             // we need to get the fields defs to find out what it is connected to
-            let formElementsDefs = view.application.definitionForID(
+            let formElementsDefs = view.AB.definitionForID(
                element.settings.fieldId
             );
             // loop through the connected objects discovered above
@@ -349,13 +355,31 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
                   // get the ui id of this component that matches the link Object
                   let fieldToCheck;
                   fieldsDefs.forEach((fdefs) => {
+                     // if the field has a custom foreign key we need to store it
+                     // so selectivity later can know what value to get, otherwise
+                     // we just get the uuid of the record
                      if (
+                        fdefs.settings.isCustomFK &&
+                        fdefs.settings.indexField != "" &&
                         fdefs.settings.linkObject &&
                         fdefs.settings.linkType == "one" &&
                         fdefs.settings.linkObject ==
                            formElementsDefs.settings.linkObject
                      ) {
-                        fieldToCheck = fdefs.id;
+                        let customFK = view.AB.definitionForID(
+                           fdefs.settings.indexField
+                        );
+                        // if the index definitions were found
+                        if (customFK) {
+                           fieldToCheck = fdefs.id + ":" + customFK.columnName;
+                        }
+                     } else if (
+                        fdefs.settings.linkObject &&
+                        fdefs.settings.linkType == "one" &&
+                        fdefs.settings.linkObject ==
+                           formElementsDefs.settings.linkObject
+                     ) {
+                        fieldToCheck = fdefs.id + ":" + "uuid";
                      }
                   });
                   // only add optinos that have a fieldToCheck
@@ -671,7 +695,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
          goToEditPage: (rowId) => {
             if (!this.settings.editForm) return;
 
-            let editForm = this.application.urlResolve(this.settings.editForm);
+            let editForm = this.AB.urlResolve(this.settings.editForm);
             if (!editForm) return;
 
             let $form;
