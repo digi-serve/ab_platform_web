@@ -92,6 +92,7 @@ module.exports = class ABViewDetailCustom extends ABViewDetailCustomCore {
       var idBase = "ABViewDetailCustom_" + (idPrefix || "") + this.id;
       var ids = {
          component: App.unique(idBase + "_component"),
+         detail: this.parentDetailComponent().id,
       };
 
       var templateLabel = "";
@@ -120,7 +121,7 @@ module.exports = class ABViewDetailCustom extends ABViewDetailCustomCore {
       component.ui.on = {
          //Add data-cy attribute for Cypress Testing
          onAfterRender: () => {
-            const dataCy = `detailCustom-${field?.label?.replace(/\s/g,'')}-${field?.id}`;
+            const dataCy = `detail custom ${field?.columnName} ${field?.id} ${ids.detail}`;
             $$(ids.component)?.$view.setAttribute('data-cy', dataCy);
          }
       };
