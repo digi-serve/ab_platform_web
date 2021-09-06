@@ -1157,7 +1157,7 @@ module.exports = class ABViewGrid extends ABViewGridCore {
             Promise.resolve()
                .then(
                   () =>
-                     new Promise((next, err) => {
+                     new Promise(async (next, err) => {
                         // if (
                         //    !this.settings ||
                         //    !this.settings.gridFilter ||
@@ -1177,23 +1177,24 @@ module.exports = class ABViewGrid extends ABViewGridCore {
 
                         let limit = null;
 
-                        // limit pull data to reduce time and performance loading
-                        // if (dc.__dataCollection.count() > 300) limit = 300;
+                        // // limit pull data to reduce time and performance loading
+                        // if (dc.totalCount > 300) limit = 300;
 
                         // Load all data
                         let gridElem = $$(DataTable.ui.id);
                         if (
                            gridElem.data.find({}).length < gridElem.data.count()
                         ) {
-                           dc.reloadData(0, limit)
-                              .catch(err)
-                              .then(() => {
-                                 // Should set .loadAll to this data collection ?
-                                 if (limit == null) dc.settings.loadAll = true;
-
-                                 next();
-                              });
-                        } else {
+                           try {
+                              await dc.reloadData(0, limit);
+                           }
+                           catch(err) {
+                              console.log(err);
+                              next(err);
+                           }
+                           
+                           // Should set .loadAll to this data collection ?
+                           if (limit == null) dc.settings.loadAll = true;
                            next();
                         }
                      })
