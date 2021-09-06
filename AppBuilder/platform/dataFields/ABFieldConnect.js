@@ -868,8 +868,6 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
                   // if we are filtering based off another selectivity's value we
                   // need to do it on fetch each time because the value can change
-                  let self = this;
-
                   // copy the filters so we don't add to them every time there is a change
                   let combineFilters = JSON.parse(
                      JSON.stringify(options.filters)
@@ -879,7 +877,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                   if (options.filterValue && options.filterKey) {
 
                      // get the current value of the parent select box
-                     let parentVal = self.getValue($$(options.filterValue));
+                     let parentVal = this.getValue($$(options.filterValue));
                      if (parentVal) {
 
                         // if there is a value create a new filter rule
