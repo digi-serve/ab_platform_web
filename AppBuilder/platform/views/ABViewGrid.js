@@ -750,6 +750,8 @@ module.exports = class ABViewGrid extends ABViewGridCore {
          detailsView: this.settings.detailsPage,
          editView: this.settings.editPage,
          isEditable: this.settings.isEditable,
+         isSortable: this.settings.isSortable,
+         gridFilter: this.settings.gridFilter,
          massUpdate: this.settings.massUpdate,
          configureHeaders: false,
          summaryColumns: this.settings.objectWorkspace.summaryColumns,
@@ -1421,7 +1423,12 @@ module.exports = class ABViewGrid extends ABViewGridCore {
    }
 
    populatePopupEditors(view, dataSource) {
-      var dv = this.datacollection;
+
+      // moved this up because we do not need the object to populate defaults and
+      // default settings were getting skipped when initialized
+      PopupFilterProperty.setSettings(view.settings.gridFilter);
+
+      let dv = this.datacollection;
       if (!dv) return;
 
       let object = dv.datasource;
@@ -1443,7 +1450,6 @@ module.exports = class ABViewGrid extends ABViewGridCore {
       );
 
       PopupFilterProperty.objectLoad(object);
-      PopupFilterProperty.setSettings(view.settings.gridFilter);
 
       PopupSummaryColumnsComponent.objectLoad(object, view);
       PopupSummaryColumnsComponent.setValue(
