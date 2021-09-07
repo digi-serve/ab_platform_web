@@ -831,8 +831,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
             // this happens in the Interface Builder when only the single form UI is displayed
             readOnly = true;
-            placeholderReadOnly =
-               "Must select item from 'PARENT ELEMENT' first.";
+            placeholderReadOnly = L("", "Must select item from '{0}' first.", ["PARENT ELEMENT"]);
          } else {
             let val = this.getValue($$(options.filterValue));
             if (!val) {
@@ -840,8 +839,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                // if there isn't a value on the parent select element set this one to readonly and change placeholder text
                readOnly = true;
                let label = $$(options.filterValue);
-               placeholderReadOnly =
-                  `Must select item from ${label.config.name} first.`;
+               placeholderReadOnly = L("", "Must select item from '{0}' first.", [label.config.label]);
             }
          }
       }
