@@ -121,8 +121,8 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
          },
          dragColumn: true,
          on: {
-            onBeforeSelect: function (data, preserve) {
-               var skippable = [
+            onBeforeSelect: function(data, preserve, evt) {
+               let skippable = [
                   "appbuilder_select_item",
                   "appbuilder_view_detail",
                   "appbuilder_view_track",
@@ -350,24 +350,13 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
          let customDisplays = (data) => {
             if (!CurrentObject || !DataTable.data) return;
 
-            var displayRecords = [];
+            let displayRecords = [];
 
-            let verticalScrollState = DataTable.getScrollState().y,
-               rowHeight = DataTable.config.rowHeight,
-               height = DataTable.$view.querySelector(".webix_ss_body")
-                  .clientHeight,
-               startRecIndex = Math.floor(verticalScrollState / rowHeight),
-               endRecIndex = startRecIndex + DataTable.getVisibleCount(),
-               index = 0;
+            DataTable.eachRow(function(row) {
+               displayRecords.push(row);
+            }, false);
 
-            DataTable.data.order.each(function (id) {
-               if (id != null && startRecIndex <= index && index <= endRecIndex)
-                  displayRecords.push(id);
-
-               index++;
-            });
-
-            var editable = settings.isEditable;
+            let editable = settings.isEditable;
             if (DataTable.config.accessLevel < 2) {
                editable = false;
             }
@@ -1527,7 +1516,7 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
             ) {
                tip = obj[columnName + "__relation"].text;
             } else if (imageFields.indexOf(columnName) != -1) {
-               if (obj[columnName] == null) {
+               if (obj[columnName] == null || obj[columnName] == "") {
                   return "";
                } else {
                   // TODO: we need to get this URL from the ABFieldImage object!
