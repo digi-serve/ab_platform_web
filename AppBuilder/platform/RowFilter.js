@@ -1373,8 +1373,8 @@ module.exports = class RowFilter extends RowFilterCore {
             $viewConditionValue &&
             $viewConditionValue.getChildViews()
          ) {
-            var vals = f.value.split(":");
-            var index = 0;
+            let vals = (f.value || "").split(":");
+            let index = 0;
             $viewConditionValue.getChildViews().forEach((element) => {
                $$(element).blockEvent();
                $$(element).setValue(vals[index]);
