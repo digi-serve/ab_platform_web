@@ -144,6 +144,9 @@ module.exports = class ABViewDataview extends ABViewDataviewCore {
             emitter: dc,
             eventName: "loadData",
             listener: () => {
+               // we need to empty out any rows rendered because they were
+               // part of a different set of data.
+               com.emptyView();
                com.renderData();
             },
          });
@@ -267,9 +270,22 @@ module.exports = class ABViewDataview extends ABViewDataviewCore {
          return this.yPosition || 0;
       };
 
+      com.emptyView = () => {
+         let flexlayout = {
+            id: ids.dataFlexView,
+            view: "flexlayout",
+            paddingX: 15,
+            paddingY: 19,
+            type: "space",
+            cols: []
+         };
+         webix.ui(flexlayout, $$(ids.scrollview), $$(ids.dataFlexView));
+      };
+
+
       com.renderData = () => {
-         var editPage = this.settings.editPage;
-         var detailsPage = this.settings.detailsPage;
+         let editPage = this.settings.editPage;
+         let detailsPage = this.settings.detailsPage;
          var editTab = this.settings.editTab;
          var detailsTab = this.settings.detailsTab;
          var accessLevel = this.parent.getUserAccess();
@@ -278,10 +294,12 @@ module.exports = class ABViewDataview extends ABViewDataviewCore {
          var dc = this.datacollection;
          if (!dc) return;
 
-         var Layout = $$(ids.dataFlexView) || $$(ids.component);
+         let Layout = $$(ids.dataFlexView) || $$(ids.component);
 
-         var recordWidth = Math.floor(
-            (Layout.$width - 20 - parseInt(this.settings.xCount) * 20) /
+         if (!Layout || isNaN(Layout.$width)) return;
+
+         let recordWidth = Math.floor(
+            (Layout.$width - 40 - parseInt(this.settings.xCount) * 20) /
                parseInt(this.settings.xCount)
          );
 
@@ -353,9 +371,9 @@ module.exports = class ABViewDataview extends ABViewDataviewCore {
                type: "space",
                cols: records,
             };
-            webix.ui(flexlayout, $$(ids.component));
+            webix.ui(flexlayout, $$(ids.scrollview), $$(ids.dataFlexView));
 
-            for (var i = this._startPos; i < stopPos; i++) {
+            for (let i = this._startPos; i < stopPos; i++) {
                let detailCom = App.AB.cloneDeep(
                   super.component(App, rows[i].id)
                );
