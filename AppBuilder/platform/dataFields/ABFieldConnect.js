@@ -29,8 +29,8 @@ var ids = {
 var defaultValues = ABFieldConnectCore.defaultValues();
 
 function populateSelect(populate, callback) {
-   var options = [];
-   ABFieldConnectComponent.CurrentApplication.objectsIncluded().forEach((o) => {
+   let options = [];
+   ABFieldConnectComponent.AB.objects().forEach((o) => {
       options.push({ id: o.id, value: o.label });
    });
 
