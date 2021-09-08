@@ -1,5 +1,6 @@
 const ABViewDetailCore = require("../../core/views/ABViewDetailCore");
 const ABViewDetailComponent = require("./ABViewDetailComponent");
+const ABObjectQuery = require("../ABObjectQuery");
 
 const ABViewDetailPropertyComponentDefaults = ABViewDetailCore.defaultValues();
 
@@ -381,6 +382,16 @@ module.exports = class ABViewDetail extends ABViewDetailCore {
                         break;
                      case "file":
                         val = rowData[field.columnName];
+                        break;
+                     case "formula":
+                        if (rowData) {
+                           let dv = this.datacollection;
+                           let ds = dv ? dv.datasource : null;
+                           let needRecalculate =
+                              !ds || ds instanceof ABObjectQuery ? false : true;
+
+                           val = field.format(rowData, needRecalculate);
+                        }
                         break;
                      default:
                         if (rowData) {
