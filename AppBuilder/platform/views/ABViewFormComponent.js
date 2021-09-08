@@ -108,7 +108,10 @@ module.exports = class ABViewFormComponent extends ABViewFormComponentCore {
             _ui.label = field.label;
          }
 
-         if (field.settings.required || this.settings.required) {
+         if (
+            field.settings.required == true ||
+            this.settings.required == true
+         ) {
             _ui.required = 1;
          }
 
