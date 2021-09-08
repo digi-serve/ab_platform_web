@@ -827,18 +827,18 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       // to make sure the UX helps the user know what to do.
       let placeholderReadOnly = null;
       if (options.filterValue && options.filterKey) {
-         if (!$$(options.filterValue)) {
+         if (!$$(options.filterValue.ui.id)) {
 
             // this happens in the Interface Builder when only the single form UI is displayed
             readOnly = true;
             placeholderReadOnly = L("", "Must select item from '{0}' first.", ["PARENT ELEMENT"]);
          } else {
-            let val = this.getValue($$(options.filterValue));
+            let val = this.getValue($$(options.filterValue.ui.id));
             if (!val) {
 
                // if there isn't a value on the parent select element set this one to readonly and change placeholder text
                readOnly = true;
-               let label = $$(options.filterValue);
+               let label = $$(options.filterValue.ui.id);
                placeholderReadOnly = L("", "Must select item from '{0}' first.", [label.config.label]);
             }
          }
@@ -872,10 +872,16 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                   );
 
                   // only add filters if we pass valid value and key
-                  if (options.filterValue && options.filterKey) {
+                  if (
+                     options.filterValue &&
+                     options.filterKey &&
+                     $$(options.filterValue.ui.id)
+                  ) {
 
                      // get the current value of the parent select box
-                     let parentVal = this.getValue($$(options.filterValue));
+                     let parentVal = this.getValue(
+                        $$(options.filterValue.ui.id)
+                     );
                      if (parentVal) {
 
                         // if there is a value create a new filter rule
@@ -969,10 +975,10 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             );
 
             // add a change listener to the selectivity instance we are filtering our options list by.
-            if (options.filterValue && $$(options.filterValue)) {
-               let parentDomNode = $$(options.filterValue).$view.querySelector(
-                  ".connect-data-values"
-               );
+            if (options.filterValue && $$(options.filterValue.ui.id)) {
+               let parentDomNode = $$(
+                  options.filterValue.ui.id
+               ).$view.querySelector(".connect-data-values");
                parentDomNode.addEventListener(
                   "change",
                   (e) => {
