@@ -1266,27 +1266,33 @@ module.exports = class ABViewForm extends ABViewFormCore {
     * @return {boolean} isValid
     */
    validateData(formView, object, formVals) {
-      var isValid = true;
+      let isValid = true;
 
       // validate required fields
-      var requiredFields = this.fieldComponents(
-         (fComp) => fComp.settings.required == true
+      let requiredFields = this.fieldComponents(
+         (fComp) =>
+            (fComp.field &&
+               fComp.field() &&
+               fComp.field().settings.required == true) ||
+            fComp.settings.required == true
       ).map((fComp) => fComp.field());
-      requiredFields.forEach((f) => {
-         if (f && !formVals[f.columnName] && formVals[f.columnName] != "0") {
-            formView.markInvalid(f.columnName, "*This is a required field.");
-            isValid = false;
-         }
-      });
 
       // validate data
-      var validator;
+      let validator;
       if (isValid) {
          validator = object.isValidData(formVals);
          isValid = validator.pass();
       }
 
       $$(formView).validate();
+
+      // Display required messages
+      requiredFields.forEach((f) => {
+         if (f && !formVals[f.columnName] && formVals[f.columnName] != "0") {
+            formView.markInvalid(f.columnName, "*This is a required field.");
+            isValid = false;
+         }
+      });
 
       // if data is invalid
       if (!isValid) {
