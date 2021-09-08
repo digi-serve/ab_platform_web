@@ -1403,7 +1403,10 @@ module.exports = class ABViewGrid extends ABViewGridCore {
          dv.datasource
             .fields((f) => {
                return (
-                  !f.isConnection &&
+                  (f.key != "connectObject" ||
+                     (f.key == "connectObject" &&
+                        f.settings &&
+                        f.settings.linkType == "one")) &&
                   view.settings.objectWorkspace.hiddenFields.indexOf(
                      f.columnName
                   ) < 0
