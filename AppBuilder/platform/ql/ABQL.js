@@ -442,7 +442,7 @@ class ABQL extends ABQLCore {
                this.params = this.params || {};
                this.params[pDef.name] = condition;
 
-               var shortHand = $$(this.ids.shorthand);
+               let shortHand = $$(this.ids.shorthand);
                // console.log(Filter.toShortHand());
                shortHand.define({
                   label: Filter.toShortHand(),
@@ -451,7 +451,7 @@ class ABQL extends ABQLCore {
 
                // NOTE: the hidden element is a text field, so convert the
                // {condition object} => a string
-               var elCondition = $$(this.ids.condition);
+               let elCondition = $$(this.ids.condition);
                elCondition.define({
                   value: JSON.stringify(this.params[pDef.name]),
                });
