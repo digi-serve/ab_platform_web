@@ -145,7 +145,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                   getModels() {
                      let reportModels = {};
 
-                     (compInstance.application.datacollections() || []).forEach(
+                     (compInstance.AB.datacollections() || []).forEach(
                         (dc) => {
                            let obj = dc.datasource;
                            if (!obj) return;
@@ -155,7 +155,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                            // get connected data collections
                            // let linkedFields = [];
                            // (obj.connectFields() || []).forEach((f, index) => {
-                           //    let connectedDcs = compInstance.application.datacollections(
+                           //    let connectedDcs = compInstance.AB.datacollections(
                            //       (dColl) =>
                            //          dColl &&
                            //          dColl.datasource &&
@@ -254,6 +254,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                      let pullDataTasks = [];
                      let dcIds = [];
                      let dcData = {};
+                     let reportFields = [];
 
                      // pull data of the base and join DCs
                      dcIds.push(config.data);
@@ -272,6 +273,21 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                     dcData[dcId] = data || [];
                                     next();
                                  });
+                           })
+                        );
+                     });
+
+                     dcIds.forEach((dcId) => {
+                        let dataCol = compInstance.AB.datacollections(
+                           (dc) => dc.id == dcId
+                        )[0];
+                        if (!dataCol) return;
+
+                        reportFields = reportFields.concat(
+                           _logic.getReportFields(dataCol).map((f) => {
+                              // change format of id to match the report widget
+                              f.id = `${dcId}.${f.id}`; // dc_id.field_id
+                              return f;
                            })
                         );
                      });
@@ -300,9 +316,18 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                              val.getTime &&
                                              !isNaN(val.getTime())
                                           ) {
-                                             return webix.i18n.dateFormatStr(
-                                                val
-                                             );
+                                             // pull ABDateField
+                                             let dateField = reportFields.filter(
+                                                (f) => f.id == c.id
+                                             )[0];
+                                             dateField = dateField
+                                                ? dateField.abField
+                                                : null;
+
+                                             // display date format
+                                             return dateField
+                                                ? dateField.getDateDisplay(val)
+                                                : webix.i18n.dateFormatStr(val);
                                           } else {
                                              return "";
                                           }
@@ -328,7 +353,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                     }
 
                                     (config.joins || []).forEach((j) => {
-                                       let sourceDc = compInstance.application.datacollections(
+                                       let sourceDc = compInstance.AB.datacollections(
                                           (dc) => dc.id == j.sid
                                        )[0];
                                        if (!sourceDc) return;
@@ -336,7 +361,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                        let sourceObj = sourceDc.datasource;
                                        if (!sourceObj) return;
 
-                                       let targetDc = compInstance.application.datacollections(
+                                       let targetDc = compInstance.AB.datacollections(
                                           (dc) => dc.id == j.tid
                                        )[0];
                                        if (!targetDc) return;
@@ -428,25 +453,6 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                            .then(
                               () =>
                                  new Promise((next, bad) => {
-                                    let reportFields = [];
-
-                                    dcIds.forEach((dcId) => {
-                                       let dataCol = compInstance.application.datacollections(
-                                          (dc) => dc.id == dcId
-                                       )[0];
-                                       if (!dataCol) return;
-
-                                       reportFields = reportFields.concat(
-                                          _logic
-                                             .getReportFields(dataCol)
-                                             .map((f) => {
-                                                // change format of id to match the report widget
-                                                f.id = `${dcId}.${f.id}`; // dc_id.field_id
-                                                return f;
-                                             })
-                                       );
-                                    });
-
                                     let queryVal = JSON.parse(
                                        config.query || "{}"
                                     );
@@ -666,10 +672,11 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                   ref: "",
                   key: false,
                   show: true,
+                  abField: f
                });
 
                if (f.isConnection && f.settings.isSource) {
-                  let linkedDcs = compInstance.application.datacollections(
+                  let linkedDcs = compInstance.AB.datacollections(
                      (dc) =>
                         dc &&
                         dc.datasource &&
@@ -694,7 +701,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
          },
 
          getData: (datacollectionId) => {
-            let datacollection = compInstance.application.datacollections(
+            let datacollection = compInstance.AB.datacollections(
                (dcItem) => dcItem.id == datacollectionId
             )[0];
             if (!datacollection) return Promise.resolve([]);
