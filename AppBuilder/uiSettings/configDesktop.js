@@ -51,5 +51,5 @@ export default {
    labelWidthCheckbox: 0,
 
    // show elements on desktop
-   hideMobile: false
+   hideMobile: false,
 };

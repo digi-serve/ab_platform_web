@@ -113,9 +113,11 @@ module.exports = class ABViewDetailText extends ABViewDetailTextCore {
       component.ui.on = {
          //Add data-cy attribute for Cypress Testing
          onAfterRender: () => {
-            const dataCy = `detailText-${field?.label?.replace(/\s/g,'')}-${field?.id}`;
-            $$(ids.component)?.$view.setAttribute('data-cy', dataCy);
-         }
+            const dataCy = `detailText-${field?.label?.replace(/\s/g, "")}-${
+               field?.id
+            }`;
+            $$(ids.component)?.$view.setAttribute("data-cy", dataCy);
+         },
       };
 
       return {

@@ -98,7 +98,8 @@ var ABFieldFormulaComponent = new ABFieldComponent({
                // pull 'number' and 'calculate' fields from link objects
                // if (fLink.key == "number" || fLink.key == "calculate") {
                // NOTE: calculate fields does not support in queries
-               if (fLink.key == 'number') { // NOTE: calculate fields does not support in queries
+               if (fLink.key == "number") {
+                  // NOTE: calculate fields does not support in queries
                   options.push({
                      // UUID:UUID
                      id: `${f.id}:${fLink.id}`,

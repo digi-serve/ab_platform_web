@@ -127,9 +127,11 @@ module.exports = class ABViewDetailImage extends ABViewDetailImageCore {
       component.ui.on = {
          //Add data-cy attribute for Cypress Testing
          onAfterRender: () => {
-            const dataCy = `detailImage-${field?.label?.replace(/\s/g,'')}-${field?.id}`;
-            $$(ids.component)?.$view.setAttribute('data-cy', dataCy);
-         }
+            const dataCy = `detailImage-${field?.label?.replace(/\s/g, "")}-${
+               field?.id
+            }`;
+            $$(ids.component)?.$view.setAttribute("data-cy", dataCy);
+         },
       };
 
       var _logic = {

@@ -25,7 +25,7 @@ module.exports = class ABViewProperty {
    static propertyComponent() {
       let ui = {
          view: "template",
-         template: "No UI"
+         template: "No UI",
       };
 
       let init = (options) => {
@@ -36,13 +36,13 @@ module.exports = class ABViewProperty {
       };
 
       let logic = {
-         callbacks: {}
+         callbacks: {},
       };
 
       return {
          ui: ui,
          init: init,
-         logic: logic
+         logic: logic,
       };
    }
 
@@ -75,7 +75,7 @@ module.exports = class ABViewProperty {
 
       let ui = {
          view: "template",
-         template: "No UI"
+         template: "No UI",
       };
 
       let init = (options) => {
@@ -86,13 +86,13 @@ module.exports = class ABViewProperty {
       };
 
       let logic = {
-         callbacks: {}
+         callbacks: {},
       };
 
       return {
          ui: ui,
          init: init,
-         logic: logic
+         logic: logic,
       };
    }
 };

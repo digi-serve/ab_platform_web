@@ -66,11 +66,7 @@ module.exports = class ABFieldSelectivity extends ABField {
             settings["data"],
             settings.multiple
          );
-      } else if (
-         typeof settings["data"] == "undefined" ||
-         typeof settings["data"] == "null" ||
-         settings["data"] == null
-      ) {
+      } else if (settings["data"] == null || settings["data"] == "") {
          settings["data"] = this.prepareData([], settings.multiple);
       } else {
          settings["data"] = this.prepareData(
@@ -333,9 +329,9 @@ module.exports = class ABFieldSelectivity extends ABField {
       var outerHeight = domNode.parentElement.clientHeight;
       if (innerHeight - outerHeight > 5) {
          var count = 0;
+         let values = [];
          if (domNode && domNode.selectivity)
-            var values = domNode.selectivity.getValue() || [];
-         else var values = [];
+            values = domNode.selectivity.getValue() || [];
 
          count = values.length;
          if (count > 1) {

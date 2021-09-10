@@ -128,7 +128,7 @@ module.exports = class ABViewPivot extends ABViewPivotCore {
             view: "counter",
             min: 1,
             label: L("", "Decimal Places"),
-            labelWidth: App.config.labelWidthXLarge
+            labelWidth: App.config.labelWidthXLarge,
          },
       ]);
    }
@@ -200,7 +200,7 @@ module.exports = class ABViewPivot extends ABViewPivotCore {
             return value && value != "0"
                ? parseFloat(value).toFixed(decimalPlaces || 0)
                : value;
-         }
+         },
       };
 
       // make sure each of our child views get .init() called

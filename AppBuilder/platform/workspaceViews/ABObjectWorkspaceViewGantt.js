@@ -24,7 +24,9 @@ var defaultValues = {
    notes: "none", // id of a ABFieldString, ABFieldLongText
 };
 
-module.exports = class ABObjectWorkspaceViewGantt extends ABObjectWorkspaceView {
+module.exports = class ABObjectWorkspaceViewGantt extends (
+   ABObjectWorkspaceView
+) {
    constructor(attributes, object) {
       super(attributes, object, "gantt");
 

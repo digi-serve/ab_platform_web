@@ -47,7 +47,7 @@ module.exports = class ABViewWidget extends ABViewWidgetCore {
       super.propertyEditorPopulate(App, ids, view);
 
       $$(ids.columnSpan).setValue(
-         view.position.dx || ABPropertyComponentDefaulggts.columnSpan
+         view.position.dx || ABPropertyComponentDefaults.columnSpan
       );
       $$(ids.rowSpan).setValue(
          view.position.dy || ABPropertyComponentDefaults.rowSpan

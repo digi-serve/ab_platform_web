@@ -5,7 +5,9 @@
 //
 const ABViewRuleAction = require("../ABViewRuleAction");
 
-module.exports = class ABViewRuleActionFormSubmitRuleClosePopup extends ABViewRuleAction {
+module.exports = class ABViewRuleActionFormSubmitRuleClosePopup extends (
+   ABViewRuleAction
+) {
    /**
     * @param {object} App
     *      The shared App object that is created in OP.Component

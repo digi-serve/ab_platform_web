@@ -12,7 +12,7 @@ module.exports = class CSVImporter {
             "ab.object.form.csv.separatedBy.semicolon",
             "*Semicolon (;)"
          ),
-         space: L("ab.object.form.csv.separatedBy.space", "*Space ( )")
+         space: L("ab.object.form.csv.separatedBy.space", "*Space ( )"),
       };
    }
 
@@ -21,7 +21,7 @@ module.exports = class CSVImporter {
          { id: ",", value: this.labels.comma },
          { id: "\t", value: this.labels.tab },
          { id: ";", value: this.labels.semicolon },
-         { id: "s", value: this.labels.space }
+         { id: "s", value: this.labels.space },
       ];
    }
 
@@ -65,7 +65,7 @@ module.exports = class CSVImporter {
 
       return new Promise((resolve, reject) => {
          // read CSV file
-         let reader = new FileReader();
+         let reader = new window.FileReader();
          reader.onload = (e) => {
             let result = [];
 
@@ -150,9 +150,6 @@ module.exports = class CSVImporter {
    reformat(str) {
       if (!str) return "";
 
-      return str
-         .trim()
-         .replace(/"/g, "")
-         .replace(/'/g, "");
+      return str.trim().replace(/"/g, "").replace(/'/g, "");
    }
 };

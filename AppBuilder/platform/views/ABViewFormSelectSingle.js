@@ -2,7 +2,9 @@ const ABViewFormSelectSingleCore = require("../../core/views/ABViewFormSelectSin
 
 const ABViewFormSelectSinglePropertyComponentDefaults = ABViewFormSelectSingleCore.defaultValues();
 
-module.exports = class ABViewFormSelectSingle extends ABViewFormSelectSingleCore {
+module.exports = class ABViewFormSelectSingle extends (
+   ABViewFormSelectSingleCore
+) {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
    // }

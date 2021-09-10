@@ -113,17 +113,17 @@ module.exports = class ABViewDataview extends ABViewDataviewCore {
                   paddingX: 15,
                   paddingY: 19,
                   type: "space",
-                  cols: []
+                  cols: [],
                },
                on: {
-                  onAfterScroll: function() {
+                  onAfterScroll: function () {
                      let pos = this.getScrollState();
 
                      com.logic.scroll(pos);
-                  }
-               }
-            }
-         ]
+                  },
+               },
+            },
+         ],
       };
 
       if (this.settings.height) com.ui.height = this.settings.height;
@@ -303,11 +303,10 @@ module.exports = class ABViewDataview extends ABViewDataviewCore {
             paddingX: 15,
             paddingY: 19,
             type: "space",
-            cols: []
+            cols: [],
          };
          webix.ui(flexlayout, $$(ids.scrollview), $$(ids.dataFlexView));
       };
-
 
       com.renderData = () => {
          let editPage = this.settings.editPage;
@@ -463,15 +462,17 @@ module.exports = class ABViewDataview extends ABViewDataviewCore {
          }
 
          //Add data-cy attributes for cypress tests
-         Layout.$view.setAttribute('data-cy', `dataview-container-${this.id}`)
+         Layout.$view.setAttribute("data-cy", `dataview-container-${this.id}`);
 
          Layout.getChildViews().forEach((child, i) => {
-            const id = rows[i + this._startPos]['id'];
+            const id = rows[i + this._startPos]["id"];
             const view = child.$view;
-            view.querySelector('.webix_accordionitem_body')
-               .setAttribute('data-cy', `dataview-item-${id}`);
-            view.querySelector('.webix_accordionitem_button')
-               .setAttribute('data-cy', `dataview-item-button-${id}`);
+            view
+               .querySelector(".webix_accordionitem_body")
+               .setAttribute("data-cy", `dataview-item-${id}`);
+            view
+               .querySelector(".webix_accordionitem_button")
+               .setAttribute("data-cy", `dataview-item-button-${id}`);
          });
 
          com.logic.ready();

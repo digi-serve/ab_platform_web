@@ -1310,9 +1310,10 @@ module.exports = class ABViewForm extends ABViewFormCore {
                   domInvalidMessage &&
                   !domInvalidMessage.style["margin-left"]
                ) {
-                  domInvalidMessage.style.marginLeft = `${this.settings
-                     .labelWidth ||
-                     ABViewFormPropertyComponentDefaults.labelWidth}px`;
+                  domInvalidMessage.style.marginLeft = `${
+                     this.settings.labelWidth ||
+                     ABViewFormPropertyComponentDefaults.labelWidth
+                  }px`;
                }
             }
          }

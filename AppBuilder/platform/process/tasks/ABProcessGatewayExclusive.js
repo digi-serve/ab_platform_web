@@ -1,7 +1,9 @@
 const ABProcessGatewayExclusiveCore = require("../../../core/process/tasks/ABProcessGatewayExclusiveCore.js");
 const RowFilter = require("../../RowFilter");
 
-module.exports = class ABProcessGatewayExclusive extends ABProcessGatewayExclusiveCore {
+module.exports = class ABProcessGatewayExclusive extends (
+   ABProcessGatewayExclusiveCore
+) {
    ////
    //// Process Instance Methods
    ////

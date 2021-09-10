@@ -7,7 +7,9 @@
 //
 const ABViewRuleActionFormRecordRuleUpdateConnected = require("./ABViewRuleActionFormRecordRuleUpdateConnected");
 
-module.exports = class ABViewRuleActionFormRecordRuleRemoveConnected extends ABViewRuleActionFormRecordRuleUpdateConnected {
+module.exports = class ABViewRuleActionFormRecordRuleRemoveConnected extends (
+   ABViewRuleActionFormRecordRuleUpdateConnected
+) {
    constructor(App, idBase, currentForm) {
       super(App, idBase, currentForm);
 

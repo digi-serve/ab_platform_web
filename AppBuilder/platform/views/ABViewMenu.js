@@ -126,7 +126,8 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
                // we don't want to send a toggle event because it triggers saves to the database
                $$(ids.pages).checkItem(id);
                webix.message({
-                  text: "Item comtains submenu, please remove items in submenu before removing.",
+                  text:
+                     "Item comtains submenu, please remove items in submenu before removing.",
                   type: "error",
                   expire: 10000,
                });
@@ -412,7 +413,7 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
                      view: "edittree",
                      borderless: true,
                      css: "transparent",
-                     editor: "inline-text",
+                     // editor: "inline-text",
                      editable: true,
                      editValue: "aliasname",
                      editor: "text",
@@ -422,25 +423,27 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
                            "{common.icon()} " +
                            // TODO : Hide checkbox at own page
                            // (item.id == _logic.currentEditObject().parent.id ?
-                           (false
-                              ? '<input type="checkbox" class="webix_tree_checkbox" disabled="disabled">'
-                              : "{common.checkbox()} ") +
+                           // (false
+                           //    ? '<input type="checkbox" class="webix_tree_checkbox" disabled="disabled">'
+                           //    :
+                           "{common.checkbox()} " +
                            ' <div class="fa fa-{common.fieldIcon()}"></div>' +
                            " #label#" +
                            "</div>"
-                        )
-                           .replace("{common.icon()}", common.icon(item))
-                           .replace(
-                              "{common.checkbox()}",
-                              common.checkbox(item, false)
-                           )
-                           .replace(
-                              "{common.fieldIcon()}",
-                              item.key == "viewcontainer"
-                                 ? "window-maximize"
-                                 : "file"
-                           )
-                           .replace("#label#", item.label);
+                              // )
+                              .replace("{common.icon()}", common.icon(item))
+                              .replace(
+                                 "{common.checkbox()}",
+                                 common.checkbox(item, false)
+                              )
+                              .replace(
+                                 "{common.fieldIcon()}",
+                                 item.key == "viewcontainer"
+                                    ? "window-maximize"
+                                    : "file"
+                              )
+                              .replace("#label#", item.label)
+                        );
                      },
                      on: {
                         onItemCheck: function (id, state) {

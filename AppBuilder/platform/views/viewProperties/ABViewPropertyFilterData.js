@@ -75,6 +75,7 @@ module.exports = class ABViewPropertyFilterData extends ABViewProperty {
          globalToolbar: idBase + "_globalToolbar",
       };
 
+      let L = App.Label;
       let labels = {
          common: App.labels,
          component: {

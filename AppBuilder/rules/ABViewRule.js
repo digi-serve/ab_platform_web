@@ -434,7 +434,9 @@ module.exports = class ABViewRule {
                if (data[f.id] && typeof data[f.id] === "string") {
                   data[f.id] = convertToNumber(data[f.id]);
                }
-            } catch (e) {}
+            } catch (e) {
+               // continue regardless of error
+            }
          });
 
       // hiddenQB.setValue(QBCondition);

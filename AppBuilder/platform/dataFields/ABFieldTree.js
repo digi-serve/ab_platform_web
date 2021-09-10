@@ -365,9 +365,8 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
             return;
          }
 
-         var row = row;
          var branches = [];
-         var options = _.cloneDeep(field.settings.options);
+         options = _.cloneDeep(field.settings.options);
          options = new webix.TreeCollection({
             data: options,
          });
@@ -430,14 +429,10 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
       var idBase = App.unique(this.idCustomContainer(row));
       var idPopup = idBase + "-popup";
       var idTree = idBase + "-tree";
-      var App = App;
-      // var node = node;
       var view = $$(node);
       var field = this;
       var parentComponent = component;
       var values = {};
-      var options = {};
-      var row = row;
       var firstRender = true;
 
       function getValues(field, row) {

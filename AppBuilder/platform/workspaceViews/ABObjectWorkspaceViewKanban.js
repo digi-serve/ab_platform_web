@@ -20,7 +20,9 @@ var defaultValues = {
    ownerField: null,
 };
 
-module.exports = class ABObjectWorkspaceViewKanban extends ABObjectWorkspaceView {
+module.exports = class ABObjectWorkspaceViewKanban extends (
+   ABObjectWorkspaceView
+) {
    constructor(attributes, object) {
       super(attributes, object, "kanban");
 

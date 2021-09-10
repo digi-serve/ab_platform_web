@@ -107,11 +107,6 @@ module.exports = class ABViewRuleAction {
       return [this.conditionRules(), this.conditionFields()];
    }
 
-   component(App, idBase) {
-      this.App = App;
-      this.idBase = idBase;
-   }
-
    // stashCondition
    // capture the current set of rules provided by the QB object.
    // This doesn't guarantee these will be saved to the App settings.

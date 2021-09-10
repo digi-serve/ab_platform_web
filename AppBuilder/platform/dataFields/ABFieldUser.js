@@ -199,15 +199,15 @@ module.exports = class ABFieldUser extends ABFieldUserCore {
                // Create definitions of the connected fields
                // NOTE: skip directly to the ABMLClass.save() to avoid the
                // migrations caused during the ABField.save() operations.
-               .then(() => ABMLClass.prototype.save.call(this))
+               .then(() => ABFieldUserCore.prototype.save.call(this))
                .then(() => {
                   linkCol.settings.linkColumn = this.id;
-                  return ABMLClass.prototype.save.call(linkCol);
+                  return ABFieldUserCore.prototype.save.call(linkCol);
                })
                // Update the id value of linked field to connect together
                .then(() => {
                   this.settings.linkColumn = linkCol.id;
-                  return ABMLClass.prototype.save.call(this);
+                  return ABFieldUserCore.prototype.save.call(this);
                })
                // Add fields to Objects
                .then(() => this.object.fieldAdd(this))

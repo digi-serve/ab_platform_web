@@ -202,9 +202,10 @@ module.exports = class ABViewChartBar extends ABViewChartBarCore {
       var ids = {
          component: App.unique(idBase + "_component"),
       };
+      var _ui;
 
       if (this.settings.barType == "bar" || this.settings.barType == null) {
-         var _ui = {
+         _ui = {
             id: ids.component,
             view: "chart",
             type:
@@ -250,7 +251,7 @@ module.exports = class ABViewChartBar extends ABViewChartBarCore {
             // data: reportData
          };
       } else {
-         var _ui = {
+         _ui = {
             id: ids.component,
             view: "chart",
             type:

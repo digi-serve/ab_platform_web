@@ -53,7 +53,6 @@ function _onShow(App, compId, instance, component) {
    }
 
    field.customDisplay(rowData, App, node, {
-      editable: true,
       formView: instance.settings.formView,
       filters: instance.settings.objectWorkspace.filterConditions,
       filterValue: filterValue,
@@ -314,12 +313,12 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
                            label: L(
                               "ab.component.connect.filterConnectedValue",
                               "*Filter by Connected Field Value:"
-                           )
+                           ),
                         },
                         {
                            view: "combo",
                            name: "filterConnectedValue",
-                           options: [] // we will add these in propertyEditorPopulate
+                           options: [], // we will add these in propertyEditorPopulate
                         },
                      ],
                   },
@@ -337,45 +336,38 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
 
       // get the definitions for the connected field
       let fieldDefs = view.AB.definitionForID(view.settings.fieldId);
-      
+
       // get the definition for the object that the field is related to
-      let objectDefs = view.AB.definitionForID(
-         fieldDefs.settings.linkObject
-      );
-      
+      let objectDefs = view.AB.definitionForID(fieldDefs.settings.linkObject);
+
       // we need these definitions later as we check to find out which field
       // we are filtering by so push them into an array for later
       let fieldsDefs = [];
       objectDefs.fieldIDs.forEach((fld) => {
          fieldsDefs.push(view.AB.definitionForID(fld));
       });
-      
+
       // find out what connected objects this field has
       let connectedObjs = view.AB.connectedObjects(
          fieldDefs.settings.linkObject
       );
-      
+
       // loop through the form's elements (need to ensure that just looking at parent is okay in all cases)
       view.parent.views().forEach((element) => {
-         
          // identify if element is a connected field
          if (element.key == "connect") {
-            
             // we need to get the fields defs to find out what it is connected to
             let formElementsDefs = view.AB.definitionForID(
                element.settings.fieldId
             );
-            
+
             // loop through the connected objects discovered above
             connectedObjs.forEach((connObj) => {
-               
                // see if the connected object matches the connected object of the form element
                if (connObj.id == formElementsDefs.settings.linkObject) {
-                  
                   // get the ui id of this component that matches the link Object
                   let fieldToCheck;
                   fieldsDefs.forEach((fdefs) => {
-
                      // if the field has a custom foreign key we need to store it
                      // so selectivity later can know what value to get, otherwise
                      // we just get the uuid of the record
@@ -405,15 +397,14 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
                         fieldToCheck = `${fdefs.id}:uuid`;
                      }
                   });
-                  
+
                   // only add optinos that have a fieldToCheck
                   if (fieldToCheck) {
-                     
                      // get the component we are referencing so we can display its label
                      let formComponent = view.parent.viewComponents[element.id]; // need to ensure that just looking at parent is okay in all cases
                      filterConnectedOptions.push({
                         id: `${formComponent.ui.name}:${fieldToCheck}`, // store the columnName name because the ui id changes on each load
-                        value: formComponent.ui.label // should be the translated field label
+                        value: formComponent.ui.label, // should be the translated field label
                      });
                   }
                }

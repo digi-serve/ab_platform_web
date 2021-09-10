@@ -5,7 +5,9 @@ const ABViewPropertyDefaults = ABViewConditionalContainerCore.defaultValues();
 
 let FilterComponent = null;
 
-module.exports = class ABViewConditionalContainer extends ABViewConditionalContainerCore {
+module.exports = class ABViewConditionalContainer extends (
+   ABViewConditionalContainerCore
+) {
    constructor(values, application, parent, defaultValues) {
       super(values, application, parent, defaultValues);
 

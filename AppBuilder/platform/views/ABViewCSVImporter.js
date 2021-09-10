@@ -555,7 +555,6 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
             {
                id: ids.datatable,
                view: "datatable",
-               tooltip: true,
                resizeColumn: true,
                editable: true,
                editaction: "dblclick",
@@ -1311,7 +1310,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                dataTable.config.rulePops = rulePops;
                dataTable.refresh();
             } else {
-               var dataTable = $$(ids.datatable);
+               dataTable = $$(ids.datatable);
                // check if the previous datatable had rule popups and remove them
                if (dataTable.config.rulePops) {
                   dataTable.config.rulePops.forEach((popup) => {
@@ -1725,7 +1724,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
 
                matchFields.forEach((f) => {
                   if (!f.field || !f.field || !f.field.key) return;
-                  
+
                   let fValue = data[f.columnIndex];
                   switch (f.field.key) {
                      // case "connectObject":

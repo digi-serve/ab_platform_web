@@ -604,9 +604,7 @@ module.exports = class ABObject extends ABObjectCore {
 
       // if label is empty, then show .id
       if (!labelData.trim())
-         labelData = labelData = `${
-            this.AB.isUUID(rowData.id) ? "ID: " : ""
-         }${rowData.id}`; // show id of row
+         labelData = `${this.AB.isUUID(rowData.id) ? "ID: " : ""}${rowData.id}`; // show id of row
 
       return labelData;
    }

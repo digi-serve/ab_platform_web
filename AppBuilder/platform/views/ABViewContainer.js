@@ -414,7 +414,7 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
                   css: "gravity_counter",
                   on: {
                      onChange: () => {
-                        logic.onChange();
+                        _logic.onChange();
                      },
                   },
                },
@@ -481,7 +481,6 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
             .addView(
                {
                   view: "counter",
-                  value: "1",
                   min: 1,
                   label: "Column " + step + " Gravity",
                   labelWidth: App.config.labelWidthXLarge,
@@ -622,7 +621,7 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
                var getGrav = 1;
 
                if (curRow.cols[newPos] && curRow.cols[newPos].gravity) {
-                  var getGrav = curRow.cols[newPos].gravity;
+                  getGrav = curRow.cols[newPos].gravity;
                }
 
                component.ui.gravity = getGrav;

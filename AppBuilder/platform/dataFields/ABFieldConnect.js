@@ -84,6 +84,7 @@ var ABFieldConnectComponent = new ABFieldComponent({
       ids = field.idsUnique(ids, App);
 
       var L = App.Label;
+      this.App = App;
 
       return [
          {
@@ -384,6 +385,7 @@ var ABFieldConnectComponent = new ABFieldComponent({
       },
 
       clickNewObject: () => {
+         let App = this.App;
          if (!App.actions.addNewObject) return;
 
          async.series(
@@ -470,8 +472,8 @@ var ABFieldConnectComponent = new ABFieldComponent({
          $$(ids.indexField2).refresh();
 
          // NOTE: simplify access to .AB.objects() here:
-         console.error("DEBUGGING: what access to AB do I have here?");
-         debugger;
+         // console.error("DEBUGGING: what access to AB do I have here?");
+         // debugger;
 
          // 1:1
          // 1:M
@@ -479,10 +481,9 @@ var ABFieldConnectComponent = new ABFieldComponent({
             (linkType == "one" && linkViaType == "one") ||
             (linkType == "one" && linkViaType == "many")
          ) {
-            sourceObject =
-               ABFieldConnectComponent.CurrentApplication.AB.objects(
-                  (o) => o.id == linkObjectId
-               )[0];
+            sourceObject = ABFieldConnectComponent.CurrentApplication.AB.objects(
+               (o) => o.id == linkObjectId
+            )[0];
          }
          // M:1
          else if (linkType == "many" && linkViaType == "one") {
@@ -492,10 +493,9 @@ var ABFieldConnectComponent = new ABFieldComponent({
          else if (linkType == "many" && linkViaType == "many") {
             sourceObject = ABFieldConnectComponent.CurrentObject;
 
-            let linkObject =
-               ABFieldConnectComponent.CurrentApplication.AB.objects(
-                  (o) => o.id == linkObjectId
-               )[0];
+            let linkObject = ABFieldConnectComponent.CurrentApplication.AB.objects(
+               (o) => o.id == linkObjectId
+            )[0];
 
             // Populate the second index fields
             let linkIndexFields = [];
@@ -828,18 +828,22 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       let placeholderReadOnly = null;
       if (options.filterValue && options.filterKey) {
          if (!$$(options.filterValue.ui.id)) {
-
             // this happens in the Interface Builder when only the single form UI is displayed
             readOnly = true;
-            placeholderReadOnly = L("", "Must select item from '{0}' first.", ["PARENT ELEMENT"]);
+            placeholderReadOnly = L("", "Must select item from '{0}' first.", [
+               "PARENT ELEMENT",
+            ]);
          } else {
             let val = this.getValue($$(options.filterValue.ui.id));
             if (!val) {
-
                // if there isn't a value on the parent select element set this one to readonly and change placeholder text
                readOnly = true;
                let label = $$(options.filterValue.ui.id);
-               placeholderReadOnly = L("", "Must select item from '{0}' first.", [label.config.label]);
+               placeholderReadOnly = L(
+                  "",
+                  "Must select item from '{0}' first.",
+                  [label.config.label]
+               );
             }
          }
       }
@@ -863,7 +867,6 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                minimumInputLength: 0,
                quietMillis: 250,
                fetch: (url, init, queryOptions) => {
-
                   // if we are filtering based off another selectivity's value we
                   // need to do it on fetch each time because the value can change
                   // copy the filters so we don't add to them every time there is a change
@@ -877,18 +880,16 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                      options.filterKey &&
                      $$(options.filterValue.ui.id)
                   ) {
-
                      // get the current value of the parent select box
                      let parentVal = this.getValue(
                         $$(options.filterValue.ui.id)
                      );
                      if (parentVal) {
-
                         // if there is a value create a new filter rule
                         let filter = {
                            key: options.filterKey,
                            rule: "equals",
-                           value: parentVal[options.filterColumn]
+                           value: parentVal[options.filterColumn],
                         };
                         combineFilters.rules.push(filter);
                      }
@@ -984,25 +985,23 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                   (e) => {
                      let parentVal = this.selectivityGet(parentDomNode);
                      if (parentVal) {
-
                         // if there is a value set allow the user to edit and
                         // put back the placeholder text to the orignal value
                         domNode.selectivity.setOptions({
                            readOnly: false,
-                           placeholder: placeholder
+                           placeholder: placeholder,
                         });
 
                         // clear any previous value because it could be invalid
                         domNode.selectivity.setValue(null);
                      } else {
-
                         // if there is not a value set make field read only and
                         // set the placeholder text to a read only version
                         domNode.selectivity.setOptions({
                            readOnly: true,
-                           placeholder: placeholderReadOnly
+                           placeholder: placeholderReadOnly,
                         });
-                        
+
                         // clear any previous value because it could be invalid
                         domNode.selectivity.setValue(null);
                      }

@@ -336,8 +336,9 @@ module.exports = class InsertRecordTask extends InsertRecordTaskCore {
                if (!this.isRepeat) {
                   this[s] = "";
                   break;
+               } else {
+                  // no break;
                }
-            // no break;
             // eslint-disable-next-line no-fallthrough
             default:
                this[s] = this.property(ids[s]);

@@ -85,8 +85,8 @@ module.exports = class ABViewTab extends ABViewTabCore {
 
          if (this.settings.sidebarPos == "right") {
             // the sidebar is in the second column now so we need to reference it properly
-            var viewIndex = 0;
-            var tabIndex = 1;
+            viewIndex = 0;
+            tabIndex = 1;
          }
 
          tabElem.cols[viewIndex].id = ids.component;
@@ -236,6 +236,7 @@ module.exports = class ABViewTab extends ABViewTabCore {
          },
 
          tabRemove: (e, nodeId, trg) => {
+            let L = App.Label;
             var tabId = $$(ids.component).getValue();
             var deletedView = this.views((v) => v.id == tabId)[0];
             if (deletedView) {
@@ -301,6 +302,7 @@ module.exports = class ABViewTab extends ABViewTabCore {
    }
 
    static popupShow(tab) {
+      let L = AB.Label;
       var popup = $$("ab-component-tab-add-new-tab-popup");
       var form = $$("ab-component-tab-add-new-tab-form");
       var button = $$("ab-component-tab-save-button");
@@ -1017,7 +1019,7 @@ module.exports = class ABViewTab extends ABViewTabCore {
                }
 
                // for tabs we need to look at the view's accessLevels
-               var accessLevel = v.view.getUserAccess();
+               accessLevel = v.view.getUserAccess();
                v.component.init(null, accessLevel);
 
                // done

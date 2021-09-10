@@ -115,9 +115,7 @@ module.exports = class ABViewFormCustom extends ABViewFormCustomCore {
          height = DEFAULT_HEIGHT;
       }
 
-      let template = (
-         `<div class="customField ${settings.labelPosition}">${templateLabel}#template#</div>`
-      )
+      let template = `<div class="customField ${settings.labelPosition}">${templateLabel}#template#</div>`
          .replace(/#width#/g, settings.labelWidth)
          .replace(/#label#/g, field.label)
          .replace(

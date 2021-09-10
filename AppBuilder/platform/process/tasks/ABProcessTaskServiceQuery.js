@@ -2,7 +2,9 @@ const ABProcessTaskServiceQueryCore = require("../../../core/process/tasks/ABPro
 
 const ABQLManager = require("../../ql/ABQLManager.js");
 
-module.exports = class ABProcessTaskServiceQuery extends ABProcessTaskServiceQueryCore {
+module.exports = class ABProcessTaskServiceQuery extends (
+   ABProcessTaskServiceQueryCore
+) {
    ////
    //// Process Instance Methods
    ////

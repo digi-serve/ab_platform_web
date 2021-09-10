@@ -12,19 +12,22 @@
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 module.exports = {
    env: {
+      browser: true,
       node: true,
       es6: true,
+      amd: true,
    },
 
    parserOptions: {
-      ecmaVersion: 8,
+      ecmaVersion: 2021,
+      sourceType: "module", // export import syntax
    },
 
    // extending recommended config and config derived from eslint-config-prettier
    extends: ["eslint:recommended", "prettier"],
 
    // activating eslint-plugin-prettier (--fix stuff)
-   // plugins: ["prettier"],
+   plugins: ["prettier"],
 
    rules: {
       // customizing prettier rules (unfortunately not many of them are customizable)
@@ -40,5 +43,19 @@ module.exports = {
 
       // eslint rule customization here:
       "no-console": 0, // allow console.log() in our services
+      "no-unused-vars": 0, // allow unused variables (webpack will remove them)
+   },
+
+   globals: {
+      AB: true, // global ABFactory
+      async: true,
+      io: true, // socket.io
+      moment: true,
+      reports: true, // webix's Report Manager widget
+      tinymce: true,
+      Selectivity: true,
+      webix: true, // webix
+      $$: true, // webix element
+      _: true, // lodash
    },
 };

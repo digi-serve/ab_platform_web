@@ -1,7 +1,6 @@
 const ABViewFormButtonCore = require("../../core/views/ABViewFormButtonCore");
 
-const ABViewFormButtonPropertyComponentDefaults =
-   ABViewFormButtonCore.defaultValues();
+const ABViewFormButtonPropertyComponentDefaults = ABViewFormButtonCore.defaultValues();
 
 module.exports = class ABViewFormButton extends ABViewFormButtonCore {
    // constructor(values, application, parent, defaultValues) {

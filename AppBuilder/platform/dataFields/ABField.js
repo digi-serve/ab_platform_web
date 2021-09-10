@@ -107,7 +107,9 @@ module.exports = class ABField extends ABFieldCore {
          if (typeof rules == "string") {
             try {
                rules = JSON.parse(rules);
-            } catch (e) {}
+            } catch (e) {
+               // continue regardless of error
+            }
          }
          (rules || []).forEach((settings) => {
             field.addValidation(ids, settings);

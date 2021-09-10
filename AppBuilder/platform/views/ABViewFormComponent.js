@@ -1,7 +1,6 @@
 const ABViewFormComponentCore = require("../../core/views/ABViewFormComponentCore");
 
-const ABViewFormFieldPropertyComponentDefaults =
-   ABViewFormComponentCore.defaultValues();
+const ABViewFormFieldPropertyComponentDefaults = ABViewFormComponentCore.defaultValues();
 
 module.exports = class ABViewFormComponent extends ABViewFormComponentCore {
    // constructor(values, application, parent, defaultValues) {

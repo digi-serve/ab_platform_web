@@ -2,7 +2,9 @@ const ABViewFormSelectMultipleCore = require("../../core/views/ABViewFormSelectM
 
 const ABViewFormSelectMultiplePropertyComponentDefaults = ABViewFormSelectMultipleCore.defaultValues();
 
-module.exports = class ABViewFormSelectMultiple extends ABViewFormSelectMultipleCore {
+module.exports = class ABViewFormSelectMultiple extends (
+   ABViewFormSelectMultipleCore
+) {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
    // }
@@ -169,7 +171,7 @@ module.exports = class ABViewFormSelectMultiple extends ABViewFormSelectMultiple
 
       component.logic = {
          getValue: (elem) => {
-            var elem = $$(ids.component);
+            elem = elem || $$(ids.component);
 
             return field.getValue(elem);
          },

@@ -664,7 +664,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
     *					unique id references.
     * @param {HtmlDOM} node  the HTML Dom object for this field's display.
     */
-    customEdit(row, App, node, id, evt) {
+   customEdit(row, App, node, id, evt) {
       if (
          (evt && evt.target.className.indexOf("delete-image") > -1) ||
          this.deleteImage
@@ -674,6 +674,8 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
             row.removeDefaultImage = [];
          }
          row.removeDefaultImage[this.columnName] = true;
+
+         let L = this.AB.Label();
 
          // Ask the user if they really want to delete the photo
          this.AB.Dialog.Confirm({
@@ -752,7 +754,6 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
    }
 
    imageTemplate(obj, options) {
-      var L = this.AB.Label();
       options = options || {};
       options.height = options.height || "100%";
       options.width = options.width || "100%";
@@ -789,8 +790,8 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
 
       var html = [
          `<div class="image-data-field-icon" style="${iconDisplay}"><i class="fa fa-picture-o fa-2x"></i>#drag#</div>` +
-            `<div class="image-data-field-image" style="${imageDisplay} width:${options.width}; height:${options.height}; ${imageURL}">#remove#</div>`
-         ].join("");
+            `<div class="image-data-field-image" style="${imageDisplay} width:${options.width}; height:${options.height}; ${imageURL}">#remove#</div>`,
+      ].join("");
 
       html = html.replace(
          "#drag#",

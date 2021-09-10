@@ -13,6 +13,7 @@ module.exports = class ABView extends ABViewCore {
     * @return {ABFactory.Validation.validator()}
     */
    isValid() {
+      let L = AB.Label;
       var validator = this.AB.Validation.validator();
 
       // // labels must be unique among views on the same parent
@@ -426,6 +427,7 @@ module.exports = class ABView extends ABViewCore {
       isGlobal = false,
       defaultOption = null
    ) {
+      let L = AB.Label;
       if (defaultOption == null) {
          defaultOption = {
             id: "",

@@ -898,7 +898,7 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                var isEditable = this.settings.isEditable;
 
                // we need to recursivly look backwards to toggle tabs into view when a user choosed to select a tab for edit or details views
-               function toggleTab(parentTab, wb) {
+               let toggleTab = (parentTab, wb) => {
                   // find the tab
                   var tab = wb.getTopParentView().queryView({ id: parentTab });
                   // if we didn't pass and id we may have passed a domNode
@@ -927,7 +927,7 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                   if (nextTab) {
                      toggleTab(nextTab, wb);
                   }
-               }
+               };
 
                $$(DataTable.ui.id).attachEvent(
                   "onItemClick",
@@ -962,20 +962,29 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                   }
                );
 
-               $$(DataTable.ui.id).attachEvent('onAfterRender', function (data) {
-                  if ($$(DataTable.ui.id)) {
-                    //set cy data
-                    $$(DataTable.ui.id).$view.setAttribute("data-cy", DataTable.idBase);
-                    for (const key in ids) {
-                      if (Object.hasOwnProperty.call(ids, key)) {
-                        let element = (ids[key]).toString()
-                        if ( $$(element) ) {
-                          $$(element).$view.setAttribute("data-cy", element);
+               $$(DataTable.ui.id).attachEvent(
+                  "onAfterRender",
+                  function (data) {
+                     if ($$(DataTable.ui.id)) {
+                        //set cy data
+                        $$(DataTable.ui.id).$view.setAttribute(
+                           "data-cy",
+                           DataTable.idBase
+                        );
+                        for (const key in ids) {
+                           if (Object.hasOwnProperty.call(ids, key)) {
+                              let element = ids[key].toString();
+                              if ($$(element)) {
+                                 $$(element).$view.setAttribute(
+                                    "data-cy",
+                                    element
+                                 );
+                              }
+                           }
                         }
-                      }
-                    }
-                 }
-               });
+                     }
+                  }
+               );
 
                // $$(DataTable.ui.id).attachEvent('onBeforeRender', function (data) {
                // 	_logic.clientSideDataFilter();
@@ -1137,8 +1146,7 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                   // NOTE: Webix's client sorting does not support dynamic loading.
                   // If the data does not be loaded, then load all data.
                   await this.datacollection.reloadData(0, 0);
-               }
-               catch (err) {
+               } catch (err) {
                   console.log(err);
                }
             }
@@ -1189,12 +1197,11 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                         ) {
                            try {
                               await dc.reloadData(0, limit);
-                           }
-                           catch(err) {
+                           } catch (err) {
                               console.log(err);
                               next(err);
                            }
-                           
+
                            // Should set .loadAll to this data collection ?
                            if (limit == null) dc.settings.loadAll = true;
                            next();
@@ -1426,7 +1433,6 @@ module.exports = class ABViewGrid extends ABViewGridCore {
    }
 
    populatePopupEditors(view, dataSource) {
-
       // moved this up because we do not need the object to populate defaults and
       // default settings were getting skipped when initialized
       PopupFilterProperty.setSettings(view.settings.gridFilter);

@@ -27,7 +27,8 @@ var ABFieldCalculateComponent = new ABFieldComponent({
 
    elements: (App, field) => {
       ids = field.idsUnique(ids, App);
-      var L = App.Label;
+      let L = App.Label;
+      this.L = L;
 
       var delimiterList = [
          { id: "none", value: L("ab.common.none", "*None") },
@@ -295,6 +296,7 @@ var ABFieldCalculateComponent = new ABFieldComponent({
       },
 
       getDateFields: () => {
+         let L = this.L;
          if (ABFieldCalculateComponent.CurrentObject) {
             var options = [];
 

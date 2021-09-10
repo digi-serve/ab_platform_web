@@ -2,7 +2,9 @@ const ABViewDetailSelectivityCore = require("../../core/views/ABViewDetailSelect
 
 const ABViewDetailPropertyComponentDefaults = ABViewDetailSelectivityCore.defaultValues();
 
-module.exports = class ABViewDetailSelectivity extends ABViewDetailSelectivityCore {
+module.exports = class ABViewDetailSelectivity extends (
+   ABViewDetailSelectivityCore
+) {
    /**
     * @param {obj} values  key=>value hash of ABView values
     * @param {ABApplication} application the application object this view is under
@@ -110,9 +112,12 @@ module.exports = class ABViewDetailSelectivity extends ABViewDetailSelectivityCo
       component.ui.on = {
          //Add data-cy attribute for Cypress Testing
          onAfterRender: () => {
-            const dataCy = `detailSelectivity-${field?.label?.replace(/\s/g,'')}-${field?.id}`;
-            $$(ids.component)?.$view.setAttribute('data-cy', dataCy);
-         }
+            const dataCy = `detailSelectivity-${field?.label?.replace(
+               /\s/g,
+               ""
+            )}-${field?.id}`;
+            $$(ids.component)?.$view.setAttribute("data-cy", dataCy);
+         },
       };
 
       if (this.settings.height) component.ui.height = this.settings.height;

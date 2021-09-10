@@ -4,8 +4,8 @@ const ABGanttProperty = require("../workspaceViews/ABObjectWorkspaceViewGantt.js
 
 const ABViewGanttPropertyComponentDefaults = ABViewGanttCore.defaultValues();
 
-function L(key, altText) {
-   return AD.lang.label.getLabel(key) || altText;
+function L(...params) {
+   return AB.Label(...params);
 }
 
 module.exports = class ABViewGantt extends ABViewGanttCore {

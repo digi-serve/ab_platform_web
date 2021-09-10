@@ -5,8 +5,8 @@ const ABViewPropertyLinkPage = require("./viewProperties/ABViewPropertyLinkPage"
 
 const ABFieldImage = require("../dataFields/ABFieldImage");
 
-function L(key, altText) {
-   return AD.lang.label.getLabel(key) || altText;
+function L(...params) {
+   return AB.Label(...params);
 }
 
 let PopupCarouselFilterMenu = null;
@@ -411,7 +411,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
       let spacer = {};
       if (this.settings.width == 0) {
          spacer = {
-            width: 1
+            width: 1,
          };
       }
 
@@ -443,7 +443,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
                   },
                ],
             },
-            spacer // spacer
+            spacer, // spacer
          ],
       };
 
@@ -598,7 +598,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
                   css: "image",
                   template: _logic.myTemplate,
                   data: {
-                     id: OP.Util.uuid(),
+                     id: AB.uuid(),
                      src: `/opsportal/image/${obj.application.name}/${field.settings.defaultImageUrl}`,
                      label: "Default image",
                   },
@@ -677,16 +677,16 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
                               {
                                  view: "icon",
                                  icon: "fa fa-times",
-                                 click: function() {
+                                 click: function () {
                                     webix.html.removeCss(
                                        $$(ids.component).getNode(),
                                        "fullscreen"
                                     );
                                     webix.fullscreen.exit();
-                                 }
-                              }
-                           ]
-                        }
+                                 },
+                              },
+                           ],
+                        },
                      });
                   }
                }

@@ -38,11 +38,11 @@ function _toExternal(cond) {
    if (cond.key) {
       if (cond.key != "this_object") {
          if (cond.rule && cond.rule.indexOf(cond.key) > -1) {
-             cond.rule = cond.rule.replace(`${cond.key}_`, "");
+            cond.rule = cond.rule.replace(`${cond.key}_`, "");
          }
       } else {
          if (cond.rule && cond.rule.indexOf("uuid") > -1) {
-             cond.rule = cond.rule.replace(`uuid_`, "");
+            cond.rule = cond.rule.replace(`uuid_`, "");
          }
       }
    }

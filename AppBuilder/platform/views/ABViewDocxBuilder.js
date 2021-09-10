@@ -465,9 +465,14 @@ module.exports = class ABViewDocxBuilder extends ABViewDocxBuilderCore {
                on: {
                   // Add data-cy attribute for cypress tests
                   onAfterRender: () => {
-                     const dataCy = `docx-${buttonLabelText.replace(/\s/g, '')}-${this.id}`
-                     $$(ids.button)?.$view.querySelector('button').setAttribute('data-cy', dataCy);
-                 },
+                     const dataCy = `docx-${buttonLabelText.replace(
+                        /\s/g,
+                        ""
+                     )}-${this.id}`;
+                     $$(ids.button)
+                        ?.$view.querySelector("button")
+                        .setAttribute("data-cy", dataCy);
+                  },
                },
             },
             {
@@ -720,7 +725,7 @@ module.exports = class ABViewDocxBuilder extends ABViewDocxBuilderCore {
                         dcValues.push(resultData);
                      });
 
-                    // If data sources have more than 1 or the result data more than 1 items, then add label of data source
+                     // If data sources have more than 1 or the result data more than 1 items, then add label of data source
                      let datacollectionData =
                         dcValues.length > 1 ? dcValues : dcValues[0];
                      if (

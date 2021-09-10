@@ -7,7 +7,9 @@
 //
 const ABViewRuleActionObjectUpdater = require("./ABViewRuleActionObjectUpdater");
 
-module.exports = class ABViewRuleActionFormRecordRuleUpdate extends ABViewRuleActionObjectUpdater {
+module.exports = class ABViewRuleActionFormRecordRuleUpdate extends (
+   ABViewRuleActionObjectUpdater
+) {
    /**
     * @param {object} App
     *      The shared App object that is created in OP.Component

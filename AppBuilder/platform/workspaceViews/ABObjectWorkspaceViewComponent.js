@@ -5,18 +5,18 @@ module.exports = class ABObjectWorkspaceViewComponent {
    constructor(options) {
       this.elements =
          options.elements ||
-         function() {
+         function () {
             return [];
          };
-      this.init = options.init || function() {};
+      this.init = options.init || function () {};
       this.validate =
          options.validate ||
-         function() {
+         function () {
             return true;
          };
       this.values =
          options.values ||
-         function() {
+         function () {
             return {};
          };
       this.logic = options.logic || {};

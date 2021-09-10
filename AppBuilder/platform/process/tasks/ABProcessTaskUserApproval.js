@@ -3,7 +3,9 @@
 const ABProcessTaskUserApprovalCore = require("../../../core/process/tasks/ABProcessTaskUserApprovalCore.js");
 const ABProcessParticipant = require("../ABProcessParticipant.js");
 
-module.exports = class ABProcessTaskUserApproval extends ABProcessTaskUserApprovalCore {
+module.exports = class ABProcessTaskUserApproval extends (
+   ABProcessTaskUserApprovalCore
+) {
    ////
    //// Process Instance Methods
    ////

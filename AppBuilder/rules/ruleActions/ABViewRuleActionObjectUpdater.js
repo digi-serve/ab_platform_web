@@ -207,7 +207,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
             var UpdateForm = $$(ids.updateForm);
             if (!UpdateForm) {
                // this is a problem!
-               OP.Error.log(
+               AB.error(
                   "ABViewRuleActionFormRecordRuleUpdate.init() could not find webix form.",
                   { id: ids.updateForm }
                );
@@ -380,7 +380,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
          },
 
          isValid: () => {
-            var validator = OP.Validation.validator();
+            var validator = AB.Validation.validator();
             var valueField = $$(ids.row).getChildViews()[0].getChildViews()[3];
             var FormView = valueField.getParentView().getParentView();
 
@@ -763,7 +763,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
          },
 
          populateFilters: (dataView, filterConditions) => {
-            var filterConditions =
+            filterConditions =
                filterConditions ||
                ABViewRuleActionObjectUpdaterDefaults.filterConditions;
 
@@ -1064,15 +1064,17 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                         // case: datacollection is a query
                         // our field is a pointer to an object. we want to pull out that object
                         // from the query data.
-                        case "query":
-                           var fieldWithValue = clonedDataCollection.datasource.fieldByID(
+                        case "query": {
+                           let fieldWithValueOfQuery = clonedDataCollection.datasource.fieldByID(
                               op.queryField
                            );
 
-                           var newValue = currRow[fieldWithValue.columnName];
+                           var newValue =
+                              currRow[fieldWithValueOfQuery.columnName];
 
                            if (typeof newValue == "undefined") {
-                              newValue = currRow[fieldWithValue.relationName()];
+                              newValue =
+                                 currRow[fieldWithValueOfQuery.relationName()];
 
                               if (Array.isArray(newValue)) {
                                  newValue = newValue.map((v) => {
@@ -1086,6 +1088,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                            newValues = _.uniq(newValues.concat(newValue));
 
                            break;
+                        }
                      }
 
                      currRow = clonedDataCollection.getNextRecord(currRow);
@@ -1124,11 +1127,11 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                         clonedDataCollection.sourceType == "query" ||
                         (op.valueType == "exist" && op.queryField)
                      ) {
-                        var fieldWithValue = clonedDataCollection.datasource.fieldByID(
+                        fieldWithValue = clonedDataCollection.datasource.fieldByID(
                            op.queryField
                         );
 
-                        var newValue = value[fieldWithValue.columnName];
+                        newValue = value[fieldWithValue.columnName];
 
                         if (typeof newValue == "undefined") {
                            newValue = value[fieldWithValue.relationName()];
@@ -1207,7 +1210,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
             model
                .update(options.data.id, options.data)
                .catch((err) => {
-                  OP.Error.log(
+                  AB.error(
                      "!!! ABViewRuleActionFormRecordRuleUpdate.process(): update error:",
                      { error: err, data: options.data }
                   );

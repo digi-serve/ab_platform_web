@@ -313,11 +313,11 @@ module.exports = class RowFilter extends RowFilterCore {
                            },
                            {
                               value: labels.component.isEmpty,
-                              id: "is_empty"
+                              id: "is_empty",
                            },
                            {
                               value: labels.component.isNotEmpty,
-                              id: "is_not_empty"
+                              id: "is_not_empty",
                            },
                            {
                               value: labels.component.sameAsUser,
@@ -1064,7 +1064,7 @@ module.exports = class RowFilter extends RowFilterCore {
                $viewCond
                   .$$(ids.inputValue)
                   .$$(ids.fieldMatch)
-                  .define("options", recordRuleFieldOptions);
+                  .define("options", this.recordRuleFieldOptions);
                $viewCond.$$(ids.inputValue).$$(ids.fieldMatch).refresh();
 
                // Show the new value inputs
@@ -1072,7 +1072,7 @@ module.exports = class RowFilter extends RowFilterCore {
                break;
 
             case "in_data_collection":
-            case "not_in_data_collection":
+            case "not_in_data_collection": {
                let dcOptions = [];
 
                // pull data collection list
@@ -1110,6 +1110,7 @@ module.exports = class RowFilter extends RowFilterCore {
                // Show the new value inputs
                $viewCond.$$(ids.inputValue).showBatch("dataCollection");
                break;
+            }
 
             default:
                // Show the default value inputs

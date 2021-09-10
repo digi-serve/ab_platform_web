@@ -297,7 +297,7 @@ class ABFactory extends ABFactoryCore {
       );
       return checker.test(key);
    }
-   
+
    merge(...params) {
       return _.merge(...params);
    }
@@ -334,7 +334,10 @@ class ABFactory extends ABFactoryCore {
    toDate(dateText = "", options = {}) {
       if (!dateText) return;
 
-      if (options.ignoreTime) dateText = dateText.replace(/\T.*/, "");
+      if (options.ignoreTime) {
+         // 2021-09-10T04:49:09.848Z -> 2021-09-10
+         dateText = dateText.replace(/T.*/, "");
+      }
 
       let result = options.format
          ? moment(dateText, options.format)

@@ -1,7 +1,7 @@
 const ABViewProperty = require("./ABViewProperty");
 
-let L = (key, altText) => {
-   return AD.lang.label.getLabel(key) || altText;
+let L = (...params) => {
+   return AB.Label(...params);
 };
 
 module.exports = class ABViewPropertyAddPage extends ABViewProperty {

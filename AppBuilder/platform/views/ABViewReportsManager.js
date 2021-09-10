@@ -1,8 +1,8 @@
 const { isString } = require("lodash");
 const ABViewReportsManagerCore = require("../../core/views/ABViewReportsManagerCore");
 
-function L(key, altText) {
-   return AD.lang.label.getLabel(key) || altText;
+function L(...params) {
+   return AB.Label(...params);
 }
 
 module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
@@ -145,50 +145,48 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                   getModels() {
                      let reportModels = {};
 
-                     (compInstance.AB.datacollections() || []).forEach(
-                        (dc) => {
-                           let obj = dc.datasource;
-                           if (!obj) return;
+                     (compInstance.AB.datacollections() || []).forEach((dc) => {
+                        let obj = dc.datasource;
+                        if (!obj) return;
 
-                           let reportFields = _logic.getReportFields(dc);
+                        let reportFields = _logic.getReportFields(dc);
 
-                           // get connected data collections
-                           // let linkedFields = [];
-                           // (obj.connectFields() || []).forEach((f, index) => {
-                           //    let connectedDcs = compInstance.AB.datacollections(
-                           //       (dColl) =>
-                           //          dColl &&
-                           //          dColl.datasource &&
-                           //          dColl.datasource.id == f.settings.linkObject
-                           //    );
-                           //    (connectedDcs || []).forEach((linkedDc) => {
-                           //       linkedFields.push({
-                           //          id: index + 1,
-                           //          name: linkedDc.label,
-                           //          source: dc.id,
-                           //          target: linkedDc.id
-                           //       });
-                           //    });
-                           // });
+                        // get connected data collections
+                        // let linkedFields = [];
+                        // (obj.connectFields() || []).forEach((f, index) => {
+                        //    let connectedDcs = compInstance.AB.datacollections(
+                        //       (dColl) =>
+                        //          dColl &&
+                        //          dColl.datasource &&
+                        //          dColl.datasource.id == f.settings.linkObject
+                        //    );
+                        //    (connectedDcs || []).forEach((linkedDc) => {
+                        //       linkedFields.push({
+                        //          id: index + 1,
+                        //          name: linkedDc.label,
+                        //          source: dc.id,
+                        //          target: linkedDc.id
+                        //       });
+                        //    });
+                        // });
 
-                           // // MOCK UP for testing
-                           // let linkedFields = [
-                           //    {
-                           //       id: "id",
-                           //       name: "id",
-                           //       source: "39378ee0-38f0-4b9d-a5aa-dddc61137fcd", // Player
-                           //       target: "0de82362-4ab5-4f0f-8cfa-d1288d173cba" // Team
-                           //    }
-                           // ];
+                        // // MOCK UP for testing
+                        // let linkedFields = [
+                        //    {
+                        //       id: "id",
+                        //       name: "id",
+                        //       source: "39378ee0-38f0-4b9d-a5aa-dddc61137fcd", // Player
+                        //       target: "0de82362-4ab5-4f0f-8cfa-d1288d173cba" // Team
+                        //    }
+                        // ];
 
-                           reportModels[dc.id] = {
-                              id: dc.id,
-                              name: dc.label,
-                              data: reportFields,
-                              refs: [],
-                           };
-                        }
-                     );
+                        reportModels[dc.id] = {
+                           id: dc.id,
+                           name: dc.label,
+                           data: reportFields,
+                           refs: [],
+                        };
+                     });
 
                      return webix.promise.resolve(reportModels);
                   }
@@ -437,7 +435,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
 
                                                    if (
                                                       r.condition.filter
-                                                      .start &&
+                                                         .start &&
                                                       isString(
                                                          r.condition.filter
                                                             .start
@@ -468,7 +466,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                     let filterElem = webix.ui({
                                        view: "query",
                                        fields: reportFields,
-                                       value: queryVal
+                                       value: queryVal,
                                     });
 
                                     // create a new data collection and apply the query filter
@@ -479,7 +477,9 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                     let filterFn;
                                     try {
                                        filterFn = filterElem.getFilterFunction();
-                                    } catch (error) {}
+                                    } catch (error) {
+                                       // continue regardless of error
+                                    }
                                     if (filterFn) tempDc.filter(filterFn);
 
                                     // sorting
@@ -590,7 +590,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                      // TODO
                      return webix.promise.resolve([]);
                   }
-               }
+               },
             ],
             [
                reports.views.table,
@@ -609,8 +609,8 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                          content:
                                             a.header === "text"
                                                ? "textFilter"
-                                               : "richSelectFilter"
-                                      }
+                                               : "richSelectFilter",
+                                      },
                                    ],
                            type: a.type,
                            sort: "date",
@@ -622,15 +622,15 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                               } else {
                                  return "";
                               }
-                           }
+                           },
                         };
                      } else {
                         return super.GetColumnConfig(a);
                      }
                   }
-               }
-            ]
-         ])
+               },
+            ],
+         ]),
       };
 
       // make sure each of our child views get .init() called
@@ -664,7 +664,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                   ref: "",
                   key: false,
                   show: true,
-                  abField: f
+                  abField: f,
                });
 
                if (f.isConnection && f.settings.isSource) {

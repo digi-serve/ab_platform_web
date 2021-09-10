@@ -2,7 +2,9 @@
 // const ABApplication = require("./ABApplication"); // NOTE: change to require()
 const ABProcessTriggerLifecycleCore = require("../../../core/process/tasks/ABProcessTriggerLifecycleCore.js");
 
-module.exports = class ABProcessTriggerLifecycle extends ABProcessTriggerLifecycleCore {
+module.exports = class ABProcessTriggerLifecycle extends (
+   ABProcessTriggerLifecycleCore
+) {
    propertyIDs(id) {
       return {
          name: `${id}_name`,

@@ -1,6 +1,8 @@
 const AccountingBatchProcessingCore = require("../../../core/process/tasks/ABProcessTaskServiceAccountingBatchProcessingCore.js");
 
-module.exports = class AccountingBatchProcessing extends AccountingBatchProcessingCore {
+module.exports = class AccountingBatchProcessing extends (
+   AccountingBatchProcessingCore
+) {
    ////
    //// Process Instance Methods
    ////

@@ -151,7 +151,7 @@ module.exports = class ABViewChart extends ABViewChartCore {
       $$(ids.isPercentage).setValue(
          view.settings.isPercentage != null
             ? view.settings.isPercentage
-            : ABViewChartPiePropertyComponentDefaults.isPercentage
+            : ABViewChartPropertyComponentDefaults.isPercentage
       );
 
       $$(ids.showLabel).setValue(
@@ -443,11 +443,12 @@ module.exports = class ABViewChart extends ABViewChartCore {
       var sumNumber = 0;
       var sumNumber2 = 0;
       var countNumber = dInfo.length;
+      var obj;
 
       switch (valueCol.key) {
          case "formula":
             {
-               var obj = valueCol.object;
+               obj = valueCol.object;
                var objLink = this.AB.objects(
                   (obj) => obj.id == valueCol.settings.object
                )[0];
@@ -462,7 +463,7 @@ module.exports = class ABViewChart extends ABViewChartCore {
 
          case "calculate":
             {
-               var obj = valueCol.object;
+               obj = valueCol.object;
                var place = valueCol.settings.decimalPlaces;
             }
             break;
