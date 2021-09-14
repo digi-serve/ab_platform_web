@@ -8,7 +8,9 @@
 const ABComponent = require("../AppBuilder/platform/ABComponent");
 const ABFieldManager = require("../AppBuilder/core/ABFieldManager");
 
-module.exports = class AB_Work_Object_Workspace_PopupNewDataField extends ABComponent {
+module.exports = class AB_Work_Object_Workspace_PopupNewDataField extends (
+   ABComponent
+) {
    //.extend(idBase, function(App) {
 
    constructor(App, idBase) {
@@ -279,7 +281,7 @@ module.exports = class AB_Work_Object_Workspace_PopupNewDataField extends ABComp
             $$(ids.component).hide();
          },
 
-         buttonSave: function () {
+         buttonSave: async function () {
             $$(ids.buttonSave).disable();
             // show progress
             $$(ids.component).showProgress();
@@ -390,7 +392,7 @@ module.exports = class AB_Work_Object_Workspace_PopupNewDataField extends ABComp
                         } else {
                            updateValues[key] = vals[key];
                         }
-		     }
+                     }
 
                      _editField.fromValues(updateValues);
 
@@ -410,112 +412,84 @@ module.exports = class AB_Work_Object_Workspace_PopupNewDataField extends ABComp
                      $$(ids.buttonSave).enable();
                      $$(ids.component).hideProgress();
                   } else {
-                     field
-                        .save()
-                        .then(() => {
-                           var finishUpdateField = () => {
-                              $$(ids.buttonSave).enable();
-                              $$(ids.component).hideProgress();
-                              _currentEditor.clear();
-                              _logic.hide();
-                              _logic.callbacks.onSave(field);
-                           };
+                     try {
+                        await field.save();
 
-                           var refreshModels = () => {
-                              // refresh linked object model
-                              linkCol.object.model().refresh();
+                        let finishUpdateField = () => {
+                           $$(ids.buttonSave).enable();
+                           $$(ids.component).hideProgress();
+                           _currentEditor.clear();
+                           _logic.hide();
+                           _logic.callbacks.onSave(field);
+                        };
 
-                              // refresh source object model
-                              // NOTE: M:1 relation has to refresh model after linked object's refreshed
-                              field.object.model().refresh();
-                           };
+                        let refreshModels = () => {
+                           // refresh linked object model
+                           linkCol.object.model().refresh();
 
-                           // TODO workaround : update link column id
-                           if (linkCol != null) {
-                              linkCol.settings.linkColumn = field.id;
-                              return linkCol
-                                 .save()
-                                 .then(() => {
-                                    // now linkCol has an .id, so update our field:
-                                    field.settings.linkColumn = linkCol.id;
-                                    return field.save();
-                                 })
-                                 .then(() => {
-                                    // when add new link fields, then run create migrate fields here
-                                    if (!_editField) {
-                                       return Promise.resolve()
-                                          .then(() => {
-                                             return new Promise((next, err) => {
-                                                field
-                                                   .migrateCreate()
-                                                   .catch(err)
-                                                   .then(() => next());
-                                             });
-                                          })
-                                          .then(() => {
-                                             return new Promise((next, err) => {
-                                                linkCol
-                                                   .migrateCreate()
-                                                   .catch(err)
-                                                   .then(() => next());
-                                             });
-                                          })
-                                          .then(() => {
-                                             // return new Promise((next, err) => {
-                                             refreshModels();
-                                             finishUpdateField();
+                           // refresh source object model
+                           // NOTE: M:1 relation has to refresh model after linked object's refreshed
+                           field.object.model().refresh();
+                        };
 
-                                             //    next();
-                                             // });
-                                          });
-                                    } else {
-                                       refreshModels();
-                                       finishUpdateField();
-                                    }
-                                 });
-                           } else {
-                              finishUpdateField();
+                        // TODO workaround : update link column id
+                        if (linkCol != null) {
+                           linkCol.settings.linkColumn = field.id;
+                           await linkCol.save();
+
+                           // now linkCol has an .id, so update our field:
+                           field.settings.linkColumn = linkCol.id;
+                           await field.save();
+
+                           // when add new link fields, then run create migrate fields here
+                           if (!_editField) {
+                              await field.migrateCreate();
+                              await linkCol.migrateCreate();
                            }
-                        })
-                        .catch((err) => {
-                           if (
-                              OP.Validation.isFormValidationError(
-                                 err,
-                                 $$(editor.ui.id)
-                              )
-                           ) {
-                              // for validation errors, keep things in place
-                              // and let the user fix the data:
-                              $$(ids.buttonSave).enable();
-                              $$(ids.component).hideProgress();
-                           } else {
-                              var errMsg = err.toString();
-                              if (err.message) {
-                                 errMsg = err.message;
-                              }
-                              webix.alert({
-                                 title: "Error saving fields.",
-                                 ok: "tell appdev",
-                                 text: errMsg,
-                                 type: "alert-error",
-                              });
 
-                              // Q: if not validation error, do we
-                              // then field.destroy() ? and let them try again?
-                              // $$(ids.buttonSave).enable();
-                              // $$(ids.component).hideProgress();
-                           }
-                        });
+                           refreshModels();
+                           finishUpdateField();
+                        } else {
+                           finishUpdateField();
+                        }
+                     } catch (err) {
+                        // if (
+                        //    OP.Validation.isFormValidationError(
+                        //       err,
+                        //       $$(editor.ui.id)
+                        //    )
+                        // ) {
+                        //    // for validation errors, keep things in place
+                        //    // and let the user fix the data:
+                        //    $$(ids.buttonSave).enable();
+                        //    $$(ids.component).hideProgress();
+                        // } else {
+                        //    var errMsg = err.toString();
+                        //    if (err.message) {
+                        //       errMsg = err.message;
+                        //    }
+                        //    webix.alert({
+                        //       title: "Error saving fields.",
+                        //       ok: "tell appdev",
+                        //       text: errMsg,
+                        //       type: "alert-error",
+                        //    });
+                        //    // Q: if not validation error, do we
+                        //    // then field.destroy() ? and let them try again?
+                        //    // $$(ids.buttonSave).enable();
+                        //    // $$(ids.component).hideProgress();
+                        // }
+                     }
                   }
                } else {
                   $$(ids.buttonSave).enable();
                   $$(ids.component).hideProgress();
                }
             } else {
-               OP.Dialog.Alert({
-                  title: "! Could not find the current editor.",
-                  text: "go tell a developer about this.",
-               });
+               // OP.Dialog.Alert({
+               //    title: "! Could not find the current editor.",
+               //    text: "go tell a developer about this.",
+               // });
                $$(ids.buttonSave).enable();
                $$(ids.component).hideProgress();
             }

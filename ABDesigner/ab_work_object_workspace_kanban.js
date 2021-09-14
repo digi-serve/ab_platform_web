@@ -195,7 +195,7 @@ module.exports = class ABWorkObjectKanBan extends ABComponent {
           *
           * Show this component.
           */
-         show: function () {
+         show: async () => {
             if ($$(ids.component)) $$(ids.component).show();
 
             FormSide.hide();
@@ -223,153 +223,128 @@ module.exports = class ABWorkObjectKanBan extends ABComponent {
             let horizontalOptions = [];
             CurrentHorizontalField = _logic.getHorizontalGroupingField();
 
-            Promise.resolve()
-               .then(() => {
-                  return new Promise((next, err) => {
-                     if (
-                        !CurrentHorizontalField ||
-                        !(CurrentHorizontalField instanceof ABFieldConnect)
-                     )
-                        return next();
+            if (
+               CurrentHorizontalField &&
+               CurrentHorizontalField instanceof ABFieldConnect
+            ) {
+               // Pull horizontal options
+               horizontalOptions = await CurrentHorizontalField.getOptions();
+            }
 
-                     // Pull horizontal options
-                     CurrentHorizontalField.getOptions()
-                        .catch(err)
-                        .then((options) => {
-                           horizontalOptions = options;
+            // Option format -  { id: "1543563751920", text: "Normal", hex: "#4CAF50" }
+            let verticalOptions = (
+               CurrentVerticalField.settings.options || []
+            ).map((opt) => {
+               // Vertical & Horizontal fields
+               if (CurrentVerticalField && CurrentHorizontalField) {
+                  let rows = [],
+                     // [{
+                     //		id: '',
+                     //		text: ''
+                     // }]
+                     horizontalVals = [];
 
-                           next();
-                        });
+                  // pull options of the Horizontal field
+                  if (CurrentHorizontalField instanceof ABFieldList) {
+                     horizontalVals = CurrentHorizontalField.settings.options;
+                  } else if (CurrentHorizontalField instanceof ABFieldUser) {
+                     horizontalVals = CurrentHorizontalField.getUsers().map(
+                        (u) => {
+                           return {
+                              id: u.id,
+                              text: u.text || u.value,
+                           };
+                        }
+                     );
+                  } else if (CurrentHorizontalField instanceof ABFieldConnect) {
+                     horizontalVals = horizontalOptions.map(({ id, text }) => ({
+                        id,
+                        text,
+                     }));
+                  }
+
+                  horizontalVals.push({
+                     id: null,
+                     text: "Other",
                   });
-               })
-               .then(() => {
-                  return new Promise((next, err) => {
-                     // Option format -  { id: "1543563751920", text: "Normal", hex: "#4CAF50" }
-                     let verticalOptions = (
-                        CurrentVerticalField.settings.options || []
-                     ).map((opt) => {
-                        // Vertical & Horizontal fields
-                        if (CurrentVerticalField && CurrentHorizontalField) {
-                           let rows = [],
-                              // [{
-                              //		id: '',
-                              //		text: ''
-                              // }]
-                              horizontalVals = [];
 
-                           // pull options of the Horizontal field
-                           if (CurrentHorizontalField instanceof ABFieldList) {
-                              horizontalVals =
-                                 CurrentHorizontalField.settings.options;
-                           } else if (
-                              CurrentHorizontalField instanceof ABFieldUser
-                           ) {
-                              horizontalVals = CurrentHorizontalField.getUsers().map(
-                                 (u) => {
-                                    return {
-                                       id: u.id,
-                                       text: u.text || u.value,
-                                    };
-                                 }
-                              );
-                           } else if (
-                              CurrentHorizontalField instanceof ABFieldConnect
-                           ) {
-                              horizontalVals = horizontalOptions.map(
-                                 ({ id, text }) => ({ id, text })
-                              );
-                           }
+                  horizontalVals.forEach((val) => {
+                     let statusOps = {};
+                     statusOps[CurrentVerticalField.columnName] = opt.id;
+                     statusOps[CurrentHorizontalField.columnName] = val.id;
 
-                           horizontalVals.push({
-                              id: null,
-                              text: "Other",
-                           });
-
-                           horizontalVals.forEach((val) => {
-                              let statusOps = {};
-                              statusOps[CurrentVerticalField.columnName] =
-                                 opt.id;
-                              statusOps[CurrentHorizontalField.columnName] =
-                                 val.id;
-
-                              // Header
-                              rows.push({
-                                 template: val.text,
-                                 height: 20,
-                                 css: "progress_header",
-                              });
-
-                              // Kanban list
-                              rows.push({
-                                 view: "kanbanlist",
-                                 status: statusOps,
-                                 type: _logic.kanbanListTemplate(),
-                              });
-                           });
-
-                           return {
-                              header: opt.text,
-                              body: {
-                                 margin: 0,
-                                 rows: rows,
-                              },
-                           };
-                        }
-                        // Vertical field only
-                        else if (CurrentVerticalField) {
-                           let statusOps = {};
-                           statusOps[CurrentVerticalField.columnName] = opt.id;
-
-                           return {
-                              header: opt.text,
-                              body: {
-                                 view: "kanbanlist",
-                                 status: statusOps,
-                                 type: _logic.kanbanListTemplate(),
-                              },
-                           };
-                        }
+                     // Header
+                     rows.push({
+                        template: val.text,
+                        height: 20,
+                        css: "progress_header",
                      });
 
-                     // Rebuild kanban that contains options
-                     // NOTE: webix kanban does not support dynamic vertical list
-                     webix.ui(verticalOptions, $$(ids.kanban));
-                     $$(ids.kanban).reconstruct();
-
-                     // Owner field
-                     CurrentOwnerField = _logic.getOwnerField();
-                     if (CurrentOwnerField) {
-                        let $menuUser = $$(ids.kanban).getUserList();
-                        $menuUser.clearAll();
-
-                        if (CurrentOwnerField instanceof ABFieldUser) {
-                           let users = this.AB.Account.userlist().map((u) => {
-                              return {
-                                 id: u.username,
-                                 value: u.username,
-                              };
-                           });
-
-                           $menuUser.parse(users);
-                        } else if (
-                           CurrentOwnerField instanceof ABFieldConnect
-                        ) {
-                           CurrentOwnerField.getOptions().then((options) => {
-                              $menuUser.parse(
-                                 options.map((opt) => {
-                                    return {
-                                       id: opt.id,
-                                       value: opt.text,
-                                    };
-                                 })
-                              );
-                           });
-                        }
-                     }
-
-                     next();
+                     // Kanban list
+                     rows.push({
+                        view: "kanbanlist",
+                        status: statusOps,
+                        type: _logic.kanbanListTemplate(),
+                     });
                   });
-               });
+
+                  return {
+                     header: opt.text,
+                     body: {
+                        margin: 0,
+                        rows: rows,
+                     },
+                  };
+               }
+               // Vertical field only
+               else if (CurrentVerticalField) {
+                  let statusOps = {};
+                  statusOps[CurrentVerticalField.columnName] = opt.id;
+
+                  return {
+                     header: opt.text,
+                     body: {
+                        view: "kanbanlist",
+                        status: statusOps,
+                        type: _logic.kanbanListTemplate(),
+                     },
+                  };
+               }
+            });
+
+            // Rebuild kanban that contains options
+            // NOTE: webix kanban does not support dynamic vertical list
+            webix.ui(verticalOptions, $$(ids.kanban));
+            $$(ids.kanban).reconstruct();
+
+            // Owner field
+            CurrentOwnerField = _logic.getOwnerField();
+            if (CurrentOwnerField) {
+               let $menuUser = $$(ids.kanban).getUserList();
+               $menuUser.clearAll();
+
+               if (CurrentOwnerField instanceof ABFieldUser) {
+                  let users = this.AB.Account.userlist().map((u) => {
+                     return {
+                        id: u.username,
+                        value: u.username,
+                     };
+                  });
+
+                  $menuUser.parse(users);
+               } else if (CurrentOwnerField instanceof ABFieldConnect) {
+                  let options = await CurrentOwnerField.getOptions();
+
+                  $menuUser.parse(
+                     options.map((opt) => {
+                        return {
+                           id: opt.id,
+                           value: opt.text,
+                        };
+                     })
+                  );
+               }
+            }
          },
 
          busy: function () {
@@ -400,7 +375,7 @@ module.exports = class ABWorkObjectKanBan extends ABComponent {
             else $$(ids.kanban).unbind();
          },
 
-         updateStatus: function (rowId, status) {
+         updateStatus: async function (rowId, status) {
             if (!CurrentVerticalField) return;
 
             // Show loading cursor
@@ -428,27 +403,26 @@ module.exports = class ABWorkObjectKanBan extends ABComponent {
                }
             }
 
-            CurrentObject.model()
-               .update(rowId, patch)
-               .then(() => {
-                  _logic.ready();
+            try {
+               await CurrentObject.model().update(rowId, patch);
 
-                  if (needRefresh) _logic.show();
+               _logic.ready();
 
-                  // update form data
-                  if (FormSide.isVisible()) {
-                     let data = $$(ids.kanban).getItem(rowId);
-                     FormSide.refresh(data);
-                  }
-               })
-               .catch((err) => {
-                  App.AB.error("Error saving item:", { error: err });
+               if (needRefresh) _logic.show();
 
-                  _logic.ready();
-               });
+               // update form data
+               if (FormSide.isVisible()) {
+                  let data = $$(ids.kanban).getItem(rowId);
+                  FormSide.refresh(data);
+               }
+            } catch (err) {
+               App.AB.error("Error saving item:", { error: err });
+
+               _logic.ready();
+            }
          },
 
-         updateOwner: function (rowId, val) {
+         updateOwner: async function (rowId, val) {
             if (!CurrentOwnerField) return;
 
             // Show loading cursor
@@ -457,25 +431,27 @@ module.exports = class ABWorkObjectKanBan extends ABComponent {
             let patch = {};
             patch[CurrentOwnerField.columnName] = val;
 
-            CurrentObject.model()
-               .update(rowId, patch)
-               .then((updatedRow) => {
-                  // update card
-                  $$(ids.kanban).updateItem(rowId, updatedRow);
+            try {
+               let updatedRow = await CurrentObject.model().update(
+                  rowId,
+                  patch
+               );
 
-                  // update form data
-                  if (FormSide.isVisible()) {
-                     let data = $$(ids.kanban).getItem(rowId);
-                     FormSide.refresh(data);
-                  }
+               // update card
+               $$(ids.kanban).updateItem(rowId, updatedRow);
 
-                  _logic.ready();
-               })
-               .catch((err) => {
-                  App.AB.error("Error saving item:", { error: err });
+               // update form data
+               if (FormSide.isVisible()) {
+                  let data = $$(ids.kanban).getItem(rowId);
+                  FormSide.refresh(data);
+               }
 
-                  _logic.ready();
-               });
+               _logic.ready();
+            } catch (err) {
+               App.AB.error("Error saving item:", { error: err });
+
+               _logic.ready();
+            }
          },
 
          saveData(data) {
@@ -505,38 +481,35 @@ module.exports = class ABWorkObjectKanBan extends ABComponent {
             $$(ids.resizer).show();
          },
 
-         removeCard: (rowId) => {
+         removeCard: async (rowId) => {
             App.AB.Dialog.Confirm({
                title: labels.component.confirmDeleteCardTitle,
                text: labels.component.confirmDeleteCardMessage,
-               callback: (result) => {
+               callback: async (result) => {
                   if (!result) return;
 
                   _logic.busy();
 
-                  CurrentObject.model()
-                     .delete(rowId)
-                     .then((response) => {
-                        if (response.numRows > 0) {
-                           $$(ids.kanban).remove(rowId);
-                        } else {
-                           App.AB.Dialog.Alert({
-                              text: L(
-                                 "key.norowseffected",
-                                 "No rows were effected.  This does not seem right."
-                              ),
-                           });
-                        }
+                  try {
+                     let response = await CurrentObject.model().delete(rowId);
 
-                        _logic.ready();
-                     })
-                     .catch((err) => {
-                        App.AB.error("Error deleting item:", { error: err });
+                     if (response.numRows > 0) {
+                        $$(ids.kanban).remove(rowId);
+                     } else {
+                        App.AB.Dialog.Alert({
+                           text: L(
+                              "key.norowseffected",
+                              "No rows were effected.  This does not seem right."
+                           ),
+                        });
+                     }
 
-                        _logic.ready();
+                     _logic.ready();
+                  } catch (err) {
+                     App.AB.error("Error deleting item:", { error: err });
 
-                        //// TODO: what do we do here?
-                     });
+                     _logic.ready();
+                  }
                },
             });
          },
