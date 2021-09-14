@@ -54,14 +54,14 @@ function populateSelect(populate, callback) {
          $$(ids.fieldLinkVia).setValue(
             L(
                "ab.dataField.connectObject.selectedObject",
-               "*<b>#selectedObjLabel#</b> entry."
-            ).replace("#selectedObjLabel#", selectedObjLabel)
+               `*<b>${selectedObjLabel}</b> entry.`
+            )
          );
          $$(ids.fieldLinkVia2).setValue(
             L(
                "ab.dataField.connectObject.connectWith",
-               "*Each <b>#selectedObjLabel#</b> entry connects with"
-            ).replace("#selectedObjLabel#", selectedObjLabel)
+               `*Each <b>${selectedObjLabel}</b> entry connects with`
+            )
          );
          $$(ids.link1).show();
          $$(ids.link2).show();
@@ -165,8 +165,8 @@ var ABFieldConnectComponent = new ABFieldComponent({
                   view: "label",
                   label: L(
                      "ab.dataField.connectObject.selectedObject",
-                     "*<b>#selectedObjLabel#</b> entry."
-                  ).replace("#selectedObjLabel#", "[Select object]"),
+                     "*<b>[Select object]</b> entry."
+                  ),
                   width: 200,
                },
             ],
@@ -181,8 +181,8 @@ var ABFieldConnectComponent = new ABFieldComponent({
                   view: "label",
                   label: L(
                      "ab.dataField.connectObject.connectWith",
-                     "Each <b>#selectedObjLabel#</b> entry connects with"
-                  ).replace("#selectedObjLabel#", "[Select object]"),
+                     "Each <b>[Select object]</b> entry connects with"
+                  ),
                   width: 300,
                },
                {
@@ -328,19 +328,13 @@ var ABFieldConnectComponent = new ABFieldComponent({
          $$(ids.fieldLink).setValue(
             L(
                "ab.dataField.connectObject.connectWith",
-               "*Each <b>#selectedObjLabel#</b> entry connects with"
-            ).replace(
-               "#selectedObjLabel#",
-               ABFieldConnectComponent.CurrentObject.label
+               `*Each <b>${ABFieldConnectComponent.CurrentObject.label}</b> entry connects with`
             )
          );
          $$(ids.fieldLink2).setValue(
             L(
                "ab.dataField.connectObject.selectedObject",
-               "*<b>#selectedObjLabel#</b> entry."
-            ).replace(
-               "#selectedObjLabel#",
-               ABFieldConnectComponent.CurrentObject.label
+               `*<b>${ABFieldConnectComponent.CurrentObject.label}</b> entry.`
             )
          );
 
@@ -369,14 +363,14 @@ var ABFieldConnectComponent = new ABFieldComponent({
          $$(ids.fieldLinkVia).setValue(
             L(
                "ab.dataField.connectObject.selectedObject",
-               "*<b>#selectedObjLabel#</b> entry."
-            ).replace("#selectedObjLabel#", selectedObjLabel)
+               `*<b>${selectedObjLabel}</b> entry.`
+            )
          );
          $$(ids.fieldLinkVia2).setValue(
             L(
                "ab.dataField.connectObject.connectWith",
-               "*Each <b>#selectedObjLabel#</b> entry connects with"
-            ).replace("#selectedObjLabel#", selectedObjLabel)
+               `*Each <b>${selectedObjLabel}</b> entry connects with`
+            )
          );
          $$(ids.link1).show();
          $$(ids.link2).show();

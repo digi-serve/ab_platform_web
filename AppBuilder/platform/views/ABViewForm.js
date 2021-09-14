@@ -185,18 +185,15 @@ module.exports = class ABViewForm extends ABViewFormCore {
          )[0];
 
          return (
-            common.markCheckbox(field) +
-            " #label# <div class='ab-component-form-fields-component-info'> <i class='fa fa-#icon#'></i> #component# </div>"
-               .replace("#label#", field.label)
-               .replace(
-                  "#icon#",
-                  formComponent ? formComponent.common().icon : "fw"
-               )
-               .replace(
-                  "#component#",
-                  formComponent ? L(formComponent.common().labelKey, "") : ""
-               )
-         );
+            `${common.markCheckbox(field)} ${field.label} <div class='ab-component-form-fields-component-info'> <i class='fa fa-${
+               formComponent 
+                  ? formComponent.common().icon 
+                  : "fw"
+               }'></i> ${
+                  formComponent 
+                     ? L(formComponent.common().labelKey, "") 
+                     : ""
+                  } </div>`);
       };
 
       _logic.check = (e, fieldId) => {

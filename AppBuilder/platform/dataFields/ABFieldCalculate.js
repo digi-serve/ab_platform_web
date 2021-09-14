@@ -312,48 +312,48 @@ var ABFieldCalculateComponent = new ABFieldComponent({
             options.push({
                label: L(
                   "ab.dataField.calculate.functions.year",
-                  "*Year of [#fieldName#]"
-               ).replace("#fieldName#", "Current"),
+                  "*Year of [Current]"
+               ),
                function: "YEAR(CURRENT)",
             });
 
             options.push({
                label: L(
                   "ab.dataField.calculate.functions.month",
-                  "*Month of [#fieldName#]"
-               ).replace("#fieldName#", "Current"),
+                  "*Month of [Current]"
+               ),
                function: "MONTH(CURRENT)",
             });
 
             options.push({
                label: L(
                   "ab.dataField.calculate.functions.day",
-                  "*Day of [#fieldName#]"
-               ).replace("#fieldName#", "Current"),
+                  "*Day of [Current]"
+               ),
                function: "DAY(CURRENT)",
             });
 
             options.push({
                label: L(
                   "ab.dataField.calculate.functions.date",
-                  "*Get days of [#fieldName#] (since January 1, 1970)"
-               ).replace("#fieldName#", "Current"),
+                  "*Get days of [Current] (since January 1, 1970)"
+               ),
                function: "DATE(CURRENT)",
             });
 
             options.push({
                label: L(
                   "ab.dataField.calculate.functions.hour",
-                  "*Get hours of [#fieldName#] (since January 1, 1970)"
-               ).replace("#fieldName#", "Current"),
+                  "*Get hours of [Current] (since January 1, 1970)"
+               ),
                function: "HOUR(CURRENT)",
             });
 
             options.push({
                label: L(
                   "ab.dataField.calculate.functions.minute",
-                  "*Get minutes of [#fieldName#] (since January 1, 1970)"
-               ).replace("#fieldName#", "Current"),
+                  "*Get minutes of [Current] (since January 1, 1970)"
+               ),
                function: "MINUTE(CURRENT)",
             });
 
@@ -364,72 +364,57 @@ var ABFieldCalculateComponent = new ABFieldComponent({
                options.push({
                   label: L(
                      "ab.dataField.calculate.functions.age",
-                     "*Calculate age from [#fieldName#]"
-                  ).replace("#fieldName#", f.label),
-                  function: "AGE({#column#})".replace("#column#", f.columnName),
+                     `*Calculate age from [${f.label}]`
+                  ),
+                  function: `AGE({${f.columnName}})`,
                });
 
                options.push({
                   label: L(
                      "ab.dataField.calculate.functions.year",
-                     "*Year of [#fieldName#]"
-                  ).replace("#fieldName#", f.label),
-                  function: "YEAR({#column#})".replace(
-                     "#column#",
-                     f.columnName
+                     `*Year of [${f.label}]`
                   ),
+                  function: `YEAR({${f.columnName}})`,
                });
 
                options.push({
                   label: L(
                      "ab.dataField.calculate.functions.month",
-                     "*Month of [#fieldName#]"
-                  ).replace("#fieldName#", f.label),
-                  function: "MONTH({#column#})".replace(
-                     "#column#",
-                     f.columnName
+                     `*Month of [${f.label}]`
                   ),
+                  function: `MONTH({${f.columnName}})`,
                });
 
                options.push({
                   label: L(
                      "ab.dataField.calculate.functions.day",
-                     "*Day of [#fieldName#]"
-                  ).replace("#fieldName#", f.label),
-                  function: "DAY({#column#})".replace("#column#", f.columnName),
+                     `*Day of [${f.label}]`
+                  ),
+                  function: `DAY({${f.columnName}})`,
                });
 
                options.push({
                   label: L(
                      "ab.dataField.calculate.functions.date",
-                     "*Get days of [#fieldName#] (since January 1, 1970)"
-                  ).replace("#fieldName#", f.label),
-                  function: "DATE({#column#})".replace(
-                     "#column#",
-                     f.columnName
+                     `*Get days of [${f.label}] (since January 1, 1970)`
                   ),
+                  function: `DATE({${f.columnName}})`,
                });
 
                options.push({
                   label: L(
                      "ab.dataField.calculate.functions.hour",
-                     "*Get hours of [#fieldName#] (since January 1, 1970)"
-                  ).replace("#fieldName#", f.label),
-                  function: "HOUR({#column#})".replace(
-                     "#column#",
-                     f.columnName
+                     `*Get hours of [${f.label}] (since January 1, 1970)`
                   ),
+                  function: `HOUR({${f.columnName}})`,
                });
 
                options.push({
                   label: L(
                      "ab.dataField.calculate.functions.minute",
-                     "*Get minutes of [#fieldName#] (since January 1, 1970)"
-                  ).replace("#fieldName#", f.label),
-                  function: "MINUTE({#column#})".replace(
-                     "#column#",
-                     f.columnName
+                     `*Get minutes of [${f.label}] (since January 1, 1970)`
                   ),
+                  function: `MINUTE({${f.columnName}})`,
                });
             });
 
@@ -441,10 +426,7 @@ var ABFieldCalculateComponent = new ABFieldComponent({
          var template = "";
 
          if (item.icon) {
-            template += '<i class="fa fa-{icon}" aria-hidden="true"></i> '.replace(
-               "{icon}",
-               item.icon
-            );
+            template += `<i class="fa fa-${item.icon}" aria-hidden="true"></i> `;
          }
 
          if (item.label) {

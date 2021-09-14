@@ -372,13 +372,9 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
       // we won't have the obj and each time this
       // field is in a form it will conflict with the last one rendered
       if (formId) {
-         return "#columnName#-#id#-image"
-            .replace("#id#", formId)
-            .replace("#columnName#", this.columnName.replace(/ /g, "_"));
+         return `${this.columnName.replace(/ /g, "_")}-${formId}-image`;
       } else {
-         return "#columnName#-#id#-image"
-            .replace("#id#", obj.id)
-            .replace("#columnName#", this.columnName.replace(/ /g, "_"));
+         return `${this.columnName.replace(/ /g, "_")}-${obj.id}-image`;
       }
    }
 
@@ -800,9 +796,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
       html = html.replace(
          "#remove#",
          options.editable
-            ? '<a style="' +
-                 imageDisplay +
-                 '" class="ab-delete-photo" href="javascript:void(0);"><i class="fa fa-times delete-image"></i></a>'
+            ? `<a style="${imageDisplay}" class="ab-delete-photo" href="javascript:void(0);"><i class="fa fa-times delete-image"></i></a>`
             : ""
       );
 

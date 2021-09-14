@@ -399,13 +399,7 @@ var ABFieldDateComponent = new ABFieldComponent({
                               )[0];
 
                            var beforeLabel =
-                              L("ab.dataField.datetime.before", "*Before") +
-                              " #number# #unit#"
-                                 .replace(
-                                    "#number#",
-                                    $$(ids.validateRangeBefore).getValue()
-                                 )
-                                 .replace("#unit#", selectedUnit.value);
+                              `${L("ab.dataField.datetime.before", "*Before")} ${$$(ids.validateRangeBefore).getValue()} ${selectedUnit.value}`;
 
                            return beforeLabel;
                         },
@@ -430,13 +424,7 @@ var ABFieldDateComponent = new ABFieldComponent({
                               )[0];
 
                            var afterLabel =
-                              L("ab.dataField.datetime.after", "*After") +
-                              " #number# #unit#"
-                                 .replace(
-                                    "#number#",
-                                    $$(ids.validateRangeAfter).getValue()
-                                 )
-                                 .replace("#unit#", selectedUnit.value);
+                              `${L("ab.dataField.datetime.after", "*After")} ${$$(ids.validateRangeAfter).getValue()} ${selectedUnit.value)}`;
 
                            return afterLabel;
                         },

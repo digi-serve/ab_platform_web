@@ -112,8 +112,7 @@ module.exports = class ABViewDetail extends ABViewDetailCore {
 
       _logic.listTemplate = (field, common) => {
          return (
-            common.markCheckbox(field) +
-            " #label#".replace("#label#", field.label)
+            `${common.markCheckbox(field)} ${field.label}`
          );
       };
 

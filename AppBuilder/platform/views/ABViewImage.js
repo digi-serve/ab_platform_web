@@ -185,11 +185,7 @@ module.exports = class ABViewImage extends ABViewImageCore {
          if (!$$(ids.component)) return;
 
          if (this.settings.filename) {
-            var imgTag = '<img src="/opsportal/image/{application}/{filename}" height="{height}" width="{width}">'
-               .replace("{application}", this.application.name)
-               .replace("{filename}", this.settings.filename)
-               .replace("{height}", this.settings.height)
-               .replace("{width}", this.settings.width);
+            var imgTag = `<img src="/opsportal/image/${this.application.name}/${this.settings.filename}" height="${this.settings.height}" width="${this.settings.width}">`;
 
             $$(ids.component).define("template", imgTag);
          } else {

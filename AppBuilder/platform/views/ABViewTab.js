@@ -247,8 +247,8 @@ module.exports = class ABViewTab extends ABViewTabCore {
                   ),
                   text: L(
                      "ab.interface.component.tab.confirmDeleteMessage",
-                     "Do you want to delete <b>{0}</b>?"
-                  ).replace("{0}", deletedView.label),
+                     `Do you want to delete <b>${deletedView.label}</b>?`
+                  ),
                   callback: (result) => {
                      if (result) {
                         // this.viewDestroy(deletedView);

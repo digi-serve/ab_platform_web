@@ -119,7 +119,7 @@ module.exports = class ABViewRuleActionFormSubmitRuleWebsite extends (
          // redirect to website
          if (this.valueRules.website)
             window.open(
-               "http://" + this.valueRules.website.replace("http://", ""),
+               `http://${this.valueRules.website.replace("http://", "")}`,
                "_blank"
             );
 

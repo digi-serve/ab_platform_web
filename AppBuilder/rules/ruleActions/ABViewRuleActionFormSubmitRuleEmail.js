@@ -457,9 +457,7 @@ module.exports = class ABViewRuleActionFormSubmitRuleEmail extends (
          },
 
          fieldTemplate: (field, common) => {
-            return "<i class='fa fa-#icon# webix_icon_btn' aria-hidden='true'></i> #label#"
-               .replace("#icon#", field.icon)
-               .replace("#label#", field.label);
+            return `<i class='fa fa-${field.icon} webix_icon_btn' aria-hidden='true'></i> ${field.label}`
          },
 
          emailFieldOptions: () => {
@@ -474,16 +472,11 @@ module.exports = class ABViewRuleActionFormSubmitRuleEmail extends (
                         optLabel = "";
 
                      if (fLink) {
-                        optId = fLink.id + "|" + f.urlPointer();
-                        optLabel = "{objLabel}.{fieldLabel} ({fieldLink})"
-                           .replace("{objLabel}", currObj.label)
-                           .replace("{fieldLabel}", f.label)
-                           .replace("{fieldLink}", fLink.label);
+                        optId = `${fLink.id}|${f.urlPointer()}`;
+                        optLabel = "${objLabel}.${f.label} (${fLink.label})";
                      } else {
-                        optId = "|" + f.urlPointer();
-                        optLabel = "{objLabel}.{fieldLabel}"
-                           .replace("{objLabel}", currObj.label)
-                           .replace("{fieldLabel}", f.label);
+                        optId = `|${f.urlPointer()}`;
+                        optLabel = `${currObj.label}.${f.label}`;
                      }
 
                      return {
@@ -538,10 +531,8 @@ module.exports = class ABViewRuleActionFormSubmitRuleEmail extends (
                      .fields((f) => f.key == "email")
                      .forEach((f) => {
                         options.push({
-                           id: dv.id + "|" + f.id, // ABDatacollectionID|fieldID
-                           value: "{dcLabel}.{fieldLabel}"
-                              .replace("{dcLabel}", dv.label)
-                              .replace("{fieldLabel}", f.label),
+                           id: `${dv.id}|${f.id}`, // ABDatacollectionID|fieldID
+                           value: `${dv.label}.${f.label}`,
                         });
                      });
                }
@@ -562,7 +553,7 @@ module.exports = class ABViewRuleActionFormSubmitRuleEmail extends (
 
                if (focusElem.setValue)
                   focusElem.setValue(
-                     val + "{#label#}".replace("#label#", field.label)
+                     `${val}${field.label}`
                   );
 
                webix.UIManager.setFocus(focusElem);
@@ -703,7 +694,7 @@ module.exports = class ABViewRuleActionFormSubmitRuleEmail extends (
                this.queryObject
                   .fields((f) => f.fieldUseAsLabel())
                   .forEach((f) => {
-                     var template = new RegExp("{" + f.label + "}", "g"),
+                     var template = new RegExp(`{${f.label}}`, "g"),
                         data = f.format(options.data);
 
                      fromName = fromName.replace(template, data);

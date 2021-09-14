@@ -201,11 +201,11 @@ module.exports = class ABField extends ABFieldCore {
                })
                .then((data) => {
                   if (data.count > 0) {
-                     var messageTemplate =
-                        "** There are #count# rows that will be updated to default value";
+                     let messageTemplate =
+                        `** There are ${data.count} rows that will be updated to default value`;
 
                      $$(ids.numberOfNull).setValue(
-                        messageTemplate.replace("#count#", data.count)
+                        messageTemplate
                      );
                      $$(ids.numberOfNull).show();
                   } else {
@@ -601,10 +601,7 @@ module.exports = class ABField extends ABFieldCore {
 
       if (options.isObjectWorkspace && this.settings.showIcon) {
          config.header =
-            '<span class="webix_icon fa fa-{icon}"></span>'.replace(
-               "{icon}",
-               this.fieldIcon()
-            ) + config.header;
+            `<span class="webix_icon fa fa-${this.fieldIcon()}"></span>${config.header}`;
       }
 
       return config;

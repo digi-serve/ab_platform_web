@@ -580,7 +580,7 @@ module.exports = class ABObject extends ABObjectCore {
       // default label
       if (!labelData && this.fields().length > 0) {
          var defaultField = this.fields((f) => f.fieldUseAsLabel())[0];
-         if (defaultField) labelData = "{" + defaultField.id + "}";
+         if (defaultField) labelData = `{${defaultField.id}}`;
          else
             labelData = `${this.AB.isUUID(rowData.id) ? "ID: " : ""}${
                rowData.id

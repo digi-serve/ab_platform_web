@@ -96,10 +96,7 @@ module.exports = class ABViewDetailTree extends ABViewDetailTreeCore {
          component.init(options);
 
          // add div of tree to detail
-         var divTree = '<div class="#className#"></div>'.replace(
-            "#className#",
-            className
-         );
+         var divTree = `<div class="${className}"></div>`;
          component.logic.setValue(ids.component, divTree);
       };
 

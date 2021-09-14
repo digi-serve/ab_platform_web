@@ -165,16 +165,14 @@ module.exports = class ABView extends ABViewCore {
          template: function (child) {
             return (
                "<div>" +
-               '<i class="fa fa-#icon# webix_icon_btn"></i> ' +
-               " #label#" +
+               `<i class="fa fa-${child.icon} webix_icon_btn"></i> ` +
+               ` ${child.label}` +
                '<div class="ab-component-tools">' +
                '<i class="fa fa-trash ab-component-remove"></i>' +
                '<i class="fa fa-edit ab-component-edit"></i>' +
                "</div>" +
                "</div>"
-            )
-               .replace("#icon#", child.icon)
-               .replace("#label#", child.label);
+            );
          },
 
          /**
@@ -196,8 +194,8 @@ module.exports = class ABView extends ABViewCore {
                ),
                text: L(
                   "ab.interface.component.confirmDeleteMessage",
-                  "Do you want to delete <b>{0}</b>?"
-               ).replace("{0}", deletedView.label),
+                  `Do you want to delete <b>${deletedView.label}</b>?`
+               ),
                callback: function (result) {
                   if (result) {
                      var Layout = $$(ids.component);

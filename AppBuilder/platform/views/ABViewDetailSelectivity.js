@@ -126,10 +126,7 @@ module.exports = class ABViewDetailSelectivity extends (
          component.init(options);
 
          // add div of selectivity to detail
-         var divSelectivity = '<div class="#className#"></div>'.replace(
-            "#className#",
-            className
-         );
+         var divSelectivity = `<div class="${className}"></div>`;
          component.logic.setValue(ids.component, divSelectivity);
       };
 

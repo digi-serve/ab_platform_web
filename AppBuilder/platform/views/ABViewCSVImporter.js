@@ -1115,9 +1115,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                         gravity: 1,
                         borderless: true,
                         css: { "padding-top": 10 },
-                        template: '<span class="fa fa-{icon}"></span> {label}'
-                           .replace("{icon}", f.icon)
-                           .replace("{label}", f.label),
+                        template: '<span class="fa fa-${f.icon}"></span> ${f.label}',
                      },
                      columnOptUI,
                   ],

@@ -420,29 +420,20 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
                      template: function (item, common) {
                         return (
                            "<div class='ab-page-list-item'>" +
-                           "{common.icon()} " +
+                           `${common.icon(item)} ` +
                            // TODO : Hide checkbox at own page
                            // (item.id == _logic.currentEditObject().parent.id ?
                            // (false
                            //    ? '<input type="checkbox" class="webix_tree_checkbox" disabled="disabled">'
                            //    :
-                           "{common.checkbox()} " +
-                           ' <div class="fa fa-{common.fieldIcon()}"></div>' +
-                           " #label#" +
+                           `${common.checkbox(item, false)} ` +
+                           ` <div class="fa fa-${
+                              item.key == "viewcontainer"
+                                 ? "window-maximize"
+                                 : "file"
+                              }"></div> ${item.label}` +
                            "</div>"
                               // )
-                              .replace("{common.icon()}", common.icon(item))
-                              .replace(
-                                 "{common.checkbox()}",
-                                 common.checkbox(item, false)
-                              )
-                              .replace(
-                                 "{common.fieldIcon()}",
-                                 item.key == "viewcontainer"
-                                    ? "window-maximize"
-                                    : "file"
-                              )
-                              .replace("#label#", item.label)
                         );
                      },
                      on: {

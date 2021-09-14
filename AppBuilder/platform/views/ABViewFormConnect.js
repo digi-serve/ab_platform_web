@@ -588,10 +588,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
       let editPageComponent;
 
       let template = (
-         '<div class="customField">' +
-         templateLabel +
-         "#plusButton##template#" +
-         "</div>"
+         `<div class="customField">${templateLabel}#plusButton##template#</div>`
       )
          .replace(/#width#/g, settings.labelWidth)
          .replace(/#label#/g, field.label)

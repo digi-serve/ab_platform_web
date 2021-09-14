@@ -550,49 +550,37 @@ module.exports = class ABViewChart extends ABViewChartCore {
                         colName = colName.split(".")[1];
 
                      // if template does not contain, then should skip
-                     if (formula.indexOf("{" + colName + "}") < 0) return;
+                     if (formula.indexOf(`{${colName}}`) < 0) return;
 
                      // number fields
                      if (f.key == "number") {
-                        let numberVal = "(#numberVal#)".replace(
-                           "#numberVal#",
-                           item[f.columnName] || 0
-                        ); // (number) - NOTE : (-5) to support negative number
+                        let numberVal = `(${item[f.columnName] || 0})`; // (number) - NOTE : (-5) to support negative number
                         formula = formula.replace(
-                           new RegExp("{" + colName + "}", "g"),
+                           new RegExp(`{${colName}}`, "g"),
                            numberVal
                         );
                      }
                      // calculate and formula fields
                      else if (f.key == "calculate" || f.key == "formula") {
-                        let calVal = "(#calVal#)".replace(
-                           "#calVal#",
-                           f.format(item) || 0
-                        );
+                        let calVal = `(${f.format(item) || 0})`;
                         formula = formula.replace(
-                           new RegExp("{" + colName + "}", "g"),
+                           new RegExp(`{${colName}}`, "g"),
                            calVal
                         );
                      }
                      // date fields
                      else if (f.key == "date") {
-                        let dateVal = '"#dataVal#"'.replace(
-                           "#dataVal#",
-                           item[f.columnName] ? item[f.columnName] : ""
-                        ); // "date"
+                        let dateVal = `"${item[f.columnName] ? item[f.columnName] : ""}"`; // "date"
                         formula = formula.replace(
-                           new RegExp("{" + colName + "}", "g"),
+                           new RegExp(`{${colName}}`, "g"),
                            dateVal
                         );
                      }
                      // boolean fields
                      else if (f.key == "boolean") {
-                        let booleanVal = "(#booleanVal#)".replace(
-                           "#booleanVal#",
-                           item[f.columnName] || 0
-                        ); // show 1 or 0 for boolean
+                        let booleanVal = `(${item[f.columnName] || 0})`; // show 1 or 0 for boolean
                         formula = formula.replace(
-                           new RegExp("{" + colName + "}", "g"),
+                           new RegExp(`{${colName}}`, "g"),
                            booleanVal
                         );
                      }

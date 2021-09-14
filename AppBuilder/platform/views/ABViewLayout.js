@@ -33,16 +33,14 @@ module.exports = class ABViewLayout extends ABViewLayoutCore {
          templateButton: function (obj) {
             return (
                '<div class="ab-widget-header ab-layout-header">' +
-               '<i class="fa fa-#icon# webix_icon_btn"></i> ' +
-               " #label#" +
+               `<i class="fa fa-${obj.icon} webix_icon_btn"></i> ` +
+               ` ${obj.label}` +
                '<div class="ab-component-tools">' +
                '<i class="fa fa-trash ab-component-remove"></i>' +
                '<i class="fa fa-edit ab-component-edit"></i>' +
                "</div>" +
                "</div>"
-            )
-               .replace("#icon#", obj.icon)
-               .replace("#label#", obj.label);
+            );
          },
 
          viewEdit: (e, id, trg) => {

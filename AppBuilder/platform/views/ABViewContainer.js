@@ -140,8 +140,8 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
          template: (child) => {
             return (
                "<div>" +
-               '<i class="fa fa-#icon# webix_icon_btn"></i> ' +
-               " #label#" +
+               `<i class="fa fa-${child.icon} webix_icon_btn"></i> ` +
+               ` ${child.label}` +
                '<div class="ab-component-tools">' +
                (child.settings.removable == false
                   ? ""
@@ -149,9 +149,7 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
                '<i class="fa fa-edit ab-component-edit"></i>' +
                "</div>" +
                "</div>"
-            )
-               .replace("#icon#", child.icon)
-               .replace("#label#", child.label);
+            );
          },
 
          /**
@@ -175,8 +173,8 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
                ),
                text: L(
                   "ab.interface.component.confirmDeleteMessage",
-                  "Do you want to delete <b>{0}</b>?"
-               ).replace("{0}", deletedView.label),
+                  `Do you want to delete <b>${deletedView.label}</b>?`
+               ),
                callback: (result) => {
                   if (result) {
                      // let Dashboard = $$(ids.component);
