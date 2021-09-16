@@ -2,6 +2,8 @@ const ABViewPageCore = require("../../core/views/ABViewPageCore");
 
 const ABPropertyComponentDefaults = ABViewPageCore.defaultValues();
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABViewPage extends ABViewPageCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -42,7 +44,6 @@ module.exports = class ABViewPage extends ABViewPageCore {
          _logic,
          ObjectDefaults
       );
-      var L = App.Label;
 
       _logic.permissionClick = (id, e, node, isRetry = false) => {
          var List = $$(ids.permissions);
@@ -140,10 +141,10 @@ module.exports = class ABViewPage extends ABViewPageCore {
          {
             name: "type",
             view: "richselect",
-            label: L("ab.components.page.type", "*Type"),
+            label: L("Type"),
             options: [
-               { id: "page", value: L("ab.components.page.page", "*Page") },
-               { id: "popup", value: L("ab.components.page.popup", "*Popup") },
+               { id: "page", value: L("Page") },
+               { id: "popup", value: L("Popup") },
             ],
             on: {
                onChange: function (newv, oldv) {
@@ -160,7 +161,7 @@ module.exports = class ABViewPage extends ABViewPageCore {
          {
             view: "fieldset",
             name: "popupSettings",
-            label: L("ab.component.page.popupSettings", "*Popup Settings"),
+            label: L("Popup Settings"),
             labelWidth: App.config.labelWidthLarge,
             body: {
                type: "clean",
@@ -169,22 +170,16 @@ module.exports = class ABViewPage extends ABViewPageCore {
                   {
                      view: "text",
                      name: "popupWidth",
-                     placeholder: L(
-                        "ab.component.page.popupWidthPlaceholder",
-                        "*Set popup width"
-                     ),
-                     label: L("ab.component.page.popupWidth", "*Width:"),
+                     placeholder: L("Set popup width"),
+                     label: L("Width:"),
                      labelWidth: App.config.labelWidthLarge,
                      validate: webix.rules.isNumber,
                   },
                   {
                      view: "text",
                      name: "popupHeight",
-                     placeholder: L(
-                        "ab.component.page.popupHeightPlaceholder",
-                        "*Set popup height"
-                     ),
-                     label: L("ab.component.page.popupHeight", "*Height:"),
+                     placeholder: L("Set popup height"),
+                     label: L("Height:"),
                      labelWidth: App.config.labelWidthLarge,
                      validate: webix.rules.isNumber,
                   },
@@ -194,7 +189,7 @@ module.exports = class ABViewPage extends ABViewPageCore {
          {
             view: "fieldset",
             name: "pageSettings",
-            label: L("ab.component.page.pageSettings", "*Page Settings"),
+            label: L("Page Settings"),
             labelWidth: App.config.labelWidthLarge,
             body: {
                type: "clean",
@@ -203,10 +198,7 @@ module.exports = class ABViewPage extends ABViewPageCore {
                   {
                      view: "checkbox",
                      name: "fixedPageWidth",
-                     labelRight: L(
-                        "ab.component.page.fixedPageWidth",
-                        "*Page has fixed width"
-                     ),
+                     labelRight: L("Page has fixed width"),
                      labelWidth: App.config.labelWidthCheckbox,
                      click: function (id, event) {
                         if (this.getValue() == 1) {
@@ -219,35 +211,23 @@ module.exports = class ABViewPage extends ABViewPageCore {
                   {
                      view: "text",
                      name: "pageWidth",
-                     placeholder: L(
-                        "ab.component.page.pageWidthPlaceholder",
-                        "*Set page width"
-                     ),
-                     label: L("ab.component.page.popupWidth", "*Page width:"),
+                     placeholder: L("Set page width"),
+                     label: L("Page width:"),
                      labelWidth: App.config.labelWidthLarge,
                   },
                   {
                      view: "richselect",
                      name: "pageBackground",
-                     label: L(
-                        "ab.component.page.pageBackground",
-                        "*Page background:"
-                     ),
+                     label: L("Page background:"),
                      labelWidth: App.config.labelWidthXLarge,
                      options: [
                         {
                            id: "ab-background-default",
-                           value: L(
-                              "ab.component.page.pageBackgroundDefault",
-                              "*White (default)"
-                           ),
+                           value: L("White (default)"),
                         },
                         {
                            id: "ab-background-gray",
-                           value: L(
-                              "ab.component.page.pageBackgroundDark",
-                              "*Dark"
-                           ),
+                           value: L("Dark"),
                         },
                         // { "id":"ab-background-texture", "value":L('ab.component.page.pageBackgroundTextured', '*Textured')}
                      ],
@@ -258,7 +238,7 @@ module.exports = class ABViewPage extends ABViewPageCore {
          {
             view: "fieldset",
             name: "pagePermissionPanel",
-            label: L("ab.component.page.pagePermissions", "*Page Permissions:"),
+            label: L("Page Permissions:"),
             labelWidth: App.config.labelWidthLarge,
             body: {
                type: "clean",
@@ -272,11 +252,9 @@ module.exports = class ABViewPage extends ABViewPageCore {
                      template: "{common.markCheckbox()} #name#",
                      type: {
                         markCheckbox: function (obj) {
-                           return (
-                              "<span class='check webix_icon fa fa-" +
-                              (obj.markCheckbox ? "check-" : "") +
-                              "square-o'></span>"
-                           );
+                           return `<span class='check webix_icon fa fa-${
+                              obj.markCheckbox ? "check-" : ""
+                           }square-o'></span>`;
                         },
                      },
                      on: {

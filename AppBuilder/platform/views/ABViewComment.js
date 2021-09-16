@@ -2,6 +2,8 @@ const ABViewCommentCore = require("../../core/views/ABViewCommentCore");
 
 const ABViewCommentPropertyComponentDefaults = ABViewCommentCore.defaultValues();
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABViewComment extends ABViewCommentCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -42,7 +44,6 @@ module.exports = class ABViewComment extends ABViewCommentCore {
          _logic,
          ObjectDefaults
       );
-      var L = App.Label;
 
       // _logic functions
 
@@ -61,7 +62,7 @@ module.exports = class ABViewComment extends ABViewCommentCore {
          {
             name: "dataSource",
             view: "richselect",
-            label: L("ab.component.form.dataSource", "*Data Source"),
+            label: L("Data Source"),
             labelWidth: App.config.labelWidthLarge,
             on: {
                onChange: _logic.selectSource,
@@ -70,28 +71,25 @@ module.exports = class ABViewComment extends ABViewCommentCore {
          {
             name: "columnUser",
             view: "richselect",
-            label: L("ab.component.comment.columnUser", "*Select a user field"),
+            label: L("Select a user field"),
             labelWidth: App.config.labelWidthLarge,
          },
          {
             name: "columnComment",
             view: "richselect",
-            label: L(
-               "ab.component.comment.columnComment",
-               "*Select a comment field"
-            ),
+            label: L("Select a comment field"),
             labelWidth: App.config.labelWidthLarge,
          },
          {
             name: "columnDate",
             view: "richselect",
-            label: L("ab.component.comment.columnDate", "*Select a date field"),
+            label: L("Select a date field"),
             labelWidth: App.config.labelWidthLarge,
          },
          {
             view: "counter",
             name: "height",
-            label: L("ab.component.common.height", "*Height:"),
+            label: L("Height:"),
             labelWidth: App.config.labelWidthLarge,
          },
       ]);

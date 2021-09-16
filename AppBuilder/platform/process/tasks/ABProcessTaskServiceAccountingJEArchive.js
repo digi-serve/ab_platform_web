@@ -1,5 +1,7 @@
 const AccountingJEArchiveCore = require("../../../core/process/tasks/ABProcessTaskServiceAccountingJEArchiveCore.js");
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class AccountingJEArchive extends AccountingJEArchiveCore {
    ////
    //// Process Instance Methods
@@ -34,7 +36,6 @@ module.exports = class AccountingJEArchive extends AccountingJEArchiveCore {
     */
    propertiesShow(id) {
       let ids = this.propertyIDs(id);
-      var L = this.AB.Label();
 
       let processValues = [{ id: 0, value: "Select a Process Value" }];
       let processDataFields = this.process.processDataFields(this);
@@ -48,7 +49,7 @@ module.exports = class AccountingJEArchive extends AccountingJEArchiveCore {
 
       objectList.unshift({
          id: 0,
-         value: L("ab.process.accounting.selectObject", "*Select an Object"),
+         value: L("Select an Object"),
       });
 
       let getConnectFieldOptions = (objectId) => {
@@ -66,7 +67,7 @@ module.exports = class AccountingJEArchive extends AccountingJEArchiveCore {
 
          options.unshift({
             id: 0,
-            value: L("ab.process.accounting.selectField", "*Select a Field"),
+            value: L("Select a Field"),
          });
 
          return options;
@@ -174,17 +175,14 @@ module.exports = class AccountingJEArchive extends AccountingJEArchiveCore {
             {
                id: ids.name,
                view: "text",
-               label: L("ab.process.element.name", "*Name"),
+               label: L("Name"),
                name: "name",
                value: this.name,
             },
             {
                id: ids.processBatchValue,
                view: "select",
-               label: L(
-                  "ab.process.accounting.processBatchValue",
-                  "*Process Batch Value"
-               ),
+               label: L("Process Batch Value"),
                value: this.processBatchValue,
                name: "processBatchValue",
                options: processValues,
@@ -192,7 +190,7 @@ module.exports = class AccountingJEArchive extends AccountingJEArchiveCore {
             {
                id: ids.objectBatch,
                view: "select",
-               label: L("ab.process.accounting.objectBatch", "*Batch Object"),
+               label: L("Batch Object"),
                value: this.objectBatch,
                name: "objectBatch",
                options: objectList,
@@ -206,10 +204,7 @@ module.exports = class AccountingJEArchive extends AccountingJEArchiveCore {
             {
                id: ids.fieldBatchFiscalMonth,
                view: "select",
-               label: L(
-                  "ab.process.accounting.fieldBatchFiscalMonth",
-                  "*Batch -> Fiscal Month"
-               ),
+               label: L("Batch -> Fiscal Month"),
                value: this.fieldBatchFiscalMonth,
                name: "fieldBatchFiscalMonth",
                options: fieldBatchList,
@@ -217,7 +212,7 @@ module.exports = class AccountingJEArchive extends AccountingJEArchiveCore {
             {
                id: ids.objectBalance,
                view: "select",
-               label: L("ab.process.accounting.objectBalance", "*BR Object"),
+               label: L("BR Object"),
                value: this.objectBalance,
                name: "objectBalance",
                options: objectList,
@@ -231,10 +226,7 @@ module.exports = class AccountingJEArchive extends AccountingJEArchiveCore {
             {
                id: ids.fieldBrFiscalMonth,
                view: "select",
-               label: L(
-                  "ab.process.accounting.fieldBrFiscalMonth",
-                  "*BR -> Fiscal Month"
-               ),
+               label: L("BR -> Fiscal Month"),
                value: this.fieldBrFiscalMonth,
                name: "fieldBrFiscalMonth",
                options: fieldBalanceList,
@@ -242,10 +234,7 @@ module.exports = class AccountingJEArchive extends AccountingJEArchiveCore {
             {
                id: ids.fieldBrAccount,
                view: "select",
-               label: L(
-                  "ab.process.accounting.fieldBrAccount",
-                  "*BR -> Account"
-               ),
+               label: L("BR -> Account"),
                value: this.fieldBrAccount,
                name: "fieldBrAccount",
                options: fieldBalanceList,
@@ -253,7 +242,7 @@ module.exports = class AccountingJEArchive extends AccountingJEArchiveCore {
             {
                id: ids.fieldBrRC,
                view: "select",
-               label: L("ab.process.accounting.fieldBrRC", "*BR -> RC"),
+               label: L("BR -> RC"),
                value: this.fieldBrRC,
                name: "fieldBrRC",
                options: fieldBalanceList,
@@ -261,7 +250,7 @@ module.exports = class AccountingJEArchive extends AccountingJEArchiveCore {
             {
                id: ids.objectJE,
                view: "select",
-               label: L("ab.process.accounting.objectJE", "*JE Object"),
+               label: L("JE Object"),
                value: this.objectJE,
                name: "objectJE",
                options: objectList,
@@ -276,10 +265,7 @@ module.exports = class AccountingJEArchive extends AccountingJEArchiveCore {
             {
                id: ids.fieldJeAccount,
                view: "select",
-               label: L(
-                  "ab.process.accounting.fieldJeAccount",
-                  "*JE -> Account"
-               ),
+               label: L("JE -> Account"),
                value: this.fieldJeAccount,
                name: "fieldJeAccount",
                options: fieldJeList,
@@ -287,7 +273,7 @@ module.exports = class AccountingJEArchive extends AccountingJEArchiveCore {
             {
                id: ids.fieldJeRC,
                view: "select",
-               label: L("ab.process.accounting.fieldJeRC", "*JE -> RC"),
+               label: L("JE -> RC"),
                value: this.fieldJeRC,
                name: "fieldJeRC",
                options: fieldJeList,
@@ -295,10 +281,7 @@ module.exports = class AccountingJEArchive extends AccountingJEArchiveCore {
             {
                id: ids.objectJEArchive,
                view: "select",
-               label: L(
-                  "ab.process.accounting.objectJEArchive",
-                  "*JE Archive Object"
-               ),
+               label: L("JE Archive Object"),
                value: this.objectJEArchive,
                name: "objectJEArchive",
                options: objectList,
@@ -313,10 +296,7 @@ module.exports = class AccountingJEArchive extends AccountingJEArchiveCore {
             {
                id: ids.fieldJeArchiveBalance,
                view: "select",
-               label: L(
-                  "ab.process.accounting.fieldJeArchiveBalance",
-                  "*JE Archive -> BR"
-               ),
+               label: L("JE Archive -> BR"),
                value: this.fieldJeArchiveBalance,
                name: "fieldJeArchiveBalance",
                options: fieldJeArchiveList,

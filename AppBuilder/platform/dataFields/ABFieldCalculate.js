@@ -15,6 +15,8 @@ var ids = {
    decimalPlaces: "ab-field-calculate-decimal-places",
 };
 
+let L = (...params) => AB.Label("", ...params);
+
 /**
  * ABFieldCalculateComponent
  *
@@ -27,24 +29,22 @@ var ABFieldCalculateComponent = new ABFieldComponent({
 
    elements: (App, field) => {
       ids = field.idsUnique(ids, App);
-      let L = App.Label;
-      this.L = L;
 
       var delimiterList = [
-         { id: "none", value: L("ab.common.none", "*None") },
+         { id: "none", value: L("None") },
          {
             id: "comma",
-            value: L("ab.dataField.number.comma", "*Comma"),
+            value: L("Comma"),
             sign: ",",
          },
          {
             id: "period",
-            value: L("ab.dataField.number.period", "*Period"),
+            value: L("Period"),
             sign: ".",
          },
          {
             id: "space",
-            value: L("ab.dataField.number.space", "*Space"),
+            value: L("Space"),
             sign: " ",
          },
       ];
@@ -90,33 +90,27 @@ var ABFieldCalculateComponent = new ABFieldComponent({
             template: field.logic.itemTemplate,
             data: [
                {
-                  label: L("ab.dataField.calculate.add", "+ Adds"),
+                  label: L("+ Adds"),
                   symbol: "+",
                },
                {
-                  label: L("ab.dataField.calculate.subtract", "- Subtracts"),
+                  label: L("- Subtracts"),
                   symbol: "-",
                },
                {
-                  label: L("ab.dataField.calculate.multiple", "* Multiples"),
+                  label: L("* Multiples"),
                   symbol: "*",
                },
                {
-                  label: L("ab.dataField.calculate.divide", "/ Divides"),
+                  label: L("/ Divides"),
                   symbol: "/",
                },
                {
-                  label: L(
-                     "ab.dataField.calculate.openBracket",
-                     "( Open Bracket"
-                  ),
+                  label: L("( Open Bracket"),
                   symbol: "(",
                },
                {
-                  label: L(
-                     "ab.dataField.calculate.closedBracket",
-                     ") Closed Bracket"
-                  ),
+                  label: L(") Closed Bracket"),
                   symbol: ")",
                },
             ],
@@ -167,7 +161,7 @@ var ABFieldCalculateComponent = new ABFieldComponent({
             id: ids.formula,
             name: "formula",
             view: "textarea",
-            label: L("ab.dataField.calculate.equation", "*Equation"),
+            label: L("Equation"),
             labelPosition: "top",
             height: 150,
          },
@@ -180,10 +174,7 @@ var ABFieldCalculateComponent = new ABFieldComponent({
                         type: "icon",
                         css: "webix_primary",
                         icon: "fa fa-hashtag",
-                        label: L(
-                           "ab.dataField.calculate.numberFields",
-                           "*Number Fields"
-                        ),
+                        label: L("Number Fields"),
                         width: 185,
                         click: function () {
                            // show popup
@@ -195,10 +186,7 @@ var ABFieldCalculateComponent = new ABFieldComponent({
                         type: "icon",
                         css: "webix_primary",
                         icon: "fa fa-calendar",
-                        label: L(
-                           "ab.dataField.calculate.dateFields",
-                           "*Date Fields"
-                        ),
+                        label: L("Date Fields"),
                         click: function () {
                            // show popup
                            $$(ids.dateOperatorPopup).show(this.$view);
@@ -214,10 +202,7 @@ var ABFieldCalculateComponent = new ABFieldComponent({
                         css: "webix_primary",
                         type: "icon",
                         icon: "fa fa-hashtag",
-                        label: L(
-                           "ab.dataField.calculate.numberFn",
-                           "*Number Operators"
-                        ),
+                        label: L("Number Operators"),
                         width: 185,
                         click: function () {
                            // show popup
@@ -231,7 +216,7 @@ var ABFieldCalculateComponent = new ABFieldComponent({
                {
                   view: "richselect",
                   name: "decimalSign",
-                  label: L("ab.dataField.calculate.decimalSign", "*Decimals"),
+                  label: L("Decimals"),
                   value: "none",
                   labelWidth: App.config.labelWidthXLarge,
                   options: delimiterList,
@@ -250,7 +235,7 @@ var ABFieldCalculateComponent = new ABFieldComponent({
                   view: "richselect",
                   id: ids.decimalPlaces,
                   name: "decimalPlaces",
-                  label: L("ab.dataField.calculate.decimalPlaces", "*Places"),
+                  label: L("Places"),
                   value: "none",
                   labelWidth: App.config.labelWidthXLarge,
                   disabled: true,
@@ -296,64 +281,48 @@ var ABFieldCalculateComponent = new ABFieldComponent({
       },
 
       getDateFields: () => {
-         let L = this.L;
          if (ABFieldCalculateComponent.CurrentObject) {
             var options = [];
 
             options.push({
-               label: L(
-                  "ab.dataField.calculate.functions.minuteToHourCurrent",
-                  "*Convert minutes to hours (Format: hours.minutes)"
-               ),
+               label: L("Convert minutes to hours (Format: hours.minutes)"),
                function: "MINUTE_TO_HOUR()",
             });
 
             /** CURRENT DATE */
             options.push({
-               label: L(
-                  "ab.dataField.calculate.functions.year",
-                  "*Year of [Current]"
-               ),
+               label: L("Year of [{0}]", ["Current"]),
                function: "YEAR(CURRENT)",
             });
 
             options.push({
-               label: L(
-                  "ab.dataField.calculate.functions.month",
-                  "*Month of [Current]"
-               ),
+               label: L("Month of [{0}]", ["Current"]),
                function: "MONTH(CURRENT)",
             });
 
             options.push({
-               label: L(
-                  "ab.dataField.calculate.functions.day",
-                  "*Day of [Current]"
-               ),
+               label: L("Day of [{0}]", ["Current"]),
                function: "DAY(CURRENT)",
             });
 
             options.push({
-               label: L(
-                  "ab.dataField.calculate.functions.date",
-                  "*Get days of [Current] (since January 1, 1970)"
-               ),
+               label: L("Get days of [{0}] (since January 1, 1970)", [
+                  "Current",
+               ]),
                function: "DATE(CURRENT)",
             });
 
             options.push({
-               label: L(
-                  "ab.dataField.calculate.functions.hour",
-                  "*Get hours of [Current] (since January 1, 1970)"
-               ),
+               label: L("Get hours of [{0}] (since January 1, 1970)", [
+                  "Current",
+               ]),
                function: "HOUR(CURRENT)",
             });
 
             options.push({
-               label: L(
-                  "ab.dataField.calculate.functions.minute",
-                  "*Get minutes of [Current] (since January 1, 1970)"
-               ),
+               label: L("Get minutes of [{0}] (since January 1, 1970)", [
+                  "Current",
+               ]),
                function: "MINUTE(CURRENT)",
             });
 
@@ -362,58 +331,43 @@ var ABFieldCalculateComponent = new ABFieldComponent({
                (f) => f.key == "date"
             ).forEach((f) => {
                options.push({
-                  label: L(
-                     "ab.dataField.calculate.functions.age",
-                     `*Calculate age from [${f.label}]`
-                  ),
+                  label: L("Calculate age from [{0}]", [f.label]),
                   function: `AGE({${f.columnName}})`,
                });
 
                options.push({
-                  label: L(
-                     "ab.dataField.calculate.functions.year",
-                     `*Year of [${f.label}]`
-                  ),
+                  label: L("Year of [{0}]", [f.label]),
                   function: `YEAR({${f.columnName}})`,
                });
 
                options.push({
-                  label: L(
-                     "ab.dataField.calculate.functions.month",
-                     `*Month of [${f.label}]`
-                  ),
+                  label: L("Month of [{0}]", [f.label]),
                   function: `MONTH({${f.columnName}})`,
                });
 
                options.push({
-                  label: L(
-                     "ab.dataField.calculate.functions.day",
-                     `*Day of [${f.label}]`
-                  ),
+                  label: L("Day of [{0}]", [f.label]),
                   function: `DAY({${f.columnName}})`,
                });
 
                options.push({
-                  label: L(
-                     "ab.dataField.calculate.functions.date",
-                     `*Get days of [${f.label}] (since January 1, 1970)`
-                  ),
+                  label: L("Get days of [${0}] (since January 1, 1970)", [
+                     f.label,
+                  ]),
                   function: `DATE({${f.columnName}})`,
                });
 
                options.push({
-                  label: L(
-                     "ab.dataField.calculate.functions.hour",
-                     `*Get hours of [${f.label}] (since January 1, 1970)`
-                  ),
+                  label: L("Get hours of [${0}] (since January 1, 1970)", [
+                     f.label,
+                  ]),
                   function: `HOUR({${f.columnName}})`,
                });
 
                options.push({
-                  label: L(
-                     "ab.dataField.calculate.functions.minute",
-                     `*Get minutes of [${f.label}] (since January 1, 1970)`
-                  ),
+                  label: L("Get minutes of [${0}] (since January 1, 1970)", [
+                     f.label,
+                  ]),
                   function: `MINUTE({${f.columnName}})`,
                });
             });

@@ -3,6 +3,8 @@
 const ABProcessTaskUserApprovalCore = require("../../../core/process/tasks/ABProcessTaskUserApprovalCore.js");
 const ABProcessParticipant = require("../ABProcessParticipant.js");
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABProcessTaskUserApproval extends (
    ABProcessTaskUserApprovalCore
 ) {
@@ -73,7 +75,6 @@ module.exports = class ABProcessTaskUserApproval extends (
     */
    propertiesShow(id) {
       var ids = this.propertyIDs(id);
-      var L = this.AB.Label();
 
       var toUserUI = ABProcessParticipant.selectUsersUi(
          id + "_who_",
@@ -84,18 +85,12 @@ module.exports = class ABProcessTaskUserApproval extends (
          // current lane/participant
          {
             id: 0,
-            value: L(
-               "ab.process.task.email.to.currentParticipant",
-               "*Current Participant"
-            ),
+            value: L("Current Participant"),
          },
          // manually select User/Role
          {
             id: 1,
-            value: L(
-               "ab.process.task.email.to.selectRoleUser",
-               "*Select Role or User"
-            ),
+            value: L("Select Role or User"),
          },
       ];
 
@@ -122,14 +117,14 @@ module.exports = class ABProcessTaskUserApproval extends (
             {
                id: ids.name,
                view: "text",
-               label: L("ab.process.task.email.name", "*Name"),
+               label: L("Name"),
                name: "name",
                value: this.name,
             },
             {
                id: ids.who,
                view: "select",
-               label: L("ab.process.task.approval.who", "*Who"),
+               label: L("Who"),
                name: "who",
                value: this.who,
                options: whoOptions,

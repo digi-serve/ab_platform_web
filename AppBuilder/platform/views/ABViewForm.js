@@ -18,6 +18,8 @@ let PopupSubmitRule = null;
 ////
 const ABViewFormPropertyComponentDefaults = ABViewFormCore.defaultValues();
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABViewForm extends ABViewFormCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -53,8 +55,6 @@ module.exports = class ABViewForm extends ABViewFormCore {
       );
 
       var idBase = "ABViewForm";
-
-      var L = App.Label;
 
       // PopupDisplayRule = new ABDisplayRule(App, idBase + "_displayrule");
 
@@ -184,16 +184,13 @@ module.exports = class ABViewForm extends ABViewFormCore {
             (v) => v.common().key == componentKey
          )[0];
 
-         return (
-            `${common.markCheckbox(field)} ${field.label} <div class='ab-component-form-fields-component-info'> <i class='fa fa-${
-               formComponent 
-                  ? formComponent.common().icon 
-                  : "fw"
-               }'></i> ${
-                  formComponent 
-                     ? L(formComponent.common().labelKey, "") 
-                     : ""
-                  } </div>`);
+         return `${common.markCheckbox(field)} ${
+            field.label
+         } <div class='ab-component-form-fields-component-info'> <i class='fa fa-${
+            formComponent ? formComponent.common().icon : "fw"
+         }'></i> ${
+            formComponent ? L(formComponent.common().labelKey) : ""
+         } </div>`;
       };
 
       _logic.check = (e, fieldId) => {
@@ -324,7 +321,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
          {
             name: "datacollection",
             view: "richselect",
-            label: L("ab.components.form.dataSource", "*Data Source"),
+            label: L("Data Source"),
             labelWidth: App.config.labelWidthLarge,
             skipAutoSave: true,
             on: {
@@ -334,7 +331,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
 
          {
             view: "fieldset",
-            label: L("ab.components.form.formFields", "*Form Fields:"),
+            label: L("Form Fields:"),
             labelWidth: App.config.labelWidthLarge,
             body: {
                type: "clean",
@@ -365,52 +362,52 @@ module.exports = class ABViewForm extends ABViewFormCore {
          {
             name: "showLabel",
             view: "checkbox",
-            label: L("ab.components.common.showlabel", "*Display Label"),
+            label: L("Display Label"),
             labelWidth: App.config.labelWidthLarge,
          },
          {
             name: "labelPosition",
             view: "richselect",
-            label: L("ab.components.common.labelPosition", "*Label Position"),
+            label: L("Label Position"),
             labelWidth: App.config.labelWidthLarge,
             options: [
                {
                   id: "left",
-                  value: L("ab.components.common.left", "*Left"),
+                  value: L("Left"),
                },
                {
                   id: "top",
-                  value: L("ab.components.common.top", "*Top"),
+                  value: L("Top"),
                },
             ],
          },
          {
             name: "labelWidth",
             view: "counter",
-            label: L("ab.components.common.labelWidth", "*Label Width"),
+            label: L("Label Width"),
             labelWidth: App.config.labelWidthLarge,
          },
          {
             view: "counter",
             name: "height",
-            label: L("ab.components.common.height", "*Height:"),
+            label: L("Height:"),
             labelWidth: App.config.labelWidthLarge,
          },
          {
             name: "clearOnLoad",
             view: "checkbox",
-            label: L("ab.components.form.clearOnLoad", "*Clear on load"),
+            label: L("Clear on load"),
             labelWidth: App.config.labelWidthLarge,
          },
          {
             name: "clearOnSave",
             view: "checkbox",
-            label: L("ab.components.form.clearOnSave", "*Clear on save"),
+            label: L("Clear on save"),
             labelWidth: App.config.labelWidthLarge,
          },
          {
             view: "fieldset",
-            label: L("ab.components.form.rules", "*Rules:"),
+            label: L("Rules:"),
             labelWidth: App.config.labelWidthLarge,
             body: {
                type: "clean",
@@ -420,17 +417,14 @@ module.exports = class ABViewForm extends ABViewFormCore {
                      cols: [
                         {
                            view: "label",
-                           label: L(
-                              "ab.components.form.submitRules",
-                              "*Submit Rules:"
-                           ),
+                           label: L("Submit Rules:"),
                            width: App.config.labelWidthLarge,
                         },
                         {
                            view: "button",
                            css: "webix_primary",
                            name: "buttonSubmitRules",
-                           label: L("ab.components.form.settings", "*Settings"),
+                           label: L("Settings"),
                            icon: "fa fa-gear",
                            type: "icon",
                            badge: 0,
@@ -444,17 +438,14 @@ module.exports = class ABViewForm extends ABViewFormCore {
                      cols: [
                         {
                            view: "label",
-                           label: L(
-                              "ab.components.form.displayRules",
-                              "*Display Rules:"
-                           ),
+                           label: L("Display Rules:"),
                            width: App.config.labelWidthLarge,
                         },
                         {
                            view: "button",
                            name: "buttonDisplayRules",
                            css: "webix_primary",
-                           label: L("ab.components.form.settings", "*Settings"),
+                           label: L("Settings"),
                            icon: "fa fa-gear",
                            type: "icon",
                            badge: 0,
@@ -468,17 +459,14 @@ module.exports = class ABViewForm extends ABViewFormCore {
                      cols: [
                         {
                            view: "label",
-                           label: L(
-                              "ab.components.form.recordRules",
-                              "*Record Rules:"
-                           ),
+                           label: L("Record Rules:"),
                            width: App.config.labelWidthLarge,
                         },
                         {
                            view: "button",
                            name: "buttonRecordRules",
                            css: "webix_primary",
-                           label: L("ab.components.form.settings", "*Settings"),
+                           label: L("Settings"),
                            icon: "fa fa-gear",
                            type: "icon",
                            badge: 0,

@@ -3,6 +3,8 @@
 const ABProcessTaskEmailCore = require("../../../core/process/tasks/ABProcessTaskEmailCore.js");
 const ABProcessParticipant = require("../ABProcessParticipant.js");
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABProcessTaskEmail extends ABProcessTaskEmailCore {
    ////
    //// Process Instance Methods
@@ -69,7 +71,6 @@ module.exports = class ABProcessTaskEmail extends ABProcessTaskEmailCore {
     */
    propertiesShow(id) {
       var ids = this.propertyIDs(id);
-      var L = this.AB.Label();
 
       var toUserUI = ABProcessParticipant.selectUsersUi(
          id + "_to_",
@@ -87,34 +88,28 @@ module.exports = class ABProcessTaskEmail extends ABProcessTaskEmailCore {
             {
                id: ids.name,
                view: "text",
-               label: L("ab.process.task.email.name", "*Name"),
+               label: L("Name"),
                name: "name",
                value: this.name,
             },
             {
                id: ids.to,
                view: "select",
-               label: L("ab.process.task.email.to", "*To"),
+               label: L("To"),
                name: "to",
                value: this.to,
                options: [
                   {
                      id: 0,
-                     value: L(
-                        "ab.process.task.email.to.nextParticipant",
-                        "*Next Participant"
-                     ),
+                     value: L("Next Participant"),
                   },
                   {
                      id: 1,
-                     value: L(
-                        "ab.process.task.email.to.selectRoleUser",
-                        "*Select Role or User"
-                     ),
+                     value: L("Select Role or User"),
                   },
                   {
                      id: 2,
-                     value: L("ab.process.task.email.to.custom", "*Custom"),
+                     value: L("Custom"),
                   },
                ],
                on: {
@@ -141,11 +136,8 @@ module.exports = class ABProcessTaskEmail extends ABProcessTaskEmailCore {
             {
                id: ids.toCustom,
                view: "text",
-               label: L("ab.process.task.email.toCustom", "*Email"),
-               placeholder: L(
-                  "ab.process.task.email.toCustom",
-                  "*Type email address here..."
-               ),
+               label: L("Email"),
+               placeholder: L("Type email address here..."),
                name: "toCustom",
                value: this.toCustom,
                hidden: parseInt(this.to) == 2 ? false : true,
@@ -153,27 +145,21 @@ module.exports = class ABProcessTaskEmail extends ABProcessTaskEmailCore {
             {
                id: ids.from,
                view: "select",
-               label: L("ab.process.task.email.from", "*From"),
+               label: L("From"),
                name: "from",
                value: this.from,
                options: [
                   {
                      id: 0,
-                     value: L(
-                        "ab.process.task.email.to.nextParticipant",
-                        "*Current Participant"
-                     ),
+                     value: L("Current Participant"),
                   },
                   {
                      id: 1,
-                     value: L(
-                        "ab.process.task.email.to.selectRoleUser",
-                        "*Select Role or User"
-                     ),
+                     value: L("Select Role or User"),
                   },
                   {
                      id: 2,
-                     value: L("ab.process.task.email.to.custom", "*Custom"),
+                     value: L("Custom"),
                   },
                ],
                on: {
@@ -200,11 +186,8 @@ module.exports = class ABProcessTaskEmail extends ABProcessTaskEmailCore {
             {
                id: ids.fromCustom,
                view: "text",
-               label: L("ab.process.task.email.fromCustom", "*Email"),
-               placeholder: L(
-                  "ab.process.task.email.fromCustomPlace",
-                  "*Type email address here..."
-               ),
+               label: L("Email"),
+               placeholder: L("Type email address here..."),
                name: "fromCustom",
                value: this.fromCustom,
                hidden: parseInt(this.from) == 2 ? false : true,
@@ -212,7 +195,7 @@ module.exports = class ABProcessTaskEmail extends ABProcessTaskEmailCore {
             {
                id: ids.subject,
                view: "text",
-               label: L("ab.process.task.email.subject", "*Subject"),
+               label: L("Subject"),
                name: "subject",
                value: this.subject,
             },
@@ -223,7 +206,7 @@ module.exports = class ABProcessTaskEmail extends ABProcessTaskEmailCore {
             {
                id: ids.message,
                view: "tinymce-editor",
-               label: L("ab.process.task.email.message", "*Message"),
+               label: L("Message"),
                name: "message",
                value: this.message,
                borderless: true,

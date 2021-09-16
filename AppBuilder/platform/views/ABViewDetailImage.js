@@ -2,6 +2,8 @@ const ABViewDetailImageCore = require("../../core/views/ABViewDetailImageCore");
 
 const ABViewDetailImagePropertyComponentDefaults = ABViewDetailImageCore.defaultValues();
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABViewDetailImage extends ABViewDetailImageCore {
    /**
     * @param {obj} values  key=>value hash of ABView values
@@ -59,7 +61,6 @@ module.exports = class ABViewDetailImage extends ABViewDetailImageCore {
          _logic,
          ObjectDefaults
       );
-      var L = App.Label;
 
       // in addition to the common .label  values, we
       // ask for:
@@ -67,13 +68,13 @@ module.exports = class ABViewDetailImage extends ABViewDetailImageCore {
          {
             view: "counter",
             name: "height",
-            label: L("ab.components.common.height", "*Height:"),
+            label: L("Height:"),
             labelWidth: App.config.labelWidthLarge,
          },
          {
             view: "counter",
             name: "width",
-            label: L("ab.components.common.width", "*Width:"),
+            label: L("Width:"),
             labelWidth: App.config.labelWidthLarge,
          },
       ]);

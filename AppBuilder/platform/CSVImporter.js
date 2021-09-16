@@ -1,18 +1,12 @@
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class CSVImporter {
    constructor(App) {
-      var L = App.Label;
-
       this.labels = {
-         comma: L("ab.object.form.csv.separatedBy.comma", "*Comma (,)"),
-         tab: L(
-            "ab.object.form.csv.separatedBy.tab",
-            "*Tab (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)"
-         ),
-         semicolon: L(
-            "ab.object.form.csv.separatedBy.semicolon",
-            "*Semicolon (;)"
-         ),
-         space: L("ab.object.form.csv.separatedBy.space", "*Space ( )"),
+         comma: L("Comma (,)"),
+         tab: L("Tab (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)"),
+         semicolon: L("Semicolon (;)"),
+         space: L("Space ( )"),
       };
    }
 

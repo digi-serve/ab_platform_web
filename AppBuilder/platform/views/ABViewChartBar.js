@@ -2,6 +2,8 @@ const ABViewChartBarCore = require("../../core/views/ABViewChartBarCore");
 
 const ABViewChartBarPropertyComponentDefaults = ABViewChartBarCore.defaultValues();
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABViewChartBar extends ABViewChartBarCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -43,7 +45,6 @@ module.exports = class ABViewChartBar extends ABViewChartBarCore {
          _logic,
          ObjectDefaults
       );
-      var L = App.Label;
 
       // in addition to the common .label  values, we
       // ask for:
@@ -51,36 +52,36 @@ module.exports = class ABViewChartBar extends ABViewChartBarCore {
          {
             name: "barType",
             view: "richselect",
-            label: L("ab.component.chart.bar.barType", "*Chart Type"),
+            label: L("Chart Type"),
             labelWidth: App.config.labelWidthLarge,
             options: [
                {
                   id: "bar",
-                  value: L("ab.component.chart.bar.column", "*Vertical"),
+                  value: L("Vertical"),
                },
                {
                   id: "barH",
-                  value: L("ab.component.chart.bar.stick", "*Horizontal"),
+                  value: L("Horizontal"),
                },
             ],
          },
          {
             name: "barPreset",
             view: "richselect",
-            label: L("ab.component.chart.bar.barPreset", "*Chart Preset"),
+            label: L("Chart Preset"),
             labelWidth: App.config.labelWidthLarge,
             options: [
                {
                   id: "column",
-                  value: L("ab.component.chart.bar.column", "*Column"),
+                  value: L("Column"),
                },
                {
                   id: "stick",
-                  value: L("ab.component.chart.bar.stick", "*Stick"),
+                  value: L("Stick"),
                },
                {
                   id: "alpha",
-                  value: L("ab.component.chart.bar.alpha", "*Alpha"),
+                  value: L("Alpha"),
                },
             ],
          },
@@ -94,34 +95,31 @@ module.exports = class ABViewChartBar extends ABViewChartBarCore {
             name: "height",
             view: "counter",
             min: 1,
-            label: L("ab.component.chart.bar.chartHeight", "*Height"),
+            label: L("Height"),
          },
          {
             name: "stepValue",
             view: "counter",
             min: 1,
-            label: L("ab.component.chart.bar.stepValue", "*Step"),
+            label: L("Step"),
          },
          {
             name: "maxValue",
             view: "counter",
             min: 1,
-            label: L("ab.component.chart.bar.maxValue", "*Max Value"),
+            label: L("Max Value"),
          },
          {
             name: "labelFontSize",
             view: "counter",
             min: 1,
-            label: L(
-               "ab.component.chart.bar.labelFontSize",
-               "*Label Font Size"
-            ),
+            label: L("Label Font Size"),
             labelWidth: App.config.labelWidthXLarge,
          },
          {
             name: "isLegend",
             view: "checkbox",
-            labelRight: L("ab.component.chart.isLegend", "*Show Legend"),
+            labelRight: L("Show Legend"),
             labelWidth: App.config.labelWidthCheckbox,
          },
       ]);

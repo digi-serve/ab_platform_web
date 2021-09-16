@@ -1,6 +1,8 @@
 var ABFieldFileCore = require("../../core/dataFields/ABFieldFileCore");
 var ABFieldComponent = require("./ABFieldComponent");
 
+let L = (...params) => AB.Label("", ...params);
+
 /**
  * ABFieldFileComponent
  *
@@ -20,7 +22,6 @@ var ABFieldFileComponent = new ABFieldComponent({
          fileType: "",
       };
       ids = field.idsUnique(ids, App);
-      var L = App.Label;
 
       return [
          {
@@ -28,7 +29,7 @@ var ABFieldFileComponent = new ABFieldComponent({
                {
                   view: "checkbox",
                   name: "limitFileSize",
-                  labelRight: L("ab.dataField.file.fileSize", "*Size (MB)"),
+                  labelRight: L("Size (MB)"),
                   width: 120,
                   labelWidth: 0,
                   value: 1,
@@ -49,7 +50,7 @@ var ABFieldFileComponent = new ABFieldComponent({
                {
                   view: "checkbox",
                   name: "limitFileType",
-                  labelRight: L("ab.dataField.file.fileType", "*Type"),
+                  labelRight: L("Type"),
                   width: 120,
                   labelWidth: 0,
                   value: 1,
@@ -61,10 +62,7 @@ var ABFieldFileComponent = new ABFieldComponent({
                {
                   view: "text",
                   name: "fileType",
-                  placeholder: L(
-                     "ab.dataField.file.fileTypePlaceholder",
-                     "txt,rtf,doc,docx,..."
-                  ),
+                  placeholder: L("txt,rtf,doc,docx,..."),
                   id: ids.fileType,
                },
             ],
@@ -158,19 +156,15 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
     * On a destroy operation, ask if the user wants to keep the related file.
     */
    destroy() {
-      var L = this.AB.Label();
-
       return new Promise((resolve, reject) => {
          // verify we have been .save()d before:
          if (this.id) {
             // Ask the user what to do about the existing file:
             this.AB.Dialog.Confirm({
-               title: L("ab.dataField.file.keepFiles", "*Keep Files?"),
-               message: L(
-                  "ab.dataField.file.keepFIlesDescription",
-                  "*Do you want to keep the files referenced by {0}?",
-                  [this.label]
-               ),
+               title: L("Keep Files?"),
+               message: L("Do you want to keep the files referenced by {0}?", [
+                  this.label,
+               ]),
                callback: (result) => {
                   // update this setting so the server can respond correctly in
                   // ABFieldFile.migrateDrop()
@@ -242,8 +236,6 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
       if (!node) {
          return;
       }
-      var L = App.Label;
-
       options = options || {};
 
       var typesList = [];
@@ -311,11 +303,9 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
                      var type = item.type.toLowerCase();
                      if (acceptableTypes.indexOf(type) == -1) {
                         webix.message(
-                           L(
-                              "Only [{0}] files are supported",
-                              "Only [{0}] files are supported",
-                              [acceptableTypes.join(", ")]
-                           )
+                           L("Only [{0}] files are supported", [
+                              acceptableTypes.join(", "),
+                           ])
                         );
                         return false;
                      }
@@ -327,11 +317,7 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
                      var acceptableSizes = maximumSize * 1000000;
                      if (item.size > acceptableSizes) {
                         webix.message(
-                           L(
-                              "Maximum file size is {0}MB",
-                              "Maximum file size is {0}MB",
-                              [maximumSize]
-                           )
+                           L("Maximum file size is {0}MB", [maximumSize])
                         );
                         return false;
                      }
@@ -411,8 +397,6 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
     * @param {HtmlDOM} node  the HTML Dom object for this field's display.
     */
    customEdit(row, App, node) {
-      var L = App.Label;
-
       if (this.deleteFile == true) {
          // remove the property because it is only needed to prevent the file dialog from showing
          delete this.deleteFile;
@@ -420,10 +404,7 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
          // Ask the user if they really want to delete the photo
          this.AB.Dialog.Confirm({
             title: "",
-            message: L(
-               "ab.dataField.file.removeFileDescription",
-               "*Are you sure you want to remove this file?"
-            ),
+            message: L("Are you sure you want to remove this file?"),
             callback: (result) => {
                var confirmDelete = result ? 1 : 0;
                if (confirmDelete) {
@@ -500,8 +481,6 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
    //File Template
 
    fileTemplate(obj, editable) {
-      var L = this.AB.Label();
-
       var iconDisplay = "";
       var fileDisplay = "display:none;";
       var fileURL = "";
@@ -523,14 +502,11 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
 
       var html = [
          `<div class="file-data-field-icon" style="text-align: center; height: inherit; display: table-cell; vertical-align: middle; border: 2px dotted #CCC; background: #FFF; border-radius: 10px; font-size: 11px; line-height: 13px; padding: 0 10px; ${iconDisplay}"><i class="fa fa-file fa-2x" style="opacity: 0.6; font-size: 32px; margin-top: 3px; margin-bottom: 5px;"></i>${
-            editable
-               ? `<br/>${L(
-                     "Drag and drop or click here",
-                     "Drag and drop or click here"
-                  )}`
-               : ""
+            editable ? `<br/>${L("Drag and drop or click here")}` : ""
          }</div>`,
-         `<div class="file-data-field-name" style=" width:100%; height:100%; position:relative; "><a target="_blank" href="${fileURL}">${(name || "")}</a>${
+         `<div class="file-data-field-name" style=" width:100%; height:100%; position:relative; "><a target="_blank" href="${fileURL}">${
+            name || ""
+         }</a>${
             editable
                ? `<a style="${fileDisplay}" class="ab-delete-photo" href="javascript:void(0);"><i class="fa fa-times delete-image"></i></a>`
                : ""

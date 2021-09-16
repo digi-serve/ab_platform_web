@@ -2,6 +2,8 @@ const ABViewWidgetCore = require("../../core/views/ABViewWidgetCore");
 
 const ABPropertyComponentDefaults = ABViewWidgetCore.defaultValues();
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABViewWidget extends ABViewWidgetCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -19,8 +21,6 @@ module.exports = class ABViewWidget extends ABViewWidgetCore {
          ObjectDefaults
       );
 
-      var L = App.Label;
-
       // in addition to the common .label  values, we
       // ask for:
       return commonUI.concat([
@@ -28,7 +28,7 @@ module.exports = class ABViewWidget extends ABViewWidgetCore {
             name: "columnSpan",
             view: "counter",
             min: 1,
-            label: L("ab.components.container.columnSpan", "*Column Span"),
+            label: L("Column Span"),
 
             hidden: true, // TODO
          },
@@ -36,7 +36,7 @@ module.exports = class ABViewWidget extends ABViewWidgetCore {
             name: "rowSpan",
             view: "counter",
             min: 1,
-            label: L("ab.components.container.rowSpan", "*Row Span"),
+            label: L("Row Span"),
 
             hidden: true, // TODO
          },

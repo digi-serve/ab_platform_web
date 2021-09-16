@@ -2,6 +2,8 @@ const ABViewChartAreaCore = require("../../core/views/ABViewChartAreaCore");
 
 const ABViewChartAreaPropertyComponentDefaults = ABViewChartAreaCore.defaultValues();
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABViewChartArea extends ABViewChartAreaCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -42,7 +44,6 @@ module.exports = class ABViewChartArea extends ABViewChartAreaCore {
          _logic,
          ObjectDefaults
       );
-      var L = App.Label;
 
       // in addition to the common .label  values, we
       // ask for:
@@ -50,19 +51,16 @@ module.exports = class ABViewChartArea extends ABViewChartAreaCore {
          {
             name: "areaType",
             view: "richselect",
-            label: L("ab.component.chart.area.areaType", "*Chart Type"),
+            label: L("Chart Type"),
             labelWidth: App.config.labelWidthLarge,
             options: [
                {
                   id: "area",
-                  value: L("ab.component.chart.area.area", "*Area"),
+                  value: L("Area"),
                },
                {
                   id: "stackedArea",
-                  value: L(
-                     "ab.component.chart.area.stackedArea",
-                     "*Stacked Area"
-                  ),
+                  value: L("Stacked Area"),
                },
             ],
          },
@@ -76,34 +74,31 @@ module.exports = class ABViewChartArea extends ABViewChartAreaCore {
             name: "chartHeight",
             view: "counter",
             min: 1,
-            label: L("ab.component.chart.area.chartHeight", "*Height"),
+            label: L("Height"),
          },
          {
             name: "stepValue",
             view: "counter",
             min: 1,
-            label: L("ab.component.chart.area.stepValue", "*Step"),
+            label: L("Step"),
          },
          {
             name: "maxValue",
             view: "counter",
             min: 1,
-            label: L("ab.component.chart.area.maxValue", "*Max Value"),
+            label: L("Max Value"),
          },
          {
             name: "labelFontSize",
             view: "counter",
             min: 1,
-            label: L(
-               "ab.component.chart.area.labelFontSize",
-               "*Label Font Size"
-            ),
+            label: L("Label Font Size"),
             labelWidth: App.config.labelWidthXLarge,
          },
          {
             name: "isLegend",
             view: "checkbox",
-            labelRight: L("ab.component.chart.isLegend", "*Show Legend"),
+            labelRight: L("Show Legend"),
             labelWidth: App.config.labelWidthCheckbox,
          },
       ]);

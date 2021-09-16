@@ -3,6 +3,8 @@ const ABProcessTriggerTimerCore = require("../../../core/process/tasks/ABProcess
 const START_URL = "/process/timer/#id#/start";
 const STOP_URL = "/process/timer/#id#/stop";
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABProcessTriggerTimer extends ABProcessTriggerTimerCore {
    propertyIDs(id) {
       return {
@@ -24,7 +26,6 @@ module.exports = class ABProcessTriggerTimer extends ABProcessTriggerTimerCore {
     *        the webix $$(id) of the properties panel area.
     */
    propertiesShow(id) {
-      let L = AB.Label;
       let ids = this.propertyIDs(id);
       let defaultValues = ABProcessTriggerTimer.defaults();
 
@@ -48,7 +49,7 @@ module.exports = class ABProcessTriggerTimer extends ABProcessTriggerTimerCore {
             {
                id: ids.name,
                view: "text",
-               label: L("ab.process.task.trigger.name", "*Name"),
+               label: L("Name"),
                labelWidth: LABEL_WIDTH,
                name: "name",
                value: this.name,
@@ -57,21 +58,18 @@ module.exports = class ABProcessTriggerTimer extends ABProcessTriggerTimerCore {
                id: ids.repeatEvery,
                view: "richselect",
                name: "repeatEvery",
-               label: L(
-                  "ab.process.task.trigger.timer.repeatEvery",
-                  "*Repeat every"
-               ),
+               label: L("Repeat every"),
                labelWidth: LABEL_WIDTH,
                value: this.repeatEvery || defaultValues.repeatEvery,
                options: [
-                  { id: "daily", value: "Daily" },
+                  { id: "daily", value: L("Daily") },
                   {
                      id: "weekly",
-                     value: "Weekly",
+                     value: L("Weekly"),
                   },
                   {
                      id: "monthly",
-                     value: "Monthly",
+                     value: L("Monthly"),
                   },
                ],
                on: {
@@ -84,7 +82,7 @@ module.exports = class ABProcessTriggerTimer extends ABProcessTriggerTimerCore {
                id: ids.repeatTime,
                view: "datepicker",
                name: "repeatTime",
-               label: L("ab.process.task.trigger.timer.repeatTime", "*Time"),
+               label: L("Time"),
                labelWidth: LABEL_WIDTH,
                value: this.repeatTime || defaultValues.repeatTime,
                timepicker: true,
@@ -104,69 +102,45 @@ module.exports = class ABProcessTriggerTimer extends ABProcessTriggerTimerCore {
                      vertical: true,
                      value: this.repeatDaily || defaultValues.repeatDaily,
                      options: [
-                        { id: "day", value: "Day" },
-                        { id: "weekday", value: "Weekday" },
+                        { id: "day", value: L("Day") },
+                        { id: "weekday", value: L("Weekday") },
                      ],
                   },
                   {
                      view: "multiselect",
                      id: ids.repeatWeekly,
                      labelWidth: LABEL_WIDTH,
-                     label: L(
-                        "ab.process.task.trigger.timer.repeatWeekly",
-                        "*Every week on:"
-                     ),
+                     label: L("Every week on:"),
                      batch: "weekly",
                      value: this.repeatWeekly || defaultValues.repeatWeekly,
                      options: [
                         {
                            id: "SUN",
-                           value: L(
-                              "ab.process.task.trigger.timer.week.sunday",
-                              "*Sunday"
-                           ),
+                           value: L("Sunday"),
                         },
                         {
                            id: "MON",
-                           value: L(
-                              "ab.process.task.trigger.timer.week.monday",
-                              "*Monday"
-                           ),
+                           value: L("Monday"),
                         },
                         {
                            id: "TUE",
-                           value: L(
-                              "ab.process.task.trigger.timer.week.tuesday",
-                              "*Tuesday"
-                           ),
+                           value: L("Tuesday"),
                         },
                         {
                            id: "WED",
-                           value: L(
-                              "ab.process.task.trigger.timer.week.wednesday",
-                              "*Wednesday"
-                           ),
+                           value: L("Wednesday"),
                         },
                         {
                            id: "THU",
-                           value: L(
-                              "ab.process.task.trigger.timer.week.thursday",
-                              "*Thursday"
-                           ),
+                           value: L("Thursday"),
                         },
                         {
                            id: "FRI",
-                           value: L(
-                              "ab.process.task.trigger.timer.week.friday",
-                              "*Friday"
-                           ),
+                           value: L("Friday"),
                         },
                         {
                            id: "SAT",
-                           value: L(
-                              "ab.process.task.trigger.timer.week.saturday",
-                              "*Saturday"
-                           ),
+                           value: L("Saturday"),
                         },
                      ],
                   },
@@ -178,10 +152,7 @@ module.exports = class ABProcessTriggerTimer extends ABProcessTriggerTimerCore {
                            id: ids.repeatMonthly,
                            view: "richselect",
                            labelWidth: LABEL_WIDTH,
-                           label: L(
-                              "ab.process.task.trigger.timer.month.repeatOn",
-                              "*Monthly on day"
-                           ),
+                           label: L("Monthly on day"),
                            options: dayOptions,
                            value:
                               this.repeatMonthly || defaultValues.repeatMonthly,
@@ -193,7 +164,7 @@ module.exports = class ABProcessTriggerTimer extends ABProcessTriggerTimerCore {
             {
                id: ids.isEnabled,
                view: "switch",
-               label: L("ab.process.task.trigger.timer.enable", "*Enable"),
+               label: L("Enable"),
                labelWidth: LABEL_WIDTH,
                value: this.isEnabled,
             },

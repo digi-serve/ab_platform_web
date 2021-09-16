@@ -22,6 +22,8 @@
 //
 const ObjectQueryBuilder = require("./ABViewQueryBuilderObjectFieldConditions");
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABViewRule {
    /**
     * @param {object} App
@@ -56,18 +58,13 @@ module.exports = class ABViewRule {
       this.App = App;
       this.idBase = idBase;
 
-      var L = App.Label;
-
       var labels = (this.labels = {
          common: App.labels,
          component: {
-            action: L("ab.component.form.action", "*Action"),
-            actionPlaceholder: L(
-               "ab.component.form.actionPlaceholder",
-               "*Choose an action"
-            ),
-            when: L("ab.component.form.when", "*When"),
-            values: L("ab.component.form.values", "*Values"),
+            action: L("Action"),
+            actionPlaceholder: L("Choose an action"),
+            when: L("When"),
+            values: L("Values"),
          },
       });
 

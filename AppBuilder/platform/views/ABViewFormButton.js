@@ -2,6 +2,8 @@ const ABViewFormButtonCore = require("../../core/views/ABViewFormButtonCore");
 
 const ABViewFormButtonPropertyComponentDefaults = ABViewFormButtonCore.defaultValues();
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABViewFormButton extends ABViewFormButtonCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -54,7 +56,6 @@ module.exports = class ABViewFormButton extends ABViewFormButtonCore {
          _logic,
          ObjectDefaults
       );
-      var L = App.Label;
 
       // in addition to the common .label  values, we
       // ask for:
@@ -62,72 +63,63 @@ module.exports = class ABViewFormButton extends ABViewFormButtonCore {
          {
             name: "includeSave",
             view: "checkbox",
-            label: L("ab.component.button.includeSave", "*Save"),
+            label: L("Save"),
          },
          {
             name: "saveLabel",
             view: "text",
             labelWidth: App.config.labelWidthLarge,
-            label: L("ab.component.button.saveLabel", "*Save Label"),
-            placeholder: L(
-               "ab.component.button.saveLabelPlaceholder",
-               "*Save Placeholder"
-            ),
+            label: L("Save Label"),
+            placeholder: L("Save Placeholder"),
          },
          {
             name: "includeCancel",
             view: "checkbox",
-            label: L("ab.component.button.includeCancel", "*Cancel"),
+            label: L("Cancel"),
          },
          {
             name: "cancelLabel",
             view: "text",
             labelWidth: App.config.labelWidthLarge,
-            label: L("ab.component.button.cancelLabel", "*Cancel Label"),
-            placeholder: L(
-               "ab.component.button.cancelLabelPlaceholder",
-               "*Cancel Placeholder"
-            ),
+            label: L("Cancel Label"),
+            placeholder: L("Cancel Placeholder"),
          },
          {
             name: "includeReset",
             view: "checkbox",
-            label: L("ab.component.button.includeReset", "*Reset"),
+            label: L("Reset"),
          },
          {
             name: "resetLabel",
             view: "text",
             labelWidth: App.config.labelWidthLarge,
-            label: L("ab.component.button.resetLabel", "*Reset Label"),
-            placeholder: L(
-               "ab.component.button.resetLabelPlaceholder",
-               "*Reset Placeholder"
-            ),
+            label: L("Reset Label"),
+            placeholder: L("Reset Placeholder"),
          },
          {
             name: "afterCancel",
             view: "richselect",
             labelWidth: App.config.labelWidthLarge,
-            label: L("ab.component.button.afterCancel", "*After Cancel"),
+            label: L("After Cancel"),
             // options: []
          },
          {
             name: "alignment",
             view: "richselect",
             labelWidth: App.config.labelWidthLarge,
-            label: L("ab.component.button.alignment", "*Alignment"),
+            label: L("Alignment"),
             options: [
                {
                   id: "left",
-                  value: L("ab.component.button.alignment.left", "*Left"),
+                  value: L("Left"),
                },
                {
                   id: "center",
-                  value: L("ab.component.button.alignment.center", "*Center"),
+                  value: L("Center"),
                },
                {
                   id: "right",
-                  value: L("ab.component.button.alignment.right", "*Right"),
+                  value: L("Right"),
                },
             ],
          },
@@ -208,8 +200,6 @@ module.exports = class ABViewFormButton extends ABViewFormButtonCore {
 
       var form = this.parentFormComponent();
 
-      var L = App.Label;
-
       var _ui = {
          id: ids.component,
          cols: [],
@@ -230,8 +220,7 @@ module.exports = class ABViewFormButton extends ABViewFormButtonCore {
             {
                view: "button",
                autowidth: true,
-               value:
-                  this.settings.cancelLabel || L("ab.common.cancel", "*Cancel"),
+               value: this.settings.cancelLabel || L("Cancel"),
                click: function () {
                   _logic.onCancel(this);
                },
@@ -256,8 +245,7 @@ module.exports = class ABViewFormButton extends ABViewFormButtonCore {
             {
                view: "button",
                autowidth: true,
-               value:
-                  this.settings.resetLabel || L("ab.common.reset", "*Reset"),
+               value: this.settings.resetLabel || L("Reset"),
                click: function () {
                   _logic.onClear(this);
                },
@@ -283,7 +271,7 @@ module.exports = class ABViewFormButton extends ABViewFormButtonCore {
             type: "form",
             css: "webix_primary",
             autowidth: true,
-            value: this.settings.saveLabel || L("ab.common.save", "*Save"),
+            value: this.settings.saveLabel || L("Save"),
             click: function () {
                _logic.callbacks.onSaveClick(this);
             },

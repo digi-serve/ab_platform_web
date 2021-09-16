@@ -2,6 +2,8 @@ const ABViewTabCore = require("../../core/views/ABViewTabCore");
 
 const ABViewTabPropertyComponentDefaults = ABViewTabCore.defaultValues();
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABViewTab extends ABViewTabCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -236,19 +238,14 @@ module.exports = class ABViewTab extends ABViewTabCore {
          },
 
          tabRemove: (e, nodeId, trg) => {
-            let L = App.Label;
             var tabId = $$(ids.component).getValue();
             var deletedView = this.views((v) => v.id == tabId)[0];
             if (deletedView) {
                App.AB.Dialog.Confirm({
-                  title: L(
-                     "ab.interface.component.tab.confirmDeleteTitle",
-                     "*Delete tab"
-                  ),
-                  text: L(
-                     "ab.interface.component.tab.confirmDeleteMessage",
-                     `Do you want to delete <b>${deletedView.label}</b>?`
-                  ),
+                  title: L("Delete tab"),
+                  text: L("Do you want to delete <b>{0}</b>?", [
+                     deletedView.label,
+                  ]),
                   callback: (result) => {
                      if (result) {
                         // this.viewDestroy(deletedView);
@@ -302,7 +299,6 @@ module.exports = class ABViewTab extends ABViewTabCore {
    }
 
    static popupShow(tab) {
-      let L = AB.Label;
       var popup = $$("ab-component-tab-add-new-tab-popup");
       var form = $$("ab-component-tab-add-new-tab-form");
       var button = $$("ab-component-tab-save-button");
@@ -316,8 +312,8 @@ module.exports = class ABViewTab extends ABViewTabCore {
                tabicon: tab.tabicon,
             });
 
-            popup.getHead().setHTML(L("ab.component.tab.editTab", "*Edit Tab"));
-            button.setValue(L("ab.common.save", "*Save"));
+            popup.getHead().setHTML(L("Edit Tab"));
+            button.setValue(L("Save"));
          }
          // Add new tab
          else {
@@ -326,8 +322,8 @@ module.exports = class ABViewTab extends ABViewTabCore {
                label: "",
             });
 
-            popup.getHead().setHTML(L("ab.component.tab.addTab", "*Add Tab"));
-            button.setValue(L("ab.common.add", "*Add"));
+            popup.getHead().setHTML(L("Add Tab"));
+            button.setValue(L("Add"));
          }
 
          button.refresh();
@@ -362,7 +358,6 @@ module.exports = class ABViewTab extends ABViewTabCore {
          _logic,
          ObjectDefaults
       );
-      var L = App.Label;
 
       // create 'add new tab' popup
       webix
@@ -382,7 +377,7 @@ module.exports = class ABViewTab extends ABViewTabCore {
                      view: "text",
                      name: "label",
                      id: "ab-component-tab-name",
-                     label: L("ab.component.tab.label", "*Label"),
+                     label: L("Label"),
                      required: true,
                   },
                   {
@@ -414,7 +409,7 @@ module.exports = class ABViewTab extends ABViewTabCore {
                         { fillspace: true },
                         {
                            view: "button",
-                           value: L("ab.common.cancel", "*Cancel"),
+                           value: L("Cancel"),
                            css: "ab-cancel-button",
                            autowidth: true,
                            click: () => {
@@ -425,7 +420,7 @@ module.exports = class ABViewTab extends ABViewTabCore {
                            id: "ab-component-tab-save-button",
                            view: "button",
                            css: "webix_primary",
-                           value: L("ab.component.tab.addTab", "*Add Tab"),
+                           value: L("Add Tab"),
                            autowidth: true,
                            type: "form",
                            click: () => {
@@ -485,17 +480,17 @@ module.exports = class ABViewTab extends ABViewTabCore {
          {
             view: "counter",
             name: "height",
-            label: L("ab.component.tab.height", "*Height"),
+            label: L("Height"),
          },
          {
             view: "counter",
             name: "minWidth",
-            label: L("ab.component.tab.minWidth", "*Minimum width"),
+            label: L("Minimum width"),
          },
          {
             view: "checkbox",
             name: "stackTabs",
-            labelRight: L("ab.component.tab.stack", "*Stack Tabs Vertically"),
+            labelRight: L("Stack Tabs Vertically"),
             labelWidth: App.config.labelWidthCheckbox,
             on: {
                onChange: (newv, oldv) => {
@@ -514,39 +509,36 @@ module.exports = class ABViewTab extends ABViewTabCore {
          {
             view: "checkbox",
             name: "iconOnTop",
-            labelRight: L(
-               "ab.component.tab.darkTheme",
-               "*Position icon above text"
-            ),
+            labelRight: L("Position icon above text"),
             labelWidth: App.config.labelWidthCheckbox,
          },
          {
             view: "checkbox",
             name: "darkTheme",
-            labelRight: L("ab.component.tab.darkTheme", "*Use Dark Theme"),
+            labelRight: L("Use Dark Theme"),
             labelWidth: App.config.labelWidthCheckbox,
          },
          {
             view: "counter",
             name: "sidebarWidth",
-            label: L("ab.component.tab.sidebarWidth", "*Width of Sidebar"),
+            label: L("Width of Sidebar"),
             labelWidth: App.config.labelWidthXLarge,
          },
          {
             view: "richselect",
             name: "sidebarPos",
-            label: L("ab.component.tab.sidebarPos", "*Position of Sidebar"),
+            label: L("Position of Sidebar"),
             labelWidth: App.config.labelWidthXLarge,
             options: [
-               { id: "left", value: L("ab.common.left", "*Left") },
-               { id: "right", value: L("ab.common.right", "*Right") },
+               { id: "left", value: L("Left") },
+               { id: "right", value: L("Right") },
             ],
          },
          // [button] : add tab
          {
             view: "button",
             css: "webix_primary",
-            value: L("ab.component.tab.addTab", "*Add Tab"),
+            value: L("Add Tab"),
             click: () => {
                this.popupShow();
             },
@@ -611,7 +603,6 @@ module.exports = class ABViewTab extends ABViewTabCore {
     * @return {obj} UI component
     */
    component(App) {
-      var L = App.Label;
       var AB = this.AB;
 
       var comp = super.component(App);
@@ -673,14 +664,14 @@ module.exports = class ABViewTab extends ABViewTabCore {
             // create a menu item for the collapse option to use later
             var collapseMenu = {
                id: ids.collapseMenu,
-               value: L("ab.application.collapseMenu", "*Collapse Menu"),
+               value: L("Collapse Menu"),
                icon: "chevron-circle-left",
             };
 
             // create a menu item from the expand option to use later
             var expandMenu = {
                id: ids.expandMenu,
-               value: L("ab.application.expandMenu", "*Expand Menu"),
+               value: L("Expand Menu"),
                icon: "chevron-circle-right",
                hidden: true,
             };

@@ -1,5 +1,7 @@
 const AccountingFPCloseCore = require("../../../core/process/tasks/ABProcessTaskServiceAccountingFPCloseCore.js");
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class AccountingFPClose extends AccountingFPCloseCore {
    ////
    //// Process Instance Methods
@@ -39,7 +41,6 @@ module.exports = class AccountingFPClose extends AccountingFPCloseCore {
     */
    propertiesShow(id) {
       var ids = this.propertyIDs(id);
-      var L = this.AB.Label();
 
       var processValues = [{ id: 0, value: "Select a Process Value" }];
       var processDataFields = this.process.processDataFields(this);
@@ -52,14 +53,14 @@ module.exports = class AccountingFPClose extends AccountingFPCloseCore {
       });
       objectList.unshift({
          id: 0,
-         value: L("ab.process.accounting.selectObject", "*Select an Object"),
+         value: L("Select an Object"),
       });
 
       let getFieldOptions = (objID) => {
          let fields = [
             {
                id: 0,
-               value: L("ab.process.accounting.selectField", "*Select a Field"),
+               value: L("Select a Field"),
             },
          ];
 
@@ -181,17 +182,14 @@ module.exports = class AccountingFPClose extends AccountingFPCloseCore {
             {
                id: ids.name,
                view: "text",
-               label: L("ab.process.element.name", "*Name"),
+               label: L("Name"),
                name: "name",
                value: this.name,
             },
             {
                id: ids.processFPValue,
                view: "select",
-               label: L(
-                  "ab.process.accounting.processFPValue",
-                  "*Process Fiscal Period Value"
-               ),
+               label: L("Process Fiscal Period Value"),
                value: this.processFPValue,
                name: "processFPValue",
                options: processValues,
@@ -199,7 +197,7 @@ module.exports = class AccountingFPClose extends AccountingFPCloseCore {
             {
                id: ids.objectFP,
                view: "select",
-               label: L("ab.process.accounting.objectFP", "*FP Object"),
+               label: L("FP Object"),
                value: this.objectFP,
                name: "objectFP",
                options: objectList,
@@ -217,7 +215,7 @@ module.exports = class AccountingFPClose extends AccountingFPCloseCore {
             {
                id: ids.objectGL,
                view: "select",
-               label: L("ab.process.accounting.objectGL", "*GL Object"),
+               label: L("GL Object"),
                value: this.objectGL,
                name: "objectGL",
                options: objectList,
@@ -235,7 +233,7 @@ module.exports = class AccountingFPClose extends AccountingFPCloseCore {
             {
                id: ids.objectAcc,
                view: "select",
-               label: L("ab.process.accounting.objectAcc", "*Account Object"),
+               label: L("Account Object"),
                value: this.objectAcc,
                name: "objectAcc",
                options: objectList,
@@ -251,7 +249,7 @@ module.exports = class AccountingFPClose extends AccountingFPCloseCore {
             {
                id: ids.fieldFPStart,
                view: "select",
-               label: L("ab.process.accounting.fieldFPStart", "*FP -> Start"),
+               label: L("FP -> Start"),
                value: this.fieldFPStart,
                name: "fieldFPStart",
                options: fpFields,
@@ -259,7 +257,7 @@ module.exports = class AccountingFPClose extends AccountingFPCloseCore {
             {
                id: ids.fieldFPOpen,
                view: "select",
-               label: L("ab.process.accounting.fieldFPOpen", "*FP -> Open"),
+               label: L("FP -> Open"),
                value: this.fieldFPOpen,
                name: "fieldFPOpen",
                options: fpFields,
@@ -267,7 +265,7 @@ module.exports = class AccountingFPClose extends AccountingFPCloseCore {
             {
                id: ids.fieldFPStatus,
                view: "select",
-               label: L("ab.process.accounting.fieldFPStatus", "*FP -> Status"),
+               label: L("FP -> Status"),
                value: this.fieldFPStatus,
                name: "fieldFPStatus",
                options: fpFields,
@@ -283,7 +281,7 @@ module.exports = class AccountingFPClose extends AccountingFPCloseCore {
             {
                id: ids.fieldFPActive,
                view: "select",
-               label: L("ab.process.accounting.fieldFPActive", "*FP -> Active"),
+               label: L("FP -> Active"),
                value: this.fieldFPActive,
                name: "fieldFPActive",
                options: fpStatusFields,
@@ -291,10 +289,7 @@ module.exports = class AccountingFPClose extends AccountingFPCloseCore {
             {
                id: ids.fieldGLStarting,
                view: "select",
-               label: L(
-                  "ab.process.accounting.fieldGLStarting",
-                  "*GL -> Starting BL"
-               ),
+               label: L("GL -> Starting BL"),
                value: this.fieldGLStarting,
                name: "fieldGLStarting",
                options: glFields,
@@ -302,10 +297,7 @@ module.exports = class AccountingFPClose extends AccountingFPCloseCore {
             {
                id: ids.fieldGLRunning,
                view: "select",
-               label: L(
-                  "ab.process.accounting.fieldGLRunning",
-                  "*GL -> Running BL"
-               ),
+               label: L("GL -> Running BL"),
                value: this.fieldGLRunning,
                name: "fieldGLRunning",
                options: glFields,
@@ -313,10 +305,7 @@ module.exports = class AccountingFPClose extends AccountingFPCloseCore {
             {
                id: ids.fieldGLAccount,
                view: "select",
-               label: L(
-                  "ab.process.accounting.fieldGLAccount",
-                  "*GL -> Account"
-               ),
+               label: L("GL -> Account"),
                value: this.fieldGLAccount,
                name: "fieldGLAccount",
                options: glFields,
@@ -324,7 +313,7 @@ module.exports = class AccountingFPClose extends AccountingFPCloseCore {
             {
                id: ids.fieldGLRc,
                view: "select",
-               label: L("ab.process.accounting.fieldGLRc", "*GL -> RC"),
+               label: L("GL -> RC"),
                value: this.fieldGLRc,
                name: "fieldGLRc",
                options: glFields,
@@ -332,7 +321,7 @@ module.exports = class AccountingFPClose extends AccountingFPCloseCore {
             {
                id: ids.fieldGLDebit,
                view: "select",
-               label: L("ab.process.accounting.fieldGLDebit", "*GL -> Debit"),
+               label: L("GL -> Debit"),
                value: this.fieldGLDebit,
                name: "fieldGLDebit",
                options: glFields,
@@ -340,7 +329,7 @@ module.exports = class AccountingFPClose extends AccountingFPCloseCore {
             {
                id: ids.fieldGLCredit,
                view: "select",
-               label: L("ab.process.accounting.fieldGLCredit", "*GL -> Credit"),
+               label: L("GL -> Credit"),
                value: this.fieldGLCredit,
                name: "fieldGLCredit",
                options: glFields,
@@ -348,7 +337,7 @@ module.exports = class AccountingFPClose extends AccountingFPCloseCore {
             {
                id: ids.fieldAccType,
                view: "select",
-               label: L("ab.process.accounting.fieldAccType", "*Acc -> Type"),
+               label: L("Acc -> Type"),
                value: this.fieldAccType,
                name: "fieldAccType",
                options: accFields,
@@ -367,7 +356,7 @@ module.exports = class AccountingFPClose extends AccountingFPCloseCore {
             {
                id: ids.fieldAccAsset,
                view: "select",
-               label: L("ab.process.accounting.fieldAccAsset", "*Acc -> Asset"),
+               label: L("Acc -> Asset"),
                value: this.fieldAccAsset,
                name: "fieldAccAsset",
                options: accTypeOptions,
@@ -375,10 +364,7 @@ module.exports = class AccountingFPClose extends AccountingFPCloseCore {
             {
                id: ids.fieldAccExpense,
                view: "select",
-               label: L(
-                  "ab.process.accounting.fieldAccExpense",
-                  "*Acc -> Expense"
-               ),
+               label: L("Acc -> Expense"),
                value: this.fieldAccExpense,
                name: "fieldAccExpense",
                options: accTypeOptions,
@@ -386,10 +372,7 @@ module.exports = class AccountingFPClose extends AccountingFPCloseCore {
             {
                id: ids.fieldAccLiabilities,
                view: "select",
-               label: L(
-                  "ab.process.accounting.fieldAccLiabilities",
-                  "*Acc -> Liabilities"
-               ),
+               label: L("Acc -> Liabilities"),
                value: this.fieldAccLiabilities,
                name: "fieldAccLiabilities",
                options: accTypeOptions,
@@ -397,10 +380,7 @@ module.exports = class AccountingFPClose extends AccountingFPCloseCore {
             {
                id: ids.fieldAccEquity,
                view: "select",
-               label: L(
-                  "ab.process.accounting.fieldAccEquity",
-                  "*Acc -> Equity"
-               ),
+               label: L("Acc -> Equity"),
                value: this.fieldAccEquity,
                name: "fieldAccEquity",
                options: accTypeOptions,
@@ -408,10 +388,7 @@ module.exports = class AccountingFPClose extends AccountingFPCloseCore {
             {
                id: ids.fieldAccIncome,
                view: "select",
-               label: L(
-                  "ab.process.accounting.fieldAccIncome",
-                  "*Acc -> Income"
-               ),
+               label: L("Acc -> Income"),
                value: this.fieldAccIncome,
                name: "fieldAccIncome",
                options: accTypeOptions,

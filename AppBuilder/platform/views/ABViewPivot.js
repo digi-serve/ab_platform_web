@@ -4,6 +4,8 @@ const ABFieldFormula = require("../dataFields/ABFieldFormula");
 const ABFieldNumber = require("../dataFields/ABFieldNumber");
 const ABObjectQuery = require("../ABObjectQuery");
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABViewPivot extends ABViewPivotCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -63,54 +65,43 @@ module.exports = class ABViewPivot extends ABViewPivotCore {
          _logic,
          ObjectDefaults
       );
-      let L = App.Label;
 
       return commonUI.concat([
          {
             name: "datacollection",
             view: "richselect",
-            label: L("ab.components.pivot.dataSource", "*Data Source"),
+            label: L("Data Source"),
             labelWidth: App.config.labelWidthLarge,
          },
          {
             view: "counter",
             name: "height",
-            label: L("ab.component.pivot.height", "*Height:"),
+            label: L("Height:"),
             labelWidth: App.config.labelWidthLarge,
          },
          {
             view: "checkbox",
             name: "removeMissed",
-            labelRight: L(
-               "ab.component.pivot.removeMissed",
-               "*Remove empty data."
-            ),
+            labelRight: L("Remove empty data."),
             labelWidth: App.config.labelWidthCheckbox,
          },
          {
             view: "checkbox",
             name: "totalColumn",
-            labelRight: L(
-               "ab.component.pivot.totalColumn",
-               "*Show a total column."
-            ),
+            labelRight: L("Show a total column."),
             labelWidth: App.config.labelWidthCheckbox,
          },
          {
             view: "checkbox",
             name: "separateLabel",
-            labelRight: L(
-               "ab.component.pivot.separateLabel",
-               "*Separate header label."
-            ),
+            labelRight: L("Separate header label."),
             labelWidth: App.config.labelWidthCheckbox,
          },
          {
             view: "checkbox",
             name: "min",
             labelRight: L(
-               "ab.component.pivot.min",
-               "*Highlighting of a cell(s) with the least value in a row."
+               "Highlighting of a cell(s) with the least value in a row."
             ),
             labelWidth: App.config.labelWidthCheckbox,
          },
@@ -118,8 +109,7 @@ module.exports = class ABViewPivot extends ABViewPivotCore {
             view: "checkbox",
             name: "max",
             labelRight: L(
-               "ab.component.pivot.max",
-               "*Highlighting of a cell(s) with the biggest value in a row."
+               "Highlighting of a cell(s) with the biggest value in a row."
             ),
             labelWidth: App.config.labelWidthCheckbox,
          },
@@ -127,7 +117,7 @@ module.exports = class ABViewPivot extends ABViewPivotCore {
             name: "decimalPlaces",
             view: "counter",
             min: 1,
-            label: L("", "Decimal Places"),
+            label: L("Decimal Places"),
             labelWidth: App.config.labelWidthXLarge,
          },
       ]);

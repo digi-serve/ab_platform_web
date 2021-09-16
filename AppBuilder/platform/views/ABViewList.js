@@ -1,5 +1,7 @@
 const ABViewListCore = require("../../core/views/ABViewListCore");
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABViewList extends ABViewListCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -49,8 +51,6 @@ module.exports = class ABViewList extends ABViewListCore {
          ObjectDefaults
       );
 
-      var L = App.Label;
-
       // _logic functions
 
       _logic.selectSource = (dcId, oldDcId) => {
@@ -64,7 +64,7 @@ module.exports = class ABViewList extends ABViewListCore {
          {
             name: "datacollection",
             view: "richselect",
-            label: L("ab.components.list.dataSource", "*Data Source"),
+            label: L("Data Source"),
             labelWidth: App.config.labelWidthLarge,
             on: {
                onChange: _logic.selectSource,
@@ -73,13 +73,13 @@ module.exports = class ABViewList extends ABViewListCore {
          {
             name: "field",
             view: "richselect",
-            label: L("ab.components.list.field", "*Field"),
+            label: L("Field"),
             labelWidth: App.config.labelWidthLarge,
          },
          {
             view: "counter",
             name: "height",
-            label: L("ab.component.list.height", "*Height:"),
+            label: L("Height:"),
             labelWidth: App.config.labelWidthLarge,
          },
       ]);

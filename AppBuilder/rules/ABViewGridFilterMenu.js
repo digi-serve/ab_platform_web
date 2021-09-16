@@ -1,5 +1,7 @@
 const ABViewGridFilterRule = require("./ABViewGridFilterRule");
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABViewGridFilterMenu {
    /**
     * @param {object} App
@@ -25,18 +27,13 @@ module.exports = class ABViewGridFilterMenu {
       this.App = App;
       this.idBase = idBase;
 
-      var L = App.Label;
-
       this.currentForm = null;
 
       var labels = (this.labels = {
          common: App.labels,
          component: {
-            header: L("ab.component.grid.filterMenu", "*Filter Menu"),
-            addNewFilter: L(
-               "ab.components.grid.addNewFilter",
-               "*Add new filter"
-            ),
+            header: L("Filter Menu"),
+            addNewFilter: L("Add new filter"),
          },
       });
 

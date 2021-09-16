@@ -2,6 +2,8 @@ const ABViewFormSelectSingleCore = require("../../core/views/ABViewFormSelectSin
 
 const ABViewFormSelectSinglePropertyComponentDefaults = ABViewFormSelectSingleCore.defaultValues();
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABViewFormSelectSingle extends (
    ABViewFormSelectSingleCore
 ) {
@@ -57,7 +59,6 @@ module.exports = class ABViewFormSelectSingle extends (
          _logic,
          ObjectDefaults
       );
-      var L = App.Label;
 
       // in addition to the common .label  values, we
       // ask for:
@@ -65,18 +66,15 @@ module.exports = class ABViewFormSelectSingle extends (
          {
             name: "type",
             view: "richselect",
-            label: L("ab.component.selectsingle.type", "*Type"),
+            label: L("Type"),
             options: [
                {
                   id: "richselect",
-                  value: L(
-                     "ab.component.selectsingle.selectlist",
-                     "*Select list"
-                  ),
+                  value: L("Select list"),
                },
                {
                   id: "radio",
-                  value: L("ab.component.selectsingle.radio", "*Radio"),
+                  value: L("Radio"),
                },
             ],
          },

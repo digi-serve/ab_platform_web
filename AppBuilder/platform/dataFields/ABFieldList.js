@@ -5,6 +5,8 @@ var ABFieldSelectivity = require("./ABFieldSelectivity");
 
 var defaultValues = ABFieldListCore.defaultValues();
 
+let L = (...params) => AB.Label("", ...params);
+
 var ids = {
    isMultiple: "ab-list-multiple-option",
    hasColors: "ab-list-colors-option",
@@ -86,10 +88,7 @@ function updateDefaultList(ids, settings = {}, L) {
       selectivityRender.selectivityRender(domNode, {
          multiple: true,
          data: settings.multipleDefault,
-         placeholder: L(
-            "ab.dataField.list.placeholder_multiple",
-            "*Select items"
-         ),
+         placeholder: L("Select items"),
          items: optList.map(function (opt) {
             return {
                id: opt.id,
@@ -130,7 +129,6 @@ var ABFieldListComponent = new ABFieldComponent({
 
    elements: (App, field) => {
       ids = field.idsUnique(ids, App);
-      var L = App.Label;
 
       return [
          {
@@ -138,7 +136,7 @@ var ABFieldListComponent = new ABFieldComponent({
             name: "isMultiple",
             disallowEdit: true,
             id: ids.isMultiple,
-            labelRight: L("ab.dataField.list.isMultiple", "*Multiselect"),
+            labelRight: L("Multiselect"),
             labelWidth: 0,
             value: false,
             on: {
@@ -159,7 +157,7 @@ var ABFieldListComponent = new ABFieldComponent({
             view: "checkbox",
             name: "hasColors",
             id: ids.hasColors,
-            labelRight: L("ab.dataField.list.hasColors", "*Customize Colors"),
+            labelRight: L("Customize Colors"),
             labelWidth: 0,
             value: false,
             on: {
@@ -172,7 +170,7 @@ var ABFieldListComponent = new ABFieldComponent({
          },
          {
             view: "label",
-            label: `<b>${L("ab.dataField.list.options", "*Options")}</b>`,
+            label: `<b>${L("Options")}</b>`,
          },
          {
             id: ids.options,
@@ -200,13 +198,9 @@ var ABFieldListComponent = new ABFieldComponent({
                      // Ask the user if they want to remove option
                      webix
                         .confirm({
-                           title: L(
-                              "ab.dataField.list.optionDeleteTitle",
-                              "*Delete Option"
-                           ),
+                           title: L("Delete Option"),
                            text: L(
-                              "ab.dataField.list.optionDeleteText",
-                              "*All exisiting entries with this value will be cleared. Are you sure you want to delete this option?"
+                              "All exisiting entries with this value will be cleared. Are you sure you want to delete this option?"
                            ),
                            type: "confirm-warning",
                         })
@@ -276,7 +270,7 @@ var ABFieldListComponent = new ABFieldComponent({
          {
             view: "button",
             css: "webix_primary",
-            value: L("ab.dataField.list.addNewOption", "*Add new option"),
+            value: L("Add new option"),
             click: function () {
                let itemId = webix.uid();
                let nextHex = getNextHex();
@@ -298,13 +292,10 @@ var ABFieldListComponent = new ABFieldComponent({
          },
          {
             id: ids.default,
-            placeholder: L(
-               "ab.dataField.list.selectDefault",
-               "*Select Default"
-            ),
+            placeholder: L("Select Default"),
             name: "default",
             view: "richselect",
-            label: L("ab.common.default", "*Default"),
+            label: L("Default"),
          },
          {
             id: ids.multipleDefault,
@@ -382,10 +373,6 @@ var ABFieldListComponent = new ABFieldComponent({
          $$(ids.options).parse(opts);
          $$(ids.options).refresh();
 
-         // update single/multiple default selector
-         var L = (...params) => {
-            this.AB.Multilingual.label(...params);
-         };
          setTimeout(() => {
             updateDefaultList(ids, field.settings, L);
          }, 10);
@@ -606,9 +593,6 @@ module.exports = class ABFieldList extends ABFieldListCore {
       var config = super.columnHeader(options);
       var field = this;
       var App = App;
-      var L = (...params) => {
-         this.AB.Multilingual.label(...params);
-      };
 
       // Multiple select list
       if (this.settings.isMultiple == true) {
@@ -624,10 +608,7 @@ module.exports = class ABFieldList extends ABFieldListCore {
 
             var domNode = node;
 
-            var placeholder = L(
-               "ab.dataField.list.placeholder_multiple",
-               "*Select items"
-            );
+            var placeholder = L("Select items");
             var readOnly = false;
             if (editable != null && editable == false) {
                readOnly = true;
@@ -663,10 +644,9 @@ module.exports = class ABFieldList extends ABFieldListCore {
          var placeHolder = "";
          if (options.editable) {
             formClass = " form-entry";
-            placeHolder =
-               "<span style='color: #CCC; padding: 0 5px;'>" +
-               L("ab.dataField.list.placeholder", "*Select item") +
-               "</span>";
+            placeHolder = `<span style='color: #CCC; padding: 0 5px;'>${L(
+               "Select item"
+            )}"</span>`;
          }
          var isRemovable = options.editable && !this.settings.required;
 
@@ -734,13 +714,9 @@ module.exports = class ABFieldList extends ABFieldListCore {
       }
 
       options = options || {};
-      var L = App.Label;
 
       if (this.settings.isMultiple == true) {
-         var placeholder = L(
-            "ab.dataField.list.placeholder_multiple",
-            "*Select items"
-         );
+         var placeholder = L("Select items");
          var readOnly = false;
          if (options.editable != null && options.editable == false) {
             readOnly = true;

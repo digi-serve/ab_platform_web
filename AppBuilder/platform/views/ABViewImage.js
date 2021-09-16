@@ -1,5 +1,7 @@
 const ABViewImageCore = require("../../core/views/ABViewImageCore");
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABViewImage extends ABViewImageCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -36,7 +38,6 @@ module.exports = class ABViewImage extends ABViewImageCore {
          _logic,
          ObjectDefaults
       );
-      var L = App.Label;
 
       _logic.validateType = (item) => {
          // verify file type
@@ -44,7 +45,7 @@ module.exports = class ABViewImage extends ABViewImageCore {
          var type = item.type.toLowerCase();
          if (acceptableTypes.indexOf(type) == -1) {
             webix.message(
-               L("key.image.types", "Only [{0}] images are supported", [
+               L("Only [{0}] images are supported", [
                   acceptableTypes.join(", "),
                ])
             );
@@ -100,7 +101,7 @@ module.exports = class ABViewImage extends ABViewImageCore {
             cols: [
                {
                   view: "label",
-                  label: L("ab.component.image.image", "*Image:"),
+                  label: L("Image:"),
                   css: "ab-text-bold",
                   width: App.config.labelWidthXLarge,
                },
@@ -128,13 +129,13 @@ module.exports = class ABViewImage extends ABViewImageCore {
          {
             view: "counter",
             name: "width",
-            label: L("ab.component.image.width", "*Width:"),
+            label: L("Width:"),
             labelWidth: App.config.labelWidthXLarge,
          },
          {
             view: "counter",
             name: "height",
-            label: L("ab.component.image.height", "*Height:"),
+            label: L("Height:"),
             labelWidth: App.config.labelWidthXLarge,
          },
       ]);

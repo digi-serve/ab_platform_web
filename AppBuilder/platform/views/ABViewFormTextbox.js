@@ -2,6 +2,8 @@ const ABViewFormTextboxCore = require("../../core/views/ABViewFormTextboxCore");
 
 const ABViewFormTextboxPropertyComponentDefaults = ABViewFormTextboxCore.defaultValues();
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABViewFormTextbox extends ABViewFormTextboxCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -58,28 +60,26 @@ module.exports = class ABViewFormTextbox extends ABViewFormTextboxCore {
          ObjectDefaults
       );
 
-      var L = App.Label;
-
       // in addition to the common .label  values, we
       // ask for:
       return commonUI.concat([
          {
             name: "type",
             view: "radio",
-            label: L("ab.component.textbox.type", "*Type"),
+            label: L("Type"),
             vertical: true,
             options: [
                {
                   id: "single",
-                  value: L("ab.component.textbox.single", "*Single line"),
+                  value: L("Single line"),
                },
                {
                   id: "multiple",
-                  value: L("ab.component.textbox.multiple", "*Multiple lines"),
+                  value: L("Multiple lines"),
                },
                {
                   id: "rich",
-                  value: L("ab.component.textbox.rich", "*Rich editor"),
+                  value: L("Rich editor"),
                },
             ],
          },

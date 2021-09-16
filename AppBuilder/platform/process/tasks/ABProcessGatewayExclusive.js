@@ -1,6 +1,8 @@
 const ABProcessGatewayExclusiveCore = require("../../../core/process/tasks/ABProcessGatewayExclusiveCore.js");
 const RowFilter = require("../../RowFilter");
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABProcessGatewayExclusive extends (
    ABProcessGatewayExclusiveCore
 ) {
@@ -22,7 +24,6 @@ module.exports = class ABProcessGatewayExclusive extends (
     */
    propertiesShow(id, App) {
       var ids = this.propertyIDs(id);
-      var L = App.Label;
 
       var ui = {
          id: id,

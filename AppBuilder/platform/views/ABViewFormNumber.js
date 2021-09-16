@@ -2,6 +2,8 @@ const ABViewFormNumberCore = require("../../core/views/ABViewFormNumberCore");
 
 const ABViewFormNumberPropertyComponentDefaults = ABViewFormNumberCore.defaultValues();
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABViewFormNumber extends ABViewFormNumberCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -55,7 +57,6 @@ module.exports = class ABViewFormNumber extends ABViewFormNumberCore {
          _logic,
          ObjectDefaults
       );
-      var L = App.Label;
 
       // in addition to the common .label  values, we
       // ask for:
@@ -64,10 +65,7 @@ module.exports = class ABViewFormNumber extends ABViewFormNumberCore {
             name: "isStepper",
             view: "checkbox",
             labelWidth: App.config.labelWidthCheckbox,
-            labelRight: L(
-               "ab.component.button.isStepper",
-               "*Plus/Minus Buttons"
-            ),
+            labelRight: L("Plus/Minus Buttons"),
          },
       ]);
    }

@@ -1,8 +1,6 @@
 const ABViewProperty = require("./ABViewProperty");
 
-var L = (...params) => {
-   return AB.Label(...params);
-};
+let L = (...params) => AB.Label("", ...params);
 
 module.exports = class ABViewPropertyLinkPage extends ABViewProperty {
    constructor() {
@@ -41,7 +39,7 @@ module.exports = class ABViewPropertyLinkPage extends ABViewProperty {
 
       let ui = {
          view: "fieldset",
-         label: L("ab.component.label.linkedPages", "*Linked Pages:"),
+         label: L("Linked Pages:"),
          labelWidth: App.config.labelWidthLarge,
          body: {
             type: "clean",
@@ -51,14 +49,14 @@ module.exports = class ABViewPropertyLinkPage extends ABViewProperty {
                   id: ids.detailsPage,
                   view: "select",
                   name: "detailsPage",
-                  label: L("ab.component.label.detailsPage", "*Details Page:"),
+                  label: L("Details Page:"),
                   labelWidth: App.config.labelWidthLarge,
                },
                {
                   id: ids.editPage,
                   view: "select",
                   name: "editPage",
-                  label: L("ab.component.label.editForm", "*Edit Form:"),
+                  label: L("Edit Form:"),
                   labelWidth: App.config.labelWidthLarge,
                },
             ],
@@ -122,7 +120,7 @@ module.exports = class ABViewPropertyLinkPage extends ABViewProperty {
 
             pagesHasDetail.unshift({
                id: "",
-               value: L("ab.component.label.noLinkedView", "*No linked view"),
+               value: L("No linked view"),
             });
             $$(ids.detailsPage).define("options", pagesHasDetail);
             $$(ids.detailsPage).refresh();
@@ -162,7 +160,7 @@ module.exports = class ABViewPropertyLinkPage extends ABViewProperty {
 
             pagesHasForm.unshift({
                id: "",
-               value: L("ab.component.label.noLinkedForm", "*No linked form"),
+               value: L("No linked form"),
             });
             $$(ids.editPage).define("options", pagesHasForm);
             $$(ids.editPage).refresh();

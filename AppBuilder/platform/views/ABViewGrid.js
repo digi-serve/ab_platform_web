@@ -14,6 +14,8 @@ const ABPopupExport = require("../../../ABDesigner/ab_work_object_workspace_popu
 const ABViewPropertyFilterData = require("./viewProperties/ABViewPropertyFilterData");
 const ABViewPropertyLinkPage = require("./viewProperties/ABViewPropertyLinkPage");
 
+let L = (...params) => AB.Label("", ...params);
+
 let PopupHideFieldComponent = null;
 let PopupFrozenColumnsComponent = null;
 let PopupFilterProperty = null;
@@ -90,7 +92,6 @@ module.exports = class ABViewGrid extends ABViewGridCore {
          _logic,
          ObjectDefaults
       );
-      var L = App.Label;
 
       var idBase = "ABViewGridPropertyEditor";
 
@@ -132,7 +133,7 @@ module.exports = class ABViewGrid extends ABViewGridCore {
             cols: [
                {
                   view: "label",
-                  label: L("ab.component.grid.filterMenu", "*Filter Menu"),
+                  label: L("Filter Menu"),
                },
             ],
          },
@@ -261,7 +262,7 @@ module.exports = class ABViewGrid extends ABViewGridCore {
       return commonUI.concat([
          {
             view: "fieldset",
-            label: L("ab.component.label.gridProperties", "*Grid Properties:"),
+            label: L("Grid Properties:"),
             labelWidth: App.config.labelWidthLarge,
             body: {
                type: "clean",
@@ -270,46 +271,31 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                   {
                      view: "checkbox",
                      name: "isEditable",
-                     labelRight: L(
-                        "ab.component.label.isEditable",
-                        "*User can edit in grid."
-                     ),
+                     labelRight: L("User can edit in grid."),
                      labelWidth: App.config.labelWidthCheckbox,
                   },
                   {
                      view: "checkbox",
                      name: "massUpdate",
-                     labelRight: L(
-                        "ab.component.label.massUpdate",
-                        "*User can edit multiple items at one time."
-                     ),
+                     labelRight: L("User can edit multiple items at one time."),
                      labelWidth: App.config.labelWidthCheckbox,
                   },
                   {
                      view: "checkbox",
                      name: "allowDelete",
-                     labelRight: L(
-                        "ab.component.label.allowDelete",
-                        "*User can delete records."
-                     ),
+                     labelRight: L("User can delete records."),
                      labelWidth: App.config.labelWidthCheckbox,
                   },
                   {
                      view: "checkbox",
                      name: "isSortable",
-                     labelRight: L(
-                        "ab.component.label.isSortable",
-                        "*User can sort records."
-                     ),
+                     labelRight: L("User can sort records."),
                      labelWidth: App.config.labelWidthCheckbox,
                   },
                   {
                      view: "checkbox",
                      name: "isExportable",
-                     labelRight: L(
-                        "ab.component.label.isExportable",
-                        "*User can export."
-                     ),
+                     labelRight: L("User can export."),
                      labelWidth: App.config.labelWidthCheckbox,
                   },
                ],
@@ -317,7 +303,7 @@ module.exports = class ABViewGrid extends ABViewGridCore {
          },
          {
             view: "fieldset",
-            label: L("ab.component.label.dataSource", "*Grid Data:"),
+            label: L("Grid Data:"),
             labelWidth: App.config.labelWidthLarge,
             body: {
                type: "clean",
@@ -326,7 +312,7 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                   {
                      view: "select",
                      name: "datacollection",
-                     label: L("ab.component.label.dataSource", "*Object:"),
+                     label: L("Object:"),
                      labelWidth: App.config.labelWidthLarge,
                      on: {
                         onChange: (newv, oldv) => {
@@ -360,7 +346,7 @@ module.exports = class ABViewGrid extends ABViewGridCore {
          },
          {
             view: "fieldset",
-            label: L("ab.component.grid.group", "*Group:"),
+            label: L("Group:"),
             labelWidth: App.config.labelWidthLarge,
             body: {
                type: "clean",
@@ -369,7 +355,7 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                   {
                      view: "multiselect",
                      name: "groupBy",
-                     label: L("ab.component.grid.groupBy", "*Group by:"),
+                     label: L("Group by:"),
                      labelWidth: App.config.labelWidthLarge,
                      options: [],
                      on: {
@@ -400,10 +386,7 @@ module.exports = class ABViewGrid extends ABViewGridCore {
          this.linkPageComponent.ui,
          {
             view: "fieldset",
-            label: L(
-               "ab.component.label.customizeDisplay",
-               "*Customize Display:"
-            ),
+            label: L("Customize Display:"),
             labelWidth: App.config.labelWidthLarge,
             body: {
                type: "clean",
@@ -413,17 +396,14 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                      cols: [
                         {
                            view: "label",
-                           label: L(
-                              "ab.component.label.hiddenFields",
-                              "*Hidden Fields:"
-                           ),
+                           label: L("Hidden Fields:"),
                            css: "ab-text-bold",
                            width: App.config.labelWidthXLarge,
                         },
                         {
                            view: view,
                            name: "buttonFieldsVisible",
-                           label: L("ab.component.label.settings", "*Settings"),
+                           label: L("Settings"),
                            icon: "fa fa-gear",
                            type: "icon",
                            click: function () {
@@ -436,17 +416,14 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                      cols: [
                         {
                            view: "label",
-                           label: L(
-                              "ab.component.label.filterData",
-                              "*Filter Option:"
-                           ),
+                           label: L("Filter Option:"),
                            css: "ab-text-bold",
                            width: App.config.labelWidthXLarge,
                         },
                         {
                            view: view,
                            name: "buttonFilterData",
-                           label: L("ab.component.label.settings", "*Settings"),
+                           label: L("Settings"),
                            icon: "fa fa-gear",
                            type: "icon",
                            click: function () {
@@ -459,17 +436,14 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                      cols: [
                         {
                            view: "label",
-                           label: L(
-                              "ab.component.label.freezeColumns",
-                              "*Freeze Columns:"
-                           ),
+                           label: L("Freeze Columns:"),
                            css: "ab-text-bold",
                            width: App.config.labelWidthXLarge,
                         },
                         {
                            view: view,
                            name: "buttonFieldsFreeze",
-                           label: L("ab.component.label.settings", "*Settings"),
+                           label: L("Settings"),
                            icon: "fa fa-gear",
                            type: "icon",
                            click: function () {
@@ -483,17 +457,14 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                      cols: [
                         {
                            view: "label",
-                           label: L(
-                              "ab.component.label.summaryFields",
-                              "*Summary Fields:"
-                           ),
+                           label: L("Summary Fields:"),
                            css: "ab-text-bold",
                            width: App.config.labelWidthXLarge,
                         },
                         {
                            view: view,
                            name: "buttonSummaryFields",
-                           label: L("ab.component.label.settings", "*Settings"),
+                           label: L("Settings"),
                            icon: "fa fa-gear",
                            type: "icon",
                            click: function () {
@@ -507,17 +478,14 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                      cols: [
                         {
                            view: "label",
-                           label: L(
-                              "ab.component.label.countFields",
-                              "*Count Fields:"
-                           ),
+                           label: L("Count Fields:"),
                            css: "ab-text-bold",
                            width: App.config.labelWidthXLarge,
                         },
                         {
                            view: view,
                            name: "buttonCountFields",
-                           label: L("ab.component.label.settings", "*Settings"),
+                           label: L("Settings"),
                            icon: "fa fa-gear",
                            type: "icon",
                            click: function () {
@@ -530,37 +498,28 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                   {
                      view: "counter",
                      name: "height",
-                     label: L("ab.component.grid.height", "*Height:"),
+                     label: L("Height:"),
                      labelWidth: App.config.labelWidthXLarge,
                   },
 
                   {
                      view: "checkbox",
                      name: "hideHeader",
-                     labelRight: L(
-                        "ab.component.label.hideHeader",
-                        "*Hide table header"
-                     ),
+                     labelRight: L("Hide table header"),
                      labelWidth: App.config.labelWidthCheckbox,
                   },
 
                   {
                      view: "checkbox",
                      name: "labelAsField",
-                     labelRight: L(
-                        "ab.component.label.labelAsField",
-                        "*Show a field using label template"
-                     ),
+                     labelRight: L("Show a field using label template"),
                      labelWidth: App.config.labelWidthCheckbox,
                   },
 
                   {
                      view: "checkbox",
                      name: "hideButtons",
-                     labelRight: L(
-                        "ab.component.label.hideButtons",
-                        "*Hide edit and view buttons"
-                     ),
+                     labelRight: L("Hide edit and view buttons"),
                      labelWidth: App.config.labelWidthCheckbox,
                   },
                ],
@@ -723,7 +682,6 @@ module.exports = class ABViewGrid extends ABViewGridCore {
     */
    component(App, objId) {
       let baseCom = super.component(App);
-      var L = App.Label;
 
       var idBase = objId || "ABViewGrid_" + this.id;
       var ids = {
@@ -1031,7 +989,7 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                         view: "button",
                         id: ids.buttonMassUpdate,
                         css: "webix_transparent",
-                        label: L("ab.object.toolbar.massUpdate", "*Edit"),
+                        label: L("Edit"),
                         icon: "fa fa-pencil-square-o",
                         type: "icon",
                         disabled: true,
@@ -1044,7 +1002,7 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                         view: "button",
                         id: ids.buttonDeleteSelected,
                         css: "webix_transparent",
-                        label: L("ab.object.toolbar.deleteRecords", "*Delete"),
+                        label: L("Delete"),
                         icon: "fa fa-trash",
                         type: "icon",
                         disabled: true,
@@ -1057,7 +1015,7 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                         view: "button",
                         id: ids.buttonFilter,
                         css: "webix_transparent",
-                        label: L("ab.object.toolbar.filterFields", "*Filters"),
+                        label: L("Filters"),
                         icon: "fa fa-filter",
                         type: "icon",
                         autowidth: true,
@@ -1069,7 +1027,7 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                         view: "button",
                         id: ids.buttonSort,
                         css: "webix_transparent",
-                        label: L("ab.object.toolbar.sortFields", "*Sort"),
+                        label: L("Sort"),
                         icon: "fa fa-sort",
                         type: "icon",
                         autowidth: true,
@@ -1081,7 +1039,7 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                         view: "button",
                         id: ids.buttonExport,
                         css: "webix_transparent",
-                        label: L("ab.object.toolbar.export", "*Export"),
+                        label: L("Export"),
                         icon: "fa fa-print",
                         type: "icon",
                         autowidth: true,
@@ -1318,10 +1276,9 @@ module.exports = class ABViewGrid extends ABViewGridCore {
 
             if (deleteTasks.length > 0) {
                App.AB.Dialog.Confirm({
-                  title: L("ab.massDelete.title", "*Delete Multiple Records"),
+                  title: L("Delete Multiple Records"),
                   text: L(
-                     "ab.massDelete.description",
-                     "*Are you sure you want to delete the selected records?"
+                     "Are you sure you want to delete the selected records?"
                   ),
                   callback: function (result) {
                      if (result) {
@@ -1338,9 +1295,8 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                });
             } else {
                App.AB.Dialog.Alert({
-                  title: L("key.no.records.selected", "No Records Selected"),
+                  title: L("No Records Selected"),
                   text: L(
-                     "key.select.one",
                      "You need to select at least one record...did you drink your coffee today?"
                   ),
                });

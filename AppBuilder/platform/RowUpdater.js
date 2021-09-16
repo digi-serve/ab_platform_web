@@ -1,6 +1,8 @@
 const ABComponent = require("./ABComponent");
 const ABViewForm = require("../platform/views/ABViewForm");
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class RowUpdater extends ABComponent {
    constructor(App, idBase, AB) {
       super(App, idBase, AB);
@@ -10,15 +12,13 @@ module.exports = class RowUpdater extends ABComponent {
          App = this.App;
       }
 
-      let L = App.Label;
-
       let labels = {
          common: (App || {}).labels,
          component: {
-            addNew: L("ab.component.form.addNew", "*Add field to edit"),
+            addNew: L("Add field to edit"),
 
-            set: L("ab.component.form.set", "*Set"),
-            to: L("ab.component.form.to", "*To"),
+            set: L("Set"),
+            to: L("To"),
          },
       };
 

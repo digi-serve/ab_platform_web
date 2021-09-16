@@ -2,6 +2,8 @@ const ABViewLabelCore = require("../../core/views/ABViewLabelCore");
 
 const ABViewLabelPropertyComponentDefaults = ABViewLabelCore.defaultValues();
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABViewLabel extends ABViewLabelCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -69,7 +71,6 @@ module.exports = class ABViewLabel extends ABViewLabelCore {
          _logic,
          ObjectDefaults
       );
-      var L = App.Label;
 
       // in addition to the common .label  values, we
       // ask for:
@@ -78,16 +79,13 @@ module.exports = class ABViewLabel extends ABViewLabelCore {
          {
             view: "text",
             name: "text",
-            label: L("ab.component.label.text", "*Text"),
-            placeholder: L(
-               "ab.component.label.textPlaceholder",
-               "*Text Placeholder"
-            ),
+            label: L("Text"),
+            placeholder: L("Text Placeholder"),
             // labelWidth: App.config.labelWidthMedium,
          },
          {
             view: "fieldset",
-            label: L("ab.component.label.formatting", "*Format Options:"),
+            label: L("Format Options:"),
             body: {
                type: "clean",
                padding: 10,
@@ -100,24 +98,15 @@ module.exports = class ABViewLabel extends ABViewLabelCore {
                      options: [
                         {
                            id: 0,
-                           value: L(
-                              "ab.component.label.formatting.normal",
-                              "*normal"
-                           ),
+                           value: L("normal"),
                         },
                         {
                            id: 1,
-                           value: L(
-                              "ab.component.label.formatting.title",
-                              "*title"
-                           ),
+                           value: L("title"),
                         },
                         {
                            id: 2,
-                           value: L(
-                              "ab.component.label.formatting.description",
-                              "*description"
-                           ),
+                           value: L("description"),
                         },
                      ],
                   },
@@ -126,7 +115,7 @@ module.exports = class ABViewLabel extends ABViewLabelCore {
          },
          {
             view: "fieldset",
-            label: L("ab.component.label.alignment", "*Alignment:"),
+            label: L("Alignment:"),
             body: {
                type: "clean",
                padding: 10,
@@ -139,24 +128,15 @@ module.exports = class ABViewLabel extends ABViewLabelCore {
                      options: [
                         {
                            id: "left",
-                           value: L(
-                              "ab.component.label.alignment.left",
-                              "*Left"
-                           ),
+                           value: L("Left"),
                         },
                         {
                            id: "center",
-                           value: L(
-                              "ab.component.label.alignment.center",
-                              "*Center"
-                           ),
+                           value: L("Center"),
                         },
                         {
                            id: "right",
-                           value: L(
-                              "ab.component.label.alignment.right",
-                              "*Right"
-                           ),
+                           value: L("Right"),
                         },
                      ],
                   },

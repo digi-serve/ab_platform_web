@@ -7,6 +7,8 @@ const AccountingJEArchive = require("./ABProcessTaskServiceAccountingJEArchive.j
 const ABProcessTaskServiceInsertRecord = require("./ABProcessTaskServiceInsertRecord.js");
 const ABProcessTaskServiceQuery = require("./ABProcessTaskServiceQuery.js");
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABProcessTaskService extends ABProcessTaskServiceCore {
    ////
    //// Process Instance Methods
@@ -26,7 +28,6 @@ module.exports = class ABProcessTaskService extends ABProcessTaskServiceCore {
     */
    propertiesShow(id) {
       // var ids = this.propertyIDs(id);
-      var L = this.AB.Label();
 
       var ui = {
          id: id,
@@ -34,57 +35,42 @@ module.exports = class ABProcessTaskService extends ABProcessTaskServiceCore {
          elements: [
             {
                view: "button",
-               label: L(
-                  "ab.process.task.service.accountingBatch",
-                  "*Accounting: Process Batch"
-               ),
+               label: L("Accounting: Process Batch"),
                click: () => {
                   this.switchTo("accountingBatch", id);
                },
             },
             {
                view: "button",
-               label: L(
-                  "ab.process.task.service.accountingFPClose",
-                  "*Accounting: Fiscal Period Close"
-               ),
+               label: L("Accounting: Fiscal Period Close"),
                click: () => {
                   this.switchTo("accountingFPClose", id);
                },
             },
             {
                view: "button",
-               label: L(
-                  "ab.process.task.service.accountingFPYearClose",
-                  "*Accounting: Fiscal Period Year Close"
-               ),
+               label: L("Accounting: Fiscal Period Year Close"),
                click: () => {
                   this.switchTo("accountingFPYearClose", id);
                },
             },
             {
                view: "button",
-               label: L(
-                  "ab.process.task.service.accountingJEArchive",
-                  "*Accounting: Journal Entry Archive"
-               ),
+               label: L("Accounting: Journal Entry Archive"),
                click: () => {
                   this.switchTo("accountingJEArchive", id);
                },
             },
             {
                view: "button",
-               label: L("ab.process.task.service.query", "*Query Task"),
+               label: L("Query Task"),
                click: () => {
                   this.switchTo("query", id);
                },
             },
             {
                view: "button",
-               label: L(
-                  "ab.process.task.service.insertRecord",
-                  "*Insert Record Task"
-               ),
+               label: L("Insert Record Task"),
                click: () => {
                   this.switchTo("insertRecord", id);
                },

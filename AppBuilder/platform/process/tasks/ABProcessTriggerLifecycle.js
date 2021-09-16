@@ -2,6 +2,8 @@
 // const ABApplication = require("./ABApplication"); // NOTE: change to require()
 const ABProcessTriggerLifecycleCore = require("../../../core/process/tasks/ABProcessTriggerLifecycleCore.js");
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABProcessTriggerLifecycle extends (
    ABProcessTriggerLifecycleCore
 ) {
@@ -21,7 +23,6 @@ module.exports = class ABProcessTriggerLifecycle extends (
     */
    propertiesShow(id) {
       var ids = this.propertyIDs(id);
-      var L = this.AB.Label();
 
       var allObjects = this.application.objectsIncluded();
       var listObj = [];
@@ -36,7 +37,7 @@ module.exports = class ABProcessTriggerLifecycle extends (
             {
                id: ids.name,
                view: "text",
-               label: L("ab.process.task.email.name", "*Name"),
+               label: L("Name"),
                name: "name",
                value: this.name,
             },

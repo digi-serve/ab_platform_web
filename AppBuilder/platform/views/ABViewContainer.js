@@ -2,6 +2,8 @@ const ABViewContainerCore = require("../../core/views/ABViewContainerCore");
 
 const ABPropertyComponentDefaults = ABViewContainerCore.defaultValues();
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABViewContainer extends ABViewContainerCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -161,20 +163,13 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
           */
          viewDelete: (e, id, trg) => {
             var deletedView = this.views((v) => v.id == id)[0];
-
-            var L = App.Label;
-
             if (!deletedView) return false;
 
             App.AB.Dialog.Confirm({
-               title: L(
-                  "ab.interface.component.confirmDeleteTitle",
-                  "*Delete component"
-               ),
-               text: L(
-                  "ab.interface.component.confirmDeleteMessage",
-                  `Do you want to delete <b>${deletedView.label}</b>?`
-               ),
+               title: L("Delete component"),
+               text: L("Do you want to delete <b>{0}</b>?", [
+                  deletedView.label,
+               ]),
                callback: (result) => {
                   if (result) {
                      // let Dashboard = $$(ids.component);
@@ -396,8 +391,6 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
          ObjectDefaults
       );
 
-      var L = App.Label;
-
       _logic.addColumnGravity = (newVal, oldVal) => {
          var pos = $$(ids.gravity).getParentView().index($$(ids.gravity));
          $$(ids.gravity)
@@ -437,7 +430,7 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
             name: "columns",
             view: "counter",
             min: 1,
-            label: L("ab.components.container.columns", "*Columns"),
+            label: L("Columns"),
             labelWidth: App.config.labelWidthXLarge,
             on: {
                onChange: function (newVal, oldVal) {

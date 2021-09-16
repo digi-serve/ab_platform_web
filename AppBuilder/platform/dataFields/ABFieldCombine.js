@@ -1,6 +1,8 @@
 var ABFieldCombineCore = require("../../core/dataFields/ABFieldCombineCore");
 var ABFieldComponent = require("./ABFieldComponent");
 
+let L = (...params) => AB.Label("", ...params);
+
 var ids = {
    combinedFields: "ab-new-combined-combinedFields",
 };
@@ -22,14 +24,13 @@ var ABFieldCombineComponent = new ABFieldComponent({
 
    elements: (App, field) => {
       ids = field.idsUnique(ids, App);
-      var L = App.Label;
 
       return [
          {
             id: ids.combinedFields,
             name: "combinedFields",
             view: "multicombo",
-            label: L("ab.combined.combinedFields", "*Combined Fields"),
+            label: L("Combined Fields"),
             labelWidth: App.config.labelWidthXLarge,
             disallowEdit: true,
             options: [],
@@ -37,7 +38,7 @@ var ABFieldCombineComponent = new ABFieldComponent({
          {
             view: "richselect",
             name: "delimiter",
-            label: L("ab.combined.delimiter", "*Delimiter"),
+            label: L("Delimiter"),
             value: defaultValues.delimiter,
             labelWidth: App.config.labelWidthXLarge,
             disallowEdit: true,

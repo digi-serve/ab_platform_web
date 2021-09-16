@@ -8,6 +8,8 @@
 var ABFieldCore = require("../../core/dataFields/ABFieldCore");
 var FilterComplex = require("../FilterComplex");
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABField extends ABFieldCore {
    constructor(values, object, fieldDefaults) {
       super(values, object, fieldDefaults);
@@ -141,8 +143,6 @@ module.exports = class ABField extends ABFieldCore {
       /// TODO: maybe just pass in onChange instead of _logic
       /// if not onChange, then use our default:
 
-      var L = App.Label;
-
       // setup our default labelOnChange functionality:
       var labelOnChange = function (newVal, oldVal) {
          oldVal = oldVal || "";
@@ -201,12 +201,9 @@ module.exports = class ABField extends ABFieldCore {
                })
                .then((data) => {
                   if (data.count > 0) {
-                     let messageTemplate =
-                        `** There are ${data.count} rows that will be updated to default value`;
+                     let messageTemplate = `** There are ${data.count} rows that will be updated to default value`;
 
-                     $$(ids.numberOfNull).setValue(
-                        messageTemplate
-                     );
+                     $$(ids.numberOfNull).setValue(messageTemplate);
                      $$(ids.numberOfNull).show();
                   } else {
                      $$(ids.numberOfNull).hide();
@@ -308,7 +305,7 @@ module.exports = class ABField extends ABFieldCore {
             {
                id: ids.addValidation,
                view: "button",
-               label: L("ab.field.addfieldvalidation", "Add Field Validation"),
+               label: L("Add Field Validation"),
                css: "webix_primary",
                click: () => {
                   addValidation(ids);
@@ -342,8 +339,6 @@ module.exports = class ABField extends ABFieldCore {
    }
 
    addValidation(ids, settings) {
-      var L = this.AB.Label();
-
       var App = this.object.application.App;
       var Filter = new FilterComplex(App, "field_validation_rules");
       $$(ids.filterComplex).addView({
@@ -360,10 +355,7 @@ module.exports = class ABField extends ABFieldCore {
                         settings && settings.invalidMessage
                            ? settings.invalidMessage
                            : "",
-                     label: L(
-                        "ab.validataion.invalidMessage",
-                        "Invalid Message"
-                     ),
+                     label: L("Invalid Message"),
                   },
                   Filter.ui,
                ],
@@ -395,7 +387,6 @@ module.exports = class ABField extends ABFieldCore {
     * @return null or [{OP.Validation.validator()}] objects.
     */
    isValid() {
-      var L = this.AB.Label();
       var validator = this.AB.Validation.validator();
 
       // .columnName must be unique among fileds on the same object
@@ -411,7 +402,6 @@ module.exports = class ABField extends ABFieldCore {
          validator.addError(
             "columnName",
             L(
-               "ab.validation.object.name.unique",
                "*Field columnName must be unique ({0} already used in this Application)",
                [this.columnName]
             )
@@ -600,8 +590,9 @@ module.exports = class ABField extends ABFieldCore {
       };
 
       if (options.isObjectWorkspace && this.settings.showIcon) {
-         config.header =
-            `<span class="webix_icon fa fa-${this.fieldIcon()}"></span>${config.header}`;
+         config.header = `<span class="webix_icon fa fa-${this.fieldIcon()}"></span>${
+            config.header
+         }`;
       }
 
       return config;

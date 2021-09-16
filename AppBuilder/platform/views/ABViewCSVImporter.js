@@ -5,6 +5,8 @@ const ABRecordRule = require("../../rules/ABViewRuleListFormRecordRules");
 
 const ABViewCSVImporterPropertyComponentDefaults = ABViewCSVImporterCore.defaultValues();
 
+let L = (...params) => AB.Label("", ...params);
+
 var FilterComplex = require("../FilterComplex");
 
 let PopupRecordRule = null;
@@ -46,7 +48,6 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
       );
 
       let idBase = "ABViewCSVImporter";
-      let L = App.Label;
 
       PopupRecordRule = new ABRecordRule();
       PopupRecordRule.component(App, idBase + "_recordrule"); // prepare the UI component.
@@ -85,9 +86,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
             field.label
          } <div class='ab-component-form-fields-component-info'> <i class='fa fa-${
             formComponent ? formComponent.common().icon : "fw"
-         }'></i> ${
-            formComponent ? L(formComponent.common().labelKey, "Label") : ""
-         } </div>`;
+         }'></i> ${formComponent ? L("Label") : ""} </div>`;
       };
 
       _logic.check = (e, fieldId) => {
@@ -130,12 +129,12 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
       return commonUI.concat([
          {
             view: "fieldset",
-            label: L("ab.component.label.dataSource", "*Data:"),
+            label: L("Data:"),
             labelWidth: App.config.labelWidthLarge,
             body: {
                name: "datacollection",
                view: "richselect",
-               label: L("ab.components.form.dataSource", "*Data Source"),
+               label: L("Data Source"),
                labelWidth: App.config.labelWidthLarge,
                skipAutoSave: true,
                on: {
@@ -145,10 +144,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
          },
          {
             view: "fieldset",
-            label: L(
-               "ab.component.csvImporter.availableFields",
-               "*Available Fields:"
-            ),
+            label: L("Available Fields:"),
             labelWidth: App.config.labelWidthLarge,
             body: {
                type: "clean",
@@ -178,7 +174,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
          },
          {
             view: "fieldset",
-            label: L("ab.components.form.rules", "*Rules:"),
+            label: L("Rules:"),
             labelWidth: App.config.labelWidthLarge,
             body: {
                type: "clean",
@@ -188,17 +184,14 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                      cols: [
                         {
                            view: "label",
-                           label: L(
-                              "ab.components.form.recordRules",
-                              "*Record Rules:"
-                           ),
+                           label: L("Record Rules:"),
                            width: App.config.labelWidthLarge,
                         },
                         {
                            view: "button",
                            name: "buttonRecordRules",
                            css: "webix_primary",
-                           label: L("ab.components.form.settings", "*Settings"),
+                           label: L("Settings"),
                            icon: "fa fa-gear",
                            type: "icon",
                            badge: 0,
@@ -213,10 +206,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
          },
          {
             view: "fieldset",
-            label: L(
-               "ab.component.label.customizeDisplay",
-               "*Customize Display:"
-            ),
+            label: L("Customize Display:"),
             labelWidth: App.config.labelWidthLarge,
             body: {
                type: "clean",
@@ -225,13 +215,13 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                   {
                      name: "buttonLabel",
                      view: "text",
-                     label: L("ab.components.csvImporter.label", "*Label"),
+                     label: L("Label"),
                      labelWidth: App.config.labelWidthXLarge,
                   },
                   {
                      view: "counter",
                      name: "width",
-                     label: L("ab.components.csvImporter.width", "*Width:"),
+                     label: L("Width:"),
                      labelWidth: App.config.labelWidthXLarge,
                   },
                ],
@@ -351,7 +341,6 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
     */
    component(App, idBase) {
       idBase = idBase || "ABCSVImporter_" + this.id;
-      var L = App.Label;
 
       let ids = {
          button: App.unique(idBase + "_button"),
@@ -382,31 +371,16 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
       let labels = {
          common: App.labels,
          component: {
-            importCsvHeader: L(
-               "ab.object.form.csv.importCsvHeader",
-               "*Import CSV"
-            ),
-            selectCsvFile: L(
-               "ab.object.form.csv.selectCsvFile",
-               "*Choose a CSV file"
-            ),
+            importCsvHeader: L("Import CSV"),
+            selectCsvFile: L("Choose a CSV file"),
 
-            fileTypeErrorTitle: L(
-               "ab.object.form.csv.fileTypeErrorTitle",
-               "*This file extension is disallow"
-            ),
-            fileTypeError: L(
-               "ab.object.form.csv.fileTypeError",
-               "*Please only upload CSV file"
-            ),
+            fileTypeErrorTitle: L("This file extension is disallow"),
+            fileTypeError: L("Please only upload CSV file"),
 
-            separatedBy: L("ab.object.form.csv.separatedBy", "*Separated by"),
-            headerFirstLine: L(
-               "ab.object.form.csv.headerFirstLine",
-               "*Header on first line"
-            ),
+            separatedBy: L("Separated by"),
+            headerFirstLine: L("Header on first line"),
 
-            import: L("ab.object.form.csv.import") || "*Import",
+            import: L("Import"),
          },
       };
 
@@ -658,7 +632,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                   {},
                   {
                      view: "label",
-                     label: L("ab.components.csvImporter", "*CSV Importer"),
+                     label: L("CSV Importer"),
                      autowidth: true,
                   },
                   {},
@@ -974,19 +948,19 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                   ];
                   let dateOrderOptions = [
                      {
-                        value: L("ab.component.label.dateOrderDMY", "D-M-Y"),
+                        value: L("D-M-Y"),
                         id: 1,
                      },
                      {
-                        value: L("ab.component.label.dateOrderMDY", "M-D-Y"),
+                        value: L("M-D-Y"),
                         id: 2,
                      },
                      {
-                        value: L("ab.component.label.dateOrderYMD", "Y-M-D"),
+                        value: L("Y-M-D"),
                         id: 3,
                      },
                      {
-                        value: L("ab.component.label.dateOrderYMD", "Y-D-M"),
+                        value: L("Y-D-M"),
                         id: 4,
                      },
                   ];
@@ -997,10 +971,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                         columnOptUI,
                         {
                            view: "richselect",
-                           label: L(
-                              "ab.component.label.separator",
-                              "Separator"
-                           ),
+                           label: L("Separator"),
                            labelWidth: 100,
                            on: {
                               onChange: function () {
@@ -1014,7 +985,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                         },
                         {
                            view: "richselect",
-                           label: L("ab.component.label.dayFormat", "Day"),
+                           label: L("Day"),
                            labelWidth: 100,
                            on: {
                               onChange: function () {
@@ -1028,7 +999,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                         },
                         {
                            view: "richselect",
-                           label: L("ab.component.label.monthFormat", "Month"),
+                           label: L("Month"),
                            labelWidth: 100,
                            on: {
                               onChange: function () {
@@ -1042,7 +1013,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                         },
                         {
                            view: "richselect",
-                           label: L("ab.component.label.yearFormat", "Year"),
+                           label: L("Year"),
                            labelWidth: 100,
                            on: {
                               onChange: function () {
@@ -1056,7 +1027,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                         },
                         {
                            view: "richselect",
-                           label: L("ab.component.label.dateOrder", "Order"),
+                           label: L("Order"),
                            labelWidth: 100,
                            on: {
                               onChange: function () {
@@ -1115,7 +1086,8 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                         gravity: 1,
                         borderless: true,
                         css: { "padding-top": 10 },
-                        template: '<span class="fa fa-${f.icon}"></span> ${f.label}',
+                        template:
+                           '<span class="fa fa-${f.icon}"></span> ${f.label}',
                      },
                      columnOptUI,
                   ],
@@ -1809,11 +1781,10 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                uiCleanUp();
 
                webix.alert({
-                  title: L("Invalid Data", "Invalid Data"),
-                  ok: L("Okay", "Okay"),
+                  title: L("Invalid Data"),
+                  ok: L("Okay"),
                   text: L(
-                     "ab.components.csvImporter.invalidData",
-                     "*The highlighted row has invalid data. Please edit in the window or update the CSV and try again."
+                     "The highlighted row has invalid data. Please edit in the window or update the CSV and try again."
                   ),
                });
 
@@ -1929,8 +1900,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                         title: "Invalid Data",
                         ok: "Okay",
                         text: L(
-                           "ab.components.csvImporter.invalidData",
-                           "*The highlighted row has invalid data. Please edit in the window or update the CSV and try again."
+                           "The highlighted row has invalid data. Please edit in the window or update the CSV and try again."
                         ),
                      });
                      uiCleanUp();

@@ -2,6 +2,8 @@ const ABProcessTaskServiceQueryCore = require("../../../core/process/tasks/ABPro
 
 const ABQLManager = require("../../ql/ABQLManager.js");
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABProcessTaskServiceQuery extends (
    ABProcessTaskServiceQueryCore
 ) {
@@ -25,7 +27,6 @@ module.exports = class ABProcessTaskServiceQuery extends (
     */
    propertiesShow(id) {
       var ids = this.propertyIDs(id);
-      var L = this.AB.Label();
 
       var ui = {
          id: id,
@@ -34,7 +35,7 @@ module.exports = class ABProcessTaskServiceQuery extends (
             {
                id: ids.name,
                view: "text",
-               label: L("ab.process.task.email.name", "*Name"),
+               label: L("Name"),
                name: "name",
                value: this.name,
             },

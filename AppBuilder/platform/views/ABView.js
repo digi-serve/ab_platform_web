@@ -1,5 +1,7 @@
 const ABViewCore = require("../../core/views/ABViewCore.js");
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABView extends ABViewCore {
    // constructor(attributes, application, parent) {
    //    super(attributes, application, parent);
@@ -13,7 +15,6 @@ module.exports = class ABView extends ABViewCore {
     * @return {ABFactory.Validation.validator()}
     */
    isValid() {
-      let L = AB.Label;
       var validator = this.AB.Validation.validator();
 
       // // labels must be unique among views on the same parent
@@ -32,10 +33,7 @@ module.exports = class ABView extends ABViewCore {
          if (!isNameUnique) {
             validator.addError(
                "label",
-               L(
-                  "ab.validation.view.label.unique",
-                  "*View label must be unique among peers."
-               )
+               L("View label must be unique among peers.")
             );
          }
       }
@@ -51,8 +49,6 @@ module.exports = class ABView extends ABViewCore {
     * @return {Component}
     */
    editorComponent(App, mode) {
-      var L = App.Label;
-
       var idBase = "ABViewEditorComponent";
       var ids = {
          component: App.unique(idBase + "_component"),
@@ -188,14 +184,10 @@ module.exports = class ABView extends ABViewCore {
             if (!deletedView) return false;
 
             this.AB.Dialog.Confirm({
-               title: L(
-                  "ab.interface.component.confirmDeleteTitle",
-                  "*Delete component"
-               ),
-               text: L(
-                  "ab.interface.component.confirmDeleteMessage",
-                  `Do you want to delete <b>${deletedView.label}</b>?`
-               ),
+               title: L("Delete component"),
+               text: L("Do you want to delete <b>{0}</b>?", [
+                  deletedView.label,
+               ]),
                callback: function (result) {
                   if (result) {
                      var Layout = $$(ids.component);
@@ -425,14 +417,10 @@ module.exports = class ABView extends ABViewCore {
       isGlobal = false,
       defaultOption = null
    ) {
-      let L = AB.Label;
       if (defaultOption == null) {
          defaultOption = {
             id: "",
-            value: L(
-               "ab.component.label.selectDatacollection",
-               "*Select a DataCollection"
-            ),
+            value: L("Select a DataCollection"),
          };
       }
 

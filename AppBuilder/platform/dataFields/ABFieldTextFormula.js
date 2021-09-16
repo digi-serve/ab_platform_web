@@ -1,6 +1,8 @@
 var ABFieldTextFormulaCore = require("../../core/dataFields/ABFieldTextFormulaCore");
 var ABFieldComponent = require("./ABFieldComponent");
 
+let L = (...params) => AB.Label("", ...params);
+
 /**
  * ABFieldTextFormulaComponent
  *
@@ -22,20 +24,15 @@ var ABFieldTextFormulaComponent = new ABFieldComponent({
       };
       ids = field.idsUnique(ids, App);
 
-      var L = App.Label;
-
       return [
          {
             id: ids.textFormula,
             view: "textarea",
-            label: L("ab.dataField.textformula.formula", "*Text Formula"),
+            label: L("Text Formula"),
             name: "textFormula",
             editor: "text",
             labelWidth: App.config.labelWidthLarge,
-            placeholder: L(
-               "ab.dataField.textformula.placeholder",
-               "*{Firstname} {Lastname}"
-            ),
+            placeholder: L("{Firstname} {Lastname}"),
             on: {
                onFocus: (/* current_view, prev_view */) => {
                   $$(ids.formulaSuggest).show();

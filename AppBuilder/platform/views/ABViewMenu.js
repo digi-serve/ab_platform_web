@@ -3,6 +3,8 @@ const ABViewTab = require("./ABViewTab");
 
 const ABViewMenuPropertyComponentDefaults = ABViewMenuCore.defaultValues();
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABViewMenu extends ABViewMenuCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -78,7 +80,6 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
          _logic,
          ObjectDefaults
       );
-      var L = App.Label;
 
       // _logic functions
 
@@ -223,72 +224,69 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
          {
             name: "orientation",
             view: "richselect",
-            label: L("ab.component.menu.orientation", "*Orientation"),
+            label: L("Orientation"),
             value: ABViewMenuPropertyComponentDefaults.orientation,
             labelWidth: App.config.labelWidthXLarge,
             options: [
                {
                   id: "x",
-                  value: L("ab.component.menu.horizontal", "*Horizontal"),
+                  value: L("Horizontal"),
                },
                {
                   id: "y",
-                  value: L("ab.component.menu.vertical", "*Vertical"),
+                  value: L("Vertical"),
                },
             ],
          },
          {
             name: "buttonStyle",
             view: "richselect",
-            label: L("ab.component.menu.buttonStyle", "*Button Style"),
+            label: L("Button Style"),
             value: ABViewMenuPropertyComponentDefaults.buttonStyle,
             labelWidth: App.config.labelWidthXLarge,
             options: [
                {
                   id: "ab-menu-default",
-                  value: L("ab.common.default", "*Default"),
+                  value: L("Default"),
                },
                {
                   id: "ab-menu-link",
-                  value: L("ab.component.menu.linkeButton", "*Link"),
+                  value: L("Link"),
                },
             ],
          },
          {
             name: "menuAlignment",
             view: "richselect",
-            label: L("ab.component.menu.menuAlignment", "*Menu Alignment"),
+            label: L("Menu Alignment"),
             value: ABViewMenuPropertyComponentDefaults.menuAlignment,
             labelWidth: App.config.labelWidthXLarge,
             options: [
                {
                   id: "ab-menu-left",
-                  value: L("ab.component.menu.alignLeft", "*Left"),
+                  value: L("Left"),
                },
                {
                   id: "ab-menu-center",
-                  value: L("ab.component.menu.alignCenter", "*Center"),
+                  value: L("Center"),
                },
                {
                   id: "ab-menu-right",
-                  value: L("ab.component.menu.alignRight", "*Right"),
+                  value: L("Right"),
                },
             ],
          },
          {
             name: "menuInToolbar",
             view: "checkbox",
-            labelRight: L(
-               "ab.component.menu.menuInToolbar",
-               "*Put menu in toolbar"
-            ),
+            labelRight: L("Put menu in toolbar"),
             value: ABViewMenuPropertyComponentDefaults.menuInToolbar,
             labelWidth: App.config.labelWidthCheckbox,
          },
          {
             name: "toolbarFieldset",
             view: "fieldset",
-            label: L("ab.component.menu.toolbarSettings", "*Toolbar Settings:"),
+            label: L("Toolbar Settings:"),
             labelWidth: App.config.labelWidthLarge,
             body: {
                view: "layout",
@@ -298,100 +296,73 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
                   {
                      name: "menuPadding",
                      view: "counter",
-                     label: L(
-                        "ab.component.menu.menuPadding",
-                        "*Toolbar padding"
-                     ),
+                     label: L("Toolbar padding"),
                      value: ABViewMenuPropertyComponentDefaults.menuPadding,
                      labelWidth: App.config.labelWidthLarge,
                   },
                   {
                      name: "menuTheme",
                      view: "richselect",
-                     label: L("ab.component.menu.menuTheme", "*Toolbar theme"),
+                     label: L("Toolbar theme"),
                      value: ABViewMenuPropertyComponentDefaults.menuTheme,
                      labelWidth: App.config.labelWidthLarge,
                      options: [
                         {
                            id: "white",
-                           value: L(
-                              "ab.component.menu.menuTheme.light",
-                              "*White (Default)"
-                           ),
+                           value: L("White (Default)"),
                         },
                         {
                            id: "bg_gray",
-                           value: L(
-                              "ab.component.menu.menuTheme.gray",
-                              "*Gray"
-                           ),
+                           value: L("Gray"),
                         },
                         {
                            id: "webix_dark",
-                           value: L(
-                              "ab.component.menu.menuTheme.dark",
-                              "*Dark"
-                           ),
+                           value: L("Dark"),
                         },
                      ],
                   },
                   {
                      name: "menuPosition",
                      view: "richselect",
-                     label: L(
-                        "ab.component.menu.menuPosition",
-                        "*Menu Position"
-                     ),
+                     label: L("Menu Position"),
                      value: ABViewMenuPropertyComponentDefaults.menuPosition,
                      labelWidth: App.config.labelWidthLarge,
                      options: [
                         {
                            id: "left",
-                           value: L("ab.common.left", "*Left"),
+                           value: L("Left"),
                         },
                         {
                            id: "center",
-                           value: L("ab.common.center", "*Center"),
+                           value: L("Center"),
                         },
                         {
                            id: "right",
-                           value: L("ab.common.right", "*Right"),
+                           value: L("Right"),
                         },
                      ],
                   },
                   {
                      name: "menuTextLeft",
                      view: "text",
-                     label: L("ab.component.menu.menuTextLeft", "*Text Left"),
-                     placeholder: L(
-                        "ab.component.menu.menuTextLeftPlaceholder",
-                        "*Place text in left region of toolbar."
-                     ),
+                     label: L("Text Left"),
+                     placeholder: L("Place text in left region of toolbar."),
                      labelWidth: App.config.labelWidthLarge,
                      labelPosition: "top",
                   },
                   {
                      name: "menuTextCenter",
                      view: "text",
-                     label: L(
-                        "ab.component.menu.menuTextCenter",
-                        "*Text Center"
-                     ),
-                     placeholder: L(
-                        "ab.component.menu.menuTextCenterPlaceholder",
-                        "*Place text in center region of toolbar."
-                     ),
+                     label: L("Text Center"),
+                     placeholder: L("Place text in center region of toolbar."),
                      labelWidth: App.config.labelWidthLarge,
                      labelPosition: "top",
                   },
                   {
                      name: "menuTextRight",
                      view: "text",
-                     label: L("ab.component.menu.menuTextRight", "*Text Right"),
-                     placeholder: L(
-                        "ab.component.menu.menuTextRighttPlaceholder",
-                        "*Place text in right region of toolbar."
-                     ),
+                     label: L("Text Right"),
+                     placeholder: L("Place text in right region of toolbar."),
                      labelWidth: App.config.labelWidthLarge,
                      labelPosition: "top",
                   },
@@ -401,7 +372,7 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
          {
             name: "pagesFieldset",
             view: "fieldset",
-            label: L("ab.component.menu.pageList", "*Page List:"),
+            label: L("Page List:"),
             labelWidth: App.config.labelWidthLarge,
             body: {
                view: "layout",
@@ -431,9 +402,9 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
                               item.key == "viewcontainer"
                                  ? "window-maximize"
                                  : "file"
-                              }"></div> ${item.label}` +
+                           }"></div> ${item.label}` +
                            "</div>"
-                              // )
+                           // )
                         );
                      },
                      on: {
@@ -486,10 +457,7 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
          {
             name: "pageOrderFieldset",
             view: "fieldset",
-            label: L(
-               "ab.component.menu.pageList",
-               "*Drag & Drop to Reorder/Click to Add Icon:"
-            ),
+            label: L("Drag & Drop to Reorder/Click to Add Icon:"),
             labelWidth: App.config.labelWidthLarge,
             body: {
                view: "layout",

@@ -1,5 +1,7 @@
 let ABViewDetailTreeCore = require("../../core/views/ABViewDetailTreeCore");
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABViewDetailTree extends ABViewDetailTreeCore {
    /**
     * @param {obj} values  key=>value hash of ABView values

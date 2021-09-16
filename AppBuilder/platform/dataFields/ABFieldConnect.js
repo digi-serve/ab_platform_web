@@ -1,9 +1,7 @@
 var ABFieldConnectCore = require("../../core/dataFields/ABFieldConnectCore");
 var ABFieldComponent = require("./ABFieldComponent");
 
-function L(key, altText) {
-   return AB.Multilingual.label(key, altText);
-}
+let L = (...params) => AB.Label("", ...params);
 
 var ids = {
    linkObject: "ab-new-connectObject-list-item",
@@ -52,16 +50,10 @@ function populateSelect(populate, callback) {
       if (selectedObj) {
          var selectedObjLabel = selectedObj.value;
          $$(ids.fieldLinkVia).setValue(
-            L(
-               "ab.dataField.connectObject.selectedObject",
-               `*<b>${selectedObjLabel}</b> entry.`
-            )
+            L("<b>${0}</b> entry.", [selectedObjLabel])
          );
          $$(ids.fieldLinkVia2).setValue(
-            L(
-               "ab.dataField.connectObject.connectWith",
-               `*Each <b>${selectedObjLabel}</b> entry connects with`
-            )
+            L("Each <b>${0}</b> entry connects with", [selectedObjLabel])
          );
          $$(ids.link1).show();
          $$(ids.link2).show();
@@ -83,24 +75,17 @@ var ABFieldConnectComponent = new ABFieldComponent({
    elements: (App, field) => {
       ids = field.idsUnique(ids, App);
 
-      var L = App.Label;
       this.App = App;
 
       return [
          {
             view: "richselect",
-            label: L(
-               "ab.dataField.connectObject.connectToObject",
-               "*Connected to:"
-            ),
+            label: L("Connected to:"),
             id: ids.linkObject,
             disallowEdit: true,
             name: "linkObject",
             labelWidth: App.config.labelWidthLarge,
-            placeholder: L(
-               "ab.dataField.connectObject.connectToObjectPlaceholder",
-               "*Select object"
-            ),
+            placeholder: L("Select object"),
             options: [],
             // select: true,
             // height: 140,
@@ -116,10 +101,7 @@ var ABFieldConnectComponent = new ABFieldComponent({
             css: "webix_primary",
             id: ids.objectCreateNew,
             disallowEdit: true,
-            value: L(
-               "ab.dataField.connectObject.connectToNewObject",
-               "*Connect to new Object"
-            ),
+            value: L("Connect to new Object"),
             click: () => {
                ABFieldConnectComponent.logic.clickNewObject();
             },
@@ -144,11 +126,11 @@ var ABFieldConnectComponent = new ABFieldComponent({
                   options: [
                      {
                         id: "many",
-                        value: L("ab.dataField.connectObject.hasMany", "*many"),
+                        value: L("many"),
                      },
                      {
                         id: "one",
-                        value: L("ab.dataField.connectObject.belongTo", "*one"),
+                        value: L("one"),
                      },
                   ],
                   on: {
@@ -163,10 +145,7 @@ var ABFieldConnectComponent = new ABFieldComponent({
                {
                   id: ids.fieldLinkVia,
                   view: "label",
-                  label: L(
-                     "ab.dataField.connectObject.selectedObject",
-                     "*<b>[Select object]</b> entry."
-                  ),
+                  label: L("<b>{0}</b> entry.", ["[Select object]"]),
                   width: 200,
                },
             ],
@@ -179,10 +158,9 @@ var ABFieldConnectComponent = new ABFieldComponent({
                {
                   id: ids.fieldLinkVia2,
                   view: "label",
-                  label: L(
-                     "ab.dataField.connectObject.connectWith",
-                     "Each <b>[Select object]</b> entry connects with"
-                  ),
+                  label: L("Each <b>{0}</b> entry connects with", [
+                     "[Select object]",
+                  ]),
                   width: 300,
                },
                {
@@ -195,11 +173,11 @@ var ABFieldConnectComponent = new ABFieldComponent({
                   options: [
                      {
                         id: "many",
-                        value: L("ab.dataField.connectObject.hasMany", "*many"),
+                        value: L("many"),
                      },
                      {
                         id: "one",
-                        value: L("ab.dataField.connectObject.belongTo", "*one"),
+                        value: L("one"),
                      },
                   ],
                   on: {
@@ -234,10 +212,7 @@ var ABFieldConnectComponent = new ABFieldComponent({
             view: "checkbox",
             disallowEdit: true,
             labelWidth: 0,
-            labelRight: L(
-               "ab.dataField.connectObject.isCustomFK",
-               "*Custom Foreign Key"
-            ),
+            labelRight: L("Custom Foreign Key"),
             hidden: true,
             on: {
                onChange: () => {
@@ -252,11 +227,8 @@ var ABFieldConnectComponent = new ABFieldComponent({
             disallowEdit: true,
             hidden: true,
             labelWidth: App.config.labelWidthLarge,
-            label: L("ab.dataField.connectObject.indexField", "*Index Field:"),
-            placeholder: L(
-               "ab.dataField.connectObject.indexFieldPlaceholder",
-               "*Select index field"
-            ),
+            label: L("Index Field:"),
+            placeholder: L("Select index field"),
             options: [],
             // on: {
             //    onChange: () => {
@@ -271,11 +243,8 @@ var ABFieldConnectComponent = new ABFieldComponent({
             disallowEdit: true,
             hidden: true,
             labelWidth: App.config.labelWidthLarge,
-            label: L("ab.dataField.connectObject.indexField", "*Index Field:"),
-            placeholder: L(
-               "ab.dataField.connectObject.indexFieldPlaceholder",
-               "*Select index field"
-            ),
+            label: L("Index Field:"),
+            placeholder: L("Select index field"),
             options: [],
          },
       ];
@@ -326,16 +295,14 @@ var ABFieldConnectComponent = new ABFieldComponent({
 
          // show current object name
          $$(ids.fieldLink).setValue(
-            L(
-               "ab.dataField.connectObject.connectWith",
-               `*Each <b>${ABFieldConnectComponent.CurrentObject.label}</b> entry connects with`
-            )
+            L("Each <b>{0}</b> entry connects with", [
+               ABFieldConnectComponent.CurrentObject.label,
+            ])
          );
          $$(ids.fieldLink2).setValue(
-            L(
-               "ab.dataField.connectObject.selectedObject",
-               `*<b>${ABFieldConnectComponent.CurrentObject.label}</b> entry.`
-            )
+            L("<b>{0}</b> entry.", [
+               ABFieldConnectComponent.CurrentObject.label,
+            ])
          );
 
          // keep the column name element to use when custom index is checked
@@ -361,16 +328,10 @@ var ABFieldConnectComponent = new ABFieldComponent({
 
          let selectedObjLabel = selectedObj.value;
          $$(ids.fieldLinkVia).setValue(
-            L(
-               "ab.dataField.connectObject.selectedObject",
-               `*<b>${selectedObjLabel}</b> entry.`
-            )
+            L("<b>{0}</b> entry.", [selectedObjLabel])
          );
          $$(ids.fieldLinkVia2).setValue(
-            L(
-               "ab.dataField.connectObject.connectWith",
-               `*Each <b>${selectedObjLabel}</b> entry connects with`
-            )
+            L("Each <b>{0}</b> entry connects with", [selectedObjLabel])
          );
          $$(ids.link1).show();
          $$(ids.link2).show();
@@ -401,8 +362,8 @@ var ABFieldConnectComponent = new ABFieldComponent({
       },
 
       selectLinkType: (newValue /*, oldValue */) => {
-         let labelEntry = L("ab.dataField.connectObject.entry", "*entry");
-         let labelEntries = L("ab.dataField.connectObject.entries", "*entries");
+         let labelEntry = L("entry");
+         let labelEntries = L("entries");
 
          let message = $$(ids.fieldLinkVia).getValue() || "";
 
@@ -418,8 +379,8 @@ var ABFieldConnectComponent = new ABFieldComponent({
       },
 
       selectLinkViaType: (newValue /*, oldValue */) => {
-         let labelEntry = L("ab.dataField.connectObject.entry", "*entry");
-         let labelEntries = L("ab.dataField.connectObject.entries", "*entries");
+         let labelEntry = L("entry");
+         let labelEntries = L("entries");
 
          let message = $$(ids.fieldLink2).getValue() || "";
 
@@ -727,15 +688,9 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
          var multiselect = field.settings.linkType == "many";
 
-         var placeholder = L(
-            "ab.dataField.connect.placeholder_single",
-            "*Select item"
-         );
+         var placeholder = L("Select item");
          if (multiselect) {
-            placeholder = L(
-               "ab.dataField.connect.placeholder_multiple",
-               "*Select items"
-            );
+            placeholder = L("Select items");
          }
          var readOnly = false;
          if (editable != null && !editable) {
@@ -797,15 +752,9 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       // get selected values
       var selectedData = this.pullRelationValues(row);
 
-      var placeholder = L(
-         "ab.dataField.connect.placeholder_single",
-         "*Select item"
-      );
+      var placeholder = L("Select item");
       if (multiselect) {
-         placeholder = L(
-            "ab.dataField.connect.placeholder_multiple",
-            "*Select items"
-         );
+         placeholder = L("Select items");
       }
       var readOnly = false;
       if (options.editable != null && options.editable == false) {
@@ -824,7 +773,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          if (!$$(options.filterValue.ui.id)) {
             // this happens in the Interface Builder when only the single form UI is displayed
             readOnly = true;
-            placeholderReadOnly = L("", "Must select item from '{0}' first.", [
+            placeholderReadOnly = L("Must select item from '{0}' first.", [
                "PARENT ELEMENT",
             ]);
          } else {
@@ -833,11 +782,9 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                // if there isn't a value on the parent select element set this one to readonly and change placeholder text
                readOnly = true;
                let label = $$(options.filterValue.ui.id);
-               placeholderReadOnly = L(
-                  "",
-                  "Must select item from '{0}' first.",
-                  [label.config.label]
-               );
+               placeholderReadOnly = L("Must select item from '{0}' first.", [
+                  label.config.label,
+               ]);
             }
          }
       }

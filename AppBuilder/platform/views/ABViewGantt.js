@@ -4,9 +4,7 @@ const ABGanttProperty = require("../workspaceViews/ABObjectWorkspaceViewGantt.js
 
 const ABViewGanttPropertyComponentDefaults = ABViewGanttCore.defaultValues();
 
-function L(...params) {
-   return AB.Label(...params);
-}
+let L = (...params) => AB.Label("", ...params);
 
 module.exports = class ABViewGantt extends ABViewGanttCore {
    constructor(values, application, parent, defaultValues) {
@@ -52,7 +50,7 @@ module.exports = class ABViewGantt extends ABViewGanttCore {
       return commonUI.concat([
          {
             view: "fieldset",
-            label: L("ab.component.label.dataSource", "*Gantt Data:"),
+            label: L("Gantt Data:"),
             labelWidth: App.config.labelWidthLarge,
             body: {
                type: "clean",
@@ -61,7 +59,7 @@ module.exports = class ABViewGantt extends ABViewGanttCore {
                   {
                      view: "select",
                      name: "datacollection",
-                     label: L("ab.component.label.dataSource", "*Object:"),
+                     label: L("Object:"),
                      labelWidth: App.config.labelWidthLarge,
                      on: {
                         onChange: (newv, oldv) => {
@@ -74,7 +72,7 @@ module.exports = class ABViewGantt extends ABViewGanttCore {
          },
          {
             view: "fieldset",
-            label: L("ab.component.label.ganttFields", "*Gantt Fields:"),
+            label: L("Gantt Fields:"),
             labelWidth: App.config.labelWidthLarge,
             body: {
                view: "form",

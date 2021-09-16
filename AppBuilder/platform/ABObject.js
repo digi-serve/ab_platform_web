@@ -1,6 +1,8 @@
 const ABObjectCore = require("../core/ABObjectCore");
 const ABObjectWorkspaceViewCollection = require("./workspaceViews/ABObjectWorkspaceViewCollection");
 
+let L = (...params) => AB.Label("", ...params);
+
 // Start listening for server events for object updates and call triggerEvent as the callback
 if (typeof io != "undefined") {
    io.socket.on("ab.object.update", function (msg) {
@@ -70,7 +72,6 @@ module.exports = class ABObject extends ABObjectCore {
 
    isValid() {
       var validator = this.AB.Validation.validator();
-      var L = this.AB.Label();
 
       // label/name must be unique:
       var isNameUnique =
@@ -83,11 +84,7 @@ module.exports = class ABObject extends ABObjectCore {
       if (!isNameUnique) {
          validator.addError(
             "name",
-            L(
-               "ab.validation.object.name.unique",
-               'Object name must be unique ("{0}" already in use)',
-               [this.name]
-            )
+            L('Object name must be unique ("{0}" already in use)', [this.name])
          );
          // errors = OP.Form.validationError({
          // 		name:'name',

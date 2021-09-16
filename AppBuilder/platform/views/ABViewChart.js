@@ -2,6 +2,8 @@ const ABViewChartCore = require("../../core/views/ABViewChartCore");
 
 const ABViewChartPropertyComponentDefaults = ABViewChartCore.defaultValues();
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABViewChart extends ABViewChartCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -35,7 +37,6 @@ module.exports = class ABViewChart extends ABViewChartCore {
          _logic,
          ObjectDefaults
       );
-      var L = App.Label;
       this._App = App; // #Hack!!
 
       _logic.enableMultipleSeries = (isEnable) => {
@@ -53,7 +54,7 @@ module.exports = class ABViewChart extends ABViewChartCore {
          {
             name: "multipleSeries",
             view: "checkbox",
-            label: L("ab.component.chart.isMultipleSeries", "*Multiple Series"),
+            label: L("Multiple Series"),
             labelWidth: App.config.labelWidthLarge,
             on: {
                onChange: _logic.enableMultipleSeries,
@@ -62,65 +63,65 @@ module.exports = class ABViewChart extends ABViewChartCore {
          {
             name: "dataview",
             view: "richselect",
-            label: L("ab.component.chart.dataSource", "*Chart Data"),
+            label: L("Chart Data"),
             labelWidth: App.config.labelWidthLarge,
          },
          {
             name: "columnLabel",
             view: "richselect",
-            label: L("ab.component.chart.columnLabel", "*Label Column"),
+            label: L("Label Column"),
             labelWidth: App.config.labelWidthLarge,
          },
          {
             name: "columnValue",
             view: "richselect",
-            label: L("ab.component.chart.columnValue", "*Value Column"),
+            label: L("Value Column"),
             labelWidth: App.config.labelWidthLarge,
          },
          {
             name: "columnValue2",
             view: "richselect",
-            label: L("ab.component.chart.columnValue2", "*Value Column 2"),
+            label: L("Value Column 2"),
             labelWidth: App.config.labelWidthLarge,
          },
          {
             name: "isPercentage",
             view: "checkbox",
-            labelRight: L("ab.component.chart.isPercentage", "*Percentage"),
+            labelRight: L("Percentage"),
             labelWidth: App.config.labelWidthCheckbox,
          },
          {
             name: "showLabel",
             view: "checkbox",
-            label: L("ab.components.common.showlabel", "*Display Label"),
+            label: L("Display Label"),
             labelWidth: App.config.labelWidthLarge,
          },
          {
             name: "labelPosition",
             view: "richselect",
-            label: L("ab.components.common.labelPosition", "*Label Position"),
+            label: L("Label Position"),
             labelWidth: App.config.labelWidthLarge,
             options: [
                {
                   id: "left",
-                  value: L("ab.components.common.left", "*Left"),
+                  value: L("Left"),
                },
                {
                   id: "top",
-                  value: L("ab.components.common.top", "*Top"),
+                  value: L("Top"),
                },
             ],
          },
          {
             name: "labelWidth",
             view: "counter",
-            label: L("ab.components.common.labelWidth", "*Label Width"),
+            label: L("Label Width"),
             labelWidth: App.config.labelWidthLarge,
          },
          {
             view: "counter",
             name: "height",
-            label: L("ab.component.common.height", "*Height:"),
+            label: L("Height:"),
             labelWidth: App.config.labelWidthLarge,
          },
       ]);
@@ -215,12 +216,6 @@ module.exports = class ABViewChart extends ABViewChartCore {
    }
 
    static populateFieldOptions(ids, view) {
-      // #Hack!!
-      var L = (a, b) => b;
-      if (this._App) {
-         L = this._App.Label;
-      }
-
       // clear options
       $$(ids.columnLabel).define("options", []);
       $$(ids.columnLabel).refresh();
@@ -252,7 +247,7 @@ module.exports = class ABViewChart extends ABViewChartCore {
 
       var defaultOption = {
          id: "",
-         value: L("ab.component.label.selectColumn", "*Select a column"),
+         value: L("Select a column"),
          key: "",
       };
       columnLabelOptions.unshift(defaultOption);
@@ -269,12 +264,6 @@ module.exports = class ABViewChart extends ABViewChartCore {
 
    static populateFieldOptions2(ids, view) {
       // clear options
-      // #Hack!!
-      var L = (a, b) => b;
-      if (this._App) {
-         L = this._App.Label;
-      }
-
       $$(ids.columnValue2).define("options", []);
       $$(ids.columnValue2).refresh();
       $$(ids.columnValue2).enable();
@@ -299,7 +288,7 @@ module.exports = class ABViewChart extends ABViewChartCore {
 
       var defaultOption = {
          id: "",
-         value: L("ab.component.label.selectColumn", "*Select a column"),
+         value: L("Select a column"),
          key: "",
       };
       columnValueOptions.unshift(defaultOption);
@@ -570,7 +559,9 @@ module.exports = class ABViewChart extends ABViewChartCore {
                      }
                      // date fields
                      else if (f.key == "date") {
-                        let dateVal = `"${item[f.columnName] ? item[f.columnName] : ""}"`; // "date"
+                        let dateVal = `"${
+                           item[f.columnName] ? item[f.columnName] : ""
+                        }"`; // "date"
                         formula = formula.replace(
                            new RegExp(`{${colName}}`, "g"),
                            dateVal

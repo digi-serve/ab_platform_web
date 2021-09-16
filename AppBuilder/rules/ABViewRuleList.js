@@ -31,6 +31,8 @@
 //		.catch();
 //  }
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABViewRuleList {
    /**
     * @param {object} App
@@ -64,18 +66,13 @@ module.exports = class ABViewRuleList {
 
       App = App || this.App;
 
-      var L = App.Label;
-
       this.currentForm = null;
 
       var labels = (this.labels = {
          common: App.labels,
          component: {
-            header: L(
-               this.childSettings.labels.header,
-               this.childSettings.labels.headerDefault
-            ),
-            addNewRule: L("ab.components.form.addNewRule", "*Add new rule"),
+            header: L(this.childSettings.labels.header),
+            addNewRule: L("Add new rule"),
          },
       });
 

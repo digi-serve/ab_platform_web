@@ -1,5 +1,7 @@
 const ObjectQueryBuilder = require("./ABViewQueryBuilderObjectFieldConditions");
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABViewGridFilterRule {
    /**
     * @param {object} App
@@ -21,16 +23,11 @@ module.exports = class ABViewGridFilterRule {
       this.App = App;
       this.idBase = idBase;
 
-      var L = App.Label;
-
       var labels = (this.labels = {
          common: App.labels,
          component: {
-            ruleName: L("ab.component.grid.ruleNamePlaceholder", "*Rule Name"),
-            ruleNamePlaceholder: L(
-               "ab.component.grid.ruleNamePlaceholder",
-               "*Name"
-            ),
+            ruleName: L("Rule Name"),
+            ruleNamePlaceholder: L("Name"),
          },
       });
 

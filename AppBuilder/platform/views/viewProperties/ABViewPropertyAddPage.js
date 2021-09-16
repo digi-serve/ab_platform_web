@@ -1,8 +1,6 @@
 const ABViewProperty = require("./ABViewProperty");
 
-let L = (...params) => {
-   return AB.Label(...params);
-};
+let L = (...params) => AB.Label("", ...params);
 
 module.exports = class ABViewPropertyAddPage extends ABViewProperty {
    /**
@@ -26,13 +24,11 @@ module.exports = class ABViewPropertyAddPage extends ABViewProperty {
          id: ids.formView,
          name: "formView",
          view: "richselect",
-         label: L("ab.component.connect.form", "*Add New Form"),
+         label: L("Add New Form"),
          labelWidth: App.config.labelWidthXLarge,
          on: {
             onChange: (newVal, oldVal) => {
-               if (
-                  newVal == L("ab.component.connect.no", "*No add new option")
-               ) {
+               if (newVal == L("No add new option")) {
                   $$(ids.formView).setValue("");
                }
 
@@ -61,7 +57,7 @@ module.exports = class ABViewPropertyAddPage extends ABViewProperty {
             let editForms = [
                {
                   id: "none",
-                  value: L("ab.component.connect.no", "*No add new option"),
+                  value: L("No add new option"),
                },
             ];
 

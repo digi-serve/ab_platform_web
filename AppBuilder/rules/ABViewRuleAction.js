@@ -19,6 +19,8 @@
 // initialize itself from those settings.
 //
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABViewRuleAction {
    /**
     * @param {object} App
@@ -46,20 +48,15 @@ module.exports = class ABViewRuleAction {
       this.App = App;
       this.idBase = idBase;
 
-      var L = App.Label;
-
-      this.label = L(
-         "ab.component.ruleaction.abviewruleAction",
-         "*generic abviewruleaction"
-      );
+      this.label = L("generic abviewruleaction");
 
       // Labels for UI components
       var labels = (this.labels = {
          common: App.labels,
          component: {
-            action: L("ab.component.form.action", "*Action"),
-            when: L("ab.component.form.when", "*When"),
-            values: L("ab.component.form.values", "*Values"),
+            action: L("Action"),
+            when: L("When"),
+            values: L("Values"),
          },
       });
 

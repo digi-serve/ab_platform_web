@@ -1,6 +1,8 @@
 var ABFieldEmailCore = require("../../core/dataFields/ABFieldEmailCore");
 var ABFieldComponent = require("./ABFieldComponent");
 
+let L = (...params) => AB.Label("", ...params);
+
 /**
  * ABFieldBooleanComponent
  *
@@ -17,19 +19,14 @@ var ABFieldEmailComponent = new ABFieldComponent({
       };
       ids = field.idsUnique(ids, App);
 
-      var L = App.Label;
-
       return [
          {
             view: "text",
             id: ids.default,
             name: "default",
             labelWidth: App.config.labelWidthXLarge,
-            label: L("ab.common.default", "*Default"),
-            placeholder: L(
-               "ab.common.defaultPlaceholder",
-               "*Enter default value"
-            ),
+            label: L("Default"),
+            placeholder: L("Enter default value"),
          },
       ];
    },

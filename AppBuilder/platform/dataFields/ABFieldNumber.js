@@ -1,6 +1,8 @@
 const ABFieldNumberCore = require("../../core/dataFields/ABFieldNumberCore");
 const ABFieldComponent = require("./ABFieldComponent");
 
+let L = (...params) => AB.Label("", ...params);
+
 /**
  * ABFieldNumberComponent
  *
@@ -22,8 +24,6 @@ var ABFieldNumberComponent = new ABFieldComponent({
       // 	validateMinimum: App.unique(idBase + '_validateMinimum'),
       // 	validateMaximum: App.unique(idBase + '_validateMaximum')
       // }
-      var L = App.Label;
-
       var ids = {
          // allowRequired: '',
          default: "",
@@ -60,14 +60,11 @@ var ABFieldNumberComponent = new ABFieldComponent({
          // },
          {
             view: "text",
-            label: L("ab.common.default", "*Default"),
+            label: L("Default"),
             labelWidth: App.config.labelWidthXLarge,
             id: ids.default,
             name: "default",
-            placeholder: L(
-               "ab.common.defaultPlaceholder",
-               "*Enter default value"
-            ),
+            placeholder: L("Enter default value"),
             labelPosition: "top",
             on: {
                onChange: function (newVal, oldVal) {
@@ -87,7 +84,7 @@ var ABFieldNumberComponent = new ABFieldComponent({
             view: "richselect",
             // id: componentIds.typeFormat,
             name: "typeFormat",
-            label: L("ab.dataField.number.format", "*Format"),
+            label: L("Format"),
             value: "none",
             labelWidth: App.config.labelWidthXLarge,
             options: ABFieldNumberCore.formatList(),
@@ -97,7 +94,7 @@ var ABFieldNumberComponent = new ABFieldComponent({
             // id: componentIds.typeDecimals,
             name: "typeDecimals",
             disallowEdit: true,
-            label: L("ab.dataField.number.decimals", "*Decimals"),
+            label: L("Decimals"),
             value: "none",
             labelWidth: App.config.labelWidthXLarge,
             options: ABFieldNumberCore.delimiterList(),
@@ -122,7 +119,7 @@ var ABFieldNumberComponent = new ABFieldComponent({
             id: ids.typeDecimalPlaces,
             name: "typeDecimalPlaces",
             disallowEdit: true,
-            label: L("ab.dataField.number.places", "*Places"),
+            label: L("Places"),
             value: "none",
             labelWidth: App.config.labelWidthXLarge,
             disabled: true,
@@ -141,21 +138,21 @@ var ABFieldNumberComponent = new ABFieldComponent({
             view: "richselect",
             id: ids.typeRounding,
             name: "typeRounding",
-            label: L("ab.dataField.number.rounding", "*Rounding"),
+            label: L("Rounding"),
             value: "none",
             labelWidth: App.config.labelWidthXLarge,
             vertical: true,
             disabled: true,
             hidden: true,
             options: [
-               { id: "none", value: L("ab.common.default", "*Default") },
+               { id: "none", value: L("Default") },
                {
                   id: "roundUp",
-                  value: L("ab.dataField.number.roundUp", "*Round Up"),
+                  value: L("Round Up"),
                },
                {
                   id: "roundDown",
-                  value: L("ab.dataField.number.roundDown", "*Round Down"),
+                  value: L("Round Down"),
                },
             ],
          },
@@ -163,7 +160,7 @@ var ABFieldNumberComponent = new ABFieldComponent({
             view: "richselect",
             // id: componentIds.typeThousands,
             name: "typeThousands",
-            label: L("ab.dataField.number.thousands", "*Thousands"),
+            label: L("Thousands"),
             value: "none",
             labelWidth: App.config.labelWidthXLarge,
             vertical: true,
@@ -175,7 +172,7 @@ var ABFieldNumberComponent = new ABFieldComponent({
             id: ids.validate,
             name: "validation",
             labelWidth: App.config.labelWidthCheckbox,
-            labelRight: L("ab.dataField.number.validation", "*Validation"),
+            labelRight: L("Validation"),
             on: {
                onChange: function (newVal) {
                   if (newVal) {
@@ -196,7 +193,7 @@ var ABFieldNumberComponent = new ABFieldComponent({
             view: "text",
             id: ids.validateMinimum,
             name: "validateMinimum",
-            label: L("ab.dataField.number.minimum", "*Minimum"),
+            label: L("Minimum"),
             labelWidth: App.config.labelWidthXLarge,
             disabled: true,
             hidden: true,
@@ -213,7 +210,7 @@ var ABFieldNumberComponent = new ABFieldComponent({
             view: "text",
             id: ids.validateMaximum,
             name: "validateMaximum",
-            label: L("ab.dataField.number.maximum", "*Maximum"),
+            label: L("Maximum"),
             labelWidth: App.config.labelWidthXLarge,
             disabled: true,
             hidden: true,

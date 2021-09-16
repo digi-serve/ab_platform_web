@@ -5,6 +5,8 @@ const ABWorkspaceViewKanban = require("../workspaceViews/ABObjectWorkspaceViewKa
 
 const ABViewPropertyLinkPage = require("./viewProperties/ABViewPropertyLinkPage");
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABViewKanban extends ABViewKanbanCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -54,7 +56,6 @@ module.exports = class ABViewKanban extends ABViewKanbanCore {
          ObjectDefaults
       );
       let idBase = "ABViewKanbanPropertyEditor";
-      var L = App.Label;
 
       if (this._kanbanViewComponent == null)
          this._kanbanViewComponent = ABWorkspaceViewKanban.component(
@@ -80,7 +81,7 @@ module.exports = class ABViewKanban extends ABViewKanbanCore {
       return commonUI.concat([
          {
             view: "fieldset",
-            label: L("ab.component.label.dataSource", "*Kanban Data:"),
+            label: L("Kanban Data:"),
             labelWidth: App.config.labelWidthLarge,
             body: {
                type: "clean",
@@ -89,7 +90,7 @@ module.exports = class ABViewKanban extends ABViewKanbanCore {
                   {
                      name: "datacollection",
                      view: "select",
-                     label: L("ab.components.list.dataSource", "*Data Source"),
+                     label: L("Data Source"),
                      labelWidth: App.config.labelWidthXLarge,
                      value: null,
                      on: {
@@ -99,39 +100,24 @@ module.exports = class ABViewKanban extends ABViewKanbanCore {
                   {
                      name: "vGroup",
                      view: "select",
-                     label: L(
-                        "ab.add_view.kanban.vGroup",
-                        "*Vertical Grouping"
-                     ),
-                     placeholder: L(
-                        "ab.add_view.kanban.grouping_placeholder",
-                        "*Select a field"
-                     ),
+                     label: L("Vertical Grouping"),
+                     placeholder: L("Select a field"),
                      labelWidth: App.config.labelWidthXLarge,
                      options: [],
                   },
                   {
                      name: "hGroup",
                      view: "select",
-                     label: L(
-                        "ab.add_view.kanban.hGroup",
-                        "*Horizontal Grouping"
-                     ),
-                     placeholder: L(
-                        "ab.add_view.kanban.grouping_placeholder",
-                        "*Select a field"
-                     ),
+                     label: L("Horizontal Grouping"),
+                     placeholder: L("Select a field"),
                      labelWidth: App.config.labelWidthXLarge,
                      options: [],
                   },
                   {
                      name: "owner",
                      view: "select",
-                     label: L("ab.add_view.kanban.owner", "*Card Owner"),
-                     placeholder: L(
-                        "ab.add_view.kanban.owner_placeholder",
-                        "*Select a user field"
-                     ),
+                     label: L("Card Owner"),
+                     placeholder: L("Select a user field"),
                      labelWidth: App.config.labelWidthXLarge,
                      options: [],
                   },
@@ -211,7 +197,6 @@ module.exports = class ABViewKanban extends ABViewKanbanCore {
 
    component(App, idBase) {
       let baseCom = super.component(App);
-      var L = App.Label;
 
       idBase = idBase || "ABViewKanban_" + this.id;
 
@@ -236,7 +221,7 @@ module.exports = class ABViewKanban extends ABViewKanbanCore {
          rows: [
             {
                view: "label",
-               label: L("key.viewkanban.select", "*Select an object to load."),
+               label: L("Select an object to load."),
                inputWidth: 200,
                align: "center",
             },

@@ -1,6 +1,8 @@
 var ABFieldTreeCore = require("../../core/dataFields/ABFieldTreeCore");
 var ABFieldComponent = require("./ABFieldComponent");
 
+let L = (...params) => AB.Label("", ...params);
+
 var ids = {
    options: "ab-tree-option",
    popup: "ab-tree-popup",
@@ -31,12 +33,11 @@ var ABFieldTreeComponent = new ABFieldComponent({
          });
       }
       ids = field.idsUnique(ids, App);
-      var L = App.Label;
 
       return [
          {
             view: "label",
-            label: `<b>${L("ab.dataField.tree.options", "*Options")}</b>`,
+            label: `<b>${L("Options")}</b>`,
          },
          {
             id: ids.options,
@@ -83,7 +84,7 @@ var ABFieldTreeComponent = new ABFieldComponent({
          {
             view: "button",
             css: "webix_primary",
-            value: L("ab.dataField.tree.addNewOption", "*Add new option"),
+            value: L("Add new option"),
             click: () => {
                var itemId = webix.uid().toString();
                treeCol.data.add({
@@ -241,8 +242,6 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
    columnHeader(options) {
       options = options || {};
 
-      var L = this.AB.Label();
-
       var config = super.columnHeader(options);
       var field = this;
 
@@ -252,7 +251,7 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
          formClass = " form-entry";
          placeHolder =
             "<span style='color: #CCC; padding: 0 5px;'>" +
-            L("ab.dataField.tree.placeholder", "*Select items") +
+            L("Select items") +
             "</span>";
       }
 
@@ -350,7 +349,6 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
       if (!node) {
          return;
       }
-      var L = App.Label;
 
       options = options || {};
 
@@ -360,7 +358,7 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
          if (!row || row.length == 0) {
             node.innerHTML =
                "<div class='list-data-values form-entry'><span style='color: #CCC; padding: 0 5px;'>" +
-               L("ab.dataField.tree.placeholder", "*Select items") +
+               L("Select items") +
                "</span></div>";
             return;
          }

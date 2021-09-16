@@ -12,6 +12,8 @@ const ABFieldNumber = require("../dataFields/ABFieldNumber");
 const ABFieldString = require("../dataFields/ABFieldString");
 const ABFieldLongText = require("../dataFields/ABFieldLongText");
 
+let L = (...params) => AB.Label("", ...params);
+
 var defaultValues = {
    name: "Default Gantt",
    filterConditions: [], // array of filters to apply to the data table
@@ -65,30 +67,19 @@ module.exports = class ABObjectWorkspaceViewGantt extends (
          notes: App.unique(idBase + "_popupGanttNotes"),
       };
 
-      let L = App.Label;
-
       let labels = {
          common: App.labels,
          component: {
-            title: L("ab.add_view.gantt.title", "*Title"),
-            startDate: L("ab.add_view.gantt.startDate", "*Start Date"),
-            endDate: L("ab.add_view.gantt.endDate", "*End Date"),
-            duration: L("ab.add_view.gantt.duration", "*Duration"),
-            progress: L("ab.add_view.gantt.progress", "*Progress"),
-            notes: L("ab.add_view.gantt.notes", "*Notes"),
+            title: L("Title"),
+            startDate: L("Start Date"),
+            endDate: L("End Date"),
+            duration: L("Duration"),
+            progress: L("Progress"),
+            notes: L("Notes"),
 
-            datePlaceholder: L(
-               "ab.add_view.gantt.datePlaceholder",
-               "*Select a date field"
-            ),
-            numberPlaceholder: L(
-               "ab.add_view.gantt.numberPlaceholder",
-               "*Select a number field"
-            ),
-            stringPlaceholder: L(
-               "ab.add_view.gantt.stringPlaceholder",
-               "*Select a string field"
-            ),
+            datePlaceholder: L("Select a date field"),
+            numberPlaceholder: L("Select a number field"),
+            stringPlaceholder: L("Select a string field"),
          },
       };
 

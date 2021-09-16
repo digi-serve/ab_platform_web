@@ -1,6 +1,8 @@
 const ABViewContainer = require("../../platform/views/ABViewContainer");
 const ABViewLayoutCore = require("../../core/views/ABViewLayoutCore");
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABViewLayout extends ABViewLayoutCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -24,7 +26,6 @@ module.exports = class ABViewLayout extends ABViewLayoutCore {
          component: App.unique(idBase + "_component"),
          view: App.unique(idBase + "_view"),
       };
-      var L = App.Label;
 
       var component = this.component(App);
 
@@ -68,14 +69,8 @@ module.exports = class ABViewLayout extends ABViewLayoutCore {
             })[0];
 
             App.AB.Dialog.Confirm({
-               title: L(
-                  "ab.interface.component.confirmDeleteTitle",
-                  "*Delete component"
-               ),
-               text: L(
-                  "ab.interface.component.confirmDeleteMessage",
-                  "*Do you want to delete <b>{0}</b>?"
-               ).replace("{0}", view.label),
+               title: L("Delete component"),
+               text: L("Do you want to delete <b>{0}</b>?", [view.label]),
                callback: (result) => {
                   if (result) {
                      // this.viewDestroy(view)
@@ -169,8 +164,6 @@ module.exports = class ABViewLayout extends ABViewLayoutCore {
          ObjectDefaults
       );
 
-      var L = App.Label;
-
       // if I don't create my own propertyEditorComponent, then I need to
       // create the onClick handler that will cause the current view instance
       // to create a vew sub view/ column
@@ -187,7 +180,7 @@ module.exports = class ABViewLayout extends ABViewLayoutCore {
          {
             view: "button",
             css: "webix_primary",
-            value: L("ab.component.layout.addColumn", "*Add Column "),
+            value: L("Add Column "),
             click: _logic.onClick,
          },
       ]);

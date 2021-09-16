@@ -1,6 +1,8 @@
 var ABFieldBooleanCore = require("../../core/dataFields/ABFieldBooleanCore");
 var ABFieldComponent = require("./ABFieldComponent");
 
+let L = (...params) => AB.Label("", ...params);
+
 /**
  * ABFieldBooleanComponent
  *
@@ -13,24 +15,19 @@ var ABFieldBooleanComponent = new ABFieldComponent({
 
    elements: (App, field) => {
       // ids = field.idsUnique(ids, App);
-      var L = App.Label;
-
       return [
          {
             name: "default",
             view: "checkbox",
-            label: L("ab.common.default", "*Default"),
+            label: L("Default"),
             labelPosition: "left",
             labelWidth: 70,
-            labelRight: L("ab.dataField.boolean.uncheck", "*Uncheck"),
+            labelRight: L("Uncheck"),
             css: "webix_table_checkbox",
             on: {
                onChange: function (newVal, oldVal) {
-                  let checkLabel = L("ab.dataField.boolean.check", "*Check");
-                  let uncheckLabel = L(
-                     "ab.dataField.boolean.uncheck",
-                     "*Uncheck"
-                  );
+                  let checkLabel = L("Check");
+                  let uncheckLabel = L("Uncheck");
 
                   this.define("labelRight", newVal ? checkLabel : uncheckLabel);
                   this.refresh();

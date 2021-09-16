@@ -4,6 +4,8 @@ const RowFilter = require("../RowFilter");
 
 const ABViewCSVExporterPropertyComponentDefaults = ABViewCSVExporterCore.defaultValues();
 
+let L = (...params) => AB.Label("", ...params);
+
 let PropertyFilter = null;
 
 module.exports = class ABViewCSVExporter extends ABViewCSVExporterCore {
@@ -36,8 +38,6 @@ module.exports = class ABViewCSVExporter extends ABViewCSVExporterCore {
 
    static propertyEditorDefaultElements(App, ids, _logic, ObjectDefaults) {
       let idBase = "ABViewCSVExporter";
-
-      let L = App.Label;
 
       let commonUI = super.propertyEditorDefaultElements(
          App,
@@ -97,14 +97,14 @@ module.exports = class ABViewCSVExporter extends ABViewCSVExporterCore {
       return commonUI.concat([
          {
             view: "fieldset",
-            label: L("ab.component.label.dataSource", "*Data:"),
+            label: L("Data:"),
             labelWidth: App.config.labelWidthLarge,
             body: {
                rows: [
                   {
                      name: "datacollection",
                      view: "richselect",
-                     label: L("ab.components.form.dataSource", "*Data Source"),
+                     label: L("Data Source"),
                      labelWidth: App.config.labelWidthLarge,
                      skipAutoSave: true,
                      on: {
@@ -114,20 +114,14 @@ module.exports = class ABViewCSVExporter extends ABViewCSVExporterCore {
                   {
                      name: "hasHeader",
                      view: "checkbox",
-                     label: L(
-                        "ab.components.csvExporter.hasHeader",
-                        "*Header on first line"
-                     ),
+                     label: L("Header on first line"),
                      labelWidth: App.config.labelWidthXLarge,
                   },
                   {
                      cols: [
                         {
                            view: "label",
-                           label: L(
-                              "ab.component.label.filterData",
-                              "*Filter Option:"
-                           ),
+                           label: L("Filter Option:"),
                            css: "ab-text-bold",
                            width: App.config.labelWidthLarge,
                         },
@@ -135,7 +129,7 @@ module.exports = class ABViewCSVExporter extends ABViewCSVExporterCore {
                            view: "button",
                            name: "filterMenuButton",
                            css: "webix_primary",
-                           label: L("ab.component.label.settings", "*Settings"),
+                           label: L("Settings"),
                            icon: "fa fa-gear",
                            type: "icon",
                            badge: 0,
@@ -150,10 +144,7 @@ module.exports = class ABViewCSVExporter extends ABViewCSVExporterCore {
          },
          {
             view: "fieldset",
-            label: L(
-               "ab.component.label.customizeDisplay",
-               "*Customize Display:"
-            ),
+            label: L("Customize Display:"),
             labelWidth: App.config.labelWidthLarge,
             body: {
                type: "clean",
@@ -162,22 +153,19 @@ module.exports = class ABViewCSVExporter extends ABViewCSVExporterCore {
                   {
                      name: "buttonLabel",
                      view: "text",
-                     label: L("ab.components.csvExporter.label", "*Label"),
+                     label: L("Label"),
                      labelWidth: App.config.labelWidthLarge,
                   },
                   {
                      name: "filename",
                      view: "text",
-                     label: L(
-                        "ab.components.csvExporter.filename",
-                        "*File name"
-                     ),
+                     label: L("File name"),
                      labelWidth: App.config.labelWidthLarge,
                   },
                   {
                      view: "counter",
                      name: "width",
-                     label: L("ab.components.csvExporter.width", "*Width:"),
+                     label: L("Width:"),
                      labelWidth: App.config.labelWidthLarge,
                   },
                ],

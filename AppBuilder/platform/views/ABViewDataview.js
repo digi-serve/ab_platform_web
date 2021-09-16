@@ -3,6 +3,8 @@ const ABViewPropertyLinkPage = require("./viewProperties/ABViewPropertyLinkPage"
 
 const ABViewDataviewDefaults = ABViewDataviewCore.defaultValues();
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABViewDataview extends ABViewDataviewCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -14,7 +16,6 @@ module.exports = class ABViewDataview extends ABViewDataviewCore {
 
    static propertyEditorDefaultElements(App, ids, _logic, ObjectDefaults) {
       var idBase = "ABViewDataviewPropertyEditor";
-      var L = App.Label;
 
       var commonUI = super.propertyEditorDefaultElements(
          App,
@@ -33,7 +34,7 @@ module.exports = class ABViewDataview extends ABViewDataviewCore {
             view: "counter",
             name: "xCount",
             min: 1, // we cannot have 0 columns per row so lets not accept it
-            label: L("ab.components.dataview.xCount", "*Items in a row"),
+            label: L("Items in a row"),
             labelWidth: App.config.labelWidthLarge,
             step: 1,
          },

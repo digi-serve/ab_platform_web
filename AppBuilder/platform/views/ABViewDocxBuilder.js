@@ -11,6 +11,8 @@ const JSZip = require("../../../js/jszip.min.js");
 
 const ABViewDocxBuilderPropertyComponentDefaults = ABViewDocxBuilderCore.defaultValues();
 
+let L = (...params) => AB.Label("", ...params);
+
 function letUserDownload(blob, filename) {
    let url = window.URL.createObjectURL(blob);
 
@@ -59,7 +61,6 @@ module.exports = class ABViewDocxBuilder extends ABViewDocxBuilderCore {
          _logic,
          ObjectDefaults
       );
-      var L = App.Label;
 
       _logic.validateType = (item) => {
          // verify file type
@@ -121,7 +122,7 @@ module.exports = class ABViewDocxBuilder extends ABViewDocxBuilderCore {
       return commonUI.concat([
          {
             view: "fieldset",
-            label: L("ab.component.label.dataSource", "*Data:"),
+            label: L("Data:"),
             labelWidth: App.config.labelWidthLarge,
             body: {
                type: "clean",
@@ -131,10 +132,7 @@ module.exports = class ABViewDocxBuilder extends ABViewDocxBuilderCore {
                      name: "datacollection",
                      // view: 'richselect',
                      view: "multicombo",
-                     label: L(
-                        "ab.components.docxBuilder.dataSource",
-                        "*Data Source"
-                     ),
+                     label: L("Data Source"),
                      labelWidth: App.config.labelWidthLarge,
                   },
                ],
@@ -143,10 +141,7 @@ module.exports = class ABViewDocxBuilder extends ABViewDocxBuilderCore {
 
          {
             view: "fieldset",
-            label: L(
-               "ab.component.docxBuilder.templateFile",
-               "*Template file:"
-            ),
+            label: L("Template file:"),
             labelWidth: App.config.labelWidthLarge,
             body: {
                type: "clean",
@@ -156,10 +151,7 @@ module.exports = class ABViewDocxBuilder extends ABViewDocxBuilderCore {
                      cols: [
                         {
                            view: "label",
-                           label: L(
-                              "ab.component.docxBuilder.title",
-                              "*DOCX file:"
-                           ),
+                           label: L("DOCX file:"),
                            css: "ab-text-bold",
                            width: App.config.labelWidthXLarge,
                         },
@@ -187,10 +179,7 @@ module.exports = class ABViewDocxBuilder extends ABViewDocxBuilderCore {
                   {
                      name: "filelabel",
                      view: "text",
-                     label: L(
-                        "ab.components.docxBuilder.filename",
-                        "*Filename"
-                     ),
+                     label: L("Filename"),
                      labelWidth: App.config.labelWidthLarge,
                   },
                   {
@@ -210,7 +199,7 @@ module.exports = class ABViewDocxBuilder extends ABViewDocxBuilderCore {
 
          {
             view: "fieldset",
-            label: L("ab.component.docxBuilder.language", "*Language:"),
+            label: L("Language:"),
             labelWidth: App.config.labelWidthLarge,
             body: {
                type: "clean",
@@ -219,10 +208,7 @@ module.exports = class ABViewDocxBuilder extends ABViewDocxBuilderCore {
                   {
                      name: "language",
                      view: "richselect",
-                     label: L(
-                        "ab.components.docxBuilder.language",
-                        "*Language"
-                     ),
+                     label: L("Language"),
                      labelWidth: App.config.labelWidthLarge,
                   },
                ],
@@ -231,10 +217,7 @@ module.exports = class ABViewDocxBuilder extends ABViewDocxBuilderCore {
 
          {
             view: "fieldset",
-            label: L(
-               "ab.component.label.customizeDisplay",
-               "*Customize Display:"
-            ),
+            label: L("Customize Display:"),
             labelWidth: App.config.labelWidthLarge,
             body: {
                type: "clean",
@@ -243,45 +226,33 @@ module.exports = class ABViewDocxBuilder extends ABViewDocxBuilderCore {
                   {
                      name: "buttonlabel",
                      view: "text",
-                     label: L("ab.components.docxBuilder.text", "*Label"),
+                     label: L("Label"),
                      labelWidth: App.config.labelWidthXLarge,
                   },
 
                   {
                      view: "counter",
                      name: "width",
-                     label: L("ab.components.docxBuilder.width", "*Width:"),
+                     label: L("Width:"),
                      labelWidth: App.config.labelWidthXLarge,
                   },
                   {
                      view: "richselect",
                      name: "toolbarBackground",
-                     label: L(
-                        "ab.component.page.toolbarBackground",
-                        "*Page background:"
-                     ),
+                     label: L("Page background:"),
                      labelWidth: App.config.labelWidthXLarge,
                      options: [
                         {
                            id: "ab-background-default",
-                           value: L(
-                              "ab.component.page.toolbarBackgroundDefault",
-                              "*White (default)"
-                           ),
+                           value: L("White (default)"),
                         },
                         {
                            id: "webix_dark",
-                           value: L(
-                              "ab.component.page.toolbarBackgroundDark",
-                              "*Dark"
-                           ),
+                           value: L("Dark"),
                         },
                         {
                            id: "ab-background-lightgray",
-                           value: L(
-                              "ab.component.page.toolbarBackgroundDark",
-                              "*Gray"
-                           ),
+                           value: L("Gray"),
                         },
                      ],
                   },
@@ -289,32 +260,20 @@ module.exports = class ABViewDocxBuilder extends ABViewDocxBuilderCore {
                   {
                      view: "richselect",
                      name: "buttonPosition",
-                     label: L(
-                        "ab.component.page.buttonPosition",
-                        "*Button Position:"
-                     ),
+                     label: L("Button Position:"),
                      labelWidth: App.config.labelWidthXLarge,
                      options: [
                         {
                            id: "left",
-                           value: L(
-                              "ab.component.page.buttonPositionLeft",
-                              "*Left (default)"
-                           ),
+                           value: L("Left (default)"),
                         },
                         {
                            id: "center",
-                           value: L(
-                              "ab.component.page.buttonPositionCenter",
-                              "*Centered"
-                           ),
+                           value: L("Centered"),
                         },
                         {
                            id: "right",
-                           value: L(
-                              "ab.component.page.buttonPositionRight",
-                              "*Right"
-                           ),
+                           value: L("Right"),
                         },
                      ],
                   },

@@ -3,6 +3,8 @@ const RowFilter = require("../RowFilter");
 
 const ABViewPropertyDefaults = ABViewConditionalContainerCore.defaultValues();
 
+let L = (...params) => AB.Label("", ...params);
+
 let FilterComponent = null;
 
 module.exports = class ABViewConditionalContainer extends (
@@ -28,8 +30,6 @@ module.exports = class ABViewConditionalContainer extends (
          _logic,
          ObjectDefaults
       );
-
-      var L = App.Label;
 
       var idBase = "ABViewConditionalContainerPropertyEditor";
 
@@ -90,10 +90,7 @@ module.exports = class ABViewConditionalContainer extends (
          {
             name: "datacollection",
             view: "richselect",
-            label: L(
-               "ab.components.conditionalcontainer.dataSource",
-               "*Data Source"
-            ),
+            label: L("Data Source"),
             labelWidth: App.config.labelWidthLarge,
             on: {
                onChange: function (dvId) {
@@ -104,10 +101,7 @@ module.exports = class ABViewConditionalContainer extends (
          {
             view: "fieldset",
             name: "filter",
-            label: L(
-               "ab.component.conditionalcontainer.advancedOptions",
-               "*Filter:"
-            ),
+            label: L("Filter:"),
             labelWidth: App.config.labelWidthLarge,
             body: {
                type: "clean",
@@ -117,19 +111,13 @@ module.exports = class ABViewConditionalContainer extends (
                      cols: [
                         {
                            view: "label",
-                           label: L(
-                              "ab.component.conditionalcontainer.filterData",
-                              "*Filter Data:"
-                           ),
+                           label: L("Filter Data:"),
                            width: App.config.labelWidthLarge,
                         },
                         {
                            view: "button",
                            name: "buttonFilter",
-                           label: L(
-                              "ab.component.conditionalcontainer.settings",
-                              "*Settings"
-                           ),
+                           label: L("Settings"),
                            icon: "fa fa-gear",
                            type: "icon",
                            css: "webix_primary",

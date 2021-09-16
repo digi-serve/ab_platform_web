@@ -4,6 +4,8 @@ const ABObjectQuery = require("../ABObjectQuery");
 
 const ABViewDetailPropertyComponentDefaults = ABViewDetailCore.defaultValues();
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABViewDetail extends ABViewDetailCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -37,8 +39,6 @@ module.exports = class ABViewDetail extends ABViewDetailCore {
          _logic,
          ObjectDefaults
       );
-
-      var L = App.Label;
 
       // _logic functions
 
@@ -161,7 +161,7 @@ module.exports = class ABViewDetail extends ABViewDetailCore {
          {
             name: "datacollection",
             view: "richselect",
-            label: L("ab.components.detail.dataSource", "*Data Source"),
+            label: L("Data Source"),
             labelWidth: App.config.labelWidthLarge,
             skipAutoSave: true,
             on: {
@@ -190,35 +190,35 @@ module.exports = class ABViewDetail extends ABViewDetailCore {
          {
             name: "showLabel",
             view: "checkbox",
-            label: L("ab.components.common.showlabel", "*Display Label"),
+            label: L("Display Label"),
             labelWidth: App.config.labelWidthLarge,
          },
          {
             name: "labelPosition",
             view: "richselect",
-            label: L("ab.components.common.labelPosition", "*Label Position"),
+            label: L("Label Position"),
             labelWidth: App.config.labelWidthLarge,
             options: [
                {
                   id: "left",
-                  value: L("ab.components.common.left", "*Left"),
+                  value: L("Left"),
                },
                {
                   id: "top",
-                  value: L("ab.components.common.top", "*Top"),
+                  value: L("Top"),
                },
             ],
          },
          {
             name: "labelWidth",
             view: "counter",
-            label: L("ab.components.common.labelWidth", "*Label Width"),
+            label: L("Label Width"),
             labelWidth: App.config.labelWidthLarge,
          },
          {
             view: "counter",
             name: "height",
-            label: L("ab.component.common.height", "*Height:"),
+            label: L("Height:"),
             labelWidth: App.config.labelWidthLarge,
          },
       ]);

@@ -2,6 +2,8 @@ const ABViewDetailTextCore = require("../../core/views/ABViewDetailTextCore");
 
 const ABViewDetailTextPropertyComponentDefaults = ABViewDetailTextCore.defaultValues();
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABViewDetailText extends ABViewDetailTextCore {
    /**
     * @param {obj} values  key=>value hash of ABView values
@@ -59,7 +61,6 @@ module.exports = class ABViewDetailText extends ABViewDetailTextCore {
          _logic,
          ObjectDefaults
       );
-      var L = App.Label;
 
       // in addition to the common .label  values, we
       // ask for:

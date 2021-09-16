@@ -1,6 +1,8 @@
 var ABFieldImageCore = require("../../core/dataFields/ABFieldImageCore");
 var ABFieldComponent = require("./ABFieldComponent");
 
+let L = (...params) => AB.Label("", ...params);
+
 /**
  * ABFieldImageComponent
  *
@@ -22,15 +24,13 @@ var ABFieldImageComponent = new ABFieldComponent({
       };
       ids = field.idsUnique(ids, App);
 
-      var L = App.Label;
-
       return [
          {
             cols: [
                {
                   view: "checkbox",
                   name: "useWidth",
-                  labelRight: L("ab.dataField.image.width", "*Width"),
+                  labelRight: L("Width"),
                   width: 80,
                   labelWidth: 0,
                   value: 1,
@@ -52,7 +52,7 @@ var ABFieldImageComponent = new ABFieldComponent({
                   view: "checkbox",
                   name: "useHeight",
                   // id:componentIds.useHeight,
-                  labelRight: L("ab.dataField.image.height", "*Height"),
+                  labelRight: L("Height"),
                   width: 80,
                   labelWidth: 0,
                   value: 1,
@@ -73,10 +73,7 @@ var ABFieldImageComponent = new ABFieldComponent({
                {
                   view: "checkbox",
                   name: "useDefaultImage",
-                  labelRight: L(
-                     "ab.dataField.image.defaultImage",
-                     "*Default image"
-                  ),
+                  labelRight: L("Default image"),
                   width: 200,
                   labelWidth: 0,
                   value: 0,
@@ -334,11 +331,9 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
             // Ask the user what to do about the existing images:
             this.AB.Dialog.Confirm({
                title: L("ab.dataField.image.keepImages", "*Keep Images?"),
-               message: L(
-                  "ab.dataField.image.keepImagesDescription",
-                  "*Do you want to keep the images referenced by {0}?",
-                  [this.label]
-               ),
+               message: L("Do you want to keep the images referenced by {0}?", [
+                  this.label,
+               ]),
                callback: (result) => {
                   // update this setting so the server can respond correctly in
                   // ABFieldImage.migrateDrop()
@@ -555,11 +550,9 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
                   var type = item.type.toLowerCase();
                   if (acceptableTypes.indexOf(type) == -1) {
                      webix.message(
-                        L(
-                           "Only [{0}] images are supported",
-                           "Only [{0}] images are supported",
-                           [acceptableTypes.join(", ")]
-                        )
+                        L("Only [{0}] images are supported", [
+                           acceptableTypes.join(", "),
+                        ])
                      );
                      return false;
                   }
@@ -676,10 +669,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
          // Ask the user if they really want to delete the photo
          this.AB.Dialog.Confirm({
             title: "",
-            message: L(
-               "ab.dataField.image.removeImageDescription",
-               "*Are you sure you want to remove this image?"
-            ),
+            message: L("Are you sure you want to remove this image?"),
             callback: (result) => {
                var confirmDelete = result ? 1 : 0;
                if (confirmDelete) {

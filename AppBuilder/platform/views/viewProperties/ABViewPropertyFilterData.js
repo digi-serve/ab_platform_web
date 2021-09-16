@@ -3,9 +3,7 @@ const ABViewGridFilterRule = require("../../../rules/ABViewGridFilterRule");
 
 const RowFilter = require("../../RowFilter");
 
-// var L = (key, altText) => {
-//    return AD.lang.label.getLabel(key) || altText;
-// };
+let L = (...params) => AB.Label("", ...params);
 
 var getRule = (object, App, idBase) => {
    var FilterRule = new ABViewGridFilterRule();
@@ -75,15 +73,11 @@ module.exports = class ABViewPropertyFilterData extends ABViewProperty {
          globalToolbar: idBase + "_globalToolbar",
       };
 
-      let L = App.Label;
       let labels = {
          common: App.labels,
          component: {
-            header: L("ab.component.grid.filterMenu", "*Filter Menu"),
-            addNewFilter: L(
-               "ab.components.grid.addNewFilter",
-               "*Add new filter"
-            ),
+            header: L("Filter Menu"),
+            addNewFilter: L("Add new filter"),
          },
       };
 
@@ -532,7 +526,6 @@ module.exports = class ABViewPropertyFilterData extends ABViewProperty {
     */
    component(App, idBase) {
       super.component(App, idBase);
-      var L = App.Label;
 
       this.App = App;
       this.idBase = idBase;
@@ -612,7 +605,7 @@ module.exports = class ABViewPropertyFilterData extends ABViewProperty {
                      view: "button",
                      css: "webix_primary",
                      id: ids.resetFilterButton,
-                     label: L("ab.object.toolbar.resetFilter", "*Reset Filter"),
+                     label: L("Reset Filter"),
                      icon: "fa fa-ban",
                      type: "icon",
                      badge: 0,

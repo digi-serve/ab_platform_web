@@ -2,6 +2,8 @@ var ABFieldConnectCore = require("../../core/dataFields/ABFieldConnectCore");
 var ABFieldUserCore = require("../../core/dataFields/ABFieldUserCore");
 var ABFieldComponent = require("./ABFieldComponent");
 
+let L = (...params) => AB.Label("", ...params);
+
 var ids = {
    editable: "ab-user-editable",
    isMultiple: "ab-user-multiple-option",
@@ -22,7 +24,6 @@ var ABFieldUserComponent = new ABFieldComponent({
 
    elements: function (App, field) {
       ids = field.idsUnique(ids, App);
-      var L = App.Label;
 
       return [
          {
@@ -30,20 +31,14 @@ var ABFieldUserComponent = new ABFieldComponent({
             name: "isMultiple",
             id: ids.isMultiple,
             disallowEdit: true,
-            labelRight: L(
-               "ab.dataField.user.isMultiple",
-               "*Allow multiple users"
-            ),
+            labelRight: L("Allow multiple users"),
             labelWidth: App.config.labelWidthCheckbox,
          },
          {
             view: "checkbox",
             name: "isCurrentUser",
             id: ids.isCurrentUser,
-            labelRight: L(
-               "ab.dataField.user.isCurrentUser",
-               "*Default value as current user"
-            ),
+            labelRight: L("Default value as current user"),
             labelWidth: App.config.labelWidthCheckbox,
             on: {
                onChange: function (newValue, oldValue) {
@@ -62,24 +57,21 @@ var ABFieldUserComponent = new ABFieldComponent({
             name: "editable",
             hidden: true,
             id: ids.editable,
-            labelRight: L("ab.dataField.user.editableLabel", "*Editable"),
+            labelRight: L("Editable"),
             labelWidth: App.config.labelWidthCheckbox,
          },
          {
             view: "checkbox",
             name: "isShowProfileImage",
             id: ids.isShowProfileImage,
-            labelRight: L(
-               "ab.dataField.user.isShowProfileImage",
-               "*Show Profile Image"
-            ),
+            labelRight: L("Show Profile Image"),
             labelWidth: App.config.labelWidthCheckbox,
          },
          {
             view: "checkbox",
             name: "isShowUsername",
             id: ids.isShowUsername,
-            labelRight: L("ab.dataField.user.showUsername", "*Show Username"),
+            labelRight: L("Show Username"),
             labelWidth: App.config.labelWidthCheckbox,
          },
       ];

@@ -8,6 +8,8 @@ const RowFilter = require("../RowFilter");
 
 let FilterComponent = null;
 
+let L = (...params) => AB.Label("", ...params);
+
 function _onShow(App, compId, instance, component) {
    let elem = $$(compId);
    if (!elem) return;
@@ -164,7 +166,6 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
          _logic,
          ObjectDefaults
       );
-      var L = App.Label;
 
       let idBase = "ABViewFormConnectPropertyEditor";
       this.App = App;
@@ -233,10 +234,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
          {
             view: "fieldset",
             name: "addNewSettings",
-            label: L(
-               "ab.component.connect.addNewSettings",
-               "*Add New Popup Settings:"
-            ),
+            label: L("Add New Popup Settings:"),
             labelWidth: App.config.labelWidthLarge,
             body: {
                type: "clean",
@@ -245,22 +243,16 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
                   {
                      view: "text",
                      name: "popupWidth",
-                     placeholder: L(
-                        "ab.component.connect.popupWidthPlaceholder",
-                        "*Set popup width"
-                     ),
-                     label: L("ab.component.page.popupWidth", "*Width:"),
+                     placeholder: L("Set popup width"),
+                     label: L("Width:"),
                      labelWidth: App.config.labelWidthLarge,
                      validate: webix.rules.isNumber,
                   },
                   {
                      view: "text",
                      name: "popupHeight",
-                     placeholder: L(
-                        "ab.component.connect.popupHeightPlaceholder",
-                        "*Set popup height"
-                     ),
-                     label: L("ab.component.page.popupHeight", "*Height:"),
+                     placeholder: L("Set popup height"),
+                     label: L("Height:"),
                      labelWidth: App.config.labelWidthLarge,
                      validate: webix.rules.isNumber,
                   },
@@ -270,10 +262,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
          {
             view: "fieldset",
             name: "advancedOption",
-            label: L(
-               "ab.component.connect.advancedOptions",
-               "*Advanced Options:"
-            ),
+            label: L("Advanced Options:"),
             labelWidth: App.config.labelWidthLarge,
             body: {
                type: "clean",
@@ -283,20 +272,14 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
                      cols: [
                         {
                            view: "label",
-                           label: L(
-                              "ab.component.connect.filterData",
-                              "*Filter Options:"
-                           ),
+                           label: L("Filter Options:"),
                            width: App.config.labelWidthLarge,
                         },
                         {
                            view: "button",
                            name: "buttonFilter",
                            css: "webix_primary",
-                           label: L(
-                              "ab.component.connect.settings",
-                              "*Settings"
-                           ),
+                           label: L("Settings"),
                            icon: "fa fa-gear",
                            type: "icon",
                            badge: 0,
@@ -310,10 +293,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
                      rows: [
                         {
                            view: "label",
-                           label: L(
-                              "ab.component.connect.filterConnectedValue",
-                              "*Filter by Connected Field Value:"
-                           ),
+                           label: L("Filter by Connected Field Value:"),
                         },
                         {
                            view: "combo",
@@ -587,9 +567,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
       let addPageComponent = this.addPageTool.component(App, idBase);
       let editPageComponent;
 
-      let template = (
-         `<div class="customField">${templateLabel}#plusButton##template#</div>`
-      )
+      let template = `<div class="customField">${templateLabel}#plusButton##template#</div>`
          .replace(/#width#/g, settings.labelWidth)
          .replace(/#label#/g, field.label)
          .replace(/#plusButton#/g, addPageComponent.ui)

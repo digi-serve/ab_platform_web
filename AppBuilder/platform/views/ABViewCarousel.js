@@ -5,9 +5,7 @@ const ABViewPropertyLinkPage = require("./viewProperties/ABViewPropertyLinkPage"
 
 const ABFieldImage = require("../dataFields/ABFieldImage");
 
-function L(...params) {
-   return AB.Label(...params);
-}
+let L = (...params) => AB.Label("", ...params);
 
 let PopupCarouselFilterMenu = null;
 
@@ -89,7 +87,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
             cols: [
                {
                   view: "label",
-                  label: L("ab.component.grid.filterMenu", "*Filter Menu"),
+                  label: L("Filter Menu"),
                },
             ],
          },
@@ -131,7 +129,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
       return commonUI.concat([
          {
             view: "fieldset",
-            label: L("ab.component.label.dataSource", "*Data:"),
+            label: L("Data:"),
             labelWidth: App.config.labelWidthLarge,
             body: {
                type: "clean",
@@ -140,7 +138,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
                   {
                      view: "select",
                      name: "datacollection",
-                     label: L("ab.component.label.dataSource", "*Object:"),
+                     label: L("Object:"),
                      labelWidth: App.config.labelWidthLarge,
                      options: [],
                      on: {
@@ -173,18 +171,12 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
                               if (imageFields.length > 0) {
                                  imageFields.unshift({
                                     id: "",
-                                    value: L(
-                                       "ab.component.label.selectField",
-                                       "*Select a field"
-                                    ),
+                                    value: L("Select a field"),
                                  });
                               } else {
                                  imageFields.unshift({
                                     id: "",
-                                    value: L(
-                                       "ab.component.label.noImageFields",
-                                       "*no image fields."
-                                    ),
+                                    value: L("no image fields."),
                                  });
                               }
 
@@ -198,7 +190,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
                   {
                      view: "select",
                      name: "field",
-                     label: L("ab.component.label.imageField", "*Image Field:"),
+                     label: L("Image Field:"),
                      labelWidth: App.config.labelWidthLarge,
                      options: [],
                   },
@@ -234,10 +226,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
          // },
          {
             view: "fieldset",
-            label: L(
-               "ab.component.label.customizeDisplay",
-               "*Customize Display:"
-            ),
+            label: L("Customize Display:"),
             labelWidth: App.config.labelWidthLarge,
             body: {
                type: "clean",
@@ -246,10 +235,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
                   {
                      view: "select",
                      name: "navigationType",
-                     label: L(
-                        "ab.component.carousel.navigationType",
-                        "*Navigation Type"
-                     ),
+                     label: L("Navigation Type"),
                      labelWidth: App.config.labelWidthLarge,
                      options: [
                         { id: "corner", value: "Corner" },
@@ -260,44 +246,35 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
                   {
                      view: "checkbox",
                      name: "showLabel",
-                     labelRight: L(
-                        "ab.component.carousel.showLabel",
-                        "*Show label of image"
-                     ),
+                     labelRight: L("Show label of image"),
                      labelWidth: App.config.labelWidthCheckbox,
                   },
 
                   {
                      view: "checkbox",
                      name: "hideItem",
-                     labelRight: L(
-                        "ab.component.carousel.hideItem",
-                        "*Hide item list"
-                     ),
+                     labelRight: L("Hide item list"),
                      labelWidth: App.config.labelWidthCheckbox,
                   },
 
                   {
                      view: "checkbox",
                      name: "hideButton",
-                     labelRight: L(
-                        "ab.component.carousel.hideButton",
-                        "*Hide navigation buttons"
-                     ),
+                     labelRight: L("Hide navigation buttons"),
                      labelWidth: App.config.labelWidthCheckbox,
                   },
 
                   {
                      view: "counter",
                      name: "width",
-                     label: L("ab.component.grid.width", "*Width:"),
+                     label: L("Width:"),
                      labelWidth: App.config.labelWidthXLarge,
                   },
 
                   {
                      view: "counter",
                      name: "height",
-                     label: L("ab.component.grid.height", "*Height:"),
+                     label: L("Height:"),
                      labelWidth: App.config.labelWidthXLarge,
                   },
 
@@ -305,10 +282,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
                      cols: [
                         {
                            view: "label",
-                           label: L(
-                              "ab.component.label.filterData",
-                              "*Filter Option:"
-                           ),
+                           label: L("Filter Option:"),
                            css: "ab-text-bold",
                            width: App.config.labelWidthXLarge,
                         },
@@ -316,7 +290,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
                            view: "button",
                            id: ids.gridFilterMenuButton,
                            css: "webix_primary",
-                           label: L("ab.component.label.settings", "*Settings"),
+                           label: L("Settings"),
                            icon: "fa fa-gear",
                            type: "icon",
                            badge: 0,

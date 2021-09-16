@@ -20,6 +20,8 @@ var defaultValues = {
    ownerField: null,
 };
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABObjectWorkspaceViewKanban extends (
    ABObjectWorkspaceView
 ) {
@@ -58,23 +60,15 @@ module.exports = class ABObjectWorkspaceViewKanban extends (
          ownerInput: App.unique(idBase + "_popupAddViewOwner"),
       };
 
-      let L = App.Label;
-
       let labels = {
          common: App.labels,
          component: {
-            vGroup: L("ab.add_view.kanban.vGroup", "*Vertical Grouping"),
-            hGroup: L("ab.add_view.kanban.hGroup", "*Horizontal Grouping"),
-            owner: L("ab.add_view.kanban.owner", "*Card Owner"),
-            groupingPlaceholder: L(
-               "ab.add_view.kanban.grouping_placeholder",
-               "*Select a field"
-            ),
-            ownerPlaceholder: L(
-               "ab.add_view.kanban.owner_placeholder",
-               "*Select a user field"
-            ),
-            noneOption: L("ab.add_view.kanban.none_option", "*None"),
+            vGroup: L("Vertical Grouping"),
+            hGroup: L("Horizontal Grouping"),
+            owner: L("Card Owner"),
+            groupingPlaceholder: L("Select a field"),
+            ownerPlaceholder: L("Select a user field"),
+            noneOption: L("None"),
          },
       };
 

@@ -1,6 +1,8 @@
 var ABFieldStringCore = require("../../core/dataFields/ABFieldStringCore");
 var ABFieldComponent = require("./ABFieldComponent");
 
+let L = (...params) => AB.Label("", ...params);
+
 /**
  * ABFieldStringComponent
  *
@@ -17,28 +19,20 @@ var ABFieldStringComponent = new ABFieldComponent({
       };
       ids = field.idsUnique(ids, App);
 
-      var L = App.Label;
-
       return [
          {
             view: "text",
             id: ids.default,
             name: "default",
             labelWidth: App.config.labelWidthXLarge,
-            label: L("ab.common.default", "*Default"),
-            placeholder: L(
-               "ab.common.defaultPlaceholder",
-               "*Enter default value"
-            ),
+            label: L("Default"),
+            placeholder: L("Enter default value"),
          },
          {
             view: "checkbox",
             name: "supportMultilingual",
             disallowEdit: true,
-            labelRight: L(
-               "ab.dataField.string.supportMultilingual",
-               "*Support multilingual"
-            ),
+            labelRight: L("Support multilingual"),
             labelWidth: App.config.labelWidthCheckbox,
             value: false,
          },
@@ -200,14 +194,9 @@ module.exports = class ABFieldString extends ABFieldStringCore {
          var max_length = 255;
 
          if (data[this.columnName].length > max_length) {
-            var L = this.AB.Label();
             validator.addError(
                this.columnName,
-               L(
-                  "should NOT be longer than {0} characters",
-                  "should NOT be longer than {0} characters",
-                  [max_length]
-               )
+               L("should NOT be longer than {0} characters", [max_length])
             );
          }
       }

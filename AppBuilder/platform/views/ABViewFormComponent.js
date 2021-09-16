@@ -2,6 +2,8 @@ const ABViewFormComponentCore = require("../../core/views/ABViewFormComponentCor
 
 const ABViewFormFieldPropertyComponentDefaults = ABViewFormComponentCore.defaultValues();
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABViewFormComponent extends ABViewFormComponentCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -14,26 +16,25 @@ module.exports = class ABViewFormComponent extends ABViewFormComponentCore {
          _logic,
          ObjectDefaults
       );
-      var L = App.Label;
 
       return commonUI.concat([
          {
             name: "fieldLabel",
             view: "text",
             disabled: true,
-            label: L("ab.component.form.field.label", "*Field"),
+            label: L("Field"),
          },
          {
             name: "required",
             view: "checkbox",
             labelWidth: App.config.labelWidthCheckbox,
-            labelRight: L("ab.common.required", "*Required"),
+            labelRight: L("Required"),
          },
          {
             name: "disable",
             view: "checkbox",
             labelWidth: App.config.labelWidthCheckbox,
-            labelRight: L("ab.common.disable", "*Disable"),
+            labelRight: L("Disable"),
          },
       ]);
    }

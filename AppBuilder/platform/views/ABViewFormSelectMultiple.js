@@ -2,6 +2,8 @@ const ABViewFormSelectMultipleCore = require("../../core/views/ABViewFormSelectM
 
 const ABViewFormSelectMultiplePropertyComponentDefaults = ABViewFormSelectMultipleCore.defaultValues();
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABViewFormSelectMultiple extends (
    ABViewFormSelectMultipleCore
 ) {
@@ -57,7 +59,6 @@ module.exports = class ABViewFormSelectMultiple extends (
          _logic,
          ObjectDefaults
       );
-      var L = App.Label;
 
       // in addition to the common .label  values, we
       // ask for:
@@ -65,22 +66,16 @@ module.exports = class ABViewFormSelectMultiple extends (
          {
             name: "type",
             view: "richselect",
-            label: L("ab.component.select.type", "*Type"),
+            label: L("Type"),
             options: [
                {
                   id: "multicombo",
-                  value: L(
-                     "ab.component.selectmultiple.multicombo",
-                     "*Multi Combo"
-                  ),
+                  value: L("Multi Combo"),
                },
 
                {
                   id: "checkbox",
-                  value: L(
-                     "ab.component.selectmultiple.checkboxes",
-                     "*Checkboxes"
-                  ),
+                  value: L("Checkboxes"),
                },
             ],
          },

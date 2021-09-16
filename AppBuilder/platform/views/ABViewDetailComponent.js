@@ -1,5 +1,7 @@
 const ABViewDetailComponentCore = require("../../core/views/ABViewDetailComponentCore");
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABViewDetailComponent extends ABViewDetailComponentCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -12,14 +14,13 @@ module.exports = class ABViewDetailComponent extends ABViewDetailComponentCore {
          _logic,
          ObjectDefaults
       );
-      var L = App.Label;
 
       return commonUI.concat([
          {
             name: "fieldLabel",
             view: "text",
             disabled: true,
-            label: L("ab.component.detail.field.label", "*Field"),
+            label: L("Field"),
          },
       ]);
    }

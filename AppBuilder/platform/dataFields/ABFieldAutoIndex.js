@@ -1,6 +1,8 @@
 var ABFieldAutoIndexCore = require("../../core/dataFields/ABFieldAutoIndexCore");
 var ABFieldComponent = require("./ABFieldComponent");
 
+let L = (...params) => AB.Label("", ...params);
+
 var ids = {
    prefixText: "prefixText",
    delimiterText: "delimiterText",
@@ -47,16 +49,14 @@ var ABFieldAutoIndexComponent = new ABFieldComponent({
    elements: (App, field) => {
       ids = field.idsUnique(ids, App);
 
-      var L = App.Label;
-
       return [
          {
             id: ids.prefixText,
             view: "text",
             name: "prefix",
             labelWidth: App.config.labelWidthLarge,
-            label: L("ab.dataField.prefixText", "*Prefix"),
-            placeholder: L("ab.dataField.prefixTextPlaceholder", "*US"),
+            label: L("Prefix"),
+            placeholder: L("US"),
             on: {
                onChange: (newVal, oldVal) => {
                   previewChange();
@@ -68,7 +68,7 @@ var ABFieldAutoIndexComponent = new ABFieldComponent({
             view: "richselect",
             name: "delimiter",
             labelWidth: App.config.labelWidthLarge,
-            label: L("ab.dataField.delimiter", "*Delimiter"),
+            label: L("Delimiter"),
             value: "dash",
             options: ABFieldAutoIndexCore.delimiterList(),
             on: {
@@ -82,7 +82,7 @@ var ABFieldAutoIndexComponent = new ABFieldComponent({
             view: "counter",
             name: "displayLength",
             labelWidth: App.config.labelWidthLarge,
-            label: L("ab.dataField.displayLength", "*Length"),
+            label: L("Length"),
             step: 1,
             value: 4,
             min: 1,
@@ -98,7 +98,7 @@ var ABFieldAutoIndexComponent = new ABFieldComponent({
             view: "text",
             name: "previewText",
             labelWidth: App.config.labelWidthLarge,
-            label: L("ab.dataField.previewText", "*Preview"),
+            label: L("Preview"),
             disabled: true,
          },
          // {

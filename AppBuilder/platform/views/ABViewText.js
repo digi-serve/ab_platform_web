@@ -2,6 +2,8 @@ const ABViewTextCore = require("../../core/views/ABViewTextCore");
 
 const ABViewTextPropertyComponentDefaults = ABViewTextCore.defaultValues();
 
+let L = (...params) => AB.Label("", ...params);
+
 module.exports = class ABViewText extends ABViewTextCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -95,7 +97,6 @@ module.exports = class ABViewText extends ABViewTextCore {
          _logic,
          ObjectDefaults
       );
-      var L = App.Label;
 
       // _logic functions
 
@@ -119,13 +120,13 @@ module.exports = class ABViewText extends ABViewTextCore {
          {
             view: "counter",
             name: "height",
-            label: L("ab.component.list.height", "*Height:"),
+            label: L("Height:"),
             labelWidth: App.config.labelWidthLarge,
          },
          {
             name: "datacollection",
             view: "richselect",
-            label: L("ab.components.list.dataSource", "*Data Source"),
+            label: L("Data Source"),
             labelWidth: App.config.labelWidthLarge,
             on: {
                onChange: _logic.selectSource,
