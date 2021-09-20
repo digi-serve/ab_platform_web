@@ -12,7 +12,7 @@ const ABFieldNumber = require("../dataFields/ABFieldNumber");
 const ABFieldString = require("../dataFields/ABFieldString");
 const ABFieldLongText = require("../dataFields/ABFieldLongText");
 
-let L = (...params) => AB.Label("", ...params);
+let L = (...params) => AB.Label()("", ...params);
 
 var defaultValues = {
    name: "Default Gantt",

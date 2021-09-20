@@ -1,7 +1,7 @@
 const ABComponent = require("./ABComponent");
 const ABViewForm = require("../platform/views/ABViewForm");
 
-let L = (...params) => AB.Label("", ...params);
+let L = (...params) => AB.Label()("", ...params);
 
 module.exports = class RowUpdater extends ABComponent {
    constructor(App, idBase, AB) {

@@ -2,7 +2,7 @@ const ABViewContainerCore = require("../../core/views/ABViewContainerCore");
 
 const ABPropertyComponentDefaults = ABViewContainerCore.defaultValues();
 
-let L = (...params) => AB.Label("", ...params);
+let L = (...params) => AB.Label()("", ...params);
 
 module.exports = class ABViewContainer extends ABViewContainerCore {
    // constructor(values, application, parent, defaultValues) {

@@ -2,7 +2,7 @@ const ABViewFormNumberCore = require("../../core/views/ABViewFormNumberCore");
 
 const ABViewFormNumberPropertyComponentDefaults = ABViewFormNumberCore.defaultValues();
 
-let L = (...params) => AB.Label("", ...params);
+let L = (...params) => AB.Label()("", ...params);
 
 module.exports = class ABViewFormNumber extends ABViewFormNumberCore {
    // constructor(values, application, parent, defaultValues) {

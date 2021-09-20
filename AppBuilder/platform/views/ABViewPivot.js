@@ -4,7 +4,7 @@ const ABFieldFormula = require("../dataFields/ABFieldFormula");
 const ABFieldNumber = require("../dataFields/ABFieldNumber");
 const ABObjectQuery = require("../ABObjectQuery");
 
-let L = (...params) => AB.Label("", ...params);
+let L = (...params) => AB.Label()("", ...params);
 
 module.exports = class ABViewPivot extends ABViewPivotCore {
    // constructor(values, application, parent, defaultValues) {

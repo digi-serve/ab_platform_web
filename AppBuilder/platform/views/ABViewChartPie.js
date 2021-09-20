@@ -2,7 +2,7 @@ const ABViewChartPieCore = require("../../core/views/ABViewChartPieCore");
 
 const ABViewChartPiePropertyComponentDefaults = ABViewChartPieCore.defaultValues();
 
-let L = (...params) => AB.Label("", ...params);
+let L = (...params) => AB.Label()("", ...params);
 
 module.exports = class ABViewChartPie extends ABViewChartPieCore {
    // constructor(values, application, parent, defaultValues) {

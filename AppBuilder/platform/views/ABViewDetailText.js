@@ -2,7 +2,7 @@ const ABViewDetailTextCore = require("../../core/views/ABViewDetailTextCore");
 
 const ABViewDetailTextPropertyComponentDefaults = ABViewDetailTextCore.defaultValues();
 
-let L = (...params) => AB.Label("", ...params);
+let L = (...params) => AB.Label()("", ...params);
 
 module.exports = class ABViewDetailText extends ABViewDetailTextCore {
    /**

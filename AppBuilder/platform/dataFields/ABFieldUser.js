@@ -2,7 +2,7 @@ var ABFieldConnectCore = require("../../core/dataFields/ABFieldConnectCore");
 var ABFieldUserCore = require("../../core/dataFields/ABFieldUserCore");
 var ABFieldComponent = require("./ABFieldComponent");
 
-let L = (...params) => AB.Label("", ...params);
+let L = (...params) => AB.Label()("", ...params);
 
 var ids = {
    editable: "ab-user-editable",

@@ -1,6 +1,6 @@
 const InsertRecordTaskCore = require("../../../core/process/tasks/ABProcessTaskServiceInsertRecordCore.js");
 
-let L = (...params) => AB.Label("", ...params);
+let L = (...params) => AB.Label()("", ...params);
 
 module.exports = class InsertRecordTask extends InsertRecordTaskCore {
    ////

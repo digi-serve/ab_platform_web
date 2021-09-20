@@ -2,7 +2,7 @@ const ABViewDetailSelectivityCore = require("../../core/views/ABViewDetailSelect
 
 const ABViewDetailPropertyComponentDefaults = ABViewDetailSelectivityCore.defaultValues();
 
-let L = (...params) => AB.Label("", ...params);
+let L = (...params) => AB.Label()("", ...params);
 
 module.exports = class ABViewDetailSelectivity extends (
    ABViewDetailSelectivityCore

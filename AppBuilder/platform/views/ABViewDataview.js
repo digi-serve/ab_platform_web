@@ -3,7 +3,7 @@ const ABViewPropertyLinkPage = require("./viewProperties/ABViewPropertyLinkPage"
 
 const ABViewDataviewDefaults = ABViewDataviewCore.defaultValues();
 
-let L = (...params) => AB.Label("", ...params);
+let L = (...params) => AB.Label()("", ...params);
 
 module.exports = class ABViewDataview extends ABViewDataviewCore {
    // constructor(values, application, parent, defaultValues) {

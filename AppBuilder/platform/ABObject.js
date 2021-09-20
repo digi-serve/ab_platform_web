@@ -1,7 +1,7 @@
 const ABObjectCore = require("../core/ABObjectCore");
 const ABObjectWorkspaceViewCollection = require("./workspaceViews/ABObjectWorkspaceViewCollection");
 
-let L = (...params) => AB.Label("", ...params);
+let L = (...params) => AB.Label()("", ...params);
 
 // Start listening for server events for object updates and call triggerEvent as the callback
 if (typeof io != "undefined") {

@@ -3,7 +3,7 @@ const ABViewGridFilterRule = require("../../../rules/ABViewGridFilterRule");
 
 const RowFilter = require("../../RowFilter");
 
-let L = (...params) => AB.Label("", ...params);
+let L = (...params) => AB.Label()("", ...params);
 
 var getRule = (object, App, idBase) => {
    var FilterRule = new ABViewGridFilterRule();

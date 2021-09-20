@@ -1,6 +1,6 @@
 const ABViewCore = require("../../core/views/ABViewCore.js");
 
-let L = (...params) => AB.Label("", ...params);
+let L = (...params) => AB.Label()("", ...params);
 
 module.exports = class ABView extends ABViewCore {
    // constructor(attributes, application, parent) {

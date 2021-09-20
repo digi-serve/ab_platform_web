@@ -1,6 +1,6 @@
 const AccountingBatchProcessingCore = require("../../../core/process/tasks/ABProcessTaskServiceAccountingBatchProcessingCore.js");
 
-let L = (...params) => AB.Label("", ...params);
+let L = (...params) => AB.Label()("", ...params);
 
 module.exports = class AccountingBatchProcessing extends (
    AccountingBatchProcessingCore

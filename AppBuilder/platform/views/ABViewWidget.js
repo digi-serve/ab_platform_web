@@ -2,7 +2,7 @@ const ABViewWidgetCore = require("../../core/views/ABViewWidgetCore");
 
 const ABPropertyComponentDefaults = ABViewWidgetCore.defaultValues();
 
-let L = (...params) => AB.Label("", ...params);
+let L = (...params) => AB.Label()("", ...params);
 
 module.exports = class ABViewWidget extends ABViewWidgetCore {
    // constructor(values, application, parent, defaultValues) {

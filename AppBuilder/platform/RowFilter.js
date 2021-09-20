@@ -1,6 +1,6 @@
 const RowFilterCore = require("../core/RowFilterCore");
 
-let L = (...params) => AB.Label("", ...params);
+let L = (...params) => AB.Label()("", ...params);
 
 module.exports = class RowFilter extends RowFilterCore {
    constructor(App, idBase, AB) {

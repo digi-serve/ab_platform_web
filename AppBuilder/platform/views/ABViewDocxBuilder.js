@@ -11,7 +11,7 @@ const JSZip = require("../../../js/jszip.min.js");
 
 const ABViewDocxBuilderPropertyComponentDefaults = ABViewDocxBuilderCore.defaultValues();
 
-let L = (...params) => AB.Label("", ...params);
+let L = (...params) => AB.Label()("", ...params);
 
 function letUserDownload(blob, filename) {
    let url = window.URL.createObjectURL(blob);

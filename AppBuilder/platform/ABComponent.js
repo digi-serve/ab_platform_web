@@ -2,7 +2,7 @@ const ABEmitter = require("./ABEmitter");
 
 const CustomComponentManager = require("../../webix_custom_components/customComponentManager");
 
-let L = (...params) => AB.Label("", ...params);
+let L = (...params) => AB.Label()("", ...params);
 
 module.exports = class ABComponent extends ABEmitter {
    /**

@@ -1,7 +1,7 @@
 var ABFieldStringCore = require("../../core/dataFields/ABFieldStringCore");
 var ABFieldComponent = require("./ABFieldComponent");
 
-let L = (...params) => AB.Label("", ...params);
+let L = (...params) => AB.Label()("", ...params);
 
 /**
  * ABFieldStringComponent

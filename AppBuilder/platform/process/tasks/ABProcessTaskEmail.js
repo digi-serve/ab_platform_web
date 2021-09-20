@@ -3,7 +3,7 @@
 const ABProcessTaskEmailCore = require("../../../core/process/tasks/ABProcessTaskEmailCore.js");
 const ABProcessParticipant = require("../ABProcessParticipant.js");
 
-let L = (...params) => AB.Label("", ...params);
+let L = (...params) => AB.Label()("", ...params);
 
 module.exports = class ABProcessTaskEmail extends ABProcessTaskEmailCore {
    ////

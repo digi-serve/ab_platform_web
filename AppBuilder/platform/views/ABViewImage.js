@@ -1,6 +1,6 @@
 const ABViewImageCore = require("../../core/views/ABViewImageCore");
 
-let L = (...params) => AB.Label("", ...params);
+let L = (...params) => AB.Label()("", ...params);
 
 module.exports = class ABViewImage extends ABViewImageCore {
    // constructor(values, application, parent, defaultValues) {

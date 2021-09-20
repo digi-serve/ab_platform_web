@@ -31,7 +31,7 @@
 //		.catch();
 //  }
 
-let L = (...params) => AB.Label("", ...params);
+let L = (...params) => AB.Label()("", ...params);
 
 module.exports = class ABViewRuleList {
    /**

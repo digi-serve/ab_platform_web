@@ -1,6 +1,6 @@
 const ABViewProperty = require("./ABViewProperty");
 
-let L = (...params) => AB.Label("", ...params);
+let L = (...params) => AB.Label()("", ...params);
 
 module.exports = class ABViewPropertyAddPage extends ABViewProperty {
    /**

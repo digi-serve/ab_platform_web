@@ -4,7 +4,7 @@ const RowFilter = require("../RowFilter");
 
 const ABViewCSVExporterPropertyComponentDefaults = ABViewCSVExporterCore.defaultValues();
 
-let L = (...params) => AB.Label("", ...params);
+let L = (...params) => AB.Label()("", ...params);
 
 let PropertyFilter = null;
 

@@ -2,7 +2,7 @@ const ABViewLabelCore = require("../../core/views/ABViewLabelCore");
 
 const ABViewLabelPropertyComponentDefaults = ABViewLabelCore.defaultValues();
 
-let L = (...params) => AB.Label("", ...params);
+let L = (...params) => AB.Label()("", ...params);
 
 module.exports = class ABViewLabel extends ABViewLabelCore {
    // constructor(values, application, parent, defaultValues) {

@@ -7,7 +7,7 @@ const AccountingJEArchive = require("./ABProcessTaskServiceAccountingJEArchive.j
 const ABProcessTaskServiceInsertRecord = require("./ABProcessTaskServiceInsertRecord.js");
 const ABProcessTaskServiceQuery = require("./ABProcessTaskServiceQuery.js");
 
-let L = (...params) => AB.Label("", ...params);
+let L = (...params) => AB.Label()("", ...params);
 
 module.exports = class ABProcessTaskService extends ABProcessTaskServiceCore {
    ////

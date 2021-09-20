@@ -1,7 +1,7 @@
 var ABFieldAutoIndexCore = require("../../core/dataFields/ABFieldAutoIndexCore");
 var ABFieldComponent = require("./ABFieldComponent");
 
-let L = (...params) => AB.Label("", ...params);
+let L = (...params) => AB.Label()("", ...params);
 
 var ids = {
    prefixText: "prefixText",

@@ -2,7 +2,7 @@ const ABViewTextCore = require("../../core/views/ABViewTextCore");
 
 const ABViewTextPropertyComponentDefaults = ABViewTextCore.defaultValues();
 
-let L = (...params) => AB.Label("", ...params);
+let L = (...params) => AB.Label()("", ...params);
 
 module.exports = class ABViewText extends ABViewTextCore {
    // constructor(values, application, parent, defaultValues) {

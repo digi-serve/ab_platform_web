@@ -4,7 +4,7 @@ const ABObjectQuery = require("../ABObjectQuery");
 
 const ABViewDetailPropertyComponentDefaults = ABViewDetailCore.defaultValues();
 
-let L = (...params) => AB.Label("", ...params);
+let L = (...params) => AB.Label()("", ...params);
 
 module.exports = class ABViewDetail extends ABViewDetailCore {
    // constructor(values, application, parent, defaultValues) {

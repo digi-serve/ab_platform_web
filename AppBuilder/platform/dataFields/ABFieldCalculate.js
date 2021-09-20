@@ -15,7 +15,7 @@ var ids = {
    decimalPlaces: "ab-field-calculate-decimal-places",
 };
 
-let L = (...params) => AB.Label("", ...params);
+let L = (...params) => AB.Label()("", ...params);
 
 /**
  * ABFieldCalculateComponent

@@ -3,7 +3,7 @@ const ABProcessTriggerTimerCore = require("../../../core/process/tasks/ABProcess
 const START_URL = "/process/timer/#id#/start";
 const STOP_URL = "/process/timer/#id#/stop";
 
-let L = (...params) => AB.Label("", ...params);
+let L = (...params) => AB.Label()("", ...params);
 
 module.exports = class ABProcessTriggerTimer extends ABProcessTriggerTimerCore {
    propertyIDs(id) {

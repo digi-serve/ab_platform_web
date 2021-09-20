@@ -1,7 +1,7 @@
 const ABFieldDateTimeCore = require("../../core/dataFields/ABFieldDateTimeCore");
 const ABFieldComponent = require("./ABFieldComponent");
 
-let L = (...params) => AB.Label("", ...params);
+let L = (...params) => AB.Label()("", ...params);
 
 function defaultDateChange() {
    var defaultDateValue = $$(ids.defaultDate).getValue();

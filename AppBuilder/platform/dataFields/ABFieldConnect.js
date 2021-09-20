@@ -1,7 +1,7 @@
 var ABFieldConnectCore = require("../../core/dataFields/ABFieldConnectCore");
 var ABFieldComponent = require("./ABFieldComponent");
 
-let L = (...params) => AB.Label("", ...params);
+let L = (...params) => AB.Label()("", ...params);
 
 var ids = {
    linkObject: "ab-new-connectObject-list-item",

@@ -8,7 +8,7 @@
 var ABFieldCore = require("../../core/dataFields/ABFieldCore");
 var FilterComplex = require("../FilterComplex");
 
-let L = (...params) => AB.Label("", ...params);
+let L = (...params) => AB.Label()("", ...params);
 
 module.exports = class ABField extends ABFieldCore {
    constructor(values, object, fieldDefaults) {

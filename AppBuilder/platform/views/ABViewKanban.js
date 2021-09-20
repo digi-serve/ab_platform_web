@@ -5,7 +5,7 @@ const ABWorkspaceViewKanban = require("../workspaceViews/ABObjectWorkspaceViewKa
 
 const ABViewPropertyLinkPage = require("./viewProperties/ABViewPropertyLinkPage");
 
-let L = (...params) => AB.Label("", ...params);
+let L = (...params) => AB.Label()("", ...params);
 
 module.exports = class ABViewKanban extends ABViewKanbanCore {
    // constructor(values, application, parent, defaultValues) {

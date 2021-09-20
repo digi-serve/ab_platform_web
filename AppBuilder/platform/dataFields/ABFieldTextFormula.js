@@ -1,7 +1,7 @@
 var ABFieldTextFormulaCore = require("../../core/dataFields/ABFieldTextFormulaCore");
 var ABFieldComponent = require("./ABFieldComponent");
 
-let L = (...params) => AB.Label("", ...params);
+let L = (...params) => AB.Label()("", ...params);
 
 /**
  * ABFieldTextFormulaComponent

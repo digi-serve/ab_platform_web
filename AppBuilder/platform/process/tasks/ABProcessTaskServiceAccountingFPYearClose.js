@@ -1,6 +1,6 @@
 const AccountingFPYearCloseCore = require("../../../core/process/tasks/ABProcessTaskServiceAccountingFPYearCloseCore.js");
 
-let L = (...params) => AB.Label("", ...params);
+let L = (...params) => AB.Label()("", ...params);
 
 module.exports = class AccountingFPYearClose extends AccountingFPYearCloseCore {
    ////

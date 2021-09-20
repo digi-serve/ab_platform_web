@@ -1,7 +1,7 @@
 var ABFieldTreeCore = require("../../core/dataFields/ABFieldTreeCore");
 var ABFieldComponent = require("./ABFieldComponent");
 
-let L = (...params) => AB.Label("", ...params);
+let L = (...params) => AB.Label()("", ...params);
 
 var ids = {
    options: "ab-tree-option",
