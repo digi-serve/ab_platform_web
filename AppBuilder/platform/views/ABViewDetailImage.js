@@ -113,7 +113,7 @@ module.exports = class ABViewDetailImage extends ABViewDetailImageCore {
       var idBase = "ABViewDetailImage_" + (idPrefix || "") + this.id;
       var ids = {
          component: App.unique(idBase + "_component"),
-         detail: this.parentDetailComponent().id,
+         detail: this.parentDetailComponent()?.id || this.parent.id,
       };
 
       var defaultImageUrl = field ? field.settings.defaultImageUrl : "";
