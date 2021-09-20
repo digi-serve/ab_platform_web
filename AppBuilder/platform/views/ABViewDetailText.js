@@ -102,7 +102,7 @@ module.exports = class ABViewDetailText extends ABViewDetailTextCore {
       var idBase = "ABViewDetailText_" + (idPrefix || "") + this.id;
       var ids = {
          component: App.unique(idBase + "_component"),
-         detail: this.parentDetailComponent().id,
+         detail: this.parentDetailComponent()?.id || this.parent.id,
       };
 
       component.ui.id = ids.component;
