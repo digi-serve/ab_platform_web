@@ -81,6 +81,16 @@ class Network extends EventEmitter {
    // Interface API
    //
    /**
+    * Network.isRealTime
+    * indicates wether or not the current network connection supports
+    * RealTime updates.
+    * @return {bool}
+    */
+   get isRealTime() {
+      return this._network.isRealTime;
+   }
+
+   /**
     * Network.get(options, jobResponse)
     * perform a GET request back to the AppBuilder server.
     * @param {obj} params the request parameters that need to be executed on

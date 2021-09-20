@@ -114,56 +114,6 @@ class PortalWork extends ClassUI {
                         },
                      },
                   },
-                  /**
-                   * NOTE: This is NOT supposed to Stay here.
-                   * just a tempory Developer Hack to quickly load definitions.
-                   */
-                  {
-                     view: "uploader",
-                     id: "tmp_uploader",
-                     // label: labels.common.import,
-                     width: 40,
-                     upload: "/definition/import",
-                     multiple: false,
-                     type: "icon",
-                     icon: "fa fa-upload no-margin",
-                     autosend: true,
-                     css: "webix_transparent",
-                     on: {
-                        onAfterFileAdd: () => {
-                           $$("tmp_uploader").disable();
-                        },
-                        onFileUpload: (/*item, response */) => {
-                           // the file upload process has finished
-                           // reload the page:
-                           window.location.reload();
-                           return false;
-                        },
-                        onFileUploadError: (details /*, response */) => {
-                           // {obj} details
-                           //   .file : {obj} file details hash
-                           //   .name : {string} filename
-                           //   .size : {int} file size
-                           //   .status : {string} "error"
-                           //   .xhr :  {XHR Object}
-                           //      .responseText
-                           //      .status : {int}  404
-                           //      .statusText : {string}
-
-                           this.AB.error("Error uploading file", {
-                              url: details.xhr.responseURL,
-                              status: details.status,
-                              code: details.xhr.status,
-                              response: details.xhr.responseText,
-                           });
-                           $$("tmp_uploader").enable();
-                           return false;
-                        },
-                        onAfterRender() {
-                           ClassUI.CYPRESS_REF(this);
-                        },
-                     },
-                  },
                ],
             },
             {
@@ -196,7 +146,7 @@ class PortalWork extends ClassUI {
                                              );
                                           });
                                        },
-                                       onAfterSelect: (id) => {
+                                       onAfterSelect: (/* id */) => {
                                           // this.selectApplication(id);
                                        },
                                        onItemClick: (id) => {
@@ -241,10 +191,14 @@ class PortalWork extends ClassUI {
       // are responsible for displaying the proper state of each of our
       // Root Pages.
 
+      // Get all our ABApplications and loaded Plugins in allApplications
+      var allApplications = this.AB.applications() || [];
+      allApplications = allApplications.concat(this.AB.plugins() || []);
+
       // Build out our Navigation Side Bar Menu with our available
       // ABApplications
       let menu_data = [];
-      (this.AB.applications() || []).forEach((app) => {
+      allApplications.forEach((app) => {
          // TODO: implement Sorting on these before building UI
          menu_data.push(this.uiSideBarMenuEntry(app));
       });
@@ -323,9 +277,15 @@ class PortalWork extends ClassUI {
             this.AppState = AppState;
 
             // set default selected App if not already set
-            // just choose the 1st App in the list
+            // just choose the 1st App in the list (must have pages)
             if (!this.AppState.lastSelectedApp && menu_data.length) {
-               this.AppState.lastSelectedApp = menu_data[0].abApplication.id;
+               menu_data.forEach((menu) => {
+                  if (!this.AppState.lastSelectedApp) {
+                     if ((menu.abApplication.pages() || []).length > 0) {
+                        this.AppState.lastSelectedApp = menu.abApplication.id;
+                     }
+                  }
+               });
             }
 
             //
@@ -348,10 +308,16 @@ class PortalWork extends ClassUI {
                   // if we couldn't find the entry then our .lastSelectedApp
                   // must be referencing an Application we no longer have
                   // access to.
-                  // So just pick the 1st app:
-                  foundMenuEntry = this.sidebarMenuEntryByID(
-                     menu_data[0].abApplication.id
-                  );
+                  // So just pick the 1st app with pages
+                  menu_data.forEach((menu) => {
+                     if (!foundMenuEntry) {
+                        if ((menu.abApplication.pages() || []).length > 0) {
+                           foundMenuEntry = this.sidebarMenuEntryByID(
+                              menu.abApplication.id
+                           );
+                        }
+                     }
+                  });
                }
 
                if (foundMenuEntry) {
@@ -377,7 +343,7 @@ class PortalWork extends ClassUI {
             //
 
             var allPlaceholders = [];
-            (this.AB.applications() || []).forEach((app) => {
+            allApplications.forEach((app) => {
                (app.pages() || []).forEach((page) => {
                   allPlaceholders.push({
                      id: this.pageID(page),
@@ -433,7 +399,7 @@ class PortalWork extends ClassUI {
             // Step 5: initialize the remaining Pages
             //
 
-            (this.AB.applications() || []).forEach((app) => {
+            allApplications.forEach((app) => {
                (app.pages() || []).forEach((page) => {
                   if (!DefaultPage || page.id != DefaultPage.id) {
                      var cont = new ClassUIPage(
@@ -559,11 +525,15 @@ class PortalWork extends ClassUI {
             this.AppState.lastPages[row.abApplication.id] = p.id;
          }
 
+         var pbLabel = p.label;
+         if ("function" === typeof p.label) {
+            pbLabel = p.label();
+         }
          pageButtons.push({
             view: "button",
             css: active,
             type: "icon",
-            label: p.label,
+            label: pbLabel,
             autowidth: true,
             icon: `fa fa-${p.icon}`,
             abPage: p,
@@ -618,7 +588,7 @@ class PortalWork extends ClassUI {
          .forEach((p) => {
             selectedPage = p;
          });
-      this.showPage(selectedPage.data.abPage);
+      this.showPage(selectedPage?.data?.abPage);
 
       // hide the sidebar menu
       var sideBar = $$("navSidebar");
@@ -647,7 +617,7 @@ class PortalWork extends ClassUI {
    }
 
    showPage(page) {
-      var pageUI = this.pageContainers[page.id];
+      var pageUI = this.pageContainers[page?.id];
       if (pageUI) {
          pageUI.show();
          this.AppState.lastPages[page.application.id] = page.id;

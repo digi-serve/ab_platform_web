@@ -17,7 +17,7 @@ module.exports = {
    },
 
    parserOptions: {
-      ecmaVersion: 8,
+      ecmaVersion: 2020,
    },
 
    // extending recommended config and config derived from eslint-config-prettier

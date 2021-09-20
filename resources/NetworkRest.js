@@ -48,6 +48,10 @@ class NetworkRest extends EventEmitter {
       // {Network} ._network
       // the Parent Network Resource that the rest of the Platform actually
       // works with.
+
+      this.isRealTime = false;
+      // {bool}
+      // does this Network type support RealTime updates. (socket = true);
    }
 
    /**

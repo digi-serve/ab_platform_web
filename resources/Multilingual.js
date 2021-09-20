@@ -17,6 +17,7 @@ class Multilingual extends MLClass {
 
       this._missingLabelID = false;
       this._missingLabels = {};
+      this._pluginLabelsMissing = {};
    }
 
    init(AB) {
@@ -26,6 +27,8 @@ class Multilingual extends MLClass {
 
       this.labels = this.AB.Config.labelConfig();
 
+      this.pluginLabels = {};
+
       // this isn't actually an Async operation, so just resolve()
       return Promise.resolve();
    }
@@ -34,7 +37,12 @@ class Multilingual extends MLClass {
       return this.AB.Account.language();
    }
 
-   label(key, altText, values = []) {
+   label(key, altText, values = [], postMissing = true) {
+      // part of our transition: L("single string") should start to work:
+      if (typeof altText == "undefined" && key) {
+         altText = key;
+      }
+
       // NOTE: transition to new Labels
       // currently our code still uses the L(key, altText, values) format, but
       // the labels we get back are in L(altText, values) format.
@@ -51,10 +59,33 @@ class Multilingual extends MLClass {
       }
       var label = this.labels[newKey];
       if (!label) {
-         this.postMissingLabel(key, altText);
+         if (postMissing) {
+            this.postMissingLabel(key, altText);
+         }
          label = altText;
       }
 
+      values.forEach((v, i) => {
+         var sub = `{${i}}`;
+         label = label.replaceAll(sub, v);
+      });
+      return label;
+   }
+
+   labelPlugin(plugin, altText, values = []) {
+      // 1st check to see if it is a common label from platform:
+      var label = this.label(altText, altText, values, false);
+      if (!label) {
+         // ok, so check to see if it is a Plugin Label:
+         label = this.pluginLabels[plugin][altText];
+      }
+      if (!label) {
+         // !! record it missing.
+         this._pluginLabelsMissing[plugin] =
+            this._pluginLabelsMissing[plugin] || {};
+         this._pluginLabelsMissing[plugin][altText] = altText;
+         label = altText;
+      }
       values.forEach((v, i) => {
          var sub = `{${i}}`;
          label = label.replaceAll(sub, v);
@@ -67,6 +98,16 @@ class Multilingual extends MLClass {
          "Multilingual:languages(): Implement Language Storage/Retrieval."
       );
       return [];
+   }
+
+   pluginLoadLabels(key, labels) {
+      this.pluginLabels[key] = labels;
+   }
+   pluginLabelReport(key) {
+      console.warn("missing labels for plugin: ", key);
+      console.warn("current language:", this.currentLanguage());
+      var labels = JSON.stringify(this._pluginLabelsMissing[key], null, 3);
+      console.warn(labels);
    }
 
    postMissingLabel(key, altText) {

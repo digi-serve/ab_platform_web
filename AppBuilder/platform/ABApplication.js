@@ -37,17 +37,17 @@ module.exports = class ABClassApplication extends ABApplicationCore {
    //    return `opstools.${this.validAppName()}.view`;
    // }
 
-   validAppName() {
-      return this.AB.rules.toApplicationNameFormat(this.name);
-   }
+   // validAppName() {
+   //    return this.AB.rules.toApplicationNameFormat(this.name);
+   // }
 
    ////
    //// DB Related
    ////
 
-   dbApplicationName() {
-      return this.AB.rules.toApplicationNameFormat(this.name);
-   }
+   // dbApplicationName() {
+   //    return this.AB.rules.toApplicationNameFormat(this.name);
+   // }
 
    ///
    /// Definition
@@ -144,6 +144,15 @@ module.exports = class ABClassApplication extends ABApplicationCore {
       values.key = ABViewPage.common().key;
 
       return ABViewManager.newView(values, this, null);
+   }
+
+   save() {
+      // if someone just changed the name of our ABApplication, reflect that
+      // in our Def.Name
+      if (this.name != this.label) {
+         this.name = this.label;
+      }
+      return super.save();
    }
 
    /**

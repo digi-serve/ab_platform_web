@@ -14,6 +14,8 @@ import Config from "../config/Config.js";
 import Account from "../resources/Account.js";
 // Account : manages the current Logged in User and Account information.
 
+import ClassUI from "../ui/ClassUI.js";
+
 import Dialog from "./_factory_utils/Dialog.js";
 // Dialog : common UI dialogs.
 
@@ -57,6 +59,9 @@ class ABFactory extends ABFactoryCore {
       this.Storage = Storage;
       this.Tenant = Tenant;
       this.Webix = Webix;
+
+      // Plugin Classes
+      this.ClassUI = ClassUI;
 
       // Temp placeholders until Resources are implemented:
       this.Analytics = {
@@ -102,6 +107,88 @@ class ABFactory extends ABFactoryCore {
          // this simply prevents thrown errors if there are no listeners.
          console.error(err);
       });
+
+      this._plugins = [];
+      // {array} of loaded Plugin.applications.
+
+      this._pendingNetworkRequests = {};
+      // {hash}   uuid : {Promise}
+      // convert our definitionsXXXX() operations to be Relay/offline compatible.
+      // if a queued operation is sent after a web browser refresh, then
+      // we will NOT have a pending promise to .resolve()/.reject()
+
+      this.Network.on("definition.create", (context, err, fullDef) => {
+         var pending = this._pendingNetworkRequests[context.uuid];
+         if (err) {
+            this.error(err);
+            pending?.reject(err);
+            return;
+         }
+
+         // if we are NOT in Network Socket mode:
+         if (!this.Network.isRealTime) {
+            // simulate this data coming via RT update
+            var pkt = {
+               id: fullDef.id,
+               data: fullDef,
+            };
+            this.emit("ab.abdefinition.create", pkt);
+         }
+
+         let newDef = this.definitionNew(fullDef);
+         pending?.resolve(newDef);
+      });
+
+      this.Network.on("definition.update", (context, err, serverDef) => {
+         var pending = this._pendingNetworkRequests[context.uuid];
+         if (err) {
+            if (err.toString().indexOf("Not Found") > -1) {
+               return this.definitionCreate(values)
+                  .then(pending?.resolve)
+                  .catch(penidng?.reject);
+            }
+            // log the error
+            this.error(err);
+            pending?.reject(err);
+            return;
+         }
+
+         this._definitions[context.id] = serverDef;
+
+         // if we are NOT in Network Socket mode:
+         // if (!this.Network.isRealTime) {
+         var pkt = {
+            id: serverDef.id,
+            data: serverDef,
+         };
+         this.emit("ab.abdefinition.update", pkt);
+         // }
+
+         pending?.resolve(serverDef);
+      });
+
+      this.Network.on("definition.delete", (context, err, serverDef) => {
+         var pending = this._pendingNetworkRequests[context.uuid];
+         if (err) {
+            // log the error
+            this.error(err);
+            pending?.reject(err);
+            return;
+         }
+
+         delete this._definitions[context.id];
+
+         // if we are NOT in Network Socket mode:
+         // if (!this.Network.isRealTime) {
+         var pkt = {
+            id: context.id,
+            data: serverDef,
+         };
+         this.emit("ab.abdefinition.delete", pkt);
+         // }
+
+         pending?.resolve();
+      });
    }
 
    /**
@@ -132,7 +219,55 @@ class ABFactory extends ABFactoryCore {
             });
          })
          .then(() => {
-            // Now prepare the rest of the ABFactory()
+            //
+            // RealTime Updates of our ABDefinitions
+            //
+
+            // new ABDefinition created:
+            this.on("ab.abdefinition.create", (pkt) => {
+               // pkt.id : definition.id
+               // pkt.data : definition
+
+               if (typeof pkt.data.json == "string") {
+                  try {
+                     pkt.data.json = JSON.parse(pkt.data.json);
+                  } catch (e) {
+                     console.log(e);
+                  }
+               }
+               this.definitionSync("created", pkt.id, pkt.data);
+            });
+
+            // ABDefinition updated:
+            this.on("ab.abdefinition.update", (pkt) => {
+               // pkt.id : definition.id
+               // pkt.data : definition
+               if (typeof pkt.data.json == "string") {
+                  try {
+                     pkt.data.json = JSON.parse(pkt.data.json);
+                  } catch (e) {
+                     console.log(e);
+                  }
+               }
+               this._definitions[pkt.id] = pkt.data;
+               this.definitionSync("updated", pkt.id, pkt.data);
+            });
+
+            // ABDefinition delete:
+            this.on("ab.abdefinition.delete", (pkt) => {
+               // pkt.id : definition.id
+               // pkt.data : definition
+               if (typeof pkt.data.json == "string") {
+                  try {
+                     pkt.data.json = JSON.parse(pkt.data.json);
+                  } catch (e) {
+                     console.log(e);
+                  }
+               }
+               delete this._definitions[pkt.id];
+               this.definitionSync("destroyed", pkt.id, pkt.data);
+            });
+
             return super.init();
          });
    }
@@ -145,20 +280,30 @@ class ABFactory extends ABFactoryCore {
     * @return {Promise}
     *        resolved with a new {ABDefinition} for the entry.
     */
-   definitionCreate(def) {
-      return this.Network.post({
-         url: `/app_builder/abdefinitionmodel`,
-         data: def,
-      })
-         .then((fullDef) => {
-            let newDef = this.definitionNew(fullDef);
-            this.emit("definition.created", newDef);
-            return newDef;
-         })
-         .catch((err) => {
-            this.error(err);
-            throw err;
-         });
+   async definitionCreate(def) {
+      // we will set our uuid
+      if (typeof def.id == "undefined") {
+         def.id = this.uuid();
+         def.json.id = def.id;
+      }
+
+      return new Promise((resolve, reject) => {
+         var uuid = this.uuid();
+         this._pendingNetworkRequests[uuid] = { resolve, reject };
+         var jobResponse = {
+            key: "definition.create",
+            context: {
+               uuid,
+            },
+         };
+         this.Network.post(
+            {
+               url: `/definition/create`,
+               data: def,
+            },
+            jobResponse
+         );
+      });
    }
 
    /**
@@ -168,7 +313,27 @@ class ABFactory extends ABFactoryCore {
     *        the uuid of the ABDefinition to delete
     * @return {Promise}
     */
-   definitionDestroy(id) {
+   async definitionDestroy(id) {
+      return new Promise((resolve, reject) => {
+         var uuid = this.uuid();
+         this._pendingNetworkRequests[uuid] = { resolve, reject };
+         var jobResponse = {
+            key: "definition.delete",
+            context: {
+               id,
+               uuid,
+            },
+         };
+         this.Network.delete(
+            {
+               url: `/definition/${id}`,
+            },
+            jobResponse
+         );
+      });
+
+      /*
+      var prevDef = this._definitions[id];
       return this.Network.delete({
          url: `/app_builder/abdefinitionmodel/${id}`,
       })
@@ -180,6 +345,7 @@ class ABFactory extends ABFactoryCore {
             this.error(err);
             throw err;
          });
+*/
    }
 
    /**
@@ -192,26 +358,80 @@ class ABFactory extends ABFactoryCore {
     * @return {Promise}
     *        resolved with a new {ABDefinition} for the entry.
     */
-   definitionUpdate(id, values) {
-      return this.Network.put({
-         url: `/app_builder/abdefinitionmodel/${id}`,
-         data: values,
-      })
-         .then((serverDef) => {
-            this._definitions[id] = serverDef;
-            // TODO: fiugure out how to propogate definition updates to live objects
-            this.emit("definition.updated", id, serverDef);
-            return serverDef;
-         })
-         .catch((err) => {
-            if (err.toString().indexOf("Not Found") > -1) {
-               return this.definitionCreate(values);
-            }
-            // log the error
-            this.error(err);
-            // keep the error propagating:
-            throw err;
-         });
+   async definitionUpdate(id, values) {
+      return new Promise((resolve, reject) => {
+         var uuid = this.uuid();
+         this._pendingNetworkRequests[uuid] = { resolve, reject };
+         var jobResponse = {
+            key: "definition.update",
+            context: {
+               id,
+               uuid,
+            },
+         };
+         this.Network.put(
+            {
+               url: `/definition/${id}`,
+               data: values,
+            },
+            jobResponse
+         );
+      });
+   }
+
+   definitionSync(op, id, def) {
+      var { keyList, keyFn } = this.objectKeysByDef(def);
+      if (keyList) {
+         switch (op) {
+            case "created":
+               this[keyList].push(this[keyFn](def.json));
+               this.emit("definition.created", def.json);
+               break;
+
+            case "updated":
+               // get the current object
+               var curr = this[keyList].find((d) => d.id == id);
+
+               // remove from list
+               this[keyList] = this[keyList].filter((d) => d.id != id);
+               // add new one:
+               this[keyList].push(this[keyFn](def.json));
+
+               // signal this object needs to be updated:
+               if (curr.emit) {
+                  curr.emit("definition.updated");
+               }
+
+               this.emit("definition.updated", def.json);
+               break;
+
+            case "destroyed":
+               // get the current object
+               var curr = this[keyList].find((d) => d.id == id);
+               if (curr) {
+                  // remove from list
+                  this[keyList] = this[keyList].filter((d) => d.id != id);
+
+                  // signal this object needs to be updated:
+                  if (curr?.emit) {
+                     curr.emit("definition.deleted");
+                  }
+
+                  this.emit("definition.deleted", def.json);
+               }
+               break;
+         }
+      }
+
+      if (def.id) {
+      }
+   }
+
+   plugins() {
+      return this._plugins;
+   }
+   pluginLoad(p) {
+      this._plugins.push(p);
    }
 
    //
@@ -297,7 +517,7 @@ class ABFactory extends ABFactoryCore {
       );
       return checker.test(key);
    }
-   
+
    merge(...params) {
       return _.merge(...params);
    }
@@ -334,7 +554,7 @@ class ABFactory extends ABFactoryCore {
    toDate(dateText = "", options = {}) {
       if (!dateText) return;
 
-      if (options.ignoreTime) dateText = dateText.replace(/\T.*/, "");
+      if (options.ignoreTime) dateText = dateText.replace(/T.*/, "");
 
       let result = options.format
          ? moment(dateText, options.format)

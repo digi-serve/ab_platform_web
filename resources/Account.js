@@ -48,8 +48,15 @@ class Account extends EventEmitter {
       return Promise.resolve();
    }
 
+   isSystemDesigner() {
+      return (
+         this.roles((r) => r.uuid === "6cc04894-a61b-4fb5-b3e5-b8c3f78bd331")
+            .length > 0
+      );
+   }
+
    language() {
-      return this._config.languageCode;
+      return this._config?.languageCode ?? "en";
    }
 
    logout() {
@@ -59,8 +66,8 @@ class Account extends EventEmitter {
       );
    }
 
-   roles() {
-      return this._config.roles || [];
+   roles(fn = () => true) {
+      return (this._config.roles || []).filter(fn);
    }
    rolesAll() {
       return this._listRoles;

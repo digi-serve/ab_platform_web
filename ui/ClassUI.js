@@ -1,8 +1,14 @@
 var EventEmitter = require("events").EventEmitter;
 
 class ClassUI extends EventEmitter {
-   constructor() {
+   constructor(base) {
       super();
+      this.ids = {
+         component: base,
+      };
+      // if (!base) {
+      //    console.warn("new ClassUI() called without a base component id. ");
+      // }
    }
 
    /**
@@ -79,6 +85,12 @@ class ClassUI extends EventEmitter {
       console.error(
          "ClassUI.ui(): it is expected that sub classes of ClassUI will implement their own ui() method."
       );
+   }
+
+   show() {
+      if (this.ids?.component) {
+         $$(this.ids.component).show();
+      }
    }
 }
 
