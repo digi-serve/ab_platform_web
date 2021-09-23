@@ -873,6 +873,22 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
                   this.changePage(id);
                }
             },
+            onAfterRender: () => {
+               const Menu = $$(this.id);
+               const views = this.application.views();
+               Menu.data.each((item) => {
+                  const node = Menu.getItemNode(item.id);
+                  if (!node) return;
+                  // get linked page/tab info so we can use its name in the data-cy
+                  const viewInfo = views.filter((view) => {
+                     return view.id == item.id;
+                  })[0];
+                  node.setAttribute(
+                     "data-cy",
+                     `menu-item ${viewInfo.name} ${item.id} ${this.id}`
+                  );
+               });
+            },
          },
          type: {
             subsign: true,
@@ -985,18 +1001,8 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
             this.ClearPagesInView(Menu);
             if (this.settings.order && this.settings.order.length) {
                this.AddPagesToView(Menu, this.settings.order);
-               Menu.data.each((item) => {
-                  var node = Menu.getItemNode(item.id);
-                  if (!node) return;
-                  // get linked page/tab info so we can use its name in the data-cy
-                  var viewInfo = this.application.views((view) => {
-                     return view.id == item.id;
-                  })[0];
-                  node.setAttribute(
-                     "data-cy",
-                     `menu-item ${viewInfo.name} ${item.id} ${this.id}`
-                  );
-               });
+               // Force onAfterRender to fire
+               Menu.refresh();
             }
          }
       };
