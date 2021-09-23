@@ -21,6 +21,8 @@ module.exports = class ABWorkObjectKanBan extends ABComponent {
     */
 
    constructor(App, idBase) {
+      require("../js/webix/components/kanban/kanban");
+
       idBase = idBase || "ab_work_object_workspace_kanban";
       super(App, idBase);
 

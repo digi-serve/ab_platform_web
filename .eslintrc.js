@@ -49,7 +49,6 @@ module.exports = {
    globals: {
       AB: true, // global ABFactory
       async: true,
-      gantt: true,
       io: true, // socket.io
       moment: true,
       reports: true, // webix's Report Manager widget

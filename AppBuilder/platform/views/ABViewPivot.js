@@ -7,9 +7,11 @@ const ABObjectQuery = require("../ABObjectQuery");
 let L = (...params) => AB.Label()("", ...params);
 
 module.exports = class ABViewPivot extends ABViewPivotCore {
-   // constructor(values, application, parent, defaultValues) {
-   //    super(values, application, parent, defaultValues);
-   // }
+   constructor(values, application, parent, defaultValues) {
+      super(values, application, parent, defaultValues);
+
+      require("../../../js/webix/components/pivot/pivot");
+   }
 
    //
    //	Editor Related
@@ -219,7 +221,7 @@ module.exports = class ABViewPivot extends ABViewPivotCore {
             let dataMapped = data.map((d) => {
                let result = {};
 
-               object.fields(null, true).forEach((f) => {
+               object.fields().forEach((f) => {
                   if (
                      f instanceof ABFieldCalculate ||
                      f instanceof ABFieldFormula ||

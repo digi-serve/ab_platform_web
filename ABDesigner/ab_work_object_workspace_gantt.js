@@ -68,6 +68,7 @@ module.exports = class ABWorkObjectGantt extends ABComponent {
          CurrentNotesField = null;
 
       // Our webix UI definition:
+      let gantt = require("../js/webix/components/gantt/gantt");
       this.ui = {
          id: ids.component,
          rows: [
