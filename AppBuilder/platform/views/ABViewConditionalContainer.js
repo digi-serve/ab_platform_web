@@ -14,7 +14,7 @@ module.exports = class ABViewConditionalContainer extends (
       super(values, application, parent, defaultValues);
 
       // Set filter value
-      this.__filterComponent = new RowFilter();
+      this.__filterComponent = new RowFilter(null, "ABViewConditionalContainer", AB);
       // this.__filterComponent.applicationLoad(application);
       this.populateFilterComponent();
    }
@@ -73,7 +73,7 @@ module.exports = class ABViewConditionalContainer extends (
          this.populateBadgeNumber(ids, view);
       };
 
-      FilterComponent = new RowFilter(App, idBase + "_filter");
+      FilterComponent = new RowFilter(App, idBase + "_filter", AB);
       FilterComponent.init({
          // when we make a change in the popups we want to make sure we save the new workspace to the properties to do so just fire an onChange event
          onChange: _logic.onFilterChange,

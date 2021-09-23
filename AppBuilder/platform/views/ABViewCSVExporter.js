@@ -233,7 +233,7 @@ module.exports = class ABViewCSVExporter extends ABViewCSVExporterCore {
    static initPopupEditors(App, ids, _logic) {
       var idBase = "ABViewCSVExporterPropertyEditor";
 
-      PropertyFilter = new RowFilter(App, idBase + "_filter");
+      PropertyFilter = new RowFilter(App, idBase + "_filter", AB);
       PropertyFilter.init({
          // when we make a change in the popups we want to make sure we save the new workspace to the properties to do so just fire an onChange event
          onChange: _logic.onFilterChange,
@@ -294,7 +294,7 @@ module.exports = class ABViewCSVExporter extends ABViewCSVExporterCore {
          component: {},
       };
 
-      let ClientFilter = new RowFilter(App, idBase + "_filter");
+      let ClientFilter = new RowFilter(App, idBase + "_filter", AB);
 
       let _ui = {
          view: "layout",

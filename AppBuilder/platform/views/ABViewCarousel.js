@@ -549,7 +549,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
                if (imgFile) {
                   let imgData = {
                      id: r.id,
-                     src: `/opsportal/image/${obj.application.name}/${imgFile}`,
+                     src: `/file/${imgFile}`,
                   };
 
                   // label of row data
@@ -573,7 +573,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
                   template: _logic.myTemplate,
                   data: {
                      id: AB.uuid(),
-                     src: `/opsportal/image/${obj.application.name}/${field.settings.defaultImageUrl}`,
+                     src: `/file/${field.settings.defaultImageUrl}`,
                      label: "Default image",
                   },
                });
