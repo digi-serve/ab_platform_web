@@ -7,6 +7,8 @@
 //
 const ABViewRuleActionObjectUpdater = require("./ABViewRuleActionObjectUpdater");
 
+let L = (...params) => AB.Label()("", ...params);
+
 module.exports = class ABViewRuleActionFormRecordRuleUpdate extends (
    ABViewRuleActionObjectUpdater
 ) {
@@ -18,10 +20,9 @@ module.exports = class ABViewRuleActionFormRecordRuleUpdate extends (
     */
    constructor(App, idBase, currentForm) {
       super(App, idBase, currentForm);
-      var L = App.Label;
 
       this.key = "ABViewRuleActionFormRecordRuleUpdate";
-      this.label = L("ab.component.ruleaction.updateRecord", "*Update Record");
+      this.label = L("Update Record");
    }
 
    get isPreProcess() {

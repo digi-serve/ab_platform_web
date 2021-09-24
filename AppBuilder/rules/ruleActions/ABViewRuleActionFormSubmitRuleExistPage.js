@@ -5,6 +5,8 @@
 //
 const ABViewRuleAction = require("../ABViewRuleAction");
 
+let L = (...params) => AB.Label()("", ...params);
+
 module.exports = class ABViewRuleActionFormSubmitRuleExistPage extends (
    ABViewRuleAction
 ) {
@@ -16,14 +18,10 @@ module.exports = class ABViewRuleActionFormSubmitRuleExistPage extends (
     */
    constructor(App, idBase) {
       super();
-      var L = App.Label;
 
       this.App = App;
       this.key = "ABViewRuleActionFormSubmitRuleExistPage";
-      this.label = L(
-         "ab.component.ruleaction.abviewruleActionFormSubmitRuleExistPage",
-         "*Redirect to an existing page"
-      );
+      this.label = L("Redirect to an existing page");
 
       this.currentObject = null; // the object this Action is tied to.
 

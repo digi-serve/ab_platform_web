@@ -7,6 +7,8 @@ const ABViewRuleAction = require("../ABViewRuleAction");
 const ABFieldConnect = require("../../platform/dataFields/ABFieldConnect");
 const ABFieldEmail = require("../../platform/dataFields/ABFieldEmail");
 
+let L = (...params) => AB.Label()("", ...params);
+
 module.exports = class ABViewRuleActionFormSubmitRuleEmail extends (
    ABViewRuleAction
 ) {
@@ -18,14 +20,10 @@ module.exports = class ABViewRuleActionFormSubmitRuleEmail extends (
     */
    constructor(App, idBase) {
       super();
-      var L = App.Label;
 
       this.App = App;
       this.key = "ABViewRuleActionFormSubmitRuleEmail";
-      this.label = L(
-         "ab.component.ruleaction.abviewruleActionFormSubmitRuleEmail",
-         "*Send a custom email"
-      );
+      this.label = L("Send a custom email");
 
       this.queryObject = null; // the object this Action is tied to.
 
@@ -473,7 +471,7 @@ module.exports = class ABViewRuleActionFormSubmitRuleEmail extends (
 
                      if (fLink) {
                         optId = `${fLink.id}|${f.urlPointer()}`;
-                        optLabel = "${objLabel}.${f.label} (${fLink.label})";
+                        optLabel = `${objLabel}.${f.label} (${fLink.label})`;
                      } else {
                         optId = `|${f.urlPointer()}`;
                         optLabel = `${currObj.label}.${f.label}`;

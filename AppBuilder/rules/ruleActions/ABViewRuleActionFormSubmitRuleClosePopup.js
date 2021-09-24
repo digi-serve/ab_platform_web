@@ -5,6 +5,8 @@
 //
 const ABViewRuleAction = require("../ABViewRuleAction");
 
+let L = (...params) => AB.Label()("", ...params);
+
 module.exports = class ABViewRuleActionFormSubmitRuleClosePopup extends (
    ABViewRuleAction
 ) {
@@ -16,14 +18,10 @@ module.exports = class ABViewRuleActionFormSubmitRuleClosePopup extends (
     */
    constructor(App, idBase) {
       super();
-      var L = App.Label;
 
       this.App = App;
       this.key = "ABViewRuleActionFormSubmitRuleClosePopup";
-      this.label = L(
-         "ab.component.ruleaction.abviewruleActionFormSubmitRuleClosePopup",
-         "*Close the current popup"
-      );
+      this.label = L("Close the current popup");
 
       this.currentObject = null; // the object this Action is tied to.
 

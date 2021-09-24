@@ -5,6 +5,8 @@
 //
 const ABViewRuleAction = require("../ABViewRuleAction");
 
+let L = (...params) => AB.Label()("", ...params);
+
 module.exports = class ABViewRuleActionFormSubmitRuleParentPage extends (
    ABViewRuleAction
 ) {
@@ -16,14 +18,10 @@ module.exports = class ABViewRuleActionFormSubmitRuleParentPage extends (
     */
    constructor(App, idBase) {
       super();
-      var L = App.Label;
 
       this.App = App;
       this.key = "ABViewRuleActionFormSubmitRuleParentPage";
-      this.label = L(
-         "ab.component.ruleaction.abviewพuleActionFormSubmitRuleParentPage",
-         "*Redirect to the parent page"
-      );
+      this.label = L("Redirect to the parent page");
 
       this.currentObject = null; // the object this Action is tied to.
 

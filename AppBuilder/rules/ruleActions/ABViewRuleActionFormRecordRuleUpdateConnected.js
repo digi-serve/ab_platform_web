@@ -9,18 +9,16 @@ const ABViewRuleActionObjectUpdater = require("./ABViewRuleActionObjectUpdater")
 const ABFieldConnect = require("../../platform/dataFields/ABFieldConnect");
 const ObjectQueryBuilder = require("../ABViewQueryBuilderObjectFieldConditions");
 
+let L = (...params) => AB.Label()("", ...params);
+
 module.exports = class ABViewRuleActionFormRecordRuleUpdateConnected extends (
    ABViewRuleActionObjectUpdater
 ) {
    constructor(App, idBase, currentForm) {
       super(App, idBase, currentForm);
-      var L = App.Label;
 
       this.key = "ABViewRuleActionFormRecordRuleUpdateConnected";
-      this.label = L(
-         "ab.component.ruleaction.updateConnectedRecord",
-         "*Update Connected Record"
-      );
+      this.label = L("Update Connected Record");
 
       this.baseObject = null; // the object the current form is working with.
       // Use this to find our connected fields.
@@ -33,14 +31,8 @@ module.exports = class ABViewRuleActionFormRecordRuleUpdateConnected extends (
       this.objectQB = null; // the QueryBuilder used for offering conditions based upon our connected Object.
       this.qbCondition = null; // the QB condition entered for selecting which remote object.
 
-      this.labels.component.selectField = L(
-         "ab.ruleAction.UpdateConnected.selectField",
-         "*Select which connected object to update."
-      );
-      this.labels.component.remoteCondition = L(
-         "ab.ruleAction.UpdateConnected.remoteCondition",
-         "*How to choose which object:"
-      );
+      this.labels.component.selectField = L("Select which connected object to update.");
+      this.labels.component.remoteCondition = L("How to choose which object:");
    }
 
    // field

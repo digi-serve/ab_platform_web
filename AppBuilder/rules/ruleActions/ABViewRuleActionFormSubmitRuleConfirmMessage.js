@@ -5,6 +5,8 @@
 //
 const ABViewRuleAction = require("../ABViewRuleAction");
 
+let L = (...params) => AB.Label()("", ...params);
+
 module.exports = class ABViewRuleActionFormSubmitRuleConfirmMessage extends (
    ABViewRuleAction
 ) {
@@ -16,14 +18,10 @@ module.exports = class ABViewRuleActionFormSubmitRuleConfirmMessage extends (
     */
    constructor(App, idBase) {
       super();
-      var L = App.Label;
 
       this.App = App;
       this.key = "ABViewRuleActionFormSubmitRuleConfirmMessage";
-      this.label = L(
-         "ab.component.ruleaction.abviewruleActionFormSubmitRuleConfirmMessage",
-         "*Show a confirmation message"
-      );
+      this.label = L("Show a confirmation message");
 
       this.currentObject = null; // the object this Action is tied to.
 
@@ -36,7 +34,7 @@ module.exports = class ABViewRuleActionFormSubmitRuleConfirmMessage extends (
       var labels = (this.labels = {
          // common: App.labels,
          component: {
-            message: L("ab.ruleAction.confirmMessage.message", "*Message"),
+            message: L("Message"),
             // set: L("ab.component.form.set", "*Set"),
             // to: L("ab.component.form.to", "*To"),
          },

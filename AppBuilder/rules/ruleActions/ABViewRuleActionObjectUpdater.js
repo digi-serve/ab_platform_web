@@ -7,6 +7,8 @@ const ABViewRuleAction = require("../ABViewRuleAction");
 
 const RowFilter = require("../../platform/RowFilter");
 
+let L = (...params) => AB.Label()("", ...params);
+
 var ABViewRuleActionObjectUpdaterDefaults = {
    filterConditions: {
       // array of filters to apply to the data table
@@ -24,10 +26,9 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
     */
    constructor(App, idBase, currentForm) {
       super(App, idBase, currentForm);
-      var L = App.Label;
 
       this.key = "ABViewRuleActionFormRecordRuleUpdate";
-      this.label = L("ab.component.ruleaction.updateRecord", "*Update Record");
+      this.label = L("Update Record");
 
       this.updateObject = null; // the object this Action will Update.
 
@@ -46,24 +47,12 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                "ab.ruleAction.Update.required",
                "*A value is required"
             ),
-            set: L("ab.component.form.set", "*Set"),
-            setPlaceholder: L(
-               "ab.component.form.setPlaceholder",
-               "*Choose a field"
-            ),
-            to: L("ab.component.form.to", "*To"),
-            chooseSource: L(
-               "ab.component.ruleaction.chooseSource",
-               "*Choose a data source"
-            ),
-            chooseField: L(
-               "ab.component.ruleaction.chooseField",
-               "*Choose value from..."
-            ),
-            selectBy: L(
-               "ab.component.ruleaction.selectBy",
-               "*Choose select option"
-            ),
+            set: L("Set"),
+            setPlaceholder: L("Choose a field"),
+            to: L("To"),
+            chooseSource: L("Choose a data source"),
+            chooseField: L("Choose value from..."),
+            selectBy: L("Choose select option"),
          },
       });
    }

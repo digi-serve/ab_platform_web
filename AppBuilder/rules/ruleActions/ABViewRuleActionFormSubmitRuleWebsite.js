@@ -5,6 +5,8 @@
 //
 const ABViewRuleAction = require("../ABViewRuleAction");
 
+let L = (...params) => AB.Label()("", ...params);
+
 module.exports = class ABViewRuleActionFormSubmitRuleWebsite extends (
    ABViewRuleAction
 ) {
@@ -16,14 +18,10 @@ module.exports = class ABViewRuleActionFormSubmitRuleWebsite extends (
     */
    constructor(App, idBase) {
       super();
-      var L = App.Label;
 
       this.App = App;
       this.key = "ABViewRuleActionFormSubmitRuleWebsite";
-      this.label = L(
-         "ab.component.ruleaction.abviewruleActionFormSubmitRuleWebsite",
-         "*Redirect to another website URL"
-      );
+      this.label = L("Redirect to another website URL");
 
       this.currentObject = null; // the object this Action is tied to.
 

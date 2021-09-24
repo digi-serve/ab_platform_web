@@ -7,26 +7,20 @@
 //
 const ABViewRuleActionFormRecordRuleUpdateConnected = require("./ABViewRuleActionFormRecordRuleUpdateConnected");
 
+let L = (...params) => AB.Label()("", ...params);
+
 module.exports = class ABViewRuleActionFormRecordRuleRemoveConnected extends (
    ABViewRuleActionFormRecordRuleUpdateConnected
 ) {
    constructor(App, idBase, currentForm) {
       super(App, idBase, currentForm);
 
-      var L = App.Label;
-
       this.key = "ABViewRuleActionFormRecordRuleRemoveConnected";
-      this.label = L(
-         "ab.component.ruleaction.removeConnectedRecord",
-         "*Remove Connected Record"
-      );
+      this.label = L("Remove Connected Record");
 
       this.isUpdateValueDisabled = true; // disable update data of each fields
 
-      this.labels.component.selectField = L(
-         "ab.ruleAction.RemoveConnected.selectField",
-         "*Select which connected object to remove"
-      );
+      this.labels.component.selectField = L("Select which connected object to remove");
    }
 
    /**
