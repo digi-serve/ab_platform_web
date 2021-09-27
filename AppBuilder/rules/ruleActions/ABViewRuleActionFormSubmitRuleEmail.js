@@ -455,7 +455,7 @@ module.exports = class ABViewRuleActionFormSubmitRuleEmail extends (
          },
 
          fieldTemplate: (field, common) => {
-            return `<i class='fa fa-${field.icon} webix_icon_btn' aria-hidden='true'></i> ${field.label}`
+            return `<i class='fa fa-${field.icon} webix_icon_btn' aria-hidden='true'></i> ${field.label}`;
          },
 
          emailFieldOptions: () => {
@@ -471,7 +471,7 @@ module.exports = class ABViewRuleActionFormSubmitRuleEmail extends (
 
                      if (fLink) {
                         optId = `${fLink.id}|${f.urlPointer()}`;
-                        optLabel = `${objLabel}.${f.label} (${fLink.label})`;
+                        optLabel = `${currObj.label}.${f.label} (${fLink.label})`;
                      } else {
                         optId = `|${f.urlPointer()}`;
                         optLabel = `${currObj.label}.${f.label}`;
@@ -550,9 +550,7 @@ module.exports = class ABViewRuleActionFormSubmitRuleEmail extends (
                if (focusElem.getValue) val = focusElem.getValue();
 
                if (focusElem.setValue)
-                  focusElem.setValue(
-                     `${val}${field.label}`
-                  );
+                  focusElem.setValue(`${val}${field.label}`);
 
                webix.UIManager.setFocus(focusElem);
             }

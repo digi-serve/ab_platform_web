@@ -38,7 +38,7 @@ class ABQLSetSave extends ABQLSetSaveCore {
             label: "ABQLSetSave",
             object: context.object,
             data: context.data,
-            prev: context
+            prev: context,
          };
 
          if (!context.data) {

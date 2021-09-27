@@ -220,8 +220,9 @@ module.exports = class ABObjectQuery extends ABObjectQueryCore {
 
          // icon
          if (field.settings && field.settings.showIcon) {
-            h.header =
-               `<span class="webix_icon fa fa-${field.fieldIcon()}"></span>${h.header}`;
+            h.header = `<span class="webix_icon fa fa-${field.fieldIcon()}"></span>${
+               h.header
+            }`;
          }
 
          // If this query supports grouping, then add folder icon to display in grid

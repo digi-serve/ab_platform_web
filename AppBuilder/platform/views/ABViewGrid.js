@@ -930,7 +930,7 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                            DataTable.idBase
                         );
                         for (const key in ids) {
-                           if (Object.hasOwnProperty.call(ids, key)) {
+                           if (Object.prototype.hasOwnProperty.call(ids, key)) {
                               let element = ids[key].toString();
                               if ($$(element)) {
                                  $$(element).$view.setAttribute(
@@ -1114,7 +1114,7 @@ module.exports = class ABViewGrid extends ABViewGridCore {
             }, 777);
          },
 
-         callbackFilterData: (fnFilter, filterRules) => {
+         callbackFilterData: async (fnFilter, filterRules) => {
             filterRules = filterRules || [];
 
             if ($$(ids.buttonFilter)) {
@@ -1122,87 +1122,58 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                $$(ids.buttonFilter).refresh();
             }
 
-            Promise.resolve()
-               .then(
-                  () =>
-                     new Promise(async (next, err) => {
-                        // if (
-                        //    !this.settings ||
-                        //    !this.settings.gridFilter ||
-                        //    this.settings.gridFilter.filterOption != 3
-                        // )
-                        //    // Global search
-                        //    return next();
+            let dc = this.datacollection;
 
-                        let dc = this.datacollection;
-                        if (
-                           !dc ||
-                           (dc.settings.loadAll &&
-                              dc.dataStatus != dc.dataStatusFlag.notInitial)
-                        )
-                           // Load all already
-                           return next();
+            // Check loaded data already
+            if (
+               dc &&
+               (!dc.settings.loadAll ||
+                  dc.dataStatus == dc.dataStatusFlag.notInitial)
+            ) {
+               let limit = null;
 
-                        let limit = null;
+               // // limit pull data to reduce time and performance loading
+               // if (dc.totalCount > 300) limit = 300;
 
-                        // // limit pull data to reduce time and performance loading
-                        // if (dc.totalCount > 300) limit = 300;
+               // Load all data
+               let gridElem = $$(DataTable.ui.id);
+               if (gridElem.data.find({}).length < gridElem.data.count()) {
+                  await dc.reloadData(0, limit);
 
-                        // Load all data
-                        let gridElem = $$(DataTable.ui.id);
-                        if (
-                           gridElem.data.find({}).length < gridElem.data.count()
-                        ) {
-                           try {
-                              await dc.reloadData(0, limit);
-                           } catch (err) {
-                              console.log(err);
-                              next(err);
-                           }
+                  // Should set .loadAll to this data collection ?
+                  if (limit == null) dc.settings.loadAll = true;
+               }
+            }
 
-                           // Should set .loadAll to this data collection ?
-                           if (limit == null) dc.settings.loadAll = true;
-                           next();
-                        }
-                     })
-               )
-               // client filter data
-               .then(
-                  () =>
-                     new Promise((next, err) => {
-                        if (!fnFilter) return next();
+            // client filter data
+            if (fnFilter) {
+               // wait the data are parsed into webix.datatable
+               setTimeout(() => {
+                  let table = $$(DataTable.ui.id);
+                  table.filter((rowData) => {
+                     // rowData is null when is not load from paging
+                     if (rowData == null) return false;
 
-                        // wait the data are parsed into webix.datatable
-                        setTimeout(() => {
-                           let table = $$(DataTable.ui.id);
-                           table.filter((rowData) => {
-                              // rowData is null when is not load from paging
-                              if (rowData == null) return false;
+                     return fnFilter(rowData);
+                  });
 
-                              return fnFilter(rowData);
-                           });
-
-                           if (
-                              this.settings.gridFilter.globalFilterPosition ==
-                              "single"
-                           ) {
-                              if (table.count() > 0) {
-                                 table.show();
-                                 table.select(table.getFirstId(), false);
-                                 table.callEvent("onItemClick", [
-                                    table.getFirstId(),
-                                    "auto",
-                                    null,
-                                 ]);
-                              } else {
-                                 table.hide();
-                              }
-                           }
-
-                           next();
-                        }, 500);
-                     })
-               );
+                  if (
+                     this.settings.gridFilter.globalFilterPosition == "single"
+                  ) {
+                     if (table.count() > 0) {
+                        table.show();
+                        table.select(table.getFirstId(), false);
+                        table.callEvent("onItemClick", [
+                           table.getFirstId(),
+                           "auto",
+                           null,
+                        ]);
+                     } else {
+                        table.hide();
+                     }
+                  }
+               }, 500);
+            }
          },
 
          changePage: (dv, rowItem, page) => {
@@ -1261,7 +1232,11 @@ module.exports = class ABViewGrid extends ABViewGridCore {
             $$(DataTable.ui.id).data.each(function (obj) {
                if (
                   typeof obj != "undefined" &&
-                  obj.hasOwnProperty("appbuilder_select_item") &&
+                  // obj.hasOwnProperty("appbuilder_select_item") &&
+                  Object.prototype.hasOwnProperty.call(
+                     obj,
+                     "appbuilder_select_item"
+                  ) &&
                   obj.appbuilder_select_item == 1
                ) {
                   deleteTasks.push(function (next) {

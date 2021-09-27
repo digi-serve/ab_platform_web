@@ -111,9 +111,7 @@ module.exports = class ABViewDetail extends ABViewDetailCore {
       };
 
       _logic.listTemplate = (field, common) => {
-         return (
-            `${common.markCheckbox(field)} ${field.label}`
-         );
+         return `${common.markCheckbox(field)} ${field.label}`;
       };
 
       _logic.check = (e, fieldId) => {

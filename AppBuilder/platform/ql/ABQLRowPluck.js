@@ -12,7 +12,7 @@ class ABQLRowPluck extends ABQLRowPluckCore {
                      let prepareContext = {
                         object: context.object,
                         data: context.data,
-                        prev: context
+                        prev: context,
                      };
 
                      // convert to an array
@@ -28,7 +28,7 @@ class ABQLRowPluck extends ABQLRowPluckCore {
                   // NOTE: Use new ABQLSetPluck instance because ignore call this.next.do function to mess up the chain variable
                   let setPluck = new ABQLSetPluck(
                      {
-                        fieldID: this.fieldID
+                        fieldID: this.fieldID,
                      },
                      this
                   );

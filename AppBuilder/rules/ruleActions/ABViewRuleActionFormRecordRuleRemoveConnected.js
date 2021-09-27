@@ -20,7 +20,9 @@ module.exports = class ABViewRuleActionFormRecordRuleRemoveConnected extends (
 
       this.isUpdateValueDisabled = true; // disable update data of each fields
 
-      this.labels.component.selectField = L("Select which connected object to remove");
+      this.labels.component.selectField = L(
+         "Select which connected object to remove"
+      );
    }
 
    /**

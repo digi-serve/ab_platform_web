@@ -14,7 +14,11 @@ module.exports = class ABViewConditionalContainer extends (
       super(values, application, parent, defaultValues);
 
       // Set filter value
-      this.__filterComponent = new RowFilter(null, "ABViewConditionalContainer", AB);
+      this.__filterComponent = new RowFilter(
+         null,
+         "ABViewConditionalContainer",
+         AB
+      );
       // this.__filterComponent.applicationLoad(application);
       this.populateFilterComponent();
    }

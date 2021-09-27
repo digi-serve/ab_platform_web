@@ -31,7 +31,9 @@ module.exports = class ABViewRuleActionFormRecordRuleUpdateConnected extends (
       this.objectQB = null; // the QueryBuilder used for offering conditions based upon our connected Object.
       this.qbCondition = null; // the QB condition entered for selecting which remote object.
 
-      this.labels.component.selectField = L("Select which connected object to update.");
+      this.labels.component.selectField = L(
+         "Select which connected object to update."
+      );
       this.labels.component.remoteCondition = L("How to choose which object:");
    }
 
