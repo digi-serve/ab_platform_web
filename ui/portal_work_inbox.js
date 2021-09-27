@@ -51,6 +51,11 @@ class PortalWorkInbox extends ClassUI {
                   click: () => {
                      $$(this.id).hide();
                   },
+                  on: {
+                     onAfterRender() {
+                        ClassUI.CYPRESS_REF(this);
+                     },
+                  },
                },
             ],
          },
@@ -117,7 +122,11 @@ class PortalWorkInbox extends ClassUI {
       //
       // Prepare our Hashes:
       //
-      this.AB.applications().forEach((app) => {
+      var lang = this.AB.Account.language();
+      (this.AB.Config.inboxMetaConfig() || []).forEach((app) => {
+         // convert config info with current language labels
+         this.translate(app, lang);
+
          var appAccordion = new ClassAccordionEntry(app);
          $$("inbox_accordion").addView(appAccordion.ui());
          allAppAccordions[app.id] = appAccordion;
@@ -139,14 +148,11 @@ class PortalWorkInbox extends ClassUI {
             this.emit("updated");
          });
 
-         app.processes().forEach((p) => {
+         (app.processes || []).forEach((p) => {
+            this.translate(p, lang);
             this.processLookupHash[p.id] = p.label;
             this.appLookupHash[p.id] = app.id;
          });
-
-         // TODO: what if there are processes that are sending us forms due to
-         // a ROLE assignment, but we don't have access to the Application it
-         // is part of?  Do we then make a special role {p.id : role.id }?
       });
 
       this.entries = this.AB.Config.inboxConfig() || [];
@@ -172,11 +178,15 @@ class PortalWorkInbox extends ClassUI {
                })
             );
          } else {
-            // TODO: This can happen if the User has NO Applications, or
-            // maybe just doesn't have the Application related to the inbox
-            // approval. (see above comment)
-            console.error(
-               "could not find an inbox-accordion for index[" + index + "]"
+            this.AB.notify.developer(
+               new Error(
+                  `could not find an inbox-accordion for index[${index}]`
+               ),
+               {
+                  context: "portal_work_inbox:init(): config error",
+                  inboxMeta: this.AB.Config.inboxMetaConfig(),
+                  inbox: this.entries,
+               }
             );
          }
       }
@@ -254,6 +264,30 @@ class PortalWorkInbox extends ClassUI {
          $$("inboxItems").show();
       }
       $$(this.id).show();
+   }
+
+   /**
+    * @method translate()
+    * given an object with a .translations property, we will fill out
+    * the translations for the given language.
+    * @param {obj} obj
+    * @param {string} lang
+    *        the language_code of the translations to use.
+    */
+   translate(obj, lang) {
+      if (obj.translations) {
+         var entry = obj.translations.find((t) => t.language_code == lang);
+         if (!entry) {
+            entry = obj.translations[0];
+         }
+         if (entry) {
+            Object.keys(entry).forEach((k) => {
+               if (k != "language_code") {
+                  obj[k] = entry[k];
+               }
+            });
+         }
+      }
    }
 
    count() {

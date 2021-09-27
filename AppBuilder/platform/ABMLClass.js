@@ -11,9 +11,45 @@
 var ABMLClassCore = require("../core/ABMLClassCore");
 
 module.exports = class ABMLClass extends ABMLClassCore {
-   // constructor(fieldList) {
-   //    super(fieldList);
-   // }
+   constructor(fieldList, AB) {
+      super(fieldList, AB);
+
+      this._warnings = [];
+      // {array}
+      // an array of warning messages for this object.
+
+      this.on("warning", (message, data) => {
+         this._warnings.push({ message, data });
+      });
+   }
+
+   fromValues(attributes) {
+      super.fromValues(attributes);
+      this.warningsEval();
+   }
+
+   warnings() {
+      return this._warnings;
+   }
+
+   warningsEval() {
+      this._warnings = [];
+      if (
+         ["datacollection", "object", "query", "process"].indexOf(this.type) >
+         -1
+      ) {
+         console.warn(
+            `ABML Object [${this.type}][${this.label}] has not overwritten .warningsEval()`
+         );
+      }
+   }
+
+   warningsAll() {
+      console.warn(
+         `ABML Object [${this.label}] has not overwritten .warningsAll()`
+      );
+      return this.warnings();
+   }
 
    /**
     * @method languageDefault

@@ -201,7 +201,10 @@ class NetworkRest extends EventEmitter {
             `Too many retries (${this.numRetries}) for ${params.url}`
          );
          err.code = "E_TOMANYRETRIES";
-         this.AB.Analytics.logError(err);
+         this.AB.notify.developer(err, {
+            context: "NetworkRest:_request: Too Many Retries",
+         });
+         // this.AB.Analytics.logError(err);
          if (jobResponse) {
             this._network.publishResponse(jobResponse, err);
          }
@@ -309,8 +312,13 @@ class NetworkRest extends EventEmitter {
                         return;
                      }
 
-                     this.AB.Analytics.logError(packet.data);
-                     this.AB.error(packet.data);
+                     this.AB.notify.developer(packet, {
+                        context:
+                           "NetworkRest:_request:Error returned from Server (req.ab.error())",
+                        data: packet.data,
+                     });
+                     // this.AB.Analytics.logError(packet.data);
+                     // this.AB.error(packet.data);
                      if (jobResponse) {
                         this._network.publishResponse(
                            jobResponse,
@@ -330,8 +338,12 @@ class NetworkRest extends EventEmitter {
                      error.text = err.statusText;
                      error.err = err;
                      error.url = `${params.method} ${params.url}`;
-                     this.AB.Analytics.logError(error);
-                     this.AB.error(error);
+                     this.AB.notify.developer(error, {
+                        context:
+                           "NetworkRest:_request:Unknown Error returned from server",
+                     });
+                     // this.AB.Analytics.logError(error);
+                     // this.AB.error(error);
                      if (jobResponse) {
                         this._network.publishResponse(jobResponse, error);
                      }

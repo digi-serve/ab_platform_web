@@ -47,6 +47,11 @@ class PortalWorkInboxTaskwindow extends ClassUI {
                      // reset the pager so we don't get errors when we open it next
                      $$(this.idTaskPager).select(0);
                   },
+                  on: {
+                     onAfterRender() {
+                        ClassUI.CYPRESS_REF(this, "inbox_taskwindow_close");
+                     },
+                  },
                },
             ],
          },
@@ -85,6 +90,16 @@ class PortalWorkInboxTaskwindow extends ClassUI {
                         template:
                            '<div style="margin-top:9px; text-align: center;">{common.first()} {common.prev()} {common.pages()} {common.next()} {common.last()}</div>',
                         on: {
+                           onAfterRender() {
+                              // debugger;
+                              ClassUI.CYPRESS_REF(this);
+                              // this.data.each((a) => {
+                              //    ClassUI.CYPRESS_REF(
+                              //       this.getItemNode(a.id),
+                              //       `${self.id}_${a.id}`
+                              //    );
+                              // });
+                           },
                            onBeforePageChange: (new_page /*, old_page  */) => {
                               var views = $$(
                                  this.idTaskMultiview

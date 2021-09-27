@@ -120,20 +120,18 @@ class ABFactory extends ABFactoryCore {
       this.Network.on("definition.create", (context, err, fullDef) => {
          var pending = this._pendingNetworkRequests[context.uuid];
          if (err) {
-            this.error(err);
+            // this.error(err);
             pending?.reject(err);
             return;
          }
 
-         // if we are NOT in Network Socket mode:
-         if (!this.Network.isRealTime) {
-            // simulate this data coming via RT update
-            var pkt = {
-               id: fullDef.id,
-               data: fullDef,
-            };
-            this.emit("ab.abdefinition.create", pkt);
-         }
+         // for immediate feedback to our UI:
+         // simulate the RT update from our sockets:
+         var pkt = {
+            id: fullDef.id,
+            data: fullDef,
+         };
+         this.emit("ab.abdefinition.create", pkt);
 
          let newDef = this.definitionNew(fullDef);
          pending?.resolve(newDef);
@@ -143,26 +141,25 @@ class ABFactory extends ABFactoryCore {
          var pending = this._pendingNetworkRequests[context.uuid];
          if (err) {
             if (err.toString().indexOf("Not Found") > -1) {
-               return this.definitionCreate(values)
+               return this.definitionCreate(context.values)
                   .then(pending?.resolve)
-                  .catch(penidng?.reject);
+                  .catch(pending?.reject);
             }
             // log the error
-            this.error(err);
+            // this.error(err);
             pending?.reject(err);
             return;
          }
 
          this._definitions[context.id] = serverDef;
 
-         // if we are NOT in Network Socket mode:
-         // if (!this.Network.isRealTime) {
+         // for immediate feedback to our UI:
+         // simulate the RT update from our sockets:
          var pkt = {
             id: serverDef.id,
             data: serverDef,
          };
          this.emit("ab.abdefinition.update", pkt);
-         // }
 
          pending?.resolve(serverDef);
       });
@@ -171,21 +168,20 @@ class ABFactory extends ABFactoryCore {
          var pending = this._pendingNetworkRequests[context.uuid];
          if (err) {
             // log the error
-            this.error(err);
+            // this.error(err);
             pending?.reject(err);
             return;
          }
 
          delete this._definitions[context.id];
 
-         // if we are NOT in Network Socket mode:
-         // if (!this.Network.isRealTime) {
+         // for immediate feedback to our UI:
+         // simulate the RT update from our sockets:
          var pkt = {
             id: context.id,
             data: serverDef,
          };
          this.emit("ab.abdefinition.delete", pkt);
-         // }
 
          pending?.resolve();
       });
@@ -302,7 +298,21 @@ class ABFactory extends ABFactoryCore {
                data: def,
             },
             jobResponse
-         );
+         ).catch((err) => {
+            var message = "Error attempting to CREATE definitions";
+            if (err.code == "E_NOPERM") {
+               message = "User Doesn't have permission to CREATE definitions";
+            }
+            this.notify.developer(err, {
+               context: "ABFactory.definitionCreate()",
+               message,
+               def,
+            });
+
+            // NOTE: when using jobResponse type calls, expect that
+            // handler to be handling the errors.
+            // don't keep propagating them here.
+         });
       });
    }
 
@@ -329,7 +339,21 @@ class ABFactory extends ABFactoryCore {
                url: `/definition/${id}`,
             },
             jobResponse
-         );
+         ).catch((err) => {
+            var message = "Error attempting to DESTROY definitions";
+            if (err.code == "E_NOPERM") {
+               message = "User Doesn't have permission to DELETE definitions";
+            }
+            this.notify.developer(err, {
+               context: "ABFactory.definitionDestroy()",
+               message,
+               id,
+            });
+
+            // NOTE: when using jobResponse type calls, expect that
+            // handler to be handling the errors.
+            // don't keep propagating them here.
+         });
       });
 
       /*
@@ -367,6 +391,7 @@ class ABFactory extends ABFactoryCore {
             context: {
                id,
                uuid,
+               values,
             },
          };
          this.Network.put(
@@ -375,13 +400,54 @@ class ABFactory extends ABFactoryCore {
                data: values,
             },
             jobResponse
-         );
+         ).catch((err) => {
+            var message = "Error attempting to UPDATE definitions";
+            if (err.code == "E_NOPERM") {
+               message = "User Doesn't have permission to UPDATE definitions";
+            }
+            this.notify.developer(err, {
+               context: "ABFactory.definitionUpdate()",
+               message,
+            });
+
+            // NOTE: when using jobResponse type calls, expect that
+            // handler to be handling the errors.
+            // don't keep propagating them here.
+         });
       });
+   }
+
+   /**
+    * definitionsParse()
+    * include the incoming definitions into our ABFactory. These new
+    * definitions will replace any existing ones with the same .id.
+    * @param {array[ABDefinitioin]} defs
+    *     the incoming array of ABDefinitions to parse.
+    * @return {Promise}
+    */
+   definitionsParse(defs = []) {
+      if (!Array.isArray(defs)) {
+         defs = [defs];
+      }
+
+      // store/replace the incoming definitions
+      // 1st: insert ALL our definitions internally
+      defs.forEach((d) => {
+         this._definitions[d.id] = d;
+      });
+      // 2nd: Now we can then go through and signal the "updates"
+      // and the related objects can find their dependent definitions.
+      defs.forEach((d) => {
+         this.definitionSync("updated", d.id, d);
+      });
+
+      return Promise.resolve();
    }
 
    definitionSync(op, id, def) {
       var { keyList, keyFn } = this.objectKeysByDef(def);
       if (keyList) {
+         var curr;
          switch (op) {
             case "created":
                this[keyList].push(this[keyFn](def.json));
@@ -390,7 +456,7 @@ class ABFactory extends ABFactoryCore {
 
             case "updated":
                // get the current object
-               var curr = this[keyList].find((d) => d.id == id);
+               curr = this[keyList].find((d) => d.id == id);
 
                // remove from list
                this[keyList] = this[keyList].filter((d) => d.id != id);
@@ -398,24 +464,20 @@ class ABFactory extends ABFactoryCore {
                this[keyList].push(this[keyFn](def.json));
 
                // signal this object needs to be updated:
-               if (curr.emit) {
-                  curr.emit("definition.updated");
-               }
+               curr?.emit?.("definition.updated");
 
                this.emit("definition.updated", def.json);
                break;
 
             case "destroyed":
                // get the current object
-               var curr = this[keyList].find((d) => d.id == id);
+               curr = this[keyList].find((d) => d.id == id);
                if (curr) {
                   // remove from list
                   this[keyList] = this[keyList].filter((d) => d.id != id);
 
                   // signal this object needs to be updated:
-                  if (curr?.emit) {
-                     curr.emit("definition.deleted");
-                  }
+                  curr?.emit?.("definition.deleted");
 
                   this.emit("definition.deleted", def.json);
                }
@@ -423,8 +485,8 @@ class ABFactory extends ABFactoryCore {
          }
       }
 
-      if (def.id) {
-      }
+      // if (def.id) {
+      // }
    }
 
    plugins() {

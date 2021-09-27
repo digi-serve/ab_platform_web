@@ -16,6 +16,10 @@ module.exports = {
       es6: true,
    },
 
+   globals: {
+      io: true,
+   },
+
    parserOptions: {
       ecmaVersion: 2020,
    },

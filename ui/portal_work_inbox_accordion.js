@@ -46,7 +46,7 @@ class PortalWorkInboxAccordion extends ClassUI {
             data: [],
             click: function (id /* , ev */) {
                var list = this;
-               var parent = this.getParentView();
+               // var parent = this.getParentView();
                var selectedItem = this.getItem(id);
 
                var cells = [];
@@ -76,7 +76,24 @@ class PortalWorkInboxAccordion extends ClassUI {
 
                self.emit("showTasks", /*list, */ selectedItem.name, cells);
             },
+            on: {
+               onAfterRender() {
+                  ClassUI.CYPRESS_REF(this);
+                  this.data.each((a) => {
+                     ClassUI.CYPRESS_REF(
+                        this.getItemNode(a.id),
+                        `${self.id}_${a.id}`
+                     );
+                  });
+               },
+            },
          },
+         // TODO: This never gets called!
+         // on: {
+         //    onAfterRender() {
+         //       ClassUI.CYPRESS_REF(this);
+         //    },
+         // },
       };
    }
 
@@ -85,9 +102,14 @@ class PortalWorkInboxAccordion extends ClassUI {
       if (!this.AB) {
          this.AB = AB;
 
-         this.AB.Network.on("inbox.update", (context, err, response) => {
+         this.AB.Network.on("inbox.update", (context, err /* , response */) => {
             if (err && err.message) {
                webix.message(err.message);
+               this.AB.notify.developer(err, {
+                  context:
+                     "portal_work_inbox_accordion:Network[inbox.update]: error updating Inbox item",
+                  info: context,
+               });
                return;
             }
 

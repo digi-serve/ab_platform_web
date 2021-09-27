@@ -15,6 +15,7 @@ const listSocketEvents = [
    "ab.datacollection.stale",
    "ab.datacollection.delete",
    "ab.inbox.create",
+   "ab.object.update",
 ];
 // {array}
 // The io.socket.* events we are listening for that relate to our datacollection

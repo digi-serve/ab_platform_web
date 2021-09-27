@@ -105,16 +105,16 @@ module.exports = class ABProcessParticipant extends ABProcessParticipantCore {
       ];
    }
 
-   static propertyIDs(id) {
-      return {
-         form: `${id}_form`,
-         name: `${id}_name`,
-         role: `${id}_role`,
-         useRole: `${id}_useRoles`,
-         useAccount: `${id}_useAccounts`,
-         account: `${id}_account`,
-      };
-   }
+   // static propertyIDs(id) {
+   //    return {
+   //       form: `${id}_form`,
+   //       name: `${id}_name`,
+   //       role: `${id}_role`,
+   //       useRole: `${id}_useRoles`,
+   //       useAccount: `${id}_useAccounts`,
+   //       account: `${id}_account`,
+   //    };
+   // }
    /**
     * propertiesShow()
     * display the properties panel for this Process Element.
@@ -122,6 +122,8 @@ module.exports = class ABProcessParticipant extends ABProcessParticipantCore {
     *        the webix $$(id) of the properties panel area.
     */
    propertiesShow(id) {
+      console.error("TODO: refactor to ABDesigner");
+
       var ids = ABProcessParticipant.propertyIDs(id);
 
       var ui = {
@@ -286,84 +288,88 @@ module.exports = class ABProcessParticipant extends ABProcessParticipantCore {
     * @param {jsonobj} obj
     *        the default values for these fields.
     */
-   static selectManagersUi(AB, id, obj) {
-      var L = (...params) => {
-         return AB.Multilingual.label(...params);
-      };
 
-      var ids = ABProcessParticipant.propertyIDs(id);
-      var __Roles = AB.Account.rolesAll().map((r) => {
-         return { id: r.id, value: r.name };
-      });
-      var __Users = AB.Account.userList().map((u) => {
-         return { id: u.uuid, value: u.username };
-      });
+   /*
+    * Moving this to ABDesigner/src/rootPages/Designer/forms/process
+    */
+   // static selectManagersUi(AB, id, obj) {
+   //    var L = (...params) => {
+   //       return AB.Multilingual.label(...params);
+   //    };
 
-      return {
-         type: "form",
-         css: "no-margin",
-         rows: [
-            {
-               cols: [
-                  {
-                     view: "checkbox",
-                     id: ids.useRole,
-                     labelRight: L("by Role"),
-                     labelWidth: 0,
-                     width: 120,
-                     value: obj.useRole == "1" ? 1 : 0,
-                     click: function (id /*, event */) {
-                        if ($$(id).getValue()) {
-                           $$(ids.role).enable();
-                        } else {
-                           $$(ids.role).disable();
-                        }
-                     },
-                  },
-                  {
-                     id: ids.role,
-                     view: "multicombo",
-                     value: obj.role ? obj.role : 0,
-                     disabled: obj.useRole == "1" ? false : true,
-                     suggest: __Roles,
-                     placeholder: L("Click or type to add role..."),
-                     labelAlign: "left",
-                     stringResult: false /* returns data as an array of [id] */,
-                  },
-               ],
-            },
-            {
-               cols: [
-                  {
-                     view: "checkbox",
-                     id: ids.useAccount,
-                     labelRight: L("by Account"),
-                     labelWidth: 0,
-                     width: 120,
-                     value: obj.useAccount == "1" ? 1 : 0,
-                     click: function (id /*, event */) {
-                        if ($$(id).getValue()) {
-                           $$(ids.account).enable();
-                        } else {
-                           $$(ids.account).disable();
-                        }
-                     },
-                  },
-                  {
-                     id: ids.account,
-                     view: "multicombo",
-                     value: obj.account ? obj.account : 0,
-                     disabled: obj.useAccount == "1" ? false : true,
-                     suggest: __Users,
-                     labelAlign: "left",
-                     placeholder: L("Click or type to add user..."),
-                     stringResult: false /* returns data as an array of [id] */,
-                  },
-               ],
-            },
-         ],
-      };
-   }
+   //    var ids = ABProcessParticipant.propertyIDs(id);
+   //    var __Roles = AB.Account.rolesAll().map((r) => {
+   //       return { id: r.id, value: r.name };
+   //    });
+   //    var __Users = AB.Account.userList().map((u) => {
+   //       return { id: u.uuid, value: u.username };
+   //    });
+
+   //    return {
+   //       type: "form",
+   //       css: "no-margin",
+   //       rows: [
+   //          {
+   //             cols: [
+   //                {
+   //                   view: "checkbox",
+   //                   id: ids.useRole,
+   //                   labelRight: L("by Role"),
+   //                   labelWidth: 0,
+   //                   width: 120,
+   //                   value: obj.useRole == "1" ? 1 : 0,
+   //                   click: function (id /*, event */) {
+   //                      if ($$(id).getValue()) {
+   //                         $$(ids.role).enable();
+   //                      } else {
+   //                         $$(ids.role).disable();
+   //                      }
+   //                   },
+   //                },
+   //                {
+   //                   id: ids.role,
+   //                   view: "multicombo",
+   //                   value: obj.role ? obj.role : 0,
+   //                   disabled: obj.useRole == "1" ? false : true,
+   //                   suggest: __Roles,
+   //                   placeholder: L("Click or type to add role..."),
+   //                   labelAlign: "left",
+   //                   stringResult: false /* returns data as an array of [id] */,
+   //                },
+   //             ],
+   //          },
+   //          {
+   //             cols: [
+   //                {
+   //                   view: "checkbox",
+   //                   id: ids.useAccount,
+   //                   labelRight: L("by Account"),
+   //                   labelWidth: 0,
+   //                   width: 120,
+   //                   value: obj.useAccount == "1" ? 1 : 0,
+   //                   click: function (id /*, event */) {
+   //                      if ($$(id).getValue()) {
+   //                         $$(ids.account).enable();
+   //                      } else {
+   //                         $$(ids.account).disable();
+   //                      }
+   //                   },
+   //                },
+   //                {
+   //                   id: ids.account,
+   //                   view: "multicombo",
+   //                   value: obj.account ? obj.account : 0,
+   //                   disabled: obj.useAccount == "1" ? false : true,
+   //                   suggest: __Users,
+   //                   labelAlign: "left",
+   //                   placeholder: L("Click or type to add user..."),
+   //                   stringResult: false /* returns data as an array of [id] */,
+   //                },
+   //             ],
+   //          },
+   //       ],
+   //    };
+   // }
 
    /**
     * stashUsersUi()
@@ -371,34 +377,37 @@ module.exports = class ABProcessParticipant extends ABProcessParticipantCore {
     * @param {string} id
     *        the webix $$(id) of the properties panel area.
     */
-   static stashUsersUi(id) {
-      var obj = {};
-      var ids = ABProcessParticipant.propertyIDs(id);
+   /*
+    * Moving this to ABDesigner/src/rootPages/Designer/forms/process
+    */
+   // static stashUsersUi(id) {
+   //    var obj = {};
+   //    var ids = ABProcessParticipant.propertyIDs(id);
 
-      if ($$(ids.useRole)) {
-         obj.useRole = $$(ids.useRole).getValue();
-      }
+   //    if ($$(ids.useRole)) {
+   //       obj.useRole = $$(ids.useRole).getValue();
+   //    }
 
-      if ($$(ids.role) && obj.useRole) {
-         obj.role = $$(ids.role).getValue();
-         if (obj.role === "--") obj.role = null;
-      } else {
-         obj.role = null;
-      }
+   //    if ($$(ids.role) && obj.useRole) {
+   //       obj.role = $$(ids.role).getValue();
+   //       if (obj.role === "--") obj.role = null;
+   //    } else {
+   //       obj.role = null;
+   //    }
 
-      if ($$(ids.useAccount)) {
-         obj.useAccount = $$(ids.useAccount).getValue();
-      }
+   //    if ($$(ids.useAccount)) {
+   //       obj.useAccount = $$(ids.useAccount).getValue();
+   //    }
 
-      if ($$(ids.account) && obj.useAccount) {
-         obj.account = $$(ids.account).getValue(/*{ options: true }*/);
-         if (obj.account === "--") obj.account = null;
-      } else {
-         obj.account = null;
-      }
+   //    if ($$(ids.account) && obj.useAccount) {
+   //       obj.account = $$(ids.account).getValue(/*{ options: true }*/);
+   //       if (obj.account === "--") obj.account = null;
+   //    } else {
+   //       obj.account = null;
+   //    }
 
-      return obj;
-   }
+   //    return obj;
+   // }
 
    /**
     * propertiesStash()

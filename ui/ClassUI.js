@@ -3,9 +3,17 @@ var EventEmitter = require("events").EventEmitter;
 class ClassUI extends EventEmitter {
    constructor(base) {
       super();
-      this.ids = {
-         component: base,
-      };
+
+      if (base) {
+         if ("string" == typeof base) {
+            this.ids = {
+               component: base,
+            };
+         } else {
+            this.ids = base;
+         }
+      }
+
       // if (!base) {
       //    console.warn("new ClassUI() called without a base component id. ");
       // }
@@ -25,7 +33,9 @@ class ClassUI extends EventEmitter {
     *        [optional] the value of the data-cy attribute
     */
    static CYPRESS_REF(el, id) {
-      id = id || el.config.id;
+      if (!el) return;
+
+      id = id || el.config?.id;
 
       // is this a webix object?
       if (el.getInputNode) {
@@ -43,7 +53,7 @@ class ClassUI extends EventEmitter {
       }
 
       // this is probably a straight up DOM element:
-      el.setAttribute("data-cy", id);
+      el.setAttribute?.("data-cy", id);
    }
 
    /**

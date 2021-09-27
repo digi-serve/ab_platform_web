@@ -93,7 +93,7 @@ class Config {
       return this._config.definitions;
    }
 
-   error(...args) {
+   error(/* ...args */) {
       console.error("Who is calling this? -> move to AB.error() instead.");
       // this.emit("ab.error", args);
    }
@@ -123,6 +123,13 @@ class Config {
    inboxConfig() {
       if (this._config && this._config.inbox) {
          return this._config.inbox;
+      }
+      return null;
+   }
+
+   inboxMetaConfig() {
+      if (this._config && this._config.inboxMeta) {
+         return this._config.inboxMeta;
       }
       return null;
    }
