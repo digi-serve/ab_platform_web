@@ -176,7 +176,7 @@ module.exports = class ABField extends ABFieldCore {
          requiredOnChange = _logic.requiredOnChange;
       }
 
-      var getNumberOfNullValue = (isRequired) => {
+      var getNumberOfNullValue = async (isRequired) => {
          if (
             isRequired &&
             this._CurrentField &&
@@ -186,34 +186,28 @@ module.exports = class ABField extends ABFieldCore {
             // TODO: disable save button
 
             // get count number
-            this._CurrentField.object
-               .model()
-               .count({
-                  where: {
-                     glue: "and",
-                     rules: [
-                        {
-                           key: this._CurrentField.id,
-                           rule: "is_null",
-                        },
-                     ],
-                  },
-               })
-               .then((data) => {
-                  if (data.count > 0) {
-                     let messageTemplate = `** There are ${data.count} rows that will be updated to default value`;
+            let data = await this._CurrentField.object.model().count({
+               where: {
+                  glue: "and",
+                  rules: [
+                     {
+                        key: this._CurrentField.id,
+                        rule: "is_null",
+                     },
+                  ],
+               },
+            });
 
-                     $$(ids.numberOfNull).setValue(messageTemplate);
-                     $$(ids.numberOfNull).show();
-                  } else {
-                     $$(ids.numberOfNull).hide();
-                  }
+            if (data.count > 0) {
+               let messageTemplate = `** There are ${data.count} rows that will be updated to default value`;
 
-                  // TODO: enable save button
-               })
-               .catch((err) => {
-                  // TODO: enable save button
-               });
+               $$(ids.numberOfNull).setValue(messageTemplate);
+               $$(ids.numberOfNull).show();
+            } else {
+               $$(ids.numberOfNull).hide();
+            }
+
+            // TODO: enable save button
          } else {
             $$(ids.numberOfNull).hide();
          }
@@ -272,11 +266,11 @@ module.exports = class ABField extends ABFieldCore {
                // disallowEdit: true,
                labelWidth: App.config.labelWidthCheckbox,
                on: {
-                  onChange: (newVal, oldVal) => {
+                  onChange: async (newVal, oldVal) => {
                      requiredOnChange(newVal, oldVal, ids);
 
                      // If check require on edit field, then show warning message
-                     getNumberOfNullValue(newVal);
+                     await getNumberOfNullValue(newVal);
                   },
                },
             },
@@ -426,29 +420,21 @@ module.exports = class ABField extends ABFieldCore {
     *
     * @return {Promise}
     */
-   destroy() {
-      return new Promise((resolve, reject) => {
-         // verify we have been .save() before:
-         if (this.id) {
-            // NOTE: our .migrateXXX() routines expect the object to currently exist
-            // in the DB before we perform the DB operations.  So we need to
-            // .migrateDrop()  before we actually .objectDestroy() this.
-            this.migrateDrop()
-               .then(() => {
-                  // the server still references an ABField in relationship to it's
-                  // ABObject, so we need to destroy the Field 1st, then remove it
-                  // from it's object.
-                  return super.destroy();
-               })
-               .then(() => {
-                  return this.object.fieldRemove(this);
-               })
-               .then(resolve)
-               .catch(reject);
-         } else {
-            resolve(); // nothing to do really
-         }
-      });
+   async destroy() {
+      // verify we have been .save() before:
+      if (!this.id) return;
+
+      // NOTE: our .migrateXXX() routines expect the object to currently exist
+      // in the DB before we perform the DB operations.  So we need to
+      // .migrateDrop()  before we actually .objectDestroy() this.
+      await this.migrateDrop();
+
+      // the server still references an ABField in relationship to it's
+      // ABObject, so we need to destroy the Field 1st, then remove it
+      // from it's object.
+      await super.destroy();
+
+      await this.object.fieldRemove(this);
    }
 
    /**
@@ -460,87 +446,64 @@ module.exports = class ABField extends ABFieldCore {
     * @return {Promise}
     *						.resolve( {this} )
     */
-   save() {
-      return new Promise((resolve, reject) => {
-         var isAdd = false;
-         // if this is our initial save()
-         if (!this.id) {
-            isAdd = true;
-         }
+   async save() {
+      let isAdd = false;
+      // if this is our initial save()
+      if (!this.id) {
+         isAdd = true;
+      }
 
-         Promise.resolve()
-            .then(() => {
-               // Whenever we update our settings, make sure any
-               // existing rows that have NULL values for this field
-               // are updated to have our current .default value.
-               return new Promise((next, error) => {
-                  if (
-                     isAdd ||
-                     !this.settings.required ||
-                     !this.settings.default
-                  )
-                     return next();
+      // Whenever we update our settings, make sure any
+      // existing rows that have NULL values for this field
+      // are updated to have our current .default value.
+      if (!isAdd && this.settings.required && this.settings.default) {
+         let model = this.object.model();
 
-                  var model = this.object.model();
+         // pull rows that has null value
+         let result = await model.findAll({
+            where: {
+               glue: "and",
+               rules: [
+                  {
+                     key: this.id,
+                     rule: "is_null",
+                  },
+               ],
+            },
+         });
 
-                  // pull rows that has null value
-                  model
-                     .findAll({
-                        where: {
-                           glue: "and",
-                           rules: [
-                              {
-                                 key: this.id,
-                                 rule: "is_null",
-                              },
-                           ],
-                        },
-                     })
-                     .then((result) => {
-                        var tasks = [];
+         let tasks = [];
 
-                        // updating ...
-                        result.data.forEach((d) => {
-                           if (!d[this.columnName])
-                              d[this.columnName] = this.settings.default;
+         // updating ...
+         result.data.forEach((d) => {
+            if (!d[this.columnName]) d[this.columnName] = this.settings.default;
 
-                           tasks.push(model.update(d.id, d));
-                        });
+            tasks.push(model.update(d.id, d));
+         });
 
-                        Promise.all(tasks).then(next).catch(error);
-                     })
-                     .catch(error);
-               });
-            })
-            .then(() => {
-               // New ABDefinition method of saving:
-               // when this is done, we now have an .id
-               return super.save();
-            })
-            .then(() => {
-               // incase this was an ADD operation, make sure the
-               // parent Obj now includes this object:
-               // NOTE: must be done after the .save() so we have an .id
-               return this.object.fieldAdd(this);
-            })
-            .then(() => {
-               // perform any server side migrations for this Field:
+         await Promise.all(tasks);
+      }
 
-               // but not connectObject fields:
-               // ABFieldConnect.migrateXXX() gets called from the UI popupNewDataField
-               // in order to handle the timings of the 2 fields that need to be created
-               if (this.isConnection) return;
+      // New ABDefinition method of saving:
+      // when this is done, we now have an .id
+      await super.save();
 
-               var fnMigrate = isAdd
-                  ? this.migrateCreate()
-                  : this.migrateUpdate();
-               return fnMigrate;
-            })
-            .then(() => {
-               resolve(this);
-            })
-            .catch(reject);
-      });
+      // incase this was an ADD operation, make sure the
+      // parent Obj now includes this object:
+      // NOTE: must be done after the .save() so we have an .id
+      await this.object.fieldAdd(this);
+
+      // perform any server side migrations for this Field:
+
+      // but not connectObject fields:
+      // ABFieldConnect.migrateXXX() gets called from the UI popupNewDataField
+      // in order to handle the timings of the 2 fields that need to be created
+      if (!this.isConnection) {
+         let fnMigrate = isAdd ? this.migrateCreate() : this.migrateUpdate();
+         await fnMigrate;
+      }
+
+      return this;
    }
 
    ///

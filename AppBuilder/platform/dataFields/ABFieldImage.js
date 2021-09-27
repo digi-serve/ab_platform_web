@@ -322,7 +322,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
     * @function destroy
     * On a destroy operation, ask if the user wants to keep the related images.
     */
-   destroy() {
+   async destroy() {
       var L = this.AB.Label();
 
       return new Promise((resolve, reject) => {
@@ -334,22 +334,27 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
                message: L("Do you want to keep the images referenced by {0}?", [
                   this.label,
                ]),
-               callback: (result) => {
+               callback: async (result) => {
                   // update this setting so the server can respond correctly in
                   // ABFieldImage.migrateDrop()
                   this.settings.removeExistingData = result ? 0 : 1;
-                  this.save()
-                     .then(() => {
-                        // TODO: a reminder that you still got alot on the server to do!
-                        this.AB.Dialog.Alert({
-                           title: "!! TODO !!",
-                           text:
-                              "ABFieldImage.destroy(): Tell a Developer to actually pay attention to this!",
-                        });
-                        // now the default .destroy()
-                        super.destroy().then(resolve).catch(reject);
-                     })
-                     .catch(reject);
+
+                  try {
+                     await this.save();
+
+                     // TODO: a reminder that you still got alot on the server to do!
+                     this.AB.Dialog.Alert({
+                        title: "!! TODO !!",
+                        text:
+                           "ABFieldImage.destroy(): Tell a Developer to actually pay attention to this!",
+                     });
+
+                     await super.destroy();
+
+                     resolve();
+                  } catch (err) {
+                     reject(err);
+                  }
                },
             });
          } else {
@@ -565,7 +570,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
                },
 
                // when upload is complete:
-               onFileUpload: (item, response) => {
+               onFileUpload: async (item, response) => {
                   webixContainer.hideProgress();
                   this.showImage(response.data.uuid, node);
 
@@ -576,41 +581,34 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
 
                   // update just this value on our current object.model
                   if (row.id) {
-                     this.object
-                        .model()
-                        .update(row.id, values)
-                        .then(() => {
-                           // update the client side data object as well so other data changes won't cause this save to be reverted
-                           if (
-                              $$(node) &&
-                              $$(node).getItem &&
-                              $$(node).getItem(row.id)
-                           ) {
-                              $$(node).updateItem(row.id, values);
-                           } else {
-                              // if you scroll the table the connection to the datatable is lost so we need to find it again
-                              var dataTable = document.querySelector(
-                                 ".webix_dtable"
-                              );
-                              if (
-                                 $$(dataTable) &&
-                                 $$(dataTable).getItem(row.id)
-                              )
-                                 $$(dataTable).updateItem(row.id, values);
-                           }
-                        })
-                        .catch((err) => {
-                           node.classList.add("webix_invalid");
-                           node.classList.add("webix_invalid_cell");
+                     try {
+                        await this.object.model().update(row.id, values);
+                     } catch (err) {
+                        node.classList.add("webix_invalid");
+                        node.classList.add("webix_invalid_cell");
 
-                           this.AB.notify.developer(err, {
-                              context:
-                                 "ABFieldImage.onFileUpload(): model.update(): error updating our entry",
-                              field: this,
-                              row,
-                              values,
-                           });
+                        this.AB.notify.developer(err, {
+                           context:
+                              "ABFieldImage.onFileUpload(): model.update(): error updating our entry",
+                           field: this,
+                           row,
+                           values,
                         });
+                     }
+
+                     // update the client side data object as well so other data changes won't cause this save to be reverted
+                     if (
+                        $$(node) &&
+                        $$(node).getItem &&
+                        $$(node).getItem(row.id)
+                     ) {
+                        $$(node).updateItem(row.id, values);
+                     } else {
+                        // if you scroll the table the connection to the datatable is lost so we need to find it again
+                        var dataTable = document.querySelector(".webix_dtable");
+                        if ($$(dataTable) && $$(dataTable).getItem(row.id))
+                           $$(dataTable).updateItem(row.id, values);
+                     }
                   }
 
                   // update value in the form component
@@ -670,33 +668,31 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
          this.AB.Dialog.Confirm({
             title: "",
             message: L("Are you sure you want to remove this image?"),
-            callback: (result) => {
+            callback: async (result) => {
                var confirmDelete = result ? 1 : 0;
                if (confirmDelete) {
                   // update just this value on our current object.model
                   var values = {};
                   values[this.columnName] = ""; // removing the reference to the image here
 
-                  this.object
-                     .model()
-                     .update(row.id, values)
-                     .then(() => {
-                        // update the client side data object as well so other data changes won't cause this save to be reverted
-                        if ($$(node) && $$(node).updateItem)
-                           $$(node).updateItem(row.id, values);
-                     })
-                     .catch((err) => {
-                        node.classList.add("webix_invalid");
-                        node.classList.add("webix_invalid_cell");
+                  try {
+                     await this.object.model().update(row.id, values);
+                  } catch (err) {
+                     node.classList.add("webix_invalid");
+                     node.classList.add("webix_invalid_cell");
 
-                        this.AB.notify.developer(err, {
-                           context:
-                              "ABFieldImage: customEdit(): Error updating our entry",
-                           field: this,
-                           row: row,
-                           values: values,
-                        });
+                     this.AB.notify.developer(err, {
+                        context:
+                           "ABFieldImage: customEdit(): Error updating our entry",
+                        field: this,
+                        row: row,
+                        values: values,
                      });
+                  }
+
+                  // update the client side data object as well so other data changes won't cause this save to be reverted
+                  if ($$(node) && $$(node).updateItem)
+                     $$(node).updateItem(row.id, values);
 
                   // update value in the form component
                   this.setValue($$(node), values);

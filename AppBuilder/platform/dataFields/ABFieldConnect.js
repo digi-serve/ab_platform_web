@@ -585,45 +585,37 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
     *
     * @return {Promise}
     */
-   destroy() {
-      return new Promise((resolve, reject) => {
-         // verify we have been .save()d before:
-         if (this.id) {
-            // NOTE: our .migrateXXX() routines expect the object to currently exist
-            // in the DB before we perform the DB operations.  So we need to
-            // .migrateDrop()  before we actually .objectDestroy() this.
-            // this.migrateDrop()
-            //    // .then(() => {
-            //    //    // NOTE : prevent recursive remove connected fields
-            //    //    // - remove this field from JSON
-            //    //    this.object._fields = this.object.fields((f) => {
-            //    //       return f.id != this.id;
-            //    //    });
-            //    // })
-            //    .then(() => {
-            //       // Save JSON of the object
-            //       return this.object.fieldRemove(this);
-            //    })
-            super
-               .destroy()
-               .then(() => {
-                  // Now we need to remove our linked Object->field
+   async destroy() {
+      // verify we have been .save()d before:
+      if (!this.id) return Promise.resolve();
 
-                  var linkObject = this.datasourceLink;
-                  if (!linkObject) return Promise.resolve(); // already notified
+      // NOTE: our .migrateXXX() routines expect the object to currently exist
+      // in the DB before we perform the DB operations.  So we need to
+      // .migrateDrop()  before we actually .objectDestroy() this.
+      // this.migrateDrop()
+      //    // .then(() => {
+      //    //    // NOTE : prevent recursive remove connected fields
+      //    //    // - remove this field from JSON
+      //    //    this.object._fields = this.object.fields((f) => {
+      //    //       return f.id != this.id;
+      //    //    });
+      //    // })
+      //    .then(() => {
+      //       // Save JSON of the object
+      //       return this.object.fieldRemove(this);
+      //    })
+      await super.destroy();
 
-                  var linkField = this.fieldLink;
-                  if (!linkField) return Promise.resolve(); // already notified
+      // Now we need to remove our linked Object->field
 
-                  // destroy linked field
-                  return linkField.destroy();
-               })
-               .then(resolve)
-               .catch(reject);
-         } else {
-            resolve(); // nothing to do really
-         }
-      });
+      var linkObject = this.datasourceLink;
+      if (!linkObject) return Promise.resolve(); // already notified
+
+      var linkField = this.fieldLink;
+      if (!linkField) return Promise.resolve(); // already notified
+
+      // destroy linked field
+      return linkField.destroy();
    }
 
    ///
@@ -807,7 +799,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                url: "It will call url in .getOptions function", // require
                minimumInputLength: 0,
                quietMillis: 250,
-               fetch: (url, init, queryOptions) => {
+               fetch: async (url, init, queryOptions) => {
                   // if we are filtering based off another selectivity's value we
                   // need to do it on fetch each time because the value can change
                   // copy the filters so we don't add to them every time there is a change
@@ -836,14 +828,14 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                      }
                   }
 
-                  return this.getOptions(
+                  let data = await this.getOptions(
                      combineFilters,
                      queryOptions.term
-                  ).then(function (data) {
-                     return {
-                        results: data,
-                     };
-                  });
+                  );
+
+                  return {
+                     results: data,
+                  };
                },
             },
          },
@@ -859,7 +851,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          if (domNode && row.id && !isFormView) {
             domNode.addEventListener(
                "change",
-               (/* e */) => {
+               async (/* e */) => {
                   // update just this value on our current object.model
                   var values = {};
                   values[this.columnName] = this.selectivityGet(domNode);
@@ -876,29 +868,27 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                   )
                      values[this.columnName] = "";
 
-                  this.object
-                     .model()
-                     .update(row.id, values)
-                     .then(() => {
-                        // update values of relation to display in grid
-                        values[this.relationName()] = values[this.columnName];
+                  try {
+                     await this.object.model().update(row.id, values);
+                  } catch (err) {
+                     node.classList.add("webix_invalid");
+                     node.classList.add("webix_invalid_cell");
 
-                        // update new value to item of DataTable .updateItem
-                        if (values[this.columnName] == "")
-                           values[this.columnName] = [];
-                        if ($$(node) && $$(node).updateItem)
-                           $$(node).updateItem(row.id, values);
-                     })
-                     .catch((err) => {
-                        node.classList.add("webix_invalid");
-                        node.classList.add("webix_invalid_cell");
-
-                        this.AB.error("Error updating our entry.", {
-                           error: err,
-                           row: row,
-                           values: values,
-                        });
+                     this.AB.error("Error updating our entry.", {
+                        error: err,
+                        row: row,
+                        values: values,
                      });
+                  }
+
+                  // update values of relation to display in grid
+                  values[this.relationName()] = values[this.columnName];
+
+                  // update new value to item of DataTable .updateItem
+                  if (values[this.columnName] == "")
+                     values[this.columnName] = [];
+                  if ($$(node) && $$(node).updateItem)
+                     $$(node).updateItem(row.id, values);
                },
                false
             );
@@ -1011,98 +1001,93 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
     *
     * @return {Promise}
     */
-   getOptions(where, term) {
-      return new Promise((resolve, reject) => {
-         where = where || {};
+   async getOptions(where, term) {
+      where = where || {};
 
-         if (!where.glue) where.glue = "and";
+      if (!where.glue) where.glue = "and";
 
-         if (!where.rules) where.rules = [];
+      if (!where.rules) where.rules = [];
 
-         term = term || "";
+      term = term || "";
 
-         // check if linked object value is not define, should return a empty array
-         if (!this.settings.linkObject) return resolve([]);
+      // check if linked object value is not define, should return a empty array
+      if (!this.settings.linkObject) return [];
 
-         // if options was cached
-         // if (this._options != null) return resolve(this._options);
+      // if options was cached
+      // if (this._options != null) return resolve(this._options);
 
-         var linkedObj = this.datasourceLink;
+      var linkedObj = this.datasourceLink;
 
-         // System could not found the linked object - It may be deleted ?
-         if (linkedObj == null) return reject();
+      // System could not found the linked object - It may be deleted ?
+      if (linkedObj == null) throw new Error("No linked object");
 
-         var linkedCol = this.fieldLink;
+      var linkedCol = this.fieldLink;
 
-         // System could not found the linked field - It may be deleted ?
-         if (linkedCol == null) return reject();
+      // System could not found the linked field - It may be deleted ?
+      if (linkedCol == null) throw new Error("No linked column");
 
-         // Get linked object model
-         var linkedModel = linkedObj.model();
+      // Get linked object model
+      var linkedModel = linkedObj.model();
 
-         // M:1 - get data that's only empty relation value
-         if (
-            this.settings.linkType == "many" &&
-            this.settings.linkViaType == "one"
-         ) {
+      // M:1 - get data that's only empty relation value
+      if (
+         this.settings.linkType == "many" &&
+         this.settings.linkViaType == "one"
+      ) {
+         where.rules.push({
+            key: linkedCol.id,
+            rule: "is_null",
+         });
+         // where[linkedCol.columnName] = null;
+      }
+      // 1:1
+      else if (
+         this.settings.linkType == "one" &&
+         this.settings.linkViaType == "one"
+      ) {
+         // 1:1 - get data is not match link id that we have
+         if (this.settings.isSource == true) {
+            // NOTE: make sure "haveNoRelation" shows up as an operator
+            // the value ":0" doesn't matter, we just need 'haveNoRelation' as an operator.
+            // newRule[linkedCol.id] = { 'haveNoRelation': 0 };
+            where.rules.push({
+               key: linkedCol.id,
+               rule: "haveNoRelation",
+            });
+         }
+         // 1:1 - get data that's only empty relation value by query null value from link table
+         else {
             where.rules.push({
                key: linkedCol.id,
                rule: "is_null",
             });
-            // where[linkedCol.columnName] = null;
+            // newRule[linkedCol.id] = 'null';
+            // where[linkedCol.id] = null;
          }
-         // 1:1
-         else if (
-            this.settings.linkType == "one" &&
-            this.settings.linkViaType == "one"
-         ) {
-            // 1:1 - get data is not match link id that we have
-            if (this.settings.isSource == true) {
-               // NOTE: make sure "haveNoRelation" shows up as an operator
-               // the value ":0" doesn't matter, we just need 'haveNoRelation' as an operator.
-               // newRule[linkedCol.id] = { 'haveNoRelation': 0 };
-               where.rules.push({
-                  key: linkedCol.id,
-                  rule: "haveNoRelation",
-               });
-            }
-            // 1:1 - get data that's only empty relation value by query null value from link table
-            else {
-               where.rules.push({
-                  key: linkedCol.id,
-                  rule: "is_null",
-               });
-               // newRule[linkedCol.id] = 'null';
-               // where[linkedCol.id] = null;
-            }
-         }
+      }
 
-         // Pull linked object data
-         linkedModel
-            .findAll({
-               where: where,
-               populate: false,
-            })
-            .then((result) => {
-               // cache linked object data
-               this._options = result.data || result || [];
-
-               // populate display text
-               (this._options || []).forEach((opt) => {
-                  opt.text = linkedObj.displayData(opt);
-               });
-
-               // filter
-               this._options = this._options.filter(function (item) {
-                  if (item.text.toLowerCase().includes(term.toLowerCase())) {
-                     return true;
-                  }
-               });
-
-               resolve(this._options);
-            })
-            .catch(reject);
+      // Pull linked object data
+      let result = await linkedModel.findAll({
+         where: where,
+         populate: false,
       });
+
+      // cache linked object data
+      this._options = result.data || result || [];
+
+      // populate display text
+      (this._options || []).forEach((opt) => {
+         opt.text = linkedObj.displayData(opt);
+      });
+
+      // filter
+      this._options = this._options.filter(function (item) {
+         if (item.text.toLowerCase().includes(term.toLowerCase())) {
+            return true;
+         }
+      });
+
+      return this._options;
    }
 
    getValue(item) {

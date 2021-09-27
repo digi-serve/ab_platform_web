@@ -155,37 +155,44 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
     * @function destroy
     * On a destroy operation, ask if the user wants to keep the related file.
     */
-   destroy() {
+   async destroy() {
       return new Promise((resolve, reject) => {
          // verify we have been .save()d before:
-         if (this.id) {
-            // Ask the user what to do about the existing file:
-            this.AB.Dialog.Confirm({
-               title: L("Keep Files?"),
-               message: L("Do you want to keep the files referenced by {0}?", [
-                  this.label,
-               ]),
-               callback: (result) => {
-                  // update this setting so the server can respond correctly in
-                  // ABFieldFile.migrateDrop()
-                  this.settings.removeExistingData = result ? 0 : 1;
-                  this.save()
-                     .then(() => {
-                        // TODO: a reminder that you still got alot on the server to do!
-                        this.AB.Dialog.Alert({
-                           title: "!! TODO !!",
-                           text:
-                              "Tell a Developer to actually pay attention to this!",
-                        });
-                        // now the default .destroy()
-                        super.destroy().then(resolve).catch(reject);
-                     })
-                     .catch(reject);
-               },
-            });
-         } else {
-            resolve(); // nothing to do really
+         if (!this.id) {
+            resolve();
+            return;
          }
+
+         // Ask the user what to do about the existing file:
+         this.AB.Dialog.Confirm({
+            title: L("Keep Files?"),
+            message: L("Do you want to keep the files referenced by {0}?", [
+               this.label,
+            ]),
+            callback: async (result) => {
+               // update this setting so the server can respond correctly in
+               // ABFieldFile.migrateDrop()
+               this.settings.removeExistingData = result ? 0 : 1;
+
+               try {
+                  await this.save();
+
+                  // TODO: a reminder that you still got alot on the server to do!
+                  this.AB.Dialog.Alert({
+                     title: "!! TODO !!",
+                     text:
+                        "Tell a Developer to actually pay attention to this!",
+                  });
+
+                  // now the default .destroy()
+                  await super.destroy();
+
+                  resolve();
+               } catch (err) {
+                  reject(err);
+               }
+            },
+         });
       });
    }
 
@@ -331,7 +338,7 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
                },
 
                // when upload is complete:
-               onFileUpload: (item, response) => {
+               onFileUpload: async (item, response) => {
                   webixContainer.hideProgress();
                   // this.showFile(idBase, response.data.uuid);
 
@@ -342,25 +349,23 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
 
                   // update just this value on our current object.model
                   if (row.id) {
-                     this.object
-                        .model()
-                        .update(row.id, values)
-                        .then(() => {
-                           // update the client side data object as well so other data changes won't cause this save to be reverted
-                           if ($$(node) && $$(node).updateItem)
-                              $$(node).updateItem(row.id, values);
-                        })
-                        .catch((err) => {
-                           node.classList.add("webix_invalid");
-                           node.classList.add("webix_invalid_cell");
+                     try {
+                        await this.object.model().update(row.id, values);
 
-                           this.AB.notify.developer(err, {
-                              context:
-                                 "ABFieldFile.onFileUpload(): Error updating our entry.",
-                              row: row,
-                              values: values,
-                           });
+                        // update the client side data object as well so other data changes won't cause this save to be reverted
+                        if ($$(node) && $$(node).updateItem)
+                           $$(node).updateItem(row.id, values);
+                     } catch (err) {
+                        node.classList.add("webix_invalid");
+                        node.classList.add("webix_invalid_cell");
+
+                        this.AB.notify.developer(err, {
+                           context:
+                              "ABFieldFile.onFileUpload(): Error updating our entry.",
+                           row: row,
+                           values: values,
                         });
+                     }
                   }
 
                   // update value in the form component
@@ -405,7 +410,7 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
          this.AB.Dialog.Confirm({
             title: "",
             message: L("Are you sure you want to remove this file?"),
-            callback: (result) => {
+            callback: async (result) => {
                var confirmDelete = result ? 1 : 0;
                if (confirmDelete) {
                   // update just this value on our current object.model
@@ -413,24 +418,22 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
                   values[this.columnName] = "";
 
                   if (row.id) {
-                     this.object
-                        .model()
-                        .update(row.id, values)
-                        .then(() => {
-                           // update the client side data object as well so other data changes won't cause this save to be reverted
-                           if ($$(node) && $$(node).updateItem)
-                              $$(node).updateItem(row.id, values);
-                        })
-                        .catch((err) => {
-                           node.classList.add("webix_invalid");
-                           node.classList.add("webix_invalid_cell");
+                     try {
+                        await this.object.model().update(row.id, values);
+                     } catch (err) {
+                        node.classList.add("webix_invalid");
+                        node.classList.add("webix_invalid_cell");
 
-                           this.AB.error("Error updating our entry.", {
-                              error: err,
-                              row: row,
-                              values: values,
-                           });
+                        this.AB.error("Error updating our entry.", {
+                           error: err,
+                           row: row,
+                           values: values,
                         });
+                     }
+
+                     // update the client side data object as well so other data changes won't cause this save to be reverted
+                     if ($$(node) && $$(node).updateItem)
+                        $$(node).updateItem(row.id, values);
                   }
                   // update value in the form component
                   else {

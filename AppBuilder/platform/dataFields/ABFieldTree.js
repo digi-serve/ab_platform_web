@@ -500,7 +500,7 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
                      );
                   },
                   on: {
-                     onItemCheck: function (id, value, event) {
+                     onItemCheck: async function (id, value, event) {
                         var dom = this.getItemNode(id);
                         var tree = this;
                         if (value == true) {
@@ -539,25 +539,23 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
                            if (values[field.columnName].length == 0)
                               values[field.columnName] = "";
 
-                           field.object
-                              .model()
-                              .update(row.id, values)
-                              .then(() => {
-                                 // update the client side data object as well so other data changes won't cause this save to be reverted
-                                 if (view && view.updateItem) {
-                                    view.updateItem(row.id, values);
-                                 }
-                              })
-                              .catch((err) => {
-                                 node.classList.add("webix_invalid");
-                                 node.classList.add("webix_invalid_cell");
+                           try {
+                              await field.object.model().update(row.id, values);
+                           } catch (err) {
+                              node.classList.add("webix_invalid");
+                              node.classList.add("webix_invalid_cell");
 
-                                 this.AB.error("Error updating our entry.", {
-                                    error: err,
-                                    row: row,
-                                    values: values,
-                                 });
+                              this.AB.error("Error updating our entry.", {
+                                 error: err,
+                                 row: row,
+                                 values: values,
                               });
+                           }
+
+                           // update the client side data object as well so other data changes won't cause this save to be reverted
+                           if (view && view.updateItem) {
+                              view.updateItem(row.id, values);
+                           }
                         } else {
                            var rowData = {};
                            rowData[field.columnName] = $$(idTree).getChecked();

@@ -145,7 +145,7 @@ module.exports = class ABFieldUser extends ABFieldUserCore {
    /// Working with Actual Object Values:
    ///
 
-   save() {
+   async save() {
       // Add new
       if (this.id == null) {
          var SiteUser = this.AB.objectUser();
@@ -186,31 +186,30 @@ module.exports = class ABFieldUser extends ABFieldUserCore {
                isSource: 0,
             },
          });
-         return (
-            Promise.resolve()
-               // Create definitions of the connected fields
-               // NOTE: skip directly to the ABMLClass.save() to avoid the
-               // migrations caused during the ABField.save() operations.
-               .then(() => ABFieldUserCore.prototype.save.call(this))
-               .then(() => {
-                  linkCol.settings.linkColumn = this.id;
-                  return ABFieldUserCore.prototype.save.call(linkCol);
-               })
-               // Update the id value of linked field to connect together
-               .then(() => {
-                  this.settings.linkColumn = linkCol.id;
-                  return ABFieldUserCore.prototype.save.call(this);
-               })
-               // Add fields to Objects
-               .then(() => this.object.fieldAdd(this))
-               .then(() => SiteUser.fieldAdd(linkCol))
-               // Create column to DB
-               .then(() => this.migrateCreate())
-               // .then(() => linkCol.migrateCreate())
-               .then(() => {
-                  return this;
-               })
-         );
+
+         // Create definitions of the connected fields
+         // NOTE: skip directly to the ABMLClass.save() to avoid the
+         // migrations caused during the ABField.save() operations.
+         await ABFieldUserCore.prototype.save.call(this);
+
+         linkCol.settings.linkColumn = this.id;
+         await ABFieldUserCore.prototype.save.call(linkCol);
+
+         // Update the id value of linked field to connect together
+         this.settings.linkColumn = linkCol.id;
+         await ABFieldUserCore.prototype.save.call(this);
+
+         // Add fields to Objects
+         await this.object.fieldAdd(this);
+
+         await SiteUser.fieldAdd(linkCol);
+
+         // Create column to DB
+         await this.migrateCreate();
+
+         // await linkCol.migrateCreate();
+
+         return Promise.resolve(this);
       } else {
          return super.save();
       }
