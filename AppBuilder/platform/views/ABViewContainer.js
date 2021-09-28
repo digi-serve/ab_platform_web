@@ -170,56 +170,54 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
                text: L("Do you want to delete <b>{0}</b>?", [
                   deletedView.label,
                ]),
-               callback: (result) => {
-                  if (result) {
-                     // let Dashboard = $$(ids.component);
+               callback: async (result) => {
+                  if (!result) return;
+                  // let Dashboard = $$(ids.component);
 
-                     // // remove UI of this component in template
-                     // var deletedElem = Dashboard.queryView({ name: id });
-                     // if (deletedElem) {
+                  // // remove UI of this component in template
+                  // var deletedElem = Dashboard.queryView({ name: id });
+                  // if (deletedElem) {
 
-                     // 	// store the removed view to signal event in .onChange
-                     // 	this.__deletedView = deletedView;
+                  // 	// store the removed view to signal event in .onChange
+                  // 	this.__deletedView = deletedView;
 
-                     // 	// remove view
-                     // 	var remainingViews = this.views((v) => { return v.id != deletedView.id; })
-                     // 	this._views = remainingViews;
+                  // 	// remove view
+                  // 	var remainingViews = this.views((v) => { return v.id != deletedView.id; })
+                  // 	this._views = remainingViews;
 
-                     // 	// this calls the remove REST to API server
-                     // 	Dashboard.removeView(deletedElem);
-                     // }
+                  // 	// this calls the remove REST to API server
+                  // 	Dashboard.removeView(deletedElem);
+                  // }
 
-                     _logic.busy();
+                  _logic.busy();
 
-                     deletedView
-                        .destroy()
-                        .then(() => {
-                           // signal the current view has been deleted.
-                           deletedView.emit("destroyed", deletedView);
+                  try {
+                     await deletedView.destroy();
+                  } catch (err) {
+                     App.AB.error("Error trying to delete selected View:", {
+                        error: err,
+                        view: deletedView,
+                     });
 
-                           let Dashboard = $$(ids.component);
-
-                           // Update UI
-                           var deletedElem = Dashboard.queryView({ name: id });
-                           if (deletedElem) {
-                              Dashboard.blockEvent();
-                              Dashboard.removeView(deletedElem);
-                              Dashboard.unblockEvent();
-                           }
-
-                           _logic.showEmptyPlaceholder();
-
-                           _logic.ready();
-                        })
-                        .catch((err) => {
-                           App.AB.error(
-                              "Error trying to delete selected View:",
-                              { error: err, view: deletedView }
-                           );
-
-                           _logic.ready();
-                        });
+                     _logic.ready();
                   }
+
+                  // signal the current view has been deleted.
+                  deletedView.emit("destroyed", deletedView);
+
+                  let Dashboard = $$(ids.component);
+
+                  // Update UI
+                  var deletedElem = Dashboard.queryView({ name: id });
+                  if (deletedElem) {
+                     Dashboard.blockEvent();
+                     Dashboard.removeView(deletedElem);
+                     Dashboard.unblockEvent();
+                  }
+
+                  _logic.showEmptyPlaceholder();
+
+                  _logic.ready();
                },
             });
             e.preventDefault();
@@ -250,65 +248,48 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
             return false;
          },
 
-         onReorder: () => {
-            return new Promise((resolve, reject) => {
-               _logic.busy();
+         onReorder: async () => {
+            _logic.busy();
 
-               var Dashboard = $$(ids.component);
+            var Dashboard = $$(ids.component);
 
-               // ignore in "preview" mode
-               // if (Dashboard == null || Dashboard.config.view != "dashboard") return;
+            // ignore in "preview" mode
+            // if (Dashboard == null || Dashboard.config.view != "dashboard") return;
 
-               var viewState = Dashboard.serialize();
+            var viewState = Dashboard.serialize();
 
-               var allViewUpdates = [];
+            var allViewUpdates = [];
 
-               // save view position state to views
-               this.views().forEach((v) => {
-                  var state = viewState.filter((vs) => vs.name == v.id)[0];
-                  if (state) {
-                     v.position.x = state.x;
-                     v.position.y = state.y;
+            // save view position state to views
+            this.views().forEach((v) => {
+               var state = viewState.filter((vs) => vs.name == v.id)[0];
+               if (state) {
+                  v.position.x = state.x;
+                  v.position.y = state.y;
 
-                     // validate position data
-                     if (v.position.x < 0) v.position.x = 0;
-                     if (v.position.y < 0) v.position.y = 0;
+                  // validate position data
+                  if (v.position.x < 0) v.position.x = 0;
+                  if (v.position.y < 0) v.position.y = 0;
 
-                     allViewUpdates.push(v.save());
-                  }
-               });
+                  allViewUpdates.push(v.save());
+               }
+            });
 
+            try {
                // save template layout
                // this.saveReorder()
-               Promise.all(allViewUpdates)
-                  .then(() => {
-                     return this.save();
-                  })
-                  .catch((err) => {
-                     App.AB.error("Error trying to save selected View:", {
-                        error: err,
-                        view: this,
-                     });
+               await Promise.all(allViewUpdates);
 
-                     _logic.ready();
+               await this.save();
 
-                     reject(err);
-                  })
-                  .then(() => {
-                     // // signal the current view has been deleted.
-                     // // this variable is stored in .viewDelete
-                     // if (this.__deletedView) {
-                     // 	this.__deletedView.emit('destroyed', this.__deletedView);
-
-                     // 	// clear
-                     // 	delete this.__deletedView;
-                     // }
-
-                     _logic.ready();
-
-                     resolve();
-                  });
-            });
+               _logic.ready();
+            } catch (err) {
+               App.AB.error("Error trying to save selected View:", {
+                  error: err,
+                  view: this,
+               });
+               _logic.ready();
+            }
          },
 
          showEmptyPlaceholder: () => {
@@ -520,22 +501,18 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
       view.settings.gravity = gravity;
    }
 
-   static propertyEditorSave(ids, view) {
-      return Promise.resolve()
-         .then(() => {
-            this.propertyEditorValues(ids, view);
+   static async propertyEditorSave(ids, view) {
+      this.propertyEditorValues(ids, view);
 
-            // Save .settings of container
-            return view.save();
-         })
-         .then(() => {
-            // signal the current view has been updated.
-            view.emit("properties.updated", view);
+      // Save .settings of container
+      await view.save();
 
-            // Save reorder of subviews
-            let editorComponent = view.editorComponent(this._App);
-            return editorComponent.logic.onReorder();
-         });
+      // signal the current view has been updated.
+      view.emit("properties.updated", view);
+
+      // Save reorder of subviews
+      let editorComponent = view.editorComponent(this._App);
+      await editorComponent.logic.onReorder();
    }
 
    /**

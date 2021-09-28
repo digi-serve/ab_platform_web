@@ -246,7 +246,7 @@ module.exports = class ABViewDataview extends ABViewDataviewCore {
           * 					y: {integer}
           * 				}
           */
-         scroll: (pos) => {
+         scroll: async (pos) => {
             let loadWhen = 40;
 
             let y = pos.y;
@@ -266,9 +266,9 @@ module.exports = class ABViewDataview extends ABViewDataviewCore {
                // loading cursor
                com.logic.busy();
 
-               dc.loadData($$(ids.dataFlexView).getChildViews().length || 0)
-                  .catch(() => {})
-                  .then(() => {});
+               await dc.loadData(
+                  $$(ids.dataFlexView).getChildViews().length || 0
+               );
 
                this.loadMoreTimer = setTimeout(() => {
                   this.loadMoreTimer = null;

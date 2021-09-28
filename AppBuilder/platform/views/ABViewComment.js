@@ -481,11 +481,11 @@ module.exports = class ABViewComment extends ABViewCommentCore {
       return currentUserId;
    }
 
-   saveData(commentText, dateTime) {
+   async saveData(commentText, dateTime) {
       if (commentText == null || commentText == "") return Promise.resolve();
 
       let dv = this.datacollection;
-      if (!dv) return null;
+      if (!dv) return Promise.resolve();
 
       let model = this.model();
       if (model == null) {
@@ -520,15 +520,6 @@ module.exports = class ABViewComment extends ABViewCommentCore {
          }
       }
 
-      return new Promise((resolve, reject) => {
-         model
-            .create(comment)
-            .then(() => {
-               resolve();
-            })
-            .catch((err) => {
-               reject(err);
-            });
-      });
+      return await model.create(comment);
    }
 };

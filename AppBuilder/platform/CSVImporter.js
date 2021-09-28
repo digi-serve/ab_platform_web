@@ -54,7 +54,7 @@ module.exports = class CSVImporter {
     * 						["Value 2.1", "Value 2.2", "Value 2.3"],
     * 					]
     */
-   getDataRows(fileInfo, separatedBy) {
+   async getDataRows(fileInfo, separatedBy) {
       if (!this.validateFile(fileInfo)) return Promise.reject();
 
       return new Promise((resolve, reject) => {

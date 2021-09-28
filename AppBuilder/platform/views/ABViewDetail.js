@@ -42,7 +42,7 @@ module.exports = class ABViewDetail extends ABViewDetailCore {
 
       // _logic functions
 
-      _logic.selectSource = (dcId, oldDcId) => {
+      _logic.selectSource = async (dcId, oldDcId) => {
          // TODO : warning message
 
          _logic.busy();
@@ -53,68 +53,42 @@ module.exports = class ABViewDetail extends ABViewDetailCore {
          // clear sub views
          currView._views = [];
 
-         return (
-            Promise.resolve()
-               // .then(() => {
+         this.propertyUpdateFieldOptions(ids, currView, dcId);
 
-               // 	// remove all old field components
-               // 	if (oldDcId != null)
-               // 		return currView.clearFieldComponents();
+         // add all fields to editor by default
+         if (currView._views.length > 0) return Promise.resolve();
 
-               // })
-               .then(() => {
-                  // refresh UI
-                  // currView.emit('properties.updated', currView);
+         let fieldSaves = [];
+         let fields = $$(ids.fields).find({});
+         fields.reverse();
+         fields.forEach(async (f, index) => {
+            if (!f.selected) {
+               let yPosition = fields.length - index - 1;
 
-                  // _logic.busy();
+               var fieldView = currView.addFieldToView(f, yPosition, ids, App);
+               fieldSaves.push(await fieldView.save());
 
-                  // Update field options in property
-                  this.propertyUpdateFieldOptions(ids, currView, dcId);
+               // update item to UI list
+               f.selected = 1;
+               $$(ids.fields).updateItem(f.id, f);
+            }
+         });
 
-                  // add all fields to editor by default
-                  if (currView._views.length > 0) return Promise.resolve();
+         await Promise.all(fieldSaves);
 
-                  let fieldSaves = [];
-                  let fields = $$(ids.fields).find({});
-                  fields.reverse();
-                  fields.forEach((f, index) => {
-                     if (!f.selected) {
-                        let yPosition = fields.length - index - 1;
+         // Saving
+         await currView.save();
 
-                        var fieldView = currView.addFieldToView(
-                           f,
-                           yPosition,
-                           ids,
-                           App
-                        );
-                        fieldSaves.push(fieldView.save());
+         currView.emit("properties.updated", currView);
 
-                        // update item to UI list
-                        f.selected = 1;
-                        $$(ids.fields).updateItem(f.id, f);
-                     }
-                  });
-
-                  return Promise.all(fieldSaves);
-               })
-               // Saving
-               .then(() => {
-                  return currView.save();
-               })
-               // Finally
-               .then(() => {
-                  currView.emit("properties.updated", currView);
-
-                  _logic.ready();
-               })
-         );
+         _logic.ready();
       };
 
       _logic.listTemplate = (field, common) => {
          return `${common.markCheckbox(field)} ${field.label}`;
       };
 
-      _logic.check = (e, fieldId) => {
+      _logic.check = async (e, fieldId) => {
          var currView = _logic.currentEditObject();
 
          // update UI list
@@ -124,16 +98,13 @@ module.exports = class ABViewDetail extends ABViewDetailCore {
 
          // add a field to the form
          if (item.selected) {
-            currView
-               .addFieldToView(item, null, ids, App)
-               .save()
-               .then(() => {
-                  // Refresh UI
-                  currView.emit("properties.updated", currView);
+            await currView.addFieldToView(item, null, ids, App).save();
 
-                  // .addFieldToView() does not auto update the currView:
-                  return currView.save();
-               });
+            // Refresh UI
+            currView.emit("properties.updated", currView);
+
+            // .addFieldToView() does not auto update the currView:
+            await currView.save();
          }
          // remove field in the form
          else {
@@ -144,10 +115,10 @@ module.exports = class ABViewDetail extends ABViewDetailCore {
                // let remainingViews = currView.views(c => c.settings.fieldId != fieldId);
                // currView._views = remainingViews;
 
-               fieldView.destroy().then(() => {
-                  // Refresh UI
-                  currView.emit("properties.updated", currView);
-               });
+               await fieldView.destroy();
+
+               // Refresh UI
+               currView.emit("properties.updated", currView);
             }
          }
 
@@ -163,7 +134,8 @@ module.exports = class ABViewDetail extends ABViewDetailCore {
             labelWidth: App.config.labelWidthLarge,
             skipAutoSave: true,
             on: {
-               onChange: _logic.selectSource,
+               onChange: async (dcId, oldDcId) =>
+                  await _logic.selectSource(dcId, oldDcId),
             },
          },
          {
@@ -182,7 +154,7 @@ module.exports = class ABViewDetail extends ABViewDetailCore {
                },
             },
             onClick: {
-               check: _logic.check,
+               check: async (e, fieldId) => await _logic.check(e, fieldId),
             },
          },
          {

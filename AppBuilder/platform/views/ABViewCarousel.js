@@ -498,7 +498,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
             if (Carousel.hideProgress) Carousel.hideProgress();
          },
 
-         switchImage: (current_position) => {
+         switchImage: async (current_position) => {
             let dv = this.datacollection;
             if (!dv) return;
 
@@ -510,13 +510,15 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
                // loading cursor
                _logic.busy();
 
-               dv.loadData(this._rowCount || 0)
-                  .catch(() => {
-                     _logic.ready();
-                  })
-                  .then(() => {
-                     _logic.ready();
+               try {
+                  await dv.loadData(this._rowCount || 0);
+                  _logic.ready();
+               } catch (err) {
+                  App.AB.log("Error load data:", {
+                     error: err,
                   });
+                  _logic.ready();
+               }
             }
          },
 
