@@ -67,6 +67,10 @@ class Bootstrap extends EventEmitter {
       // should be displayed.  Our actual portal is a popup, but the base
       // <div> can be used for an embedded view.
 
+      this._plugins = [];
+      // {array} ._plugins
+      // an array of the loaded plugins we need to register.
+
       this._ui = null;
       // {obj} ._ui
       // the Webix Object that is our UI display
@@ -88,10 +92,36 @@ class Bootstrap extends EventEmitter {
                //    server.
                return initConfig.init(this);
             })
+
+            .then(() => {
+               // 2.5) Load any plugins
+
+               // Make sure the BootStrap Object is available globally
+               window.__ABBS = this;
+
+               var plugins = Config.plugins() || [];
+               console.log("plugins:", plugins);
+
+               var allPluginsLoaded = [];
+               plugins.forEach((p) => {
+                  allPluginsLoaded.push(loadScript(p));
+               });
+
+               return Promise.all(allPluginsLoaded);
+            })
+
             .then(() => {
                // 3) Now we have enough info, to create an instance of our
                //    {ABFactory} that drives the rest of the AppBuilder objects
                var definitions = Config.definitions() || null;
+               if (definitions) {
+                  // NOTE: when loading up an unauthorized user,
+                  // definitions will be null: we can skip the plugins
+                  // Q: is it possible to load a plugin when unauthorized?
+                  this._plugins.forEach((p) => {
+                     definitions = definitions.concat(p.definitions());
+                  });
+               }
                this.AB = new ABFactory(definitions);
 
                if (!window.AB) window.AB = this.AB;
@@ -100,8 +130,18 @@ class Bootstrap extends EventEmitter {
                // our Factory as a Global var.  So until those are rewritten we will
                // make our factory Global.
 
-               return this.AB.init();
+               return this.AB.init().then(() => {
+                  // 3.5  prepare the plugins
+                  this._plugins.forEach((p) => {
+                     p.apply(this.AB);
+                     var labels = p.labels(
+                        this.AB.Multilingual.currentLanguage()
+                     );
+                     this.AB.Multilingual.pluginLoadLabels(p.key, labels);
+                  });
+               });
             })
+
             .then(() => {
                // 4) Now we can create the UI and send it the {ABFactory}
                return Promise.resolve().then(() => {
@@ -127,6 +167,10 @@ class Bootstrap extends EventEmitter {
                });
             })
       );
+   }
+
+   addPlugin(plugin) {
+      this._plugins.push(plugin);
    }
 
    alert(options) {
@@ -156,3 +200,26 @@ class Bootstrap extends EventEmitter {
 }
 
 export default new Bootstrap();
+
+function loadScript(p) {
+   return new Promise((resolve, reject) => {
+      var cb = () => resolve();
+
+      // Adding the script tag to the head as suggested before
+      var head = document.head;
+      var script = document.createElement("script");
+      script.type = "text/javascript";
+      script.src = `/plugin/${p}`;
+
+      // Then bind the event to the callback function.
+      // There are several events for cross browser compatibility.
+      script.onreadystatechange = cb;
+      script.onload = cb;
+      script.onerror = () => {
+         reject(new Error(`Error loading plugin ${p}`));
+      };
+
+      // Fire the loading
+      head.appendChild(script);
+   });
+}

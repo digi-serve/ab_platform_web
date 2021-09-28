@@ -1,3 +1,6 @@
+import ConfigDesktop from "./configDesktop";
+import ConfigMobile from "./configMobile";
+
 // var EventEmitter = require("events").EventEmitter;
 var _defaultsDeep = require("lodash/defaultsDeep");
 
@@ -72,8 +75,8 @@ class Config {
          if (!val) {
             val = divConfigDefaults[d];
          }
-         if (val == "false") val = false;
-         if (val == "true") val = true;
+         if (val === "false") val = false;
+         if (val === "true") val = true;
 
          var key = d.split("-").pop();
          this.setting(key, val);
@@ -90,7 +93,7 @@ class Config {
       return this._config.definitions;
    }
 
-   error(...args) {
+   error(/* ...args */) {
       console.error("Who is calling this? -> move to AB.error() instead.");
       // this.emit("ab.error", args);
    }
@@ -111,9 +114,22 @@ class Config {
       return {};
    }
 
+   plugins() {
+      // TODO: Pull from this._config.plugins
+      return ["ABDesigner.js"];
+      // return [];
+   }
+
    inboxConfig() {
       if (this._config && this._config.inbox) {
          return this._config.inbox;
+      }
+      return null;
+   }
+
+   inboxMetaConfig() {
+      if (this._config && this._config.inboxMeta) {
+         return this._config.inboxMeta;
       }
       return null;
    }
@@ -132,6 +148,13 @@ class Config {
       return null;
    }
 
+   uiSettings() {
+      if (window.innerWidth < 768) {
+         return ConfigMobile;
+      }
+      return ConfigDesktop;
+   }
+
    userConfig() {
       if (this._config && this._config.user) {
          return this._config.user;
@@ -139,4 +162,4 @@ class Config {
       return null;
    }
 }
-module.exports = new Config();
+export default new Config();

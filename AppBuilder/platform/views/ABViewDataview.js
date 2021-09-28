@@ -463,17 +463,27 @@ module.exports = class ABViewDataview extends ABViewDataviewCore {
          }
 
          //Add data-cy attributes for cypress tests
-         Layout.$view.setAttribute("data-cy", `dataview-container-${this.id}`);
+         const name = this.name.replace(".dataview", "");
+         Layout.$view.setAttribute(
+            "data-cy",
+            `dataview container ${name} ${this.id}`
+         );
 
          Layout.getChildViews().forEach((child, i) => {
-            const id = rows[i + this._startPos]["id"];
+            const uuid = rows[i + this._startPos]["uuid"];
             const view = child.$view;
             view
                .querySelector(".webix_accordionitem_body")
-               .setAttribute("data-cy", `dataview-item-${id}`);
+               .setAttribute(
+                  "data-cy",
+                  `dataview item ${name} ${uuid} ${this.id}`
+               );
             view
                .querySelector(".webix_accordionitem_button")
-               .setAttribute("data-cy", `dataview-item-button-${id}`);
+               .setAttribute(
+                  "data-cy",
+                  `dataview item button ${name} ${uuid} ${this.id}`
+               );
          });
 
          com.logic.ready();

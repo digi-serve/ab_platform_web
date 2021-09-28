@@ -98,16 +98,13 @@ class ClassUIPage extends ClassUI {
             dc.init();
          });
 
-         // 2) Put Page AMP here?
-
-         // 3) Render all our Pages
-         // if (this.page.id != "5fea4e7b-f6ee-42da-a702-60d6d6c48f71")
+         // 2) Render all our Pages
          this.renderPage(this.page);
 
-         // 4) After we are rendered, we are technically initialized
+         // 3) After we are rendered, we are technically initialized
          this.initialized = true;
 
-         // 5) Make sure our Root Page is "shown"
+         // 4) Make sure our Root Page is "shown"
          this.showPage();
 
          resolve();
@@ -236,7 +233,12 @@ class ClassUIPage extends ClassUI {
       }
       */
 
-      switch (page.settings.type) {
+      var type = page.settings?.type ?? "";
+      if (typeof page.type === "function") {
+         // plugin method.
+         type = page.type();
+      }
+      switch (type) {
          case "popup":
             var popupTemplate = {
                view: "window",
@@ -277,7 +279,7 @@ class ClassUIPage extends ClassUI {
                },
             };
 
-            let oldView = $$(page.id);
+            var oldView = $$(page.id);
             if (oldView) {
                // if it is a Popup, destroy() it
                if (oldView.config.view == "window") {
@@ -305,7 +307,7 @@ class ClassUIPage extends ClassUI {
             ui.batch = page.id;
 
             // if this view already exists
-            let oldPage = $$(page.id);
+            var oldPage = $$(page.id);
             if (oldPage) {
                // if the old view was a popup, but now we want it as
                // a page, we need to move it to our multiview
@@ -444,10 +446,10 @@ class ClassUIPage extends ClassUI {
 
          // if our MultiView has this batch then show batch
          var batchExist = false;
-         var childViews = $$(this.containerID).getChildViews(),
-            batchExist = childViews.filter(function (v) {
-               return v.config.batch == showPageID;
-            })[0];
+         var childViews = $$(this.containerID).getChildViews();
+         batchExist = childViews.filter(function (v) {
+            return v.config.batch == showPageID;
+         })[0];
          if (batchExist) $$(this.containerID).showBatch(showPageID);
 
          // now make sure the actual component's .onShow() is called

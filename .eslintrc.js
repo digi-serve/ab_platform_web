@@ -18,6 +18,10 @@ module.exports = {
       amd: true,
    },
 
+   globals: {
+      io: true,
+   },
+
    parserOptions: {
       ecmaVersion: 2021,
       sourceType: "module", // export import syntax

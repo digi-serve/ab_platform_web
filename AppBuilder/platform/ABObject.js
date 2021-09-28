@@ -3,17 +3,19 @@ const ABObjectWorkspaceViewCollection = require("./workspaceViews/ABObjectWorksp
 
 let L = (...params) => AB.Label()("", ...params);
 
-// Start listening for server events for object updates and call triggerEvent as the callback
-if (typeof io != "undefined") {
-   io.socket.on("ab.object.update", function (msg) {
-      AB.emit("ab.object.update", {
-         objectId: msg.objectId,
-         data: msg.data,
-      });
-   });
-} else {
-   console.error("TODO: ABObject: configure Socket.io");
-}
+// NOTE: this has been moved to NetworkRestSocket:
+//
+// // Start listening for server events for object updates and call triggerEvent as the callback
+// if (typeof io != "undefined") {
+//    io.socket.on("ab.object.update", function (msg) {
+//       AB.emit("ab.object.update", {
+//          objectId: msg.objectId,
+//          data: msg.data,
+//       });
+//    });
+// } else {
+//    console.error("TODO: ABObject: configure Socket.io");
+// }
 
 // io.socket.on("ab.object.delete", function (msg) {
 // });
@@ -28,7 +30,7 @@ module.exports = class ABObject extends ABObjectCore {
          AB
       );
 
-      this.fromValues(attributes);
+      // this.fromValues(attributes);
 
       // listen
       this.AB.on("ab.object.update", (data) => {
@@ -112,7 +114,7 @@ module.exports = class ABObject extends ABObjectCore {
    isValidData(data) {
       var validator = this.AB.Validation.validator();
       this.fields().forEach((f) => {
-         var p = f.isValidData(data, validator);
+         f.isValidData(data, validator);
       });
 
       return validator;
@@ -230,7 +232,7 @@ module.exports = class ABObject extends ABObjectCore {
       };
 
       var disableRelatedQueries = () => {
-         return new Promise((next, err) => {
+         return new Promise((next /*, err */) => {
             this.AB.queries(
                (q) => q.objects((o) => o.id == this.id).length > 0
             ).forEach((q) => {
@@ -404,7 +406,7 @@ module.exports = class ABObject extends ABObjectCore {
     * @param {int} oldWidth the old width of the field
     * @return {Promise}
     */
-   columnResize(columnName, newWidth, oldWidth) {
+   columnResize(columnName, newWidth /*, oldWidth */) {
       var fieldID = null;
       for (var i = 0; i < this._fields.length; i++) {
          if (this._fields[i].columnName == columnName) {

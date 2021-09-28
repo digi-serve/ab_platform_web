@@ -1,8 +1,22 @@
 var EventEmitter = require("events").EventEmitter;
 
 class ClassUI extends EventEmitter {
-   constructor() {
+   constructor(base) {
       super();
+
+      if (base) {
+         if ("string" == typeof base) {
+            this.ids = {
+               component: base,
+            };
+         } else {
+            this.ids = base;
+         }
+      }
+
+      // if (!base) {
+      //    console.warn("new ClassUI() called without a base component id. ");
+      // }
    }
 
    /**
@@ -19,7 +33,9 @@ class ClassUI extends EventEmitter {
     *        [optional] the value of the data-cy attribute
     */
    static CYPRESS_REF(el, id) {
-      id = id || el.config.id;
+      if (!el) return;
+
+      id = id || el.config?.id;
 
       // is this a webix object?
       if (el.getInputNode) {
@@ -37,7 +53,7 @@ class ClassUI extends EventEmitter {
       }
 
       // this is probably a straight up DOM element:
-      el.setAttribute("data-cy", id);
+      el.setAttribute?.("data-cy", id);
    }
 
    /**
@@ -79,6 +95,12 @@ class ClassUI extends EventEmitter {
       console.error(
          "ClassUI.ui(): it is expected that sub classes of ClassUI will implement their own ui() method."
       );
+   }
+
+   show() {
+      if (this.ids?.component) {
+         $$(this.ids.component).show();
+      }
    }
 }
 

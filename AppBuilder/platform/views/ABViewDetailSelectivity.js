@@ -105,6 +105,7 @@ module.exports = class ABViewDetailSelectivity extends (
       var idBase = "ABViewDetailSelectivity_" + (idPrefix || "") + this.id;
       var ids = {
          component: App.unique(idBase + "_component"),
+         detail: this.parentDetailComponent()?.id || this.parent.id,
       };
       var className = "ab-detail-selectivity";
 
@@ -113,10 +114,7 @@ module.exports = class ABViewDetailSelectivity extends (
       component.ui.on = {
          //Add data-cy attribute for Cypress Testing
          onAfterRender: () => {
-            const dataCy = `detailSelectivity-${field?.label?.replace(
-               /\s/g,
-               ""
-            )}-${field?.id}`;
+            const dataCy = `detail selectivity ${field?.columnName} ${field?.id} ${ids.detail}`;
             $$(ids.component)?.$view.setAttribute("data-cy", dataCy);
          },
       };

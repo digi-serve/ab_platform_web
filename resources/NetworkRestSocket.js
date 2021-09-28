@@ -7,11 +7,15 @@
 import NetworkRest from "./NetworkRest";
 
 const listSocketEvents = [
+   "ab.abdefinition.create",
+   "ab.abdefinition.update",
+   "ab.abdefinition.delete",
    "ab.datacollection.create",
    "ab.datacollection.update",
    "ab.datacollection.stale",
    "ab.datacollection.delete",
    "ab.inbox.create",
+   "ab.object.update",
 ];
 // {array}
 // The io.socket.* events we are listening for that relate to our datacollection
@@ -22,6 +26,10 @@ class NetworkRestSocket extends NetworkRest {
       // {Network} parent
 
       super(parent);
+
+      this.isRealTime = true;
+      // {bool}
+      // does this Network type support RealTime updates. (socket = true);
 
       // Pass the io.socket.on(*) events to our AB factory.
       listSocketEvents.forEach((ev) => {

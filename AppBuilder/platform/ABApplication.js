@@ -7,6 +7,11 @@ const ABViewPage = require("./views/ABViewPage");
 const ABViewManager = require("./ABViewManager");
 
 module.exports = class ABClassApplication extends ABApplicationCore {
+   // constructor(attributes, AB) {
+   //    super(attributes, AB);
+   //    this.warningsEval();
+   // }
+
    static applications(/*fn = () => true*/) {
       console.error(
          "ABApplication.applicationForID(): Depreciated. Who is doing this?"
@@ -37,17 +42,17 @@ module.exports = class ABClassApplication extends ABApplicationCore {
    //    return `opstools.${this.validAppName()}.view`;
    // }
 
-   validAppName() {
-      return this.AB.rules.toApplicationNameFormat(this.name);
-   }
+   // validAppName() {
+   //    return this.AB.rules.toApplicationNameFormat(this.name);
+   // }
 
    ////
    //// DB Related
    ////
 
-   dbApplicationName() {
-      return this.AB.rules.toApplicationNameFormat(this.name);
-   }
+   // dbApplicationName() {
+   //    return this.AB.rules.toApplicationNameFormat(this.name);
+   // }
 
    ///
    /// Definition
@@ -144,6 +149,84 @@ module.exports = class ABClassApplication extends ABApplicationCore {
       values.key = ABViewPage.common().key;
 
       return ABViewManager.newView(values, this, null);
+   }
+
+   save() {
+      // if someone just changed the name of our ABApplication, reflect that
+      // in our Def.Name
+      if (this.name != this.label) {
+         this.name = this.label;
+      }
+      return super.save();
+   }
+
+   warningsEval() {
+      this._warnings = [];
+
+      //
+      // check for valid object references:
+      //
+      var checks = {
+         objectIDs: "object",
+         queryIDs: "query",
+         datacollectionIDs: "datacollection",
+      };
+
+      Object.keys(checks).forEach((k) => {
+         this[k].forEach((id) => {
+            var def = this.AB.definitionByID(id);
+            if (!def) {
+               this.emit(
+                  "warning",
+                  `Application is referencing a missing ${checks[k]}`,
+                  {
+                     appID: this.id,
+                     id,
+                  }
+               );
+            }
+         });
+      });
+
+      //
+      // Make sure there is some way to access this Application:
+      //
+      if (this.roleAccess.length == 0 && !this.isAccessManaged) {
+         this.emit(
+            "warning",
+            "Application has no Role assigned, and is unaccessible."
+         );
+      }
+
+      // do our Role references exist?
+      var allRoles = this.AB.Account.rolesAll().map((r) => r.id);
+      this.roleAccess.forEach((r) => {
+         if (allRoles.indexOf(r) == -1) {
+            this.emit(
+               "warning",
+               `Specified Role Access [${r}] does not exist in this system`,
+               { role: r }
+            );
+         }
+      });
+   }
+
+   warningsAll() {
+      var warnings = [].concat(this._warnings);
+      [
+         "objectsIncluded",
+         "queriesIncluded",
+         "datacollectionsIncluded",
+         "processes",
+         "pages",
+         "views",
+      ].forEach((k) => {
+         this[k]().forEach((o) => {
+            warnings = warnings.concat(o.warnings());
+         });
+      });
+
+      return warnings;
    }
 
    /**

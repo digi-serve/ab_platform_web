@@ -114,6 +114,7 @@ module.exports = class ABViewDetailImage extends ABViewDetailImageCore {
       var idBase = "ABViewDetailImage_" + (idPrefix || "") + this.id;
       var ids = {
          component: App.unique(idBase + "_component"),
+         detail: this.parentDetailComponent()?.id || this.parent.id,
       };
 
       var defaultImageUrl = field ? field.settings.defaultImageUrl : "";
@@ -128,9 +129,7 @@ module.exports = class ABViewDetailImage extends ABViewDetailImageCore {
       component.ui.on = {
          //Add data-cy attribute for Cypress Testing
          onAfterRender: () => {
-            const dataCy = `detailImage-${field?.label?.replace(/\s/g, "")}-${
-               field?.id
-            }`;
+            const dataCy = `detail image ${field?.columnName} ${field?.id} ${ids.detail}`;
             $$(ids.component)?.$view.setAttribute("data-cy", dataCy);
          },
       };
