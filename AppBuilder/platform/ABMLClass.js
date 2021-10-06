@@ -92,10 +92,9 @@ module.exports = class ABMLClass extends ABMLClassCore {
       var def = this.toDefinition();
       // if not name, try to use our label as the name
       def.name = def.name || this.name || this.label || "name";
-      return def.save().then((data) => {
-         if (!this.id) {
-            this.id = data.id;
-         }
-      });
+      var data = await def.save();
+      if (!this.id) {
+         this.id = data.id;
+      }
    }
 };

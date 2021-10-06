@@ -11,6 +11,9 @@ class Network extends EventEmitter {
    constructor() {
       super();
 
+      this.setMaxListeners(0);
+      // we'll have > 10 for sure!
+
       this.queueLock = null;
       // {Lock} .queueLock
       // our semaphore for coordinating our access to our local storage.
