@@ -678,7 +678,7 @@ module.exports = class ABViewRuleActionFormSubmitRuleEmail extends (
          .then(() => {
             // send out
             return new Promise((resolve, reject) => {
-               recipients = _.uniq(recipients).filter((r) => r);
+               recipients = AB.uniq(recipients).filter((r) => r);
 
                if (!recipients || recipients.length < 1) return resolve();
 
@@ -706,7 +706,7 @@ module.exports = class ABViewRuleActionFormSubmitRuleEmail extends (
                      fromEmail: this.valueRules.fromEmail,
                      subject: subject,
                      message: message,
-                     recipients: _.uniq(recipients),
+                     recipients: AB.uniq(recipients),
                   },
                })
                   .then(() => {

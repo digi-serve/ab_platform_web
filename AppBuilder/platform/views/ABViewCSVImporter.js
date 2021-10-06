@@ -1305,9 +1305,9 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                   let data = row[f.columnIndex - 1];
 
                   if (f.field.key == "date") {
-                     let dateFormat = moment(data, f.format).format(
-                        "YYYY-MM-DD"
-                     );
+
+                     let date = AB.toDate(data, { format: f.format });
+                     let dateFormat = AB.toDateFormat(date, { format: "YYYY-MM-DD"});
                      if (dateFormat == "Invalid date") {
                         dateFormat = dateFormat + " - " + data;
                      }

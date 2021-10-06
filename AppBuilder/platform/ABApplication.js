@@ -35,7 +35,7 @@ module.exports = class ABClassApplication extends ABApplicationCore {
    }
 
    areaKey() {
-      return _.kebabCase(`ab-${this.name}`);
+      return AB.kebabCase(`ab-${this.name}`);
    }
 
    // actionKeyName() {
@@ -135,7 +135,7 @@ module.exports = class ABClassApplication extends ABApplicationCore {
       });
 
       // return only unique entries:
-      ids = _.uniq(ids);
+      ids = AB.uniq(ids);
    }
 
    /**

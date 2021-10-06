@@ -1096,7 +1096,7 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
                      col.template = function (obj, common) {
                         // return common.treetable(obj, common) + obj.value;
                         if (obj.$group) {
-                           let rowData = _.clone(obj);
+                           let rowData = AB.cloneDeep(obj);
                            rowData[groupField.columnName] = rowData.value;
 
                            return (
@@ -1427,7 +1427,7 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
             groupBys = groupBys.reverse();
             groupBys.forEach((colName, gIndex) => {
                let by;
-               let groupMap = _.clone(baseGroupMap);
+               let groupMap = AB.cloneDeep(baseGroupMap);
 
                // Root
                if (gIndex == groupBys.length - 1) {

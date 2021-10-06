@@ -37,7 +37,7 @@ class ABQLRowPluck extends ABQLRowPluckCore {
                })
                // change label from "ABQLSetPluck" to "ABQLRowPluck"
                .then((context) => {
-                  let nextContext = _.cloneDeep(context);
+                  let nextContext = AB.cloneDeep(context);
                   nextContext.label = "ABQLRowPluck";
 
                   // Clean up the data to match the pluck field

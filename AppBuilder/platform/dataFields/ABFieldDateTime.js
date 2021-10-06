@@ -624,7 +624,7 @@ module.exports = class ABFieldDateTime extends ABFieldDateTimeCore {
          }
 
          // else retun the actual ISO string => Date() value
-         return new Date(moment(d));
+         return AB.toDate(d);
       };
 
       return config;

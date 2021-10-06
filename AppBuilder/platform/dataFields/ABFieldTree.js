@@ -261,7 +261,7 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
          if (obj.$group) return obj[field.columnName];
 
          var branches = [];
-         var selectOptions = _.cloneDeep(field.settings.options);
+         var selectOptions = AB.cloneDeep(field.settings.options);
          selectOptions = new webix.TreeCollection({
             data: selectOptions,
          });
@@ -364,7 +364,7 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
          }
 
          var branches = [];
-         options = _.cloneDeep(field.settings.options);
+         options = AB.cloneDeep(field.settings.options);
          options = new webix.TreeCollection({
             data: options,
          });
@@ -450,7 +450,7 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
 
          $$(idTree).blockEvent(); // prevents endless loop
 
-         var options = _.cloneDeep(field.settings.options);
+         var options = AB.cloneDeep(field.settings.options);
          $$(idTree).clearAll();
          $$(idTree).parse(options);
          $$(idTree).refresh();

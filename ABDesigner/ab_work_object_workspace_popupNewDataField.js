@@ -290,7 +290,7 @@ module.exports = class AB_Work_Object_Workspace_PopupNewDataField extends (
             if (editor) {
                // the editor can define some basic form validations.
                if (editor.isValid()) {
-                  var vals = _.cloneDeep(editor.values());
+                  var vals = AB.cloneDeep(editor.values());
 
                   var field = null;
                   var oldData = null;
@@ -374,7 +374,7 @@ module.exports = class AB_Work_Object_Workspace_PopupNewDataField extends (
                      oldData = _editField.toObj();
 
                      // update changed values to old data
-                     var updateValues = _.cloneDeep(oldData);
+                     var updateValues = AB.cloneDeep(oldData);
                      for (let key in vals) {
                         // update each values of .settings
                         if (

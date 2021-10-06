@@ -954,7 +954,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
 
             // loop through rules to find "same-as-field" or "not-same-as-field"
             // adjust operator and switch key value to actual value when found
-            var filterConditions = _.cloneDeep(op.filterConditions);
+            var filterConditions = AB.cloneDeep(op.filterConditions);
             if (filterConditions && filterConditions.rules) {
                filterConditions.rules
                   .filter((r) => {
@@ -1074,7 +1074,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                               }
                            }
 
-                           newValues = _.uniq(newValues.concat(newValue));
+                           newValues = AB.uniq(newValues.concat(newValue));
 
                            break;
                         }
@@ -1089,7 +1089,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                         if (field.linkType() == "one") {
                            var updates = [];
                            newValues.forEach((v) => {
-                              var objectToUpdateClone = _.cloneDeep(
+                              var objectToUpdateClone = AB.cloneDeep(
                                  objectToUpdate
                               );
                               objectToUpdateClone[field.columnName] = v;

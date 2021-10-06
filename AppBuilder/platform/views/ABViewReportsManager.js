@@ -260,7 +260,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                         dcIds.push(j.sid);
                         dcIds.push(j.tid);
                      });
-                     dcIds = _.uniq(dcIds);
+                     dcIds = AB.uniq(dcIds);
                      dcIds.forEach((dcId) => {
                         pullDataTasks.push(
                            new Promise((next, bad) => {
@@ -388,8 +388,8 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                                 } else {
                                                    result.push(
                                                       Object.assign(
-                                                         _.clone(sData),
-                                                         _.clone(tData)
+                                                         AB.cloneDeep(sData),
+                                                         AB.cloneDeep(tData)
                                                       )
                                                    );
                                                 }
@@ -524,7 +524,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                                       case "sum":
                                                          groupedResult[
                                                             col
-                                                         ] = _.sumBy(
+                                                         ] = AB.sumBy(
                                                             groupedData,
                                                             rawCol
                                                          );
@@ -532,7 +532,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                                       case "avg":
                                                          groupedResult[
                                                             col
-                                                         ] = _.meanBy(
+                                                         ] = AB.meanBy(
                                                             groupedData,
                                                             rawCol
                                                          );
@@ -544,7 +544,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                                          break;
                                                       case "max":
                                                          groupedResult[col] =
-                                                            (_.maxBy(
+                                                            (AB.maxBy(
                                                                groupedData,
                                                                rawCol
                                                             ) || {})[rawCol] ||
@@ -552,7 +552,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                                          break;
                                                       case "min":
                                                          groupedResult[col] =
-                                                            (_.minBy(
+                                                            (AB.minBy(
                                                                groupedData,
                                                                rawCol
                                                             ) || {})[rawCol] ||
@@ -784,9 +784,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                     reportRow[col] = row[columnName];
                                     if (reportRow[col]) {
                                        if (!(reportRow[col] instanceof Date)) {
-                                          reportRow[col] = new Date(
-                                             moment(row[columnName])
-                                          );
+                                          reportRow[col] = AB.toDate(row[columnName]);
                                        }
                                     } else {
                                        reportRow[col] = "";

@@ -745,7 +745,7 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
             if (currentItem && currentItem.translations)
                translations = currentItem.translations;
             // else if (pageInfo && pageInfo.translations)
-            //    translations = _.cloneDeep(pageInfo.translations);
+            //    translations = AB.cloneDeep(pageInfo.translations);
 
             // pagesIdList.push({
             //    pageId: currentPageId,

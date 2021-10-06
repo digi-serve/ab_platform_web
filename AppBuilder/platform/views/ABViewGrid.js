@@ -1239,13 +1239,7 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                   ) &&
                   obj.appbuilder_select_item == 1
                ) {
-                  deleteTasks.push(function (next) {
-                     CurrentObject.model()
-                        .delete(obj.id)
-                        .then((response) => {
-                           next();
-                        }, next);
-                  });
+                  deleteTasks.push(CurrentObject.model().delete(obj.id));
                }
             });
 
@@ -1255,16 +1249,12 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                   text: L(
                      "Are you sure you want to delete the selected records?"
                   ),
-                  callback: function (result) {
+                  callback: async (result) => {
                      if (result) {
-                        async.parallel(deleteTasks, function (err) {
-                           if (err) {
-                              // TODO : Error message
-                           } else {
-                              // Anything we need to do after we are done.
-                              _logic.disableUpdateDelete();
-                           }
-                        });
+                        await Promise.all(deleteTasks);
+
+                        // Anything we need to do after we are done.
+                        _logic.disableUpdateDelete();
                      }
                   },
                });

@@ -129,12 +129,12 @@ class ABQLSetPluck extends ABQLSetPluckCore {
                // in v2:
                // use .find() and:
                // var cond = {};
-               // cond[PK] = _.uniq(ids);
+               // cond[PK] = AB.uniq(ids);
 
                var cond = {
                   key: PK,
                   rule: "in",
-                  value: _.uniq(ids),
+                  value: AB.uniq(ids),
                };
 
                return new Promise((resolve, reject) => {

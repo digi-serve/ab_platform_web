@@ -592,6 +592,26 @@ class ABFactory extends ABFactoryCore {
       return _.uniq(...params);
    }
 
+   kebabCase(...params) {
+      return _.kebabCase(...params);
+   }
+
+   sumBy(...params) {
+      return _.sumBy(...params);
+   }
+
+   meanBy(...params) {
+      return _.meanBy(...params);
+   }
+
+   maxBy(...params) {
+      return _.maxBy(...params);
+   }
+
+   minBy(...params) {
+      return _.minBy(...params);
+   }
+
    uuid() {
       return uuid.v4();
    }

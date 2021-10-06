@@ -52,14 +52,11 @@ module.exports = {
 
    globals: {
       AB: true, // global ABFactory
-      async: true,
       io: true, // socket.io
-      moment: true,
       reports: true, // webix's Report Manager widget
       tinymce: true,
       Selectivity: true,
       webix: true, // webix
       $$: true, // webix element
-      _: true, // lodash
    },
 };

@@ -1234,7 +1234,7 @@ module.exports = class RowFilter extends RowFilterCore {
       // block .onChange event
       logic.blockOnChange();
 
-      let config_settings = _.cloneDeep(settings);
+      let config_settings = AB.cloneDeep(settings);
       config_settings.rules = config_settings.rules || [];
 
       // Redraw form with no elements

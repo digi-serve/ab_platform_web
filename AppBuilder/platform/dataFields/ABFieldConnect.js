@@ -26,7 +26,7 @@ var ids = {
 
 var defaultValues = ABFieldConnectCore.defaultValues();
 
-function populateSelect(populate, callback) {
+function populateSelect(populate) {
    let options = [];
    ABFieldConnectComponent.AB.objects().forEach((o) => {
       options.push({ id: o.id, value: o.label });
@@ -58,7 +58,6 @@ function populateSelect(populate, callback) {
          $$(ids.link1).show();
          $$(ids.link2).show();
       }
-      callback();
    }
 }
 
@@ -102,8 +101,8 @@ var ABFieldConnectComponent = new ABFieldComponent({
             id: ids.objectCreateNew,
             disallowEdit: true,
             value: L("Connect to new Object"),
-            click: () => {
-               ABFieldConnectComponent.logic.clickNewObject();
+            click: async () => {
+               await ABFieldConnectComponent.logic.clickNewObject();
             },
          },
          {
@@ -339,26 +338,19 @@ var ABFieldConnectComponent = new ABFieldComponent({
          ABFieldConnectComponent.logic.updateCustomIndex();
       },
 
-      clickNewObject: () => {
+      clickNewObject: async () => {
          let App = this.App;
          if (!App.actions.addNewObject) return;
 
-         async.series(
-            [
-               function (callback) {
-                  App.actions.addNewObject(false, callback); // pass false because after it is created we do not want it to select it in the object list
-               },
-               function (callback) {
-                  populateSelect(true, callback); // pass true because we want it to select the last item in the list that was just created
-               },
-            ],
-            function (err) {
-               if (err) {
-                  App.AB.error(err);
-               }
-               // console.log('all functions complete')
-            }
-         );
+         try {
+            // pass false because after it is created we do not want it to select it in the object list
+            await App.actions.addNewObject(false);
+
+            // pass true because we want it to select the last item in the list that was just created
+            populateSelect(true);
+         } catch(err) {
+            App.AB.error(err);
+         }
       },
 
       selectLinkType: (newValue /*, oldValue */) => {
@@ -1099,7 +1091,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
    setValue(item, rowData) {
       if (!item) return;
 
-      // if (_.isEmpty(rowData)) return; removed because sometimes we will
+      // if (AB.isEmpty(rowData)) return; removed because sometimes we will
       // want to set this to empty
 
       let val = this.pullRelationValues(rowData);
