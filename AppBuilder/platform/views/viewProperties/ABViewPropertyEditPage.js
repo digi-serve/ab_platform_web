@@ -17,7 +17,7 @@ module.exports = class ABViewPropertyEditPage extends ABViewPropertyAddPage {
 
    static propertyComponent(App, idBase) {
       let ids = {
-         formEdit: idBase + "_editForm",
+         formEdit: `${idBase}_editForm`,
       };
 
       let ui = {
@@ -25,7 +25,7 @@ module.exports = class ABViewPropertyEditPage extends ABViewPropertyAddPage {
          name: "editForm",
          view: "richselect",
          label: L("Edit Form"),
-         labelWidth: App.config.labelWidthXLarge,
+         labelWidth: this.AB.Config.labelWidthXLarge,
          on: {
             onChange: (newVal, oldVal) => {
                if (newVal == L("No add new option")) {

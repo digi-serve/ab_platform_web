@@ -261,7 +261,7 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
          if (obj.$group) return obj[field.columnName];
 
          var branches = [];
-         var selectOptions = AB.cloneDeep(field.settings.options);
+         var selectOptions = this.AB.cloneDeep(field.settings.options);
          selectOptions = new webix.TreeCollection({
             data: selectOptions,
          });
@@ -364,7 +364,7 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
          }
 
          var branches = [];
-         options = AB.cloneDeep(field.settings.options);
+         options = this.AB.cloneDeep(field.settings.options);
          options = new webix.TreeCollection({
             data: options,
          });
@@ -425,8 +425,8 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
     */
    customEdit(row, App, node, component) {
       var idBase = App.unique(this.idCustomContainer(row));
-      var idPopup = idBase + "-popup";
-      var idTree = idBase + "-tree";
+      var idPopup = `${idBase}-popup`;
+      var idTree = `${idBase}-tree`;
       var view = $$(node);
       var field = this;
       var parentComponent = component;
@@ -450,7 +450,7 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
 
          $$(idTree).blockEvent(); // prevents endless loop
 
-         var options = AB.cloneDeep(field.settings.options);
+         var options = this.AB.cloneDeep(field.settings.options);
          $$(idTree).clearAll();
          $$(idTree).parse(options);
          $$(idTree).refresh();
@@ -545,8 +545,8 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
                               node.classList.add("webix_invalid");
                               node.classList.add("webix_invalid_cell");
 
-                              this.AB.error("Error updating our entry.", {
-                                 error: err,
+                              this.AB.notify.developer(err, {
+                                 message: "Error updating our entry.",
                                  row: row,
                                  values: values,
                               });

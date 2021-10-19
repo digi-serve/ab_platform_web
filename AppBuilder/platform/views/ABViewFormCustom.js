@@ -23,7 +23,7 @@ module.exports = class ABViewFormCustom extends ABViewFormCustomCore {
    editorComponent(App, mode) {
       var idBase = "ABViewFormCustomEditorComponent";
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       var templateElem = this.component(App).ui;
@@ -59,10 +59,10 @@ module.exports = class ABViewFormCustom extends ABViewFormCustomCore {
       if (!field) return component;
 
       var idBase = this.parentFormUniqueID(
-         "ABViewFormCustom_" + this.id + "_f_"
+         `ABViewFormCustom_${this.id}_f_`
       );
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       var settings = {};

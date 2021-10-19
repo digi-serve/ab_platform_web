@@ -52,9 +52,9 @@ module.exports = class ABWorkObjectGantt extends ABComponent {
 
       // internal list of Webix IDs to reference our UI components.
       let ids = {
-         component: this.unique(idBase + "_workspace_gantt_component"),
-         menu: this.unique(idBase + "_workspace_gantt_menu"),
-         gantt: this.unique(idBase + "_workspace_gantt"),
+         component: this.unique(`${idBase}_workspace_gantt_component`),
+         menu: this.unique(`${idBase}_workspace_gantt_menu`),
+         gantt: this.unique(`${idBase}_workspace_gantt`),
       };
 
       let CurrentObject = null,
@@ -416,7 +416,7 @@ module.exports = class ABWorkObjectGantt extends ABComponent {
             try {
                return await CurrentObject.model().create(patch);
             } catch (err) {
-               this.AB.error("Error adding task:", { error: err });
+               this.AB.notify.developer(err, { message: "Error when's adding a task in gantt workspace" });
             }
          },
 
@@ -426,7 +426,7 @@ module.exports = class ABWorkObjectGantt extends ABComponent {
             try {
                await CurrentObject.model().update(rowId, patch);
             } catch (err) {
-               this.AB.error("Error updating task:", { error: err });
+               this.AB.notify.developer(err, { message: "Error when's updating a task in gantt workspace" });
             }
          },
 
@@ -434,7 +434,7 @@ module.exports = class ABWorkObjectGantt extends ABComponent {
             try {
                await CurrentObject.model().delete(rowId);
             } catch (err) {
-               this.AB.error("Error deleting item:", { error: err });
+               this.AB.notify.developer(err, { message: "Error when's deleting a task in gantt workspace" });
             }
          },
 

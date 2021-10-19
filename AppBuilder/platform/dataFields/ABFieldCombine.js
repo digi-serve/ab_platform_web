@@ -31,7 +31,7 @@ var ABFieldCombineComponent = new ABFieldComponent({
             name: "combinedFields",
             view: "multicombo",
             label: L("Combined Fields"),
-            labelWidth: App.config.labelWidthXLarge,
+            labelWidth: this.AB.Config.labelWidthXLarge,
             disallowEdit: true,
             options: [],
          },
@@ -40,7 +40,7 @@ var ABFieldCombineComponent = new ABFieldComponent({
             name: "delimiter",
             label: L("Delimiter"),
             value: defaultValues.delimiter,
-            labelWidth: App.config.labelWidthXLarge,
+            labelWidth: this.AB.Config.labelWidthXLarge,
             disallowEdit: true,
             options: [
                { id: "plus", value: "Plus ( + )" },

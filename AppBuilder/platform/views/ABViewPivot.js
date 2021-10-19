@@ -73,31 +73,31 @@ module.exports = class ABViewPivot extends ABViewPivotCore {
             name: "datacollection",
             view: "richselect",
             label: L("Data Source"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
          },
          {
             view: "counter",
             name: "height",
             label: L("Height:"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
          },
          {
             view: "checkbox",
             name: "removeMissed",
             labelRight: L("Remove empty data."),
-            labelWidth: App.config.labelWidthCheckbox,
+            labelWidth: this.AB.Config.labelWidthCheckbox,
          },
          {
             view: "checkbox",
             name: "totalColumn",
             labelRight: L("Show a total column."),
-            labelWidth: App.config.labelWidthCheckbox,
+            labelWidth: this.AB.Config.labelWidthCheckbox,
          },
          {
             view: "checkbox",
             name: "separateLabel",
             labelRight: L("Separate header label."),
-            labelWidth: App.config.labelWidthCheckbox,
+            labelWidth: this.AB.Config.labelWidthCheckbox,
          },
          {
             view: "checkbox",
@@ -105,7 +105,7 @@ module.exports = class ABViewPivot extends ABViewPivotCore {
             labelRight: L(
                "Highlighting of a cell(s) with the least value in a row."
             ),
-            labelWidth: App.config.labelWidthCheckbox,
+            labelWidth: this.AB.Config.labelWidthCheckbox,
          },
          {
             view: "checkbox",
@@ -113,14 +113,14 @@ module.exports = class ABViewPivot extends ABViewPivotCore {
             labelRight: L(
                "Highlighting of a cell(s) with the biggest value in a row."
             ),
-            labelWidth: App.config.labelWidthCheckbox,
+            labelWidth: this.AB.Config.labelWidthCheckbox,
          },
          {
             name: "decimalPlaces",
             view: "counter",
             min: 1,
             label: L("Decimal Places"),
-            labelWidth: App.config.labelWidthXLarge,
+            labelWidth: this.AB.Config.labelWidthXLarge,
          },
       ]);
    }

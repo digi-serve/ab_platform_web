@@ -32,14 +32,14 @@ var ABFieldUserComponent = new ABFieldComponent({
             id: ids.isMultiple,
             disallowEdit: true,
             labelRight: L("Allow multiple users"),
-            labelWidth: App.config.labelWidthCheckbox,
+            labelWidth: this.AB.Config.labelWidthCheckbox,
          },
          {
             view: "checkbox",
             name: "isCurrentUser",
             id: ids.isCurrentUser,
             labelRight: L("Default value as current user"),
-            labelWidth: App.config.labelWidthCheckbox,
+            labelWidth: this.AB.Config.labelWidthCheckbox,
             on: {
                onChange: function (newValue, oldValue) {
                   if (newValue == 0) {
@@ -58,21 +58,21 @@ var ABFieldUserComponent = new ABFieldComponent({
             hidden: true,
             id: ids.editable,
             labelRight: L("Editable"),
-            labelWidth: App.config.labelWidthCheckbox,
+            labelWidth: this.AB.Config.labelWidthCheckbox,
          },
          {
             view: "checkbox",
             name: "isShowProfileImage",
             id: ids.isShowProfileImage,
             labelRight: L("Show Profile Image"),
-            labelWidth: App.config.labelWidthCheckbox,
+            labelWidth: this.AB.Config.labelWidthCheckbox,
          },
          {
             view: "checkbox",
             name: "isShowUsername",
             id: ids.isShowUsername,
             labelRight: L("Show Username"),
-            labelWidth: App.config.labelWidthCheckbox,
+            labelWidth: this.AB.Config.labelWidthCheckbox,
          },
       ];
    },
@@ -209,7 +209,7 @@ module.exports = class ABFieldUser extends ABFieldUserCore {
 
          // await linkCol.migrateCreate();
 
-         return Promise.resolve(this);
+         return this;
       } else {
          return super.save();
       }

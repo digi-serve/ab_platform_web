@@ -30,11 +30,6 @@ module.exports = class ABViewRuleActionFormRecordRuleUpdateConnected extends (
 
       this.objectQB = null; // the QueryBuilder used for offering conditions based upon our connected Object.
       this.qbCondition = null; // the QB condition entered for selecting which remote object.
-
-      this.labels.component.selectField = L(
-         "Select which connected object to update."
-      );
-      this.labels.component.remoteCondition = L("How to choose which object:");
    }
 
    // field
@@ -149,7 +144,7 @@ module.exports = class ABViewRuleActionFormRecordRuleUpdateConnected extends (
             {
                id: ids.selectConnectedField,
                view: "richselect",
-               label: this.labels.component.selectField,
+               label: L("Select which connected object to update."),
                labelWidth: 300,
                value: this.selectedField,
                options: this.fieldDropList,
@@ -224,7 +219,8 @@ module.exports = class ABViewRuleActionFormRecordRuleUpdateConnected extends (
                   }
                }
             } else {
-               this.AB.error("!!! No connectedObject found.", {
+               this.AB.notify.builder({}, {
+                  message: "!!! No connectedObject found.",
                   fieldID: this.selectedFieldID,
                });
             }
@@ -310,9 +306,7 @@ module.exports = class ABViewRuleActionFormRecordRuleUpdateConnected extends (
     */
    queryBuilderDisplay() {
       if (!this.objectQB) {
-         this.objectQB = new ObjectQueryBuilder(
-            this.labels.component.remoteCondition
-         );
+         this.objectQB = new ObjectQueryBuilder(L("How to choose which object:"));
 
          var connObj = this.connectedObject();
          if (connObj) this.objectQB.objectLoad(connObj);
@@ -405,9 +399,11 @@ module.exports = class ABViewRuleActionFormRecordRuleUpdateConnected extends (
                      cb();
                   })
                   .catch((err) => {
-                     this.AB.error(
-                        "!!! ABViewRuleActionFormRecordRuleUpdateConnected.process(): update error:",
-                        { error: err, data: options.data }
+                     this.AB.notify.developer(err,
+                        {
+                           message: "!!! ABViewRuleActionFormRecordRuleUpdateConnected.process(): update error:",
+                           data: options.data
+                        }
                      );
                      cb(err);
                   });
@@ -431,7 +427,7 @@ module.exports = class ABViewRuleActionFormRecordRuleUpdateConnected extends (
             } else {
                // get all the entries that match our condition:
                model
-                  .findAll({ where: condition })
+                  .find({ where: condition })
                   .then((list) => {
                      var done = 0;
 

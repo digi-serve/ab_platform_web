@@ -526,7 +526,7 @@ module.exports = class ABFieldDate extends ABFieldDateCore {
          }
 
          // else retun the actual ISO string => Date() value
-         return AB.toDate(d);
+         return this.AB.toDate(d);
       };
 
       return config;

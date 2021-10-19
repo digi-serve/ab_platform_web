@@ -24,7 +24,7 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
    editorComponent(App, mode) {
       var idBase = "ABViewContainerEditorComponent";
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       var subComponents = {}; // { viewId: viewComponent, ..., viewIdn: viewComponent }
@@ -141,16 +141,14 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
           */
          template: (child) => {
             return (
-               "<div>" +
-               `<i class="fa fa-${child.icon} webix_icon_btn"></i> ` +
-               ` ${child.label}` +
-               '<div class="ab-component-tools">' +
-               (child.settings.removable == false
+               `<div>
+               <i class="fa fa-${child.icon} webix_icon_btn"></i> ${child.label}
+               <div class="ab-component-tools">
+               ${(child.settings.removable == false
                   ? ""
-                  : '<i class="fa fa-trash ab-component-remove"></i>') +
-               '<i class="fa fa-edit ab-component-edit"></i>' +
-               "</div>" +
-               "</div>"
+                  : '<i class="fa fa-trash ab-component-remove"></i>')}
+               <i class="fa fa-edit ab-component-edit"></i>
+               </div></div>`
             );
          },
 
@@ -165,7 +163,7 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
             var deletedView = this.views((v) => v.id == id)[0];
             if (!deletedView) return false;
 
-            App.AB.Dialog.Confirm({
+            App.AB.Webix.confirm({
                title: L("Delete component"),
                text: L("Do you want to delete <b>{0}</b>?", [
                   deletedView.label,
@@ -194,8 +192,8 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
                   try {
                      await deletedView.destroy();
                   } catch (err) {
-                     App.AB.error("Error trying to delete selected View:", {
-                        error: err,
+                     App.AB.notify.developer(err, {
+                        message: "Error trying to delete selected View:",
                         view: deletedView,
                      });
 
@@ -284,8 +282,8 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
 
                _logic.ready();
             } catch (err) {
-               App.AB.error("Error trying to save selected View:", {
-                  error: err,
+               App.AB.notify.developer(err, {
+                  message: "Error trying to save selected View:",
                   view: this,
                });
                _logic.ready();
@@ -382,7 +380,7 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
                   value: "1",
                   min: 1,
                   label: "Column " + newVal + " Gravity",
-                  labelWidth: App.config.labelWidthXLarge,
+                  labelWidth: this.AB.Config.labelWidthXLarge,
                   css: "gravity_counter",
                   on: {
                      onChange: () => {
@@ -412,7 +410,7 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
             view: "counter",
             min: 1,
             label: L("Columns"),
-            labelWidth: App.config.labelWidthXLarge,
+            labelWidth: this.AB.Config.labelWidthXLarge,
             on: {
                onChange: function (newVal, oldVal) {
                   if (newVal > 8) $$(ids.columns).setValue(8);
@@ -455,7 +453,7 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
                   view: "counter",
                   min: 1,
                   label: "Column " + step + " Gravity",
-                  labelWidth: App.config.labelWidthXLarge,
+                  labelWidth: this.AB.Config.labelWidthXLarge,
                   css: "gravity_counter",
                   value:
                      view.settings.gravity && view.settings.gravity[step - 1]
@@ -526,7 +524,7 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
    component(App, idPrefix) {
       var idBase = "ABViewContainer_" + (idPrefix || "") + this.id;
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       this.viewComponents = this.viewComponents || {}; // { viewId: viewComponent, ..., viewIdn: viewComponent }

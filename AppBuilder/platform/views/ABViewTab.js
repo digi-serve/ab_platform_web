@@ -241,7 +241,7 @@ module.exports = class ABViewTab extends ABViewTabCore {
             var tabId = $$(ids.component).getValue();
             var deletedView = this.views((v) => v.id == tabId)[0];
             if (deletedView) {
-               App.AB.Dialog.Confirm({
+               App.AB.Webix.confirm({
                   title: L("Delete tab"),
                   text: L("Do you want to delete <b>{0}</b>?", [
                      deletedView.label,
@@ -491,7 +491,7 @@ module.exports = class ABViewTab extends ABViewTabCore {
             view: "checkbox",
             name: "stackTabs",
             labelRight: L("Stack Tabs Vertically"),
-            labelWidth: App.config.labelWidthCheckbox,
+            labelWidth: this.AB.Config.labelWidthCheckbox,
             on: {
                onChange: (newv, oldv) => {
                   if (newv == 1) {
@@ -510,25 +510,25 @@ module.exports = class ABViewTab extends ABViewTabCore {
             view: "checkbox",
             name: "iconOnTop",
             labelRight: L("Position icon above text"),
-            labelWidth: App.config.labelWidthCheckbox,
+            labelWidth: this.AB.Config.labelWidthCheckbox,
          },
          {
             view: "checkbox",
             name: "darkTheme",
             labelRight: L("Use Dark Theme"),
-            labelWidth: App.config.labelWidthCheckbox,
+            labelWidth: this.AB.Config.labelWidthCheckbox,
          },
          {
             view: "counter",
             name: "sidebarWidth",
             label: L("Width of Sidebar"),
-            labelWidth: App.config.labelWidthXLarge,
+            labelWidth: this.AB.Config.labelWidthXLarge,
          },
          {
             view: "richselect",
             name: "sidebarPos",
             label: L("Position of Sidebar"),
-            labelWidth: App.config.labelWidthXLarge,
+            labelWidth: this.AB.Config.labelWidthXLarge,
             options: [
                { id: "left", value: L("Left") },
                { id: "right", value: L("Right") },
@@ -709,7 +709,7 @@ module.exports = class ABViewTab extends ABViewTabCore {
                            $$(ids.sidebar).select(selectedItem);
                            // store this state in local storage the user preference is
                            // remembered next time they see this sidebar
-                           AB.Storage.set(
+                           this.AB.Storage.set(
                               idBase + "-state",
                               $$(ids.sidebar).getState()
                            );
@@ -727,7 +727,7 @@ module.exports = class ABViewTab extends ABViewTabCore {
                            $$(ids.sidebar).select(selectedItem);
                            // store this state in local storage the user preference is
                            // remembered next time they see this sidebar
-                           AB.Storage.set(
+                           this.AB.Storage.set(
                               idBase + "-state",
                               $$(ids.sidebar).getState()
                            );
@@ -745,36 +745,31 @@ module.exports = class ABViewTab extends ABViewTabCore {
                   onAfterRender: () => {
                      // set ids of controller buttons
                      let collapseNode = $$(ids.sidebar).$view.querySelector(
-                        '[webix_tm_id="' + ids.collapseMenu + '"]'
+                        `[webix_tm_id="${ids.collapseMenu}"]`
                      );
                      if (collapseNode) {
                         collapseNode.setAttribute(
                            "data-cy",
-                           "tab-" + "collapseMenu" + "-" + ids.collapseMenu
+                           `tab-collapseMenu-${ids.collapseMenu}`
                         );
                      }
                      let expandNode = $$(ids.sidebar).$view.querySelector(
-                        '[webix_tm_id="' + ids.expandMenu + '"]'
+                        `[webix_tm_id="${ids.expandMenu}"]`
                      );
                      if (expandNode) {
                         expandNode.setAttribute(
                            "data-cy",
-                           "tab-" + "expandMenu" + "-" + ids.expandMenu
+                           `tab-${expandMenu}-${ids.expandMenu}`
                         );
                      }
                      this.views((view) => {
                         var node = $$(ids.sidebar).$view.querySelector(
-                           '[webix_tm_id="' + view.id + '_menu"]'
+                           `[webix_tm_id="${view.id}_menu"]`
                         );
                         if (!node) return;
                         node.setAttribute(
                            "data-cy",
-                           "tab-" +
-                              view.label.replace(" ", "") +
-                              "-" +
-                              view.id +
-                              "-" +
-                              this.id
+                           `tab-${view.label.replace(" ", "")}-${view.id}-${this.id}`
                         );
                      });
                   },

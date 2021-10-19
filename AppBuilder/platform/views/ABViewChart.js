@@ -55,7 +55,7 @@ module.exports = class ABViewChart extends ABViewChartCore {
             name: "multipleSeries",
             view: "checkbox",
             label: L("Multiple Series"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             on: {
                onChange: _logic.enableMultipleSeries,
             },
@@ -64,43 +64,43 @@ module.exports = class ABViewChart extends ABViewChartCore {
             name: "dataview",
             view: "richselect",
             label: L("Chart Data"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
          },
          {
             name: "columnLabel",
             view: "richselect",
             label: L("Label Column"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
          },
          {
             name: "columnValue",
             view: "richselect",
             label: L("Value Column"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
          },
          {
             name: "columnValue2",
             view: "richselect",
             label: L("Value Column 2"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
          },
          {
             name: "isPercentage",
             view: "checkbox",
             labelRight: L("Percentage"),
-            labelWidth: App.config.labelWidthCheckbox,
+            labelWidth: this.AB.Config.labelWidthCheckbox,
          },
          {
             name: "showLabel",
             view: "checkbox",
             label: L("Display Label"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
          },
          {
             name: "labelPosition",
             view: "richselect",
             label: L("Label Position"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             options: [
                {
                   id: "left",
@@ -116,13 +116,13 @@ module.exports = class ABViewChart extends ABViewChartCore {
             name: "labelWidth",
             view: "counter",
             label: L("Label Width"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
          },
          {
             view: "counter",
             name: "height",
             label: L("Height:"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
          },
       ]);
    }
@@ -306,7 +306,7 @@ module.exports = class ABViewChart extends ABViewChartCore {
    component(App) {
       var idBase = "ABViewChart_" + this.id;
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       // get webix.dashboard
@@ -438,15 +438,9 @@ module.exports = class ABViewChart extends ABViewChartCore {
          case "formula":
             {
                obj = valueCol.object;
-               var objLink = this.AB.objects(
-                  (obj) => obj.id == valueCol.settings.object
-               )[0];
-               var fieldBase = obj.fields(
-                  (f) => f.id == valueCol.settings.field
-               )[0];
-               var fieldLink = objLink.fields(
-                  (f) => f.id == valueCol.settings.fieldLink
-               )[0];
+               var objLink = this.AB.objectByID(valueCol.settings.object);
+               var fieldBase = obj.fieldByID(valueCol.settings.field);
+               var fieldLink = objLink.fieldByID(valueCol.settings.fieldLink);
             }
             break;
 

@@ -490,7 +490,7 @@ module.exports = class ABFieldList extends ABFieldListCore {
                   var numToDo = 0;
 
                   model
-                     .findAll()
+                     .find({})
                      .then((list) => {
                         list = list.data || list;
 
@@ -543,7 +543,7 @@ module.exports = class ABFieldList extends ABFieldListCore {
                   var numDone = 0;
 
                   model
-                     .findAll(where)
+                     .find(where)
                      .then((list) => {
                         // make sure we just work with the { data:[] } that was returned
                         list = list.data || list;
@@ -772,8 +772,8 @@ module.exports = class ABFieldList extends ABFieldListCore {
                         node.classList.add("webix_invalid");
                         node.classList.add("webix_invalid_cell");
 
-                        this.AB.error("Error updating our entry.", {
-                           error: err,
+                        this.AB.notify.developer(err, {
+                           message: "Error updating our entry.",
                            row: row,
                            values: values,
                         });
@@ -805,8 +805,8 @@ module.exports = class ABFieldList extends ABFieldListCore {
                      node.classList.add("webix_invalid");
                      node.classList.add("webix_invalid_cell");
 
-                     this.AB.error("Error updating our entry.", {
-                        error: err,
+                     this.AB.notify.developer(err, {
+                        message: "Error updating our entry.",
                         row: row,
                         values: "",
                      });

@@ -29,7 +29,7 @@ module.exports = class ABViewDetailText extends ABViewDetailTextCore {
    editorComponent(App, mode) {
       var idBase = "ABViewDetailTextEditorComponent";
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       var textElem = this.component(App).ui;
@@ -69,7 +69,7 @@ module.exports = class ABViewDetailText extends ABViewDetailTextCore {
             view: "counter",
             name: "height",
             label: L("ab.components.common.height", "*Height:"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
          },
       ]);
    }
@@ -102,7 +102,7 @@ module.exports = class ABViewDetailText extends ABViewDetailTextCore {
       var field = this.field();
       var idBase = "ABViewDetailText_" + (idPrefix || "") + this.id;
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
          detail: this.parentDetailComponent()?.id || this.parent.id,
       };
 

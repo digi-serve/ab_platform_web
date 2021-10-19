@@ -23,19 +23,11 @@ module.exports = class ABViewGridFilterRule {
       this.App = App;
       this.idBase = idBase;
 
-      var labels = (this.labels = {
-         common: App.labels,
-         component: {
-            ruleName: L("Rule Name"),
-            ruleNamePlaceholder: L("Name"),
-         },
-      });
-
       // this is different because multiple instances of this View can be displayed
       // at the same time.  So make each instance Unique:
       var uniqueInstanceID = webix.uid();
       var myUnique = (key) => {
-         return idBase + "_" + key + "_" + uniqueInstanceID;
+         return `${idBase}_${key}_${uniqueInstanceID}`;
       };
 
       // internal list of Webix IDs to reference our UI components.
@@ -99,8 +91,8 @@ module.exports = class ABViewGridFilterRule {
             },
             {
                view: "text",
-               label: this.labels.component.ruleName,
-               placeholder: this.labels.component.ruleNamePlaceholder,
+               label: L("Rule Name"),
+               placeholder: L("Name"),
                id: this.ids.ruleName,
             },
 

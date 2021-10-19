@@ -66,7 +66,7 @@ module.exports = class ABViewDetail extends ABViewDetailCore {
                let yPosition = fields.length - index - 1;
 
                var fieldView = currView.addFieldToView(f, yPosition, ids, App);
-               fieldSaves.push(await fieldView.save());
+               fieldSaves.push(fieldView.save());
 
                // update item to UI list
                f.selected = 1;
@@ -131,11 +131,11 @@ module.exports = class ABViewDetail extends ABViewDetailCore {
             name: "datacollection",
             view: "richselect",
             label: L("Data Source"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             skipAutoSave: true,
             on: {
-               onChange: async (dcId, oldDcId) =>
-                  await _logic.selectSource(dcId, oldDcId),
+               onChange: (dcId, oldDcId) => 
+                  _logic.selectSource(dcId, oldDcId),
             },
          },
          {
@@ -154,20 +154,20 @@ module.exports = class ABViewDetail extends ABViewDetailCore {
                },
             },
             onClick: {
-               check: async (e, fieldId) => await _logic.check(e, fieldId),
+               check: (e, fieldId) => _logic.check(e, fieldId),
             },
          },
          {
             name: "showLabel",
             view: "checkbox",
             label: L("Display Label"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
          },
          {
             name: "labelPosition",
             view: "richselect",
             label: L("Label Position"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             options: [
                {
                   id: "left",
@@ -183,13 +183,13 @@ module.exports = class ABViewDetail extends ABViewDetailCore {
             name: "labelWidth",
             view: "counter",
             label: L("Label Width"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
          },
          {
             view: "counter",
             name: "height",
             label: L("Height:"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
          },
       ]);
    }
@@ -247,7 +247,7 @@ module.exports = class ABViewDetail extends ABViewDetailCore {
    }
 
    static propertyUpdateFieldOptions(ids, view, dcId) {
-      var datacollection = view.AB.datacollections((dc) => dc.id == dcId)[0];
+      var datacollection = view.AB.datacollectionByID(dcId);
       var object = datacollection ? datacollection.datasource : null;
 
       // Pull field list

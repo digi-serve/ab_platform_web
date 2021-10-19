@@ -90,7 +90,7 @@ var ABFieldImageComponent = new ABFieldComponent({
                      '<div class="default-image-holder">' +
                      '<div class="image-data-field-icon">' +
                      '<i class="fa fa-picture-o fa-2x"></i>' +
-                     "<div>Drag and drop or click here</div>" +
+                     `<div>${L("Drag and drop or click here")}</div>` +
                      "</div>" +
                      '<div class="image-data-field-image" style="display:none;">' +
                      '<a style="" class="ab-delete-photo" href="javascript:void(0);"><i class="fa fa-times delete-image" style="display:none;"></i></a>' +
@@ -128,7 +128,10 @@ var ABFieldImageComponent = new ABFieldComponent({
 
                      // if an error was returned
                      onFileUploadError: function (item, response) {
-                        App.AB.error("Error loading image", response);
+                        App.AB.notify.developer({}, {
+                           message: "Error loading image",
+                           response
+                        });
                      },
                   },
                },
@@ -329,7 +332,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
          // verify we have been .save()d before:
          if (this.id) {
             // Ask the user what to do about the existing images:
-            this.AB.Dialog.Confirm({
+            this.AB.Webix.confirm({
                title: L("ab.dataField.image.keepImages", "*Keep Images?"),
                message: L("Do you want to keep the images referenced by {0}?", [
                   this.label,
@@ -343,7 +346,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
                      await this.save();
 
                      // TODO: a reminder that you still got alot on the server to do!
-                     this.AB.Dialog.Alert({
+                     this.AB.alert({
                         title: "!! TODO !!",
                         text:
                            "ABFieldImage.destroy(): Tell a Developer to actually pay attention to this!",
@@ -665,7 +668,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
          let L = this.AB.Label();
 
          // Ask the user if they really want to delete the photo
-         this.AB.Dialog.Confirm({
+         this.AB.Webix.confirm({
             title: "",
             message: L("Are you sure you want to remove this image?"),
             callback: async (result) => {
@@ -777,7 +780,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
 
       html = html.replace(
          "#drag#",
-         options.editable ? "<div>Drag and drop or click here</div>" : ""
+         options.editable ? `<div>${L("Drag and drop or click here")}</div>` : ""
       );
       html = html.replace(
          "#remove#",

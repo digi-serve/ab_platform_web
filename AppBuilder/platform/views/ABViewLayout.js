@@ -33,14 +33,12 @@ module.exports = class ABViewLayout extends ABViewLayoutCore {
       var _logic = {
          templateButton: function (obj) {
             return (
-               '<div class="ab-widget-header ab-layout-header">' +
-               `<i class="fa fa-${obj.icon} webix_icon_btn"></i> ` +
-               ` ${obj.label}` +
-               '<div class="ab-component-tools">' +
-               '<i class="fa fa-trash ab-component-remove"></i>' +
-               '<i class="fa fa-edit ab-component-edit"></i>' +
-               "</div>" +
-               "</div>"
+               `<div class="ab-widget-header ab-layout-header">
+               <i class="fa fa-${obj.icon} webix_icon_btn"></i> ${obj.label}
+               <div class="ab-component-tools">'
+               <i class="fa fa-trash ab-component-remove"></i>
+               <i class="fa fa-edit ab-component-edit"></i>
+               </div></div>`
             );
          },
 
@@ -68,7 +66,7 @@ module.exports = class ABViewLayout extends ABViewLayoutCore {
                return v.id == id;
             })[0];
 
-            App.AB.Dialog.Confirm({
+            App.AB.Webix.confirm({
                title: L("Delete component"),
                text: L("Do you want to delete <b>{0}</b>?", [view.label]),
                callback: (result) => {

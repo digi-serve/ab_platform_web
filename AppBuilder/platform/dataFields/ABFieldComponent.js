@@ -50,7 +50,7 @@ module.exports = class ABFieldComponent {
       var elements = this.elements(App, this);
 
       this.idBase = idBase
-         ? idBase + "_" + this.fieldDefaults.key
+         ? `${idBase}_${this.fieldDefaults.key}`
          : this.idBase;
 
       ////
@@ -58,20 +58,20 @@ module.exports = class ABFieldComponent {
       ////
 
       var ids = {
-         component: App.unique(this.idBase + "_component"),
+         component: App.unique(`${this.idBase}_component`),
 
          // the common property fields
-         label: App.unique(this.idBase + "_label"),
-         columnName: App.unique(this.idBase + "_columnName"),
-         fieldDescription: App.unique(this.idBase + "_fieldDescription"),
-         showIcon: App.unique(this.idBase + "_showIcon"),
-         required: App.unique(this.idBase + "_required"),
-         numberOfNull: App.unique(this.idBase + "_numberOfNull"),
-         unique: App.unique(this.idBase + "_unique"),
-         filterComplex: App.unique(this.idBase + "_filtercomplex"),
-         addValidation: App.unique(this.idBase + "_addvalidation"),
-         shorthand: App.unique(this.idBase + "_shorthand"),
-         validationRules: App.unique(this.idBase + "_validationRules"),
+         label: App.unique(`${this.idBase}_label`),
+         columnName: App.unique(`${this.idBase}_columnName`),
+         fieldDescription: App.unique(`${this.idBase}_fieldDescription`),
+         showIcon: App.unique(`${this.idBase}_showIcon`),
+         required: App.unique(`${this.idBase}_required`),
+         numberOfNull: App.unique(`${this.idBase}_numberOfNull`),
+         unique: App.unique(`${this.idBase}_unique`),
+         filterComplex: App.unique(`${this.idBase}_filtercomplex`),
+         addValidation: App.unique(`${this.idBase}_addvalidation`),
+         shorthand: App.unique(`${this.idBase}_shorthand`),
+         validationRules: App.unique(`${this.idBase}_validationRules`),
       };
 
       this.eachDeep(elements, (e) => {
@@ -90,7 +90,7 @@ module.exports = class ABFieldComponent {
       // and use that in our ids list if it doesn't already exist
       for (var i in this.ids) {
          if (!ids[i]) {
-            ids[i] = App.unique(this.idBase + "_" + i);
+            ids[i] = App.unique(`${this.idBase}_${i}`);
          }
       }
 
@@ -399,9 +399,9 @@ module.exports = class ABFieldComponent {
    idsUnique(ids, App) {
       for (var i in ids) {
          if (ids[i] == "") {
-            ids[i] = App.unique(this.idBase + "_" + i);
+            ids[i] = App.unique(`${this.idBase}_${i}`);
          } else {
-            ids[i] = App.unique(this.idBase + "_" + ids[i]);
+            ids[i] = App.unique(`${this.idBase}_${ids[i]}`);
          }
       }
       return ids;

@@ -12,22 +12,12 @@ module.exports = class RowUpdater extends ABComponent {
          App = this.App;
       }
 
-      let labels = {
-         common: (App || {}).labels,
-         component: {
-            addNew: L("Add field to edit"),
-
-            set: L("Set"),
-            to: L("To"),
-         },
-      };
-
       // internal list of Webix IDs to reference our UI components.
       let ids = {
-         form: this.unique(idBase + "_rowUpdaterForm"),
-         addNew: this.unique(idBase + "_rowUpdaterAddNew"),
+         form: this.unique(`${idBase}_rowUpdaterForm`),
+         addNew: this.unique(`${idBase}_rowUpdaterAddNew`),
 
-         field: this.unique(idBase + "_rowUpdaterField"),
+         field: this.unique(`${idBase}_rowUpdaterField`),
       };
 
       let _Object;
@@ -114,7 +104,7 @@ module.exports = class RowUpdater extends ABComponent {
                      // Label
                      view: "label",
                      width: 40,
-                     label: labels.component.set,
+                     label: L("Set"),
                   },
                   {
                      // Field list
@@ -132,7 +122,7 @@ module.exports = class RowUpdater extends ABComponent {
                      // Label
                      view: "label",
                      width: 40,
-                     label: labels.component.to,
+                     label: L("To"),
                   },
                   // Field value
                   {},
@@ -161,7 +151,7 @@ module.exports = class RowUpdater extends ABComponent {
                css: "webix_primary",
                icon: "fa fa-plus",
                type: "iconButton",
-               label: labels.component.addNew,
+               label: L("Add field to edit"),
                click: function () {
                   _logic.addItem();
                },
@@ -192,13 +182,9 @@ module.exports = class RowUpdater extends ABComponent {
          },
 
          selectField: function (columnId, $viewCond) {
-            let field = _Object.fields((col) => col.id == columnId)[0];
+            let field = _Object.fieldByID(columnId);
             if (!field) {
-               this.AB.error(
-                  "RowUpdater.selectField() could not find a field for [" +
-                     columnId +
-                     "]"
-               );
+               this.AB.notify.builder({}, { message:  `RowUpdater.selectField() could not find a field for [${columnId}]` } );
                return;
             }
             let fieldComponent = field.formComponent(),
@@ -300,7 +286,7 @@ module.exports = class RowUpdater extends ABComponent {
                   let $valueElem = $viewCond.getChildViews()[3];
                   if (!$valueElem) return;
 
-                  let fieldInfo = _Object.fields((f) => f.id == fieldId)[0];
+                  let fieldInfo = _Object.fieldByID(fieldId);
 
                   let val;
                   if (fieldInfo.key == "date" || fieldInfo.key == "datetime") {
@@ -354,7 +340,7 @@ module.exports = class RowUpdater extends ABComponent {
                let $valueElem = $viewItem.getChildViews()[3];
                if (!$valueElem) return;
 
-               let fieldInfo = _Object.fields((f) => f.id == item.fieldId)[0];
+               let fieldInfo = _Object.fieldByID(item.fieldId);
                if (!fieldInfo) return;
 
                // Set value

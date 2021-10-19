@@ -59,28 +59,12 @@ module.exports = class ABObjectWorkspaceViewGantt extends (
 
    static component(App, idBase) {
       let ids = {
-         title: App.unique(idBase + "_popupGanttTitle"),
-         startDate: App.unique(idBase + "_popupGanttStartDate"),
-         endDate: App.unique(idBase + "_popupGanttEndDate"),
-         duration: App.unique(idBase + "_popupGanttDuration"),
-         progress: App.unique(idBase + "_popupGanttProgress"),
-         notes: App.unique(idBase + "_popupGanttNotes"),
-      };
-
-      let labels = {
-         common: App.labels,
-         component: {
-            title: L("Title"),
-            startDate: L("Start Date"),
-            endDate: L("End Date"),
-            duration: L("Duration"),
-            progress: L("Progress"),
-            notes: L("Notes"),
-
-            datePlaceholder: L("Select a date field"),
-            numberPlaceholder: L("Select a number field"),
-            stringPlaceholder: L("Select a string field"),
-         },
+         title: App.unique(`${idBase}_popupGanttTitle`),
+         startDate: App.unique(`${idBase}_popupGanttStartDate`),
+         endDate: App.unique(`${idBase}_popupGanttEndDate`),
+         duration: App.unique(`${idBase}_popupGanttDuration`),
+         progress: App.unique(`${idBase}_popupGanttProgress`),
+         notes: App.unique(`${idBase}_popupGanttNotes`),
       };
 
       let refreshOptions = (object, view) => {
@@ -94,7 +78,7 @@ module.exports = class ABObjectWorkspaceViewGantt extends (
          // Add default option
          dateFields.unshift({
             id: "none",
-            value: labels.component.datePlaceholder,
+            value: L("Select a date field"),
          });
 
          // End date
@@ -108,7 +92,7 @@ module.exports = class ABObjectWorkspaceViewGantt extends (
          // Add default option
          numberFields.unshift({
             id: "none",
-            value: labels.component.numberPlaceholder,
+            value: L("Select a number field"),
          });
          $$(ids.duration).define("options", numberFields);
 
@@ -120,7 +104,7 @@ module.exports = class ABObjectWorkspaceViewGantt extends (
          // Add default option
          decimalFields.unshift({
             id: "none",
-            value: labels.component.numberPlaceholder,
+            value: L("Select a number field"),
          });
          $$(ids.progress).define("options", decimalFields);
 
@@ -134,7 +118,7 @@ module.exports = class ABObjectWorkspaceViewGantt extends (
          // Add default option
          stringFields.unshift({
             id: "none",
-            value: labels.component.stringPlaceholder,
+            value: L("Select a string field"),
          });
          $$(ids.title).define("options", stringFields);
          $$(ids.notes).define("options", stringFields);
@@ -179,7 +163,7 @@ module.exports = class ABObjectWorkspaceViewGantt extends (
 
       var PopupNewDataFieldComponent = new ABPopupNewDataField(
          App,
-         idBase + "_gantt"
+         `${idBase}_gantt`
       );
 
       let ViewComponent = new ABObjectWorkspaceViewComponent({
@@ -192,8 +176,8 @@ module.exports = class ABObjectWorkspaceViewGantt extends (
                         {
                            id: ids.title,
                            view: "richselect",
-                           label: `<span class='webix_icon fa fa-calendar'></span> ${labels.component.title}`,
-                           placeholder: labels.component.stringPlaceholder,
+                           label: `<span class='webix_icon fa fa-calendar'></span> ${L("Title")}`,
+                           placeholder: L("Select a string field"),
                            labelWidth: 130,
                            name: "title",
                            options: [],
@@ -219,8 +203,8 @@ module.exports = class ABObjectWorkspaceViewGantt extends (
                         {
                            id: ids.startDate,
                            view: "richselect",
-                           label: `<span class='webix_icon fa fa-calendar'></span> ${labels.component.startDate}`,
-                           placeholder: labels.component.datePlaceholder,
+                           label: `<span class='webix_icon fa fa-calendar'></span> ${L("Start Date")}`,
+                           placeholder: L("Select a date field"),
                            labelWidth: 130,
                            name: "startDate",
                            required: true,
@@ -247,8 +231,8 @@ module.exports = class ABObjectWorkspaceViewGantt extends (
                         {
                            id: ids.endDate,
                            view: "richselect",
-                           label: `<span class='webix_icon fa fa-calendar'></span> ${labels.component.endDate}`,
-                           placeholder: labels.component.datePlaceholder,
+                           label: `<span class='webix_icon fa fa-calendar'></span> ${L("End Date")}`,
+                           placeholder: L("Select a date field"),
                            labelWidth: 130,
                            name: "endDate",
                            options: [],
@@ -274,8 +258,8 @@ module.exports = class ABObjectWorkspaceViewGantt extends (
                         {
                            id: ids.duration,
                            view: "richselect",
-                           label: `<span class='webix_icon fa fa-hashtag'></span> ${labels.component.duration}`,
-                           placeholder: labels.component.numberPlaceholder,
+                           label: `<span class='webix_icon fa fa-hashtag'></span> ${L("Duration")}`,
+                           placeholder: L("Select a number field"),
                            labelWidth: 130,
                            name: "duration",
                            options: [],
@@ -301,8 +285,8 @@ module.exports = class ABObjectWorkspaceViewGantt extends (
                         {
                            id: ids.progress,
                            view: "richselect",
-                           label: `<span class='webix_icon fa fa-hashtag'></span> ${labels.component.progress}`,
-                           placeholder: labels.component.numberPlaceholder,
+                           label: `<span class='webix_icon fa fa-hashtag'></span> ${L("Progress")}`,
+                           placeholder: L("Select a number field"),
                            labelWidth: 130,
                            name: "progress",
                            required: false,
@@ -329,8 +313,8 @@ module.exports = class ABObjectWorkspaceViewGantt extends (
                         {
                            id: ids.notes,
                            view: "richselect",
-                           label: `<span class='webix_icon fa fa-align-right'></span> ${labels.component.notes}`,
-                           placeholder: labels.component.stringPlaceholder,
+                           label: `<span class='webix_icon fa fa-align-right'></span> ${L("Notes")}`,
+                           placeholder: L("Select a string field"),
                            labelWidth: 130,
                            name: "notes",
                            required: false,
@@ -448,41 +432,41 @@ module.exports = class ABObjectWorkspaceViewGantt extends (
       let viewCollection = this.object, // Should use another name property ?
          object = viewCollection.object;
 
-      return object.fields((f) => f.id == this.title)[0];
+      return object.fieldByID(this.title);
    }
 
    get startDateField() {
       let viewCollection = this.object, // Should use another name property ?
          object = viewCollection.object;
 
-      return object.fields((f) => f.id == this.startDate)[0];
+      return object.fieldByID(this.startDate);
    }
 
    get endDateField() {
       let viewCollection = this.object, // Should use another name property ?
          object = viewCollection.object;
 
-      return object.fields((f) => f.id == this.endDate)[0];
+      return object.fieldByID(this.endDate);
    }
 
    get durationField() {
       let viewCollection = this.object, // Should use another name property ?
          object = viewCollection.object;
 
-      return object.fields((f) => f.id == this.duration)[0];
+      return object.fieldByID(this.duration);
    }
 
    get progressField() {
       let viewCollection = this.object, // Should use another name property ?
          object = viewCollection.object;
 
-      return object.fields((f) => f.id == this.progress)[0];
+      return object.fieldByID(this.progress);
    }
 
    get notesField() {
       let viewCollection = this.object,
          object = viewCollection.object;
 
-      return object.fields((f) => f.id == this.notes)[0];
+      return object.fieldByID(this.notes);
    }
 };

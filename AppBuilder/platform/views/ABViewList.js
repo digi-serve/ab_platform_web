@@ -65,7 +65,7 @@ module.exports = class ABViewList extends ABViewListCore {
             name: "datacollection",
             view: "richselect",
             label: L("Data Source"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             on: {
                onChange: _logic.selectSource,
             },
@@ -74,13 +74,13 @@ module.exports = class ABViewList extends ABViewListCore {
             name: "field",
             view: "richselect",
             label: L("Field"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
          },
          {
             view: "counter",
             name: "height",
             label: L("Height:"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
          },
       ]);
    }
@@ -94,7 +94,7 @@ module.exports = class ABViewList extends ABViewListCore {
     * @param {string} dvId - id of ABDatacollection
     */
    static propertyUpdateFieldOptions(ids, view, dvId) {
-      var datacollection = view.AB.datacollections((dc) => dc.id == dvId)[0];
+      var datacollection = view.AB.datacollectionByID(dvId);
       var object = datacollection ? datacollection.datasource : null;
 
       // Pull field list

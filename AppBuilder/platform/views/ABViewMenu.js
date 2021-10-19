@@ -128,7 +128,7 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
                $$(ids.pages).checkItem(id);
                webix.message({
                   text:
-                     "Item comtains submenu, please remove items in submenu before removing.",
+                     L("Item contains submenu, please remove items in submenu before removing."),
                   type: "error",
                   expire: 10000,
                });
@@ -226,7 +226,7 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
             view: "richselect",
             label: L("Orientation"),
             value: ABViewMenuPropertyComponentDefaults.orientation,
-            labelWidth: App.config.labelWidthXLarge,
+            labelWidth: this.AB.Config.labelWidthXLarge,
             options: [
                {
                   id: "x",
@@ -243,7 +243,7 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
             view: "richselect",
             label: L("Button Style"),
             value: ABViewMenuPropertyComponentDefaults.buttonStyle,
-            labelWidth: App.config.labelWidthXLarge,
+            labelWidth: this.AB.Config.labelWidthXLarge,
             options: [
                {
                   id: "ab-menu-default",
@@ -260,7 +260,7 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
             view: "richselect",
             label: L("Menu Alignment"),
             value: ABViewMenuPropertyComponentDefaults.menuAlignment,
-            labelWidth: App.config.labelWidthXLarge,
+            labelWidth: this.AB.Config.labelWidthXLarge,
             options: [
                {
                   id: "ab-menu-left",
@@ -281,13 +281,13 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
             view: "checkbox",
             labelRight: L("Put menu in toolbar"),
             value: ABViewMenuPropertyComponentDefaults.menuInToolbar,
-            labelWidth: App.config.labelWidthCheckbox,
+            labelWidth: this.AB.Config.labelWidthCheckbox,
          },
          {
             name: "toolbarFieldset",
             view: "fieldset",
             label: L("Toolbar Settings:"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             body: {
                view: "layout",
                type: "clean",
@@ -298,14 +298,14 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
                      view: "counter",
                      label: L("Toolbar padding"),
                      value: ABViewMenuPropertyComponentDefaults.menuPadding,
-                     labelWidth: App.config.labelWidthLarge,
+                     labelWidth: this.AB.Config.labelWidthLarge,
                   },
                   {
                      name: "menuTheme",
                      view: "richselect",
                      label: L("Toolbar theme"),
                      value: ABViewMenuPropertyComponentDefaults.menuTheme,
-                     labelWidth: App.config.labelWidthLarge,
+                     labelWidth: this.AB.Config.labelWidthLarge,
                      options: [
                         {
                            id: "white",
@@ -326,7 +326,7 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
                      view: "richselect",
                      label: L("Menu Position"),
                      value: ABViewMenuPropertyComponentDefaults.menuPosition,
-                     labelWidth: App.config.labelWidthLarge,
+                     labelWidth: this.AB.Config.labelWidthLarge,
                      options: [
                         {
                            id: "left",
@@ -347,7 +347,7 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
                      view: "text",
                      label: L("Text Left"),
                      placeholder: L("Place text in left region of toolbar."),
-                     labelWidth: App.config.labelWidthLarge,
+                     labelWidth: this.AB.Config.labelWidthLarge,
                      labelPosition: "top",
                   },
                   {
@@ -355,7 +355,7 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
                      view: "text",
                      label: L("Text Center"),
                      placeholder: L("Place text in center region of toolbar."),
-                     labelWidth: App.config.labelWidthLarge,
+                     labelWidth: this.AB.Config.labelWidthLarge,
                      labelPosition: "top",
                   },
                   {
@@ -363,7 +363,7 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
                      view: "text",
                      label: L("Text Right"),
                      placeholder: L("Place text in right region of toolbar."),
-                     labelWidth: App.config.labelWidthLarge,
+                     labelWidth: this.AB.Config.labelWidthLarge,
                      labelPosition: "top",
                   },
                ],
@@ -373,7 +373,7 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
             name: "pagesFieldset",
             view: "fieldset",
             label: L("Page List:"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             body: {
                view: "layout",
                type: "clean",
@@ -390,21 +390,9 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
                      editor: "text",
                      template: function (item, common) {
                         return (
-                           "<div class='ab-page-list-item'>" +
-                           `${common.icon(item)} ` +
-                           // TODO : Hide checkbox at own page
-                           // (item.id == _logic.currentEditObject().parent.id ?
-                           // (false
-                           //    ? '<input type="checkbox" class="webix_tree_checkbox" disabled="disabled">'
-                           //    :
-                           `${common.checkbox(item, false)} ` +
-                           ` <div class="fa fa-${
-                              item.key == "viewcontainer"
-                                 ? "window-maximize"
-                                 : "file"
-                           }"></div> ${item.label}` +
-                           "</div>"
-                           // )
+                           `<div class='ab-page-list-item'>
+                           ${common.icon(item)} ${common.checkbox(item, false)} <div class="fa fa-${item.key == "viewcontainer" ? "window-maximize" : "file"}"></div> 
+                           ${item.label}</div>`
                         );
                      },
                      on: {
@@ -458,7 +446,7 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
             name: "pageOrderFieldset",
             view: "fieldset",
             label: L("Drag & Drop to Reorder/Click to Add Icon:"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             body: {
                view: "layout",
                type: "clean",

@@ -35,7 +35,7 @@ module.exports = class ABViewDataview extends ABViewDataviewCore {
             name: "xCount",
             min: 1, // we cannot have 0 columns per row so lets not accept it
             label: L("Items in a row"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             step: 1,
          },
          this.linkPageComponent.ui,
@@ -94,9 +94,9 @@ module.exports = class ABViewDataview extends ABViewDataviewCore {
 
       var idBase = "ABViewDataview_" + this.id;
       var ids = {
-         scrollview: App.unique(idBase + "_scrollview"),
-         component: App.unique(idBase + "_component"),
-         dataFlexView: App.unique(idBase + "_dataFlexView"),
+         scrollview: App.unique(`${idBase}_scrollview`),
+         component: App.unique(`${idBase}_component`),
+         dataFlexView: App.unique(`${idBase}_dataFlexView`),
       };
 
       let linkPage = this.linkPageHelper.component(App, idBase);

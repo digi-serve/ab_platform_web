@@ -24,7 +24,7 @@ module.exports = class ABViewChartBar extends ABViewChartBarCore {
    editorComponent(App, mode) {
       let idBase = "ABViewChartBarEditorComponent";
       let ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       let baseEditor = super.editorComponent(App, mode, {
@@ -53,7 +53,7 @@ module.exports = class ABViewChartBar extends ABViewChartBarCore {
             name: "barType",
             view: "richselect",
             label: L("Chart Type"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             options: [
                {
                   id: "bar",
@@ -69,7 +69,7 @@ module.exports = class ABViewChartBar extends ABViewChartBarCore {
             name: "barPreset",
             view: "richselect",
             label: L("Chart Preset"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             options: [
                {
                   id: "column",
@@ -114,13 +114,13 @@ module.exports = class ABViewChartBar extends ABViewChartBarCore {
             view: "counter",
             min: 1,
             label: L("Label Font Size"),
-            labelWidth: App.config.labelWidthXLarge,
+            labelWidth: this.AB.Config.labelWidthXLarge,
          },
          {
             name: "isLegend",
             view: "checkbox",
             labelRight: L("Show Legend"),
-            labelWidth: App.config.labelWidthCheckbox,
+            labelWidth: this.AB.Config.labelWidthCheckbox,
          },
       ]);
    }
@@ -198,7 +198,7 @@ module.exports = class ABViewChartBar extends ABViewChartBarCore {
 
       var idBase = "ABViewChartBar_" + this.id;
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
       var _ui;
 

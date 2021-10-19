@@ -130,7 +130,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
          {
             view: "fieldset",
             label: L("Data:"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -139,7 +139,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
                      view: "select",
                      name: "datacollection",
                      label: L("Object:"),
-                     labelWidth: App.config.labelWidthLarge,
+                     labelWidth: this.AB.Config.labelWidthLarge,
                      options: [],
                      on: {
                         onChange: function (newv, oldv) {
@@ -151,7 +151,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
 
                               let dataCollection = _logic
                                  .currentEditObject()
-                                 .AB.datacollections((dc) => dc.id == newv)[0];
+                                 .AB.datacollectionByID(newv);
                               if (dataCollection) {
                                  let datasource = dataCollection.datasource;
                                  if (datasource) {
@@ -191,7 +191,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
                      view: "select",
                      name: "field",
                      label: L("Image Field:"),
-                     labelWidth: App.config.labelWidthLarge,
+                     labelWidth: this.AB.Config.labelWidthLarge,
                      options: [],
                   },
                ],
@@ -202,7 +202,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
          // {
          // 	view: "fieldset",
          // 	label: L('ab.component.label.linkedPages', '*Linked Pages:'),
-         // 	labelWidth: App.config.labelWidthLarge,
+         // 	labelWidth: this.AB.Config.labelWidthLarge,
          // 	body: {
          // 		type: "clean",
          // 		padding: 10,
@@ -211,14 +211,14 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
          // 				view: "select",
          // 				name: "detailsPage",
          // 				label: L('ab.component.label.detailsPage', '*Details Page:'),
-         // 				labelWidth: App.config.labelWidthLarge,
+         // 				labelWidth: this.AB.Config.labelWidthLarge,
          // 				options: []
          // 			},
          // 			{
          // 				view: "select",
          // 				name: "editPage",
          // 				label: L('ab.component.label.editForm', '*Edit Form:'),
-         // 				labelWidth: App.config.labelWidthLarge,
+         // 				labelWidth: this.AB.Config.labelWidthLarge,
          // 				options: []
          // 			}
          // 		]
@@ -227,7 +227,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
          {
             view: "fieldset",
             label: L("Customize Display:"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -236,7 +236,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
                      view: "select",
                      name: "navigationType",
                      label: L("Navigation Type"),
-                     labelWidth: App.config.labelWidthLarge,
+                     labelWidth: this.AB.Config.labelWidthLarge,
                      options: [
                         { id: "corner", value: "Corner" },
                         { id: "side", value: "Side" },
@@ -247,35 +247,35 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
                      view: "checkbox",
                      name: "showLabel",
                      labelRight: L("Show label of image"),
-                     labelWidth: App.config.labelWidthCheckbox,
+                     labelWidth: this.AB.Config.labelWidthCheckbox,
                   },
 
                   {
                      view: "checkbox",
                      name: "hideItem",
                      labelRight: L("Hide item list"),
-                     labelWidth: App.config.labelWidthCheckbox,
+                     labelWidth: this.AB.Config.labelWidthCheckbox,
                   },
 
                   {
                      view: "checkbox",
                      name: "hideButton",
                      labelRight: L("Hide navigation buttons"),
-                     labelWidth: App.config.labelWidthCheckbox,
+                     labelWidth: this.AB.Config.labelWidthCheckbox,
                   },
 
                   {
                      view: "counter",
                      name: "width",
                      label: L("Width:"),
-                     labelWidth: App.config.labelWidthXLarge,
+                     labelWidth: this.AB.Config.labelWidthXLarge,
                   },
 
                   {
                      view: "counter",
                      name: "height",
                      label: L("Height:"),
-                     labelWidth: App.config.labelWidthXLarge,
+                     labelWidth: this.AB.Config.labelWidthXLarge,
                   },
 
                   {
@@ -284,7 +284,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
                            view: "label",
                            label: L("Filter Option:"),
                            css: "ab-text-bold",
-                           width: App.config.labelWidthXLarge,
+                           width: this.AB.Config.labelWidthXLarge,
                         },
                         {
                            view: "button",
@@ -370,7 +370,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
    component(App) {
       var idBase = "ABViewCarousel_" + this.id;
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       var dv = this.datacollection;
@@ -574,7 +574,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
                   css: "image",
                   template: _logic.myTemplate,
                   data: {
-                     id: AB.uuid(),
+                     id: this.AB.uuid(),
                      src: `/file/${field.settings.defaultImageUrl}`,
                      label: "Default image",
                   },

@@ -54,7 +54,7 @@ var ABFieldAutoIndexComponent = new ABFieldComponent({
             id: ids.prefixText,
             view: "text",
             name: "prefix",
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             label: L("Prefix"),
             placeholder: L("US"),
             on: {
@@ -67,7 +67,7 @@ var ABFieldAutoIndexComponent = new ABFieldComponent({
             id: ids.delimiterText,
             view: "richselect",
             name: "delimiter",
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             label: L("Delimiter"),
             value: "dash",
             options: ABFieldAutoIndexCore.delimiterList(),
@@ -81,7 +81,7 @@ var ABFieldAutoIndexComponent = new ABFieldComponent({
             id: ids.displayLength,
             view: "counter",
             name: "displayLength",
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             label: L("Length"),
             step: 1,
             value: 4,
@@ -97,7 +97,7 @@ var ABFieldAutoIndexComponent = new ABFieldComponent({
             id: ids.previewText,
             view: "text",
             name: "previewText",
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             label: L("Preview"),
             disabled: true,
          },
@@ -112,7 +112,7 @@ var ABFieldAutoIndexComponent = new ABFieldComponent({
          // 	view: "checkbox",
          // 	name:'supportMultilingual',
          // 	labelRight: L('ab.dataField.string.supportMultilingual', '*Support multilingual'),
-         // 	labelWidth: App.config.labelWidthCheckbox,
+         // 	labelWidth: this.AB.Config.labelWidthCheckbox,
          // 	value: true
          // }
       ];

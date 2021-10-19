@@ -50,7 +50,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
       let idBase = "ABViewCSVImporter";
 
       PopupRecordRule = new ABRecordRule();
-      PopupRecordRule.component(App, idBase + "_recordrule"); // prepare the UI component.
+      PopupRecordRule.component(App, `${idBase}_recordrule`); // prepare the UI component.
 
       // _logic functions
 
@@ -130,12 +130,12 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
          {
             view: "fieldset",
             label: L("Data:"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             body: {
                name: "datacollection",
                view: "richselect",
                label: L("Data Source"),
-               labelWidth: App.config.labelWidthLarge,
+               labelWidth: this.AB.Config.labelWidthLarge,
                skipAutoSave: true,
                on: {
                   onChange: _logic.selectSource,
@@ -145,7 +145,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
          {
             view: "fieldset",
             label: L("Available Fields:"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -175,7 +175,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
          {
             view: "fieldset",
             label: L("Rules:"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -185,7 +185,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                         {
                            view: "label",
                            label: L("Record Rules:"),
-                           width: App.config.labelWidthLarge,
+                           width: this.AB.Config.labelWidthLarge,
                         },
                         {
                            view: "button",
@@ -207,7 +207,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
          {
             view: "fieldset",
             label: L("Customize Display:"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -216,13 +216,13 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                      name: "buttonLabel",
                      view: "text",
                      label: L("Label"),
-                     labelWidth: App.config.labelWidthXLarge,
+                     labelWidth: this.AB.Config.labelWidthXLarge,
                   },
                   {
                      view: "counter",
                      name: "width",
                      label: L("Width:"),
-                     labelWidth: App.config.labelWidthXLarge,
+                     labelWidth: this.AB.Config.labelWidthXLarge,
                   },
                ],
             },
@@ -280,9 +280,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
    }
 
    static propertyAvailableFields(ids, view, options = {}) {
-      let datacollection = view.AB.datacollections(
-         (dc) => dc.id == view.settings.dataviewID
-      )[0];
+      let datacollection = view.AB.datacollectionByID(view.settings.dataviewID);
       let object = datacollection ? datacollection.datasource : null;
 
       view.settings = view.settings || {};
@@ -343,46 +341,30 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
       idBase = idBase || "ABCSVImporter_" + this.id;
 
       let ids = {
-         button: App.unique(idBase + "_button"),
-         popup: App.unique(idBase + "_popup"),
+         button: App.unique(`${idBase}_button`),
+         popup: App.unique(`${idBase}_popup`),
 
-         form: App.unique(idBase + "_form"),
-         uploader: App.unique(idBase + "_uploader"),
-         uploadFileList: App.unique(idBase + "_uploadList"),
-         separatedBy: App.unique(idBase + "_separatedBy"),
-         headerOnFirstLine: App.unique(idBase + "_headerOnFirstLine"),
-         columnList: App.unique(idBase + "_columnList"),
+         form: App.unique(`${idBase}_form`),
+         uploader: App.unique(`${idBase}_uploader`),
+         uploadFileList: App.unique(`${idBase}_uploadList`),
+         separatedBy: App.unique(`${idBase}_separatedBy`),
+         headerOnFirstLine: App.unique(`${idBase}_headerOnFirstLine`),
+         columnList: App.unique(`${idBase}_columnList`),
 
-         search: App.unique(idBase + "_search"),
-         datatable: App.unique(idBase + "_datatable"),
+         search: App.unique(`${idBase}_search`),
+         datatable: App.unique(`${idBase}_datatable`),
 
-         statusMessage: App.unique(idBase + "_statusMessage"),
-         progressBar: App.unique(idBase + "_progressBar"),
+         statusMessage: App.unique(`${idBase}_statusMessage`),
+         progressBar: App.unique(`${idBase}_progressBar`),
 
-         importButton: App.unique(idBase + "_importButton"),
-         rules: App.unique(idBase + "_datatable_rules"),
+         importButton: App.unique(`${idBase}_importButton`),
+         rules: App.unique(`${idBase}_datatable_rules`),
       };
 
       let csvImporter = new CSVImporter(App);
       let _dataRows = null;
       let _currentObject = null;
       let _csvFileInfo = null;
-
-      let labels = {
-         common: App.labels,
-         component: {
-            importCsvHeader: L("Import CSV"),
-            selectCsvFile: L("Choose a CSV file"),
-
-            fileTypeErrorTitle: L("This file extension is disallow"),
-            fileTypeError: L("Please only upload CSV file"),
-
-            separatedBy: L("Separated by"),
-            headerFirstLine: L("Header on first line"),
-
-            import: L("Import"),
-         },
-      };
 
       let _ui = {
          cols: [
@@ -422,7 +404,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                      view: "uploader",
                      name: "csvFile",
                      css: "webix_primary",
-                     value: labels.component.selectCsvFile,
+                     value: L("Choose a CSV file"),
                      accept: "text/csv",
                      multiple: false,
                      autosend: false,
@@ -454,7 +436,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                            id: ids.separatedBy,
                            view: "richselect",
                            name: "separatedBy",
-                           label: labels.component.separatedBy,
+                           label: L("Separated by"),
                            labelWidth: 140,
                            options: csvImporter.getSeparateItems(),
                            value: ",",
@@ -468,7 +450,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                            id: ids.headerOnFirstLine,
                            view: "checkbox",
                            name: "headerOnFirstLine",
-                           label: labels.component.headerFirstLine,
+                           label: L("Header on first line"),
                            labelWidth: 140,
                            disabled: true,
                            value: true,
@@ -571,12 +553,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                   },
                   onCheck: function () {
                      var selected = $$(ids.datatable).find({ _included: true });
-                     $$(ids.importButton).setValue(
-                        labels.component.import +
-                           " " +
-                           selected.length +
-                           " Records"
-                     );
+                     $$(ids.importButton).setValue(`${L("Import")} ${selected.length}  Records`);
                      if (selected.length > 1000) {
                         // we only allow 1000 record imports
                         webix.alert({
@@ -600,7 +577,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                view: "button",
                name: "import",
                id: ids.importButton,
-               value: labels.component.import,
+               value: L("Import"),
                css: "webix_primary",
                disabled: true,
                click: () => {
@@ -674,7 +651,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                         {
                            view: "button",
                            name: "cancel",
-                           value: labels.common.cancel,
+                           value: L("Cancel"),
                            css: "ab-cancel-button",
                            autowidth: true,
                            click: () => {
@@ -799,9 +776,9 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
 
             if (!csvImporter.validateFile(_csvFileInfo)) {
                webix.alert({
-                  title: labels.component.fileTypeErrorTitle,
-                  text: labels.component.fileTypeError,
-                  ok: labels.common.ok,
+                  title: L("This file extension is disallow"),
+                  text: L("Please only upload CSV file"),
+                  ok: L("OK"),
                });
 
                return false;
@@ -822,9 +799,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                if ($$(ids.headerOnFirstLine).getValue()) {
                   length = _dataRows.length - 1;
                }
-               $$(ids.importButton).setValue(
-                  labels.component.import + " " + length + " Records"
-               );
+               $$(ids.importButton).setValue(`${L("Import")} ${length} Records`);
 
                _logic.populateColumnList();
 
@@ -1306,8 +1281,8 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
 
                   if (f.field.key == "date") {
 
-                     let date = AB.toDate(data, { format: f.format });
-                     let dateFormat = AB.toDateFormat(date, { format: "YYYY-MM-DD"});
+                     let date = this.AB.toDate(data, { format: f.format });
+                     let dateFormat = this.AB.toDateFormat(date, { format: "YYYY-MM-DD"});
                      if (dateFormat == "Invalid date") {
                         dateFormat = dateFormat + " - " + data;
                      }
@@ -1329,9 +1304,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                parsedData = parsedData.slice(1);
             }
 
-            $$(ids.importButton).setValue(
-               labels.component.import + " " + parsedData.length + " Records"
-            );
+            $$(ids.importButton).setValue(`${L("Import")} ${parsedData.length} Records`);
 
             $datatable.refreshColumns(columns);
 
@@ -1388,9 +1361,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                $$(ids.importButton).setValue(result);
             } else {
                var selected = $$(ids.datatable).find({ _included: true });
-               $$(ids.importButton).setValue(
-                  labels.component.import + " " + selected.length + " Records"
-               );
+               $$(ids.importButton).setValue(`${L("Import")} ${selected.length} Records`);
             }
          },
 
@@ -1420,9 +1391,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                // webix .options list disallow value 0
                let colIndex = $selector.getValue();
 
-               let field = _currentObject.fields(
-                  (f) => f.id == $selector.config.fieldId
-               )[0];
+               let field = _currentObject.fieldByID($selector.config.fieldId);
                if (!field) return;
 
                let fieldData = {
@@ -1491,9 +1460,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
 
                   // define the column to compare data to search .id
                   if ($linkDataSelector) {
-                     let searchField = field.datasourceLink.fields(
-                        (f) => f.id == $linkDataSelector.getValue()
-                     )[0];
+                     let searchField = field.datasourceLink.fieldByID($linkDataSelector.getValue());
                      fieldData.searchField = searchField;
                   }
                }
@@ -1576,7 +1543,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                      let fieldInfo = matchFields.filter(
                         (f) => f.field && f.field.columnName == err.name
                      )[0];
-                     errorMsg.push(err.name + ": " + err.message);
+                     errorMsg.push(`${err.name}: ${err.message}`);
                      // we also need to define an error message
                      // webix.message({
                      //    type: "error",
@@ -1647,9 +1614,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                $$(ids.statusMessage).hide();
 
                var selected = $$(ids.datatable).find({ _included: true });
-               $$(ids.importButton).setValue(
-                  labels.component.import + " " + selected.length + " Records"
-               );
+               $$(ids.importButton).setValue(`${L("Import")} ${selected.length} Records`);
 
                // _logic.hide();
 
@@ -1833,7 +1798,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
 
                      allLookups.push(
                         connectModel
-                           .findAll({
+                           .find({
                               where: {},
                               populate: false,
                            })

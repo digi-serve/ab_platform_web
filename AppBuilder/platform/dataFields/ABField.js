@@ -226,7 +226,7 @@ module.exports = class ABField extends ABFieldCore {
                name: "label",
                label: App.labels.dataFieldLabel, // Label
                placeholder: App.labels.dataFieldLabelPlaceholder, // Label
-               labelWidth: App.config.labelWidthLarge,
+               labelWidth: this.AB.Config.labelWidthLarge,
                css: "ab-new-label-name",
                on: {
                   onChange: function (newVal, oldVal) {
@@ -240,7 +240,7 @@ module.exports = class ABField extends ABFieldCore {
                name: "columnName",
                disallowEdit: true,
                label: App.labels.dataFieldColumnName, // 'Field Name',
-               labelWidth: App.config.labelWidthLarge,
+               labelWidth: this.AB.Config.labelWidthLarge,
                placeholder: App.labels.dataFieldColumnNamePlaceholder, // 'Database field name',
             },
             {
@@ -254,7 +254,7 @@ module.exports = class ABField extends ABFieldCore {
                id: ids.showIcon,
                name: "showIcon",
                labelRight: App.labels.dataFieldShowIcon, // 'Show icon',
-               labelWidth: App.config.labelWidthCheckbox,
+               labelWidth: this.AB.Config.labelWidthCheckbox,
                value: true,
             },
             {
@@ -264,7 +264,7 @@ module.exports = class ABField extends ABFieldCore {
                hidden: !Field.supportRequire,
                labelRight: App.labels.required,
                // disallowEdit: true,
-               labelWidth: App.config.labelWidthCheckbox,
+               labelWidth: this.AB.Config.labelWidthCheckbox,
                on: {
                   onChange: async (newVal, oldVal) => {
                      requiredOnChange(newVal, oldVal, ids);
@@ -290,7 +290,7 @@ module.exports = class ABField extends ABFieldCore {
                hidden: !Field.supportUnique,
                labelRight: App.labels.unique,
                disallowEdit: true,
-               labelWidth: App.config.labelWidthCheckbox,
+               labelWidth: this.AB.Config.labelWidthCheckbox,
             },
             {
                id: ids.filterComplex,
@@ -344,7 +344,7 @@ module.exports = class ABField extends ABFieldCore {
                   {
                      view: "text",
                      name: "invalidMessage",
-                     labelWidth: App.config.labelWidthLarge,
+                     labelWidth: this.AB.Config.labelWidthLarge,
                      value:
                         settings && settings.invalidMessage
                            ? settings.invalidMessage
@@ -460,7 +460,7 @@ module.exports = class ABField extends ABFieldCore {
          let model = this.object.model();
 
          // pull rows that has null value
-         let result = await model.findAll({
+         let result = await model.find({
             where: {
                glue: "and",
                rules: [

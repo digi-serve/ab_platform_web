@@ -24,7 +24,7 @@ module.exports = class ABViewChartArea extends ABViewChartAreaCore {
    editorComponent(App, mode) {
       let idBase = "ABViewChartAreaEditorComponent";
       let ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
       let baseEditor = super.editorComponent(App, mode, {
          componentId: ids.component,
@@ -52,7 +52,7 @@ module.exports = class ABViewChartArea extends ABViewChartAreaCore {
             name: "areaType",
             view: "richselect",
             label: L("Chart Type"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             options: [
                {
                   id: "area",
@@ -93,13 +93,13 @@ module.exports = class ABViewChartArea extends ABViewChartAreaCore {
             view: "counter",
             min: 1,
             label: L("Label Font Size"),
-            labelWidth: App.config.labelWidthXLarge,
+            labelWidth: this.AB.Config.labelWidthXLarge,
          },
          {
             name: "isLegend",
             view: "checkbox",
             labelRight: L("Show Legend"),
-            labelWidth: App.config.labelWidthCheckbox,
+            labelWidth: this.AB.Config.labelWidthCheckbox,
          },
       ]);
    }
@@ -171,7 +171,7 @@ module.exports = class ABViewChartArea extends ABViewChartAreaCore {
 
       var idBase = "ABViewChartArea_" + this.id;
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       var _ui = {

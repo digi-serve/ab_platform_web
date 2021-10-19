@@ -27,28 +27,15 @@ module.exports = class ABWorkObjectKanBan extends ABComponent {
       super(App, idBase);
 
       var L = this.Label;
-      var labels = {
-         common: App.labels,
-         component: {
-            confirmDeleteCardTitle: L(
-               "ab.object.deleteCard.title",
-               "*Remove card"
-            ),
-            confirmDeleteCardMessage: L(
-               "ab.object.deleteCard.message",
-               "*Do you want to delete this card?"
-            ),
-         },
-      };
 
       // internal list of Webix IDs to reference our UI components.
       var ids = {
-         component: this.unique(idBase + "_workspace_kanban"),
-         kanban: this.unique(idBase + "_kanban"),
-         resizer: this.unique(idBase + "_resizer"),
+         component: this.unique(`${idBase}_workspace_kanban`),
+         kanban: this.unique(`${idBase}_kanban`),
+         resizer: this.unique(`${idBase}_resizer`),
       };
 
-      let FormSide = new AB_Work_Form(App, idBase + "_kanban_form");
+      let FormSide = new AB_Work_Form(App, `${idBase}_kanban_form`);
 
       var CurrentObject = null; // current ABObject being displayed
       var CurrentDatacollection = null;
@@ -418,7 +405,7 @@ module.exports = class ABWorkObjectKanBan extends ABComponent {
                   FormSide.refresh(data);
                }
             } catch (err) {
-               App.AB.error("Error saving item:", { error: err });
+               App.AB.notify.developer(err, { message: "Error saving item:" });
 
                _logic.ready();
             }
@@ -450,7 +437,7 @@ module.exports = class ABWorkObjectKanBan extends ABComponent {
 
                _logic.ready();
             } catch (err) {
-               App.AB.error("Error saving item:", { error: err });
+               App.AB.notify.developer(err, { message: "Error saving item:" });
 
                _logic.ready();
             }
@@ -484,9 +471,9 @@ module.exports = class ABWorkObjectKanBan extends ABComponent {
          },
 
          removeCard: async (rowId) => {
-            App.AB.Dialog.Confirm({
-               title: labels.component.confirmDeleteCardTitle,
-               text: labels.component.confirmDeleteCardMessage,
+            App.AB.Webix.confirm({
+               title: L("Remove card"),
+               text: L("Do you want to delete this card?"),
                callback: async (result) => {
                   if (!result) return;
 
@@ -498,17 +485,14 @@ module.exports = class ABWorkObjectKanBan extends ABComponent {
                      if (response.numRows > 0) {
                         $$(ids.kanban).remove(rowId);
                      } else {
-                        App.AB.Dialog.Alert({
-                           text: L(
-                              "key.norowseffected",
-                              "No rows were effected.  This does not seem right."
-                           ),
+                        App.AB.alert({
+                           text: L("No rows were effected. This does not seem right."),
                         });
                      }
 
                      _logic.ready();
                   } catch (err) {
-                     App.AB.error("Error deleting item:", { error: err });
+                     App.AB.notify.developer(err, { message: "Error deleting item:" });
 
                      _logic.ready();
                   }

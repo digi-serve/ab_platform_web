@@ -79,10 +79,10 @@ module.exports = class AccountingFPYearClose extends AccountingFPYearCloseCore {
 
       let getListOptions = (objectId, fieldId) => {
          let result = [];
-         let object = this.AB.objects((obj) => obj.id == objectId)[0];
+         let object = this.AB.objectByID(objectId);
          if (!object) return result;
 
-         let fpStatusField = object.fields((f) => f.id == fieldId)[0];
+         let fpStatusField = object.fieldByID(fieldId);
          if (
             !fpStatusField ||
             !fpStatusField.settings ||

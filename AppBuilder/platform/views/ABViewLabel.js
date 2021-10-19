@@ -81,7 +81,7 @@ module.exports = class ABViewLabel extends ABViewLabelCore {
             name: "text",
             label: L("Text"),
             placeholder: L("Text Placeholder"),
-            // labelWidth: App.config.labelWidthMedium,
+            // labelWidth: this.AB.Config.labelWidthMedium,
          },
          {
             view: "fieldset",

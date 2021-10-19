@@ -51,7 +51,7 @@ module.exports = class ABViewGantt extends ABViewGanttCore {
          {
             view: "fieldset",
             label: L("Gantt Data:"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -60,7 +60,7 @@ module.exports = class ABViewGantt extends ABViewGanttCore {
                      view: "select",
                      name: "datacollection",
                      label: L("Object:"),
-                     labelWidth: App.config.labelWidthLarge,
+                     labelWidth: this.AB.Config.labelWidthLarge,
                      on: {
                         onChange: (newv, oldv) => {
                            if (newv == oldv) return;
@@ -73,7 +73,7 @@ module.exports = class ABViewGantt extends ABViewGanttCore {
          {
             view: "fieldset",
             label: L("Gantt Fields:"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             body: {
                view: "form",
                name: "fields",
@@ -162,29 +162,17 @@ module.exports = class ABViewGantt extends ABViewGanttCore {
          if (!obj) return;
 
          ganttView.setFields({
-            titleField: obj.fields(
-               (f) => f.id == this.settings.titleFieldID
-            )[0],
+            titleField: obj.fieldByID(this.settings.titleFieldID),
 
-            startDateField: obj.fields(
-               (f) => f.id == this.settings.startDateFieldID
-            )[0],
+            startDateField: obj.fieldByID(this.settings.startDateFieldID),
 
-            endDateField: obj.fields(
-               (f) => f.id == this.settings.endDateFieldID
-            )[0],
+            endDateField: obj.fieldByID(this.settings.endDateFieldID),
 
-            durationField: obj.fields(
-               (f) => f.id == this.settings.durationFieldID
-            )[0],
+            durationField: obj.fieldByID(this.settings.durationFieldID),
 
-            progressField: obj.fields(
-               (f) => f.id == this.settings.progressFieldID
-            )[0],
+            progressField: obj.fieldByID(this.settings.progressFieldID),
 
-            notesField: obj.fields(
-               (f) => f.id == this.settings.notesFieldID
-            )[0],
+            notesField: obj.fieldByID(this.settings.notesFieldID),
          });
 
          ganttView.objectLoad(obj);

@@ -59,10 +59,10 @@ module.exports = class ABViewForm extends ABViewFormCore {
       // PopupDisplayRule = new ABDisplayRule(App, idBase + "_displayrule");
 
       PopupRecordRule = new ABRecordRule();
-      PopupRecordRule.component(App, idBase + "_recordrule"); // prepare the UI component.
+      PopupRecordRule.component(App, `${idBase}_recordrule`); // prepare the UI component.
 
       PopupSubmitRule = new ABSubmitRule();
-      PopupSubmitRule.component(App, idBase + "_submitrule");
+      PopupSubmitRule.component(App, `${idBase}_submitrule`);
 
       // _logic functions
 
@@ -322,7 +322,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
             name: "datacollection",
             view: "richselect",
             label: L("Data Source"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             skipAutoSave: true,
             on: {
                onChange: _logic.selectSource,
@@ -332,7 +332,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
          {
             view: "fieldset",
             label: L("Form Fields:"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -363,13 +363,13 @@ module.exports = class ABViewForm extends ABViewFormCore {
             name: "showLabel",
             view: "checkbox",
             label: L("Display Label"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
          },
          {
             name: "labelPosition",
             view: "richselect",
             label: L("Label Position"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             options: [
                {
                   id: "left",
@@ -385,30 +385,30 @@ module.exports = class ABViewForm extends ABViewFormCore {
             name: "labelWidth",
             view: "counter",
             label: L("Label Width"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
          },
          {
             view: "counter",
             name: "height",
             label: L("Height:"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
          },
          {
             name: "clearOnLoad",
             view: "checkbox",
             label: L("Clear on load"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
          },
          {
             name: "clearOnSave",
             view: "checkbox",
             label: L("Clear on save"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
          },
          {
             view: "fieldset",
             label: L("Rules:"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -418,7 +418,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
                         {
                            view: "label",
                            label: L("Submit Rules:"),
-                           width: App.config.labelWidthLarge,
+                           width: this.AB.Config.labelWidthLarge,
                         },
                         {
                            view: "button",
@@ -439,7 +439,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
                         {
                            view: "label",
                            label: L("Display Rules:"),
-                           width: App.config.labelWidthLarge,
+                           width: this.AB.Config.labelWidthLarge,
                         },
                         {
                            view: "button",
@@ -460,7 +460,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
                         {
                            view: "label",
                            label: L("Record Rules:"),
-                           width: App.config.labelWidthLarge,
+                           width: this.AB.Config.labelWidthLarge,
                         },
                         {
                            view: "button",
@@ -574,7 +574,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
    static propertyUpdateFieldOptions(ids, view, dcId) {
       var formComponent = view.parentFormComponent();
       var existsFields = formComponent.fieldComponents();
-      var datacollection = view.AB.datacollections((dc) => dc.id == dcId)[0];
+      var datacollection = view.AB.datacollectionByID(dcId);
       var object = datacollection ? datacollection.datasource : null;
 
       // Pull field list
@@ -658,7 +658,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
       var idBase = "ABViewForm_" + this.id;
       this.uniqueInstanceID = webix.uid();
       var myUnique = (key) => {
-         return App.unique(idBase + "_" + key + "_" + this.uniqueInstanceID);
+         return App.unique(`${idBase}_${key}_${this.uniqueInstanceID}`);
       };
       var ids = {
          component: myUnique("_component"),
@@ -912,9 +912,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
                rule.actionSettings.valueRules.fieldOperations.forEach((op) => {
                   if (op.valueType != "exist") return;
 
-                  let pullDataDC = this.AB.datacollections(
-                     (dc) => dc.id == op.value
-                  )[0];
+                  let pullDataDC = this.AB.datacollectionByID(op.value);
 
                   if (
                      pullDataDC &&
@@ -1417,7 +1415,10 @@ module.exports = class ABViewForm extends ABViewFormCore {
                   text: "System could not save your data",
                   type: "error",
                });
-               this.AB.error(err);
+               this.AB.notify.developer(err, {
+                  message: "Could not save your data",
+                  view: this
+               });
             }
          }
 
@@ -1440,8 +1441,9 @@ module.exports = class ABViewForm extends ABViewFormCore {
                         resolve(newFormVals);
                      })
                      .catch((err) => {
-                        this.AB.error("Error processing Record Rules.", {
-                           error: err,
+                        this.AB.notify.developer(err, {
+                           message: "Error processing Record Rules.", 
+                           view: this,
                            newFormVals: newFormVals,
                         });
                         // Question:  how do we respond to an error?
@@ -1468,8 +1470,9 @@ module.exports = class ABViewForm extends ABViewFormCore {
                         resolve(newFormVals);
                      })
                      .catch((err) => {
-                        this.AB.error("Error processing Record Rules.", {
-                           error: err,
+                        this.AB.notify.developer(err, {
+                           message: "Error processing Record Rules.",
+                           view: this,
                            newFormVals: newFormVals,
                         });
                         // Question:  how do we respond to an error?

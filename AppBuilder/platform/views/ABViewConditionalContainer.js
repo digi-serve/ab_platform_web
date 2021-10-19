@@ -77,7 +77,7 @@ module.exports = class ABViewConditionalContainer extends (
          this.populateBadgeNumber(ids, view);
       };
 
-      FilterComponent = new RowFilter(App, idBase + "_filter", AB);
+      FilterComponent = new RowFilter(App, `${idBase}_filter`, AB);
       FilterComponent.init({
          // when we make a change in the popups we want to make sure we save the new workspace to the properties to do so just fire an onChange event
          onChange: _logic.onFilterChange,
@@ -95,7 +95,7 @@ module.exports = class ABViewConditionalContainer extends (
             name: "datacollection",
             view: "richselect",
             label: L("Data Source"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             on: {
                onChange: function (dvId) {
                   _logic.changeDatacollection(dvId);
@@ -106,7 +106,7 @@ module.exports = class ABViewConditionalContainer extends (
             view: "fieldset",
             name: "filter",
             label: L("Filter:"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -116,7 +116,7 @@ module.exports = class ABViewConditionalContainer extends (
                         {
                            view: "label",
                            label: L("Filter Data:"),
-                           width: App.config.labelWidthLarge,
+                           width: this.AB.Config.labelWidthLarge,
                         },
                         {
                            view: "button",
@@ -170,7 +170,7 @@ module.exports = class ABViewConditionalContainer extends (
 
       // specify data collection id
       if (datacollectionId) {
-         dv = view.AB.datacollections((d) => d.id == datacollectionId)[0];
+         dv = view.AB.datacollectionByID(datacollectionId);
       }
 
       if (dv && dv.datasource) {
@@ -218,7 +218,7 @@ module.exports = class ABViewConditionalContainer extends (
    component(App) {
       var idBase = "ABViewConditionalContainer_" + this.id;
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       var baseComp = super.component(App);

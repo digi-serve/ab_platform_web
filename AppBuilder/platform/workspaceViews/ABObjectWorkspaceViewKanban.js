@@ -55,21 +55,9 @@ module.exports = class ABObjectWorkspaceViewKanban extends (
 
    static component(App, idBase) {
       let ids = {
-         vGroupInput: App.unique(idBase + "_popupAddViewVGroup"),
-         hGroupInput: App.unique(idBase + "_popupAddViewHGroup"),
-         ownerInput: App.unique(idBase + "_popupAddViewOwner"),
-      };
-
-      let labels = {
-         common: App.labels,
-         component: {
-            vGroup: L("Vertical Grouping"),
-            hGroup: L("Horizontal Grouping"),
-            owner: L("Card Owner"),
-            groupingPlaceholder: L("Select a field"),
-            ownerPlaceholder: L("Select a user field"),
-            noneOption: L("None"),
-         },
+         vGroupInput: App.unique(`${idBase}_popupAddViewVGroup`),
+         hGroupInput: App.unique(`${idBase}_popupAddViewHGroup`),
+         ownerInput: App.unique(`${idBase}_popupAddViewOwner`),
       };
 
       let refreshOptions = (object, view, options = {}) => {
@@ -90,7 +78,7 @@ module.exports = class ABObjectWorkspaceViewKanban extends (
             if (!isRequired && options.length) {
                options.unshift({
                   id: 0,
-                  value: labels.component.noneOption,
+                  value: L("None"),
                });
             }
             $option.define("options", options);
@@ -152,8 +140,7 @@ module.exports = class ABObjectWorkspaceViewKanban extends (
       };
 
       var PopupNewDataFieldComponent = new ABPopupNewDataField(
-         App,
-         idBase + "_kanban"
+         App, `${idBase}_kanban`
       );
 
       return new ABObjectWorkspaceViewComponent({
@@ -165,9 +152,9 @@ module.exports = class ABObjectWorkspaceViewKanban extends (
                      cols: [
                         {
                            view: "richselect",
-                           label: `<span class='webix_icon fa fa-columns'></span> ${labels.component.vGroup}`,
+                           label: `<span class='webix_icon fa fa-columns'></span> ${L("Vertical Grouping")}`,
                            id: ids.vGroupInput,
-                           placeholder: labels.component.groupingPlaceholder,
+                           placeholder: L("Select a field"),
                            labelWidth: 180,
                            name: "vGroup",
                            required: true,
@@ -178,8 +165,7 @@ module.exports = class ABObjectWorkspaceViewKanban extends (
                                  $$(ids.hGroupInput).validate();
                               },
                            },
-                           invalidMessage:
-                              labels.common.invalidMessage.required,
+                           invalidMessage: L("Required"),
                         },
                         {
                            view: "button",
@@ -201,9 +187,9 @@ module.exports = class ABObjectWorkspaceViewKanban extends (
                      cols: [
                         {
                            view: "richselect",
-                           label: `<span class='webix_icon fa fa-list'></span> ${labels.component.hGroup}`,
+                           label: `<span class='webix_icon fa fa-list'></span> ${L("Horizontal Grouping")}`,
                            id: ids.hGroupInput,
-                           placeholder: labels.component.groupingPlaceholder,
+                           placeholder: L("Select a field"),
                            labelWidth: 180,
                            name: "hGroup",
                            required: false,
@@ -242,8 +228,8 @@ module.exports = class ABObjectWorkspaceViewKanban extends (
                      cols: [
                         {
                            view: "richselect",
-                           label: `<span class='webix_icon fa fa-user-circle'></span> ${labels.component.owner}`,
-                           placeholder: labels.component.ownerPlaceholder,
+                           label: `<span class='webix_icon fa fa-user-circle'></span> ${L("Card Owner")}`,
+                           placeholder: L("Select a user field"),
                            id: ids.ownerInput,
                            labelWidth: 180,
                            name: "owner",
@@ -337,20 +323,20 @@ module.exports = class ABObjectWorkspaceViewKanban extends (
       let viewCollection = this.object, // Should use another name property ?
          object = viewCollection.object;
 
-      return object.fields((f) => f.id == this.horizontalGroupingField)[0];
+      return object.fieldByID(this.horizontalGroupingField);
    }
 
    getVerticalGroupingField() {
       let viewCollection = this.object, // Should use another name property ?
          object = viewCollection.object;
 
-      return object.fields((f) => f.id == this.verticalGroupingField)[0];
+      return object.fieldByID(this.verticalGroupingField);
    }
 
    getOwnerField() {
       let viewCollection = this.object, // Should use another name property ?
          object = viewCollection.object;
 
-      return object.fields((f) => f.id == this.ownerField)[0];
+      return object.fieldByID(this.ownerField);
    }
 };

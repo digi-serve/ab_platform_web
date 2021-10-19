@@ -24,7 +24,7 @@ module.exports = class ABViewFormButton extends ABViewFormButtonCore {
    editorComponent(App, mode) {
       var idBase = "ABViewFormButtonEditorComponent";
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       var button = this.component(App).ui;
@@ -68,7 +68,7 @@ module.exports = class ABViewFormButton extends ABViewFormButtonCore {
          {
             name: "saveLabel",
             view: "text",
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             label: L("Save Label"),
             placeholder: L("Save Placeholder"),
          },
@@ -80,7 +80,7 @@ module.exports = class ABViewFormButton extends ABViewFormButtonCore {
          {
             name: "cancelLabel",
             view: "text",
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             label: L("Cancel Label"),
             placeholder: L("Cancel Placeholder"),
          },
@@ -92,21 +92,21 @@ module.exports = class ABViewFormButton extends ABViewFormButtonCore {
          {
             name: "resetLabel",
             view: "text",
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             label: L("Reset Label"),
             placeholder: L("Reset Placeholder"),
          },
          {
             name: "afterCancel",
             view: "richselect",
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             label: L("After Cancel"),
             // options: []
          },
          {
             name: "alignment",
             view: "richselect",
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             label: L("Alignment"),
             options: [
                {
@@ -192,10 +192,10 @@ module.exports = class ABViewFormButton extends ABViewFormButtonCore {
     */
    component(App) {
       var idBase = this.parentFormUniqueID(
-         "ABViewFormButton_" + this.id + "_f_"
+         `ABViewFormButton_${this.id}_f_`
       );
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       var form = this.parentFormComponent();

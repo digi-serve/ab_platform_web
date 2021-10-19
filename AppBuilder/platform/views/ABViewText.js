@@ -121,13 +121,13 @@ module.exports = class ABViewText extends ABViewTextCore {
             view: "counter",
             name: "height",
             label: L("Height:"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
          },
          {
             name: "datacollection",
             view: "richselect",
             label: L("Data Source"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             on: {
                onChange: _logic.selectSource,
             },
@@ -157,12 +157,10 @@ module.exports = class ABViewText extends ABViewTextCore {
     * @param {string} dvId - id of ABDatacollection
     */
    static propertyUpdateFieldOptions(ids, view, dvId) {
-      var datacollection = view.AB.datacollections((dc) => dc.id == dvId)[0];
+      var datacollection = view.AB.datacollectionByID(dvId);
 
       if (!datacollection && view.parent.key == "dataview") {
-         datacollection = view.AB.datacollections(
-            (dc) => dc.id == view.parent.settings.dataviewID
-         )[0];
+         datacollection = view.AB.datacollectionByID(view.parent.settings.dataviewID);
          $$(ids.datacollection).setValue(view.parent.settings.dataviewID);
       }
 

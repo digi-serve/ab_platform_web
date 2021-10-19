@@ -53,7 +53,7 @@ module.exports = class AccountingJEArchive extends AccountingJEArchiveCore {
       });
 
       let getConnectFieldOptions = (objectId) => {
-         let object = this.AB.objects((o) => o.id == objectId)[0];
+         let object = this.AB.objectByID(objectId);
          if (!object) return [];
 
          let options = object
@@ -114,12 +114,10 @@ module.exports = class AccountingJEArchive extends AccountingJEArchiveCore {
          // clear form
          webix.ui([], $fieldsMatch);
 
-         let JEObj = this.AB.objects((o) => o.id == this.objectJE)[0];
+         let JEObj = this.AB.objectByID(this.objectJE);
          if (!JEObj) return;
 
-         let JEArchiveObj = this.AB.objects(
-            (o) => o.id == this.objectJEArchive
-         )[0];
+         let JEArchiveObj = this.AB.objectByID(this.objectJEArchive);
          if (!JEArchiveObj) return;
 
          // create JE acrhive field options to the form

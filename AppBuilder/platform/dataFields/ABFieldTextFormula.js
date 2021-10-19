@@ -31,7 +31,7 @@ var ABFieldTextFormulaComponent = new ABFieldComponent({
             label: L("Text Formula"),
             name: "textFormula",
             editor: "text",
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             placeholder: L("{Firstname} {Lastname}"),
             on: {
                onFocus: (/* current_view, prev_view */) => {
@@ -79,7 +79,7 @@ var ABFieldTextFormulaComponent = new ABFieldComponent({
          // 	view: "checkbox",
          // 	name:'supportMultilingual',
          // 	labelRight: L('ab.dataField.string.supportMultilingual', '*Support multilingual'),
-         // 	labelWidth: App.config.labelWidthCheckbox,
+         // 	labelWidth: this.AB.Config.labelWidthCheckbox,
          // 	value: true
          // }
       ];

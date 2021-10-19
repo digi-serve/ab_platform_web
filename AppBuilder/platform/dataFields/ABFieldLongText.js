@@ -37,7 +37,7 @@ var ABFieldLongTextComponent = new ABFieldComponent({
             name: "supportMultilingual",
             disallowEdit: true,
             labelRight: L("Support multilingual"),
-            labelWidth: App.config.labelWidthCheckbox,
+            labelWidth: this.AB.Config.labelWidthCheckbox,
             value: false,
          },
       ];

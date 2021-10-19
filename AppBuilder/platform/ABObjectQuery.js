@@ -196,7 +196,7 @@ module.exports = class ABObjectQuery extends ABObjectQueryCore {
          let object = this.objectByAlias(h.alias);
          if (!object) return;
 
-         let field = object.fields((f) => f.id == h.fieldID)[0];
+         let field = object.fieldByID(h.fieldID);
          if (!field) return;
 
          // NOTE: query v1

@@ -64,7 +64,7 @@ module.exports = class ABViewFormNumber extends ABViewFormNumberCore {
          {
             name: "isStepper",
             view: "checkbox",
-            labelWidth: App.config.labelWidthCheckbox,
+            labelWidth: this.AB.Config.labelWidthCheckbox,
             labelRight: L("Plus/Minus Buttons"),
          },
       ]);

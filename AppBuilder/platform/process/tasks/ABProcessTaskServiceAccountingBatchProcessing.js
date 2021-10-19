@@ -142,7 +142,7 @@ module.exports = class AccountingBatchProcessing extends (
          var jeEntryID = $$(ids.objectJE).getValue();
          var jeEntry = objectList.find((o) => o.id == jeEntryID);
          if (jeEntry && jeEntry.object) {
-            var statusField = jeEntry.object.fields((f) => f.id == newVal)[0];
+            var statusField = jeEntry.object.fieldByID(newVal);
             if (statusField && statusField.options) {
                // get the options as an []
                jeFieldStatusValues = compileStatusValues(statusField);

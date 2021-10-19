@@ -1,4 +1,3 @@
-const { isString } = require("lodash");
 const ABViewReportsManagerCore = require("../../core/views/ABViewReportsManagerCore");
 
 function L(...params) {
@@ -87,7 +86,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                reports.services.Backend,
                class MyBackend extends reports.services.Backend {
                   getModules() {
-                     return webix.promise.resolve(
+                     return Promise.resolve(
                         compInstance.settings.moduleList || []
                      );
                   }
@@ -188,11 +187,11 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                         };
                      });
 
-                     return webix.promise.resolve(reportModels);
+                     return Promise.resolve(reportModels);
                   }
 
                   getQueries() {
-                     return webix.promise.resolve(
+                     return Promise.resolve(
                         compInstance.settings.queryList || []
                      );
                   }
@@ -260,7 +259,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                         dcIds.push(j.sid);
                         dcIds.push(j.tid);
                      });
-                     dcIds = AB.uniq(dcIds);
+                     dcIds = compInstance.AB.uniq(dcIds);
                      dcIds.forEach((dcId) => {
                         pullDataTasks.push(
                            new Promise((next, bad) => {
@@ -276,9 +275,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                      });
 
                      dcIds.forEach((dcId) => {
-                        let dataCol = compInstance.AB.datacollections(
-                           (dc) => dc.id == dcId
-                        )[0];
+                        let dataCol = compInstance.AB.datacollectionByID(dcId);
                         if (!dataCol) return;
 
                         reportFields = reportFields.concat(
@@ -305,28 +302,20 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                     }
 
                                     (config.joins || []).forEach((j) => {
-                                       let sourceDc = compInstance.AB.datacollections(
-                                          (dc) => dc.id == j.sid
-                                       )[0];
+                                       let sourceDc = compInstance.AB.datacollectionByID(j.sid);
                                        if (!sourceDc) return;
 
                                        let sourceObj = sourceDc.datasource;
                                        if (!sourceObj) return;
 
-                                       let targetDc = compInstance.AB.datacollections(
-                                          (dc) => dc.id == j.tid
-                                       )[0];
+                                       let targetDc = compInstance.AB.datacollectionByID(j.tid);
                                        if (!targetDc) return;
 
                                        let targetObj = targetDc.datasource;
                                        if (!targetObj) return;
 
-                                       let sourceLinkField = sourceObj.fields(
-                                          (f) => f.id == j.sf
-                                       )[0];
-                                       let targetLinkField = targetObj.fields(
-                                          (f) => f.id == j.tf
-                                       )[0];
+                                       let sourceLinkField = sourceObj.fieldByID(j.sf);
+                                       let targetLinkField = targetObj.fieldByID(j.tf);
                                        if (!sourceLinkField && !targetLinkField)
                                           return;
 
@@ -388,8 +377,8 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                                 } else {
                                                    result.push(
                                                       Object.assign(
-                                                         AB.cloneDeep(sData),
-                                                         AB.cloneDeep(tData)
+                                                         compInstance.AB.cloneDeep(sData),
+                                                         compInstance.AB.cloneDeep(tData)
                                                       )
                                                    );
                                                 }
@@ -405,9 +394,14 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                            .then(
                               () =>
                                  new Promise((next, bad) => {
-                                    let queryVal = JSON.parse(
-                                       config.query || "{}"
-                                    );
+                                    let queryVal;
+                                    try {
+                                       queryVal = JSON.parse(
+                                          config.query || "{}"
+                                       );
+                                    } catch(err) {
+                                       bad(err);
+                                    }
 
                                     if (
                                        queryVal &&
@@ -424,7 +418,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                                 // Convert string to Date object
                                                 if (r.condition.filter) {
                                                    if (
-                                                      isString(
+                                                      this.AB.isString(
                                                          r.condition.filter
                                                       )
                                                    ) {
@@ -436,7 +430,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                                    if (
                                                       r.condition.filter
                                                          .start &&
-                                                      isString(
+                                                         this.AB.isString(
                                                          r.condition.filter
                                                             .start
                                                       )
@@ -448,7 +442,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
 
                                                    if (
                                                       r.condition.filter.end &&
-                                                      isString(
+                                                      this.AB.isString(
                                                          r.condition.filter.end
                                                       )
                                                    ) {
@@ -524,7 +518,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                                       case "sum":
                                                          groupedResult[
                                                             col
-                                                         ] = AB.sumBy(
+                                                         ] = compInstance.AB.sumBy(
                                                             groupedData,
                                                             rawCol
                                                          );
@@ -532,7 +526,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                                       case "avg":
                                                          groupedResult[
                                                             col
-                                                         ] = AB.meanBy(
+                                                         ] = compInstance.AB.meanBy(
                                                             groupedData,
                                                             rawCol
                                                          );
@@ -544,7 +538,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                                          break;
                                                       case "max":
                                                          groupedResult[col] =
-                                                            (AB.maxBy(
+                                                            (compInstance.AB.maxBy(
                                                                groupedData,
                                                                rawCol
                                                             ) || {})[rawCol] ||
@@ -552,7 +546,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                                          break;
                                                       case "min":
                                                          groupedResult[col] =
-                                                            (AB.minBy(
+                                                            (compInstance.AB.minBy(
                                                                groupedData,
                                                                rawCol
                                                             ) || {})[rawCol] ||
@@ -574,7 +568,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                     next();
                                  })
                            )
-                           .then(() => webix.promise.resolve(result))
+                           .then(() => Promise.resolve(result))
                      );
                   }
                   getOptions(fields) {
@@ -584,11 +578,11 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                      //    {"id":"2","value":"North"},
                      //    // other options
                      //  ]
-                     return webix.promise.resolve([]);
+                     return Promise.resolve([]);
                   }
                   getFieldData(fieldId) {
                      // TODO
-                     return webix.promise.resolve([]);
+                     return Promise.resolve([]);
                   }
                },
             ],
@@ -693,9 +687,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
          },
 
          getData: (datacollectionId) => {
-            let datacollection = compInstance.AB.datacollections(
-               (dcItem) => dcItem.id == datacollectionId
-            )[0];
+            let datacollection = compInstance.AB.datacollectionByID(datacollectionId);
             if (!datacollection) return Promise.resolve([]);
 
             let object = datacollection.datasource;
@@ -784,7 +776,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                     reportRow[col] = row[columnName];
                                     if (reportRow[col]) {
                                        if (!(reportRow[col] instanceof Date)) {
-                                          reportRow[col] = AB.toDate(row[columnName]);
+                                          reportRow[col] = compInstance.AB.toDate(row[columnName]);
                                        }
                                     } else {
                                        reportRow[col] = "";

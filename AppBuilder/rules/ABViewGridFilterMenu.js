@@ -29,26 +29,18 @@ module.exports = class ABViewGridFilterMenu {
 
       this.currentForm = null;
 
-      var labels = (this.labels = {
-         common: App.labels,
-         component: {
-            header: L("Filter Menu"),
-            addNewFilter: L("Add new filter"),
-         },
-      });
-
       // internal list of Webix IDs to reference our UI components.
       var ids = (this.ids = {
-         component: idBase + "_component",
-         filterRules: idBase + "_rules",
-         filterRulesScrollview: idBase + "_filterRulesScrollview",
+         component: `${idBase}_component`,
+         filterRules: `${idBase}_rules`,
+         filterRulesScrollview: `${idBase}_filterRulesScrollview`,
 
-         filterOptionRadio: idBase + "_filterOptionRadio",
-         filterUser: idBase + "_filterUser",
-         filterGlobal: idBase + "_filterGlobal",
-         filterMenuLayout: idBase + "_filterMenuLayout",
+         filterOptionRadio: `${idBase}_filterOptionRadio`,
+         filterUser: `${idBase}_filterUser`,
+         filterGlobal: `${idBase}_filterGlobal`,
+         filterMenuLayout: `${idBase}_filterMenuLayout`,
 
-         needLoadAllLabel: idBase + "_needLoadAll",
+         needLoadAllLabel: `${idBase}_needLoadAll`,
       });
 
       // webix UI definition:
@@ -63,7 +55,7 @@ module.exports = class ABViewGridFilterMenu {
          css: "ab-main-container",
          head: {
             view: "toolbar",
-            cols: [{ view: "label", label: labels.component.header }],
+            cols: [{ view: "label", label: L("Filter Menu") }],
          },
          body: {
             type: "form",
@@ -80,7 +72,7 @@ module.exports = class ABViewGridFilterMenu {
                   ],
                   vertical: true,
                   label: "Filter Option",
-                  labelWidth: App.config.labelWidthLarge,
+                  labelWidth: this.AB.Config.labelWidthLarge,
                   on: {
                      onChange: (newValue, oldValue) => {
                         _logic.setFilterOption(newValue);
@@ -94,7 +86,7 @@ module.exports = class ABViewGridFilterMenu {
                   hidden: true,
                   vertical: true,
                   label: "Show",
-                  labelWidth: App.config.labelWidthLarge,
+                  labelWidth: this.AB.Config.labelWidthLarge,
                   options: [
                      { id: "default", value: "All matching records" },
                      { id: "single", value: "Single records only" },
@@ -108,7 +100,7 @@ module.exports = class ABViewGridFilterMenu {
                   hidden: true,
                   value: "toolbar",
                   label: "Display",
-                  labelWidth: App.config.labelWidthLarge,
+                  labelWidth: this.AB.Config.labelWidthLarge,
                   options: [
                      { id: "toolbar", value: "Toolbar" },
                      { id: "form", value: "Form" },
@@ -128,7 +120,7 @@ module.exports = class ABViewGridFilterMenu {
                               css: "webix_primary",
                               icon: "fa fa-plus",
                               type: "iconButton",
-                              label: labels.component.addNewFilter,
+                              label: L("Add new filter"),
                               width: 150,
                               click: () => {
                                  this.addFilterRule();
@@ -165,7 +157,7 @@ module.exports = class ABViewGridFilterMenu {
                      {
                         view: "button",
                         name: "cancel",
-                        value: labels.common.cancel,
+                        value: L("Cancel"),
                         css: "ab-cancel-button",
                         autowidth: true,
                         click: function () {
@@ -176,7 +168,7 @@ module.exports = class ABViewGridFilterMenu {
                         view: "button",
                         css: "webix_primary",
                         name: "save",
-                        label: labels.common.save,
+                        label: L("Save"),
                         type: "form",
                         autowidth: true,
                         click: function () {

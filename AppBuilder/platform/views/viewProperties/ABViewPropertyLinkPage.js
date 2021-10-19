@@ -26,21 +26,14 @@ module.exports = class ABViewPropertyLinkPage extends ABViewProperty {
       let base = super.propertyComponent();
 
       let ids = {
-         detailsPage: idBase + "_linkPage_detailsPage",
-         editPage: idBase + "_linkPage_editPage",
-      };
-
-      let labels = {
-         common: App.labels,
-         component: {
-            // header: L("ab.component.grid.filterMenu", "*Filter Menu")
-         },
+         detailsPage: `${idBase}_linkPage_detailsPage`,
+         editPage: `${idBase}_linkPage_editPage`,
       };
 
       let ui = {
          view: "fieldset",
          label: L("Linked Pages:"),
-         labelWidth: App.config.labelWidthLarge,
+         labelWidth: this.AB.Config.labelWidthLarge,
          body: {
             type: "clean",
             padding: 10,
@@ -50,14 +43,14 @@ module.exports = class ABViewPropertyLinkPage extends ABViewProperty {
                   view: "select",
                   name: "detailsPage",
                   label: L("Details Page:"),
-                  labelWidth: App.config.labelWidthLarge,
+                  labelWidth: this.AB.Config.labelWidthLarge,
                },
                {
                   id: ids.editPage,
                   view: "select",
                   name: "editPage",
                   label: L("Edit Form:"),
-                  labelWidth: App.config.labelWidthLarge,
+                  labelWidth: this.AB.Config.labelWidthLarge,
                },
             ],
          },

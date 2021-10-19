@@ -164,7 +164,7 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
          }
 
          // Ask the user what to do about the existing file:
-         this.AB.Dialog.Confirm({
+         this.AB.Webix.confirm({
             title: L("Keep Files?"),
             message: L("Do you want to keep the files referenced by {0}?", [
                this.label,
@@ -178,7 +178,7 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
                   await this.save();
 
                   // TODO: a reminder that you still got alot on the server to do!
-                  this.AB.Dialog.Alert({
+                  this.AB.alert({
                      title: "!! TODO !!",
                      text:
                         "Tell a Developer to actually pay attention to this!",
@@ -374,7 +374,10 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
 
                // if an error was returned
                onFileUploadError: (item, response) => {
-                  this.AB.error("Error loading file", response);
+                  this.AB.notify.developer({}, {
+                     message: "Error loading file",
+                     response
+                  });
                   webixContainer.hideProgress();
                },
             },
@@ -407,7 +410,7 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
          delete this.deleteFile;
 
          // Ask the user if they really want to delete the photo
-         this.AB.Dialog.Confirm({
+         this.AB.Webix.confirm({
             title: "",
             message: L("Are you sure you want to remove this file?"),
             callback: async (result) => {
@@ -424,8 +427,8 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
                         node.classList.add("webix_invalid");
                         node.classList.add("webix_invalid_cell");
 
-                        this.AB.error("Error updating our entry.", {
-                           error: err,
+                        this.AB.notify.developer(err, {
+                           message: "Error updating our entry.",
                            row: row,
                            values: values,
                         });

@@ -278,10 +278,9 @@ class NetworkRest extends EventEmitter {
                            resolve(data);
                         })
                         .catch((_err) => {
-                           this.AB.error(
-                              "*** NetworkRest._request().catch(): retry failed:",
-                              _err
-                           );
+                           this.AB.notify.developer(_err, {
+                              message: "*** NetworkRest._request().catch(): retry failed:",
+                           });
                            reject(_err);
                         });
 

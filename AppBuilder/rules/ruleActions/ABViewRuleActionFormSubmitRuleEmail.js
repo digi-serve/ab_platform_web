@@ -678,7 +678,7 @@ module.exports = class ABViewRuleActionFormSubmitRuleEmail extends (
          .then(() => {
             // send out
             return new Promise((resolve, reject) => {
-               recipients = AB.uniq(recipients).filter((r) => r);
+               recipients = this.AB.uniq(recipients).filter((r) => r);
 
                if (!recipients || recipients.length < 1) return resolve();
 
@@ -699,14 +699,14 @@ module.exports = class ABViewRuleActionFormSubmitRuleEmail extends (
                   });
 
                // send a email
-               OP.Comm.Service.post({
+               this.AB.Network.post({
                   url: "/app_builder/email",
                   params: {
                      fromName: fromName,
                      fromEmail: this.valueRules.fromEmail,
                      subject: subject,
                      message: message,
-                     recipients: AB.uniq(recipients),
+                     recipients: this.AB.uniq(recipients),
                   },
                })
                   .then(() => {

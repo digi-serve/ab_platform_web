@@ -83,7 +83,7 @@ var ABFieldConnectComponent = new ABFieldComponent({
             id: ids.linkObject,
             disallowEdit: true,
             name: "linkObject",
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             placeholder: L("Select object"),
             options: [],
             // select: true,
@@ -225,7 +225,7 @@ var ABFieldConnectComponent = new ABFieldComponent({
             view: "richselect",
             disallowEdit: true,
             hidden: true,
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             label: L("Index Field:"),
             placeholder: L("Select index field"),
             options: [],
@@ -241,7 +241,7 @@ var ABFieldConnectComponent = new ABFieldComponent({
             view: "richselect",
             disallowEdit: true,
             hidden: true,
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             label: L("Index Field:"),
             placeholder: L("Select index field"),
             options: [],
@@ -349,7 +349,7 @@ var ABFieldConnectComponent = new ABFieldComponent({
             // pass true because we want it to select the last item in the list that was just created
             populateSelect(true);
          } catch(err) {
-            App.AB.error(err);
+            App.AB.notify.developer(err);
          }
       },
 
@@ -428,9 +428,7 @@ var ABFieldConnectComponent = new ABFieldComponent({
             (linkType == "one" && linkViaType == "one") ||
             (linkType == "one" && linkViaType == "many")
          ) {
-            sourceObject = ABFieldConnectComponent.CurrentApplication.AB.objects(
-               (o) => o.id == linkObjectId
-            )[0];
+            sourceObject = ABFieldConnectComponent.CurrentApplication.AB.objectByID(linkObjectId);
          }
          // M:1
          else if (linkType == "many" && linkViaType == "one") {
@@ -440,9 +438,7 @@ var ABFieldConnectComponent = new ABFieldComponent({
          else if (linkType == "many" && linkViaType == "many") {
             sourceObject = ABFieldConnectComponent.CurrentObject;
 
-            let linkObject = ABFieldConnectComponent.CurrentApplication.AB.objects(
-               (o) => o.id == linkObjectId
-            )[0];
+            let linkObject = ABFieldConnectComponent.CurrentApplication.AB.objectByID(linkObjectId);
 
             // Populate the second index fields
             let linkIndexFields = [];
@@ -866,8 +862,8 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                      node.classList.add("webix_invalid");
                      node.classList.add("webix_invalid_cell");
 
-                     this.AB.error("Error updating our entry.", {
-                        error: err,
+                     this.AB.notify.developer(err, {
+                        message: "Error updating our entry.",
                         row: row,
                         values: values,
                      });
@@ -1059,7 +1055,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       }
 
       // Pull linked object data
-      let result = await linkedModel.findAll({
+      let result = await linkedModel.find({
          where: where,
          populate: false,
       });

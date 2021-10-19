@@ -117,7 +117,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
    editorComponent(App, mode) {
       let idBase = "ABViewFormConnectEditorComponent";
       let ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       let baseComp = this.component(App);
@@ -235,7 +235,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
             view: "fieldset",
             name: "addNewSettings",
             label: L("Add New Popup Settings:"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -245,7 +245,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
                      name: "popupWidth",
                      placeholder: L("Set popup width"),
                      label: L("Width:"),
-                     labelWidth: App.config.labelWidthLarge,
+                     labelWidth: this.AB.Config.labelWidthLarge,
                      validate: webix.rules.isNumber,
                   },
                   {
@@ -253,7 +253,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
                      name: "popupHeight",
                      placeholder: L("Set popup height"),
                      label: L("Height:"),
-                     labelWidth: App.config.labelWidthLarge,
+                     labelWidth: this.AB.Config.labelWidthLarge,
                      validate: webix.rules.isNumber,
                   },
                ],
@@ -263,7 +263,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
             view: "fieldset",
             name: "advancedOption",
             label: L("Advanced Options:"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -273,7 +273,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
                         {
                            view: "label",
                            label: L("Filter Options:"),
-                           width: App.config.labelWidthLarge,
+                           width: this.AB.Config.labelWidthLarge,
                         },
                         {
                            view: "button",
@@ -328,7 +328,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
       });
 
       // find out what connected objects this field has
-      let connectedObjs = view.AB.connectedObjects(
+      let connectedObjs = view.application.connectedObjects(
          fieldDefs.settings.linkObject
       );
 
@@ -465,7 +465,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
    static initPopupEditors(App, ids, _logic) {
       var idBase = "ABViewFormConnectPropertyEditor";
 
-      FilterComponent = new RowFilter(App, idBase + "_filter");
+      FilterComponent = new RowFilter(App, `${idBase}_filter`);
       FilterComponent.init({
          // when we make a change in the popups we want to make sure we save the new workspace to the properties to do so just fire an onChange event
          onChange: _logic.onFilterChange,
@@ -528,9 +528,9 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
          "ABViewFormConnect_" + this.id + "_f_"
       );
       var ids = {
-         component: App.unique(idBase + "_component"),
-         popup: App.unique(idBase + "_popup_add_new"),
-         editpopup: App.unique(idBase + "_popup_edit_form_popup_add_new"),
+         component: App.unique(`${idBase}_component`),
+         popup: App.unique(`${idBase}_popup_add_new`),
+         editpopup: App.unique(`${idBase}_popup_edit_form_popup_add_new`),
       };
 
       var settings = {};

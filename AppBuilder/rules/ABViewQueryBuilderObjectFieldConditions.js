@@ -155,7 +155,7 @@ module.exports = class ABViewQueryBuilderObjectFieldConditions {
             view: "label",
             css: "ab-text-bold",
             label: this.label,
-            width: this.App.config.labelWidthLarge,
+            width: this.AB.Config.labelWidthLarge,
          });
       }
 

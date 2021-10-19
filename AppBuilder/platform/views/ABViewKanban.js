@@ -82,7 +82,7 @@ module.exports = class ABViewKanban extends ABViewKanbanCore {
          {
             view: "fieldset",
             label: L("Kanban Data:"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -91,7 +91,7 @@ module.exports = class ABViewKanban extends ABViewKanbanCore {
                      name: "datacollection",
                      view: "select",
                      label: L("Data Source"),
-                     labelWidth: App.config.labelWidthXLarge,
+                     labelWidth: this.AB.Config.labelWidthXLarge,
                      value: null,
                      on: {
                         onChange: _logic.selectSource,
@@ -102,7 +102,7 @@ module.exports = class ABViewKanban extends ABViewKanbanCore {
                      view: "select",
                      label: L("Vertical Grouping"),
                      placeholder: L("Select a field"),
-                     labelWidth: App.config.labelWidthXLarge,
+                     labelWidth: this.AB.Config.labelWidthXLarge,
                      options: [],
                   },
                   {
@@ -110,7 +110,7 @@ module.exports = class ABViewKanban extends ABViewKanbanCore {
                      view: "select",
                      label: L("Horizontal Grouping"),
                      placeholder: L("Select a field"),
-                     labelWidth: App.config.labelWidthXLarge,
+                     labelWidth: this.AB.Config.labelWidthXLarge,
                      options: [],
                   },
                   {
@@ -118,7 +118,7 @@ module.exports = class ABViewKanban extends ABViewKanbanCore {
                      view: "select",
                      label: L("Card Owner"),
                      placeholder: L("Select a user field"),
-                     labelWidth: App.config.labelWidthXLarge,
+                     labelWidth: this.AB.Config.labelWidthXLarge,
                      options: [],
                   },
                ],
@@ -137,7 +137,7 @@ module.exports = class ABViewKanban extends ABViewKanbanCore {
     * @param {string} dvId - id of ABDatacollection
     */
    static propertyUpdateFieldOptions(ids, view, dvId) {
-      let datacollection = view.AB.datacollections((dc) => dc.id == dvId)[0];
+      let datacollection = view.AB.datacollectionByID(dvId);
       let object = datacollection ? datacollection.datasource : null;
 
       // Refresh options of fields by call ABObjectWorkspaceViewKanban's function
@@ -247,21 +247,15 @@ module.exports = class ABViewKanban extends ABViewKanbanCore {
             if (object) {
                Kanban.objectLoad(object);
 
-               let verticalGrouping = object.fields(
-                  (f) => f.id == this.settings.verticalGroupingField
-               )[0];
+               let verticalGrouping = object.fieldByID(this.settings.verticalGroupingField);
                if (verticalGrouping)
                   fieldSettings.verticalGrouping = verticalGrouping;
 
-               let horizontalGrouping = object.fields(
-                  (f) => f.id == this.settings.horizontalGroupingField
-               )[0];
+               let horizontalGrouping = object.fieldByID(this.settings.horizontalGroupingField);
                if (horizontalGrouping)
                   fieldSettings.horizontalGrouping = horizontalGrouping;
 
-               let ownerField = object.fields(
-                  (f) => f.id == this.settings.ownerField
-               )[0];
+               let ownerField = object.fieldByID(this.settings.ownerField);
                if (ownerField) fieldSettings.ownerField = ownerField;
             }
 

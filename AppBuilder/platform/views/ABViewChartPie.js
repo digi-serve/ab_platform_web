@@ -55,7 +55,7 @@ module.exports = class ABViewChartPie extends ABViewChartPieCore {
             name: "pieType",
             view: "richselect",
             label: L("Chart Type"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             options: [
                {
                   id: "pie",
@@ -88,20 +88,20 @@ module.exports = class ABViewChartPie extends ABViewChartPieCore {
             view: "counter",
             min: 1,
             label: L("Inner Font Size"),
-            labelWidth: App.config.labelWidthXLarge,
+            labelWidth: this.AB.Config.labelWidthXLarge,
          },
          {
             name: "labelFontSize",
             view: "counter",
             min: 1,
             label: L("Label Font Size"),
-            labelWidth: App.config.labelWidthXLarge,
+            labelWidth: this.AB.Config.labelWidthXLarge,
          },
          {
             name: "isLegend",
             view: "checkbox",
             labelRight: L("Show Legend"),
-            labelWidth: App.config.labelWidthCheckbox,
+            labelWidth: this.AB.Config.labelWidthCheckbox,
          },
       ]);
    }
@@ -167,7 +167,7 @@ module.exports = class ABViewChartPie extends ABViewChartPieCore {
 
       idBase = idBase || "ABViewChartPie_" + this.id;
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       let legend = null;

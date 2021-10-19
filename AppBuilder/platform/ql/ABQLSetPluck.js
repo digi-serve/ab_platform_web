@@ -95,9 +95,7 @@ class ABQLSetPluck extends ABQLSetPluckCore {
 
             // make sure we have a reference to our .field
             if (!this.field) {
-               // v2 method:
-               // this.field = this.object.fieldByID(this.fieldID);
-               this.field = this.object.fields((f) => f.id == this.fieldID)[0];
+               this.field = this.object.fieldByID(this.fieldID);
             }
             if (!this.field) {
                // whoops!
@@ -134,13 +132,13 @@ class ABQLSetPluck extends ABQLSetPluckCore {
                var cond = {
                   key: PK,
                   rule: "in",
-                  value: AB.uniq(ids),
+                  value: this.AB.uniq(ids),
                };
 
                return new Promise((resolve, reject) => {
                   linkObj
-                     .modelAPI()
-                     .findAll({ where: cond, populate: true })
+                     .model()
+                     .find({ where: cond, populate: true })
                      .then((rows) => {
                         // Special Formatting for Form.io fields.
                         // Allow displaying connected data that has been .format()ed

@@ -21,8 +21,8 @@ module.exports = class ABWorkObjectPopupExport extends ABComponent {
 
       // internal list of Webix IDs to reference our UI components.
       var ids = {
-         popupExport: this.unique(idBase + "_popupExport"),
-         list: this.unique(idBase + "_popupExport_list"),
+         popupExport: this.unique(`${idBase}_popupExport`),
+         list: this.unique(`${idBase}_popupExport_list`),
       };
 
       // webix UI definition:
@@ -181,8 +181,8 @@ module.exports = class ABWorkObjectPopupExport extends ABComponent {
                await fnExport;
                $$(ids.popupExport).hide();
             } catch (err) {
-               this.AB.error("System could not export " + name, {
-                  error: err,
+               this.AB.notify.developer(err, {
+                  message: `System could not export: ${name}`,
                });
             }
          },

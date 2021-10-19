@@ -29,7 +29,7 @@ module.exports = class ABViewDetailImage extends ABViewDetailImageCore {
    editorComponent(App, mode) {
       var idBase = "ABViewDetailImageEditorComponent";
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       var elem = this.component(App).ui;
@@ -69,13 +69,13 @@ module.exports = class ABViewDetailImage extends ABViewDetailImageCore {
             view: "counter",
             name: "height",
             label: L("Height:"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
          },
          {
             view: "counter",
             name: "width",
             label: L("Width:"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
          },
       ]);
    }
@@ -111,9 +111,9 @@ module.exports = class ABViewDetailImage extends ABViewDetailImageCore {
       var component = super.component(App);
       var field = this.field();
 
-      var idBase = "ABViewDetailImage_" + (idPrefix || "") + this.id;
+      var idBase = `ABViewDetailImage_${(idPrefix || "")}${this.id}`;
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
          detail: this.parentDetailComponent()?.id || this.parent.id,
       };
 

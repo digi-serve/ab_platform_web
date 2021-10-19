@@ -14,40 +14,28 @@ module.exports = class ABWorkObjectPopupHeaderEditMenu extends ABComponent {
       super(App, idBase);
       var L = this.Label;
 
-      var labels = {
-         common: App.labels,
-         component: {
-            hideField: L("ab.object.hideField", "*Hide field"),
-            filterField: L("ab.object.filterField", "*Filter field"),
-            sortField: L("ab.object.sortField", "*Sort field"),
-            freezeField: L("ab.object.freezeField", "*Freeze field"),
-            editField: L("ab.object.editField", "*Edit field"),
-            deleteField: L("ab.object.deleteField", "*Delete field"),
-         },
-      };
-
       var ids = {
-         component: this.unique(idBase + "_popupEditHeader"),
-         list: this.unique(idBase + "_popupEditHeader_list"),
+         component: this.unique(`${idBase}_popupEditHeader`),
+         list: this.unique(`${idBase}_popupEditHeader_list`),
       };
 
       // the list of options shown in the popup menu:
       var menuItems = {
          // Normally all items are available
          default: [
-            { command: labels.component.hideField, icon: "fa-eye-slash" },
-            { command: labels.component.filterField, icon: "fa-filter" },
-            { command: labels.component.sortField, icon: "fa-sort" },
-            { command: labels.component.freezeField, icon: "fa-thumb-tack" },
-            { command: labels.component.editField, icon: "fa-pencil-square-o" },
-            { command: labels.component.deleteField, icon: "fa-trash" },
+            { command: L("Hide field"), icon: "fa-eye-slash" },
+            { command: L("Filter field"), icon: "fa-filter" },
+            { command: L("Sort field"), icon: "fa-sort" },
+            { command: L("Freeze field"), icon: "fa-thumb-tack" },
+            { command: L("Edit field"), icon: "fa-pencil-square-o" },
+            { command: L("Delete field"), icon: "fa-trash" },
          ],
          // But for imported objects, edit & delete are disabled
          imported: [
-            { command: labels.component.hideField, icon: "fa-eye-slash" },
-            { command: labels.component.filterField, icon: "fa-filter" },
-            { command: labels.component.sortField, icon: "fa-sort" },
-            { command: labels.component.freezeField, icon: "fa-thumb-tack" },
+            { command: L("Hide field"), icon: "fa-eye-slash" },
+            { command: L("Filter field"), icon: "fa-filter" },
+            { command: L("Sort field"), icon: "fa-sort" },
+            { command: L("Freeze field"), icon: "fa-thumb-tack" },
             //{ command: labels.editField, icon: "fa-pencil-square-o" },
          ],
       };
@@ -127,22 +115,22 @@ module.exports = class ABWorkObjectPopupHeaderEditMenu extends ABComponent {
             var action = null;
             var menu = node.textContent.trim();
             switch (menu) {
-               case labels.component.hideField:
+               case L("Hide field"):
                   action = "hide";
                   break;
-               case labels.component.filterField:
+               case L("Filter field"):
                   action = "filter";
                   break;
-               case labels.component.sortField:
+               case L("Sort field"):
                   action = "sort";
                   break;
-               case labels.component.freezeField:
+               case L("Freeze field"):
                   action = "freeze";
                   break;
-               case labels.component.editField:
+               case L("Edit field"):
                   action = "edit";
                   break;
-               case labels.component.deleteField:
+               case L("Delete field"):
                   action = "delete";
                   break;
             }

@@ -77,10 +77,10 @@ module.exports = class AccountingFPClose extends AccountingFPCloseCore {
 
       let getStatusFieldOptions = (statusFieldId) => {
          let result = [];
-         let fpObject = this.AB.objects((obj) => obj.id == this.objectFP)[0];
+         let fpObject = this.AB.objectByID(this.objectFP);
          if (!fpObject) return result;
 
-         let fpStatusField = fpObject.fields((f) => f.id == statusFieldId)[0];
+         let fpStatusField = fpObject.fieldByID(statusFieldId);
          if (
             !fpStatusField ||
             !fpStatusField.settings ||
@@ -145,10 +145,10 @@ module.exports = class AccountingFPClose extends AccountingFPCloseCore {
 
       let getListOptions = (objectId, fieldId) => {
          let result = [];
-         let object = this.AB.objects((obj) => obj.id == objectId)[0];
+         let object = this.AB.objectByID(objectId);
          if (!object) return result;
 
-         let fpStatusField = object.fields((f) => f.id == fieldId)[0];
+         let fpStatusField = object.fieldByID(fieldId);
          if (
             !fpStatusField ||
             !fpStatusField.settings ||

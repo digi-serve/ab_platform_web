@@ -200,10 +200,7 @@ module.exports = class ABFieldSelectivity extends ABField {
                         let fieldId = parentElm.getAttribute("data-field-id");
                         if (!fieldId) return;
 
-                        let thisField = instance.object.fields(
-                           (f) => f.id == fieldId,
-                           true
-                        )[0];
+                        let thisField = instance.object.fieldByID(fieldId);
                         if (!thisField) return;
 
                         thisField.emit("editPage", rowId);

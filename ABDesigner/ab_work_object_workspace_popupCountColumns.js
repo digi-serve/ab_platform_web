@@ -14,18 +14,10 @@ module.exports = class AB_Work_Object_Workspace_PopupCountColumns extends ABComp
       super(App, idBase);
       var L = this.Label;
 
-      var labels = {
-         common: App.labels,
-         component: {
-            showAll: L("ab.count_columns.showAll", "*Show All"),
-            hideAll: L("ab.count_columns.hideAll", "*Hide All"),
-         },
-      };
-
       // internal list of Webix IDs to reference our UI components
       var ids = {
-         component: this.unique(idBase + "_popupCount"),
-         list: this.unique(idBase + "_popupCount_list"),
+         component: this.unique(`${idBase}_popupCount`),
+         list: this.unique(`${idBase}_popupCount_list`),
       };
 
       // Our webix UI definition:
@@ -39,7 +31,7 @@ module.exports = class AB_Work_Object_Workspace_PopupCountColumns extends ABComp
                      {
                         view: "button",
                         css: "webix_primary",
-                        value: labels.component.showAll,
+                        value: L("Show All"),
                         on: {
                            onItemClick: function () {
                               _logic.clickShowAll();
@@ -48,7 +40,7 @@ module.exports = class AB_Work_Object_Workspace_PopupCountColumns extends ABComp
                      },
                      {
                         view: "button",
-                        value: labels.component.hideAll,
+                        value: L("Hide All"),
                         on: {
                            onItemClick: function () {
                               _logic.clickHideAll();

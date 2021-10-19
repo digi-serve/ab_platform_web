@@ -31,7 +31,7 @@ module.exports = class ABViewDetailSelectivity extends (
    editorComponent(App, mode) {
       var idBase = "ABViewDetailSelectivityEditorComponent";
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       var elem = this.component(App).ui;
@@ -71,7 +71,7 @@ module.exports = class ABViewDetailSelectivity extends (
             view: "counter",
             name: "height",
             label: L("ab.components.common.height", "*Height:"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
          },
       ]);
    }
@@ -102,9 +102,9 @@ module.exports = class ABViewDetailSelectivity extends (
       var component = super.component(App);
       var field = this.field();
 
-      var idBase = "ABViewDetailSelectivity_" + (idPrefix || "") + this.id;
+      var idBase = `ABViewDetailSelectivity_${(idPrefix || "")}${this.id}`;
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
          detail: this.parentDetailComponent()?.id || this.parent.id,
       };
       var className = "ab-detail-selectivity";

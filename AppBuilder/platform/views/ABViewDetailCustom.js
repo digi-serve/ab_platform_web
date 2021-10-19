@@ -25,7 +25,7 @@ module.exports = class ABViewDetailCustom extends ABViewDetailCustomCore {
    editorComponent(App, mode) {
       var idBase = "ABViewDetailCustomEditorComponent";
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       var component = this.component(App);
@@ -91,7 +91,7 @@ module.exports = class ABViewDetailCustom extends ABViewDetailCustomCore {
 
       var idBase = "ABViewDetailCustom_" + (idPrefix || "") + this.id;
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
          detail: this.parentDetailComponent()?.id || this.parent.id,
       };
 

@@ -704,6 +704,10 @@ class ABFactory extends ABFactoryCore {
    addDate(date, number, unit) {
       return moment(date).add(number, unit).toDate();
    }
+
+   isString(...params) {
+      return _.isString(params);
+   }
 }
 
 export default ABFactory;

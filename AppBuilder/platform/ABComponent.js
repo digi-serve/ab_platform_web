@@ -163,6 +163,6 @@ module.exports = class ABComponent extends ABEmitter {
    }
 
    unique(key) {
-      return this.App.unique(this.idBase + "_" + key);
+      return this.App.unique(`${this.idBase}_${key}`);
    }
 };

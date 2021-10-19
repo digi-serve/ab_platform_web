@@ -19,23 +19,14 @@ module.exports = class AB_Work_Object_Workspace_PopupNewDataField extends (
       super(App, idBase);
       var L = this.Label;
 
-      var labels = {
-         common: App.labels,
-         component: {
-            fieldType: L("ab.add_fields.fieldType", "*Field type"),
-            label: L("ab.add_fields.label", "*Label"),
-            addNewField: L("ab.add_fields.addNewField", "*Add Column"),
-         },
-      };
-
       // internal list of Webix IDs to reference our UI components.
       var ids = {
-         component: this.unique(idBase + "_popNewField"),
-         types: this.unique(idBase + "_popNewField_types"),
-         editDefinitions: this.unique(idBase + "_popNewField_editDefinitions"),
+         component: this.unique(`${idBase}_popNewField`),
+         types: this.unique(`${idBase}_popNewField_types`),
+         editDefinitions: this.unique(`${idBase}_popNewField_editDefinitions`),
 
-         buttonSave: this.unique(idBase + "_popNewField_buttonSave"),
-         buttonCancel: this.unique(idBase + "_popNewField_buttonCancel"),
+         buttonSave: this.unique(`${idBase}_popNewField_buttonSave`),
+         buttonCancel: this.unique(`${idBase}_popNewField_buttonCancel`),
       };
 
       // Our webix UI definition:
@@ -53,13 +44,13 @@ module.exports = class AB_Work_Object_Workspace_PopupNewDataField extends (
             cols: [
                {
                   view: "label",
-                  label: L("ab.add_fields.fieldAddNew", "*Add new field"),
+                  label: L("Add new field"),
                   css: "modal_title",
                   align: "center",
                },
                {
                   view: "button",
-                  label: labels.common.close,
+                  label: L("Close"),
                   autowidth: true,
                   align: "center",
                   click: function () {
@@ -84,8 +75,8 @@ module.exports = class AB_Work_Object_Workspace_PopupNewDataField extends (
                   {
                      view: "richselect",
                      id: ids.types,
-                     label: labels.component.fieldType,
-                     labelWidth: App.config.labelWidthLarge,
+                     label: L("Field type"),
+                     labelWidth: this.AB.Config.labelWidthLarge,
                      options: [
                         //We will add these later
                         { id: "temporary", view: "temporary" },
@@ -119,7 +110,7 @@ module.exports = class AB_Work_Object_Workspace_PopupNewDataField extends (
                         { fillspace: true },
                         {
                            view: "button",
-                           value: labels.common.cancel,
+                           value: L("Cancel"),
                            css: "ab-cancel-button",
                            autowidth: true,
                            click: function () {
@@ -130,7 +121,7 @@ module.exports = class AB_Work_Object_Workspace_PopupNewDataField extends (
                            view: "button",
                            css: "webix_primary",
                            id: ids.buttonSave,
-                           label: labels.component.addNewField,
+                           label: L("Add Column"),
                            autowidth: true,
                            type: "form",
                            click: function () {
@@ -290,7 +281,7 @@ module.exports = class AB_Work_Object_Workspace_PopupNewDataField extends (
             if (editor) {
                // the editor can define some basic form validations.
                if (editor.isValid()) {
-                  var vals = AB.cloneDeep(editor.values());
+                  var vals = this.AB.cloneDeep(editor.values());
 
                   var field = null;
                   var oldData = null;
@@ -374,7 +365,7 @@ module.exports = class AB_Work_Object_Workspace_PopupNewDataField extends (
                      oldData = _editField.toObj();
 
                      // update changed values to old data
-                     var updateValues = AB.cloneDeep(oldData);
+                     var updateValues = this.AB.cloneDeep(oldData);
                      for (let key in vals) {
                         // update each values of .settings
                         if (
@@ -486,10 +477,8 @@ module.exports = class AB_Work_Object_Workspace_PopupNewDataField extends (
                   $$(ids.component).hideProgress();
                }
             } else {
-               // OP.Dialog.Alert({
-               //    title: "! Could not find the current editor.",
-               //    text: "go tell a developer about this.",
-               // });
+               this.AB.notify.developer(new Error("Could not find the current editor."), {});
+
                $$(ids.buttonSave).enable();
                $$(ids.component).hideProgress();
             }
@@ -563,7 +552,7 @@ module.exports = class AB_Work_Object_Workspace_PopupNewDataField extends (
             $$(ids.types).show();
 
             // change button text to 'add'
-            $$(ids.buttonSave).define("label", labels.component.addNewField);
+            $$(ids.buttonSave).define("label", L("Add Column"));
             $$(ids.buttonSave).refresh();
          },
 
@@ -611,7 +600,7 @@ module.exports = class AB_Work_Object_Workspace_PopupNewDataField extends (
             $$(ids.types).hide();
 
             // change button text to 'save'
-            $$(ids.buttonSave).define("label", labels.common.save);
+            $$(ids.buttonSave).define("label", L("Save"));
             $$(ids.buttonSave).refresh();
          },
 

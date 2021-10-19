@@ -63,7 +63,7 @@ module.exports = class ABViewComment extends ABViewCommentCore {
             name: "dataSource",
             view: "richselect",
             label: L("Data Source"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
             on: {
                onChange: _logic.selectSource,
             },
@@ -72,25 +72,25 @@ module.exports = class ABViewComment extends ABViewCommentCore {
             name: "columnUser",
             view: "richselect",
             label: L("Select a user field"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
          },
          {
             name: "columnComment",
             view: "richselect",
             label: L("Select a comment field"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
          },
          {
             name: "columnDate",
             view: "richselect",
             label: L("Select a date field"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
          },
          {
             view: "counter",
             name: "height",
             label: L("Height:"),
-            labelWidth: App.config.labelWidthLarge,
+            labelWidth: this.AB.Config.labelWidthLarge,
          },
       ]);
    }
@@ -149,7 +149,7 @@ module.exports = class ABViewComment extends ABViewCommentCore {
    }
 
    static propertyUpdateUserFieldOptions(ids, view, dcId) {
-      var datacollection = view.AB.datacollections((dc) => dc.id == dcId)[0];
+      var datacollection = view.AB.datacollectionByID(dcId);
       var object = datacollection ? datacollection.datasource : null;
 
       // Pull field list
@@ -173,7 +173,7 @@ module.exports = class ABViewComment extends ABViewCommentCore {
    }
 
    static propertyUpdateCommentFieldOptions(ids, view, dcId) {
-      var datacollection = view.AB.datacollections((dc) => dc.id == dcId)[0];
+      var datacollection = view.AB.datacollectionByID(dcId);
       var object = datacollection ? datacollection.datasource : null;
 
       // Pull field list
@@ -197,7 +197,7 @@ module.exports = class ABViewComment extends ABViewCommentCore {
    }
 
    static propertyUpdateDateFieldOptions(ids, view, dcId) {
-      var datacollection = view.AB.datacollections((dc) => dc.id == dcId)[0];
+      var datacollection = view.AB.datacollectionByID(dcId);
       var object = datacollection ? datacollection.datasource : null;
 
       // Pull field list
@@ -229,7 +229,7 @@ module.exports = class ABViewComment extends ABViewCommentCore {
    component(App) {
       var idBase = "ABViewComment_" + this.id;
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       let base = super.component(App);
@@ -489,8 +489,12 @@ module.exports = class ABViewComment extends ABViewCommentCore {
 
       let model = this.model();
       if (model == null) {
-         this.AB.error(
-            "ABViewComment.saveData(): could not pull a model to work with."
+         this.AB.notify.builder({},
+            {
+               message: "ABViewComment.saveData(): could not pull a model to work with.",
+               viewId: this.id
+            }
+            
          );
          return Promise.resolve();
       }

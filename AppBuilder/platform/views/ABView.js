@@ -358,7 +358,7 @@ module.exports = class ABView extends ABViewCore {
    //          name: "label",
    //          label: App.labels.dataFieldHeaderLabel,
    //          placeholder: App.labels.dataFieldHeaderLabelPlaceholder,
-   //          labelWidth: App.config.labelWidthLarge,
+   //          labelWidth: this.AB.Config.labelWidthLarge,
    //          css: "ab-new-label-name",
    //          //        on: {
    //          //          onChange: function (newVal, oldVal) {
@@ -449,7 +449,7 @@ module.exports = class ABView extends ABViewCore {
    component(App) {
       var idBase = "ABView_" + this.id;
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       // an ABView is a collection of rows:

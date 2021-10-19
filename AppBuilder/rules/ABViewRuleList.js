@@ -109,7 +109,7 @@ module.exports = class ABViewRuleList {
                   css: "webix_primary",
                   icon: "fa fa-plus",
                   type: "iconButton",
-                  label: labels.component.addNewRule,
+                  label: L("Add new rule"),
                   width: 150,
                   click: () => {
                      this.addRule();

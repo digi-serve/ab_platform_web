@@ -196,7 +196,7 @@ module.exports = class ABProcessTriggerTimer extends ABProcessTriggerTimerCore {
       this.isEnabled = $$(ids.isEnabled).getValue();
       this.triggerKey =
          this.triggerKey == null || this.triggerKey == "triggerKey.??"
-            ? `timer.${this.id || AB.uuid()}`
+            ? `timer.${this.id || this.AB.uuid()}`
             : this.triggerKey;
    }
 
@@ -211,7 +211,7 @@ module.exports = class ABProcessTriggerTimer extends ABProcessTriggerTimerCore {
             .then(() => super.save())
             // Restart the timer
             .then((result) => {
-               return OP.Comm.Service.put({
+               return this.AB.Network.put({
                   url: (this.isEnabled ? START_URL : STOP_URL).replace(
                      "#id#",
                      this.id

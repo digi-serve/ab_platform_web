@@ -594,7 +594,7 @@ module.exports = class ABObject extends ABObjectCore {
          colIds.forEach((colId) => {
             var colIdNoBracket = colId.replace("{", "").replace("}", "");
 
-            var field = this.fields((f) => f.id == colIdNoBracket)[0];
+            var field = this.fieldByID((f) => colIdNoBracket);
             if (field == null) return;
 
             labelData = labelData.replace(colId, field.format(rowData) || "");

@@ -23,8 +23,8 @@ module.exports = class AB_Work_Object_Workspace_PopupMassUpdate extends ABCompon
 
       // internal list of Webix IDs to reference our UI components
       let ids = {
-         component: this.unique(idBase + "_popupMassUpdate"),
-         submit: this.unique(idBase + "_submitMassUpdate"),
+         component: this.unique(`${idBase}_popupMassUpdate`),
+         submit: this.unique(`${idBase}_submitMassUpdate`),
       };
 
       let rowUpdater = new RowUpdater(App, idBase);
@@ -195,16 +195,14 @@ module.exports = class AB_Work_Object_Workspace_PopupMassUpdate extends ABCompon
 
             let vals = {};
             update_items.forEach((item) => {
-               let fieldInfo = CurrentObject.fields(
-                  (f) => f.id == item.fieldId
-               )[0];
+               let fieldInfo = CurrentObject.fieldByID(item.fieldId);
                if (!fieldInfo) return;
 
                vals[fieldInfo.columnName] = item.value;
             });
 
             if (updatedRowIds.length > 0) {
-               this.AB.Dialog.Confirm({
+               this.AB.Webix.confirm({
                   title: L("key.updating.mutiple", "Updating Multiple Records"),
                   text: L(
                      "key.are.you.sure",
@@ -250,12 +248,9 @@ module.exports = class AB_Work_Object_Workspace_PopupMassUpdate extends ABCompon
                   },
                });
             } else {
-               this.AB.Dialog.Alert({
-                  title: L("key.no.records.selected", "No Records Selected"),
-                  text: L(
-                     "key.select.one",
-                     "You need to select at least one record...did you drink your coffee today?"
-                  ),
+               this.AB.alert({
+                  title: L("No Records Selected"),
+                  text: L("You need to select at least one record...did you drink your coffee today?"),
                });
                update_button.enable();
                _logic.hide();

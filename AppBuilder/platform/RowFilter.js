@@ -6,95 +6,32 @@ module.exports = class RowFilter extends RowFilterCore {
    constructor(App, idBase, AB) {
       super(App, idBase, AB);
 
-      let labels = (this.labels = {
-         common: (App || {}).labels,
-         component: {
-            and: L("And"),
-            or: L("Or"),
-            addNewFilter: L("Add a filter"),
-
-            thisObject: L("This Object"),
-            inQuery: L("In Query"),
-            notInQuery: L("Not In Query"),
-            inQueryField: L("By Query Field"),
-            notInQueryField: L("Not By Query Field"),
-
-            inQueryFieldQueryPlaceholder: L("Choose a Query"),
-            inQueryFieldFieldPlaceholder: L("Choose a Field"),
-
-            sameAsUser: L("Same As User"),
-            notSameAsUser: L("Not Same As User"),
-
-            sameAsField: L("Same As Field"),
-            notSameAsField: L("Not Field"),
-
-            inDataCollection: L("In Data Collection"),
-            notInDataCollection: L("Not In Data Collection"),
-
-            containsCondition: L("contains"),
-            notContainCondition: L("doesn't contain"),
-            isCondition: L("is"),
-            isNotCondition: L("is not"),
-            isEmpty: L("is empty"),
-            isNotEmpty: L("is not empty"),
-
-            beforeCondition: L("is before"),
-            afterCondition: L("is after"),
-            onOrBeforeCondition: L("is on or before"),
-            onOrAfterCondition: L("is on or after"),
-            beforeCurrentCondition: L("is before current date"),
-            afterCurrentCondition: L("is after current date"),
-            onOrBeforeCurrentCondition: L("is on or before current date"),
-            onOrAfterCurrentCondition: L("is on or after current date"),
-            onLastDaysCondition: L("last ... days"),
-            onNextDaysCondition: L("next ... days"),
-
-            equalCondition: L(":"),
-            notEqualCondition: L("≠"),
-            lessThanCondition: L("<"),
-            moreThanCondition: L(">"),
-            lessThanOrEqualCondition: L("≤"),
-            moreThanOrEqualCondition: L("≥"),
-
-            equalListCondition: L("equals"),
-            notEqualListCondition: L("does not equal"),
-
-            checkedCondition: L("is checked"),
-            notCheckedCondition: L("is not checked"),
-
-            isCurrentUserCondition: L("is current user"),
-            isNotCurrentUserCondition: L("is not current user"),
-            containsCurrentUserCondition: L("contains current user"),
-            notContainsCurrentUserCondition: L("does not contain current user"),
-         },
-      });
-
       // internal list of Webix IDs to reference our UI components.
       let ids = (this.ids = {
-         component: this.unique(idBase + "_rowFilter"),
-         filterForm: this.unique(idBase + "_rowFilter_form"),
-         addNewFilter: this.unique(idBase + "_rowFilter_addNewFilter"),
+         component: this.unique(`${idBase}_rowFilter`),
+         filterForm: this.unique(`${idBase}_rowFilter_form`),
+         addNewFilter: this.unique(`${idBase}_rowFilter_addNewFilter`),
 
-         glue: this.unique(idBase + "_rowFilter_glue"),
-         field: this.unique(idBase + "_rowFilter_field"),
-         rule: this.unique(idBase + "_rowFilter_rule"),
-         inputValue: this.unique(idBase + "_rowFilter_inputValue"),
+         glue: this.unique(`${idBase}_rowFilter_glue`),
+         field: this.unique(`${idBase}_rowFilter_field`),
+         rule: this.unique(`${idBase}_rowFilter_rule`),
+         inputValue: this.unique(`${idBase}_rowFilter_inputValue`),
 
-         queryCombo: this.unique(idBase + "_rowFilter_queryCombo"),
-         queryFieldCombo: this.unique(idBase + "_rowFilter_queryFieldCombo"),
+         queryCombo: this.unique(`${idBase}_rowFilter_queryCombo`),
+         queryFieldCombo: this.unique(`${idBase}_rowFilter_queryFieldCombo`),
          queryFieldComboQuery: this.unique(
-            idBase + "_rowFilter_queryFieldComboQuery"
+            `${idBase}_rowFilter_queryFieldComboQuery`
          ),
          queryFieldComboField: this.unique(
-            idBase + "_rowFilter_queryFieldComboField"
+            `${idBase}_rowFilter_queryFieldComboField`
          ),
-         fieldMatch: this.unique(idBase + "_rowFilter_fieldMatchCombo"),
+         fieldMatch: this.unique(`${idBase}_rowFilter_fieldMatchCombo`),
 
-         dataCollection: this.unique(idBase + "_rowFilter_dataCollection"),
+         dataCollection: this.unique(`${idBase}_rowFilter_dataCollection`),
 
-         listOptions: this.unique(idBase + "_rowFilter_listOptions"),
+         listOptions: this.unique(`${idBase}_rowFilter_listOptions`),
 
-         datePicker: this.unique(idBase + "_rowFilter_datePicker"),
+         datePicker: this.unique(`${idBase}_rowFilter_datePicker`),
       });
 
       // Set current username
@@ -105,11 +42,11 @@ module.exports = class RowFilter extends RowFilterCore {
       // Default options list to push to all fields
       this.queryFieldOptions = [
          {
-            value: this.labels.component.inQueryField,
+            value: L("By Query Field"),
             id: "in_query_field",
          },
          {
-            value: this.labels.component.notInQueryField,
+            value: L("Not In Query"),
             id: "not_in_query_field",
          },
       ];
@@ -143,7 +80,6 @@ module.exports = class RowFilter extends RowFilterCore {
       _logic.getFilterUI = () => {
          let instance = this;
          let config_settings = this.config_settings || {};
-         let labels = this.labels;
 
          return {
             id: "f" + webix.uid(),
@@ -157,11 +93,11 @@ module.exports = class RowFilter extends RowFilterCore {
                   value: config_settings.glue || "and",
                   options: [
                      {
-                        value: labels.component.and,
+                        value: L("And"),
                         id: "and",
                      },
                      {
-                        value: labels.component.or,
+                        value: L("Or"),
                         id: "or",
                      },
                   ],
@@ -204,51 +140,51 @@ module.exports = class RowFilter extends RowFilterCore {
                         value: "in_query",
                         options: [
                            {
-                              value: labels.component.inQuery,
+                              value: L("In Query"),
                               id: "in_query",
                            },
                            {
-                              value: labels.component.notInQuery,
+                              value: L("Not In Query"),
                               id: "not_in_query",
                            },
                            {
-                              value: labels.component.containsCondition,
+                              value: L("contains"),
                               id: "contains",
                            },
                            {
-                              value: labels.component.notContainCondition,
+                              value: L("doesn't contain"),
                               id: "not_contains",
                            },
                            {
-                              value: labels.component.isCondition,
+                              value: L("is"),
                               id: "equals",
                            },
                            {
-                              value: labels.component.isNotCondition,
+                              value: L("is not"),
                               id: "not_equal",
                            },
                            {
-                              value: labels.component.isEmpty,
+                              value: L("is empty"),
                               id: "is_empty",
                            },
                            {
-                              value: labels.component.isNotEmpty,
+                              value: L("is not empty"),
                               id: "is_not_empty",
                            },
                            {
-                              value: labels.component.sameAsUser,
+                              value: L("Same As User"),
                               id: "same_as_user",
                            },
                            {
-                              value: labels.component.notSameAsUser,
+                              value: L("Not Same As User"),
                               id: "not_same_as_user",
                            },
                            {
-                              value: labels.component.inDataCollection,
+                              value: L("In Data Collection"),
                               id: "in_data_collection",
                            },
                            {
-                              value: labels.component.notInDataCollection,
+                              value: L("Not In Data Collection"),
                               id: "not_in_data_collection",
                            },
                         ].concat(instance.recordRuleOptions),
@@ -269,52 +205,51 @@ module.exports = class RowFilter extends RowFilterCore {
                         value: "less",
                         options: [
                            {
-                              value: labels.component.equalListCondition,
+                              value: L("equals"),
                               id: "equals",
                            },
                            {
-                              value: labels.component.notEqualListCondition,
+                              value: L("does not equal"),
                               id: "not_equal",
                            },
                            {
-                              value: labels.component.beforeCondition,
+                              value: L("is before"),
                               id: "less",
                            },
                            {
-                              value: labels.component.afterCondition,
+                              value: L("is after"),
                               id: "greater",
                            },
                            {
-                              value: labels.component.onOrBeforeCondition,
+                              value: L("is on or before"),
                               id: "less_or_equal",
                            },
                            {
-                              value: labels.component.onOrAfterCondition,
+                              value: L("is on or after"),
                               id: "greater_or_equal",
                            },
                            {
-                              value: labels.component.beforeCurrentCondition,
+                              value: L("is before current date"),
                               id: "less_current",
                            },
                            {
-                              value: labels.component.afterCurrentCondition,
+                              value: L("is after current date"),
                               id: "greater_current",
                            },
                            {
-                              value:
-                                 labels.component.onOrBeforeCurrentCondition,
+                              value: L("is on or before current date"),
                               id: "less_or_equal_current",
                            },
                            {
-                              value: labels.component.onOrAfterCurrentCondition,
+                              value: L("is on or after current date"),
                               id: "greater_or_equal_current",
                            },
                            {
-                              value: labels.component.onLastDaysCondition,
+                              value: L("last ... days"),
                               id: "last_days",
                            },
                            {
-                              value: labels.component.onNextDaysCondition,
+                              value: L("next ... days"),
                               id: "next_days",
                            },
                         ]
@@ -336,27 +271,27 @@ module.exports = class RowFilter extends RowFilterCore {
                         value: "equals",
                         options: [
                            {
-                              value: labels.component.equalCondition,
+                              value: L(":"),
                               id: "equals",
                            },
                            {
-                              value: labels.component.notEqualCondition,
+                              value: L("≠"),
                               id: "not_equal",
                            },
                            {
-                              value: labels.component.lessThanCondition,
+                              value: L("<"),
                               id: "less",
                            },
                            {
-                              value: labels.component.moreThanCondition,
+                              value: L(">"),
                               id: "greater",
                            },
                            {
-                              value: labels.component.lessThanOrEqualCondition,
+                              value: L("≤"),
                               id: "less_or_equal",
                            },
                            {
-                              value: labels.component.moreThanOrEqualCondition,
+                              value: L("≥"),
                               id: "greater_or_equal",
                            },
                         ]
@@ -378,19 +313,19 @@ module.exports = class RowFilter extends RowFilterCore {
                         value: "equals",
                         options: [
                            {
-                              value: labels.component.equalListCondition,
+                              value: L("equals"),
                               id: "equals",
                            },
                            {
-                              value: labels.component.notEqualListCondition,
+                              value: L("does not equal"),
                               id: "not_equal",
                            },
                            {
-                              value: labels.component.sameAsUser,
+                              value: L("Same As User"),
                               id: "same_as_user",
                            },
                            {
-                              value: labels.component.notSameAsUser,
+                              value: L("Not Same As User"),
                               id: "not_same_as_user",
                            },
                         ]
@@ -412,11 +347,11 @@ module.exports = class RowFilter extends RowFilterCore {
                         value: "equals",
                         options: [
                            {
-                              value: labels.component.equalListCondition,
+                              value: L("equals"),
                               id: "equals",
                            },
                            {
-                              value: labels.component.notEqualListCondition,
+                              value: L("does not equal"),
                               id: "not_equal",
                            },
                         ]
@@ -438,30 +373,27 @@ module.exports = class RowFilter extends RowFilterCore {
                         value: "is_current_user",
                         options: [
                            {
-                              value: labels.component.isCurrentUserCondition,
+                              value: L("is current user"),
                               id: "is_current_user",
                            },
                            {
-                              value: labels.component.isNotCurrentUserCondition,
+                              value: L("is not current user"),
                               id: "is_not_current_user",
                            },
                            {
-                              value:
-                                 labels.component.containsCurrentUserCondition,
+                              value: L("contains current user"),
                               id: "contain_current_user",
                            },
                            {
-                              value:
-                                 labels.component
-                                    .notContainsCurrentUserCondition,
+                              value: L("does not contain current user"),
                               id: "not_contain_current_user",
                            },
                            {
-                              value: labels.component.equalListCondition,
+                              value: L("equals"),
                               id: "equals",
                            },
                            {
-                              value: labels.component.notEqualListCondition,
+                              value: L("does not equal"),
                               id: "not_equal",
                            },
                         ]
@@ -483,19 +415,19 @@ module.exports = class RowFilter extends RowFilterCore {
                         value: "contains",
                         options: [
                            {
-                              value: labels.component.containsCondition,
+                              value: L("contains"),
                               id: "contains",
                            },
                            {
-                              value: labels.component.notContainCondition,
+                              value: L("doesn't contain"),
                               id: "not_contains",
                            },
                            {
-                              value: labels.component.isCondition,
+                              value: L("is"),
                               id: "equals",
                            },
                            {
-                              value: labels.component.isNotCondition,
+                              value: L("is not"),
                               id: "not_equal",
                            },
                         ]
@@ -517,19 +449,19 @@ module.exports = class RowFilter extends RowFilterCore {
                         value: "contains",
                         options: [
                            {
-                              value: labels.component.containsCondition,
+                              value: L("contains"),
                               id: "contains",
                            },
                            {
-                              value: labels.component.notContainCondition,
+                              value: L("doesn't contain"),
                               id: "not_contains",
                            },
                            {
-                              value: labels.component.isCondition,
+                              value: L("is"),
                               id: "equals",
                            },
                            {
-                              value: labels.component.isNotCondition,
+                              value: L("is not"),
                               id: "not_equal",
                            },
                         ]
@@ -576,8 +508,7 @@ module.exports = class RowFilter extends RowFilterCore {
                               id: ids.queryFieldComboQuery,
                               view: "combo",
                               options: [],
-                              placeholder:
-                                 labels.component.inQueryFieldQueryPlaceholder,
+                              placeholder: L("Choose a Query"),
                               on: {
                                  onChange: function (value) {
                                     var $viewComparer = this.getParentView();
@@ -597,8 +528,7 @@ module.exports = class RowFilter extends RowFilterCore {
                               id: ids.queryFieldComboField,
                               view: "combo",
                               options: [],
-                              placeholder:
-                                 labels.component.inQueryFieldFieldPlaceholder,
+                              placeholder: L("Choose a Field"),
                               on: {
                                  onChange: _logic.onChange,
                               },
@@ -747,7 +677,7 @@ module.exports = class RowFilter extends RowFilterCore {
             id: ids.addNewFilter,
             css: "webix_primary",
             type: "form",
-            label: labels.component.addNewFilter,
+            label: L("Add a filter"),
             click: () => {
                _logic.addNewFilter();
             },
@@ -1211,11 +1141,11 @@ module.exports = class RowFilter extends RowFilterCore {
       if (options.isRecordRule) {
          this.recordRuleOptions = [
             {
-               value: this.labels.component.sameAsField,
+               value: L("Same As Field"),
                id: "same_as_field",
             },
             {
-               value: this.labels.component.notSameAsField,
+               value: L("Not Field"),
                id: "not_same_as_field",
             },
          ];
@@ -1234,7 +1164,7 @@ module.exports = class RowFilter extends RowFilterCore {
       // block .onChange event
       logic.blockOnChange();
 
-      let config_settings = AB.cloneDeep(settings);
+      let config_settings = this.AB.cloneDeep(settings);
       config_settings.rules = config_settings.rules || [];
 
       // Redraw form with no elements

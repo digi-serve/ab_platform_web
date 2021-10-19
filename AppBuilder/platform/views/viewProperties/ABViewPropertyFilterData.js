@@ -73,14 +73,6 @@ module.exports = class ABViewPropertyFilterData extends ABViewProperty {
          globalToolbar: idBase + "_globalToolbar",
       };
 
-      let labels = {
-         common: App.labels,
-         component: {
-            header: L("Filter Menu"),
-            addNewFilter: L("Add new filter"),
-         },
-      };
-
       let ui = {
          type: "form",
          rows: [
@@ -96,7 +88,7 @@ module.exports = class ABViewPropertyFilterData extends ABViewProperty {
                ],
                vertical: true,
                label: "Filter Option",
-               labelWidth: App.config.labelWidthLarge,
+               labelWidth: this.AB.Config.labelWidthLarge,
                on: {
                   onChange: (newValue, oldValue) => {
                      logic.setFilterOption(newValue);
@@ -110,7 +102,7 @@ module.exports = class ABViewPropertyFilterData extends ABViewProperty {
                hidden: true,
                vertical: true,
                label: "Show",
-               labelWidth: App.config.labelWidthLarge,
+               labelWidth: this.AB.Config.labelWidthLarge,
                options: [
                   { id: "default", value: "All matching records" },
                   { id: "single", value: "Single records only" },
@@ -128,7 +120,7 @@ module.exports = class ABViewPropertyFilterData extends ABViewProperty {
                      id: ids.filterUser,
                      value: "toolbar",
                      label: "Display",
-                     labelWidth: App.config.labelWidthLarge,
+                     labelWidth: this.AB.Config.labelWidthLarge,
                      width: 200,
                      options: [
                         { id: "toolbar", value: "Toolbar" },
@@ -163,7 +155,7 @@ module.exports = class ABViewPropertyFilterData extends ABViewProperty {
                            css: "webix_primary",
                            icon: "fa fa-plus",
                            type: "iconButton",
-                           label: labels.component.addNewFilter,
+                           label: L("Add new filter"),
                            width: 150,
                            click: () => {
                               logic.addFilterRule();
@@ -200,7 +192,7 @@ module.exports = class ABViewPropertyFilterData extends ABViewProperty {
                   {
                      view: "button",
                      name: "cancel",
-                     value: labels.common.cancel,
+                     value: L("Cancel"),
                      css: "ab-cancel-button",
                      autowidth: true,
                      click: function () {
@@ -211,7 +203,7 @@ module.exports = class ABViewPropertyFilterData extends ABViewProperty {
                      view: "button",
                      css: "webix_primary",
                      name: "save",
-                     label: labels.common.save,
+                     label: L("Save"),
                      type: "form",
                      autowidth: true,
                      click: function () {
