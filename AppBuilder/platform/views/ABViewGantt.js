@@ -146,9 +146,9 @@ module.exports = class ABViewGantt extends ABViewGanttCore {
     */
    component(App) {
       let base = super.component(App);
-      let idBase = "ABViewGantt_" + this.id;
+      let idBase = `ABViewGantt_${this.id}`;
       let ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       let ganttView = new ABGanttWorkspace(App, idBase);

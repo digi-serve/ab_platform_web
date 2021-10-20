@@ -60,17 +60,17 @@ module.exports = class ABViewPropertyFilterData extends ABViewProperty {
 
       let ids = {
          /** Property */
-         filterRules: idBase + "_rules",
-         filterRulesScrollview: idBase + "_filterRulesScrollview",
+         filterRules: `${idBase}_rules`,
+         filterRulesScrollview: `${idBase}_filterRulesScrollview`,
 
-         filterOptionRadio: idBase + "_filterOptionRadio",
-         filterUserLayout: idBase + "_filterUserLayout",
-         filterUser: idBase + "_filterUser",
-         filterGlobal: idBase + "_filterGlobal",
-         filterMenuLayout: idBase + "_filterMenuLayout",
+         filterOptionRadio: `${idBase}_filterOptionRadio`,
+         filterUserLayout: `${idBase}_filterUserLayout`,
+         filterUser: `${idBase}_filterUser`,
+         filterGlobal: `${idBase}_filterGlobal`,
+         filterMenuLayout: `${idBase}_filterMenuLayout`,
 
-         needLoadAllLabel: idBase + "_needLoadAll",
-         globalToolbar: idBase + "_globalToolbar",
+         needLoadAllLabel: `${idBase}_needLoadAll`,
+         globalToolbar: `${idBase}_globalToolbar`,
       };
 
       let ui = {
@@ -522,8 +522,8 @@ module.exports = class ABViewPropertyFilterData extends ABViewProperty {
       this.App = App;
       this.idBase = idBase;
 
-      this.rowFilter = new RowFilter(App, idBase + "_filter", App.AB);
-      this.rowFilterForm = new RowFilter(App, idBase + "_filter_form", App.AB);
+      this.rowFilter = new RowFilter(App, `${idBase}_filter`, App.AB);
+      this.rowFilterForm = new RowFilter(App, `${idBase}_filter_form`, App.AB);
 
       if (this.object) {
          // this.rowFilter.applicationLoad(this.object.application);
@@ -535,14 +535,14 @@ module.exports = class ABViewPropertyFilterData extends ABViewProperty {
 
       let ids = {
          /** UI */
-         filterPanel: App.unique(idBase + "_filterPanel"),
+         filterPanel: App.unique(`${idBase}_filterPanel`),
          globalFilterFormContainer: App.unique(
-            idBase + "_globalFilterFormContainer"
+            `${idBase}_globalFilterFormContainer`
          ),
-         globalFilterForm: App.unique(idBase + "_globalFilterForm"),
-         filterMenutoolbar: App.unique(idBase + "_filterMenuToolbar"),
-         resetFilterButton: App.unique(idBase + "_resetFilterButton"),
-         component: App.unique(idBase + "_filterData_popup"),
+         globalFilterForm: App.unique(`${idBase}_globalFilterForm`),
+         filterMenutoolbar: App.unique(`${idBase}_filterMenuToolbar`),
+         resetFilterButton: App.unique(`${idBase}_resetFilterButton`),
+         component: App.unique(`${idBase}_filterData_popup`),
       };
 
       let instance = this;

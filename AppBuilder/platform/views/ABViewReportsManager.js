@@ -24,7 +24,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
    editorComponent(App, mode) {
       let idBase = "ABViewReportsManagerEditorComponent";
       let ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       let component = this.component(App);
@@ -70,9 +70,9 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
    component(App) {
       let baseCom = super.component(App);
 
-      let idBase = "ABViewReportManager_" + this.id;
+      let idBase = `ABViewReportManager_${this.id}`;
       let ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       let compInstance = this;

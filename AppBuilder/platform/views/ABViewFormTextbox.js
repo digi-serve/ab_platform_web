@@ -24,7 +24,7 @@ module.exports = class ABViewFormTextbox extends ABViewFormTextboxCore {
    editorComponent(App, mode) {
       var idBase = "ABViewFormTextboxEditorComponent";
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
       var textView = this.component(App);
 
@@ -110,10 +110,10 @@ module.exports = class ABViewFormTextbox extends ABViewFormTextboxCore {
       var component = super.component(App);
 
       var idBase = this.parentFormUniqueID(
-         "ABViewFormTextbox_" + this.id + "_f_"
+         `ABViewFormTextbox_${this.id}_f_`
       );
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       component.ui.id = ids.component;

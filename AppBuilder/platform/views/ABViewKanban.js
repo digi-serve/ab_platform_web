@@ -66,7 +66,7 @@ module.exports = class ABViewKanban extends ABViewKanbanCore {
       if (this._linkPageComponent == null)
          this._linkPageComponent = ABViewPropertyLinkPage.propertyComponent(
             App,
-            idBase + "_gridlinkpage"
+            `${idBase}_gridlinkpage`
          );
 
       // _logic functions
@@ -198,7 +198,7 @@ module.exports = class ABViewKanban extends ABViewKanbanCore {
    component(App, idBase) {
       let baseCom = super.component(App);
 
-      idBase = idBase || "ABViewKanban_" + this.id;
+      idBase = idBase || `ABViewKanban_${this.id}`;
 
       // let ids = {
       // 	component: App.unique(idBase + '_component')
@@ -211,7 +211,7 @@ module.exports = class ABViewKanban extends ABViewKanbanCore {
       let Kanban = new ABWorkspaceKanban(App, idBase);
       let LinkPage = this.linkPageHelper.component(
          App,
-         idBase + "_kanbanlinkpage"
+         `${idBase}_kanbanlinkpage`
       );
       let datacollection = this.datacollection;
 

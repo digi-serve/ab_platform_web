@@ -162,9 +162,9 @@ module.exports = class ABViewImage extends ABViewImageCore {
     * @return {obj} UI component
     */
    component(App) {
-      var idBase = "ABViewImage_" + this.id;
+      var idBase = `ABViewImage_${this.id}`;
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       // an ABViewLabel is a simple Label

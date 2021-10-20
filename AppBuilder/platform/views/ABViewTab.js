@@ -24,8 +24,8 @@ module.exports = class ABViewTab extends ABViewTabCore {
    editorComponent(App, mode) {
       var idBase = "ABViewTabEditorComponent";
       var ids = {
-         component: App.unique(idBase + "_component"),
-         view: App.unique(idBase + "_view"),
+         component: App.unique(`${idBase}_component`),
+         view: App.unique(`${idBase}_view`),
       };
       var component = this.component(App);
 
@@ -617,10 +617,10 @@ module.exports = class ABViewTab extends ABViewTabCore {
 
       var idBase = "ABViewTab_" + this.id;
       var ids = {
-         component: App.unique(idBase + "_component"),
-         sidebar: App.unique(idBase + "_sidebar"),
-         expandMenu: App.unique(idBase + "_expand_menu"),
-         collapseMenu: App.unique(idBase + "_collapse_menu"),
+         component: App.unique(`${idBase}_component`),
+         sidebar: App.unique(`${idBase}_sidebar`),
+         expandMenu: App.unique(`${idBase}_expand_menu`),
+         collapseMenu: App.unique(`${idBase}_collapse_menu`),
       };
 
       var _ui = {};
@@ -710,7 +710,7 @@ module.exports = class ABViewTab extends ABViewTabCore {
                            // store this state in local storage the user preference is
                            // remembered next time they see this sidebar
                            this.AB.Storage.set(
-                              idBase + "-state",
+                              `${idBase}-state`,
                               $$(ids.sidebar).getState()
                            );
                         }, 0);
@@ -728,7 +728,7 @@ module.exports = class ABViewTab extends ABViewTabCore {
                            // store this state in local storage the user preference is
                            // remembered next time they see this sidebar
                            this.AB.Storage.set(
-                              idBase + "-state",
+                              `${idBase}-state`,
                               $$(ids.sidebar).getState()
                            );
                         }, 0);
@@ -963,7 +963,7 @@ module.exports = class ABViewTab extends ABViewTabCore {
          });
 
          // initialize the sidebar and figure out if it should be collased or not
-         this.AB.Storage.get(idBase + "-state").then((state) => {
+         this.AB.Storage.get(`${idBase}-state`).then((state) => {
             if (state) {
                // this will collapse or expand the sidebar
                $$(ids.sidebar).setState(state);

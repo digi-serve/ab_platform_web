@@ -24,7 +24,7 @@ module.exports = class ABViewLabel extends ABViewLabelCore {
    editorComponent(App, mode) {
       var idBase = "ABViewLabelEditorComponent";
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       var _ui = {
@@ -176,9 +176,9 @@ module.exports = class ABViewLabel extends ABViewLabelCore {
          viewComponents.push(v.component(App));
       });
 
-      var idBase = "ABViewLabel_" + this.id;
+      var idBase = `ABViewLabel_${this.id}`;
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       // an ABViewLabel is a simple Label

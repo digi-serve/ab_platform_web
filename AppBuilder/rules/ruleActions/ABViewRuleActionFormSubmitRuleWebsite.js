@@ -70,7 +70,7 @@ module.exports = class ABViewRuleActionFormSubmitRuleWebsite extends (
    //
    valueDisplayComponent(idBase) {
       var ids = {
-         website: idBase + "website",
+         website: `${idBase}_website`,
       };
 
       this._ui = {

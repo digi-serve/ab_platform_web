@@ -17,7 +17,7 @@ module.exports = class ABViewPropertyAddPage extends ABViewProperty {
 
    static propertyComponent(App, idBase) {
       let ids = {
-         formView: idBase + "_formView",
+         formView: `${idBase}_formView`,
       };
 
       let ui = {
@@ -120,7 +120,7 @@ module.exports = class ABViewPropertyAddPage extends ABViewProperty {
 
    component(App, idBase) {
       let ids = {
-         popup: App.unique(idBase + "_popup_add_new"),
+         popup: App.unique(`${idBase}_popup_add_new`),
       };
 
       let ui = "";

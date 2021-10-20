@@ -24,7 +24,7 @@ module.exports = class ABViewFormNumber extends ABViewFormNumberCore {
    editorComponent(App, mode) {
       var idBase = "ABViewFormNumberEditorComponent";
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       var numberElem = this.component(App).ui;
@@ -97,10 +97,10 @@ module.exports = class ABViewFormNumber extends ABViewFormNumberCore {
       var field = this.field();
 
       var idBase = this.parentFormUniqueID(
-         "ABViewFormNumber_" + this.id + "_f_"
+         `ABViewFormNumber_${this.id}_f_`
       );
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       var viewType = this.settings.isStepper

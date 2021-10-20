@@ -70,7 +70,7 @@ module.exports = class ABViewRuleActionFormSubmitRuleExistPage extends (
    //
    valueDisplayComponent(idBase) {
       var ids = {
-         pagesAndTabs: idBase + "_PagesAndTabs",
+         pagesAndTabs: `${idBase}_PagesAndTabs`,
       };
 
       this._ui = {

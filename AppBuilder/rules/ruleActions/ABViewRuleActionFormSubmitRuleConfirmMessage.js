@@ -74,7 +74,7 @@ module.exports = class ABViewRuleActionFormSubmitRuleConfirmMessage extends (
    //
    valueDisplayComponent(idBase) {
       var ids = {
-         message: idBase + "_message",
+         message: `${idBase}_message`,
       };
 
       this._ui = {

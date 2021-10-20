@@ -96,28 +96,28 @@ module.exports = class ABViewGrid extends ABViewGridCore {
       var idBase = "ABViewGridPropertyEditor";
 
       // initialize our popup editors with unique names so we don't overwrite the previous editor each time
-      PopupHideFieldComponent = new ABPopupHideFields(App, idBase + "_hide");
+      PopupHideFieldComponent = new ABPopupHideFields(App, `${idBase}_hide`);
       PopupFrozenColumnsComponent = new ABPopupFrozenColumns(
          App,
-         idBase + "_freeze"
+         `${idBase}_freeze`
       );
 
       PopupSummaryColumnsComponent = new ABPopupSummaryColumns(
          App,
-         idBase + "_summary"
+         `${idBase}_summary`
       );
       PopupCountColumnsComponent = new ABPopupCountColumns(
          App,
-         idBase + "_count"
+         `${idBase}_count`
       );
 
       PopupFilterProperty = ABViewPropertyFilterData.propertyComponent(
          App,
-         idBase + "_gridfiltermenu"
+         `${idBase}_gridfiltermenu`
       );
       this.linkPageComponent = ABViewPropertyLinkPage.propertyComponent(
          App,
-         idBase + "_gridlinkpage"
+         `${idBase}_gridlinkpage`
       );
 
       let filter_property_popup = webix.ui({
@@ -681,18 +681,18 @@ module.exports = class ABViewGrid extends ABViewGridCore {
    component(App, objId) {
       let baseCom = super.component(App);
 
-      var idBase = objId || "ABViewGrid_" + this.id;
+      var idBase = objId || `ABViewGrid_${this.id}`;
       var ids = {
-         component: App.unique(idBase + "_component"),
-         toolbar: App.unique(idBase + "_toolbar"),
-         buttonDeleteSelected: App.unique(idBase + "_deleteSelected"),
+         component: App.unique(`${idBase}_component`),
+         toolbar: App.unique(`${idBase}_toolbar`),
+         buttonDeleteSelected: App.unique(`${idBase}_deleteSelected`),
          // buttonExport: App.unique('buttonExport'),
-         buttonFilter: App.unique(idBase + "_buttonFilter"),
-         buttonMassUpdate: App.unique(idBase + "_buttonMassUpdate"),
-         buttonSort: App.unique(idBase + "_buttonSort"),
-         buttonExport: App.unique(idBase + "_buttonExport"),
+         buttonFilter: App.unique(`${idBase}_buttonFilter`),
+         buttonMassUpdate: App.unique(`${idBase}_buttonMassUpdate`),
+         buttonSort: App.unique(`${idBase}_buttonSort`),
+         buttonExport: App.unique(`${idBase}_buttonExport`),
 
-         globalSearchToolbar: App.unique(idBase + "_globalSearchToolbar"),
+         globalSearchToolbar: App.unique(`${idBase}_globalSearchToolbar`),
       };
 
       var labels = {
@@ -724,20 +724,20 @@ module.exports = class ABViewGrid extends ABViewGridCore {
       let DataTable = new ABWorkspaceDatatable(App, idBase, settings);
       let PopupMassUpdateComponent = new ABPopupMassUpdate(
          App,
-         idBase + "_mass"
+         `${idBase}_mass`
       );
       let PopupSortDataTableComponent = new ABPopupSortField(
          App,
-         idBase + "_sort"
+         `${idBase}_sort`
       );
-      let exportPopup = new ABPopupExport(App, idBase + "_export");
+      let exportPopup = new ABPopupExport(App, `${idBase}_export`);
 
-      let filterUI = this.filterHelper.component(App, idBase + "_gridfilter");
+      let filterUI = this.filterHelper.component(App, `${idBase}_gridfilter`);
       this.filterHelper.fromSettings(this.settings.gridFilter);
 
       let linkPage = this.linkPageHelper.component(
          App,
-         idBase + "_gridlinkpage"
+         `${idBase}_gridlinkpage`
       );
 
       let _init = (options, accessLevel) => {

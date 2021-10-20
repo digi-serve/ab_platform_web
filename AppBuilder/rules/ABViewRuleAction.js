@@ -61,13 +61,13 @@ module.exports = class ABViewRuleAction {
       });
 
       function myUnique(key) {
-         return App.unique(idBase + "_" + key);
+         return App.unique(`${idBase}_${key}`);
       }
 
       // internal list of Webix IDs to reference our UI components.
       var ids = (this.ids = {
          // each instance must be unique
-         component: myUnique("component") + "_" + webix.uid(),
+         component: `${myUnique("component")}_${webix.uid()}`,
       });
 
       this._ui = null; // internally track our UI Component value Rules

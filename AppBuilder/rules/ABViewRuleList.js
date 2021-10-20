@@ -78,15 +78,15 @@ module.exports = class ABViewRuleList {
 
       // internal list of Webix IDs to reference our UI components.
       var ids = (this.ids = {
-         component: idBase + "_component",
-         rules: idBase + "_rules",
-         rulesScrollview: idBase + "_rulesScrollview",
+         component: `${idBase}_component`,
+         rules: `${idBase}_rules`,
+         rulesScrollview: `${idBase}_rulesScrollview`,
 
-         action: idBase + "_action",
-         when: idBase + "_when",
+         action: `${idBase}_action`,
+         when: `${idBase}_when`,
 
-         values: idBase + "_values",
-         set: idBase + "_set",
+         values: `${idBase}_values`,
+         set: `${idBase}_set`,
       });
 
       // webix UI definition:

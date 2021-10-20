@@ -24,7 +24,7 @@ module.exports = class ABViewFormReadonly extends ABViewFormReadonlyCore {
    editorComponent(App, mode) {
       var idBase = "ABViewFormReadonlyEditorComponent";
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       var templateElem = this.component(App).ui;
@@ -61,8 +61,8 @@ module.exports = class ABViewFormReadonly extends ABViewFormReadonlyCore {
 
       var idBase = this.parentFormUniqueID("ABViewFormReadonly_" + this.id);
       var ids = {
-         component: App.unique(idBase + "_component"),
-         template: App.unique(idBase + "template"),
+         component: App.unique(`${idBase}_component`),
+         template: App.unique(`${idBase}template`),
       };
 
       component.ui = {

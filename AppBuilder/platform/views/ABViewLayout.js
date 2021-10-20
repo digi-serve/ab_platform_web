@@ -23,8 +23,8 @@ module.exports = class ABViewLayout extends ABViewLayoutCore {
    editorComponent(App, mode) {
       var idBase = "ABViewLayoutEditorComponent";
       var ids = {
-         component: App.unique(idBase + "_component"),
-         view: App.unique(idBase + "_view"),
+         component: App.unique(`${idBase}_component`),
+         view: App.unique(`${idBase}_view`),
       };
 
       var component = this.component(App);
@@ -193,9 +193,9 @@ module.exports = class ABViewLayout extends ABViewLayoutCore {
     * @return {obj} UI component
     */
    component(App, idPrefix) {
-      let idBase = "ABViewLayout_" + (idPrefix || "") + this.id;
+      let idBase = `ABViewLayout_${(idPrefix || "")}${this.id}`;
       let ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       this.viewComponents = this.viewComponents || {}; // { viewId: viewComponent, ..., viewIdn: viewComponent }

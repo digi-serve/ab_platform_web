@@ -34,22 +34,22 @@ module.exports = class ABViewRuleListFormRecordRules extends ABViewRuleList {
       var listActions = [
          new RoleUpdateExisting(
             this.App,
-            this.idBase + "_ruleActionUpdate",
+            `${this.idBase}_ruleActionUpdate`,
             this.currentForm
          ),
          new RoleInsertConnected(
             this.App,
-            this.idBase + "_ruleActionInsert",
+            `${this.idBase}_ruleActionInsert`,
             this.currentForm
          ),
          new RoleUpdateConnected(
             this.App,
-            this.idBase + "_ruleActionUpdateConnected",
+            `${this.idBase}_ruleActionUpdateConnected`,
             this.currentForm
          ),
          new RoleRemoveConnected(
             this.App,
-            this.idBase + "_ruleActionRemoveConnected",
+            `${this.idBase}_ruleActionRemoveConnected`,
             this.currentForm
          ),
       ];

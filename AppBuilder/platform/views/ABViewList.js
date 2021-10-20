@@ -153,7 +153,7 @@ module.exports = class ABViewList extends ABViewListCore {
 
       var idBase = "ABViewListEditorComponent";
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       var _ui = {

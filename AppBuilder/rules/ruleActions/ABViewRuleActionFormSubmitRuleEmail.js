@@ -72,12 +72,12 @@ module.exports = class ABViewRuleActionFormSubmitRuleEmail extends (
    //
    valueDisplayComponent(idBase) {
       var ids = {
-         form: idBase + "form",
-         popup: idBase + "popup",
-         list: idBase + "fieldList",
-         toEmailsContainer: idBase + "toEmailsContainer",
-         toEmails: idBase + "toEmails",
-         message: idBase + "message",
+         form: `${idBase}_form`,
+         popup: `${idBase}_popup`,
+         list: `${idBase}_fieldList`,
+         toEmailsContainer: `${idBase}_toEmailsContainer`,
+         toEmails: `${idBase}_toEmails`,
+         message: `${idBase}_message`,
       };
 
       this._ui = {

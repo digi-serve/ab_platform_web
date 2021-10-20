@@ -25,9 +25,9 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
    editorComponent(App, mode) {
       var idBase = "ABViewMenuEditorComponent";
       var ids = {
-         component: App.unique(idBase + "_component"),
-         pages: App.unique(idBase + "_pages"),
-         tree: App.unique(idBase + "_tree"),
+         component: App.unique(`${idBase}_component`),
+         pages: App.unique(`${idBase}_pages`),
+         tree: App.unique(`${idBase}_tree`),
       };
 
       var component = this.component(App);
@@ -756,9 +756,9 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
     * @return {obj} UI component
     */
    component(App) {
-      var idBase = "ABMenuLabel_" + this.id;
+      var idBase = `ABMenuLabel_${this.id}`;
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       var css = "";

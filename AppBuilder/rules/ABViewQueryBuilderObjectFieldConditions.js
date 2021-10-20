@@ -97,7 +97,7 @@ module.exports = class ABViewQueryBuilderObjectFieldConditions {
       var uniqueInstanceID = webix.uid();
       var myUnique = (key) => {
          // return this.unique(idBase + key ) + '_' + uniqueInstanceID;
-         return idBase + "_" + key + "_" + uniqueInstanceID;
+         return `${idBase}_${key}_${uniqueInstanceID}`;
       };
 
       // internal list of Webix IDs to reference our UI components.

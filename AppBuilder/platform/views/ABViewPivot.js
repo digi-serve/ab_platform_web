@@ -28,7 +28,7 @@ module.exports = class ABViewPivot extends ABViewPivotCore {
    editorComponent(App, mode) {
       var idBase = "ABViewPivotEditorComponent";
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       var componentBase = this.component(App);
@@ -172,9 +172,9 @@ module.exports = class ABViewPivot extends ABViewPivotCore {
    component(App) {
       let baseCom = super.component(App);
 
-      var idBase = "ABViewPivot_" + this.id;
+      var idBase = `ABViewPivot_${this.id}`;
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       // an ABViewLabel is a simple Label

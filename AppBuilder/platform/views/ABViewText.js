@@ -26,7 +26,7 @@ module.exports = class ABViewText extends ABViewTextCore {
 
       var idBase = "ABViewTextEditorComponent";
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       var _ui = {
@@ -207,9 +207,9 @@ module.exports = class ABViewText extends ABViewTextCore {
    component(App, idPrefix) {
       let baseCom = super.component(App);
 
-      var idBase = "ABViewText_" + (idPrefix ? idPrefix : "") + this.id;
+      var idBase = `ABViewText_${(idPrefix ? idPrefix : "")}${this.id}`;
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       var _logic = {

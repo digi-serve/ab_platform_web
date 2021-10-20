@@ -123,7 +123,7 @@ module.exports = class ABViewPropertyEditPage extends ABViewPropertyAddPage {
    }
 
    component(App, idBase) {
-      idBase = idBase + "_popup_edit_form";
+      idBase = `${idBase}_popup_edit_form`;
 
       let comp = super.component(App, idBase);
 

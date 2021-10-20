@@ -26,8 +26,8 @@ module.exports = class ABViewFormSelectMultiple extends (
    editorComponent(App, mode) {
       var idBase = "ABViewFormSelectMultipleEditorComponent";
       var ids = {
-         component: App.unique(idBase + "_component"),
-         options: App.unique(idBase + "_option"),
+         component: App.unique(`${idBase}_component`),
+         options: App.unique(`${idBase}_option`),
       };
 
       var selectlist = this.component(App).ui;
@@ -108,10 +108,10 @@ module.exports = class ABViewFormSelectMultiple extends (
       var field = this.field();
 
       var idBase = this.parentFormUniqueID(
-         "ABViewFormSelectMultiple_" + this.id + "_f_"
+         `ABViewFormSelectMultiple_${this.id}_f_`
       );
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       component.ui.view =

@@ -26,8 +26,8 @@ module.exports = class ABViewFormSelectSingle extends (
    editorComponent(App, mode) {
       var idBase = "ABViewFormSelectSingleEditorComponent";
       var ids = {
-         component: App.unique(idBase + "_component"),
-         options: App.unique(idBase + "_option"),
+         component: App.unique(`${idBase}_component`),
+         options: App.unique(`${idBase}_option`),
       };
 
       var selectlist = this.component(App).ui;
@@ -107,10 +107,10 @@ module.exports = class ABViewFormSelectSingle extends (
       var field = this.field();
 
       var idBase = this.parentFormUniqueID(
-         "ABViewFormSelectSingle_" + this.id + "_f_"
+         `ABViewFormSelectSingle_${this.id}_f_`
       );
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       component.ui.view =
