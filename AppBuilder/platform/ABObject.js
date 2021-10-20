@@ -36,6 +36,22 @@ module.exports = class ABObject extends ABObjectCore {
       this.AB.on("ab.object.update", (data) => {
          if (this.id == data.objectId) this.fromValues(data.data);
       });
+
+      this._pendingNetworkRequests = {};
+      // {hash}   uuid : {Promise}
+      // convert our migrateXXXX() operations to be Relay/offline compatible.
+      // if a queued operation is sent after a web browser refresh, then
+      // we will NOT have a pending promise to .resolve()/.reject()
+
+      this.AB.Network.on("object.migrate", (context, err, response) => {
+         // NOTE:
+         var pending = this._pendingNetworkRequests[context.uuid];
+         if (err) {
+            pending?.reject(err);
+            return;
+         }
+         pending?.resolve(response);
+      });
    }
 
    ///
@@ -153,7 +169,7 @@ module.exports = class ABObject extends ABObjectCore {
     *
     * @return {Promise}
     */
-   destroy() {
+   async destroy() {
       /*
         return new Promise((resolve, reject) => {
             // Remove the import object, then its model will not be destroyed
@@ -218,17 +234,12 @@ module.exports = class ABObject extends ABObjectCore {
         });
  */
 
-      var removeFromApplications = () => {
-         return new Promise((next, err) => {
-            var allRemoves = [];
-            this.AB.applications().then((app) => {
-               var isThere = app.objectsIncluded((o) => o.id == this.id);
-               if (isThere) {
-                  allRemoves.push(app.objectRemove(this));
-               }
-            });
-            return Promise.all(allRemoves).then(next).catch(err);
+      var removeFromApplications = async () => {
+         var allRemoves = [];
+         this.AB.applications().forEach((app) => {
+            allRemoves.push(app.objectRemove(this));
          });
+         await Promise.all(allRemoves);
       };
 
       var disableRelatedQueries = () => {
@@ -245,55 +256,100 @@ module.exports = class ABObject extends ABObjectCore {
          });
       };
 
-      return Promise.resolve()
-         .then(() => {
-            // 1) remove us from all Application:
-            return removeFromApplications();
-         })
-         .then(() => {
-            // 2) disable any connected Queries
-            return disableRelatedQueries();
-         })
-         .then(() => {
-            // if an imported Object (FederatedTable, Existing Table, etc...)
-            // then skip this step
-            if (this.isImported) {
-               return Promise.resolve();
-            }
+      try {
+         // 1) remove us from all Application:
+         await removeFromApplications();
 
-            // time to remove my table:
-            // NOTE: our .migrateXXX() routines expect the object to currently exist
-            // in the DB before we perform the DB operations.  So we need to
-            // .migrateDrop()  before we actually .destroy() this.
-            return this.migrateDrop();
-         })
-         .then(() => {
-            // now remove my definition
+         // 2) disable any connected Queries
+         await disableRelatedQueries();
 
-            // start with my fields:
-            var fieldDrops = [];
+         // if an imported Object (FederatedTable, Existing Table, etc...)
+         // then skip this step
+         if (this.isImported) {
+            return Promise.resolve();
+         }
 
-            // Only ABObjects should attempt any fieldDrops.
-            // ABObjectQueries can safely skip this step:
-            if (this.type == "object") {
-               var allFields = this.fields();
-               this._fields = []; // clear our field counter so we don't retrigger
-               // this.save() on each field.destroy();
+         // time to remove my table:
+         // NOTE: our .migrateXXX() routines expect the object to currently exist
+         // in the DB before we perform the DB operations.  So we need to
+         // .migrateDrop()  before we actually .destroy() this.
+         await this.migrateDrop();
 
-               allFields.forEach((f) => {
-                  fieldDrops.push(f.destroy());
-               });
-            }
+         // now remove my definition
 
-            return Promise.all(fieldDrops)
-               .then(() => {
-                  // now me.
-                  return super.destroy();
-               })
-               .then(() => {
-                  this.emit("destroyed");
-               });
+         // start with my fields:
+         var fieldDrops = [];
+
+         // Only ABObjects should attempt any fieldDrops.
+         // ABObjectQueries can safely skip this step:
+         if (this.type == "object") {
+            var allFields = this.fields();
+            this._fields = []; // clear our field counter so we don't retrigger
+            // this.save() on each field.destroy();
+
+            allFields.forEach((f) => {
+               fieldDrops.push(f.destroy());
+            });
+         }
+         await Promise.all(fieldDrops);
+
+         await super.destroy();
+         this.emit("destroyed");
+      } catch (err) {
+         this.AB.notify.developer(err, {
+            context: "ABObject.destroy(): error destroying object.",
          });
+      }
+
+      // return Promise.resolve()
+      //    .then(() => {
+      //       // 1) remove us from all Application:
+      //       return removeFromApplications();
+      //    })
+      //    .then(() => {
+      //       // 2) disable any connected Queries
+      //       return disableRelatedQueries();
+      //    })
+      //    .then(() => {
+      //       // if an imported Object (FederatedTable, Existing Table, etc...)
+      //       // then skip this step
+      //       if (this.isImported) {
+      //          return Promise.resolve();
+      //       }
+
+      //       // time to remove my table:
+      //       // NOTE: our .migrateXXX() routines expect the object to currently exist
+      //       // in the DB before we perform the DB operations.  So we need to
+      //       // .migrateDrop()  before we actually .destroy() this.
+      //       return this.migrateDrop();
+      //    })
+      //    .then(() => {
+      //       // now remove my definition
+
+      //       // start with my fields:
+      //       var fieldDrops = [];
+
+      //       // Only ABObjects should attempt any fieldDrops.
+      //       // ABObjectQueries can safely skip this step:
+      //       if (this.type == "object") {
+      //          var allFields = this.fields();
+      //          this._fields = []; // clear our field counter so we don't retrigger
+      //          // this.save() on each field.destroy();
+
+      //          allFields.forEach((f) => {
+      //             fieldDrops.push(f.destroy());
+      //          });
+      //       }
+
+      //       return Promise.all(fieldDrops)
+      //          .then(() => {
+      //             // now me.
+      //             return super.destroy();
+      //          })
+      //          .then(() => {
+      //             this.emit("destroyed");
+      //          });
+      //    });
    }
 
    /**
@@ -305,56 +361,28 @@ module.exports = class ABObject extends ABObjectCore {
     * @return {Promise}
     *						.resolve( {this} )
     */
-   save() {
+   async save() {
       var isAdd = false;
 
       // if this is our initial save()
       if (!this.id) {
          this.label = this.label || this.name;
-         console.error(
-            "TODO: ABObject.save(): have AppBuilder Designer manage .createdInAppID & .objectInsert()"
-         );
-         // TODO: move this to AppBuilder Designer
-         if (!this.createdInAppID) {
-            this.createdInAppID = this.application.id;
-         }
          isAdd = true;
       }
 
-      return Promise.resolve()
-         .then(() => {
-            return super.save();
-         })
-         .then(() => {
-            return new Promise((resolve, reject) => {
-               // make sure only ABObjects perform the .objectInsert()
-               // ABObjectQueries need to perform their own operation:
-               if (this.type == "object") {
-                  console.error(
-                     "TODO: ABObject.save(): have AppBuilder Designer manage.objectInsert()"
-                  );
-                  this.application
-                     .objectInsert(this)
-                     .then(() => {
-                        resolve(this);
-                        // }
-                     })
-                     .catch(function (err) {
-                        reject(err);
-                     });
-               } else {
-                  resolve(this);
-               }
-            });
-         })
-         .then(() => {
-            if (isAdd) {
-               return this.migrateCreate();
-            }
-         })
-         .then(() => {
-            return this;
+      try {
+         await super.save();
+         if (isAdd) {
+            await this.migrateCreate();
+         }
+         return this;
+      } catch (err) {
+         this.AB.notify.developer(err, {
+            context: "ABObject.save()",
+            obj: this.toObj(),
          });
+         throw err;
+      }
    }
 
    /**
@@ -381,14 +409,36 @@ module.exports = class ABObject extends ABObjectCore {
    ///
 
    migrateCreate() {
-      return this.AB.Network.post({
-         url: `/app_builder/migrate/object/${this.id}`,
+      return new Promise((resolve, reject) => {
+         var uuid = this.AB.uuid();
+         this._pendingNetworkRequests[uuid] = { resolve, reject };
+         var jobResponse = {
+            key: "object.migrate",
+            context: { uuid, id: this.id },
+         };
+         this.AB.Network.post(
+            {
+               url: `/definition/migrate/object/${this.id}`,
+            },
+            jobResponse
+         );
       });
    }
 
    migrateDrop() {
-      return this.AB.Network["delete"]({
-         url: `/app_builder/migrate/object/${this.id}`,
+      return new Promise((resolve, reject) => {
+         var uuid = this.AB.uuid();
+         this._pendingNetworkRequests[uuid] = { resolve, reject };
+         var jobResponse = {
+            key: "object.migrate",
+            context: { uuid, id: this.id },
+         };
+         this.AB.Network["delete"](
+            {
+               url: `/definition/migrate/object/${this.id}`,
+            },
+            jobResponse
+         );
       });
    }
 
@@ -610,6 +660,25 @@ module.exports = class ABObject extends ABObjectCore {
 
    currentView() {
       return this.workspaceViews.getCurrentView();
+   }
+
+   warningsAll() {
+      // report both OUR warnings, and any warnings from any of our fields
+      var allWarnings = [].concat(this._warnings);
+      this.fields().forEach((f) => {
+         allWarnings = allWarnings.concat(f.warnings());
+      });
+
+      if (this.fields().length == 0) {
+         allWarnings.push({ message: "I got no fields.", data: {} });
+      }
+
+      return allWarnings;
+   }
+
+   warningsEval() {
+      // our .fromValues() has already registered any missing fields.
+      // those should get reported from warnings()
    }
 
    isUuid(text) {

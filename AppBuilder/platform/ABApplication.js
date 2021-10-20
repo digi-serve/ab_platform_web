@@ -59,6 +59,41 @@ module.exports = class ABClassApplication extends ABApplicationCore {
    ///
 
    /**
+    * @method objectRemove()
+    * remove the current ABObject from our list of .objectIDs.
+    * NOTE: this method persists the changes to the server.
+    * @param {ABObject} object
+    * @return {Promise}
+    */
+   objectRemove(object) {
+      var begLen = this.objectIDs.length;
+      this.objectIDs = this.objectIDs.filter((id) => {
+         return id != object.id;
+      });
+      // if there was a change then save this.
+      if (begLen != this.objectIDs.length) {
+         return this.save();
+      }
+      return Promise.resolve();
+   }
+
+   /**
+    * @method objectInsert()
+    * persist the current ABObject in our list of .objectIDs.
+    * @param {ABObject} object
+    * @return {Promise}
+    */
+   objectInsert(object) {
+      var isIncluded = this.objectIDs.indexOf(object.id) != -1;
+      if (!isIncluded) {
+         this.objectIDs.push(object.id);
+         // Save our own Info:
+         return this.save();
+      }
+      return Promise.resolve();
+   }
+
+   /**
     * @method exportIDs()
     * export any relevant .ids for the necessary operation of this application.
     * @param {array} ids

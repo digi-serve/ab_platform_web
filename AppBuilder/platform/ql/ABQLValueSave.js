@@ -1,21 +1,14 @@
+/*
+ * ABQLValueSave
+ *
+ * An ABQLValueSave can store the current Data field set into the Process Task it is
+ * in, so that this data can be made available to other Process Tasks.
+ *
+ */
+
 const ABQLValueSaveCore = require("../../core/ql/ABQLValueSaveCore.js");
 
-class ABQLValueSave extends ABQLValueSaveCore {
-   do(chain, instance) {
-      let nextLink = super
-         .do(chain, instance)
-         // change label from "ABQLSetSave" to "ABQLValueSave"
-         .then((context) => {
-            context.label = "ABQLValueSave";
-            return context;
-         });
-
-      if (this.next) {
-         return this.next.do(nextLink, instance);
-      } else {
-         return nextLink;
-      }
-   }
-}
+class ABQLValueSave extends ABQLValueSaveCore {}
+ABQLValueSave.uiIndentNext = 30;
 
 module.exports = ABQLValueSave;
