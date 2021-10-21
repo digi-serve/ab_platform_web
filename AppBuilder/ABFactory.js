@@ -83,14 +83,26 @@ class ABFactory extends ABFactoryCore {
 
       this.Validation = {
          validator: () => {
-            console.error("ABFactory: replace .Validation with OP.Validation ");
+            console.error(
+               "TODO: ABFactory: replace .Validation with OP.Validation "
+            );
             return {
                addError: () => {},
                pass: () => true,
+               fail: function () {
+                  return !this.pass();
+               },
+               updateForm: ($form) => {
+                  console.error(
+                     "TODO: AB.Validation.validator().updateForm() <<--- "
+                  );
+               },
             };
          },
          isGridValidationError: () => {
-            console.error("ABFactory: .Validation.isGridValidationError()");
+            console.error(
+               "TODO: ABFactory: .Validation.isGridValidationError()"
+            );
             return false;
          },
       };

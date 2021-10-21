@@ -557,19 +557,19 @@ module.exports = class ABField extends ABFieldCore {
 
    migrateCreate() {
       return this.AB.Network.post({
-         url: `/app_builder/migrate/object/${this.object.id}/field/${this.id}`,
+         url: `/definition/migrate/object/${this.object.id}/field/${this.id}`,
       });
    }
 
    migrateUpdate() {
       return this.AB.Network.put({
-         url: `/app_builder/migrate/object/${this.object.id}/field/${this.id}`,
+         url: `/definition/migrate/object/${this.object.id}/field/${this.id}`,
       });
    }
 
    migrateDrop() {
       return this.AB.Network["delete"]({
-         url: `/app_builder/migrate/object/${this.object.id}/field/${this.id}`,
+         url: `/definition/migrate/object/${this.object.id}/field/${this.id}`,
       });
    }
 

@@ -32,5 +32,8 @@ module.exports = class ABCustomComponentManager {
          var component = new Component(App);
          App.custom[component.key] = component;
       });
+
+      // Transition to v2:
+      App.AB.custom = App.custom;
    }
 };
