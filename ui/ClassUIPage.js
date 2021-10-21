@@ -269,6 +269,14 @@ class ClassUIPage extends ClassUI {
                            // var popup = this.getTopParentView();
                            // popup.hide();
                         },
+                        on: {
+                           //Add data-cy attribute to the close button
+                           onAfterRender: () => {
+                              const button = $$(page.id).queryView('button');
+                              const dataCy = `Popup Close Button ${page.name} ${page.id}`;
+                              button.getInputNode().setAttribute('data-cy', dataCy);
+                           }
+                        },
                      },
                   ],
                },
