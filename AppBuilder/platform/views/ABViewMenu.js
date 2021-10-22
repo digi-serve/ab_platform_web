@@ -874,7 +874,7 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
                }
             },
             onAfterRender: () => {
-               const Menu = $$(this.id);
+               const Menu = $$(ids.component);
                if (!Menu) return;
                const views = this.application.views();
                Menu.data.each((item) => {
