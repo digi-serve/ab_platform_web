@@ -207,9 +207,13 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
             var UpdateForm = $$(ids.updateForm);
             if (!UpdateForm) {
                // this is a problem!
-               OP.Error.log(
-                  "ABViewRuleActionFormRecordRuleUpdate.init() could not find webix form.",
-                  { id: ids.updateForm }
+               this.currentForm.AB.notify.developer(
+                  new Error("no webix form"),
+                  {
+                     context:
+                        "ABViewRuleActionObjectUpdater:formGet  could not find webix form",
+                     id: ids.updateForm,
+                  }
                );
                return null;
             }
@@ -380,7 +384,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
          },
 
          isValid: () => {
-            var validator = OP.Validation.validator();
+            var validator = this.currentForm.AB.Validation.validator();
             var valueField = $$(ids.row).getChildViews()[0].getChildViews()[3];
             var FormView = valueField.getParentView().getParentView();
 
@@ -941,7 +945,8 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
 
          var value = op.value;
 
-         if (value == "ab-current-user") value = OP.User.username();
+         if (value == "ab-current-user")
+            value = this.currentForm.AB.Account.username();
 
          // in the case of a connected Field, we use op.value to get the
          // datacollection, and find it's currently selected value:
@@ -1210,10 +1215,12 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
             model
                .update(options.data.id, options.data)
                .catch((err) => {
-                  OP.Error.log(
-                     "!!! ABViewRuleActionFormRecordRuleUpdate.process(): update error:",
-                     { error: err, data: options.data }
-                  );
+                  this.currentForm.AB.notify.developer(err, {
+                     context:
+                        "ABViewRuleActionObjectUpdater:process  update error",
+                     id: options.data.id,
+                     data: options.data,
+                  });
                   reject(err);
                })
                .then(resolve);
