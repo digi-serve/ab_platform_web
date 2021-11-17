@@ -199,7 +199,10 @@ module.exports = class ABField extends ABFieldCore {
             });
 
             if (data.count > 0) {
-               let messageTemplate = `** There are ${data.count} rows that will be updated to default value`;
+               let messageTemplate = L(
+                  "** There are {0} rows that will be updated to default value",
+                  [data.count]
+               );
 
                $$(ids.numberOfNull).setValue(messageTemplate);
                $$(ids.numberOfNull).show();
