@@ -1811,7 +1811,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
 
                      allLookups.push(
                         connectModel
-                           .find({
+                           .findAll({
                               where: {},
                               populate: false,
                            })

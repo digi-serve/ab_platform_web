@@ -463,7 +463,7 @@ module.exports = class ABField extends ABFieldCore {
          let model = this.object.model();
 
          // pull rows that has null value
-         let result = await model.find({
+         let result = await model.findAll({
             where: {
                glue: "and",
                rules: [

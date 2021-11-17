@@ -1059,7 +1059,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       }
 
       // Pull linked object data
-      let result = await linkedModel.find({
+      let result = await linkedModel.findAll({
          where: where,
          populate: false,
       });
