@@ -140,7 +140,7 @@ module.exports = class AB_Work_Object_Workspace_PopupHideFields extends ABCompon
             var List = $$(ids.list);
             var item = List.getItem(id);
             if (this._frozenColumnID == item.columnName) {
-               this.AB.alert({
+               webix.alert({
                   text: L("Sorry, you cannot hide your last frozen column."),
                });
                return;

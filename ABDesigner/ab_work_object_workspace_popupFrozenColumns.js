@@ -114,7 +114,7 @@ module.exports = class AB_Work_Object_Workspace_PopupFrozenColumns extends ABCom
             var label = recordClicked.columnName;
 
             if ((this._hiddenFields || []).indexOf(label) != -1) {
-               this.AB.alert({
+               webix.alert({
                   text: L("Sorry, you cannot freeze a hidden column."),
                });
                return;

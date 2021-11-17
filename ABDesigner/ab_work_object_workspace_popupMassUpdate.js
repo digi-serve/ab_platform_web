@@ -248,7 +248,7 @@ module.exports = class AB_Work_Object_Workspace_PopupMassUpdate extends ABCompon
                   },
                });
             } else {
-               this.AB.alert({
+               webix.alert({
                   title: L("No Records Selected"),
                   text: L("You need to select at least one record...did you drink your coffee today?"),
                });

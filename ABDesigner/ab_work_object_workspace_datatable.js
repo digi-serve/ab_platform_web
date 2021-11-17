@@ -437,7 +437,7 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
                                  DataTable.remove(id);
                                  DataTable.clearSelection();
                               } else {
-                                 App.AB.alert({
+                                 webix.alert({
                                     text: L("No rows were effected. This does not seem right."),
                                  });
                               }

@@ -485,7 +485,7 @@ module.exports = class ABWorkObjectKanBan extends ABComponent {
                      if (response.numRows > 0) {
                         $$(ids.kanban).remove(rowId);
                      } else {
-                        App.AB.alert({
+                        webix.alert({
                            text: L("No rows were effected. This does not seem right."),
                         });
                      }
