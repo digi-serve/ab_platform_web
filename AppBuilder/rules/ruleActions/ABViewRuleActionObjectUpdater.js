@@ -7,7 +7,7 @@ const ABViewRuleAction = require("../ABViewRuleAction");
 
 const RowFilter = require("../../platform/RowFilter");
 
-let L = (...params) => AB.Label()("", ...params);
+let L = (...params) => AB.Multilingual.label(...params);
 
 var ABViewRuleActionObjectUpdaterDefaults = {
    filterConditions: {

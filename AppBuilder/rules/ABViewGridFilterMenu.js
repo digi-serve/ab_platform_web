@@ -1,6 +1,6 @@
 const ABViewGridFilterRule = require("./ABViewGridFilterRule");
 
-let L = (...params) => AB.Label()("", ...params);
+let L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABViewGridFilterMenu {
    /**

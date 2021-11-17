@@ -7,7 +7,7 @@ const ABViewRuleAction = require("../ABViewRuleAction");
 const ABFieldConnect = require("../../platform/dataFields/ABFieldConnect");
 const ABFieldEmail = require("../../platform/dataFields/ABFieldEmail");
 
-let L = (...params) => AB.Label()("", ...params);
+let L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABViewRuleActionFormSubmitRuleEmail extends (
    ABViewRuleAction

@@ -7,7 +7,7 @@
 //
 const ABViewRuleActionFormRecordRuleUpdateConnected = require("./ABViewRuleActionFormRecordRuleUpdateConnected");
 
-let L = (...params) => AB.Label()("", ...params);
+let L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABViewRuleActionFormRecordRuleRemoveConnected extends (
    ABViewRuleActionFormRecordRuleUpdateConnected
