@@ -311,8 +311,7 @@ var ABFieldListComponent = new ABFieldComponent({
                borderless: true,
                template:
                   `<label style="width: 80px;text-align: left;line-height:32px;" class="webix_inp_label">${L(
-                     "ab.common.default",
-                     "*Default"
+                     "Default"
                   )}</label>` +
                   '<div style="margin-left: 80px; height: 36px;" class="list-data-values form-entry"></div>',
             },

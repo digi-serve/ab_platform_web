@@ -68,7 +68,7 @@ module.exports = class ABViewDetailText extends ABViewDetailTextCore {
          {
             view: "counter",
             name: "height",
-            label: L("ab.components.common.height", "*Height:"),
+            label: L("Height:"),
             labelWidth: this.AB.Config.labelWidthLarge,
          },
       ]);

@@ -32,7 +32,7 @@ module.exports = class ABProcessGatewayExclusive extends (
             {
                id: ids.name,
                view: "text",
-               label: L("ab.process.element.name", "*Name"),
+               label: L("Name"),
                name: "name",
                value: this.name,
             },

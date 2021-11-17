@@ -438,10 +438,10 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
 
             // create a droplist with select options
             var optionsSelectBy = [
-               { id: "select-one", value: "*Current selection" },
+               { id: "select-one", value: L("Current selection") },
                {
                   id: "filter-select-one",
-                  value: "*Select first after filter by...",
+                  value: L("Select first after filter by..."),
                },
             ];
 
@@ -551,7 +551,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                $componentView.options = $componentView.options || [];
                $componentView.options.unshift({
                   id: "ab-current-user",
-                  value: "*[Current User]",
+                  value: L("[Current User]"),
                });
             }
 
@@ -591,7 +591,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                // add select an array value option
                optionsSelectBy.push({
                   id: "filter-select-all",
-                  value: "*Select all after filter by...",
+                  value: L("Select all after filter by..."),
                });
 
                $inputView = $optionUpdateExsits;

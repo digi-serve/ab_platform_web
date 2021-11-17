@@ -399,7 +399,7 @@ module.exports = class ABField extends ABFieldCore {
          validator.addError(
             "columnName",
             L(
-               "*Field columnName must be unique ({0} already used in this Application)",
+               "Field columnName must be unique ({0} already used in this Application)",
                [this.columnName]
             )
          );

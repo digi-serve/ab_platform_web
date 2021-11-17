@@ -336,7 +336,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
          if (this.id) {
             // Ask the user what to do about the existing images:
             this.AB.Webix.confirm({
-               title: L("ab.dataField.image.keepImages", "*Keep Images?"),
+               title: L("Keep Images?"),
                message: L("Do you want to keep the images referenced by {0}?", [
                   this.label,
                ]),
