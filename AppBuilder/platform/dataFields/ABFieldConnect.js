@@ -1059,13 +1059,19 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       }
 
       // Pull linked object data
-      let result = await linkedModel.findAll({
-         where: where,
-         populate: false,
-      });
+      try {
+         let result = await linkedModel.findAll({
+            where: where,
+            populate: false,
+         });
 
-      // cache linked object data
-      this._options = result.data || result || [];
+         // cache linked object data
+         this._options = result.data || result || [];
+      } catch (err) {
+         this.AB.notify.developer(err, {
+            message: "Error pull data from our linked model.",
+         });
+      }
 
       // populate display text
       (this._options || []).forEach((opt) => {
