@@ -144,7 +144,7 @@ var ABFieldConnectComponent = new ABFieldComponent({
                {
                   id: ids.fieldLinkVia,
                   view: "label",
-                  label: L("<b>{0}</b> entry.", ["[Select object]"]),
+                  label: L("<b>{0}</b> entry.", [L("[Select object]")]),
                   width: 200,
                },
             ],
@@ -158,7 +158,7 @@ var ABFieldConnectComponent = new ABFieldComponent({
                   id: ids.fieldLinkVia2,
                   view: "label",
                   label: L("Each <b>{0}</b> entry connects with", [
-                     "[Select object]",
+                     L("[Select object]"),
                   ]),
                   width: 300,
                },
@@ -758,7 +758,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             // this happens in the Interface Builder when only the single form UI is displayed
             readOnly = true;
             placeholderReadOnly = L("Must select item from '{0}' first.", [
-               "PARENT ELEMENT",
+               L("PARENT ELEMENT"),
             ]);
          } else {
             let val = this.getValue($$(options.filterValue.ui.id));
