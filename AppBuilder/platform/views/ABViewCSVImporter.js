@@ -553,7 +553,9 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                   },
                   onCheck: function () {
                      var selected = $$(ids.datatable).find({ _included: true });
-                     $$(ids.importButton).setValue(`${L("Import")} ${selected.length}  Records`);
+                     $$(ids.importButton).setValue(
+                        L("Import {0} Records", [selected.length])
+                     );
                      if (selected.length > 1000) {
                         // we only allow 1000 record imports
                         webix.alert({
@@ -799,7 +801,9 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                if ($$(ids.headerOnFirstLine).getValue()) {
                   length = _dataRows.length - 1;
                }
-               $$(ids.importButton).setValue(`${L("Import")} ${length} Records`);
+               $$(ids.importButton).setValue(
+                  `${L("Import")} ${length} Records`
+               );
 
                _logic.populateColumnList();
 
@@ -1280,9 +1284,10 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                   let data = row[f.columnIndex - 1];
 
                   if (f.field.key == "date") {
-
                      let date = this.AB.toDate(data, { format: f.format });
-                     let dateFormat = this.AB.toDateFormat(date, { format: "YYYY-MM-DD"});
+                     let dateFormat = this.AB.toDateFormat(date, {
+                        format: "YYYY-MM-DD",
+                     });
                      if (dateFormat == "Invalid date") {
                         dateFormat = dateFormat + " - " + data;
                      }
@@ -1304,7 +1309,9 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                parsedData = parsedData.slice(1);
             }
 
-            $$(ids.importButton).setValue(`${L("Import")} ${parsedData.length} Records`);
+            $$(ids.importButton).setValue(
+               `${L("Import")} ${parsedData.length} Records`
+            );
 
             $datatable.refreshColumns(columns);
 
@@ -1361,7 +1368,9 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                $$(ids.importButton).setValue(result);
             } else {
                var selected = $$(ids.datatable).find({ _included: true });
-               $$(ids.importButton).setValue(`${L("Import")} ${selected.length} Records`);
+               $$(ids.importButton).setValue(
+                  `${L("Import")} ${selected.length} Records`
+               );
             }
          },
 
@@ -1460,7 +1469,9 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
 
                   // define the column to compare data to search .id
                   if ($linkDataSelector) {
-                     let searchField = field.datasourceLink.fieldByID($linkDataSelector.getValue());
+                     let searchField = field.datasourceLink.fieldByID(
+                        $linkDataSelector.getValue()
+                     );
                      fieldData.searchField = searchField;
                   }
                }
@@ -1614,7 +1625,9 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                $$(ids.statusMessage).hide();
 
                var selected = $$(ids.datatable).find({ _included: true });
-               $$(ids.importButton).setValue(`${L("Import")} ${selected.length} Records`);
+               $$(ids.importButton).setValue(
+                  `${L("Import")} ${selected.length} Records`
+               );
 
                // _logic.hide();
 

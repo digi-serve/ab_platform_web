@@ -321,7 +321,9 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                               $$(ids.editPage).setValue("");
 
                               let editingGrid = _logic.currentEditObject();
-                              let currDC = editingGrid.AB.datacollectionByID(newv);
+                              let currDC = editingGrid.AB.datacollectionByID(
+                                 newv
+                              );
                               // disallow edit data of query
                               if (currDC && currDC.sourceType == "query") {
                                  $$(ids.isEditable).setValue(false);

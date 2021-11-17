@@ -96,9 +96,7 @@ module.exports = class ABViewFormNumber extends ABViewFormNumberCore {
       var component = super.component(App);
       var field = this.field();
 
-      var idBase = this.parentFormUniqueID(
-         `ABViewFormNumber_${this.id}_f_`
-      );
+      var idBase = this.parentFormUniqueID(`ABViewFormNumber_${this.id}_f_`);
       var ids = {
          component: App.unique(`${idBase}_component`),
       };

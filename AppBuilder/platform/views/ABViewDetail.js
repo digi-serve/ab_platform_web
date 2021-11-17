@@ -134,8 +134,7 @@ module.exports = class ABViewDetail extends ABViewDetailCore {
             labelWidth: this.AB.Config.labelWidthLarge,
             skipAutoSave: true,
             on: {
-               onChange: (dcId, oldDcId) => 
-                  _logic.selectSource(dcId, oldDcId),
+               onChange: (dcId, oldDcId) => _logic.selectSource(dcId, oldDcId),
             },
          },
          {

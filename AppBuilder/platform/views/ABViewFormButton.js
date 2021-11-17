@@ -191,9 +191,7 @@ module.exports = class ABViewFormButton extends ABViewFormButtonCore {
     * @return {obj} UI component
     */
    component(App) {
-      var idBase = this.parentFormUniqueID(
-         `ABViewFormButton_${this.id}_f_`
-      );
+      var idBase = this.parentFormUniqueID(`ABViewFormButton_${this.id}_f_`);
       var ids = {
          component: App.unique(`${idBase}_component`),
       };

@@ -140,7 +140,8 @@ module.exports = class ABObjectWorkspaceViewKanban extends (
       };
 
       var PopupNewDataFieldComponent = new ABPopupNewDataField(
-         App, `${idBase}_kanban`
+         App,
+         `${idBase}_kanban`
       );
 
       return new ABObjectWorkspaceViewComponent({
@@ -152,7 +153,9 @@ module.exports = class ABObjectWorkspaceViewKanban extends (
                      cols: [
                         {
                            view: "richselect",
-                           label: `<span class='webix_icon fa fa-columns'></span> ${L("Vertical Grouping")}`,
+                           label: `<span class='webix_icon fa fa-columns'></span> ${L(
+                              "Vertical Grouping"
+                           )}`,
                            id: ids.vGroupInput,
                            placeholder: L("Select a field"),
                            labelWidth: 180,
@@ -187,7 +190,9 @@ module.exports = class ABObjectWorkspaceViewKanban extends (
                      cols: [
                         {
                            view: "richselect",
-                           label: `<span class='webix_icon fa fa-list'></span> ${L("Horizontal Grouping")}`,
+                           label: `<span class='webix_icon fa fa-list'></span> ${L(
+                              "Horizontal Grouping"
+                           )}`,
                            id: ids.hGroupInput,
                            placeholder: L("Select a field"),
                            labelWidth: 180,
@@ -228,7 +233,9 @@ module.exports = class ABObjectWorkspaceViewKanban extends (
                      cols: [
                         {
                            view: "richselect",
-                           label: `<span class='webix_icon fa fa-user-circle'></span> ${L("Card Owner")}`,
+                           label: `<span class='webix_icon fa fa-user-circle'></span> ${L(
+                              "Card Owner"
+                           )}`,
                            placeholder: L("Select a user field"),
                            id: ids.ownerInput,
                            labelWidth: 180,

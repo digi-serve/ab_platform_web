@@ -179,10 +179,14 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
             var UpdateForm = $$(ids.updateForm);
             if (!UpdateForm) {
                // this is a problem!
-               this.currentForm.AB.notify.developer({}, {
-                  message: "ABViewRuleActionFormRecordRuleUpdateConnected.formGet() could not find webix form.",
-                  elementId: ids.updateForm
-               });
+               this.currentForm.AB.notify.developer(
+                  {},
+                  {
+                     message:
+                        "ABViewRuleActionFormRecordRuleUpdateConnected.formGet() could not find webix form.",
+                     elementId: ids.updateForm,
+                  }
+               );
                return null;
             }
 
@@ -380,7 +384,10 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                   value == null ||
                   (Array.isArray(value) && value.length == 0)
                ) {
-                  validator.addError(field.columnName, L("A value is required"));
+                  validator.addError(
+                     field.columnName,
+                     L("A value is required")
+                  );
                }
 
                // field.getParentView()  ->  row
@@ -511,7 +518,8 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                                  });
 
                               FilterComponent = new RowFilter(
-                                 this.App, `${idBase}_filter`
+                                 this.App,
+                                 `${idBase}_filter`
                               );
                               // FilterComponent.applicationLoad(
                               //    this.currentForm.application
@@ -905,7 +913,8 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
 
          var value = op.value;
 
-         if (value == "ab-current-user") value = this.currentForm.AB.Account.username();
+         if (value == "ab-current-user")
+            value = this.currentForm.AB.Account.username();
 
          // in the case of a connected Field, we use op.value to get the
          // datacollection, and find it's currently selected value:
@@ -930,7 +939,9 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
 
             // loop through rules to find "same-as-field" or "not-same-as-field"
             // adjust operator and switch key value to actual value when found
-            var filterConditions = this.currentForm.AB.cloneDeep(op.filterConditions);
+            var filterConditions = this.currentForm.AB.cloneDeep(
+               op.filterConditions
+            );
             if (filterConditions && filterConditions.rules) {
                filterConditions.rules
                   .filter((r) => {
@@ -1050,7 +1061,9 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                               }
                            }
 
-                           newValues = this.currentForm.AB.uniq(newValues.concat(newValue));
+                           newValues = this.currentForm.AB.uniq(
+                              newValues.concat(newValue)
+                           );
 
                            break;
                         }
@@ -1175,12 +1188,11 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
             model
                .update(options.data.id, options.data)
                .catch((err) => {
-                  this.currentForm.AB.notify.developer(err,
-                     {
-                        message: "!!! ABViewRuleActionFormRecordRuleUpdate.process(): update error:",
-                        data: options.data
-                     }
-                  );
+                  this.currentForm.AB.notify.developer(err, {
+                     message:
+                        "!!! ABViewRuleActionFormRecordRuleUpdate.process(): update error:",
+                     data: options.data,
+                  });
                   reject(err);
                })
                .then(resolve);

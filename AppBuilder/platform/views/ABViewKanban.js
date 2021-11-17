@@ -247,11 +247,15 @@ module.exports = class ABViewKanban extends ABViewKanbanCore {
             if (object) {
                Kanban.objectLoad(object);
 
-               let verticalGrouping = object.fieldByID(this.settings.verticalGroupingField);
+               let verticalGrouping = object.fieldByID(
+                  this.settings.verticalGroupingField
+               );
                if (verticalGrouping)
                   fieldSettings.verticalGrouping = verticalGrouping;
 
-               let horizontalGrouping = object.fieldByID(this.settings.horizontalGroupingField);
+               let horizontalGrouping = object.fieldByID(
+                  this.settings.horizontalGroupingField
+               );
                if (horizontalGrouping)
                   fieldSettings.horizontalGrouping = horizontalGrouping;
 

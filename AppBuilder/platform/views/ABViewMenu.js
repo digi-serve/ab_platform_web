@@ -127,8 +127,9 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
                // we don't want to send a toggle event because it triggers saves to the database
                $$(ids.pages).checkItem(id);
                webix.message({
-                  text:
-                     L("Item contains submenu, please remove items in submenu before removing."),
+                  text: L(
+                     "Item contains submenu, please remove items in submenu before removing."
+                  ),
                   type: "error",
                   expire: 10000,
                });
@@ -389,11 +390,16 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
                      editValue: "aliasname",
                      editor: "text",
                      template: function (item, common) {
-                        return (
-                           `<div class='ab-page-list-item'>
-                           ${common.icon(item)} ${common.checkbox(item, false)} <div class="fa fa-${item.key == "viewcontainer" ? "window-maximize" : "file"}"></div> 
-                           ${item.label}</div>`
-                        );
+                        return `<div class='ab-page-list-item'>
+                           ${common.icon(item)} ${common.checkbox(
+                           item,
+                           false
+                        )} <div class="fa fa-${
+                           item.key == "viewcontainer"
+                              ? "window-maximize"
+                              : "file"
+                        }"></div> 
+                           ${item.label}</div>`;
                      },
                      on: {
                         onItemCheck: function (id, state) {

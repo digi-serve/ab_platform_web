@@ -374,10 +374,13 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
 
                // if an error was returned
                onFileUploadError: (item, response) => {
-                  this.AB.notify.developer({}, {
-                     message: "Error loading file",
-                     response
-                  });
+                  this.AB.notify.developer(
+                     {},
+                     {
+                        message: "Error loading file",
+                        response,
+                     }
+                  );
                   webixContainer.hideProgress();
                },
             },

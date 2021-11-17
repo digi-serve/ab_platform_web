@@ -109,9 +109,7 @@ module.exports = class ABViewFormTextbox extends ABViewFormTextboxCore {
    component(App) {
       var component = super.component(App);
 
-      var idBase = this.parentFormUniqueID(
-         `ABViewFormTextbox_${this.id}_f_`
-      );
+      var idBase = this.parentFormUniqueID(`ABViewFormTextbox_${this.id}_f_`);
       var ids = {
          component: App.unique(`${idBase}_component`),
       };

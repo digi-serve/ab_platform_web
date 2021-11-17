@@ -32,14 +32,12 @@ module.exports = class ABViewLayout extends ABViewLayoutCore {
       /** Logic */
       var _logic = {
          templateButton: function (obj) {
-            return (
-               `<div class="ab-widget-header ab-layout-header">
+            return `<div class="ab-widget-header ab-layout-header">
                <i class="fa fa-${obj.icon} webix_icon_btn"></i> ${obj.label}
                <div class="ab-component-tools">'
                <i class="fa fa-trash ab-component-remove"></i>
                <i class="fa fa-edit ab-component-edit"></i>
-               </div></div>`
-            );
+               </div></div>`;
          },
 
          viewEdit: (e, id, trg) => {
@@ -193,7 +191,7 @@ module.exports = class ABViewLayout extends ABViewLayoutCore {
     * @return {obj} UI component
     */
    component(App, idPrefix) {
-      let idBase = `ABViewLayout_${(idPrefix || "")}${this.id}`;
+      let idBase = `ABViewLayout_${idPrefix || ""}${this.id}`;
       let ids = {
          component: App.unique(`${idBase}_component`),
       };

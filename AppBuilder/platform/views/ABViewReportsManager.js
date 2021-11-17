@@ -302,20 +302,28 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                     }
 
                                     (config.joins || []).forEach((j) => {
-                                       let sourceDc = compInstance.AB.datacollectionByID(j.sid);
+                                       let sourceDc = compInstance.AB.datacollectionByID(
+                                          j.sid
+                                       );
                                        if (!sourceDc) return;
 
                                        let sourceObj = sourceDc.datasource;
                                        if (!sourceObj) return;
 
-                                       let targetDc = compInstance.AB.datacollectionByID(j.tid);
+                                       let targetDc = compInstance.AB.datacollectionByID(
+                                          j.tid
+                                       );
                                        if (!targetDc) return;
 
                                        let targetObj = targetDc.datasource;
                                        if (!targetObj) return;
 
-                                       let sourceLinkField = sourceObj.fieldByID(j.sf);
-                                       let targetLinkField = targetObj.fieldByID(j.tf);
+                                       let sourceLinkField = sourceObj.fieldByID(
+                                          j.sf
+                                       );
+                                       let targetLinkField = targetObj.fieldByID(
+                                          j.tf
+                                       );
                                        if (!sourceLinkField && !targetLinkField)
                                           return;
 
@@ -377,8 +385,12 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                                 } else {
                                                    result.push(
                                                       Object.assign(
-                                                         compInstance.AB.cloneDeep(sData),
-                                                         compInstance.AB.cloneDeep(tData)
+                                                         compInstance.AB.cloneDeep(
+                                                            sData
+                                                         ),
+                                                         compInstance.AB.cloneDeep(
+                                                            tData
+                                                         )
                                                       )
                                                    );
                                                 }
@@ -399,7 +411,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                        queryVal = JSON.parse(
                                           config.query || "{}"
                                        );
-                                    } catch(err) {
+                                    } catch (err) {
                                        bad(err);
                                     }
 
@@ -430,7 +442,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                                    if (
                                                       r.condition.filter
                                                          .start &&
-                                                         this.AB.isString(
+                                                      this.AB.isString(
                                                          r.condition.filter
                                                             .start
                                                       )
@@ -687,7 +699,9 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
          },
 
          getData: (datacollectionId) => {
-            let datacollection = compInstance.AB.datacollectionByID(datacollectionId);
+            let datacollection = compInstance.AB.datacollectionByID(
+               datacollectionId
+            );
             if (!datacollection) return Promise.resolve([]);
 
             let object = datacollection.datasource;
@@ -776,7 +790,11 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                     reportRow[col] = row[columnName];
                                     if (reportRow[col]) {
                                        if (!(reportRow[col] instanceof Date)) {
-                                          reportRow[col] = compInstance.AB.toDate(row[columnName]);
+                                          reportRow[
+                                             col
+                                          ] = compInstance.AB.toDate(
+                                             row[columnName]
+                                          );
                                        }
                                     } else {
                                        reportRow[col] = "";

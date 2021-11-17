@@ -86,7 +86,7 @@ module.exports = class ABViewDetailTree extends ABViewDetailTreeCore {
       var field = this.field();
       var detailView = this.detailComponent();
 
-      var idBase = `ABViewDetailTree_${(idPrefix || "")}${this.id}`;
+      var idBase = `ABViewDetailTree_${idPrefix || ""}${this.id}`;
       var ids = {
          component: App.unique(`${idBase}_component`),
       };

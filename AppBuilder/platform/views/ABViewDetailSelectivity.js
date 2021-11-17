@@ -102,7 +102,7 @@ module.exports = class ABViewDetailSelectivity extends (
       var component = super.component(App);
       var field = this.field();
 
-      var idBase = `ABViewDetailSelectivity_${(idPrefix || "")}${this.id}`;
+      var idBase = `ABViewDetailSelectivity_${idPrefix || ""}${this.id}`;
       var ids = {
          component: App.unique(`${idBase}_component`),
          detail: this.parentDetailComponent()?.id || this.parent.id,

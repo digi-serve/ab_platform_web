@@ -348,7 +348,7 @@ var ABFieldConnectComponent = new ABFieldComponent({
 
             // pass true because we want it to select the last item in the list that was just created
             populateSelect(true);
-         } catch(err) {
+         } catch (err) {
             App.AB.notify.developer(err);
          }
       },
@@ -428,7 +428,9 @@ var ABFieldConnectComponent = new ABFieldComponent({
             (linkType == "one" && linkViaType == "one") ||
             (linkType == "one" && linkViaType == "many")
          ) {
-            sourceObject = ABFieldConnectComponent.CurrentApplication.AB.objectByID(linkObjectId);
+            sourceObject = ABFieldConnectComponent.CurrentApplication.AB.objectByID(
+               linkObjectId
+            );
          }
          // M:1
          else if (linkType == "many" && linkViaType == "one") {
@@ -438,7 +440,9 @@ var ABFieldConnectComponent = new ABFieldComponent({
          else if (linkType == "many" && linkViaType == "many") {
             sourceObject = ABFieldConnectComponent.CurrentObject;
 
-            let linkObject = ABFieldConnectComponent.CurrentApplication.AB.objectByID(linkObjectId);
+            let linkObject = ABFieldConnectComponent.CurrentApplication.AB.objectByID(
+               linkObjectId
+            );
 
             // Populate the second index fields
             let linkIndexFields = [];

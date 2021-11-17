@@ -769,7 +769,9 @@ module.exports = class ABViewTab extends ABViewTabCore {
                         if (!node) return;
                         node.setAttribute(
                            "data-cy",
-                           `tab-${view.label.replace(" ", "")}-${view.id}-${this.id}`
+                           `tab-${view.label.replace(" ", "")}-${view.id}-${
+                              this.id
+                           }`
                         );
                      });
                   },

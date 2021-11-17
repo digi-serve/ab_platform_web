@@ -36,19 +36,6 @@ module.exports = class ABWorkObjectGantt extends ABComponent {
       super(App, idBase);
 
       let L = this.Label();
-      let labels = {
-         common: App.labels,
-         component: {
-            confirmDeleteTaskTitle: L(
-               "ab.object.deleteTask.title",
-               "*Remove task"
-            ),
-            confirmDeleteTaskMessage: L(
-               "ab.object.deleteTask.message",
-               "*Do you want to delete this task?"
-            ),
-         },
-      };
 
       // internal list of Webix IDs to reference our UI components.
       let ids = {

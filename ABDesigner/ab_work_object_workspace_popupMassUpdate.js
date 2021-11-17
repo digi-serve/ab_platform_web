@@ -17,10 +17,6 @@ module.exports = class AB_Work_Object_Workspace_PopupMassUpdate extends ABCompon
       super(App, idBase);
       let L = this.Label;
 
-      let labels = {
-         common: App.labels,
-      };
-
       // internal list of Webix IDs to reference our UI components
       let ids = {
          component: this.unique(`${idBase}_popupMassUpdate`),
@@ -45,7 +41,7 @@ module.exports = class AB_Work_Object_Workspace_PopupMassUpdate extends ABCompon
                      {},
                      {
                         view: "button",
-                        value: L("ab.common.cancel", "*Cancel"),
+                        value: L("Cancel"),
                         width: 100,
                         click: () => {
                            _logic.hide();
@@ -55,7 +51,7 @@ module.exports = class AB_Work_Object_Workspace_PopupMassUpdate extends ABCompon
                         id: ids.submit,
                         css: "webix_primary",
                         view: "button",
-                        label: L("ab.common.update", "*Update"),
+                        label: L("Update"),
                         type: "form",
                         width: 120,
                         click: () => {
@@ -203,11 +199,8 @@ module.exports = class AB_Work_Object_Workspace_PopupMassUpdate extends ABCompon
 
             if (updatedRowIds.length > 0) {
                webix.confirm({
-                  title: L("key.updating.mutiple", "Updating Multiple Records"),
-                  text: L(
-                     "key.are.you.sure",
-                     "Are you sure you want to update the selected records?"
-                  ),
+                  title: L("Updating Multiple Records"),
+                  text: L("Are you sure you want to update the selected records?"),
                   callback: function (result) {
                      if (result) {
                         if ($datatable && $datatable.showProgress)

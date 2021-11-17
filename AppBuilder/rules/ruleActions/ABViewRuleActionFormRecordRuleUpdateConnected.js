@@ -219,7 +219,10 @@ module.exports = class ABViewRuleActionFormRecordRuleUpdateConnected extends (
                   }
                }
             } else {
-               this.AB.notify.builder(new Error("No connectedObject found."), {});
+               this.AB.notify.builder(
+                  new Error("No connectedObject found."),
+                  {}
+               );
             }
          },
 
@@ -303,7 +306,9 @@ module.exports = class ABViewRuleActionFormRecordRuleUpdateConnected extends (
     */
    queryBuilderDisplay() {
       if (!this.objectQB) {
-         this.objectQB = new ObjectQueryBuilder(L("How to choose which object:"));
+         this.objectQB = new ObjectQueryBuilder(
+            L("How to choose which object:")
+         );
 
          var connObj = this.connectedObject();
          if (connObj) this.objectQB.objectLoad(connObj);
@@ -396,12 +401,11 @@ module.exports = class ABViewRuleActionFormRecordRuleUpdateConnected extends (
                      cb();
                   })
                   .catch((err) => {
-                     this.AB.notify.developer(err,
-                        {
-                           message: "!!! ABViewRuleActionFormRecordRuleUpdateConnected.process(): update error:",
-                           data: options.data
-                        }
-                     );
+                     this.AB.notify.developer(err, {
+                        message:
+                           "!!! ABViewRuleActionFormRecordRuleUpdateConnected.process(): update error:",
+                        data: options.data,
+                     });
                      cb(err);
                   });
             }

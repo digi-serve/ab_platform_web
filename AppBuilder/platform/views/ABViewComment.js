@@ -489,12 +489,13 @@ module.exports = class ABViewComment extends ABViewCommentCore {
 
       let model = this.model();
       if (model == null) {
-         this.AB.notify.builder({},
+         this.AB.notify.builder(
+            {},
             {
-               message: "ABViewComment.saveData(): could not pull a model to work with.",
-               viewId: this.id
+               message:
+                  "ABViewComment.saveData(): could not pull a model to work with.",
+               viewName: this.label,
             }
-            
          );
          return Promise.resolve();
       }

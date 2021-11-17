@@ -58,9 +58,7 @@ module.exports = class ABViewFormCustom extends ABViewFormCustomCore {
       // this field may be deleted
       if (!field) return component;
 
-      var idBase = this.parentFormUniqueID(
-         `ABViewFormCustom_${this.id}_f_`
-      );
+      var idBase = this.parentFormUniqueID(`ABViewFormCustom_${this.id}_f_`);
       var ids = {
          component: App.unique(`${idBase}_component`),
       };

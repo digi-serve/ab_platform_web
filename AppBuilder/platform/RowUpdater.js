@@ -184,7 +184,15 @@ module.exports = class RowUpdater extends ABComponent {
          selectField: function (columnId, $viewCond) {
             let field = _Object.fieldByID(columnId);
             if (!field) {
-               this.AB.notify.builder({}, { message:  `RowUpdater.selectField() could not find a field for [${columnId}]` } );
+               this.AB.notify.builder(
+                  {},
+                  {
+                     message: L(
+                        "RowUpdater.selectField() could not find a field for [{0}]",
+                        [columnId]
+                     ),
+                  }
+               );
                return;
             }
             let fieldComponent = field.formComponent(),

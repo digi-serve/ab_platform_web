@@ -128,10 +128,13 @@ var ABFieldImageComponent = new ABFieldComponent({
 
                      // if an error was returned
                      onFileUploadError: function (item, response) {
-                        App.AB.notify.developer({}, {
-                           message: "Error loading image",
-                           response
-                        });
+                        App.AB.notify.developer(
+                           {},
+                           {
+                              message: "Error loading image",
+                              response,
+                           }
+                        );
                      },
                   },
                },
@@ -780,7 +783,9 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
 
       html = html.replace(
          "#drag#",
-         options.editable ? `<div>${L("Drag and drop or click here")}</div>` : ""
+         options.editable
+            ? `<div>${L("Drag and drop or click here")}</div>`
+            : ""
       );
       html = html.replace(
          "#remove#",

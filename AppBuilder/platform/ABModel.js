@@ -301,21 +301,19 @@ module.exports = class ABModel extends ABModelCore {
                if (err && err.code) {
                   switch (err.code) {
                      case "ER_PARSE_ERROR":
-                        this.AB.notify.developer(err,
-                           {
-                              message: "AppBuilder:ABModel:findAll(): Parse Error with provided condition",
-                              condition: cond
-                           }
-                        );
+                        this.AB.notify.developer(err, {
+                           message:
+                              "AppBuilder:ABModel:findAll(): Parse Error with provided condition",
+                           condition: cond,
+                        });
                         break;
 
                      default:
-                        this.AB.notify.developer(err,
-                           {
-                              message: "AppBuilder:ABModel:findAll(): Unknown Error with provided condition",
-                              condition: cond
-                           }
-                        );
+                        this.AB.notify.developer(err, {
+                           message:
+                              "AppBuilder:ABModel:findAll(): Unknown Error with provided condition",
+                           condition: cond,
+                        });
                         break;
                   }
                }

@@ -1417,7 +1417,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
                });
                this.AB.notify.developer(err, {
                   message: "Could not save your data",
-                  view: this
+                  view: this,
                });
             }
          }
@@ -1442,7 +1442,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
                      })
                      .catch((err) => {
                         this.AB.notify.developer(err, {
-                           message: "Error processing Record Rules.", 
+                           message: "Error processing Record Rules.",
                            view: this,
                            newFormVals: newFormVals,
                         });

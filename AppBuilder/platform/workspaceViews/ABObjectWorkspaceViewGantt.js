@@ -176,7 +176,9 @@ module.exports = class ABObjectWorkspaceViewGantt extends (
                         {
                            id: ids.title,
                            view: "richselect",
-                           label: `<span class='webix_icon fa fa-calendar'></span> ${L("Title")}`,
+                           label: `<span class='webix_icon fa fa-calendar'></span> ${L(
+                              "Title"
+                           )}`,
                            placeholder: L("Select a string field"),
                            labelWidth: 130,
                            name: "title",
@@ -203,7 +205,9 @@ module.exports = class ABObjectWorkspaceViewGantt extends (
                         {
                            id: ids.startDate,
                            view: "richselect",
-                           label: `<span class='webix_icon fa fa-calendar'></span> ${L("Start Date")}`,
+                           label: `<span class='webix_icon fa fa-calendar'></span> ${L(
+                              "Start Date"
+                           )}`,
                            placeholder: L("Select a date field"),
                            labelWidth: 130,
                            name: "startDate",
@@ -231,7 +235,9 @@ module.exports = class ABObjectWorkspaceViewGantt extends (
                         {
                            id: ids.endDate,
                            view: "richselect",
-                           label: `<span class='webix_icon fa fa-calendar'></span> ${L("End Date")}`,
+                           label: `<span class='webix_icon fa fa-calendar'></span> ${L(
+                              "End Date"
+                           )}`,
                            placeholder: L("Select a date field"),
                            labelWidth: 130,
                            name: "endDate",
@@ -258,7 +264,9 @@ module.exports = class ABObjectWorkspaceViewGantt extends (
                         {
                            id: ids.duration,
                            view: "richselect",
-                           label: `<span class='webix_icon fa fa-hashtag'></span> ${L("Duration")}`,
+                           label: `<span class='webix_icon fa fa-hashtag'></span> ${L(
+                              "Duration"
+                           )}`,
                            placeholder: L("Select a number field"),
                            labelWidth: 130,
                            name: "duration",
@@ -285,7 +293,9 @@ module.exports = class ABObjectWorkspaceViewGantt extends (
                         {
                            id: ids.progress,
                            view: "richselect",
-                           label: `<span class='webix_icon fa fa-hashtag'></span> ${L("Progress")}`,
+                           label: `<span class='webix_icon fa fa-hashtag'></span> ${L(
+                              "Progress"
+                           )}`,
                            placeholder: L("Select a number field"),
                            labelWidth: 130,
                            name: "progress",
@@ -313,7 +323,9 @@ module.exports = class ABObjectWorkspaceViewGantt extends (
                         {
                            id: ids.notes,
                            view: "richselect",
-                           label: `<span class='webix_icon fa fa-align-right'></span> ${L("Notes")}`,
+                           label: `<span class='webix_icon fa fa-align-right'></span> ${L(
+                              "Notes"
+                           )}`,
                            placeholder: L("Select a string field"),
                            labelWidth: 130,
                            name: "notes",

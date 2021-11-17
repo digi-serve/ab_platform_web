@@ -160,7 +160,9 @@ module.exports = class ABViewText extends ABViewTextCore {
       var datacollection = view.AB.datacollectionByID(dvId);
 
       if (!datacollection && view.parent.key == "dataview") {
-         datacollection = view.AB.datacollectionByID(view.parent.settings.dataviewID);
+         datacollection = view.AB.datacollectionByID(
+            view.parent.settings.dataviewID
+         );
          $$(ids.datacollection).setValue(view.parent.settings.dataviewID);
       }
 
@@ -207,7 +209,7 @@ module.exports = class ABViewText extends ABViewTextCore {
    component(App, idPrefix) {
       let baseCom = super.component(App);
 
-      var idBase = `ABViewText_${(idPrefix ? idPrefix : "")}${this.id}`;
+      var idBase = `ABViewText_${idPrefix ? idPrefix : ""}${this.id}`;
       var ids = {
          component: App.unique(`${idBase}_component`),
       };
