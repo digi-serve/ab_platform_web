@@ -862,6 +862,15 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
                   try {
                      await this.object.model().update(row.id, values);
+
+                     // update values of relation to display in grid
+                     values[this.relationName()] = values[this.columnName];
+
+                     // update new value to item of DataTable .updateItem
+                     if (values[this.columnName] == "")
+                        values[this.columnName] = [];
+                     if ($$(node) && $$(node).updateItem)
+                        $$(node).updateItem(row.id, values);
                   } catch (err) {
                      node.classList.add("webix_invalid");
                      node.classList.add("webix_invalid_cell");
@@ -872,15 +881,6 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                         values: values,
                      });
                   }
-
-                  // update values of relation to display in grid
-                  values[this.relationName()] = values[this.columnName];
-
-                  // update new value to item of DataTable .updateItem
-                  if (values[this.columnName] == "")
-                     values[this.columnName] = [];
-                  if ($$(node) && $$(node).updateItem)
-                     $$(node).updateItem(row.id, values);
                },
                false
             );
