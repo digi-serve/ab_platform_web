@@ -219,10 +219,7 @@ module.exports = class ABViewRuleActionFormRecordRuleUpdateConnected extends (
                   }
                }
             } else {
-               this.AB.notify.builder(
-                  new Error("No connectedObject found."), 
-                  {}
-               );
+               this.AB.notify.builder(new Error("No connectedObject found."), {});
             }
          },
 
@@ -427,7 +424,7 @@ module.exports = class ABViewRuleActionFormRecordRuleUpdateConnected extends (
             } else {
                // get all the entries that match our condition:
                model
-                  .find({ where: condition })
+                  .findAll({ where: condition })
                   .then((list) => {
                      var done = 0;
 
