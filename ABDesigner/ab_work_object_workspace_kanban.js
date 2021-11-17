@@ -471,7 +471,7 @@ module.exports = class ABWorkObjectKanBan extends ABComponent {
          },
 
          removeCard: async (rowId) => {
-            App.AB.Webix.confirm({
+            webix.confirm({
                title: L("Remove card"),
                text: L("Do you want to delete this card?"),
                callback: async (result) => {

@@ -425,7 +425,7 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
             } else if (e.target.className.indexOf("trash") > -1) {
                // if this was our trash icon:
 
-               App.AB.Webix.confirm({
+               webix.confirm({
                   title: L("Delete data"),
                   text: L("Do you want to delete this row?"),
                   callback: function (result) {

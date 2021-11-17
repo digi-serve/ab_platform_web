@@ -202,7 +202,7 @@ module.exports = class AB_Work_Object_Workspace_PopupMassUpdate extends ABCompon
             });
 
             if (updatedRowIds.length > 0) {
-               this.AB.Webix.confirm({
+               webix.confirm({
                   title: L("key.updating.mutiple", "Updating Multiple Records"),
                   text: L(
                      "key.are.you.sure",
