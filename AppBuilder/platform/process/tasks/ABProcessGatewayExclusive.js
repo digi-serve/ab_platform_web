@@ -1,7 +1,7 @@
 const ABProcessGatewayExclusiveCore = require("../../../core/process/tasks/ABProcessGatewayExclusiveCore.js");
 const RowFilter = require("../../RowFilter");
 
-let L = (...params) => AB.Label()("", ...params);
+let L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABProcessGatewayExclusive extends (
    ABProcessGatewayExclusiveCore

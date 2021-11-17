@@ -1,6 +1,6 @@
 const ABViewDetailComponentCore = require("../../core/views/ABViewDetailComponentCore");
 
-let L = (...params) => AB.Label()("", ...params);
+let L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABViewDetailComponent extends ABViewDetailComponentCore {
    // constructor(values, application, parent, defaultValues) {

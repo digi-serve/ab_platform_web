@@ -2,7 +2,7 @@ const ABViewFormSelectSingleCore = require("../../core/views/ABViewFormSelectSin
 
 const ABViewFormSelectSinglePropertyComponentDefaults = ABViewFormSelectSingleCore.defaultValues();
 
-let L = (...params) => AB.Label()("", ...params);
+let L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABViewFormSelectSingle extends (
    ABViewFormSelectSingleCore

@@ -14,7 +14,7 @@ const ABPopupExport = require("../../../ABDesigner/ab_work_object_workspace_popu
 const ABViewPropertyFilterData = require("./viewProperties/ABViewPropertyFilterData");
 const ABViewPropertyLinkPage = require("./viewProperties/ABViewPropertyLinkPage");
 
-let L = (...params) => AB.Label()("", ...params);
+let L = (...params) => AB.Multilingual.label(...params);
 
 let PopupHideFieldComponent = null;
 let PopupFrozenColumnsComponent = null;

@@ -1,6 +1,6 @@
 const ABViewListCore = require("../../core/views/ABViewListCore");
 
-let L = (...params) => AB.Label()("", ...params);
+let L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABViewList extends ABViewListCore {
    // constructor(values, application, parent, defaultValues) {

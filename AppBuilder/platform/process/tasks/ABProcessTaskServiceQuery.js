@@ -2,7 +2,7 @@ const ABProcessTaskServiceQueryCore = require("../../../core/process/tasks/ABPro
 
 const ABQLManager = require("../../ql/ABQLManager.js");
 
-let L = (...params) => AB.Label()("", ...params);
+let L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABProcessTaskServiceQuery extends (
    ABProcessTaskServiceQueryCore

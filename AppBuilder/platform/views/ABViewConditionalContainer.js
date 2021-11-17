@@ -3,7 +3,7 @@ const RowFilter = require("../RowFilter");
 
 const ABViewPropertyDefaults = ABViewConditionalContainerCore.defaultValues();
 
-let L = (...params) => AB.Label()("", ...params);
+let L = (...params) => AB.Multilingual.label(...params);
 
 let FilterComponent = null;
 

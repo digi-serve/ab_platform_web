@@ -3,7 +3,7 @@ const ABViewTab = require("./ABViewTab");
 
 const ABViewMenuPropertyComponentDefaults = ABViewMenuCore.defaultValues();
 
-let L = (...params) => AB.Label()("", ...params);
+let L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABViewMenu extends ABViewMenuCore {
    // constructor(values, application, parent, defaultValues) {

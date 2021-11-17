@@ -1,7 +1,7 @@
 const ABFieldNumberCore = require("../../core/dataFields/ABFieldNumberCore");
 const ABFieldComponent = require("./ABFieldComponent");
 
-let L = (...params) => AB.Label()("", ...params);
+let L = (...params) => AB.Multilingual.label(...params);
 
 /**
  * ABFieldNumberComponent

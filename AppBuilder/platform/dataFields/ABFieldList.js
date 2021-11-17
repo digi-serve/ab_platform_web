@@ -5,7 +5,7 @@ var ABFieldSelectivity = require("./ABFieldSelectivity");
 
 var defaultValues = ABFieldListCore.defaultValues();
 
-let L = (...params) => AB.Label()("", ...params);
+let L = (...params) => AB.Multilingual.label(...params);
 
 var ids = {
    isMultiple: "ab-list-multiple-option",

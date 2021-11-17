@@ -1,7 +1,7 @@
 var ABFieldCombineCore = require("../../core/dataFields/ABFieldCombineCore");
 var ABFieldComponent = require("./ABFieldComponent");
 
-let L = (...params) => AB.Label()("", ...params);
+let L = (...params) => AB.Multilingual.label(...params);
 
 var ids = {
    combinedFields: "ab-new-combined-combinedFields",

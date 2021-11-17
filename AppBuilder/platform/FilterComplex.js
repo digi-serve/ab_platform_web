@@ -1,6 +1,6 @@
 const FilterComplexCore = require("../core/FilterComplexCore");
 
-let L = (...params) => AB.Label()("", ...params);
+let L = (...params) => AB.Multilingual.label(...params);
 
 /**
  * @function _toInternal()

@@ -5,7 +5,7 @@ const ABViewPropertyLinkPage = require("./viewProperties/ABViewPropertyLinkPage"
 
 const ABFieldImage = require("../dataFields/ABFieldImage");
 
-let L = (...params) => AB.Label()("", ...params);
+let L = (...params) => AB.Multilingual.label(...params);
 
 let PopupCarouselFilterMenu = null;
 

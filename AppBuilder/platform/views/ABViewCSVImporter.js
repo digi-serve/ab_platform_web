@@ -5,7 +5,7 @@ const ABRecordRule = require("../../rules/ABViewRuleListFormRecordRules");
 
 const ABViewCSVImporterPropertyComponentDefaults = ABViewCSVImporterCore.defaultValues();
 
-let L = (...params) => AB.Label()("", ...params);
+let L = (...params) => AB.Multilingual.label(...params);
 
 var FilterComplex = require("../FilterComplex");
 

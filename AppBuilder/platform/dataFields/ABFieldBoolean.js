@@ -1,7 +1,7 @@
 var ABFieldBooleanCore = require("../../core/dataFields/ABFieldBooleanCore");
 var ABFieldComponent = require("./ABFieldComponent");
 
-let L = (...params) => AB.Label()("", ...params);
+let L = (...params) => AB.Multilingual.label(...params);
 
 /**
  * ABFieldBooleanComponent

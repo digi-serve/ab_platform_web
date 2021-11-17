@@ -2,7 +2,7 @@ const ABFieldFormulaCore = require("../../core/dataFields/ABFieldFormulaCore");
 const ABFieldComponent = require("./ABFieldComponent");
 const RowFilter = require("../RowFilter");
 
-let L = (...params) => AB.Label()("", ...params);
+let L = (...params) => AB.Multilingual.label(...params);
 
 var ids = {
    field: "ab-field-formula-field",

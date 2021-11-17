@@ -2,7 +2,7 @@ const ABViewFormSelectMultipleCore = require("../../core/views/ABViewFormSelectM
 
 const ABViewFormSelectMultiplePropertyComponentDefaults = ABViewFormSelectMultipleCore.defaultValues();
 
-let L = (...params) => AB.Label()("", ...params);
+let L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABViewFormSelectMultiple extends (
    ABViewFormSelectMultipleCore

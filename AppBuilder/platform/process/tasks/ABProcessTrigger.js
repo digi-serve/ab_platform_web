@@ -2,7 +2,7 @@
 // const ABApplication = require("./ABApplication"); // NOTE: change to require()
 const ABProcessTriggerCore = require("../../../core/process/tasks/ABProcessTriggerCore.js");
 
-let L = (...params) => AB.Label()("", ...params);
+let L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABProcessTrigger extends ABProcessTriggerCore {
    propertyIDs(id) {

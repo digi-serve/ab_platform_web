@@ -2,7 +2,7 @@ const ABViewPageCore = require("../../core/views/ABViewPageCore");
 
 const ABPropertyComponentDefaults = ABViewPageCore.defaultValues();
 
-let L = (...params) => AB.Label()("", ...params);
+let L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABViewPage extends ABViewPageCore {
    // constructor(values, application, parent, defaultValues) {

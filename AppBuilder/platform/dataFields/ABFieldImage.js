@@ -1,7 +1,7 @@
 var ABFieldImageCore = require("../../core/dataFields/ABFieldImageCore");
 var ABFieldComponent = require("./ABFieldComponent");
 
-let L = (...params) => AB.Label()("", ...params);
+let L = (...params) => AB.Multilingual.label(...params);
 
 /**
  * ABFieldImageComponent

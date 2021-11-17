@@ -1,7 +1,7 @@
 const ABViewContainer = require("../../platform/views/ABViewContainer");
 const ABViewLayoutCore = require("../../core/views/ABViewLayoutCore");
 
-let L = (...params) => AB.Label()("", ...params);
+let L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABViewLayout extends ABViewLayoutCore {
    // constructor(values, application, parent, defaultValues) {

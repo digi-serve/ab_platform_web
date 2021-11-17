@@ -1,7 +1,7 @@
 const ABObjectCore = require("../core/ABObjectCore");
 const ABObjectWorkspaceViewCollection = require("./workspaceViews/ABObjectWorkspaceViewCollection");
 
-let L = (...params) => AB.Label()("", ...params);
+let L = (...params) => AB.Multilingual.label(...params);
 
 // NOTE: this has been moved to NetworkRestSocket:
 //

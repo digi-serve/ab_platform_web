@@ -2,7 +2,7 @@ const ABViewChartAreaCore = require("../../core/views/ABViewChartAreaCore");
 
 const ABViewChartAreaPropertyComponentDefaults = ABViewChartAreaCore.defaultValues();
 
-let L = (...params) => AB.Label()("", ...params);
+let L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABViewChartArea extends ABViewChartAreaCore {
    // constructor(values, application, parent, defaultValues) {

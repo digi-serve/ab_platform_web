@@ -3,7 +3,7 @@
 const ABProcessTaskUserCore = require("../../../core/process/tasks/ABProcessTaskUserCore.js");
 const ABProcessTaskUserApproval = require("./ABProcessTaskUserApproval.js");
 
-let L = (...params) => AB.Label()("", ...params);
+let L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABProcessTaskUser extends ABProcessTaskUserCore {
    ////

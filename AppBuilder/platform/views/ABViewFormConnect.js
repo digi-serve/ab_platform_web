@@ -8,7 +8,7 @@ const RowFilter = require("../RowFilter");
 
 let FilterComponent = null;
 
-let L = (...params) => AB.Label()("", ...params);
+let L = (...params) => AB.Multilingual.label(...params);
 
 function _onShow(App, compId, instance, component) {
    let elem = $$(compId);

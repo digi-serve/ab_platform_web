@@ -1,6 +1,6 @@
 const AccountingJEArchiveCore = require("../../../core/process/tasks/ABProcessTaskServiceAccountingJEArchiveCore.js");
 
-let L = (...params) => AB.Label()("", ...params);
+let L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class AccountingJEArchive extends AccountingJEArchiveCore {
    ////

@@ -2,7 +2,7 @@ const ABViewFormTextboxCore = require("../../core/views/ABViewFormTextboxCore");
 
 const ABViewFormTextboxPropertyComponentDefaults = ABViewFormTextboxCore.defaultValues();
 
-let L = (...params) => AB.Label()("", ...params);
+let L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABViewFormTextbox extends ABViewFormTextboxCore {
    // constructor(values, application, parent, defaultValues) {

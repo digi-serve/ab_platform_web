@@ -2,7 +2,7 @@ const ABViewDetailImageCore = require("../../core/views/ABViewDetailImageCore");
 
 const ABViewDetailImagePropertyComponentDefaults = ABViewDetailImageCore.defaultValues();
 
-let L = (...params) => AB.Label()("", ...params);
+let L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABViewDetailImage extends ABViewDetailImageCore {
    /**

@@ -2,7 +2,7 @@ const ABViewTabCore = require("../../core/views/ABViewTabCore");
 
 const ABViewTabPropertyComponentDefaults = ABViewTabCore.defaultValues();
 
-let L = (...params) => AB.Label()("", ...params);
+let L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABViewTab extends ABViewTabCore {
    // constructor(values, application, parent, defaultValues) {
