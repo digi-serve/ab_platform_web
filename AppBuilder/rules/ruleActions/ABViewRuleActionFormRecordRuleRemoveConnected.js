@@ -50,14 +50,14 @@ module.exports = class ABViewRuleActionFormRecordRuleRemoveConnected extends (
 
          model
             .update(options.data.id, updatedVals)
+            .then(resolve)
             .catch((err) => {
                this.AB.notify.developer(err, {
                   message: "!!! ABViewRuleActionFormRecordRuleUpdate.process(): update error:",
                   data: options.data
                });
                reject(err);
-            })
-            .then(resolve);
+            });
       });
    }
 };
