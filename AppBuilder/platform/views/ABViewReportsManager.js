@@ -444,7 +444,8 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                                       )
                                                    ) {
                                                       r.condition.filter.start = this.AB.toDate(
-                                                         r.condition.filter.start
+                                                         r.condition.filter
+                                                            .start
                                                       );
                                                    }
 
