@@ -489,7 +489,7 @@ module.exports = class ABFieldList extends ABFieldListCore {
                   var numToDo = 0;
 
                   model
-                     .find({})
+                     .findAll({})
                      .then((list) => {
                         list = list.data || list;
 
@@ -542,7 +542,7 @@ module.exports = class ABFieldList extends ABFieldListCore {
                   var numDone = 0;
 
                   model
-                     .find(where)
+                     .findAll(where)
                      .then((list) => {
                         // make sure we just work with the { data:[] } that was returned
                         list = list.data || list;
