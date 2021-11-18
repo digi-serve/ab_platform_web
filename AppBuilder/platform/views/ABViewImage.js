@@ -53,19 +53,11 @@ module.exports = class ABViewImage extends ABViewImageCore {
          } else {
             // set upload url to uploader
             var currView = _logic.currentEditObject();
-            var actionKey =
-               "opstool.AB_" +
-               currView.application.name.replace("_", "") +
-               ".view";
-            var url =
-               "/" +
-               [
-                  "opsportal",
-                  "image",
-                  currView.application.name,
-                  actionKey,
-                  "1",
-               ].join("/");
+            let actionKey = `opstool.AB_${currView.application.name.replace(
+               "_",
+               ""
+            )}.view`;
+            let url = `/file/upload/${currView.application.name}/${actionKey}/1`;
 
             $$(ids.file).define("upload", url);
             $$(ids.file).refresh();
@@ -186,7 +178,7 @@ module.exports = class ABViewImage extends ABViewImageCore {
          if (!$$(ids.component)) return;
 
          if (this.settings.filename) {
-            var imgTag = `<img src="/opsportal/image/${this.application.name}/${this.settings.filename}" height="${this.settings.height}" width="${this.settings.width}">`;
+            let imgTag = `<img src="/file/${this.settings.filename}" height="${this.settings.height}" width="${this.settings.width}">`;
 
             $$(ids.component).define("template", imgTag);
          } else {
