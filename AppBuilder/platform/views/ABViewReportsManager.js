@@ -1,9 +1,5 @@
 const ABViewReportsManagerCore = require("../../core/views/ABViewReportsManagerCore");
 
-function L(...params) {
-   return AB.Label(...params);
-}
-
 module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
    constructor(values, application, parent, defaultValues) {
       super(values, application, parent, defaultValues);
