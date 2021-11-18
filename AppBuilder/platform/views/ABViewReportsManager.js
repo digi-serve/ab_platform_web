@@ -430,7 +430,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                                          r.condition.filter
                                                       )
                                                    ) {
-                                                      r.condition.filter = new Date(
+                                                      r.condition.filter = this.AB.toDate(
                                                          r.condition.filter
                                                       );
                                                    }
@@ -443,7 +443,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                                             .start
                                                       )
                                                    ) {
-                                                      r.condition.filter.start = new Date(
+                                                      r.condition.filter.start = this.AB.toDate(
                                                          r.condition.filter.start
                                                       );
                                                    }
@@ -454,7 +454,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                                          r.condition.filter.end
                                                       )
                                                    ) {
-                                                      r.condition.filter.end = new Date(
+                                                      r.condition.filter.end = this.AB.toDate(
                                                          r.condition.filter.end
                                                       );
                                                    }
