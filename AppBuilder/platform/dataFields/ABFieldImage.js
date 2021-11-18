@@ -347,7 +347,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
                      await this.save();
 
                      // TODO: a reminder that you still got alot on the server to do!
-                     this.AB.alert({
+                     webix.alert({
                         title: "!! TODO !!",
                         text:
                            "ABFieldImage.destroy(): Tell a Developer to actually pay attention to this!",

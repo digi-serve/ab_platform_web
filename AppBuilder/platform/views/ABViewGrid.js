@@ -1261,7 +1261,7 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                   },
                });
             } else {
-               App.AB.alert({
+               webix.alert({
                   title: L("No Records Selected"),
                   text: L(
                      "You need to select at least one record...did you drink your coffee today?"
