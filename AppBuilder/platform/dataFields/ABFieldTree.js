@@ -541,6 +541,11 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
 
                            try {
                               await field.object.model().update(row.id, values);
+
+                              // update the client side data object as well so other data changes won't cause this save to be reverted
+                              if (view && view.updateItem) {
+                                 view.updateItem(row.id, values);
+                              }
                            } catch (err) {
                               node.classList.add("webix_invalid");
                               node.classList.add("webix_invalid_cell");
@@ -550,11 +555,6 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
                                  row: row,
                                  values: values,
                               });
-                           }
-
-                           // update the client side data object as well so other data changes won't cause this save to be reverted
-                           if (view && view.updateItem) {
-                              view.updateItem(row.id, values);
                            }
                         } else {
                            var rowData = {};
