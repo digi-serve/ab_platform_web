@@ -107,7 +107,7 @@ module.exports = class ABViewImage extends ABViewImageCore {
                },
                {
                   view: "uploader",
-                  value: "*Upload image",
+                  value: L("Upload image"),
                   name: "file",
                   apiOnly: true,
                   inputName: "image",

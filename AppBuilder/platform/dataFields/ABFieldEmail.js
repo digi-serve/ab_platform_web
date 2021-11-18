@@ -72,7 +72,7 @@ var ABFieldEmailComponent = new ABFieldComponent({
             if (!webix.rules.isEmail(emailDefault)) {
                $$(ids.component).markInvalid(
                   "default",
-                  "*This email is invalid"
+                  L("*This email is invalid")
                );
                return false;
             } else return true;

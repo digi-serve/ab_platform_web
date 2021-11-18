@@ -157,7 +157,7 @@ module.exports = class ABViewDocxBuilder extends ABViewDocxBuilderCore {
                         },
                         {
                            view: "uploader",
-                           value: "*Upload",
+                           value: L("Upload"),
                            name: "docxFile",
                            apiOnly: true,
                            inputName: "file",

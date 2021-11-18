@@ -1272,7 +1272,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
       // Display required messages
       requiredFields.forEach((f) => {
          if (f && !formVals[f.columnName] && formVals[f.columnName] != "0") {
-            formView.markInvalid(f.columnName, "*This is a required field.");
+            formView.markInvalid(f.columnName, L("This is a required field."));
             isValid = false;
 
             // Fix position of invalid message
