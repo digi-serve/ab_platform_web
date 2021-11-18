@@ -587,6 +587,22 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
                   if (row.id) {
                      try {
                         await this.object.model().update(row.id, values);
+
+                        // update the client side data object as well so other data changes won't cause this save to be reverted
+                        if (
+                           $$(node) &&
+                           $$(node).getItem &&
+                           $$(node).getItem(row.id)
+                        ) {
+                           $$(node).updateItem(row.id, values);
+                        } else {
+                           // if you scroll the table the connection to the datatable is lost so we need to find it again
+                           var dataTable = document.querySelector(
+                              ".webix_dtable"
+                           );
+                           if ($$(dataTable) && $$(dataTable).getItem(row.id))
+                              $$(dataTable).updateItem(row.id, values);
+                        }
                      } catch (err) {
                         node.classList.add("webix_invalid");
                         node.classList.add("webix_invalid_cell");
@@ -598,20 +614,6 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
                            row,
                            values,
                         });
-                     }
-
-                     // update the client side data object as well so other data changes won't cause this save to be reverted
-                     if (
-                        $$(node) &&
-                        $$(node).getItem &&
-                        $$(node).getItem(row.id)
-                     ) {
-                        $$(node).updateItem(row.id, values);
-                     } else {
-                        // if you scroll the table the connection to the datatable is lost so we need to find it again
-                        var dataTable = document.querySelector(".webix_dtable");
-                        if ($$(dataTable) && $$(dataTable).getItem(row.id))
-                           $$(dataTable).updateItem(row.id, values);
                      }
                   }
 
