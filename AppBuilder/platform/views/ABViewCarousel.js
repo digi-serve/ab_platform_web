@@ -512,13 +512,13 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
 
                try {
                   await dv.loadData(this._rowCount || 0);
-                  _logic.ready();
                } catch (err) {
                   App.AB.log("Error load data:", {
                      error: err,
                   });
-                  _logic.ready();
                }
+
+               _logic.ready();
             }
          },
 
