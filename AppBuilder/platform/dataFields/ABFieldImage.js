@@ -329,8 +329,6 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
     * On a destroy operation, ask if the user wants to keep the related images.
     */
    async destroy() {
-      var L = this.AB.Label();
-
       return new Promise((resolve, reject) => {
          // verify we have been .save()d before:
          if (this.id) {
@@ -667,8 +665,6 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
             row.removeDefaultImage = [];
          }
          row.removeDefaultImage[this.columnName] = true;
-
-         let L = this.AB.Label();
 
          // Ask the user if they really want to delete the photo
          this.AB.Webix.confirm({
