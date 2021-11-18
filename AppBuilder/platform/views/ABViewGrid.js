@@ -1246,7 +1246,7 @@ module.exports = class ABViewGrid extends ABViewGridCore {
             });
 
             if (deleteTasks.length > 0) {
-               App.AB.Webix.confirm({
+               webix.confirm({
                   title: L("Delete Multiple Records"),
                   text: L(
                      "Are you sure you want to delete the selected records?"

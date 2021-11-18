@@ -164,7 +164,7 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
          }
 
          // Ask the user what to do about the existing file:
-         this.AB.Webix.confirm({
+         webix.confirm({
             title: L("Keep Files?"),
             message: L("Do you want to keep the files referenced by {0}?", [
                this.label,
@@ -413,7 +413,7 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
          delete this.deleteFile;
 
          // Ask the user if they really want to delete the photo
-         this.AB.Webix.confirm({
+         webix.confirm({
             title: "",
             message: L("Are you sure you want to remove this file?"),
             callback: async (result) => {

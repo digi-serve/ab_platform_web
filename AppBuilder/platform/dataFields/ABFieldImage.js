@@ -333,7 +333,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
          // verify we have been .save()d before:
          if (this.id) {
             // Ask the user what to do about the existing images:
-            this.AB.Webix.confirm({
+            webix.confirm({
                title: L("Keep Images?"),
                message: L("Do you want to keep the images referenced by {0}?", [
                   this.label,
@@ -667,7 +667,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
          row.removeDefaultImage[this.columnName] = true;
 
          // Ask the user if they really want to delete the photo
-         this.AB.Webix.confirm({
+         webix.confirm({
             title: "",
             message: L("Are you sure you want to remove this image?"),
             callback: async (result) => {

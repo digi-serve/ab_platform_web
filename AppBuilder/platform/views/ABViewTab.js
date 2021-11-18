@@ -241,7 +241,7 @@ module.exports = class ABViewTab extends ABViewTabCore {
             var tabId = $$(ids.component).getValue();
             var deletedView = this.views((v) => v.id == tabId)[0];
             if (deletedView) {
-               App.AB.Webix.confirm({
+               webix.confirm({
                   title: L("Delete tab"),
                   text: L("Do you want to delete <b>{0}</b>?", [
                      deletedView.label,

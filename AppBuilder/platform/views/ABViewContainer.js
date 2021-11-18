@@ -163,7 +163,7 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
             var deletedView = this.views((v) => v.id == id)[0];
             if (!deletedView) return false;
 
-            App.AB.Webix.confirm({
+            webix.confirm({
                title: L("Delete component"),
                text: L("Do you want to delete <b>{0}</b>?", [
                   deletedView.label,

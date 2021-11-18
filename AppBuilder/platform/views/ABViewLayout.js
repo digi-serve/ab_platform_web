@@ -64,7 +64,7 @@ module.exports = class ABViewLayout extends ABViewLayoutCore {
                return v.id == id;
             })[0];
 
-            App.AB.Webix.confirm({
+            webix.confirm({
                title: L("Delete component"),
                text: L("Do you want to delete <b>{0}</b>?", [view.label]),
                callback: (result) => {
