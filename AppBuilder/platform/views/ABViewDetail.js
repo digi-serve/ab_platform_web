@@ -61,7 +61,7 @@ module.exports = class ABViewDetail extends ABViewDetailCore {
          let fieldSaves = [];
          let fields = $$(ids.fields).find({});
          fields.reverse();
-         fields.forEach(async (f, index) => {
+         fields.forEach((f, index) => {
             if (!f.selected) {
                let yPosition = fields.length - index - 1;
 
