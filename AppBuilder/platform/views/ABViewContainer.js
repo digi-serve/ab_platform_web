@@ -284,7 +284,7 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
             } catch (err) {
                App.AB.notify.developer(err, {
                   message: "Error trying to save selected View:",
-                  view: this,
+                  view: this.toObj(),
                });
                _logic.ready();
             }
