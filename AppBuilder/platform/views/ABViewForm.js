@@ -1417,7 +1417,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
                });
                this.AB.notify.developer(err, {
                   message: "Could not save your data",
-                  view: this,
+                  view: this.toObj(),
                });
             }
          }
@@ -1443,7 +1443,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
                      .catch((err) => {
                         this.AB.notify.developer(err, {
                            message: "Error processing Record Rules.",
-                           view: this,
+                           view: this.toObj(),
                            newFormVals: newFormVals,
                         });
                         // Question:  how do we respond to an error?
@@ -1472,7 +1472,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
                      .catch((err) => {
                         this.AB.notify.developer(err, {
                            message: "Error processing Record Rules.",
-                           view: this,
+                           view: this.toObj(),
                            newFormVals: newFormVals,
                         });
                         // Question:  how do we respond to an error?
