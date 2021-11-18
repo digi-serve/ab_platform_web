@@ -681,6 +681,13 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
 
                   try {
                      await this.object.model().update(row.id, values);
+
+                     // update the client side data object as well so other data changes won't cause this save to be reverted
+                     if ($$(node) && $$(node).updateItem)
+                        $$(node).updateItem(row.id, values);
+
+                     // update value in the form component
+                     this.setValue($$(node), values);
                   } catch (err) {
                      node.classList.add("webix_invalid");
                      node.classList.add("webix_invalid_cell");
@@ -693,13 +700,6 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
                         values: values,
                      });
                   }
-
-                  // update the client side data object as well so other data changes won't cause this save to be reverted
-                  if ($$(node) && $$(node).updateItem)
-                     $$(node).updateItem(row.id, values);
-
-                  // update value in the form component
-                  this.setValue($$(node), values);
                }
             },
          });
