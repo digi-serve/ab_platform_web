@@ -1,3 +1,5 @@
+require("../../../js/webix/components/pivot/pivot");
+
 const ABViewPivotCore = require("../../core/views/ABViewPivotCore");
 const ABFieldCalculate = require("../dataFields/ABFieldCalculate");
 const ABFieldFormula = require("../dataFields/ABFieldFormula");
@@ -9,8 +11,6 @@ let L = (...params) => AB.Multilingual.label(...params);
 module.exports = class ABViewPivot extends ABViewPivotCore {
    constructor(values, application, parent, defaultValues) {
       super(values, application, parent, defaultValues);
-
-      require("../../../js/webix/components/pivot/pivot");
    }
 
    //
