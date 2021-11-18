@@ -178,7 +178,7 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
                   await this.save();
 
                   // TODO: a reminder that you still got alot on the server to do!
-                  this.AB.alert({
+                  webix.alert({
                      title: "!! TODO !!",
                      text:
                         "Tell a Developer to actually pay attention to this!",
