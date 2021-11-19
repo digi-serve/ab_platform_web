@@ -157,6 +157,11 @@ module.exports = class ABViewFormTextbox extends ABViewFormTextboxCore {
          ) {
             // recreate rich editor
             webix.ui(component.ui, $$(component.ui.id));
+            // Add dataCy to TinyMCE text editor
+            $$(component.ui.id).getChildViews()[0].getEditor(true).then((editor) => {
+               const dataCy = `${this.key} rich ${component.ui.name} ${this.id} ${this.parent.id}`;
+               editor.contentAreaContainer.setAttribute('data-cy', dataCy);
+            });
          }
       };
 
