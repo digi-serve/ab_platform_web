@@ -125,6 +125,7 @@ module.exports = class ABViewPropertyAddPage extends ABViewProperty {
    component(App, idBase) {
       let ids = {
          popup: App.unique(idBase + "_popup_add_new"),
+         field: idBase.split('_')[1],
       };
 
       let ui = "";
@@ -135,8 +136,9 @@ module.exports = class ABViewPropertyAddPage extends ABViewProperty {
       ) {
          let iDiv = document.createElement("div");
          iDiv.className = "ab-connect-add-new";
+         const dataCy = `add new CR button ${this.settings.formView} ${ids.field}`
          iDiv.innerHTML =
-            '<a href="javascript:void(0);" class="fa fa-plus ab-connect-add-new-link"></a>';
+            `<a href="javascript:void(0);" class="fa fa-plus ab-connect-add-new-link" data-cy="${dataCy}"></a>`;
          // iDiv.appendChild(node);
          ui = iDiv.outerHTML;
       }
