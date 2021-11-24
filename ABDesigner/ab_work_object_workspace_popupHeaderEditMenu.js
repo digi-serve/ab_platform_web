@@ -12,7 +12,7 @@ module.exports = class ABWorkObjectPopupHeaderEditMenu extends ABComponent {
       idBase = idBase || "ab_work_object_workspace_popupHeaderEditMenu";
 
       super(App, idBase);
-      var L = this.Label;
+      var L = this.Label();
 
       var ids = {
          component: this.unique(`${idBase}_popupEditHeader`),

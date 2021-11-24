@@ -13,7 +13,7 @@ module.exports = class AB_Work_Object_Workspace_PopupFrozenColumns extends ABCom
    constructor(App, idBase) {
       idBase = idBase || "ab_work_object_workspace_popupFrozenColumns";
       super(App, idBase);
-      var L = this.Label;
+      var L = this.Label();
 
       // internal list of Webix IDs to reference our UI components
       var ids = {

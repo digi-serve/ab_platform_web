@@ -15,7 +15,7 @@ module.exports = class AB_Work_Object_Workspace_PopupMassUpdate extends ABCompon
       idBase = idBase || "ab_work_object_workspace_popupMassUpdate";
 
       super(App, idBase);
-      let L = this.Label;
+      let L = this.Label();
 
       // internal list of Webix IDs to reference our UI components
       let ids = {

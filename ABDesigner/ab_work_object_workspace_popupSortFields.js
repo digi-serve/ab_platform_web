@@ -14,7 +14,7 @@ module.exports = class AB_Work_Object_Workspace_PopupSortFields extends ABCompon
       idBase = idBase || "ab_work_object_workspace_popupSortFields";
 
       super(App, idBase);
-      var L = this.Label;
+      var L = this.Label();
 
       // internal list of Webix IDs to reference our UI components
       var ids = {

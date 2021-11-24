@@ -5,6 +5,8 @@
  *
  */
 
+require("../js/webix/components/kanban/kanban");
+
 const ABComponent = require("../AppBuilder/platform/ABComponent");
 
 const ABFieldConnect = require("../AppBuilder/platform/dataFields/ABFieldConnect");
@@ -21,12 +23,10 @@ module.exports = class ABWorkObjectKanBan extends ABComponent {
     */
 
    constructor(App, idBase) {
-      require("../js/webix/components/kanban/kanban");
-
       idBase = idBase || "ab_work_object_workspace_kanban";
       super(App, idBase);
 
-      var L = this.Label;
+      var L = this.Label();
 
       // internal list of Webix IDs to reference our UI components.
       var ids = {

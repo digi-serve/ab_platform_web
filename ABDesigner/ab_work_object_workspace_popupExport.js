@@ -12,7 +12,7 @@ module.exports = class ABWorkObjectPopupExport extends ABComponent {
       idBase = idBase || "ab_work_object_workspace_popupExport";
 
       super(App, idBase);
-      var L = this.Label;
+      var L = this.Label();
 
       var labels = {
          common: App.labels,

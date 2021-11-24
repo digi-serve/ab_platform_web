@@ -12,7 +12,7 @@ module.exports = class AB_Work_Object_Workspace_PopupCountColumns extends ABComp
       idBase = idBase || "ab_work_object_workspace_popupCountColumns";
 
       super(App, idBase);
-      var L = this.Label;
+      var L = this.Label();
 
       // internal list of Webix IDs to reference our UI components
       var ids = {
