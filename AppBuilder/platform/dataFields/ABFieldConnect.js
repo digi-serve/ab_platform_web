@@ -1071,6 +1071,8 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          this.AB.notify.developer(err, {
             message: "Error pull data from our linked model.",
          });
+
+         return [];
       }
 
       // populate display text
