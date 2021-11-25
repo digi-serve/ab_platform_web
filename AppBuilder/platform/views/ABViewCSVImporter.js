@@ -801,9 +801,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                if ($$(ids.headerOnFirstLine).getValue()) {
                   length = _dataRows.length - 1;
                }
-               $$(ids.importButton).setValue(
-                  `${L("Import")} ${length} Records`
-               );
+               $$(ids.importButton).setValue(L("Import {0} Records", [length]));
 
                _logic.populateColumnList();
 
@@ -1310,7 +1308,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
             }
 
             $$(ids.importButton).setValue(
-               `${L("Import")} ${parsedData.length} Records`
+               L("Import {0} Records", [parsedData.length])
             );
 
             $datatable.refreshColumns(columns);
@@ -1369,7 +1367,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
             } else {
                var selected = $$(ids.datatable).find({ _included: true });
                $$(ids.importButton).setValue(
-                  `${L("Import")} ${selected.length} Records`
+                  L("Import {0} Records", [selected.length])
                );
             }
          },
@@ -1626,7 +1624,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
 
                var selected = $$(ids.datatable).find({ _included: true });
                $$(ids.importButton).setValue(
-                  `${L("Import")} ${selected.length} Records`
+                  L("Import {0} Records", [selected.length])
                );
 
                // _logic.hide();
@@ -2036,9 +2034,9 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                .catch((err) => {
                   // resolve Error UI
                   webix.alert({
-                     title: "Error Creating Records",
-                     ok: "Okay",
-                     text: "One or more records failed upon creation.",
+                     title: L("Error Creating Records"),
+                     ok: L("Okay"),
+                     text: L("One or more records failed upon creation."),
                   });
                   // $$(ids.datatable).unblockEvent();
                   uiCleanUp();
