@@ -95,7 +95,10 @@ module.exports = class ABViewRuleList {
             view: "toolbar",
             css: "webix_dark",
             cols: [
-               { view: "label", label: this.childSettings.labels.header },
+               {
+                  view: "label",
+                  label: this.childSettings.labels.headerDefault,
+               },
                {
                   view: "button",
                   css: "webix_primary",
