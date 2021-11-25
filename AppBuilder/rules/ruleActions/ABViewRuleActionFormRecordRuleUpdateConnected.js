@@ -219,10 +219,9 @@ module.exports = class ABViewRuleActionFormRecordRuleUpdateConnected extends (
                   }
                }
             } else {
-               this.AB.notify.builder(
-                  new Error("No connectedObject found."),
-                  {}
-               );
+               this.AB.notify.builder(new Error("No connectedObject found."), {
+                  fieldID: this.selectedFieldID,
+               });
             }
          },
 
