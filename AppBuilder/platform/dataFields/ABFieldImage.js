@@ -129,7 +129,7 @@ var ABFieldImageComponent = new ABFieldComponent({
                      // if an error was returned
                      onFileUploadError: function (item, response) {
                         App.AB.notify.developer(
-                           {},
+                           new Error("Error loading image"),
                            {
                               message: "Error loading image",
                               response,
