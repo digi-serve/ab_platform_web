@@ -180,7 +180,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
             if (!UpdateForm) {
                // this is a problem!
                this.currentForm.AB.notify.developer(
-                  {},
+                  new Error("Could not find webix form"),
                   {
                      message:
                         "ABViewRuleActionFormRecordRuleUpdateConnected.formGet() could not find webix form.",
@@ -1187,6 +1187,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
             var model = dv.model;
             model
                .update(options.data.id, options.data)
+               .then(resolve)
                .catch((err) => {
                   this.currentForm.AB.notify.developer(err, {
                      message:
@@ -1194,8 +1195,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                      data: options.data,
                   });
                   reject(err);
-               })
-               .then(resolve);
+               });
          }
       });
    }
