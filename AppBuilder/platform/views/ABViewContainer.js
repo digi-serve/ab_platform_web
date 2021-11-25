@@ -191,29 +191,27 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
 
                   try {
                      await deletedView.destroy();
+
+                     // signal the current view has been deleted.
+                     deletedView.emit("destroyed", deletedView);
+
+                     let Dashboard = $$(ids.component);
+
+                     // Update UI
+                     var deletedElem = Dashboard.queryView({ name: id });
+                     if (deletedElem) {
+                        Dashboard.blockEvent();
+                        Dashboard.removeView(deletedElem);
+                        Dashboard.unblockEvent();
+                     }
+
+                     _logic.showEmptyPlaceholder();
                   } catch (err) {
                      App.AB.notify.developer(err, {
                         message: "Error trying to delete selected View:",
                         view: deletedView,
                      });
-
-                     _logic.ready();
                   }
-
-                  // signal the current view has been deleted.
-                  deletedView.emit("destroyed", deletedView);
-
-                  let Dashboard = $$(ids.component);
-
-                  // Update UI
-                  var deletedElem = Dashboard.queryView({ name: id });
-                  if (deletedElem) {
-                     Dashboard.blockEvent();
-                     Dashboard.removeView(deletedElem);
-                     Dashboard.unblockEvent();
-                  }
-
-                  _logic.showEmptyPlaceholder();
 
                   _logic.ready();
                },
