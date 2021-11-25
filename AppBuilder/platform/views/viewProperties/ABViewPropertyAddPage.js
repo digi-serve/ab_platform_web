@@ -210,7 +210,7 @@ module.exports = class ABViewPropertyAddPage extends ABViewProperty {
                         },
                         {
                            view: "button",
-                           label: "Close",
+                           label: L("Close"),
                            autowidth: true,
                            align: "center",
                            click: function () {

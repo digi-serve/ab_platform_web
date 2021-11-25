@@ -155,14 +155,14 @@ module.exports = class ABProcessTaskUserApproval extends (
                cols: [
                   {
                      view: "label",
-                     label: "Data To Approve",
+                     label: L("Data To Approve"),
                   },
                   {
                      view: "spacer",
                   },
                   {
                      view: "button",
-                     value: "Customize Layout",
+                     value: L("Customize Layout"),
                      autowidth: true,
                      click: () => {
                         webix
@@ -182,14 +182,16 @@ module.exports = class ABProcessTaskUserApproval extends (
                                     },
                                     {
                                        view: "label",
-                                       label: "Customize the approval layout",
+                                       label: L(
+                                          "Customize the approval layout"
+                                       ),
                                     },
                                     {
                                        view: "spacer",
                                     },
                                     {
                                        view: "button",
-                                       label: "Cancel",
+                                       label: L("Cancel"),
                                        autowidth: true,
                                        click: function () {
                                           $$(ids.modalWindow).close();
@@ -198,7 +200,7 @@ module.exports = class ABProcessTaskUserApproval extends (
                                     {
                                        view: "button",
                                        css: "webixtype_form",
-                                       label: "Save",
+                                       label: L("Save"),
                                        autowidth: true,
                                        click: () => {
                                           this.formBuilder = $$(

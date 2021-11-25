@@ -188,7 +188,7 @@ module.exports = class ABViewDocxBuilder extends ABViewDocxBuilderCore {
                      type: "icon",
                      css: "webix_primary",
                      icon: "fa fa-file-word-o",
-                     label: "Download Template File",
+                     label: L("Download Template File"),
                      click: () => {
                         _logic.downloadFile();
                      },
@@ -435,7 +435,7 @@ module.exports = class ABViewDocxBuilder extends ABViewDocxBuilderCore {
             {
                id: ids.noFile,
                view: "label",
-               label: "No template file",
+               label: L("No template file"),
             },
             {
                type: "spacer",

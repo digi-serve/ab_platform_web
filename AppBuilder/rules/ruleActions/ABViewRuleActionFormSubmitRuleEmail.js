@@ -97,12 +97,12 @@ module.exports = class ABViewRuleActionFormSubmitRuleEmail extends (
                      {
                         view: "text",
                         name: "fromName",
-                        label: "From Name",
+                        label: L("From Name"),
                      },
                      {
                         view: "text",
                         name: "fromEmail",
-                        label: "From Email",
+                        label: L("From Email"),
                         validate: webix.rules.isEmail,
                         on: {
                            onChange: function (newVal, oldVal) {
@@ -121,7 +121,7 @@ module.exports = class ABViewRuleActionFormSubmitRuleEmail extends (
                         id: ids.toEmailsContainer,
                         view: "forminput",
                         name: "toEmails",
-                        label: "Send",
+                        label: L("Send"),
                         css: "ab-rich-text",
                         width: 320,
                         body: {
@@ -141,7 +141,7 @@ module.exports = class ABViewRuleActionFormSubmitRuleEmail extends (
                                  css: "webix_primary",
                                  type: "icon",
                                  icon: "fa fa-plus",
-                                 label: "Add a recipient",
+                                 label: L("Add a recipient"),
                                  width: 150,
                                  click: () => {
                                     _logic.toEmailAdd();
@@ -153,13 +153,13 @@ module.exports = class ABViewRuleActionFormSubmitRuleEmail extends (
                      {
                         view: "text",
                         name: "subject",
-                        label: "Subject",
+                        label: L("Subject"),
                      },
                      {
                         view: "textarea",
                         id: ids.message,
                         name: "message",
-                        label: "Message",
+                        label: L("Message"),
                         width: 320,
                         height: 400,
                      },
@@ -317,10 +317,10 @@ module.exports = class ABViewRuleActionFormSubmitRuleEmail extends (
                      options: [
                         {
                            id: "email",
-                           value: "A custom email address",
+                           value: L("A custom email address"),
                         },
-                        { id: "field", value: "An email field" },
-                        { id: "query", value: "From query" },
+                        { id: "field", value: L("An email field") },
+                        { id: "query", value: L("From query") },
                      ],
                      on: {
                         onChange: function (newVal, oldVal) {

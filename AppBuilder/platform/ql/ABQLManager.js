@@ -54,10 +54,11 @@ var ABQLManager = {
     */
    builder: function (rootOP, task, AB) {
       // var rootOP = this.fromAttributes(attributes, task, AB);
+      let L = (...params) => AB.Multilingual.label(...params);
 
       return {
          ui: function (id) {
-            var options = [{ id: 0, value: "choose Root" }];
+            var options = [{ id: 0, value: L("choose Root") }];
             ABQLManagerCore.QLOps.forEach((op) => {
                options.push({ id: op.key, value: op.label });
             });
@@ -67,7 +68,7 @@ var ABQLManager = {
                rows: [
                   {
                      view: "label",
-                     label: "Query:",
+                     label: L("Query:"),
                   },
                   {
                      id: ids.root,

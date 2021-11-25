@@ -100,7 +100,7 @@ module.exports = class AB_Work_Object_Workspace_PopupNewDataField extends (
                         {
                            id: "del_me",
                            view: "label",
-                           label: "edit definition here",
+                           label: L("edit definition here"),
                         },
                      ],
                   },
@@ -159,7 +159,7 @@ module.exports = class AB_Work_Object_Workspace_PopupNewDataField extends (
       // Our init() function for setting up our UI
       this.init = (options) => {
          // register our callbacks:
-         for (var c in _logic.callbacks) {
+         for (let c in _logic.callbacks) {
             _logic.callbacks[c] = options[c] || _logic.callbacks[c];
          }
 
@@ -213,7 +213,7 @@ module.exports = class AB_Work_Object_Workspace_PopupNewDataField extends (
          webix.ui(newEditorList, $$(ids.editDefinitions));
 
          // init & hide all the unused editors:
-         for (var c in _componentHash) {
+         for (let c in _componentHash) {
             _componentHash[c].init();
 
             _componentHash[c].hide();
@@ -477,7 +477,10 @@ module.exports = class AB_Work_Object_Workspace_PopupNewDataField extends (
                   $$(ids.component).hideProgress();
                }
             } else {
-               this.AB.notify.developer(new Error("Could not find the current editor."), {});
+               this.AB.notify.developer(
+                  new Error("Could not find the current editor."),
+                  {}
+               );
 
                $$(ids.buttonSave).enable();
                $$(ids.component).hideProgress();

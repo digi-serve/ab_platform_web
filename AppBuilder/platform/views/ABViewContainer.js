@@ -379,7 +379,7 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
                   view: "counter",
                   value: "1",
                   min: 1,
-                  label: "Column " + newVal + " Gravity",
+                  label: L("Column {0} Gravity", [newVal]),
                   labelWidth: this.AB.Config.labelWidthXLarge,
                   css: "gravity_counter",
                   on: {
@@ -452,7 +452,7 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
                {
                   view: "counter",
                   min: 1,
-                  label: "Column " + step + " Gravity",
+                  label: L("Column {0} Gravity", [step]),
                   labelWidth: this.AB.Config.labelWidthXLarge,
                   css: "gravity_counter",
                   value:

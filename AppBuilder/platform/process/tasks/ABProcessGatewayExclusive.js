@@ -65,17 +65,17 @@ module.exports = class ABProcessGatewayExclusive extends (
 
          var connUI = {
             view: "fieldset",
-            label: `to ${
+            label: L("to {0}", [
                connectedElement
                   ? connectedElement.name
-                  : "unlabeled Task(" + conn.id + ")"
-            }`,
+                  : L("unlabeled Task({0})", [conn.id]),
+            ]),
             body: {
                rows: [
                   {
                      id: `${id}_${conn.id}_label`,
                      view: "text",
-                     label: "Label",
+                     label: L("Label"),
                      value: condition.label || "",
                   },
                   DF.ui,

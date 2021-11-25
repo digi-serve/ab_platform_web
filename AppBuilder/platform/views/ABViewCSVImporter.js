@@ -866,7 +866,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                for (let i = 0; i < firstLine.length; i++) {
                   csvColumnList.push({
                      id: i + 1, // webix .options list disallow value 0
-                     value: "Column " + (i + 1),
+                     value: `${L("Column")} ${i + 1}`,
                      key: csvImporter.getGuessDataType(_dataRows, i),
                   });
                }
@@ -875,7 +875,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
             // Add unselect item
             csvColumnList.unshift({
                id: "none",
-               value: "[None]",
+               value: L("[None]"),
             });
 
             // populate columns to UI

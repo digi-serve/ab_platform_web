@@ -43,7 +43,7 @@ module.exports = class InsertRecordTask extends InsertRecordTaskCore {
          let result = [];
          result.push({
             id: "PK",
-            value: "[Primary Key]",
+            value: L("[Primary Key]"),
          });
 
          object.fields().forEach((f) => {
@@ -53,7 +53,7 @@ module.exports = class InsertRecordTask extends InsertRecordTaskCore {
                if (linkDS) {
                   result.push({
                      id: `${f.id}|PK`,
-                     value: `${f.label} -> [Primary Key]`,
+                     value: `${f.label} -> ${L("[Primary Key]")}`,
                   });
 
                   linkDS.fields().forEach((linkF) => {
@@ -273,7 +273,7 @@ module.exports = class InsertRecordTask extends InsertRecordTaskCore {
             },
             {
                view: "fieldset",
-               label: "Values",
+               label: L("Values"),
                body: {
                   id: ids.fieldValues,
                   view: "form",

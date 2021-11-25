@@ -615,7 +615,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                            $componentView,
                            {
                               view: "label",
-                              label: "<a>Or exists value</a>",
+                              label: `<a>${L("Or exists value")}</a>`,
                               on: {
                                  onItemClick: function () {
                                     var $container = this.getParentView(),
@@ -634,7 +634,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                            $optionUpdateExsits,
                            {
                               view: "label",
-                              label: "<a>Or custom value</a>",
+                              label: `<a>${L("Or custom value")}</a>`,
                               on: {
                                  onItemClick: function () {
                                     var $container = this.getParentView(),

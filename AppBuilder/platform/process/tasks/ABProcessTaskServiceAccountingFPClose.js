@@ -42,7 +42,7 @@ module.exports = class AccountingFPClose extends AccountingFPCloseCore {
    propertiesShow(id) {
       var ids = this.propertyIDs(id);
 
-      var processValues = [{ id: 0, value: "Select a Process Value" }];
+      var processValues = [{ id: 0, value: L("Select a Process Value") }];
       var processDataFields = this.process.processDataFields(this);
       (processDataFields || []).forEach((row) => {
          processValues.push({ id: row.key, value: row.label });

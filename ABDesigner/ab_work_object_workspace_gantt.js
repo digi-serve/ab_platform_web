@@ -70,19 +70,19 @@ module.exports = class ABWorkObjectGantt extends ABComponent {
                      data: [
                         {
                            id: "day",
-                           value: "Day",
+                           value: L("Day"),
                         },
                         {
                            id: "week",
-                           value: "Week",
+                           value: L("Week"),
                         },
                         {
                            id: "month",
-                           value: "Month",
+                           value: L("Month"),
                         },
                         {
                            id: "year",
-                           value: "Year",
+                           value: L("Year"),
                         },
                      ],
                      on: {
@@ -403,7 +403,9 @@ module.exports = class ABWorkObjectGantt extends ABComponent {
             try {
                return await CurrentObject.model().create(patch);
             } catch (err) {
-               this.AB.notify.developer(err, { message: "Error when's adding a task in gantt workspace" });
+               this.AB.notify.developer(err, {
+                  message: "Error when's adding a task in gantt workspace",
+               });
             }
          },
 
@@ -413,7 +415,9 @@ module.exports = class ABWorkObjectGantt extends ABComponent {
             try {
                await CurrentObject.model().update(rowId, patch);
             } catch (err) {
-               this.AB.notify.developer(err, { message: "Error when's updating a task in gantt workspace" });
+               this.AB.notify.developer(err, {
+                  message: "Error when's updating a task in gantt workspace",
+               });
             }
          },
 
@@ -421,7 +425,9 @@ module.exports = class ABWorkObjectGantt extends ABComponent {
             try {
                await CurrentObject.model().delete(rowId);
             } catch (err) {
-               this.AB.notify.developer(err, { message: "Error when's deleting a task in gantt workspace" });
+               this.AB.notify.developer(err, {
+                  message: "Error when's deleting a task in gantt workspace",
+               });
             }
          },
 

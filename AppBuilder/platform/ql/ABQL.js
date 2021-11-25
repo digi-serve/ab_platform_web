@@ -11,6 +11,8 @@ const ABQLCore = require("../../core/ql/ABQLCore.js");
 const FilterComplex = require("../FilterComplex.js");
 const RowUpdater = require("../RowUpdater.js");
 
+const L = (...params) => AB.Multilingual.label(...params);
+
 class ABQL extends ABQLCore {
    // constructor(attributes, parameterDefinitions, prevOP, task, application) {
    //     super(attributes, parameterDefinitions, prevOP, task, application);
@@ -201,7 +203,7 @@ class ABQL extends ABQLCore {
       var options = this.constructor.NextQLOps.map((op) => {
          return { id: op.key, value: op.label };
       });
-      options.unshift({ id: 0, value: "choose next operation" });
+      options.unshift({ id: 0, value: L("choose next operation") });
 
       var myID = this.uiID(id);
       var ids = this.toIDs(myID);
@@ -524,7 +526,7 @@ class ABQL extends ABQLCore {
                         Updater.ui,
                         {
                            view: "button",
-                           value: "Save",
+                           value: L("Save"),
                            click: () => {
                               this.params = this.params || {};
                               this.params[pDef.name] = Updater.getValue();

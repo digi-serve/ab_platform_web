@@ -238,8 +238,8 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
                      label: L("Navigation Type"),
                      labelWidth: this.AB.Config.labelWidthLarge,
                      options: [
-                        { id: "corner", value: "Corner" },
-                        { id: "side", value: "Side" },
+                        { id: "corner", value: L("Corner") },
+                        { id: "side", value: L("Side") },
                      ],
                   },
 
@@ -576,7 +576,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
                   data: {
                      id: this.AB.uuid(),
                      src: `/file/${field.settings.defaultImageUrl}`,
-                     label: "Default image",
+                     label: L("Default image"),
                   },
                });
             }
@@ -595,7 +595,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
                      {
                         view: "label",
                         align: "center",
-                        label: "No image",
+                        label: L("No image"),
                      },
                   ],
                });

@@ -43,10 +43,10 @@ var ABFieldCombineComponent = new ABFieldComponent({
             labelWidth: this.AB.Config.labelWidthXLarge,
             disallowEdit: true,
             options: [
-               { id: "plus", value: "Plus ( + )" },
-               { id: "dash", value: "Dash ( - )" },
-               { id: "period", value: "Period ( . )" },
-               { id: "space", value: "Space ( )" },
+               { id: "plus", value: L("Plus ( + )") },
+               { id: "dash", value: L("Dash ( - )") },
+               { id: "period", value: L("Period ( . )") },
+               { id: "space", value: L("Space ( )") },
             ],
          },
       ];

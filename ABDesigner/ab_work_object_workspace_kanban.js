@@ -486,13 +486,17 @@ module.exports = class ABWorkObjectKanBan extends ABComponent {
                         $$(ids.kanban).remove(rowId);
                      } else {
                         webix.alert({
-                           text: L("No rows were effected. This does not seem right."),
+                           text: L(
+                              "No rows were effected. This does not seem right."
+                           ),
                         });
                      }
 
                      _logic.ready();
                   } catch (err) {
-                     App.AB.notify.developer(err, { message: "Error deleting item:" });
+                     App.AB.notify.developer(err, {
+                        message: "Error deleting item:",
+                     });
 
                      _logic.ready();
                   }

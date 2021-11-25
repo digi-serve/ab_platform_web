@@ -81,13 +81,13 @@ module.exports = class ABViewPropertyFilterData extends ABViewProperty {
                id: ids.filterOptionRadio,
                value: 0,
                options: [
-                  { id: 0, value: "Do not Allow User filters" },
-                  { id: 1, value: "Enable User filters" },
-                  { id: 2, value: "Use a filter menu" },
-                  { id: 3, value: "Use a global filter input" },
+                  { id: 0, value: L("Do not Allow User filters") },
+                  { id: 1, value: L("Enable User filters") },
+                  { id: 2, value: L("Use a filter menu") },
+                  { id: 3, value: L("Use a global filter input") },
                ],
                vertical: true,
-               label: "Filter Option",
+               label: L("Filter Option"),
                labelWidth: this.AB.Config.labelWidthLarge,
                on: {
                   onChange: (newValue, oldValue) => {
@@ -101,11 +101,11 @@ module.exports = class ABViewPropertyFilterData extends ABViewProperty {
                id: ids.filterGlobal,
                hidden: true,
                vertical: true,
-               label: "Show",
+               label: L("Show"),
                labelWidth: this.AB.Config.labelWidthLarge,
                options: [
-                  { id: "default", value: "All matching records" },
-                  { id: "single", value: "Single records only" },
+                  { id: "default", value: L("All matching records") },
+                  { id: "single", value: L("Single records only") },
                ],
             },
 
@@ -119,12 +119,12 @@ module.exports = class ABViewPropertyFilterData extends ABViewProperty {
                      vertical: true,
                      id: ids.filterUser,
                      value: "toolbar",
-                     label: "Display",
+                     label: L("Display"),
                      labelWidth: this.AB.Config.labelWidthLarge,
                      width: 200,
                      options: [
-                        { id: "toolbar", value: "Toolbar" },
-                        { id: "form", value: "Form" },
+                        { id: "toolbar", value: L("Toolbar") },
+                        { id: "form", value: L("Form") },
                      ],
                      on: {
                         onChange: (newValue) => {
@@ -136,7 +136,7 @@ module.exports = class ABViewPropertyFilterData extends ABViewProperty {
                      view: "checkbox",
                      id: ids.globalToolbar,
                      width: 350,
-                     labelRight: "Include a global filter input",
+                     labelRight: L("Include a global filter input"),
                   },
                   {},
                ],
@@ -163,7 +163,7 @@ module.exports = class ABViewPropertyFilterData extends ABViewProperty {
                         },
                         {
                            view: "label",
-                           label: '*need "LoadAll" from datasource',
+                           label: L('*need "LoadAll" from datasource'),
                            css: { color: "red" },
                            id: ids.needLoadAllLabel,
                            hidden: true,

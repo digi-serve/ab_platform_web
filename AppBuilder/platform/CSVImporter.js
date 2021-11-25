@@ -1,21 +1,12 @@
 let L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class CSVImporter {
-   constructor(App) {
-      this.labels = {
-         comma: L("Comma (,)"),
-         tab: L("Tab (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)"),
-         semicolon: L("Semicolon (;)"),
-         space: L("Space ( )"),
-      };
-   }
-
    getSeparateItems() {
       return [
-         { id: ",", value: this.labels.comma },
-         { id: "\t", value: this.labels.tab },
-         { id: ";", value: this.labels.semicolon },
-         { id: "s", value: this.labels.space },
+         { id: ",", value: L("Comma (,)") },
+         { id: "\t", value: L("Tab (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)") },
+         { id: ";", value: L("Semicolon (;)") },
+         { id: "s", value: L("Space ( )") },
       ];
    }
 

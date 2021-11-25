@@ -38,7 +38,7 @@ module.exports = class AccountingBatchProcessing extends (
    propertiesShow(id) {
       var ids = this.propertyIDs(id);
 
-      var processValues = [{ id: 0, value: "Select a Process Value" }];
+      var processValues = [{ id: 0, value: L("Select a Process Value") }];
       var processDataFields = this.process.processDataFields(this);
       (processDataFields || []).forEach((row) => {
          processValues.push({ id: row.key, value: row.label });
@@ -117,7 +117,7 @@ module.exports = class AccountingBatchProcessing extends (
       //      object.
 
       function compileStatusValues(statusField) {
-         var values = [{ id: 0, value: "Select the Complete Value" }];
+         var values = [{ id: 0, value: L("Select the Complete Value") }];
          if (statusField && statusField.options) {
             statusField.options().forEach((o) => {
                values.push({ id: o.id, value: o.text });

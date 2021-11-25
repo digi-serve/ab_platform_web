@@ -68,14 +68,6 @@ module.exports = class ABViewRuleList {
 
       this.currentForm = null;
 
-      var labels = (this.labels = {
-         common: App.labels,
-         component: {
-            header: L(this.childSettings.labels.header),
-            addNewRule: L("Add new rule"),
-         },
-      });
-
       // internal list of Webix IDs to reference our UI components.
       var ids = (this.ids = {
          component: `${idBase}_component`,
@@ -103,7 +95,7 @@ module.exports = class ABViewRuleList {
             view: "toolbar",
             css: "webix_dark",
             cols: [
-               { view: "label", label: labels.component.header },
+               { view: "label", label: this.childSettings.labels.header },
                {
                   view: "button",
                   css: "webix_primary",
@@ -157,7 +149,7 @@ module.exports = class ABViewRuleList {
                      {
                         view: "button",
                         name: "cancel",
-                        value: labels.common.cancel,
+                        value: L("Cancel"),
                         css: "ab-cancel-button",
                         autowidth: true,
                         click: function () {
@@ -168,7 +160,7 @@ module.exports = class ABViewRuleList {
                         view: "button",
                         css: "webix_primary",
                         name: "save",
-                        label: labels.common.save,
+                        label: L("Save"),
                         type: "form",
                         autowidth: true,
                         click: function () {

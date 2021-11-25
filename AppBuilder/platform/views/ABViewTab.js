@@ -384,7 +384,7 @@ module.exports = class ABViewTab extends ABViewTabCore {
                      view: "combo",
                      id: "ab-component-tab-icon",
                      name: "tabicon",
-                     label: "Icon",
+                     label: L("Icon"),
                      options: {
                         filter: function (item, value) {
                            if (

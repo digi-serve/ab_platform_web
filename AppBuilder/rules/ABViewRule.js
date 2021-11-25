@@ -224,8 +224,9 @@ module.exports = class ABViewRule {
                            view: "layout",
                            rows: [
                               {
-                                 label:
-                                    " ABViewRule: This should be the Set Area",
+                                 label: L(
+                                    " ABViewRule: This should be the Set Area"
+                                 ),
                                  css: "ab-text-bold",
                                  height: 30,
                               },

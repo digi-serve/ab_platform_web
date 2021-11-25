@@ -124,7 +124,7 @@ module.exports = class ABViewQueryBuilderObjectFieldConditions {
                      view: "button",
                      css: "webix_primary",
                      name: "addqb",
-                     value: "Add Custom Conditions",
+                     value: L("Add Custom Conditions"),
                      autowidth: true,
                      click: function () {
                         $$(ids.queryBuilderContainer).show();

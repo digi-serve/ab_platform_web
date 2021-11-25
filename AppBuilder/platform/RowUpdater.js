@@ -208,7 +208,7 @@ module.exports = class RowUpdater extends ABComponent {
                   inputView.options = inputView.options || [];
                   inputView.options.unshift({
                      id: "ab-current-user",
-                     value: "[Current User]",
+                     value: L("[Current User]"),
                   });
                   break;
                case "date":
@@ -219,7 +219,7 @@ module.exports = class RowUpdater extends ABComponent {
                         {
                            view: "checkbox",
                            labelWidth: 0,
-                           labelRight: "Current Date/Time",
+                           labelRight: L("Current Date/Time"),
                            on: {
                               onChange: function (newVal) {
                                  let layout = this.getParentView();

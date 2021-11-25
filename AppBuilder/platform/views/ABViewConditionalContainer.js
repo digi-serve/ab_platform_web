@@ -239,7 +239,7 @@ module.exports = class ABViewConditionalContainer extends (
                rows: [
                   {
                      view: "label",
-                     label: "Please wait...",
+                     label: L("Please wait..."),
                   },
                ],
             },

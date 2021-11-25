@@ -136,7 +136,7 @@ module.exports = class ABViewFormSelectSingle extends (
       if (component.ui.view == "radio" && component.ui.options.length < 1) {
          component.ui.options.push({
             id: "temp",
-            value: "Option",
+            value: L("Option"),
          });
       }
 

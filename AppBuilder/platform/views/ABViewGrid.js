@@ -967,7 +967,7 @@ module.exports = class ABViewGrid extends ABViewGridCore {
          rows: [
             {
                view: "label",
-               label: "Select an object to load.",
+               label: L("Select an object to load."),
                inputWidth: 200,
                align: "center",
             },

@@ -7,6 +7,8 @@
  */
 var ABProcessParticipantCore = require("../../core/process/ABProcessParticipantCore");
 
+const L = (...params) => AB.Multilingual.label(...params);
+
 module.exports = class ABProcessParticipant extends ABProcessParticipantCore {
    // constructor(attributes, process, AB) {
    //    super(attributes, process, AB);
@@ -138,7 +140,7 @@ module.exports = class ABProcessParticipant extends ABProcessParticipantCore {
                   {
                      id: ids.name,
                      view: "text",
-                     label: "Name",
+                     label: L("Name"),
                      name: "name",
                      value: this.name,
                   },

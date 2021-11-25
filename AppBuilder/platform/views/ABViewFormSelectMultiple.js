@@ -157,7 +157,7 @@ module.exports = class ABViewFormSelectMultiple extends (
       if (component.ui.view == "checkbox") {
          component.ui.options.push({
             id: "temp",
-            value: "Option",
+            value: L("Option"),
          });
       }
 

@@ -8,7 +8,9 @@
 const ABComponent = require("../AppBuilder/platform/ABComponent");
 const RowUpdater = require("../AppBuilder/platform/RowUpdater");
 
-module.exports = class AB_Work_Object_Workspace_PopupMassUpdate extends ABComponent {
+module.exports = class AB_Work_Object_Workspace_PopupMassUpdate extends (
+   ABComponent
+) {
    //.extend(idBase, function(App) {
 
    constructor(App, idBase) {
@@ -200,7 +202,9 @@ module.exports = class AB_Work_Object_Workspace_PopupMassUpdate extends ABCompon
             if (updatedRowIds.length > 0) {
                webix.confirm({
                   title: L("Updating Multiple Records"),
-                  text: L("Are you sure you want to update the selected records?"),
+                  text: L(
+                     "Are you sure you want to update the selected records?"
+                  ),
                   callback: function (result) {
                      if (result) {
                         if ($datatable && $datatable.showProgress)
@@ -243,7 +247,9 @@ module.exports = class AB_Work_Object_Workspace_PopupMassUpdate extends ABCompon
             } else {
                webix.alert({
                   title: L("No Records Selected"),
-                  text: L("You need to select at least one record...did you drink your coffee today?"),
+                  text: L(
+                     "You need to select at least one record...did you drink your coffee today?"
+                  ),
                });
                update_button.enable();
                _logic.hide();

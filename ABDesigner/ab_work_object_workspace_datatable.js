@@ -108,7 +108,7 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
          },
          dragColumn: true,
          on: {
-            onBeforeSelect: function(data, preserve, evt) {
+            onBeforeSelect: function (data, preserve, evt) {
                let skippable = [
                   "appbuilder_select_item",
                   "appbuilder_view_detail",
@@ -339,7 +339,7 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
 
             let displayRecords = [];
 
-            DataTable.eachRow(function(row) {
+            DataTable.eachRow(function (row) {
                displayRecords.push(row);
             }, false);
 
@@ -438,7 +438,9 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
                                  DataTable.clearSelection();
                               } else {
                                  webix.alert({
-                                    text: L("No rows were effected. This does not seem right."),
+                                    text: L(
+                                       "No rows were effected. This does not seem right."
+                                    ),
                                  });
                               }
                            })
@@ -628,7 +630,7 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
                })
                .catch((err) => {
                   App.AB.notify.developer(err, {
-                     message: "Error saving new column order:"
+                     message: "Error saving new column order:",
                   });
                });
          },
@@ -844,7 +846,9 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
                .update(item.id, item)
                .then(() => {})
                .catch((err) => {
-                  App.AB.notify.developer(err, { message: "Error saving item:" });
+                  App.AB.notify.developer(err, {
+                     message: "Error saving item:",
+                  });
                });
          },
 
@@ -1635,7 +1639,9 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
                   DataTable.refresh();
                })
                .catch((err) => {
-                  this.AB.notify.developer(err, { message: "Error saving item:" });
+                  this.AB.notify.developer(err, {
+                     message: "Error saving item:",
+                  });
                });
          },
       });
