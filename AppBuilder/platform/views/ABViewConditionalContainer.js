@@ -77,7 +77,7 @@ module.exports = class ABViewConditionalContainer extends (
          this.populateBadgeNumber(ids, view);
       };
 
-      FilterComponent = new RowFilter(App, `${idBase}_filter`, AB);
+      FilterComponent = new RowFilter(App, `${idBase}_filter`, this.AB);
       FilterComponent.init({
          // when we make a change in the popups we want to make sure we save the new workspace to the properties to do so just fire an onChange event
          onChange: _logic.onFilterChange,
