@@ -349,7 +349,9 @@ var ABFieldConnectComponent = new ABFieldComponent({
             // pass true because we want it to select the last item in the list that was just created
             populateSelect(true);
          } catch (err) {
-            App.AB.notify.developer(err);
+            App.AB.notify.developer(err, {
+               message: "Error when add new object.",
+            });
          }
       },
 
