@@ -855,6 +855,9 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                var detailsTab = this.settings.detailsTab;
                var isEditable = this.settings.isEditable;
 
+               // NOTE: define this function with variable format instead of function() format
+               // Because Eslint will show error "Move function declaration to function body root [no-inner-declarations]"
+
                // we need to recursivly look backwards to toggle tabs into view when a user choosed to select a tab for edit or details views
                let toggleTab = (parentTab, wb) => {
                   // find the tab
