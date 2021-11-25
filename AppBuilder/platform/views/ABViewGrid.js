@@ -1063,7 +1063,7 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                      {
                         id: ids.globalSearchToolbar,
                         view: "search",
-                        placeholder: "Search...",
+                        placeholder: L("Search..."),
                         on: {
                            onTimedKeyPress: () => {
                               let searchText = $$(

@@ -563,7 +563,7 @@ module.exports = class ABViewPropertyFilterData extends ABViewProperty {
                   {
                      id: ids.globalFilterForm,
                      view: "text",
-                     placeholder: "Search or scan a barcode to see results",
+                     placeholder: L("Search or scan a barcode to see results"),
                      on: {
                         onTimedKeyPress: function () {
                            var searchText = this.getValue();

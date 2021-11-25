@@ -496,7 +496,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                      view: "search",
                      value: "",
                      label: "",
-                     placeholder: "Search records...",
+                     placeholder: L("Search records..."),
                      keyPressTimeout: 200,
                      on: {
                         onTimedKeyPress: () => {

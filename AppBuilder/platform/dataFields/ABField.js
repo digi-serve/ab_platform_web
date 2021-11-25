@@ -227,8 +227,8 @@ module.exports = class ABField extends ABFieldCore {
                view: "text",
                id: ids.label,
                name: "label",
-               label: App.labels.dataFieldLabel, // Label
-               placeholder: App.labels.dataFieldLabelPlaceholder, // Label
+               label: L("Label"),
+               placeholder: L("Label"),
                labelWidth: this.AB.Config.labelWidthLarge,
                css: "ab-new-label-name",
                on: {
@@ -242,14 +242,14 @@ module.exports = class ABField extends ABFieldCore {
                id: ids.columnName,
                name: "columnName",
                disallowEdit: true,
-               label: App.labels.dataFieldColumnName, // 'Field Name',
+               label: L("Field Name"),
                labelWidth: this.AB.Config.labelWidthLarge,
-               placeholder: App.labels.dataFieldColumnNamePlaceholder, // 'Database field name',
+               placeholder: L("Database field name"),
             },
             {
                view: "label",
                id: ids.fieldDescription,
-               label: Field.description,
+               label: L("Description"),
                align: "right",
             },
             {
