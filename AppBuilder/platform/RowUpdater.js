@@ -95,52 +95,88 @@ module.exports = class RowUpdater extends ABComponent {
             return options;
          },
 
-         getItemUI: function () {
+         getItemUI: () => {
             return {
-               view: "layout",
-               isolate: true,
-               cols: [
+               rows: [
                   {
-                     // Label
-                     view: "label",
-                     width: 40,
-                     label: L("Set"),
-                  },
-                  {
-                     // Field list
-                     view: "combo",
-                     id: ids.field,
-                     options: _logic.getFieldList(true),
-                     on: {
-                        onChange: function (columnId) {
-                           let $viewCond = this.getParentView();
-                           _logic.selectField(columnId, $viewCond);
+                     view: "layout",
+                     isolate: true,
+                     cols: [
+                        {
+                           // Label
+                           view: "label",
+                           width: 40,
+                           label: L("Set")
                         },
-                     },
+                        {
+                           // Field list
+                           view: "combo",
+                           id: ids.field,
+                           options: _logic.getFieldList(true),
+                           on: {
+                              onChange: function(columnId) {
+                                 let $viewCond = this.getParentView();
+                                 _logic.selectField(columnId, $viewCond);
+                              }
+                           }
+                        },
+                        {
+                           // Label
+                           view: "label",
+                           width: 40,
+                           label: L("To")
+                        },
+                        // Field value
+                        {},
+                        // Extended value
+                        {
+                           hidden: true
+                        },
+                        {
+                           // "Remove" button
+                           view: "button",
+                           css: "webix_danger",
+                           icon: "fa fa-trash",
+                           type: "icon",
+                           autowidth: true,
+
+                           click: function() {
+                              let $viewCond = this.getParentView().getParentView();
+
+                              _logic.removeItem($viewCond);
+                           }
+                        }
+                     ]
                   },
                   {
-                     // Label
-                     view: "label",
-                     width: 40,
-                     label: L("To"),
-                  },
-                  // Field value
-                  {},
-                  {
-                     // "Remove" button
-                     view: "button",
-                     css: "webix_danger",
-                     icon: "fa fa-trash",
-                     type: "icon",
-                     autowidth: true,
+                     hidden:
+                        this._extendedOptions == null ||
+                        !this._extendedOptions.length,
+                     cols: [
+                        {
+                           fillspace: true
+                        },
+                        {
+                           view: "segmented",
+                           value: "custom",
+                           options: [
+                              { id: "custom", value: "Custom" },
+                              { id: "process", value: "Process" }
+                           ],
+                           on: {
+                              onChange: function(val) {
+                                 let $viewItem = this.getParentView().getParentView();
 
-                     click: function () {
-                        let $viewCond = this.getParentView();
-
-                        _logic.removeItem($viewCond);
-                     },
-                  },
-               ],
+                                 _logic.toggleCustomProcessOption(
+                                    $viewItem,
+                                    val == "process"
+                                 );
+                              }
+                           }
+                        }
+                     ]
+                  }
+               ]
             };
          },
 
@@ -181,7 +217,7 @@ module.exports = class RowUpdater extends ABComponent {
             _logic.toggleForm();
          },
 
-         selectField: function (columnId, $viewCond) {
+         selectField: (columnId, $viewCond) => {
             let field = _Object.fieldByID(columnId);
             if (!field) {
                this.AB.notify.builder(
@@ -238,15 +274,37 @@ module.exports = class RowUpdater extends ABComponent {
                   break;
             }
 
+            let childViews = $viewCond.getChildViews();
+
             // Change component to display value
-            $viewCond.removeView($viewCond.getChildViews()[3]);
+            $viewCond.removeView(childViews[3]);
             $viewCond.addView(inputView, 3);
 
             formFieldComponent.init();
 
             // Show custom display of data field
             if (field.customDisplay)
-               field.customDisplay({}, App, $viewCond.getChildViews()[3].$view);
+               field.customDisplay({}, App, childViews[3].$view);
+
+            // Add extended value options
+            $viewCond.removeView(childViews[4]);
+            if (this._extendedOptions && this._extendedOptions.length) {
+               $viewCond.addView(
+                  {
+                     view: "richselect",
+                     options: this._extendedOptions,
+                     hidden: true
+                  },
+                  4
+               );
+            } else {
+               $viewCond.addView(
+                  {
+                     hidden: true
+                  },
+                  4
+               );
+            }
 
             // _logic.refreshFieldList();
             // $$(this).adjust();
@@ -263,6 +321,7 @@ module.exports = class RowUpdater extends ABComponent {
                } else {
                   $form.hide();
                }
+               $form.adjust();
             }
          },
 
@@ -280,7 +339,9 @@ module.exports = class RowUpdater extends ABComponent {
 
             let $form = $$(ids.form);
             if ($form) {
-               $form.getChildViews().forEach(($viewCond) => {
+               $form.getChildViews().forEach(($viewItem) => {
+                  let $viewCond = $viewItem.getChildViews()[0];
+
                   // Ignore "Add new" button
                   if (!$viewCond || !$viewCond.$$) return;
 
@@ -290,30 +351,42 @@ module.exports = class RowUpdater extends ABComponent {
                   let fieldId = $fieldElem.getValue();
                   if (!fieldId) return;
 
-                  let $valueElem = $viewCond.getChildViews()[3];
-                  if (!$valueElem) return;
+                  let $customValueElem = $viewCond.getChildViews()[3];
+                  let $processValueElem = $viewCond.getChildViews()[4];
+                  if (!$customValueElem && !$processValueElem) return;
 
-                  let fieldInfo = _Object.fieldByID(fieldId);
+                  let fieldInfo = _Object.fields((f) => f.id == fieldId)[0];
 
-                  let val;
-                  if (fieldInfo.key == "date" || fieldInfo.key == "datetime") {
-                     let currDateCheckbox = $valueElem.getChildViews()[0];
-                     if (currDateCheckbox.getValue() == true) {
-                        val = "ab-current-date";
+                  let val = {
+                     fieldId: fieldId
+                  };
+
+                  // Custom value
+                  if ($customValueElem && $customValueElem.isVisible()) {
+                     if (
+                        fieldInfo.key == "date" ||
+                        fieldInfo.key == "datetime"
+                     ) {
+                        let currDateCheckbox = $customValueElem.getChildViews()[0];
+                        if (currDateCheckbox.getValue() == true) {
+                           val.value = "ab-current-date";
+                        } else {
+                           let datePicker = $customValueElem.getChildViews()[1];
+                           val.value = fieldInfo.getValue(datePicker);
+                        }
                      } else {
-                        let datePicker = $valueElem.getChildViews()[1];
-                        val = fieldInfo.getValue(datePicker);
+                        // Get value from data field manager
+                        val.value = fieldInfo.getValue($customValueElem);
                      }
-                  } else {
-                     // Get value from data field manager
-                     val = fieldInfo.getValue($valueElem);
+                  }
+                  // Process value
+                  else if ($processValueElem && $processValueElem.isVisible()) {
+                     val.isProcessValue = true;
+                     val.value = $processValueElem.getValue();
                   }
 
                   // Add to output
-                  result.push({
-                     fieldId: fieldId,
-                     value: val,
-                  });
+                  result.push(val);
                });
             }
 
@@ -341,23 +414,49 @@ module.exports = class RowUpdater extends ABComponent {
 
             settings.forEach((item) => {
                let $viewItem = $$(_logic.addItem());
+               let $viewCond = $viewItem.getChildViews()[0];
 
-               $viewItem.$$(ids.field).setValue(item.fieldId);
+               $viewCond.$$(ids.field).setValue(item.fieldId);
+               let $aa = $viewItem.queryView({ view: "segmented" }, "self");
+               $aa.setValue(item.isProcessValue ? "process" : "custom");
+               // _logic.toggleCustomProcessOption($viewItem, item.isProcessValue);
 
-               let $valueElem = $viewItem.getChildViews()[3];
-               if (!$valueElem) return;
+               let $customValueElem = $viewCond.getChildViews()[3];
+               let $processValueElem = $viewCond.getChildViews()[4];
+               if (!$customValueElem && !$processValueElem) return;
 
-               let fieldInfo = _Object.fieldByID(item.fieldId);
+               let fieldInfo = _Object.fields((f) => f.id == item.fieldId)[0];
                if (!fieldInfo) return;
 
-               // Set value
+               // Set custom value
                let rowData = {};
                rowData[fieldInfo.columnName] = item.value;
-               fieldInfo.setValue($valueElem, rowData);
+               fieldInfo.setValue($customValueElem, rowData);
+
+               // Set process value
+               $processValueElem.setValue(item.value);
             });
 
             _logic.toggleForm();
          },
+
+         setExtendedOptions: (options) => {
+            this._extendedOptions = options;
+         },
+
+         toggleCustomProcessOption: ($viewItem, showProcessOption) => {
+            let $viewCond = $viewItem.getChildViews()[0];
+            let $customOption = $viewCond.getChildViews()[3];
+            let $processOption = $viewCond.getChildViews()[4];
+
+            if (showProcessOption) {
+               $customOption.hide();
+               $processOption.show();
+            } else {
+               $customOption.show();
+               $processOption.hide();
+            }
+         }
       });
 
       // webix UI definition:
@@ -379,5 +478,6 @@ module.exports = class RowUpdater extends ABComponent {
       this.addItem = _logic.addItem;
       this.getValue = _logic.getValue;
       this.setValue = _logic.setValue;
+      this.setExtendedOptions = _logic.setExtendedOptions;
    }
 };
