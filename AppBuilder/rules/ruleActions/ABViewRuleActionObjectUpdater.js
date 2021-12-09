@@ -207,9 +207,13 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
             var UpdateForm = $$(ids.updateForm);
             if (!UpdateForm) {
                // this is a problem!
-               OP.Error.log(
-                  "ABViewRuleActionFormRecordRuleUpdate.init() could not find webix form.",
-                  { id: ids.updateForm }
+               this.currentForm.AB.notify.developer(
+                  new Error("no webix form"),
+                  {
+                     context:
+                        "ABViewRuleActionObjectUpdater:formGet  could not find webix form",
+                     id: ids.updateForm,
+                  }
                );
                return null;
             }
@@ -380,7 +384,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
          },
 
          isValid: () => {
-            var validator = OP.Validation.validator();
+            var validator = this.currentForm.AB.Validation.validator();
             var valueField = $$(ids.row).getChildViews()[0].getChildViews()[3];
             var FormView = valueField.getParentView().getParentView();
 
@@ -484,9 +488,10 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                            placeholder: this.labels.component.chooseSource,
                            on: {
                               onChange: (newv, oldv) => {
-                                 var selectedDC = this.currentForm.AB.datacollectionByID(
-                                    newv
-                                 );
+                                 var selectedDC =
+                                    this.currentForm.AB.datacollectionByID(
+                                       newv
+                                    );
                                  if (
                                     selectedDC &&
                                     (selectedDC.sourceType == "query" ||
@@ -535,14 +540,15 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                            if (newv == "select-one") {
                               $row.addView({}, 1);
                            } else {
-                              var options = this.currentForm.datacollection.datasource
-                                 .fields()
-                                 .map(function (f) {
-                                    return {
-                                       id: f.id,
-                                       value: f.label,
-                                    };
-                                 });
+                              var options =
+                                 this.currentForm.datacollection.datasource
+                                    .fields()
+                                    .map(function (f) {
+                                       return {
+                                          id: f.id,
+                                          value: f.label,
+                                       };
+                                    });
 
                               FilterComponent = new RowFilter(
                                  this.App,
@@ -560,9 +566,8 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                               $row.addView(FilterComponent.ui, 1);
 
                               var dcId = $$(ids.selectDc).getValue();
-                              var dataCollection = this.currentForm.AB.datacollectionByID(
-                                 dcId
-                              );
+                              var dataCollection =
+                                 this.currentForm.AB.datacollectionByID(dcId);
                               if (dataCollection) {
                                  _logic.populateFilters(dataCollection);
                               }
@@ -727,9 +732,8 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
 
                   if (selectBy != "select-one") {
                      var collectionId = data.value;
-                     var dataCollection = this.currentForm.AB.datacollectionByID(
-                        collectionId
-                     );
+                     var dataCollection =
+                        this.currentForm.AB.datacollectionByID(collectionId);
                      if (dataCollection && data.filterConditions) {
                         _logic.populateFilters(
                            dataCollection,
@@ -911,6 +915,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
     * @return {boolean}   true if an update took place, false if no updates.
     */
    processUpdateObject(options, objectToUpdate) {
+      this._formData = objectToUpdate;
       // return new Promise((resolve, reject) => {
       var isUpdated = false;
 
@@ -940,7 +945,8 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
 
          var value = op.value;
 
-         if (value == "ab-current-user") value = OP.User.username();
+         if (value == "ab-current-user")
+            value = this.currentForm.AB.Account.username();
 
          // in the case of a connected Field, we use op.value to get the
          // datacollection, and find it's currently selected value:
@@ -975,9 +981,10 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                      );
                   })
                   .forEach((item) => {
-                     var valueField = this.currentForm.datacollection.datasource.fieldByID(
-                        item.value
-                     );
+                     var valueField =
+                        this.currentForm.datacollection.datasource.fieldByID(
+                           item.value
+                        );
                      if (valueField.isConnection) {
                         item.value = valueField.format(this._formData);
                      } else {
@@ -992,9 +999,8 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                   });
             }
 
-            let clonedDataCollection = dataCollection.filteredClone(
-               filterConditions
-            );
+            let clonedDataCollection =
+               dataCollection.filteredClone(filterConditions);
 
             switch (op.selectBy) {
                // the 'select-one' is getting the currently set cursor on this data collection
@@ -1009,9 +1015,10 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                      // the .id of the item.  However it seems to be returning the {obj}
 
                      if (op.valueType == "exist") {
-                        var fieldWithValue = clonedDataCollection.datasource.fieldByID(
-                           op.queryField
-                        );
+                        var fieldWithValue =
+                           clonedDataCollection.datasource.fieldByID(
+                              op.queryField
+                           );
 
                         if (fieldWithValue)
                            value = value[fieldWithValue.columnName];
@@ -1065,9 +1072,10 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                         // our field is a pointer to an object. we want to pull out that object
                         // from the query data.
                         case "query":
-                           var fieldWithValue = clonedDataCollection.datasource.fieldByID(
-                              op.queryField
-                           );
+                           var fieldWithValue =
+                              clonedDataCollection.datasource.fieldByID(
+                                 op.queryField
+                              );
 
                            var newValue = currRow[fieldWithValue.columnName];
 
@@ -1097,9 +1105,8 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                         if (field.linkType() == "one") {
                            var updates = [];
                            newValues.forEach((v) => {
-                              var objectToUpdateClone = _.cloneDeep(
-                                 objectToUpdate
-                              );
+                              var objectToUpdateClone =
+                                 _.cloneDeep(objectToUpdate);
                               objectToUpdateClone[field.columnName] = v;
                               updates.push(objectToUpdateClone);
                            });
@@ -1124,9 +1131,10 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                         clonedDataCollection.sourceType == "query" ||
                         (op.valueType == "exist" && op.queryField)
                      ) {
-                        var fieldWithValue = clonedDataCollection.datasource.fieldByID(
-                           op.queryField
-                        );
+                        var fieldWithValue =
+                           clonedDataCollection.datasource.fieldByID(
+                              op.queryField
+                           );
 
                         var newValue = value[fieldWithValue.columnName];
 
@@ -1207,10 +1215,12 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
             model
                .update(options.data.id, options.data)
                .catch((err) => {
-                  OP.Error.log(
-                     "!!! ABViewRuleActionFormRecordRuleUpdate.process(): update error:",
-                     { error: err, data: options.data }
-                  );
+                  this.currentForm.AB.notify.developer(err, {
+                     context:
+                        "ABViewRuleActionObjectUpdater:process  update error",
+                     id: options.data.id,
+                     data: options.data,
+                  });
                   reject(err);
                })
                .then(resolve);
