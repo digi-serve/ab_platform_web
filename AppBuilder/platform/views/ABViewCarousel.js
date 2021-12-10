@@ -470,6 +470,19 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
             view: this,
             datacollection: dv,
          });
+
+         // set data-cy
+         const carousel = $$(ids.component).$view;
+         carousel.setAttribute('data-cy', `${this.key} ${this.id}`);
+         carousel
+             .querySelector('.webix_nav_button_prev')
+             ?.firstElementChild
+             ?.setAttribute('data-cy', `${this.key} button previous ${this.id}`);
+         carousel
+             .querySelector('.webix_nav_button_next')
+             ?.firstElementChild
+             ?.setAttribute('data-cy', `${this.key} button next ${this.id}`);
+
       };
 
       let _logic = {
