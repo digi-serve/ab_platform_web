@@ -338,6 +338,8 @@ module.exports = class ABViewDetail extends ABViewDetailCore {
 
                   if (!field) return;
 
+                  if (!rowData) return;
+
                   // get value of relation when field is a connect field
                   switch (field.key) {
                      case "connectObject":
@@ -370,23 +372,14 @@ module.exports = class ABViewDetail extends ABViewDetailCore {
                         }
                         break;
                      case "user":
-                        val = rowData[field.columnName];
-
-                        if (field.settings.isMultiple == 0)
-                           val = val
-                              ? '<span class="selectivity-multiple-selected-item rendered" style="background-color:#eee !important; color: #666 !important; box-shadow: inset 0px 1px 1px #333;"><i style="opacity: 0.6;" class="fa fa-user"></i> ' +
-                                val +
-                                "</span>"
-                              : "";
+                        val = field.pullRelationValues(rowData);
                         break;
                      case "file":
                         val = rowData[field.columnName];
                         break;
                      default:
-                        if (rowData) {
-                           val = field.format(rowData);
-                        }
-                        break;
+                        val = field.format(rowData);
+                     // break;
                   }
                }
 

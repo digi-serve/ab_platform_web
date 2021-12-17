@@ -740,6 +740,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
          // body: {
          id: ids.component,
          view: "form",
+         abid: this.id,
          rows: component.ui.rows.concat(fieldValidationsHolder),
          // elementsConfig: {
          //    on: {

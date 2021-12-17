@@ -479,10 +479,9 @@ var ABFieldConnectComponent = new ABFieldComponent({
             (linkType == "one" && linkViaType == "one") ||
             (linkType == "one" && linkViaType == "many")
          ) {
-            sourceObject =
-               ABFieldConnectComponent.CurrentApplication.AB.objects(
-                  (o) => o.id == linkObjectId
-               )[0];
+            sourceObject = ABFieldConnectComponent.CurrentApplication.AB.objects(
+               (o) => o.id == linkObjectId
+            )[0];
          }
          // M:1
          else if (linkType == "many" && linkViaType == "one") {
@@ -492,10 +491,9 @@ var ABFieldConnectComponent = new ABFieldComponent({
          else if (linkType == "many" && linkViaType == "many") {
             sourceObject = ABFieldConnectComponent.CurrentObject;
 
-            let linkObject =
-               ABFieldConnectComponent.CurrentApplication.AB.objects(
-                  (o) => o.id == linkObjectId
-               )[0];
+            let linkObject = ABFieldConnectComponent.CurrentApplication.AB.objects(
+               (o) => o.id == linkObjectId
+            )[0];
 
             // Populate the second index fields
             let linkIndexFields = [];
@@ -823,6 +821,14 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          options.filters = {};
       }
 
+      var formId = "";
+      if ($$(domNode).getFormView) {
+         var formNode = $$(domNode).getFormView();
+         if (formNode && formNode.config && formNode.config.abid) {
+            formId = formNode.config.abid;
+         }
+      }
+
       // Render selectivity
       this.selectivityRender(
          domNode,
@@ -834,7 +840,8 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             editPage: options.editPage,
             isLabelHidden: options.isLabelHidden,
             additionalText: options.additionalText,
-            dataCy: this.key + " " + this.columnName + " " + this.id,
+            dataCy:
+               this.key + " " + this.columnName + " " + this.id + " " + formId,
             ajax: {
                url: "It will call url in .getOptions function", // require
                minimumInputLength: 0,
