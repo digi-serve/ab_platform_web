@@ -12,6 +12,12 @@ module.exports = class ABField extends ABFieldCore {
    constructor(values, object, fieldDefaults) {
       super(values, object, fieldDefaults);
 
+      this.AB.on("ab.abdefinition.update", (def) => {
+         if (def.id == this.id) {
+            this.emit("definition.updated", this);
+         }
+      });
+
       //  	// NOTE: setup this first so later we can use .fieldType(), .fieldIcon()
       //  	this.defaults = fieldDefaults;
 

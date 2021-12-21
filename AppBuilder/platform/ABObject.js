@@ -28,12 +28,33 @@ module.exports = class ABObject extends ABObjectCore {
          AB
       );
 
-      // this.fromValues(attributes);
+      // listen for our ABFields."definition.updated"
+      this.fields().forEach((f) => {
+         f.on("definition.updated", (field) => {
+            // create a new Field with the updated def
+            var def = this.AB.definitionByID(field.id);
+            if (!def) return;
+
+            var newField = this.AB.fieldNew(def, this);
+
+            // we want to keep the same fieldID order:
+            var newFields = [];
+            this.fields().forEach((f) => {
+               if (f.id === field.id) {
+                  newFields.push(newField);
+                  return;
+               }
+               newFields.push(f);
+            });
+
+            this._fields = newFields;
+         });
+      });
 
       // listen
-      this.AB.on("ab.object.update", (data) => {
-         if (this.id == data.objectId) this.fromValues(data.data);
-      });
+      // this.AB.on("ab.object.update", (data) => {
+      //    if (this.id == data.objectId) this.fromValues(data.data);
+      // });
 
       this._pendingNetworkRequests = {};
       // {hash}   uuid : {Promise}
