@@ -29,12 +29,6 @@ module.exports = class ABViewRuleActionFormSubmitRuleExistPage extends (
       // [
       //		{ fieldId: xxx, value:yyy, type:key['string', 'number', 'date',...]}
       // ]
-
-      // Labels for UI components
-      var labels = (this.labels = {
-         // common: App.labels,
-         component: {},
-      });
    }
 
    // conditionFields() {

@@ -29,11 +29,6 @@ module.exports = class ABViewRuleActionFormSubmitRuleClosePopup extends (
       // [
       //		{ fieldId: xxx, value:yyy, type:key['string', 'number', 'date',...]}
       // ]
-
-      // Labels for UI components
-      var labels = (this.labels = {
-         component: {},
-      });
    }
 
    // conditionFields() {

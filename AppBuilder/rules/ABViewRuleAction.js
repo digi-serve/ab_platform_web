@@ -50,16 +50,6 @@ module.exports = class ABViewRuleAction {
 
       this.label = L("generic abviewruleaction");
 
-      // Labels for UI components
-      var labels = (this.labels = {
-         common: App.labels,
-         component: {
-            action: L("Action"),
-            when: L("When"),
-            values: L("Values"),
-         },
-      });
-
       function myUnique(key) {
          return App.unique(`${idBase}_${key}`);
       }

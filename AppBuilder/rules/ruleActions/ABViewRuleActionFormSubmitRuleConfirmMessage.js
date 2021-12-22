@@ -29,16 +29,6 @@ module.exports = class ABViewRuleActionFormSubmitRuleConfirmMessage extends (
       // [
       //		{ fieldId: xxx, value:yyy, type:key['string', 'number', 'date',...]}
       // ]
-
-      // Labels for UI components
-      var labels = (this.labels = {
-         // common: App.labels,
-         component: {
-            message: L("Message"),
-            // set: L("ab.component.form.set", "*Set"),
-            // to: L("ab.component.form.to", "*To"),
-         },
-      });
    }
 
    // conditionFields() {
