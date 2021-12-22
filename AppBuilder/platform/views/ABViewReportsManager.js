@@ -671,12 +671,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                });
 
                if (f.isConnection && f.settings.isSource) {
-                  let linkedDcs = compInstance.AB.datacollections(
-                     (dc) =>
-                        dc &&
-                        dc.datasource &&
-                        dc.datasource.id == f.settings.linkObject
-                  );
+                  let linkedDcs = compInstance.AB.datacollectionByID(f.settings.linkObject);
                   (linkedDcs || []).forEach((linkDc) => {
                      fields.push({
                         id: f.id,
