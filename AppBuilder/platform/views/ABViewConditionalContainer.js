@@ -17,7 +17,7 @@ module.exports = class ABViewConditionalContainer extends (
       this.__filterComponent = new RowFilter(
          null,
          "ABViewConditionalContainer",
-         AB
+         this.AB
       );
       // this.__filterComponent.applicationLoad(application);
       this.populateFilterComponent();
