@@ -7,10 +7,21 @@ const ABViewPage = require("./views/ABViewPage");
 const ABViewManager = require("./ABViewManager");
 
 module.exports = class ABClassApplication extends ABApplicationCore {
-   // constructor(attributes, AB) {
-   //    super(attributes, AB);
-   //    this.warningsEval();
-   // }
+   constructor(attributes, AB) {
+      super(attributes, AB);
+
+      // now listen for any updates to our managed objects
+      this._handler_page_updated = (definition) => {
+         var currPage = this._pages.find((p) => p.id === definition.id);
+         if (currPage) {
+            this._pages = this._pages.filter((p) => p.id != currPage.id);
+            this._pages.push(currPage.refreshInstance());
+         }
+      };
+      this._pages.forEach((p) => {
+         p.on("definition.updated", this._handler_page_updated);
+      });
+   }
 
    static applications(/*fn = () => true*/) {
       console.error(
@@ -38,21 +49,23 @@ module.exports = class ABClassApplication extends ABApplicationCore {
       return _.kebabCase(`ab-${this.name}`);
    }
 
-   // actionKeyName() {
-   //    return `opstools.${this.validAppName()}.view`;
-   // }
+   /**
+    * @method refreshInstance()
+    * Used when a definition.updated message is detected on this ABApplication.
+    * This method will return a new instance based upon the current definition
+    * and properly resolve any handlers and pending network Requests.
+    * @return {ABObject}
+    */
+   refreshInstance() {
+      var newObj = this.AB.applicationByID(this.id);
 
-   // validAppName() {
-   //    return this.AB.rules.toApplicationNameFormat(this.name);
-   // }
+      // remove my listeners
+      this._pages.forEach((p) => {
+         p.removeListener("definition.updated", this._handler_page_updated);
+      });
 
-   ////
-   //// DB Related
-   ////
-
-   // dbApplicationName() {
-   //    return this.AB.rules.toApplicationNameFormat(this.name);
-   // }
+      return newObj;
+   }
 
    ///
    /// Definition

@@ -174,6 +174,10 @@ module.exports = class ABDataCollection extends ABDataCollectionCore {
 
       // standardize the heights
 
+      /*
+       // In v2: we move the row height calculation into the Interface designer.
+       // 
+
       // calculate default value of $height of rows
       var obj = this.datasource;
       var defaultHeight = 0;
@@ -203,6 +207,7 @@ module.exports = class ABDataCollection extends ABDataCollectionCore {
             d.$height = defaultHeight;
          }
       });
+      */
 
       return super.processIncomingData(data).then(() => {
          // Web Platform:

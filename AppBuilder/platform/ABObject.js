@@ -62,15 +62,42 @@ module.exports = class ABObject extends ABObjectCore {
       // if a queued operation is sent after a web browser refresh, then
       // we will NOT have a pending promise to .resolve()/.reject()
 
-      this.AB.Network.on("object.migrate", (context, err, response) => {
+      this._handler_object_migrate = (context, err, response) => {
          // NOTE:
-         var pending = this._pendingNetworkRequests[context.uuid];
+         var pending = this._pendingNetworkRequests?.[context.uuid];
          if (err) {
             pending?.reject(err);
             return;
          }
          pending?.resolve(response);
-      });
+      };
+      this.AB.Network.on("object.migrate", this._handler_object_migrate);
+   }
+
+   /**
+    * @method refreshInstance()
+    * Used when a definition.updated message is detected on this ABObject.
+    * This method will return a new instance based upon the current definition
+    * and properly resolve any handlers and pending network Requests.
+    * @return {ABObject}
+    */
+   refreshInstance() {
+      var newObj = this.AB.objectByID(this.id);
+
+      // prevent doing this multiple times:
+      if (this._pendingNetworkRequests) {
+         // remove object.migrate listener
+         this.AB.Network.removeListener(
+            "object.migrate",
+            this._handler_object_migrate
+         );
+
+         // transfer the pending network requests
+         newObj._pendingNetworkRequests = this._pendingNetworkRequests;
+         this._pendingNetworkRequests = null;
+      }
+
+      return newObj;
    }
 
    ///
@@ -122,16 +149,8 @@ module.exports = class ABObject extends ABObjectCore {
       if (!isNameUnique) {
          validator.addError(
             "name",
-            L(
-               "ab.validation.object.name.unique",
-               'Object name must be unique ("{0}" already in use)',
-               [this.name]
-            )
+            L('Object name must be unique ("{0}" already in use)', [this.name])
          );
-         // errors = OP.Form.validationError({
-         // 		name:'name',
-         // 		message:L('ab.validation.object.name.unique', 'Object name must be unique (#name# already used in this Application)').replace('#name#', this.name),
-         // 	}, errors);
       }
 
       // Check the common validations:
@@ -258,12 +277,12 @@ module.exports = class ABObject extends ABObjectCore {
         });
  */
 
-      var removeFromApplications = async () => {
+      var removeFromApplications = () => {
          var allRemoves = [];
          this.AB.applications().forEach((app) => {
             allRemoves.push(app.objectRemove(this));
          });
-         await Promise.all(allRemoves);
+         return Promise.all(allRemoves);
       };
 
       var disableRelatedQueries = () => {
@@ -609,29 +628,33 @@ module.exports = class ABObject extends ABObjectCore {
       if (rowIds != null) {
          rowIds.forEach((id) => {
             var row = data.getItem(id);
-            fields.forEach((f) => {
-               var node = DataTable.getItemNode({
-                  row: row.id,
-                  column: f.columnName,
+            if (row) {
+               fields.forEach((f) => {
+                  var node = DataTable.getItemNode({
+                     row: row.id,
+                     column: f.columnName,
+                  });
+                  f.customDisplay(row, App, node, {
+                     editable: isEditable,
+                  });
                });
-               f.customDisplay(row, App, node, {
-                  editable: isEditable,
-               });
-            });
+            }
          });
       } else {
          var id = data.getFirstId();
          while (id) {
             var row = data.getItem(id);
-            fields.forEach((f) => {
-               var node = DataTable.getItemNode({
-                  row: row.id,
-                  column: f.columnName,
+            if (row) {
+               fields.forEach((f) => {
+                  var node = DataTable.getItemNode({
+                     row: row.id,
+                     column: f.columnName,
+                  });
+                  f.customDisplay(row, App, node, {
+                     editable: isEditable,
+                  });
                });
-               f.customDisplay(row, App, node, {
-                  editable: isEditable,
-               });
-            });
+            }
             id = data.getNextId(id);
          }
       }
@@ -651,7 +674,7 @@ module.exports = class ABObject extends ABObjectCore {
       // default label
       if (!labelData && this.fields().length > 0) {
          var defaultField = this.fields((f) => f.fieldUseAsLabel())[0];
-         if (defaultField) labelData = "{" + defaultField.id + "}";
+         if (defaultField) labelData = `{${defaultField.id}}`;
          else
             labelData = `${this.AB.isUUID(rowData.id) ? "ID: " : ""}${
                rowData.id
@@ -666,7 +689,7 @@ module.exports = class ABObject extends ABObjectCore {
          colIds.forEach((colId) => {
             var colIdNoBracket = colId.replace("{", "").replace("}", "");
 
-            var field = this.fields((f) => f.id == colIdNoBracket)[0];
+            var field = this.fieldByID(colIdNoBracket);
             if (field == null) return;
 
             labelData = labelData.replace(colId, field.format(rowData) || "");

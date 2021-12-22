@@ -345,9 +345,11 @@ module.exports = class ABFieldSelectivity extends ABField {
             } else {
                var anchor = document.createElement("A");
                anchor.href = "javascript:void(0);";
-               anchor.addEventListener("click", function () {
-                  App.actions.onRowResizeAuto(row.id, innerHeight);
-               });
+               // v2: this just updated the $height property for this row
+               // we don't do that anymore:
+               // anchor.addEventListener("click", function () {
+               //    App.actions.onRowResizeAuto(row.id, innerHeight);
+               // });
                var node = document.createElement("SPAN");
                var textnode = document.createTextNode(count);
                node.classList.add("webix_badge", "selectivityBadge");

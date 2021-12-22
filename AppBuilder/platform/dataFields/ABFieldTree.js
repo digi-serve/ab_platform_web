@@ -601,7 +601,9 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
                var anchor = document.createElement("A");
                anchor.href = "javascript:void(0);";
                anchor.addEventListener("click", function (event) {
-                  App.actions.onRowResizeAuto(row.id, innerHeight);
+                  // v2: this was just saving the new height to the
+                  // field properties. We don't do that anymore:
+                  // App.actions.onRowResizeAuto(row.id, innerHeight);
                   event.stopPropagation();
                });
                var node = document.createElement("SPAN");

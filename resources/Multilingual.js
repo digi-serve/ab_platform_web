@@ -43,6 +43,12 @@ class Multilingual extends MLClass {
          altText = key;
       }
 
+      // other case: L("single string {0}", [])
+      if (arguments.length == 2 && Array.isArray(altText)) {
+         values = altText;
+         altText = key;
+      }
+
       // NOTE: transition to new Labels
       // currently our code still uses the L(key, altText, values) format, but
       // the labels we get back are in L(altText, values) format.

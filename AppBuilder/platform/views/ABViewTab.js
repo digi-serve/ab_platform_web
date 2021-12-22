@@ -750,42 +750,37 @@ module.exports = class ABViewTab extends ABViewTabCore {
                      }
                   },
                   onAfterRender: () => {
-                    // set ids of controller buttons
-                    let collapseNode = $$(ids.sidebar).$view.querySelector('[webix_tm_id="' + ids.collapseMenu + '"]')
-                    if (collapseNode){
-                      collapseNode.setAttribute(
-                        "data-cy",
-                        "tab-" +
-                          "collapseMenu" +
-                          "-" +
-                          ids.collapseMenu)
-                      }
-                    let expandNode = $$(ids.sidebar).$view.querySelector('[webix_tm_id="' + ids.expandMenu + '"]')
-                    if (expandNode){
-                      expandNode.setAttribute(
-                        "data-cy",
-                        "tab-" +
-                          "expandMenu" +
-                          "-" +
-                          ids.expandMenu)
-                      }
-                    this.views((view) => {
-                      var node = $$(
-                        ids.sidebar
-                        ).$view.querySelector(
-                          '[webix_tm_id="' + view.id + '_menu"]'
-                          );
-                          if (!node) return;
-                          node.setAttribute(
-                            "data-cy",
-                            "tab-" +
-                            view.label.replace(" ", "") +
-                            "-" +
-                            view.id +
-                            "-" +
-                            this.id
-                            );
-                    });
+                     // set ids of controller buttons
+                     let collapseNode = $$(ids.sidebar).$view.querySelector(
+                        `[webix_tm_id="${ids.collapseMenu}"]`
+                     );
+                     if (collapseNode) {
+                        collapseNode.setAttribute(
+                           "data-cy",
+                           `tab-collapseMenu-${ids.collapseMenu}`
+                        );
+                     }
+                     let expandNode = $$(ids.sidebar).$view.querySelector(
+                        '[webix_tm_id="' + ids.expandMenu + '"]'
+                     );
+                     if (expandNode) {
+                        expandNode.setAttribute(
+                           "data-cy",
+                           `tab-expandMenu-${ids.expandMenu}`
+                        );
+                     }
+                     this.views((view) => {
+                        var node = $$(ids.sidebar).$view.querySelector(
+                           `[webix_tm_id="${view.id}_menu"]`
+                        );
+                        if (!node) return;
+                        node.setAttribute(
+                           "data-cy",
+                           `tab-${view.label.replace(" ", "")}-${view.id}-${
+                              this.id
+                           }`
+                        );
+                     });
                   },
                },
             };

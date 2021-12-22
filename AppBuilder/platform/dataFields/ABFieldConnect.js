@@ -389,10 +389,12 @@ var ABFieldConnectComponent = new ABFieldComponent({
          async.series(
             [
                function (callback) {
-                  App.actions.addNewObject(false, callback); // pass false because after it is created we do not want it to select it in the object list
+                  App.actions.addNewObject(false, callback);
+                  // pass false because after it is created we do not want it to select it in the object list
                },
                function (callback) {
-                  populateSelect(true, callback); // pass true because we want it to select the last item in the list that was just created
+                  populateSelect(true, callback);
+                  // pass true because we want it to select the last item in the list that was just created
                },
             ],
             function (err) {
@@ -469,19 +471,13 @@ var ABFieldConnectComponent = new ABFieldComponent({
          $$(ids.indexField2).define("options", []);
          $$(ids.indexField2).refresh();
 
-         // NOTE: simplify access to .AB.objects() here:
-         console.error("DEBUGGING: what access to AB do I have here?");
-         debugger;
-
          // 1:1
          // 1:M
          if (
             (linkType == "one" && linkViaType == "one") ||
             (linkType == "one" && linkViaType == "many")
          ) {
-            sourceObject = ABFieldConnectComponent.CurrentApplication.AB.objects(
-               (o) => o.id == linkObjectId
-            )[0];
+            sourceObject = this.AB.objectByID(linkObjectId);
          }
          // M:1
          else if (linkType == "many" && linkViaType == "one") {
@@ -490,10 +486,7 @@ var ABFieldConnectComponent = new ABFieldComponent({
          // M:N
          else if (linkType == "many" && linkViaType == "many") {
             sourceObject = ABFieldConnectComponent.CurrentObject;
-
-            let linkObject = ABFieldConnectComponent.CurrentApplication.AB.objects(
-               (o) => o.id == linkObjectId
-            )[0];
+            let linkObject = this.AB.objectByID(linkObjectId);
 
             // Populate the second index fields
             let linkIndexFields = [];
@@ -779,10 +772,21 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
    /*
     * @function customDisplay
     * perform any custom display modifications for this field.
-    * @param {object} row is the {name=>value} hash of the current row of data.
-    * @param {App} App the shared ui App object useful more making globally
-    *					unique id references.
-    * @param {HtmlDOM} node  the HTML Dom object for this field's display.
+    * @param {object} row
+    *        is the {name=>value} hash of the current row of data.
+    * @param {App} App
+    *        the shared ui App object useful more making globally
+    *			 unique id references.
+    * @param {HtmlDOM} node
+    *        the HTML Dom object for this field's display.
+    * @param {object} options
+    *        a {key=>value} hash of display options
+    *          .editable {bool}  are we able to edit the value?
+    *          .filters {hash}  the where cond to lookup values
+    *          .editPage
+    *          .isLabelHidden
+    *          .additionalText
+    *
     */
    customDisplay(row, App, node, options) {
       options = options || {};
@@ -801,15 +805,9 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       // get selected values
       var selectedData = this.pullRelationValues(row);
 
-      var placeholder = L(
-         "ab.dataField.connect.placeholder_single",
-         "*Select item"
-      );
+      var placeholder = L("Select item");
       if (multiselect) {
-         placeholder = L(
-            "ab.dataField.connect.placeholder_multiple",
-            "*Select items"
-         );
+         placeholder = L("Select items");
       }
       var readOnly = false;
       if (options.editable != null && options.editable == false) {
@@ -904,8 +902,9 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                         node.classList.add("webix_invalid");
                         node.classList.add("webix_invalid_cell");
 
-                        this.AB.error("Error updating our entry.", {
-                           error: err,
+                        this.AB.notify.developer(err, {
+                           context:
+                              "ABFieldConnect:customDisplay():onChange: Error updating our entry.",
                            row: row,
                            values: values,
                         });
@@ -988,7 +987,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
     * @return {Promise}
     */
    getOptions(where, term) {
-      return new Promise((resolve, reject) => {
+      return new Promise(async (resolve, reject) => {
          where = where || {};
 
          if (!where.glue) where.glue = "and";
@@ -1053,31 +1052,66 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             }
          }
 
-         // Pull linked object data
-         linkedModel
-            .findAll({
+         var haveResolved = false;
+         // {bool}
+         // have we already passed back a result?
+
+         var respond = (options) => {
+            // filter the raw lookup with the provided search term
+            options = options.filter(function (item) {
+               if (item.text.toLowerCase().includes(term.toLowerCase())) {
+                  return true;
+               }
+            });
+
+            if (!haveResolved) {
+               haveResolved = true;
+               resolve(options);
+            } else {
+               // if we have already resolved() then .emit() that we have
+               // updated "option.data".
+               this.emit("option.data", options);
+            }
+         };
+
+         // We store the .findAll() results locally and return that for a
+         // quick response:
+         var storageID = `${this.id}-${JSON.stringify(where)}`;
+         var storedOptions = await this.AB.Storage.get(storageID);
+         if (storedOptions) {
+            // immediately respond with our stored options.
+            this._options = storedOptions;
+            respond(storedOptions);
+         }
+
+         try {
+            // Pull linked object data
+            var result = await linkedModel.findAll({
                where: where,
                populate: false,
-            })
-            .then((result) => {
-               // cache linked object data
-               this._options = result.data || result || [];
+            });
 
-               // populate display text
-               (this._options || []).forEach((opt) => {
-                  opt.text = linkedObj.displayData(opt);
-               });
+            // cache linked object data
+            this._options = result.data || result || [];
 
-               // filter
-               this._options = this._options.filter(function (item) {
-                  if (item.text.toLowerCase().includes(term.toLowerCase())) {
-                     return true;
-                  }
-               });
+            // populate display text
+            (this._options || []).forEach((opt) => {
+               opt.text = linkedObj.displayData(opt);
+            });
 
-               resolve(this._options);
-            })
-            .catch(reject);
+            respond(this._options);
+            this.AB.Storage.set(storageID, this._options);
+         } catch (err) {
+            this.AB.notify.developer(err, {
+               context:
+                  "ABFieldConnect:getOptions(): unable to retrieve options from server",
+               field: this.toObj(),
+               where,
+            });
+
+            haveResolved = true;
+            reject(err);
+         }
       });
    }
 

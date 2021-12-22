@@ -126,7 +126,9 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
                // we don't want to send a toggle event because it triggers saves to the database
                $$(ids.pages).checkItem(id);
                webix.message({
-                  text: "Item comtains submenu, please remove items in submenu before removing.",
+                  text: L(
+                     "Item comtains submenu, please remove items in submenu before removing."
+                  ),
                   type: "error",
                   expire: 10000,
                });
@@ -877,7 +879,7 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
                const Menu = $$(ids.component);
                if (!Menu) return;
                const views = this.application.views();
-               Menu.data.each((item) => {
+               Menu?.data.each((item) => {
                   const node = Menu.getItemNode(item.id);
                   if (!node) return;
                   // get linked page/tab info so we can use its name in the data-cy
