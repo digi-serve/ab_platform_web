@@ -445,8 +445,8 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
                               }
                            })
                            .catch((err) => {
-                              App.AB.log("Error deleting item:", {
-                                 error: err,
+                              App.AB.notify.developer(err, {
+                                 message: "Error deleting item"
                               });
 
                               //// TODO: what do we do here?
