@@ -458,7 +458,7 @@ module.exports = class ABViewComment extends ABViewCommentCore {
    }
 
    getUsers() {
-      return this.AB.Account.usersAll().map((u) => {
+      return this.AB.Account.userList().map((u) => {
          return {
             id: u.username,
             value: u.username,
