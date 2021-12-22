@@ -1,6 +1,8 @@
 const ABViewFormConnectCore = require("../../core/views/ABViewFormConnectCore");
-const ABViewPropertyAddPage = require("./viewProperties/ABViewPropertyAddPage");
-const ABViewPropertyEditPage = require("./viewProperties/ABViewPropertyEditPage");
+const ABViewPropertyAddPage = require("./viewProperties/ABViewPropertyAddPage")
+   .default;
+const ABViewPropertyEditPage = require("./viewProperties/ABViewPropertyEditPage")
+   .default;
 
 const ABViewFormConnectPropertyComponentDefaults = ABViewFormConnectCore.defaultValues();
 

@@ -1,10 +1,10 @@
-const ABViewProperty = require("./ABViewProperty");
+import ABViewProperty from "./ABViewProperty";
 
 var L = (key, altText) => {
    return AD.lang.label.getLabel(key) || altText;
 };
 
-module.exports = class ABViewPropertyLinkPage extends ABViewProperty {
+export default class ABViewPropertyLinkPage extends ABViewProperty {
    constructor() {
       super();
    }
@@ -20,7 +20,7 @@ module.exports = class ABViewPropertyLinkPage extends ABViewProperty {
          detailsPage: null, // uuid
          detailsTab: null, // uuid
          editPage: null, // uuid
-         editTab: null // uuid
+         editTab: null, // uuid
       };
    }
 
@@ -29,14 +29,14 @@ module.exports = class ABViewPropertyLinkPage extends ABViewProperty {
 
       let ids = {
          detailsPage: idBase + "_linkPage_detailsPage",
-         editPage: idBase + "_linkPage_editPage"
+         editPage: idBase + "_linkPage_editPage",
       };
 
       let labels = {
          common: App.labels,
          component: {
             // header: L("ab.component.grid.filterMenu", "*Filter Menu")
-         }
+         },
       };
 
       let ui = {
@@ -52,17 +52,17 @@ module.exports = class ABViewPropertyLinkPage extends ABViewProperty {
                   view: "select",
                   name: "detailsPage",
                   label: L("ab.component.label.detailsPage", "*Details Page:"),
-                  labelWidth: App.config.labelWidthLarge
+                  labelWidth: App.config.labelWidthLarge,
                },
                {
                   id: ids.editPage,
                   view: "select",
                   name: "editPage",
                   label: L("ab.component.label.editForm", "*Edit Form:"),
-                  labelWidth: App.config.labelWidthLarge
-               }
-            ]
-         }
+                  labelWidth: App.config.labelWidthLarge,
+               },
+            ],
+         },
       };
 
       let init = (options) => {
@@ -99,7 +99,7 @@ module.exports = class ABViewPropertyLinkPage extends ABViewProperty {
                   .map((p) => {
                      return {
                         id: p.id,
-                        value: p.label
+                        value: p.label,
                      };
                   })
             );
@@ -115,14 +115,14 @@ module.exports = class ABViewPropertyLinkPage extends ABViewProperty {
                   .map((p) => {
                      return {
                         id: p.id,
-                        value: p.label
+                        value: p.label,
                      };
                   })
             );
 
             pagesHasDetail.unshift({
                id: "",
-               value: L("ab.component.label.noLinkedView", "*No linked view")
+               value: L("ab.component.label.noLinkedView", "*No linked view"),
             });
             $$(ids.detailsPage).define("options", pagesHasDetail);
             $$(ids.detailsPage).refresh();
@@ -139,7 +139,7 @@ module.exports = class ABViewPropertyLinkPage extends ABViewProperty {
                   .map((p) => {
                      return {
                         id: p.id,
-                        value: p.label
+                        value: p.label,
                      };
                   })
             );
@@ -155,14 +155,14 @@ module.exports = class ABViewPropertyLinkPage extends ABViewProperty {
                   .map((p) => {
                      return {
                         id: p.id,
-                        value: p.label
+                        value: p.label,
                      };
                   })
             );
 
             pagesHasForm.unshift({
                id: "",
-               value: L("ab.component.label.noLinkedForm", "*No linked form")
+               value: L("ab.component.label.noLinkedForm", "*No linked form"),
             });
             $$(ids.editPage).define("options", pagesHasForm);
             $$(ids.editPage).refresh();
@@ -206,7 +206,7 @@ module.exports = class ABViewPropertyLinkPage extends ABViewProperty {
             settings.editTab = editTab;
 
             return settings;
-         }
+         },
       };
 
       return {
@@ -216,7 +216,7 @@ module.exports = class ABViewPropertyLinkPage extends ABViewProperty {
 
          viewLoad: logic.viewLoad,
          setSettings: logic.setSettings,
-         getSettings: logic.getSettings
+         getSettings: logic.getSettings,
       };
    }
 
@@ -251,7 +251,7 @@ module.exports = class ABViewPropertyLinkPage extends ABViewProperty {
             if (this.datacollection) this.datacollection.setCursor(rowId);
 
             if (this.view) this.view.changePage(pageId);
-         }
+         },
       };
 
       return {
@@ -259,7 +259,7 @@ module.exports = class ABViewPropertyLinkPage extends ABViewProperty {
          init: init,
          logic: logic,
 
-         changePage: logic.changePage
+         changePage: logic.changePage,
       };
    }
-};
+}

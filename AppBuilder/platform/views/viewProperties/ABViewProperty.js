@@ -1,5 +1,7 @@
-module.exports = class ABViewProperty {
-   constructor() {}
+import ClassUI from "../../../../ui/ClassUI";
+
+export default class ABViewProperty extends ClassUI {
+   // constructor() {}
 
    /**
     * @property default
@@ -25,7 +27,7 @@ module.exports = class ABViewProperty {
    static propertyComponent() {
       let ui = {
          view: "template",
-         template: "No UI"
+         template: "No UI",
       };
 
       let init = (options) => {
@@ -36,13 +38,13 @@ module.exports = class ABViewProperty {
       };
 
       let logic = {
-         callbacks: {}
+         callbacks: {},
       };
 
       return {
          ui: ui,
          init: init,
-         logic: logic
+         logic: logic,
       };
    }
 
@@ -75,7 +77,7 @@ module.exports = class ABViewProperty {
 
       let ui = {
          view: "template",
-         template: "No UI"
+         template: "No UI",
       };
 
       let init = (options) => {
@@ -86,13 +88,13 @@ module.exports = class ABViewProperty {
       };
 
       let logic = {
-         callbacks: {}
+         callbacks: {},
       };
 
       return {
          ui: ui,
          init: init,
-         logic: logic
+         logic: logic,
       };
    }
-};
+}

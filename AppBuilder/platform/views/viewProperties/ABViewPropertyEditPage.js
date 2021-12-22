@@ -1,10 +1,10 @@
-const ABViewPropertyAddPage = require("./ABViewPropertyAddPage");
+import ABViewPropertyAddPage from "./ABViewPropertyAddPage";
 
 let L = (key, altText) => {
    return AD.lang.label.getLabel(key) || altText;
 };
 
-module.exports = class ABViewPropertyEditPage extends ABViewPropertyAddPage {
+export default class ABViewPropertyEditPage extends ABViewPropertyAddPage {
    /**
     * @property default
     * return default settings
@@ -13,13 +13,13 @@ module.exports = class ABViewPropertyEditPage extends ABViewPropertyAddPage {
     */
    static get default() {
       return {
-         editForm: "none" // The url pointer of ABViewForm
+         editForm: "none", // The url pointer of ABViewForm
       };
    }
 
    static propertyComponent(App, idBase) {
       let ids = {
-         formEdit: idBase + "_editForm"
+         formEdit: idBase + "_editForm",
       };
 
       let ui = {
@@ -37,8 +37,8 @@ module.exports = class ABViewPropertyEditPage extends ABViewPropertyAddPage {
                }
 
                _logic.callbacks.onSave();
-            }
-         }
+            },
+         },
       };
 
       let _init = (options) => {
@@ -49,9 +49,9 @@ module.exports = class ABViewPropertyEditPage extends ABViewPropertyAddPage {
 
       let _logic = {
          callbacks: {
-            onSave: function() {
+            onSave: function () {
                console.warn("NO onSave()!");
-            }
+            },
          },
 
          setSettings: (view, settings = {}) => {
@@ -61,8 +61,8 @@ module.exports = class ABViewPropertyEditPage extends ABViewPropertyAddPage {
             let editForms = [
                {
                   id: "none",
-                  value: L("ab.component.connect.no", "*No add new option")
-               }
+                  value: L("ab.component.connect.no", "*No add new option"),
+               },
             ];
 
             (view.pageRoot().pages(() => true, true) || []).forEach((p) => {
@@ -79,7 +79,7 @@ module.exports = class ABViewPropertyEditPage extends ABViewPropertyAddPage {
                   ) {
                      editForms.push({
                         id: v.urlPointer(),
-                        value: `${p.label} - ${v.label}`
+                        value: `${p.label} - ${v.label}`,
                      });
                   }
                });
@@ -109,14 +109,14 @@ module.exports = class ABViewPropertyEditPage extends ABViewPropertyAddPage {
             }
 
             return settings;
-         }
+         },
       };
 
       return {
          ui: ui,
          init: _init,
          setSettings: _logic.setSettings,
-         getSettings: _logic.getSettings
+         getSettings: _logic.getSettings,
       };
    }
 
@@ -150,4 +150,4 @@ module.exports = class ABViewPropertyEditPage extends ABViewPropertyAddPage {
 
       return comp;
    }
-};
+}

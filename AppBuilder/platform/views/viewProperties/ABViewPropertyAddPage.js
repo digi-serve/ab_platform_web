@@ -1,10 +1,10 @@
-const ABViewProperty = require("./ABViewProperty");
+import ABViewProperty from "./ABViewProperty";
 
 let L = (key, altText) => {
    return AD.lang.label.getLabel(key) || altText;
 };
 
-module.exports = class ABViewPropertyAddPage extends ABViewProperty {
+export default class ABViewPropertyAddPage extends ABViewProperty {
    /**
     * @property default
     * return default settings
@@ -322,4 +322,4 @@ module.exports = class ABViewPropertyAddPage extends ABViewProperty {
          openFormPopup: _logic.openFormPopup,
       };
    }
-};
+}

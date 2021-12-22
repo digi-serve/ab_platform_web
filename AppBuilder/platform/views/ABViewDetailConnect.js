@@ -1,5 +1,6 @@
 const ABViewDetailConnectCore = require("../../core/views/ABViewDetailConnectCore");
-const ABViewPropertyAddPage = require("./viewProperties/ABViewPropertyAddPage");
+const ABViewPropertyAddPage = require("./viewProperties/ABViewPropertyAddPage")
+   .default;
 
 module.exports = class ABViewDetailConnect extends ABViewDetailConnectCore {
    ///
