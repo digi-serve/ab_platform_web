@@ -1069,6 +1069,20 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
          // cache linked object data
          this._options = result.data || result || [];
+
+         // populate display text
+         (this._options || []).forEach((opt) => {
+            opt.text = linkedObj.displayData(opt);
+         });
+
+         // filter
+         this._options = this._options.filter(function (item) {
+            if (item.text.toLowerCase().includes(term.toLowerCase())) {
+               return true;
+            }
+         });
+
+         return this._options;
       } catch (err) {
          this.AB.notify.developer(err, {
             message: "Error pull data from our linked model.",
@@ -1076,20 +1090,6 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
          return [];
       }
-
-      // populate display text
-      (this._options || []).forEach((opt) => {
-         opt.text = linkedObj.displayData(opt);
-      });
-
-      // filter
-      this._options = this._options.filter(function (item) {
-         if (item.text.toLowerCase().includes(term.toLowerCase())) {
-            return true;
-         }
-      });
-
-      return this._options;
    }
 
    getValue(item) {
