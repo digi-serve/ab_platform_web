@@ -187,9 +187,7 @@ module.exports = class RowUpdater extends ABComponent {
                this.AB.notify.builder(
                   {},
                   {
-                     message: L(
-                        `RowUpdater.selectField() could not find a field for [${columnId}]`
-                     ),
+                     message: `RowUpdater.selectField() could not find a field for [${columnId}]`
                   }
                );
                return;
