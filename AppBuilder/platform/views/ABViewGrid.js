@@ -1233,22 +1233,22 @@ module.exports = class ABViewGrid extends ABViewGridCore {
          },
 
          toolbarDeleteSelected: function ($view) {
-            var deleteTasks = [];
-            $$(DataTable.ui.id).data.each(function (obj) {
+            let deletedRowIds = [];
+            $$(DataTable.ui.id).data.each(function (row) {
                if (
-                  typeof obj != "undefined" &&
+                  typeof row != "undefined" &&
                   // obj.hasOwnProperty("appbuilder_select_item") &&
                   Object.prototype.hasOwnProperty.call(
-                     obj,
+                     row,
                      "appbuilder_select_item"
                   ) &&
-                  obj.appbuilder_select_item == 1
+                  row.appbuilder_select_item == 1
                ) {
-                  deleteTasks.push(CurrentObject.model().delete(obj.id));
+                  deletedRowIds.push(row.id);
                }
             });
 
-            if (deleteTasks.length > 0) {
+            if (deletedRowIds.length > 0) {
                webix.confirm({
                   title: L("Delete Multiple Records"),
                   text: L(
@@ -1256,6 +1256,12 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                   ),
                   callback: async (result) => {
                      if (result) {
+                        let deleteTasks = [];
+
+                        deletedRowIds.forEach((rowId) => {
+                           deleteTasks.push(CurrentObject.model().delete(rowId));
+                        });
+      
                         await Promise.all(deleteTasks);
 
                         // Anything we need to do after we are done.
