@@ -406,6 +406,8 @@ module.exports = class ABWorkObjectGantt extends ABComponent {
                this.AB.notify.developer(err, {
                   message: "Error when's adding a task in gantt workspace",
                });
+
+               throw err;
             }
          },
 
