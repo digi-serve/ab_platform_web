@@ -14,6 +14,12 @@ module.exports = class ABField extends ABFieldCore {
    constructor(values, object, fieldDefaults) {
       super(values, object, fieldDefaults);
 
+      this.AB.on("ab.abdefinition.update", (def) => {
+         if (def.id == this.id) {
+            this.emit("definition.updated", this);
+         }
+      });
+
       //  	// NOTE: setup this first so later we can use .fieldType(), .fieldIcon()
       //  	this.defaults = fieldDefaults;
 
@@ -539,12 +545,13 @@ module.exports = class ABField extends ABFieldCore {
     * @function columnHeader
     * Return the column header for a webix grid component for this specific
     * data field.
-    * @param {Object} options - {
-    * 							isObjectWorkspace: {bool},  is this being used in the Object workspace.
-    * 							width: {int},
-    * 							height: {int},
-    * 							editable: {bool}
-    * 						}
+    * @param {Object} options
+    * {
+    *    isObjectWorkspace: {bool},  is this being used in the Object workspace.
+    *    width: {int},
+    *    height: {int},
+    *    editable: {bool}
+    * }
     * @return {obj}  configuration obj
     */
    columnHeader(options) {
@@ -569,11 +576,15 @@ module.exports = class ABField extends ABFieldCore {
     * perform any custom display modifications for this field.  If this isn't
     * a standard value display (think image, Map, graph, etc...) then use this
     * method to create the display in the table/grid cell.
-    * @param {object} row is the {name=>value} hash of the current row of data.
-    * @param {App} App the shared ui App object useful more making globally
-    *					unique id references.
-    * @param {HtmlDOM} node  the HTML Dom object for this field's display.
-    * @param {object} options - option of additional settings
+    * @param {object} row
+    *        is the {name=>value} hash of the current row of data.
+    * @param {App} App
+    *        the shared ui App object useful more making globally
+    *			 unique id references.
+    * @param {HtmlDOM} node
+    *        the HTML Dom object for this field's display.
+    * @param {object} options
+    *        option of additional settings
     */
    customDisplay(row, App, node, options) {}
 

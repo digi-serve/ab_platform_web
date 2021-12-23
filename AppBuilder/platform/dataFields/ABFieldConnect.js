@@ -338,16 +338,16 @@ var ABFieldConnectComponent = new ABFieldComponent({
          ABFieldConnectComponent.logic.updateCustomIndex();
       },
 
-      clickNewObject: async () => {
+      clickNewObject: async (callback) => {
          let App = this.App;
          if (!App.actions.addNewObject) return;
 
          try {
             // pass false because after it is created we do not want it to select it in the object list
-            await App.actions.addNewObject(false);
+            await App.actions.addNewObject(false, callback);
 
             // pass true because we want it to select the last item in the list that was just created
-            populateSelect(true);
+            populateSelect(true, callback);
          } catch (err) {
             App.AB.notify.developer(err, {
                message: "Error when add new object.",
@@ -420,19 +420,26 @@ var ABFieldConnectComponent = new ABFieldComponent({
          $$(ids.indexField2).define("options", []);
          $$(ids.indexField2).refresh();
 
+<<<<<<< HEAD
          // NOTE: simplify access to .AB.objects() here:
          // console.error("DEBUGGING: what access to AB do I have here?");
          // debugger;
 
+=======
+>>>>>>> fc20f752c011f04ca856dd4837d93e572a378d93
          // 1:1
          // 1:M
          if (
             (linkType == "one" && linkViaType == "one") ||
             (linkType == "one" && linkViaType == "many")
          ) {
+<<<<<<< HEAD
             sourceObject = ABFieldConnectComponent.CurrentApplication.AB.objectByID(
                linkObjectId
             );
+=======
+            sourceObject = this.AB.objectByID(linkObjectId);
+>>>>>>> fc20f752c011f04ca856dd4837d93e572a378d93
          }
          // M:1
          else if (linkType == "many" && linkViaType == "one") {
@@ -441,10 +448,14 @@ var ABFieldConnectComponent = new ABFieldComponent({
          // M:N
          else if (linkType == "many" && linkViaType == "many") {
             sourceObject = ABFieldConnectComponent.CurrentObject;
+<<<<<<< HEAD
 
             let linkObject = ABFieldConnectComponent.CurrentApplication.AB.objectByID(
                linkObjectId
             );
+=======
+            let linkObject = this.AB.objectByID(linkObjectId);
+>>>>>>> fc20f752c011f04ca856dd4837d93e572a378d93
 
             // Populate the second index fields
             let linkIndexFields = [];
@@ -716,10 +727,21 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
    /*
     * @function customDisplay
     * perform any custom display modifications for this field.
-    * @param {object} row is the {name=>value} hash of the current row of data.
-    * @param {App} App the shared ui App object useful more making globally
-    *					unique id references.
-    * @param {HtmlDOM} node  the HTML Dom object for this field's display.
+    * @param {object} row
+    *        is the {name=>value} hash of the current row of data.
+    * @param {App} App
+    *        the shared ui App object useful more making globally
+    *			 unique id references.
+    * @param {HtmlDOM} node
+    *        the HTML Dom object for this field's display.
+    * @param {object} options
+    *        a {key=>value} hash of display options
+    *          .editable {bool}  are we able to edit the value?
+    *          .filters {hash}  the where cond to lookup values
+    *          .editPage
+    *          .isLabelHidden
+    *          .additionalText
+    *
     */
    customDisplay(row, App, node, options) {
       options = options || {};
@@ -752,6 +774,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          options.filters = {};
       }
 
+<<<<<<< HEAD
       // if this field's options are filtered off another field's value we need
       // to make sure the UX helps the user know what to do.
       let placeholderReadOnly = null;
@@ -772,6 +795,13 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                   label.config.label,
                ]);
             }
+=======
+      var formId = "";
+      if ($$(domNode).getFormView) {
+         var formNode = $$(domNode).getFormView();
+         if (formNode && formNode.config && formNode.config.abid) {
+            formId = formNode.config.abid;
+>>>>>>> fc20f752c011f04ca856dd4837d93e572a378d93
          }
       }
 
@@ -788,7 +818,8 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             editPage: options.editPage,
             isLabelHidden: options.isLabelHidden,
             additionalText: options.additionalText,
-            dataCy: this.key + " " + this.columnName + " " + this.id,
+            dataCy:
+               this.key + " " + this.columnName + " " + this.id + " " + formId,
             ajax: {
                url: "It will call url in .getOptions function", // require
                minimumInputLength: 0,
@@ -862,6 +893,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                   )
                      values[this.columnName] = "";
 
+<<<<<<< HEAD
                   try {
                      await this.object.model().update(row.id, values);
 
@@ -881,6 +913,31 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                         message: "Error updating our entry.",
                         row: row,
                         values: values,
+=======
+                  this.object
+                     .model()
+                     .update(row.id, values)
+                     .then(() => {
+                        // update values of relation to display in grid
+                        values[this.relationName()] = values[this.columnName];
+
+                        // update new value to item of DataTable .updateItem
+                        if (values[this.columnName] == "")
+                           values[this.columnName] = [];
+                        if ($$(node) && $$(node).updateItem)
+                           $$(node).updateItem(row.id, values);
+                     })
+                     .catch((err) => {
+                        node.classList.add("webix_invalid");
+                        node.classList.add("webix_invalid_cell");
+
+                        this.AB.notify.developer(err, {
+                           context:
+                              "ABFieldConnect:customDisplay():onChange: Error updating our entry.",
+                           row: row,
+                           values: values,
+                        });
+>>>>>>> fc20f752c011f04ca856dd4837d93e572a378d93
                      });
                   }
                },
@@ -995,8 +1052,14 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
     *
     * @return {Promise}
     */
+<<<<<<< HEAD
    async getOptions(where, term) {
       where = where || {};
+=======
+   getOptions(where, term) {
+      return new Promise(async (resolve, reject) => {
+         where = where || {};
+>>>>>>> fc20f752c011f04ca856dd4837d93e572a378d93
 
       if (!where.glue) where.glue = "and";
 
@@ -1060,6 +1123,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          }
       }
 
+<<<<<<< HEAD
       // Pull linked object data
       try {
          let result = await linkedModel.findAll({
@@ -1090,6 +1154,69 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
          return [];
       }
+=======
+         var haveResolved = false;
+         // {bool}
+         // have we already passed back a result?
+
+         var respond = (options) => {
+            // filter the raw lookup with the provided search term
+            options = options.filter(function (item) {
+               if (item.text.toLowerCase().includes(term.toLowerCase())) {
+                  return true;
+               }
+            });
+
+            if (!haveResolved) {
+               haveResolved = true;
+               resolve(options);
+            } else {
+               // if we have already resolved() then .emit() that we have
+               // updated "option.data".
+               this.emit("option.data", options);
+            }
+         };
+
+         // We store the .findAll() results locally and return that for a
+         // quick response:
+         var storageID = `${this.id}-${JSON.stringify(where)}`;
+         var storedOptions = await this.AB.Storage.get(storageID);
+         if (storedOptions) {
+            // immediately respond with our stored options.
+            this._options = storedOptions;
+            respond(storedOptions);
+         }
+
+         try {
+            // Pull linked object data
+            var result = await linkedModel.findAll({
+               where: where,
+               populate: false,
+            });
+
+            // cache linked object data
+            this._options = result.data || result || [];
+
+            // populate display text
+            (this._options || []).forEach((opt) => {
+               opt.text = linkedObj.displayData(opt);
+            });
+
+            respond(this._options);
+            this.AB.Storage.set(storageID, this._options);
+         } catch (err) {
+            this.AB.notify.developer(err, {
+               context:
+                  "ABFieldConnect:getOptions(): unable to retrieve options from server",
+               field: this.toObj(),
+               where,
+            });
+
+            haveResolved = true;
+            reject(err);
+         }
+      });
+>>>>>>> fc20f752c011f04ca856dd4837d93e572a378d93
    }
 
    getValue(item) {

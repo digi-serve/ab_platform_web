@@ -172,6 +172,10 @@ module.exports = class ABViewFormCustom extends ABViewFormCustomCore {
          let rowData = {},
             node = elem.$view;
 
+         // Add data-cy attributes
+         const dataCy = `${this.key} ${field.key} ${field.columnName} ${this.id} ${this.parent.id}`;
+         node.setAttribute('data-cy', dataCy);
+
          let options = {
             formId: ids.component,
             editable: this.settings.disable == 1 ? false : true,

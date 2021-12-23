@@ -30,6 +30,13 @@ if (!window.webix) {
    window.webix = webix;
 }
 
+// Import webix components
+import gantt from "./js/webix/components/gantt/gantt.js";
+import kanban from "./js/webix/components/kanban/kanban.js";
+import pivot from "./js/webix/components/pivot/pivot.js";
+import querybuilder from "./js/webix/components/querybuilder/querybuilder.js";
+import report from "./js/webix/components/reports/reports.js";
+
 Bootstrap.init().catch((err) => {
    var errorMSG = err.toString();
 

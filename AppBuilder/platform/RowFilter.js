@@ -1000,7 +1000,9 @@ module.exports = class RowFilter extends RowFilterCore {
             // refresh config settings before notify
             _logic.getValue();
 
+            console.warn("convert RowFilter.callback.onChange() to .emit()");
             _logic.callbacks.onChange();
+            this.emit("changed");
          }
 
          return false;
@@ -1127,7 +1129,7 @@ module.exports = class RowFilter extends RowFilterCore {
    }
 
    // setting up UI
-   init(options) {
+   init(options = {}) {
       super.init(options);
 
       // register our callbacks:

@@ -759,7 +759,7 @@ module.exports = class ABViewTab extends ABViewTabCore {
                      if (expandNode) {
                         expandNode.setAttribute(
                            "data-cy",
-                           `tab-${expandMenu}-${ids.expandMenu}`
+                           `tab-expandMenu-${ids.expandMenu}`
                         );
                      }
                      this.views((view) => {

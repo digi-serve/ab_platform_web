@@ -20,12 +20,16 @@ module.exports = {
 
    globals: {
       io: true,
+      $$: true,
+      webix: true,
    },
 
    parserOptions: {
-      ecmaVersion: 2021,
-      sourceType: "module", // export import syntax
+      ecmaVersion: 2020,
+      sourceType: "module",
    },
+
+   root: true,
 
    // extending recommended config and config derived from eslint-config-prettier
    extends: ["eslint:recommended", "prettier"],

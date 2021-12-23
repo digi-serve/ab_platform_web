@@ -174,6 +174,10 @@ module.exports = class ABDataCollection extends ABDataCollectionCore {
 
       // standardize the heights
 
+      /*
+       // In v2: we move the row height calculation into the Interface designer.
+       // 
+
       // calculate default value of $height of rows
       let obj = this.datasource;
       let defaultHeight = 0;
@@ -208,6 +212,7 @@ module.exports = class ABDataCollection extends ABDataCollectionCore {
             d.$height = defaultHeight;
          }
       });
+      */
 
       return super.processIncomingData(data).then(() => {
          // Web Platform:
@@ -219,6 +224,24 @@ module.exports = class ABDataCollection extends ABDataCollectionCore {
    ///
    /// Components
    ///
+
+   /**
+    * @method attachFlexlayout
+    *
+    *
+    * @param {Object} component - a webix flexlayout element instance
+    */
+   attachFlexlayout(component) {
+      var dc = this.__dataCollection;
+
+      // prevent attach many times
+      if (this.__flexComponentIds.indexOf(component.config.id) > -1) {
+         return;
+      } else {
+         // keep component id to an array
+         this.__flexComponentIds.push(component.config.id);
+      }
+   }
 
    /**
     * @method bind

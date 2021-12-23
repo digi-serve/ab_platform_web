@@ -266,7 +266,6 @@ module.exports = class ABFieldComponent {
 
          /*
           * @function show
-          *
           * show this component.
           */
          show: (a, b) => {

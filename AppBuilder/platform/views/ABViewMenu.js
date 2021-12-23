@@ -128,7 +128,7 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
                $$(ids.pages).checkItem(id);
                webix.message({
                   text: L(
-                     "Item contains submenu, please remove items in submenu before removing."
+                     "Item comtains submenu, please remove items in submenu before removing."
                   ),
                   type: "error",
                   expire: 10000,
@@ -830,9 +830,10 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
                }
             },
             onAfterRender: () => {
-               const Menu = $$(this.id);
+               const Menu = $$(ids.component);
+               if (!Menu) return;
                const views = this.application.views();
-               Menu.data.each((item) => {
+               Menu?.data.each((item) => {
                   const node = Menu.getItemNode(item.id);
                   if (!node) return;
                   // get linked page/tab info so we can use its name in the data-cy

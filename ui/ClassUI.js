@@ -77,6 +77,16 @@ class ClassUI extends EventEmitter {
       return this.el;
    }
 
+   changePage(pageId) {
+      this.emit("changePage", pageId);
+   }
+
+   hide() {
+      if (this.ids?.component) {
+         $$(this.ids.component).hide();
+      }
+   }
+
    label(key, ...params) {
       if (this.AB) {
          return this.AB.Multilingual.label(key, key, ...params);

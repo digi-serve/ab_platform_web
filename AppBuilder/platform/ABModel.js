@@ -356,6 +356,10 @@ module.exports = class ABModel extends ABModelCore {
                if (DT.showProgress) DT.showProgress({ type: "icon" });
 
                this.findAll(cond).then((data) => {
+                  /*
+                   // In V2: we move the row height processing into 
+                   // the interface designer 
+
                   data.data.forEach((item) => {
                      if (
                         item.properties != null &&
@@ -367,6 +371,7 @@ module.exports = class ABModel extends ABModelCore {
                         item.$height = parseInt(this._where.height);
                      }
                   });
+                  */
                   DT.parse(data);
 
                   if (DT.hideProgress) DT.hideProgress();

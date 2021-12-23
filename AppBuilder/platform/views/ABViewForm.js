@@ -725,6 +725,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
          // body: {
          id: ids.component,
          view: "form",
+         abid: this.id,
          rows: component.ui.rows.concat(fieldValidationsHolder),
          // elementsConfig: {
          //    on: {
@@ -966,7 +967,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
                   field.defaultValue(defaultRowData);
                   field.setValue($$(comp.ui.id), defaultRowData);
 
-                  if (comp.logic.refresh) comp.logic.refresh(defaultRowData);
+                  comp.logic?.refresh?.(defaultRowData);
                });
                var normalFields = this.fieldComponents(
                   (comp) =>

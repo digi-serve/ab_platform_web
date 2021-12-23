@@ -30,12 +30,33 @@ module.exports = class ABObject extends ABObjectCore {
          AB
       );
 
-      // this.fromValues(attributes);
+      // listen for our ABFields."definition.updated"
+      this.fields().forEach((f) => {
+         f.on("definition.updated", (field) => {
+            // create a new Field with the updated def
+            var def = this.AB.definitionByID(field.id);
+            if (!def) return;
+
+            var newField = this.AB.fieldNew(def, this);
+
+            // we want to keep the same fieldID order:
+            var newFields = [];
+            this.fields().forEach((f) => {
+               if (f.id === field.id) {
+                  newFields.push(newField);
+                  return;
+               }
+               newFields.push(f);
+            });
+
+            this._fields = newFields;
+         });
+      });
 
       // listen
-      this.AB.on("ab.object.update", (data) => {
-         if (this.id == data.objectId) this.fromValues(data.data);
-      });
+      // this.AB.on("ab.object.update", (data) => {
+      //    if (this.id == data.objectId) this.fromValues(data.data);
+      // });
 
       this._pendingNetworkRequests = {};
       // {hash}   uuid : {Promise}
@@ -43,15 +64,42 @@ module.exports = class ABObject extends ABObjectCore {
       // if a queued operation is sent after a web browser refresh, then
       // we will NOT have a pending promise to .resolve()/.reject()
 
-      this.AB.Network.on("object.migrate", (context, err, response) => {
+      this._handler_object_migrate = (context, err, response) => {
          // NOTE:
-         var pending = this._pendingNetworkRequests[context.uuid];
+         var pending = this._pendingNetworkRequests?.[context.uuid];
          if (err) {
             pending?.reject(err);
             return;
          }
          pending?.resolve(response);
-      });
+      };
+      this.AB.Network.on("object.migrate", this._handler_object_migrate);
+   }
+
+   /**
+    * @method refreshInstance()
+    * Used when a definition.updated message is detected on this ABObject.
+    * This method will return a new instance based upon the current definition
+    * and properly resolve any handlers and pending network Requests.
+    * @return {ABObject}
+    */
+   refreshInstance() {
+      var newObj = this.AB.objectByID(this.id);
+
+      // prevent doing this multiple times:
+      if (this._pendingNetworkRequests) {
+         // remove object.migrate listener
+         this.AB.Network.removeListener(
+            "object.migrate",
+            this._handler_object_migrate
+         );
+
+         // transfer the pending network requests
+         newObj._pendingNetworkRequests = this._pendingNetworkRequests;
+         this._pendingNetworkRequests = null;
+      }
+
+      return newObj;
    }
 
    ///
@@ -104,10 +152,6 @@ module.exports = class ABObject extends ABObjectCore {
             "name",
             L('Object name must be unique ("{0}" already in use)', [this.name])
          );
-         // errors = OP.Form.validationError({
-         // 		name:'name',
-         // 		message:L('ab.validation.object.name.unique', 'Object name must be unique (#name# already used in this Application)').replace('#name#', this.name),
-         // 	}, errors);
       }
 
       // Check the common validations:
@@ -234,12 +278,12 @@ module.exports = class ABObject extends ABObjectCore {
         });
  */
 
-      var removeFromApplications = async () => {
+      var removeFromApplications = () => {
          var allRemoves = [];
          this.AB.applications().forEach((app) => {
             allRemoves.push(app.objectRemove(this));
          });
-         await Promise.all(allRemoves);
+         return Promise.all(allRemoves);
       };
 
       var disableRelatedQueries = () => {
@@ -601,15 +645,17 @@ module.exports = class ABObject extends ABObjectCore {
          let id = data.getFirstId();
          while (id) {
             var row = data.getItem(id);
-            fields.forEach((f) => {
-               var node = DataTable.getItemNode({
-                  row: row.id,
-                  column: f.columnName,
+            if (row) {
+               fields.forEach((f) => {
+                  var node = DataTable.getItemNode({
+                     row: row.id,
+                     column: f.columnName,
+                  });
+                  f.customDisplay(row, App, node, {
+                     editable: isEditable,
+                  });
                });
-               f.customDisplay(row, App, node, {
-                  editable: isEditable,
-               });
-            });
+            }
             id = data.getNextId(id);
          }
       }
