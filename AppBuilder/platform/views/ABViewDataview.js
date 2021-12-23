@@ -131,7 +131,6 @@ module.exports = class ABViewDataview extends ABViewDataviewCore {
 
       com.init = (options) => {
          var dc = this.datacollection;
-         var dataView = $$(ids.dataFlexView);
          if (!dc) return;
 
          let dataView = $$(ids.dataFlexView);

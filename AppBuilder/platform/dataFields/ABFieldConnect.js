@@ -420,26 +420,13 @@ var ABFieldConnectComponent = new ABFieldComponent({
          $$(ids.indexField2).define("options", []);
          $$(ids.indexField2).refresh();
 
-<<<<<<< HEAD
-         // NOTE: simplify access to .AB.objects() here:
-         // console.error("DEBUGGING: what access to AB do I have here?");
-         // debugger;
-
-=======
->>>>>>> fc20f752c011f04ca856dd4837d93e572a378d93
          // 1:1
          // 1:M
          if (
             (linkType == "one" && linkViaType == "one") ||
             (linkType == "one" && linkViaType == "many")
          ) {
-<<<<<<< HEAD
-            sourceObject = ABFieldConnectComponent.CurrentApplication.AB.objectByID(
-               linkObjectId
-            );
-=======
             sourceObject = this.AB.objectByID(linkObjectId);
->>>>>>> fc20f752c011f04ca856dd4837d93e572a378d93
          }
          // M:1
          else if (linkType == "many" && linkViaType == "one") {
@@ -448,14 +435,7 @@ var ABFieldConnectComponent = new ABFieldComponent({
          // M:N
          else if (linkType == "many" && linkViaType == "many") {
             sourceObject = ABFieldConnectComponent.CurrentObject;
-<<<<<<< HEAD
-
-            let linkObject = ABFieldConnectComponent.CurrentApplication.AB.objectByID(
-               linkObjectId
-            );
-=======
             let linkObject = this.AB.objectByID(linkObjectId);
->>>>>>> fc20f752c011f04ca856dd4837d93e572a378d93
 
             // Populate the second index fields
             let linkIndexFields = [];
@@ -774,7 +754,6 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          options.filters = {};
       }
 
-<<<<<<< HEAD
       // if this field's options are filtered off another field's value we need
       // to make sure the UX helps the user know what to do.
       let placeholderReadOnly = null;
@@ -785,7 +764,8 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             placeholderReadOnly = L("Must select item from '{0}' first.", [
                L("PARENT ELEMENT"),
             ]);
-         } else {
+         }
+         else {
             let val = this.getValue($$(options.filterValue.ui.id));
             if (!val) {
                // if there isn't a value on the parent select element set this one to readonly and change placeholder text
@@ -795,13 +775,14 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                   label.config.label,
                ]);
             }
-=======
+         }
+      }
+
       var formId = "";
       if ($$(domNode).getFormView) {
          var formNode = $$(domNode).getFormView();
          if (formNode && formNode.config && formNode.config.abid) {
             formId = formNode.config.abid;
->>>>>>> fc20f752c011f04ca856dd4837d93e572a378d93
          }
       }
 
@@ -819,7 +800,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             isLabelHidden: options.isLabelHidden,
             additionalText: options.additionalText,
             dataCy:
-               this.key + " " + this.columnName + " " + this.id + " " + formId,
+               `${this.key} ${this.columnName} ${this.id} ${formId}`,
             ajax: {
                url: "It will call url in .getOptions function", // require
                minimumInputLength: 0,
@@ -893,7 +874,6 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                   )
                      values[this.columnName] = "";
 
-<<<<<<< HEAD
                   try {
                      await this.object.model().update(row.id, values);
 
@@ -910,34 +890,10 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                      node.classList.add("webix_invalid_cell");
 
                      this.AB.notify.developer(err, {
-                        message: "Error updating our entry.",
+                        context:
+                           "ABFieldConnect:customDisplay():onChange: Error updating our entry.",
                         row: row,
                         values: values,
-=======
-                  this.object
-                     .model()
-                     .update(row.id, values)
-                     .then(() => {
-                        // update values of relation to display in grid
-                        values[this.relationName()] = values[this.columnName];
-
-                        // update new value to item of DataTable .updateItem
-                        if (values[this.columnName] == "")
-                           values[this.columnName] = [];
-                        if ($$(node) && $$(node).updateItem)
-                           $$(node).updateItem(row.id, values);
-                     })
-                     .catch((err) => {
-                        node.classList.add("webix_invalid");
-                        node.classList.add("webix_invalid_cell");
-
-                        this.AB.notify.developer(err, {
-                           context:
-                              "ABFieldConnect:customDisplay():onChange: Error updating our entry.",
-                           row: row,
-                           values: values,
-                        });
->>>>>>> fc20f752c011f04ca856dd4837d93e572a378d93
                      });
                   }
                },
@@ -1052,14 +1008,8 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
     *
     * @return {Promise}
     */
-<<<<<<< HEAD
    async getOptions(where, term) {
       where = where || {};
-=======
-   getOptions(where, term) {
-      return new Promise(async (resolve, reject) => {
-         where = where || {};
->>>>>>> fc20f752c011f04ca856dd4837d93e572a378d93
 
       if (!where.glue) where.glue = "and";
 
@@ -1123,10 +1073,41 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          }
       }
 
-<<<<<<< HEAD
-      // Pull linked object data
+      var haveResolved = false;
+      // {bool}
+      // have we already passed back a result?
+
+      var respond = (options) => {
+         // filter the raw lookup with the provided search term
+         options = options.filter(function (item) {
+            if (item.text.toLowerCase().includes(term.toLowerCase())) {
+               return true;
+            }
+         });
+
+         if (!haveResolved) {
+            haveResolved = true;
+            return options;
+         } else {
+            // if we have already resolved() then .emit() that we have
+            // updated "option.data".
+            this.emit("option.data", options);
+         }
+      };
+
+      // We store the .findAll() results locally and return that for a
+      // quick response:
+      var storageID = `${this.id}-${JSON.stringify(where)}`;
+      var storedOptions = await this.AB.Storage.get(storageID);
+      if (storedOptions) {
+         // immediately respond with our stored options.
+         this._options = storedOptions;
+         return  respond(storedOptions);
+      }
+
       try {
-         let result = await linkedModel.findAll({
+         // Pull linked object data
+         var result = await linkedModel.findAll({
             where: where,
             populate: false,
          });
@@ -1139,84 +1120,19 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             opt.text = linkedObj.displayData(opt);
          });
 
-         // filter
-         this._options = this._options.filter(function (item) {
-            if (item.text.toLowerCase().includes(term.toLowerCase())) {
-               return true;
-            }
-         });
-
-         return this._options;
+         this.AB.Storage.set(storageID, this._options);
+         return respond(this._options);
       } catch (err) {
          this.AB.notify.developer(err, {
-            message: "Error pull data from our linked model.",
+            context:
+               "ABFieldConnect:getOptions(): unable to retrieve options from server",
+            field: this.toObj(),
+            where,
          });
 
-         return [];
+         haveResolved = true;
+         throw err;
       }
-=======
-         var haveResolved = false;
-         // {bool}
-         // have we already passed back a result?
-
-         var respond = (options) => {
-            // filter the raw lookup with the provided search term
-            options = options.filter(function (item) {
-               if (item.text.toLowerCase().includes(term.toLowerCase())) {
-                  return true;
-               }
-            });
-
-            if (!haveResolved) {
-               haveResolved = true;
-               resolve(options);
-            } else {
-               // if we have already resolved() then .emit() that we have
-               // updated "option.data".
-               this.emit("option.data", options);
-            }
-         };
-
-         // We store the .findAll() results locally and return that for a
-         // quick response:
-         var storageID = `${this.id}-${JSON.stringify(where)}`;
-         var storedOptions = await this.AB.Storage.get(storageID);
-         if (storedOptions) {
-            // immediately respond with our stored options.
-            this._options = storedOptions;
-            respond(storedOptions);
-         }
-
-         try {
-            // Pull linked object data
-            var result = await linkedModel.findAll({
-               where: where,
-               populate: false,
-            });
-
-            // cache linked object data
-            this._options = result.data || result || [];
-
-            // populate display text
-            (this._options || []).forEach((opt) => {
-               opt.text = linkedObj.displayData(opt);
-            });
-
-            respond(this._options);
-            this.AB.Storage.set(storageID, this._options);
-         } catch (err) {
-            this.AB.notify.developer(err, {
-               context:
-                  "ABFieldConnect:getOptions(): unable to retrieve options from server",
-               field: this.toObj(),
-               where,
-            });
-
-            haveResolved = true;
-            reject(err);
-         }
-      });
->>>>>>> fc20f752c011f04ca856dd4837d93e572a378d93
    }
 
    getValue(item) {

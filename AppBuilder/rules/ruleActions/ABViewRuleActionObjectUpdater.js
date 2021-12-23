@@ -1069,7 +1069,6 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                            );
 
                            break;
-                        }
                      }
 
                      currRow = clonedDataCollection.getNextRecord(currRow);
@@ -1091,7 +1090,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                         } else {
                            objectToUpdate[field.columnName] = newValues;
                         }
-                        break;
+                     break;
                   }
                   break;
 
