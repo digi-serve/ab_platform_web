@@ -128,7 +128,7 @@ module.exports = class ABViewGridFilterMenu {
                            },
                            {
                               view: "label",
-                              label: L('*need "LoadAll" from datasource'),
+                              label: L('need "LoadAll" from datasource'),
                               css: { color: "red" },
                               id: ids.needLoadAllLabel,
                               hidden: true,

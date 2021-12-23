@@ -163,7 +163,7 @@ module.exports = class ABViewPropertyFilterData extends ABViewProperty {
                         },
                         {
                            view: "label",
-                           label: L('*need "LoadAll" from datasource'),
+                           label: L('need "LoadAll" from datasource'),
                            css: { color: "red" },
                            id: ids.needLoadAllLabel,
                            hidden: true,
