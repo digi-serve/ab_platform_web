@@ -263,7 +263,7 @@ module.exports = class ABViewGrid extends ABViewGridCore {
          {
             view: "fieldset",
             label: L("Grid Properties:"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -272,31 +272,31 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                      view: "checkbox",
                      name: "isEditable",
                      labelRight: L("User can edit in grid."),
-                     labelWidth: this.AB.Config.labelWidthCheckbox,
+                     labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
                   },
                   {
                      view: "checkbox",
                      name: "massUpdate",
                      labelRight: L("User can edit multiple items at one time."),
-                     labelWidth: this.AB.Config.labelWidthCheckbox,
+                     labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
                   },
                   {
                      view: "checkbox",
                      name: "allowDelete",
                      labelRight: L("User can delete records."),
-                     labelWidth: this.AB.Config.labelWidthCheckbox,
+                     labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
                   },
                   {
                      view: "checkbox",
                      name: "isSortable",
                      labelRight: L("User can sort records."),
-                     labelWidth: this.AB.Config.labelWidthCheckbox,
+                     labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
                   },
                   {
                      view: "checkbox",
                      name: "isExportable",
                      labelRight: L("User can export."),
-                     labelWidth: this.AB.Config.labelWidthCheckbox,
+                     labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
                   },
                ],
             },
@@ -304,7 +304,7 @@ module.exports = class ABViewGrid extends ABViewGridCore {
          {
             view: "fieldset",
             label: L("Grid Data:"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -313,7 +313,7 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                      view: "select",
                      name: "datacollection",
                      label: L("Object:"),
-                     labelWidth: this.AB.Config.labelWidthLarge,
+                     labelWidth: this.AB.UISettings.config().labelWidthLarge,
                      on: {
                         onChange: (newv, oldv) => {
                            if (newv != oldv) {
@@ -347,7 +347,7 @@ module.exports = class ABViewGrid extends ABViewGridCore {
          {
             view: "fieldset",
             label: L("Group:"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -356,7 +356,7 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                      view: "multiselect",
                      name: "groupBy",
                      label: L("Group by:"),
-                     labelWidth: this.AB.Config.labelWidthLarge,
+                     labelWidth: this.AB.UISettings.config().labelWidthLarge,
                      options: [],
                      on: {
                         onChange: (newV, oldV) => {
@@ -387,7 +387,7 @@ module.exports = class ABViewGrid extends ABViewGridCore {
          {
             view: "fieldset",
             label: L("Customize Display:"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -398,7 +398,7 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                            view: "label",
                            label: L("Hidden Fields:"),
                            css: "ab-text-bold",
-                           width: this.AB.Config.labelWidthXLarge,
+                           width: this.AB.UISettings.config().labelWidthXLarge,
                         },
                         {
                            view: view,
@@ -418,7 +418,7 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                            view: "label",
                            label: L("Filter Option:"),
                            css: "ab-text-bold",
-                           width: this.AB.Config.labelWidthXLarge,
+                           width: this.AB.UISettings.config().labelWidthXLarge,
                         },
                         {
                            view: view,
@@ -438,7 +438,7 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                            view: "label",
                            label: L("Freeze Columns:"),
                            css: "ab-text-bold",
-                           width: this.AB.Config.labelWidthXLarge,
+                           width: this.AB.UISettings.config().labelWidthXLarge,
                         },
                         {
                            view: view,
@@ -459,7 +459,7 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                            view: "label",
                            label: L("Summary Fields:"),
                            css: "ab-text-bold",
-                           width: this.AB.Config.labelWidthXLarge,
+                           width: this.AB.UISettings.config().labelWidthXLarge,
                         },
                         {
                            view: view,
@@ -480,7 +480,7 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                            view: "label",
                            label: L("Count Fields:"),
                            css: "ab-text-bold",
-                           width: this.AB.Config.labelWidthXLarge,
+                           width: this.AB.UISettings.config().labelWidthXLarge,
                         },
                         {
                            view: view,
@@ -499,28 +499,28 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                      view: "counter",
                      name: "height",
                      label: L("Height:"),
-                     labelWidth: this.AB.Config.labelWidthXLarge,
+                     labelWidth: this.AB.UISettings.config().labelWidthXLarge,
                   },
 
                   {
                      view: "checkbox",
                      name: "hideHeader",
                      labelRight: L("Hide table header"),
-                     labelWidth: this.AB.Config.labelWidthCheckbox,
+                     labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
                   },
 
                   {
                      view: "checkbox",
                      name: "labelAsField",
                      labelRight: L("Show a field using label template"),
-                     labelWidth: this.AB.Config.labelWidthCheckbox,
+                     labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
                   },
 
                   {
                      view: "checkbox",
                      name: "hideButtons",
                      labelRight: L("Hide edit and view buttons"),
-                     labelWidth: this.AB.Config.labelWidthCheckbox,
+                     labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
                   },
                ],
             },

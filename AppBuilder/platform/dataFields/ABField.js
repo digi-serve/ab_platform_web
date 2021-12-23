@@ -229,7 +229,7 @@ module.exports = class ABField extends ABFieldCore {
                name: "label",
                label: L("Label"),
                placeholder: L("Label"),
-               labelWidth: this.AB.Config.labelWidthLarge,
+               labelWidth: this.AB.UISettings.config().labelWidthLarge,
                css: "ab-new-label-name",
                on: {
                   onChange: function (newVal, oldVal) {
@@ -243,7 +243,7 @@ module.exports = class ABField extends ABFieldCore {
                name: "columnName",
                disallowEdit: true,
                label: L("Field Name"),
-               labelWidth: this.AB.Config.labelWidthLarge,
+               labelWidth: this.AB.UISettings.config().labelWidthLarge,
                placeholder: L("Database field name"),
             },
             {
@@ -257,7 +257,7 @@ module.exports = class ABField extends ABFieldCore {
                id: ids.showIcon,
                name: "showIcon",
                labelRight: App.labels.dataFieldShowIcon, // 'Show icon',
-               labelWidth: this.AB.Config.labelWidthCheckbox,
+               labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
                value: true,
             },
             {
@@ -267,7 +267,7 @@ module.exports = class ABField extends ABFieldCore {
                hidden: !Field.supportRequire,
                labelRight: App.labels.required,
                // disallowEdit: true,
-               labelWidth: this.AB.Config.labelWidthCheckbox,
+               labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
                on: {
                   onChange: async (newVal, oldVal) => {
                      requiredOnChange(newVal, oldVal, ids);
@@ -293,7 +293,7 @@ module.exports = class ABField extends ABFieldCore {
                hidden: !Field.supportUnique,
                labelRight: App.labels.unique,
                disallowEdit: true,
-               labelWidth: this.AB.Config.labelWidthCheckbox,
+               labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
             },
             {
                id: ids.filterComplex,
@@ -347,7 +347,7 @@ module.exports = class ABField extends ABFieldCore {
                   {
                      view: "text",
                      name: "invalidMessage",
-                     labelWidth: this.AB.Config.labelWidthLarge,
+                     labelWidth: this.AB.UISettings.config().labelWidthLarge,
                      value:
                         settings && settings.invalidMessage
                            ? settings.invalidMessage

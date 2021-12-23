@@ -69,7 +69,7 @@ module.exports = class ABViewDetailText extends ABViewDetailTextCore {
             view: "counter",
             name: "height",
             label: L("Height:"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
       ]);
    }

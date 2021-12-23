@@ -73,31 +73,31 @@ module.exports = class ABViewPivot extends ABViewPivotCore {
             name: "datacollection",
             view: "richselect",
             label: L("Data Source"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             view: "counter",
             name: "height",
             label: L("Height:"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             view: "checkbox",
             name: "removeMissed",
             labelRight: L("Remove empty data."),
-            labelWidth: this.AB.Config.labelWidthCheckbox,
+            labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
          },
          {
             view: "checkbox",
             name: "totalColumn",
             labelRight: L("Show a total column."),
-            labelWidth: this.AB.Config.labelWidthCheckbox,
+            labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
          },
          {
             view: "checkbox",
             name: "separateLabel",
             labelRight: L("Separate header label."),
-            labelWidth: this.AB.Config.labelWidthCheckbox,
+            labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
          },
          {
             view: "checkbox",
@@ -105,7 +105,7 @@ module.exports = class ABViewPivot extends ABViewPivotCore {
             labelRight: L(
                "Highlighting of a cell(s) with the least value in a row."
             ),
-            labelWidth: this.AB.Config.labelWidthCheckbox,
+            labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
          },
          {
             view: "checkbox",
@@ -113,14 +113,14 @@ module.exports = class ABViewPivot extends ABViewPivotCore {
             labelRight: L(
                "Highlighting of a cell(s) with the biggest value in a row."
             ),
-            labelWidth: this.AB.Config.labelWidthCheckbox,
+            labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
          },
          {
             name: "decimalPlaces",
             view: "counter",
             min: 1,
             label: L("Decimal Places"),
-            labelWidth: this.AB.Config.labelWidthXLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthXLarge,
          },
       ]);
    }

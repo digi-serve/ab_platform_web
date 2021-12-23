@@ -25,7 +25,7 @@ module.exports = class ABViewPropertyAddPage extends ABViewProperty {
          name: "formView",
          view: "richselect",
          label: L("Add New Form"),
-         labelWidth: this.AB.Config.labelWidthXLarge,
+         labelWidth: this.AB.UISettings.config().labelWidthXLarge,
          on: {
             onChange: (newVal, oldVal) => {
                if (newVal == L("No add new option")) {

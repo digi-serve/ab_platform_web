@@ -69,13 +69,13 @@ module.exports = class ABViewDetailImage extends ABViewDetailImageCore {
             view: "counter",
             name: "height",
             label: L("Height:"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             view: "counter",
             name: "width",
             label: L("Width:"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
       ]);
    }

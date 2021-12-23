@@ -235,7 +235,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
             view: "fieldset",
             name: "addNewSettings",
             label: L("Add New Popup Settings:"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -245,7 +245,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
                      name: "popupWidth",
                      placeholder: L("Set popup width"),
                      label: L("Width:"),
-                     labelWidth: this.AB.Config.labelWidthLarge,
+                     labelWidth: this.AB.UISettings.config().labelWidthLarge,
                      validate: webix.rules.isNumber,
                   },
                   {
@@ -253,7 +253,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
                      name: "popupHeight",
                      placeholder: L("Set popup height"),
                      label: L("Height:"),
-                     labelWidth: this.AB.Config.labelWidthLarge,
+                     labelWidth: this.AB.UISettings.config().labelWidthLarge,
                      validate: webix.rules.isNumber,
                   },
                ],
@@ -263,7 +263,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
             view: "fieldset",
             name: "advancedOption",
             label: L("Advanced Options:"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -273,7 +273,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
                         {
                            view: "label",
                            label: L("Filter Options:"),
-                           width: this.AB.Config.labelWidthLarge,
+                           width: this.AB.UISettings.config().labelWidthLarge,
                         },
                         {
                            view: "button",

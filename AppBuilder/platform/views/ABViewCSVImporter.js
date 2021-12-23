@@ -130,12 +130,12 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
          {
             view: "fieldset",
             label: L("Data:"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             body: {
                name: "datacollection",
                view: "richselect",
                label: L("Data Source"),
-               labelWidth: this.AB.Config.labelWidthLarge,
+               labelWidth: this.AB.UISettings.config().labelWidthLarge,
                skipAutoSave: true,
                on: {
                   onChange: _logic.selectSource,
@@ -145,7 +145,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
          {
             view: "fieldset",
             label: L("Available Fields:"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -175,7 +175,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
          {
             view: "fieldset",
             label: L("Rules:"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -185,7 +185,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                         {
                            view: "label",
                            label: L("Record Rules:"),
-                           width: this.AB.Config.labelWidthLarge,
+                           width: this.AB.UISettings.config().labelWidthLarge,
                         },
                         {
                            view: "button",
@@ -207,7 +207,7 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
          {
             view: "fieldset",
             label: L("Customize Display:"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -216,13 +216,13 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
                      name: "buttonLabel",
                      view: "text",
                      label: L("Label"),
-                     labelWidth: this.AB.Config.labelWidthXLarge,
+                     labelWidth: this.AB.UISettings.config().labelWidthXLarge,
                   },
                   {
                      view: "counter",
                      name: "width",
                      label: L("Width:"),
-                     labelWidth: this.AB.Config.labelWidthXLarge,
+                     labelWidth: this.AB.UISettings.config().labelWidthXLarge,
                   },
                ],
             },

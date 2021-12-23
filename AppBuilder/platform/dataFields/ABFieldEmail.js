@@ -24,7 +24,7 @@ var ABFieldEmailComponent = new ABFieldComponent({
             view: "text",
             id: ids.default,
             name: "default",
-            labelWidth: this.AB.Config.labelWidthXLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthXLarge,
             label: L("Default"),
             placeholder: L("Enter default value"),
          },

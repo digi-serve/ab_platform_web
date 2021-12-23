@@ -33,7 +33,7 @@ module.exports = class ABViewPropertyLinkPage extends ABViewProperty {
       let ui = {
          view: "fieldset",
          label: L("Linked Pages:"),
-         labelWidth: this.AB.Config.labelWidthLarge,
+         labelWidth: this.AB.UISettings.config().labelWidthLarge,
          body: {
             type: "clean",
             padding: 10,
@@ -43,14 +43,14 @@ module.exports = class ABViewPropertyLinkPage extends ABViewProperty {
                   view: "select",
                   name: "detailsPage",
                   label: L("Details Page:"),
-                  labelWidth: this.AB.Config.labelWidthLarge,
+                  labelWidth: this.AB.UISettings.config().labelWidthLarge,
                },
                {
                   id: ids.editPage,
                   view: "select",
                   name: "editPage",
                   label: L("Edit Form:"),
-                  labelWidth: this.AB.Config.labelWidthLarge,
+                  labelWidth: this.AB.UISettings.config().labelWidthLarge,
                },
             ],
          },

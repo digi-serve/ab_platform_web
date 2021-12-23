@@ -35,7 +35,7 @@ module.exports = class ABViewDataview extends ABViewDataviewCore {
             name: "xCount",
             min: 1, // we cannot have 0 columns per row so lets not accept it
             label: L("Items in a row"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             step: 1,
          },
          this.linkPageComponent.ui,

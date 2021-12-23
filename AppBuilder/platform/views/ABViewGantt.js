@@ -51,7 +51,7 @@ module.exports = class ABViewGantt extends ABViewGanttCore {
          {
             view: "fieldset",
             label: L("Gantt Data:"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -60,7 +60,7 @@ module.exports = class ABViewGantt extends ABViewGanttCore {
                      view: "select",
                      name: "datacollection",
                      label: L("Object:"),
-                     labelWidth: this.AB.Config.labelWidthLarge,
+                     labelWidth: this.AB.UISettings.config().labelWidthLarge,
                      on: {
                         onChange: (newv, oldv) => {
                            if (newv == oldv) return;
@@ -73,7 +73,7 @@ module.exports = class ABViewGantt extends ABViewGanttCore {
          {
             view: "fieldset",
             label: L("Gantt Fields:"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             body: {
                view: "form",
                name: "fields",

@@ -55,7 +55,7 @@ module.exports = class ABViewChartPie extends ABViewChartPieCore {
             name: "pieType",
             view: "richselect",
             label: L("Chart Type"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             options: [
                {
                   id: "pie",
@@ -88,20 +88,20 @@ module.exports = class ABViewChartPie extends ABViewChartPieCore {
             view: "counter",
             min: 1,
             label: L("Inner Font Size"),
-            labelWidth: this.AB.Config.labelWidthXLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthXLarge,
          },
          {
             name: "labelFontSize",
             view: "counter",
             min: 1,
             label: L("Label Font Size"),
-            labelWidth: this.AB.Config.labelWidthXLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthXLarge,
          },
          {
             name: "isLegend",
             view: "checkbox",
             labelRight: L("Show Legend"),
-            labelWidth: this.AB.Config.labelWidthCheckbox,
+            labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
          },
       ]);
    }

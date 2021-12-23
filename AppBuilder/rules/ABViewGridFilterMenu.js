@@ -72,7 +72,7 @@ module.exports = class ABViewGridFilterMenu {
                   ],
                   vertical: true,
                   label: L("Filter Option"),
-                  labelWidth: this.AB.Config.labelWidthLarge,
+                  labelWidth: this.AB.UISettings.config().labelWidthLarge,
                   on: {
                      onChange: (newValue, oldValue) => {
                         _logic.setFilterOption(newValue);
@@ -86,7 +86,7 @@ module.exports = class ABViewGridFilterMenu {
                   hidden: true,
                   vertical: true,
                   label: L("Show"),
-                  labelWidth: this.AB.Config.labelWidthLarge,
+                  labelWidth: this.AB.UISettings.config().labelWidthLarge,
                   options: [
                      { id: "default", value: L("All matching records") },
                      { id: "single", value: L("Single records only") },
@@ -100,7 +100,7 @@ module.exports = class ABViewGridFilterMenu {
                   hidden: true,
                   value: "toolbar",
                   label: L("Display"),
-                  labelWidth: this.AB.Config.labelWidthLarge,
+                  labelWidth: this.AB.UISettings.config().labelWidthLarge,
                   options: [
                      { id: "toolbar", value: L("Toolbar") },
                      { id: "form", value: L("Form") },

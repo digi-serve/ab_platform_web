@@ -491,7 +491,7 @@ module.exports = class ABViewTab extends ABViewTabCore {
             view: "checkbox",
             name: "stackTabs",
             labelRight: L("Stack Tabs Vertically"),
-            labelWidth: this.AB.Config.labelWidthCheckbox,
+            labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
             on: {
                onChange: (newv, oldv) => {
                   if (newv == 1) {
@@ -510,25 +510,25 @@ module.exports = class ABViewTab extends ABViewTabCore {
             view: "checkbox",
             name: "iconOnTop",
             labelRight: L("Position icon above text"),
-            labelWidth: this.AB.Config.labelWidthCheckbox,
+            labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
          },
          {
             view: "checkbox",
             name: "darkTheme",
             labelRight: L("Use Dark Theme"),
-            labelWidth: this.AB.Config.labelWidthCheckbox,
+            labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
          },
          {
             view: "counter",
             name: "sidebarWidth",
             label: L("Width of Sidebar"),
-            labelWidth: this.AB.Config.labelWidthXLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthXLarge,
          },
          {
             view: "richselect",
             name: "sidebarPos",
             label: L("Position of Sidebar"),
-            labelWidth: this.AB.Config.labelWidthXLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthXLarge,
             options: [
                { id: "left", value: L("Left") },
                { id: "right", value: L("Right") },

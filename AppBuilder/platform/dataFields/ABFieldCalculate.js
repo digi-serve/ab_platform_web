@@ -218,7 +218,7 @@ var ABFieldCalculateComponent = new ABFieldComponent({
                   name: "decimalSign",
                   label: L("Decimals"),
                   value: "none",
-                  labelWidth: this.AB.Config.labelWidthXLarge,
+                  labelWidth: this.AB.UISettings.config().labelWidthXLarge,
                   options: delimiterList,
                   on: {
                      onChange: function (newValue, oldValue) {
@@ -237,7 +237,7 @@ var ABFieldCalculateComponent = new ABFieldComponent({
                   name: "decimalPlaces",
                   label: L("Places"),
                   value: "none",
-                  labelWidth: this.AB.Config.labelWidthXLarge,
+                  labelWidth: this.AB.UISettings.config().labelWidthXLarge,
                   disabled: true,
                   options: [
                      { id: "none", value: "0" },

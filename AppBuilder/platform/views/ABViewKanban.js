@@ -82,7 +82,7 @@ module.exports = class ABViewKanban extends ABViewKanbanCore {
          {
             view: "fieldset",
             label: L("Kanban Data:"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -91,7 +91,7 @@ module.exports = class ABViewKanban extends ABViewKanbanCore {
                      name: "datacollection",
                      view: "select",
                      label: L("Data Source"),
-                     labelWidth: this.AB.Config.labelWidthXLarge,
+                     labelWidth: this.AB.UISettings.config().labelWidthXLarge,
                      value: null,
                      on: {
                         onChange: _logic.selectSource,
@@ -102,7 +102,7 @@ module.exports = class ABViewKanban extends ABViewKanbanCore {
                      view: "select",
                      label: L("Vertical Grouping"),
                      placeholder: L("Select a field"),
-                     labelWidth: this.AB.Config.labelWidthXLarge,
+                     labelWidth: this.AB.UISettings.config().labelWidthXLarge,
                      options: [],
                   },
                   {
@@ -110,7 +110,7 @@ module.exports = class ABViewKanban extends ABViewKanbanCore {
                      view: "select",
                      label: L("Horizontal Grouping"),
                      placeholder: L("Select a field"),
-                     labelWidth: this.AB.Config.labelWidthXLarge,
+                     labelWidth: this.AB.UISettings.config().labelWidthXLarge,
                      options: [],
                   },
                   {
@@ -118,7 +118,7 @@ module.exports = class ABViewKanban extends ABViewKanbanCore {
                      view: "select",
                      label: L("Card Owner"),
                      placeholder: L("Select a user field"),
-                     labelWidth: this.AB.Config.labelWidthXLarge,
+                     labelWidth: this.AB.UISettings.config().labelWidthXLarge,
                      options: [],
                   },
                ],

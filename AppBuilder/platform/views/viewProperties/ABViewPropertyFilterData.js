@@ -88,7 +88,7 @@ module.exports = class ABViewPropertyFilterData extends ABViewProperty {
                ],
                vertical: true,
                label: L("Filter Option"),
-               labelWidth: this.AB.Config.labelWidthLarge,
+               labelWidth: this.AB.UISettings.config().labelWidthLarge,
                on: {
                   onChange: (newValue, oldValue) => {
                      logic.setFilterOption(newValue);
@@ -102,7 +102,7 @@ module.exports = class ABViewPropertyFilterData extends ABViewProperty {
                hidden: true,
                vertical: true,
                label: L("Show"),
-               labelWidth: this.AB.Config.labelWidthLarge,
+               labelWidth: this.AB.UISettings.config().labelWidthLarge,
                options: [
                   { id: "default", value: L("All matching records") },
                   { id: "single", value: L("Single records only") },
@@ -120,7 +120,7 @@ module.exports = class ABViewPropertyFilterData extends ABViewProperty {
                      id: ids.filterUser,
                      value: "toolbar",
                      label: L("Display"),
-                     labelWidth: this.AB.Config.labelWidthLarge,
+                     labelWidth: this.AB.UISettings.config().labelWidthLarge,
                      width: 200,
                      options: [
                         { id: "toolbar", value: L("Toolbar") },

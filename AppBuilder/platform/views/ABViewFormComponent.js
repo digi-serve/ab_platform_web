@@ -27,13 +27,13 @@ module.exports = class ABViewFormComponent extends ABViewFormComponentCore {
          {
             name: "required",
             view: "checkbox",
-            labelWidth: this.AB.Config.labelWidthCheckbox,
+            labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
             labelRight: L("Required"),
          },
          {
             name: "disable",
             view: "checkbox",
-            labelWidth: this.AB.Config.labelWidthCheckbox,
+            labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
             labelRight: L("Disable"),
          },
       ]);

@@ -121,13 +121,13 @@ module.exports = class ABViewText extends ABViewTextCore {
             view: "counter",
             name: "height",
             label: L("Height:"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             name: "datacollection",
             view: "richselect",
             label: L("Data Source"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             on: {
                onChange: _logic.selectSource,
             },

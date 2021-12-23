@@ -95,7 +95,7 @@ module.exports = class ABViewConditionalContainer extends (
             name: "datacollection",
             view: "richselect",
             label: L("Data Source"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             on: {
                onChange: function (dvId) {
                   _logic.changeDatacollection(dvId);
@@ -106,7 +106,7 @@ module.exports = class ABViewConditionalContainer extends (
             view: "fieldset",
             name: "filter",
             label: L("Filter:"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -116,7 +116,7 @@ module.exports = class ABViewConditionalContainer extends (
                         {
                            view: "label",
                            label: L("Filter Data:"),
-                           width: this.AB.Config.labelWidthLarge,
+                           width: this.AB.UISettings.config().labelWidthLarge,
                         },
                         {
                            view: "button",

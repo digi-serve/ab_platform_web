@@ -227,7 +227,7 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
             view: "richselect",
             label: L("Orientation"),
             value: ABViewMenuPropertyComponentDefaults.orientation,
-            labelWidth: this.AB.Config.labelWidthXLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthXLarge,
             options: [
                {
                   id: "x",
@@ -244,7 +244,7 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
             view: "richselect",
             label: L("Button Style"),
             value: ABViewMenuPropertyComponentDefaults.buttonStyle,
-            labelWidth: this.AB.Config.labelWidthXLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthXLarge,
             options: [
                {
                   id: "ab-menu-default",
@@ -261,7 +261,7 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
             view: "richselect",
             label: L("Menu Alignment"),
             value: ABViewMenuPropertyComponentDefaults.menuAlignment,
-            labelWidth: this.AB.Config.labelWidthXLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthXLarge,
             options: [
                {
                   id: "ab-menu-left",
@@ -282,13 +282,13 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
             view: "checkbox",
             labelRight: L("Put menu in toolbar"),
             value: ABViewMenuPropertyComponentDefaults.menuInToolbar,
-            labelWidth: this.AB.Config.labelWidthCheckbox,
+            labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
          },
          {
             name: "toolbarFieldset",
             view: "fieldset",
             label: L("Toolbar Settings:"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             body: {
                view: "layout",
                type: "clean",
@@ -299,14 +299,14 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
                      view: "counter",
                      label: L("Toolbar padding"),
                      value: ABViewMenuPropertyComponentDefaults.menuPadding,
-                     labelWidth: this.AB.Config.labelWidthLarge,
+                     labelWidth: this.AB.UISettings.config().labelWidthLarge,
                   },
                   {
                      name: "menuTheme",
                      view: "richselect",
                      label: L("Toolbar theme"),
                      value: ABViewMenuPropertyComponentDefaults.menuTheme,
-                     labelWidth: this.AB.Config.labelWidthLarge,
+                     labelWidth: this.AB.UISettings.config().labelWidthLarge,
                      options: [
                         {
                            id: "white",
@@ -327,7 +327,7 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
                      view: "richselect",
                      label: L("Menu Position"),
                      value: ABViewMenuPropertyComponentDefaults.menuPosition,
-                     labelWidth: this.AB.Config.labelWidthLarge,
+                     labelWidth: this.AB.UISettings.config().labelWidthLarge,
                      options: [
                         {
                            id: "left",
@@ -348,7 +348,7 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
                      view: "text",
                      label: L("Text Left"),
                      placeholder: L("Place text in left region of toolbar."),
-                     labelWidth: this.AB.Config.labelWidthLarge,
+                     labelWidth: this.AB.UISettings.config().labelWidthLarge,
                      labelPosition: "top",
                   },
                   {
@@ -356,7 +356,7 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
                      view: "text",
                      label: L("Text Center"),
                      placeholder: L("Place text in center region of toolbar."),
-                     labelWidth: this.AB.Config.labelWidthLarge,
+                     labelWidth: this.AB.UISettings.config().labelWidthLarge,
                      labelPosition: "top",
                   },
                   {
@@ -364,7 +364,7 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
                      view: "text",
                      label: L("Text Right"),
                      placeholder: L("Place text in right region of toolbar."),
-                     labelWidth: this.AB.Config.labelWidthLarge,
+                     labelWidth: this.AB.UISettings.config().labelWidthLarge,
                      labelPosition: "top",
                   },
                ],
@@ -374,7 +374,7 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
             name: "pagesFieldset",
             view: "fieldset",
             label: L("Page List:"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             body: {
                view: "layout",
                type: "clean",
@@ -452,7 +452,7 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
             name: "pageOrderFieldset",
             view: "fieldset",
             label: L("Drag & Drop to Reorder/Click to Add Icon:"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             body: {
                view: "layout",
                type: "clean",

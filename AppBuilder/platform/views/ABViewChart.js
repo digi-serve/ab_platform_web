@@ -55,7 +55,7 @@ module.exports = class ABViewChart extends ABViewChartCore {
             name: "multipleSeries",
             view: "checkbox",
             label: L("Multiple Series"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             on: {
                onChange: _logic.enableMultipleSeries,
             },
@@ -64,43 +64,43 @@ module.exports = class ABViewChart extends ABViewChartCore {
             name: "dataview",
             view: "richselect",
             label: L("Chart Data"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             name: "columnLabel",
             view: "richselect",
             label: L("Label Column"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             name: "columnValue",
             view: "richselect",
             label: L("Value Column"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             name: "columnValue2",
             view: "richselect",
             label: L("Value Column 2"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             name: "isPercentage",
             view: "checkbox",
             labelRight: L("Percentage"),
-            labelWidth: this.AB.Config.labelWidthCheckbox,
+            labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
          },
          {
             name: "showLabel",
             view: "checkbox",
             label: L("Display Label"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             name: "labelPosition",
             view: "richselect",
             label: L("Label Position"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             options: [
                {
                   id: "left",
@@ -116,13 +116,13 @@ module.exports = class ABViewChart extends ABViewChartCore {
             name: "labelWidth",
             view: "counter",
             label: L("Label Width"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             view: "counter",
             name: "height",
             label: L("Height:"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
       ]);
    }

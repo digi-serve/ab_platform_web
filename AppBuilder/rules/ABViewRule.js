@@ -196,7 +196,7 @@ module.exports = class ABViewRule {
                view: "richselect",
                label: L("Action"),
                placeholder: L("Choose an action"),
-               labelWidth: this.AB.Config.labelWidthLarge,
+               labelWidth: this.AB.UISettings.config().labelWidthLarge,
                options: this.actionDropList,
                on: {
                   onChange: (newVal, oldVal) => {
@@ -217,7 +217,7 @@ module.exports = class ABViewRule {
                            view: "label",
                            label: L("Values"),
                            css: "ab-text-bold",
-                           width: this.AB.Config.labelWidthLarge,
+                           width: this.AB.UISettings.config().labelWidthLarge,
                         },
                         {
                            id: this.ids.valueDisplay,

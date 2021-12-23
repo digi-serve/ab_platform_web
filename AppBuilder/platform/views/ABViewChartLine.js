@@ -53,7 +53,7 @@ module.exports = class ABViewChartLine extends ABViewChartLineCore {
             name: "lineType",
             view: "richselect",
             label: L("Chart Type"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             options: [
                {
                   id: "line",
@@ -69,7 +69,7 @@ module.exports = class ABViewChartLine extends ABViewChartLineCore {
             name: "linePreset",
             view: "richselect",
             label: L("Chart Preset"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             options: [
                {
                   id: "plot",
@@ -114,13 +114,13 @@ module.exports = class ABViewChartLine extends ABViewChartLineCore {
             view: "counter",
             min: 1,
             label: L("Label Font Size"),
-            labelWidth: this.AB.Config.labelWidthXLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthXLarge,
          },
          {
             name: "isLegend",
             view: "checkbox",
             labelRight: L("Show Legend"),
-            labelWidth: this.AB.Config.labelWidthCheckbox,
+            labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
          },
       ]);
    }

@@ -130,7 +130,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
          {
             view: "fieldset",
             label: L("Data:"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -139,7 +139,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
                      view: "select",
                      name: "datacollection",
                      label: L("Object:"),
-                     labelWidth: this.AB.Config.labelWidthLarge,
+                     labelWidth: this.AB.UISettings.config().labelWidthLarge,
                      options: [],
                      on: {
                         onChange: function (newv, oldv) {
@@ -191,7 +191,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
                      view: "select",
                      name: "field",
                      label: L("Image Field:"),
-                     labelWidth: this.AB.Config.labelWidthLarge,
+                     labelWidth: this.AB.UISettings.config().labelWidthLarge,
                      options: [],
                   },
                ],
@@ -202,7 +202,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
          // {
          // 	view: "fieldset",
          // 	label: L('ab.component.label.linkedPages', '*Linked Pages:'),
-         // 	labelWidth: this.AB.Config.labelWidthLarge,
+         // 	labelWidth: this.AB.UISettings.config().labelWidthLarge,
          // 	body: {
          // 		type: "clean",
          // 		padding: 10,
@@ -211,14 +211,14 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
          // 				view: "select",
          // 				name: "detailsPage",
          // 				label: L('ab.component.label.detailsPage', '*Details Page:'),
-         // 				labelWidth: this.AB.Config.labelWidthLarge,
+         // 				labelWidth: this.AB.UISettings.config().labelWidthLarge,
          // 				options: []
          // 			},
          // 			{
          // 				view: "select",
          // 				name: "editPage",
          // 				label: L('ab.component.label.editForm', '*Edit Form:'),
-         // 				labelWidth: this.AB.Config.labelWidthLarge,
+         // 				labelWidth: this.AB.UISettings.config().labelWidthLarge,
          // 				options: []
          // 			}
          // 		]
@@ -227,7 +227,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
          {
             view: "fieldset",
             label: L("Customize Display:"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -236,7 +236,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
                      view: "select",
                      name: "navigationType",
                      label: L("Navigation Type"),
-                     labelWidth: this.AB.Config.labelWidthLarge,
+                     labelWidth: this.AB.UISettings.config().labelWidthLarge,
                      options: [
                         { id: "corner", value: L("Corner") },
                         { id: "side", value: L("Side") },
@@ -247,35 +247,35 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
                      view: "checkbox",
                      name: "showLabel",
                      labelRight: L("Show label of image"),
-                     labelWidth: this.AB.Config.labelWidthCheckbox,
+                     labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
                   },
 
                   {
                      view: "checkbox",
                      name: "hideItem",
                      labelRight: L("Hide item list"),
-                     labelWidth: this.AB.Config.labelWidthCheckbox,
+                     labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
                   },
 
                   {
                      view: "checkbox",
                      name: "hideButton",
                      labelRight: L("Hide navigation buttons"),
-                     labelWidth: this.AB.Config.labelWidthCheckbox,
+                     labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
                   },
 
                   {
                      view: "counter",
                      name: "width",
                      label: L("Width:"),
-                     labelWidth: this.AB.Config.labelWidthXLarge,
+                     labelWidth: this.AB.UISettings.config().labelWidthXLarge,
                   },
 
                   {
                      view: "counter",
                      name: "height",
                      label: L("Height:"),
-                     labelWidth: this.AB.Config.labelWidthXLarge,
+                     labelWidth: this.AB.UISettings.config().labelWidthXLarge,
                   },
 
                   {
@@ -284,7 +284,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
                            view: "label",
                            label: L("Filter Option:"),
                            css: "ab-text-bold",
-                           width: this.AB.Config.labelWidthXLarge,
+                           width: this.AB.UISettings.config().labelWidthXLarge,
                         },
                         {
                            view: "button",

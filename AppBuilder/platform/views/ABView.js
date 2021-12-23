@@ -358,7 +358,7 @@ module.exports = class ABView extends ABViewCore {
    //          name: "label",
    //          label: App.labels.dataFieldHeaderLabel,
    //          placeholder: App.labels.dataFieldHeaderLabelPlaceholder,
-   //          labelWidth: this.AB.Config.labelWidthLarge,
+   //          labelWidth: this.AB.UISettings.config().labelWidthLarge,
    //          css: "ab-new-label-name",
    //          //        on: {
    //          //          onChange: function (newVal, oldVal) {

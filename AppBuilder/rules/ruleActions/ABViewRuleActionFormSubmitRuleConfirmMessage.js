@@ -72,7 +72,7 @@ module.exports = class ABViewRuleActionFormSubmitRuleConfirmMessage extends (
             id: ids.message,
             view: "textarea",
             // label: this.labels.component.message,
-            // labelWidth: this.AB.Config.labelWidthLarge,
+            // labelWidth: this.AB.UISettings.config().labelWidthLarge,
             height: 130,
          },
 

@@ -68,7 +68,7 @@ module.exports = class ABViewFormButton extends ABViewFormButtonCore {
          {
             name: "saveLabel",
             view: "text",
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             label: L("Save Label"),
             placeholder: L("Save Placeholder"),
          },
@@ -80,7 +80,7 @@ module.exports = class ABViewFormButton extends ABViewFormButtonCore {
          {
             name: "cancelLabel",
             view: "text",
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             label: L("Cancel Label"),
             placeholder: L("Cancel Placeholder"),
          },
@@ -92,21 +92,21 @@ module.exports = class ABViewFormButton extends ABViewFormButtonCore {
          {
             name: "resetLabel",
             view: "text",
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             label: L("Reset Label"),
             placeholder: L("Reset Placeholder"),
          },
          {
             name: "afterCancel",
             view: "richselect",
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             label: L("After Cancel"),
             // options: []
          },
          {
             name: "alignment",
             view: "richselect",
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             label: L("Alignment"),
             options: [
                {

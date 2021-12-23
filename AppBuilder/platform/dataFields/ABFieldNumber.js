@@ -39,7 +39,7 @@ var ABFieldNumberComponent = new ABFieldComponent({
          // {
          // 	view: "text",
          // 	name:'textDefault',
-         // 	labelWidth: this.AB.Config.labelWidthXLarge,
+         // 	labelWidth: this.AB.UISettings.config().labelWidthXLarge,
          // 	placeholder: L('ab.dataField.string.default', '*Default text')
          // },
          // {
@@ -61,7 +61,7 @@ var ABFieldNumberComponent = new ABFieldComponent({
          {
             view: "text",
             label: L("Default"),
-            labelWidth: this.AB.Config.labelWidthXLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthXLarge,
             id: ids.default,
             name: "default",
             placeholder: L("Enter default value"),
@@ -86,7 +86,7 @@ var ABFieldNumberComponent = new ABFieldComponent({
             name: "typeFormat",
             label: L("Format"),
             value: "none",
-            labelWidth: this.AB.Config.labelWidthXLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthXLarge,
             options: ABFieldNumberCore.formatList(),
          },
          {
@@ -96,7 +96,7 @@ var ABFieldNumberComponent = new ABFieldComponent({
             disallowEdit: true,
             label: L("Decimals"),
             value: "none",
-            labelWidth: this.AB.Config.labelWidthXLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthXLarge,
             options: ABFieldNumberCore.delimiterList(),
             on: {
                onChange: function (newValue /*, oldValue */) {
@@ -121,7 +121,7 @@ var ABFieldNumberComponent = new ABFieldComponent({
             disallowEdit: true,
             label: L("Places"),
             value: "none",
-            labelWidth: this.AB.Config.labelWidthXLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthXLarge,
             disabled: true,
             hidden: true,
             options: [
@@ -140,7 +140,7 @@ var ABFieldNumberComponent = new ABFieldComponent({
             name: "typeRounding",
             label: L("Rounding"),
             value: "none",
-            labelWidth: this.AB.Config.labelWidthXLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthXLarge,
             vertical: true,
             disabled: true,
             hidden: true,
@@ -162,7 +162,7 @@ var ABFieldNumberComponent = new ABFieldComponent({
             name: "typeThousands",
             label: L("Thousands"),
             value: "none",
-            labelWidth: this.AB.Config.labelWidthXLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthXLarge,
             vertical: true,
             options: ABFieldNumberCore.delimiterList(),
          },
@@ -171,7 +171,7 @@ var ABFieldNumberComponent = new ABFieldComponent({
             view: "checkbox",
             id: ids.validate,
             name: "validation",
-            labelWidth: this.AB.Config.labelWidthCheckbox,
+            labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
             labelRight: L("Validation"),
             on: {
                onChange: function (newVal) {
@@ -194,7 +194,7 @@ var ABFieldNumberComponent = new ABFieldComponent({
             id: ids.validateMinimum,
             name: "validateMinimum",
             label: L("Minimum"),
-            labelWidth: this.AB.Config.labelWidthXLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthXLarge,
             disabled: true,
             hidden: true,
             on: {
@@ -211,7 +211,7 @@ var ABFieldNumberComponent = new ABFieldComponent({
             id: ids.validateMaximum,
             name: "validateMaximum",
             label: L("Maximum"),
-            labelWidth: this.AB.Config.labelWidthXLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthXLarge,
             disabled: true,
             hidden: true,
             on: {

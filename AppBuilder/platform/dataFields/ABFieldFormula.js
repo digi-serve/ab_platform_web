@@ -32,7 +32,7 @@ var ABFieldFormulaComponent = new ABFieldComponent({
             view: "richselect",
             name: "type",
             label: L("Type"),
-            labelWidth: this.AB.Config.labelWidthMedium,
+            labelWidth: this.AB.UISettings.config().labelWidthMedium,
             value: "sum",
             options: [
                { id: "sum", value: L("Sum") },
@@ -53,7 +53,7 @@ var ABFieldFormulaComponent = new ABFieldComponent({
             view: "richselect",
             name: "field",
             label: L("Field"),
-            labelWidth: this.AB.Config.labelWidthMedium,
+            labelWidth: this.AB.UISettings.config().labelWidthMedium,
             options: {
                view: "suggest",
                body: {

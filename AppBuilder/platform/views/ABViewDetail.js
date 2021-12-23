@@ -131,7 +131,7 @@ module.exports = class ABViewDetail extends ABViewDetailCore {
             name: "datacollection",
             view: "richselect",
             label: L("Data Source"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             skipAutoSave: true,
             on: {
                onChange: (dcId, oldDcId) => _logic.selectSource(dcId, oldDcId),
@@ -160,13 +160,13 @@ module.exports = class ABViewDetail extends ABViewDetailCore {
             name: "showLabel",
             view: "checkbox",
             label: L("Display Label"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             name: "labelPosition",
             view: "richselect",
             label: L("Label Position"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             options: [
                {
                   id: "left",
@@ -182,13 +182,13 @@ module.exports = class ABViewDetail extends ABViewDetailCore {
             name: "labelWidth",
             view: "counter",
             label: L("Label Width"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             view: "counter",
             name: "height",
             label: L("Height:"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
       ]);
    }

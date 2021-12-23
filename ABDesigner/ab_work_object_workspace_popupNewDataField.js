@@ -76,7 +76,7 @@ module.exports = class AB_Work_Object_Workspace_PopupNewDataField extends (
                      view: "richselect",
                      id: ids.types,
                      label: L("Field type"),
-                     labelWidth: this.AB.Config.labelWidthLarge,
+                     labelWidth: this.AB.UISettings.config().labelWidthLarge,
                      options: [
                         //We will add these later
                         { id: "temporary", view: "temporary" },

@@ -98,14 +98,14 @@ module.exports = class ABViewCSVExporter extends ABViewCSVExporterCore {
          {
             view: "fieldset",
             label: L("Data:"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             body: {
                rows: [
                   {
                      name: "datacollection",
                      view: "richselect",
                      label: L("Data Source"),
-                     labelWidth: this.AB.Config.labelWidthLarge,
+                     labelWidth: this.AB.UISettings.config().labelWidthLarge,
                      skipAutoSave: true,
                      on: {
                         onChange: _logic.selectSource,
@@ -115,7 +115,7 @@ module.exports = class ABViewCSVExporter extends ABViewCSVExporterCore {
                      name: "hasHeader",
                      view: "checkbox",
                      label: L("Header on first line"),
-                     labelWidth: this.AB.Config.labelWidthXLarge,
+                     labelWidth: this.AB.UISettings.config().labelWidthXLarge,
                   },
                   {
                      cols: [
@@ -123,7 +123,7 @@ module.exports = class ABViewCSVExporter extends ABViewCSVExporterCore {
                            view: "label",
                            label: L("Filter Option:"),
                            css: "ab-text-bold",
-                           width: this.AB.Config.labelWidthLarge,
+                           width: this.AB.UISettings.config().labelWidthLarge,
                         },
                         {
                            view: "button",
@@ -145,7 +145,7 @@ module.exports = class ABViewCSVExporter extends ABViewCSVExporterCore {
          {
             view: "fieldset",
             label: L("Customize Display:"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -154,19 +154,19 @@ module.exports = class ABViewCSVExporter extends ABViewCSVExporterCore {
                      name: "buttonLabel",
                      view: "text",
                      label: L("Label"),
-                     labelWidth: this.AB.Config.labelWidthLarge,
+                     labelWidth: this.AB.UISettings.config().labelWidthLarge,
                   },
                   {
                      name: "filename",
                      view: "text",
                      label: L("File name"),
-                     labelWidth: this.AB.Config.labelWidthLarge,
+                     labelWidth: this.AB.UISettings.config().labelWidthLarge,
                   },
                   {
                      view: "counter",
                      name: "width",
                      label: L("Width:"),
-                     labelWidth: this.AB.Config.labelWidthLarge,
+                     labelWidth: this.AB.UISettings.config().labelWidthLarge,
                   },
                ],
             },

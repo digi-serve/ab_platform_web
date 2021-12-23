@@ -378,7 +378,7 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
                   value: "1",
                   min: 1,
                   label: L("Column {0} Gravity", [newVal]),
-                  labelWidth: this.AB.Config.labelWidthXLarge,
+                  labelWidth: this.AB.UISettings.config().labelWidthXLarge,
                   css: "gravity_counter",
                   on: {
                      onChange: () => {
@@ -408,7 +408,7 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
             view: "counter",
             min: 1,
             label: L("Columns"),
-            labelWidth: this.AB.Config.labelWidthXLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthXLarge,
             on: {
                onChange: function (newVal, oldVal) {
                   if (newVal > 8) $$(ids.columns).setValue(8);
@@ -451,7 +451,7 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
                   view: "counter",
                   min: 1,
                   label: L("Column {0} Gravity", [step]),
-                  labelWidth: this.AB.Config.labelWidthXLarge,
+                  labelWidth: this.AB.UISettings.config().labelWidthXLarge,
                   css: "gravity_counter",
                   value:
                      view.settings.gravity && view.settings.gravity[step - 1]

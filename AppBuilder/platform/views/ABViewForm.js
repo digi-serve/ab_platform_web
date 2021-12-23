@@ -322,7 +322,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
             name: "datacollection",
             view: "richselect",
             label: L("Data Source"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             skipAutoSave: true,
             on: {
                onChange: _logic.selectSource,
@@ -332,7 +332,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
          {
             view: "fieldset",
             label: L("Form Fields:"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -363,13 +363,13 @@ module.exports = class ABViewForm extends ABViewFormCore {
             name: "showLabel",
             view: "checkbox",
             label: L("Display Label"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             name: "labelPosition",
             view: "richselect",
             label: L("Label Position"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             options: [
                {
                   id: "left",
@@ -385,30 +385,30 @@ module.exports = class ABViewForm extends ABViewFormCore {
             name: "labelWidth",
             view: "counter",
             label: L("Label Width"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             view: "counter",
             name: "height",
             label: L("Height:"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             name: "clearOnLoad",
             view: "checkbox",
             label: L("Clear on load"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             name: "clearOnSave",
             view: "checkbox",
             label: L("Clear on save"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             view: "fieldset",
             label: L("Rules:"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -418,7 +418,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
                         {
                            view: "label",
                            label: L("Submit Rules:"),
-                           width: this.AB.Config.labelWidthLarge,
+                           width: this.AB.UISettings.config().labelWidthLarge,
                         },
                         {
                            view: "button",
@@ -439,7 +439,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
                         {
                            view: "label",
                            label: L("Display Rules:"),
-                           width: this.AB.Config.labelWidthLarge,
+                           width: this.AB.UISettings.config().labelWidthLarge,
                         },
                         {
                            view: "button",
@@ -460,7 +460,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
                         {
                            view: "label",
                            label: L("Record Rules:"),
-                           width: this.AB.Config.labelWidthLarge,
+                           width: this.AB.UISettings.config().labelWidthLarge,
                         },
                         {
                            view: "button",

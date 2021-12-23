@@ -63,7 +63,7 @@ module.exports = class ABViewComment extends ABViewCommentCore {
             name: "dataSource",
             view: "richselect",
             label: L("Data Source"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             on: {
                onChange: _logic.selectSource,
             },
@@ -72,25 +72,25 @@ module.exports = class ABViewComment extends ABViewCommentCore {
             name: "columnUser",
             view: "richselect",
             label: L("Select a user field"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             name: "columnComment",
             view: "richselect",
             label: L("Select a comment field"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             name: "columnDate",
             view: "richselect",
             label: L("Select a date field"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             view: "counter",
             name: "height",
             label: L("Height:"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
       ]);
    }

@@ -95,7 +95,7 @@ module.exports = class ABViewImage extends ABViewImageCore {
                   view: "label",
                   label: L("Image:"),
                   css: "ab-text-bold",
-                  width: this.AB.Config.labelWidthXLarge,
+                  width: this.AB.UISettings.config().labelWidthXLarge,
                },
                {
                   view: "uploader",
@@ -122,13 +122,13 @@ module.exports = class ABViewImage extends ABViewImageCore {
             view: "counter",
             name: "width",
             label: L("Width:"),
-            labelWidth: this.AB.Config.labelWidthXLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthXLarge,
          },
          {
             view: "counter",
             name: "height",
             label: L("Height:"),
-            labelWidth: this.AB.Config.labelWidthXLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthXLarge,
          },
       ]);
    }

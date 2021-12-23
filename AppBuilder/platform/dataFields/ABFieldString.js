@@ -24,7 +24,7 @@ var ABFieldStringComponent = new ABFieldComponent({
             view: "text",
             id: ids.default,
             name: "default",
-            labelWidth: this.AB.Config.labelWidthXLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthXLarge,
             label: L("Default"),
             placeholder: L("Enter default value"),
          },
@@ -33,7 +33,7 @@ var ABFieldStringComponent = new ABFieldComponent({
             name: "supportMultilingual",
             disallowEdit: true,
             labelRight: L("Support multilingual"),
-            labelWidth: this.AB.Config.labelWidthCheckbox,
+            labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
             value: false,
          },
       ];

@@ -162,7 +162,7 @@ module.exports = class ABViewPage extends ABViewPageCore {
             view: "fieldset",
             name: "popupSettings",
             label: L("Popup Settings"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -172,7 +172,7 @@ module.exports = class ABViewPage extends ABViewPageCore {
                      name: "popupWidth",
                      placeholder: L("Set popup width"),
                      label: L("Width:"),
-                     labelWidth: this.AB.Config.labelWidthLarge,
+                     labelWidth: this.AB.UISettings.config().labelWidthLarge,
                      validate: webix.rules.isNumber,
                   },
                   {
@@ -180,7 +180,7 @@ module.exports = class ABViewPage extends ABViewPageCore {
                      name: "popupHeight",
                      placeholder: L("Set popup height"),
                      label: L("Height:"),
-                     labelWidth: this.AB.Config.labelWidthLarge,
+                     labelWidth: this.AB.UISettings.config().labelWidthLarge,
                      validate: webix.rules.isNumber,
                   },
                ],
@@ -190,7 +190,7 @@ module.exports = class ABViewPage extends ABViewPageCore {
             view: "fieldset",
             name: "pageSettings",
             label: L("Page Settings"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -199,7 +199,7 @@ module.exports = class ABViewPage extends ABViewPageCore {
                      view: "checkbox",
                      name: "fixedPageWidth",
                      labelRight: L("Page has fixed width"),
-                     labelWidth: this.AB.Config.labelWidthCheckbox,
+                     labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
                      click: function (id, event) {
                         if (this.getValue() == 1) {
                            $$(ids.pageWidth).show();
@@ -213,13 +213,13 @@ module.exports = class ABViewPage extends ABViewPageCore {
                      name: "pageWidth",
                      placeholder: L("Set page width"),
                      label: L("Page width:"),
-                     labelWidth: this.AB.Config.labelWidthLarge,
+                     labelWidth: this.AB.UISettings.config().labelWidthLarge,
                   },
                   {
                      view: "richselect",
                      name: "pageBackground",
                      label: L("Page background:"),
-                     labelWidth: this.AB.Config.labelWidthXLarge,
+                     labelWidth: this.AB.UISettings.config().labelWidthXLarge,
                      options: [
                         {
                            id: "ab-background-default",
@@ -239,7 +239,7 @@ module.exports = class ABViewPage extends ABViewPageCore {
             view: "fieldset",
             name: "pagePermissionPanel",
             label: L("Page Permissions:"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,

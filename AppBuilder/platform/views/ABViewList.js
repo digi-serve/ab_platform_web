@@ -65,7 +65,7 @@ module.exports = class ABViewList extends ABViewListCore {
             name: "datacollection",
             view: "richselect",
             label: L("Data Source"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             on: {
                onChange: _logic.selectSource,
             },
@@ -74,13 +74,13 @@ module.exports = class ABViewList extends ABViewListCore {
             name: "field",
             view: "richselect",
             label: L("Field"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             view: "counter",
             name: "height",
             label: L("Height:"),
-            labelWidth: this.AB.Config.labelWidthLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
       ]);
    }
