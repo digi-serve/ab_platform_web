@@ -305,7 +305,8 @@ class ABViewGridComponent extends ClassUI {
                oldWidth,
                user_action
             ) {
-               // if we resize the delete column we want to resize the last column but Webix will not allow since the column is split
+               // if we resize the delete column we want to resize the last
+               // column but Webix will not allow since the column is split
                var rightSplitItems = [
                   "appbuilder_view_detail",
                   "appbuilder_view_track",
@@ -315,7 +316,8 @@ class ABViewGridComponent extends ClassUI {
                if (rightSplitItems.indexOf(columnName) != -1) {
                   // Block events so we can leave the delete column alone
                   this.blockEvent();
-                  this.setColumnWidth(columnName, oldWidth); // keeps original width
+                  // keeps original width
+                  this.setColumnWidth(columnName, oldWidth);
                   this.unblockEvent();
                   // Listen to events again
 
@@ -326,11 +328,17 @@ class ABViewGridComponent extends ClassUI {
 
                   // determine if we are making the column larger or smaller
                   if (newWidth < oldWidth) {
-                     newWidth = column.width + 40; // add 40 because there is not any more space to drag so we will allow 40px increments
+                     newWidth = column.width + 40;
+                     // add 40 because there is not any more space to drag so we
+                     // will allow 40px increments
                   } else {
-                     newWidth = column.width - (newWidth - 40); // take the column's width and subtrack the difference of the expanded delet column drag
+                     newWidth = column.width - (newWidth - 40);
+                     // take the column's width and subtrack the difference of
+                     // the expanded delet column drag
                   }
-                  // we don't want columns to be smaller than 50 ?? do we ?? I could be wrong maybe a checkbox could be smaller so this could change
+                  // we don't want columns to be smaller than 50 ?? do we ??
+                  // I could be wrong maybe a checkbox could be smaller so this
+                  // could change
                   if (newWidth < 50) {
                      newWidth = 50;
                   }
@@ -1808,7 +1816,7 @@ class ABViewGridComponent extends ClassUI {
       } else {
          this.columnSplitLeft = 0;
       }
-      if (settings.detailsPage != null && !settings.hideButtons) {
+      if (settings.detailsPage != "" && !settings.hideButtons) {
          columnHeaders.push({
             id: "appbuilder_view_detail",
             header: "",
@@ -1821,7 +1829,7 @@ class ABViewGridComponent extends ClassUI {
          // columnSplitRight++;
          addedColumns.push("appbuilder_view_detail");
       }
-      if (settings.trackView != null && accessLevel == 2) {
+      if (settings.trackView != 0 && accessLevel == 2) {
          columnHeaders.push({
             id: "appbuilder_view_track",
             header: "",
@@ -1834,7 +1842,7 @@ class ABViewGridComponent extends ClassUI {
          addedColumns.push("appbuilder_view_track");
       }
       if (
-         settings.editPage != null &&
+         settings.editPage != "" &&
          !settings.hideButtons &&
          accessLevel == 2
       ) {

@@ -33,9 +33,86 @@ function errorPopup(error) {
    }
 }
 
+/*
+ * @function no_socket_trigger()
+ * a common routine to trigger an update.
+ * In the case where our AB.Network.type() isn't a socket implementation
+ * we need to manually trigger the expected socket events ourselves.
+ * This fn() attempts to simulate the socket responses in such a case.
+ * @param {ABModel} model
+ *        The ABModel currently processing the network transaction.
+ * @param {string} key
+ *        The socket update trigger we are simulating.
+ * @param {json} data
+ *        The relevant response from our network transaction.
+ */
+function no_socket_trigger(model, key, data) {
+   // If we do not have socket updates available, then trigger an
+   // update event with this data.
+   if (model.AB.Network.type() != "socket") {
+      model.AB.emit(key, {
+         objectId: model.object.id,
+         data,
+      });
+   }
+}
+
 module.exports = class ABModel extends ABModelCore {
    constructor(object) {
       super(object);
+
+      this.handler_create = (...params) => {
+         this.handler_common("ab.datacollection.create", ...params);
+      };
+
+      this.handler_delete = (...params) => {
+         this.handler_common("ab.datacollection.update", ...params);
+      };
+
+      this.handler_findAll = (...params) => {
+         this.handler_common(null, ...params);
+      };
+
+      this.handler_logs = (context, err, data) => {
+         if (err) {
+            context.reject?.(err);
+            return;
+         }
+         context.resolve?.(data);
+      };
+
+      this.handler_update = (...params) => {
+         this.handler_common("ab.datacollection.update", ...params);
+      };
+
+      this.handler_common = (key, context, err, data) => {
+         // key: {string} the relevant socket event key
+         //      can be null if not relevant.
+         // context : {obj} any provided context data provided on the
+         //           this.AB.Network.get() call.
+         // err: {Error} any returned error message from api
+         // data: {obj} returned data from the model-get api in format:
+         //       {data: [], total_count: 1, pos: 0, offset: 0, limit: 0}
+         if (err) {
+            context.reject?.(err);
+            return;
+         }
+         if (key) {
+            // on "update" & "create" we want to normalizeData()
+            if (key.indexOf("delete") == -1) {
+               this.normalizeData(data);
+            }
+         } else {
+            // on a findAll we normalize data.data
+            this.normalizeData(data.data);
+         }
+
+         context.resolve?.(data);
+
+         if (key) {
+            no_socket_trigger(this, key, data);
+         }
+      };
    }
 
    ///
@@ -134,24 +211,7 @@ module.exports = class ABModel extends ABModelCore {
 
       return new Promise((resolve, reject) => {
          var jobID = this.AB.jobID();
-         this.AB.Network.once(jobID, (context, err, data) => {
-            if (err) {
-               reject(err);
-               return;
-            }
-            this.normalizeData(data);
-            resolve(data);
-
-            // If we do not have socket updates available, then trigger an
-            // update event with this data.
-            if (this.AB.Network.type() != "socket") {
-               this.AB.emit("ab.datacollection.create", {
-                  objectId: this.object.id,
-                  data,
-               });
-            }
-         });
-
+         this.AB.Network.once(jobID, this.handler_create);
          this.AB.Network.post(
             {
                url: this.object.urlRest(),
@@ -159,27 +219,12 @@ module.exports = class ABModel extends ABModelCore {
             },
             {
                key: jobID,
-               context: {},
+               context: { resolve, reject },
             }
-         )
-            // .then((data) => {
-            //    this.normalizeData(data);
-
-            //    resolve(data);
-
-            //    // If we do not have socket updates available, then trigger an
-            //    // update event with this data.
-            //    if (this.AB.Network.type() != "socket") {
-            //       this.AB.emit("ab.datacollection.create", {
-            //          objectId: this.object.id,
-            //          data,
-            //       });
-            //    }
-            // })
-            .catch((err) => {
-               errorPopup(err);
-               reject(err);
-            });
+         ).catch((err) => {
+            errorPopup(err);
+            reject(err);
+         });
       });
    }
 
@@ -192,48 +237,19 @@ module.exports = class ABModel extends ABModelCore {
    delete(id) {
       return new Promise((resolve, reject) => {
          var jobID = this.AB.jobID();
-         this.AB.Network.once(jobID, (context, err, data) => {
-            if (err) {
-               reject(err);
-               return;
-            }
-
-            // If we do not have socket updates available, then trigger an
-            // update event with this data.
-            if (this.AB.Network.type() != "socket") {
-               this.AB.emit("ab.datacollection.delete", {
-                  objectId: this.object.id,
-                  data,
-               });
-            }
-            resolve(data);
-         });
-
+         this.AB.Network.once(jobID, this.handler_delete);
          this.AB.Network["delete"](
             {
                url: this.object.urlRestItem(id),
             },
             {
                key: jobID,
-               context: {},
+               context: { resolve, reject },
             }
-         )
-            // .then((data) => {
-            //    resolve(data);
-
-            //    // If we do not have socket updates available, then trigger an
-            //    // update event with this data.
-            //    if (this.AB.Network.type() != "socket") {
-            //       this.AB.emit("ab.datacollection.delete", {
-            //          objectId: this.object.id,
-            //          data,
-            //       });
-            //    }
-            // })
-            .catch((err) => {
-               errorPopup(err);
-               reject(err);
-            });
+         ).catch((err) => {
+            errorPopup(err);
+            reject(err);
+         });
       });
    }
 
@@ -264,23 +280,7 @@ module.exports = class ABModel extends ABModelCore {
 
       return new Promise((resolve, reject) => {
          var jobID = this.AB.jobID();
-         this.AB.Network.once(jobID, (context, err, data) => {
-            // context : {obj} any provided context data provided on the
-            //           this.AB.Network.get() call.
-            // err: {Error} any returned error message from api
-            // data: {obj} returned data from the model-get api in format:
-            //       {data: [], total_count: 1, pos: 0, offset: 0, limit: 0}
-            if (err) {
-               reject(err);
-               return;
-            }
-            this.normalizeData(data.data);
-
-            // our web client DataCollections want the additional control
-            // format {data: [], total_count: 1, pos: 0, offset: 0, limit: 0}
-            resolve(data);
-         });
-
+         this.AB.Network.once(jobID, this.handler_findAll);
          this.AB.Network.get(
             {
                url: this.object.urlRest(),
@@ -289,7 +289,7 @@ module.exports = class ABModel extends ABModelCore {
             },
             {
                key: jobID,
-               context: {},
+               context: { resolve, reject },
             }
          )
             // .then((data) => {
@@ -393,6 +393,8 @@ module.exports = class ABModel extends ABModelCore {
 
       this.findAll(cond)
          .then((data) => {
+            // v2: we no longer process item $height
+            /*
             data.data.forEach((item) => {
                if (
                   item.properties != null &&
@@ -404,6 +406,8 @@ module.exports = class ABModel extends ABModelCore {
                   item.$height = parseInt(this._where.height);
                }
             });
+            */
+
             DT.parse(data);
 
             if (DT.hideProgress) DT.hideProgress();
@@ -411,6 +415,46 @@ module.exports = class ABModel extends ABModelCore {
          .catch((err) => {
             console.error("!!!!!", err);
          });
+   }
+
+   /**
+    * @method logs()
+    * return the log history related to this model's ABObject.
+    * @param {hash} options
+    *        a key=>value hash of optional search criteria
+    *        .rowId {string} the uuid of the individual entry we are querying
+    *        .levelName {string} the type of entry ["insert", "update", "delete"]
+    *        .username {string} the entries associated with the given user
+    *        .startDate {date} entries that happened ON or AFTER this date
+    *        .endDate {date} entries that happened ON or BEFORE this date
+    *        .start {integer} paging control: how many entries to skip
+    *        .limit {integer} paging control: only return this # entries
+    * @return {Promise}
+    */
+   logs(options) {
+      return new Promise((resolve, reject) => {
+         var jobID = this.AB.jobID();
+         this.AB.Network.once(jobID, this.handler_logs);
+         this.AB.Network.get(
+            {
+               url: this.object.urlRestLog(),
+               params: options,
+               // params: newCond
+            },
+            {
+               key: jobID,
+               context: { resolve, reject },
+            }
+         ).catch((err) => {
+            if (err && err.code) {
+               this.AB.notify.developer(err, {
+                  context: "AppBuilder:ABModel:logs(): Error",
+                  options,
+               });
+            }
+            reject(err);
+         });
+      });
    }
 
    /**
@@ -449,24 +493,7 @@ module.exports = class ABModel extends ABModelCore {
 
       return new Promise((resolve, reject) => {
          var jobID = this.AB.jobID();
-         this.AB.Network.once(jobID, (context, err, data) => {
-            if (err) {
-               reject(err);
-               return;
-            }
-            this.normalizeData(data);
-            resolve(data);
-
-            // If we do not have socket updates available, then trigger an
-            // update event with this data.
-            if (this.AB.Network.type() != "socket") {
-               this.AB.emit("ab.datacollection.update", {
-                  objectId: this.object.id,
-                  data,
-               });
-            }
-         });
-
+         this.AB.Network.once(jobID, this.handler_update);
          this.AB.Network.put(
             {
                url: this.object.urlRestItem(id),

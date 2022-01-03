@@ -5,6 +5,8 @@ const moment = require("moment");
 import { nanoid } from "nanoid";
 const uuid = require("uuid");
 
+const FilterComplex = require("./platform/FilterComplex");
+
 //
 // Our Common Resources
 //
@@ -93,6 +95,8 @@ class ABFactory extends ABFactoryCore {
 
       // Common Reference to Configuration Values
       this.Config = Config;
+
+      this.Class.FilterComplex = FilterComplex;
 
       //
       // Resources
