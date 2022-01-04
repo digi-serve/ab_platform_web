@@ -1,0 +1,52 @@
+name: E2E Tests
+on:
+   # Run on any commit to the #master branch
+   push:
+      branches: [master]
+   # Run on pull requests into the #master branch
+   pull_request:
+      branches: [master]
+   # Allows user to trigger the workflow from GitHub's web UI
+   workflow_dispatch:
+
+jobs:
+   cypress-test:
+      name: Run Tests
+      runs-on: ubuntu-latest
+      steps:
+         - name: Install AppBuilder
+           run: docker swarm init && npx digi-serve/ab-cli install ab --stack=ab --port=8080 --db.expose=false --db.password=root --db.encryption=false --tag=develop --nginx.enable=true --ssl.none --bot.enable=false --smtp.enable=false --tenant.username=admin --tenant.password=admin --tenant.email=neo@thematrix.com
+
+         - name: Check out ab_platform_web
+           uses: actions/checkout@v2
+           with:
+              path: ./ab/developer/ab_platform_web
+              submodules: recursive
+
+         - name: Npm Install
+           run: npm i
+           working-directory: ./ab/developer/ab_platform_web
+
+         - name: Webpack
+           run: node node_modules/webpack-cli/bin/cli.js
+           working-directory: ./ab/developer/ab_platform_web
+
+         - name: Check out kitchen-sink tests
+           uses: actions/checkout@v2
+           with:
+              repository: digi-serve/kitchensink_app
+              path: ab/test/e2e/cypress/integration/kitchensink_app
+
+         - name: Deploy Stack
+           run: ./UP.sh -t -q
+           working-directory: ./ab
+
+         - name: Run Cypress Tests
+           uses: cypress-io/github-action@v2
+           with:
+              working-directory: ./ab
+              project: ./test/e2e
+              config: baseUrl=http://localhost:8080,responseTimeout=60000
+              wait-on: "http://localhost:8080"
+              wait-on-timeout: 300
+              env: stack=ab
