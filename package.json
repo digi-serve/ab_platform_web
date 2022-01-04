@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "description": "AppBuilder runtime environment for the Web client.",
   "main": "index.js",
-  "type": "module",
   "scripts": {
     "lint": "eslint AppBuilder/. init/. resources/. ui/. webix_custom_components/. --fix --max-warnings=0 --report-unused-disable-directives && echo '✔  Your .js files look good.'",
     "test": "mocha -r esm test/**/*.test.js",

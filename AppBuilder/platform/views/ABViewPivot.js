@@ -1,5 +1,3 @@
-require("../../../js/webix/components/pivot/pivot");
-
 const ABViewPivotCore = require("../../core/views/ABViewPivotCore");
 const ABFieldCalculate = require("../dataFields/ABFieldCalculate");
 const ABFieldFormula = require("../dataFields/ABFieldFormula");

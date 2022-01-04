@@ -4,9 +4,6 @@
  * Manage the Object Workspace KanBan area.
  *
  */
-
-require("../js/webix/components/kanban/kanban");
-
 const ABComponent = require("../AppBuilder/platform/ABComponent");
 
 const ABFieldConnect = require("../AppBuilder/platform/dataFields/ABFieldConnect");
