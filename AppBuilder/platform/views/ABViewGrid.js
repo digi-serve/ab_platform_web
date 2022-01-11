@@ -745,6 +745,20 @@ module.exports = class ABViewGrid extends ABViewGridCore {
 
       var CurrentObject = null;
 
+      // in transition to v2:
+      let hiddenFields =
+         this.settings.objectWorkspace?.hiddenFields ??
+         this.settings.hiddenFields;
+      let frozenColumnID =
+         this.settings.objectWorkspace?.frozenColumnID ??
+         this.settings.frozenColumnID;
+      let summaryColumns =
+         this.settings.objectWorkspace?.summaryColumns ??
+         this.settings.summaryColumns;
+      let countColumns =
+         this.settings.objectWorkspace?.countColumns ??
+         this.settings.countColumns;
+
       var settings = {
          allowDelete: this.settings.allowDelete,
          detailsView: this.settings.detailsPage,
@@ -752,14 +766,14 @@ module.exports = class ABViewGrid extends ABViewGridCore {
          isEditable: this.settings.isEditable,
          massUpdate: this.settings.massUpdate,
          configureHeaders: false,
-         summaryColumns: this.settings.objectWorkspace.summaryColumns,
-         countColumns: this.settings.objectWorkspace.countColumns,
+         summaryColumns,
+         countColumns,
          hideHeader: this.settings.hideHeader,
          labelAsField: this.settings.labelAsField,
          hideButtons: this.settings.hideButtons,
          groupBy: this.settings.groupBy,
-         hiddenFields: this.settings.objectWorkspace.hiddenFields,
-         frozenColumnID: this.settings.objectWorkspace.frozenColumnID || "",
+         hiddenFields,
+         frozenColumnID,
          isTreeDatable: this.datacollection && this.datacollection.isGroup,
       };
 
@@ -960,20 +974,29 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                   }
                );
 
-               $$(DataTable.ui.id).attachEvent('onAfterRender', function (data) {
-                  if ($$(DataTable.ui.id)) {
-                    //set cy data
-                    $$(DataTable.ui.id).$view.setAttribute("data-cy", DataTable.idBase);
-                    for (const key in ids) {
-                      if (Object.hasOwnProperty.call(ids, key)) {
-                        let element = (ids[key]).toString()
-                        if ( $$(element) ) {
-                          $$(element).$view.setAttribute("data-cy", element);
+               $$(DataTable.ui.id).attachEvent(
+                  "onAfterRender",
+                  function (data) {
+                     if ($$(DataTable.ui.id)) {
+                        //set cy data
+                        $$(DataTable.ui.id).$view.setAttribute(
+                           "data-cy",
+                           DataTable.idBase
+                        );
+                        for (const key in ids) {
+                           if (Object.hasOwnProperty.call(ids, key)) {
+                              let element = ids[key].toString();
+                              if ($$(element)) {
+                                 $$(element).$view.setAttribute(
+                                    "data-cy",
+                                    element
+                                 );
+                              }
+                           }
                         }
-                      }
-                    }
-                 }
-               });
+                     }
+                  }
+               );
 
                // $$(DataTable.ui.id).attachEvent('onBeforeRender', function (data) {
                // 	_logic.clientSideDataFilter();
