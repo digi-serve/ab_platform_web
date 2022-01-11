@@ -746,6 +746,7 @@ module.exports = class ABViewGrid extends ABViewGridCore {
       var CurrentObject = null;
 
       // in transition to v2:
+
       let hiddenFields =
          this.settings.objectWorkspace?.hiddenFields ??
          this.settings.hiddenFields;
@@ -758,6 +759,15 @@ module.exports = class ABViewGrid extends ABViewGridCore {
       let countColumns =
          this.settings.objectWorkspace?.countColumns ??
          this.settings.countColumns;
+
+      if (!this.settings.objectWorkspace) {
+         this.settings.objectWorkspace = {
+            hiddenFields,
+            frozenColumnID,
+            summaryColumns,
+            countColumns,
+         };
+      }
 
       var settings = {
          allowDelete: this.settings.allowDelete,
