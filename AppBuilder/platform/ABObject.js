@@ -536,7 +536,7 @@ module.exports = class ABObject extends ABObjectCore {
       countColumns = countColumns || [];
 
       var headers = [];
-      var columnNameLookup = {};
+      // var columnNameLookup = {};
 
       // get the header for each of our fields:
       this.fields().forEach((f) => {
@@ -585,17 +585,20 @@ module.exports = class ABObject extends ABObjectCore {
             header.footer = { content: "countColumn" };
 
          headers.push(header);
-         columnNameLookup[header.id] = f.columnName; // name => id
+         // columnNameLookup[header.id] = f.columnName; // name => id
       });
 
       // update our headers with any settings applied in the Object Workspace
+      /*
+      // In v2: this is handled by the ABDesigner
+      //
       if (isObjectWorkspace) {
          let hiddenFieldList = [];
 
          if (hiddenFieldNames && hiddenFieldNames.length > 0)
             hiddenFieldList = hiddenFieldNames;
-         else if (this.workspaceHiddenFields)
-            hiddenFieldList = this.workspaceHiddenFields;
+         // else if (this.workspaceHiddenFields)
+         //    hiddenFieldList = this.workspaceHiddenFields;
 
          if (hiddenFieldList.length > 0) {
             hiddenFieldList.forEach((hfID) => {
@@ -607,6 +610,7 @@ module.exports = class ABObject extends ABObjectCore {
             });
          }
       }
+      */
 
       return headers;
    }

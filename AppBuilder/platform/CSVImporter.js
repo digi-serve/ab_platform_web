@@ -1,36 +1,39 @@
-module.exports = class CSVImporter {
-   constructor(App) {
-      var L = App.Label;
+var L = null;
+// multilingual Label fn()
 
-      this.labels = {
-         comma: L("ab.object.form.csv.separatedBy.comma", "*Comma (,)"),
-         tab: L(
-            "ab.object.form.csv.separatedBy.tab",
-            "*Tab (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)"
-         ),
-         semicolon: L(
-            "ab.object.form.csv.separatedBy.semicolon",
-            "*Semicolon (;)"
-         ),
-         space: L("ab.object.form.csv.separatedBy.space", "*Space ( )")
-      };
+module.exports = class CSVImporter {
+   constructor(Label) {
+      // {ABMultilingual.label()} function.
+      //
+      if (!L) {
+         L = Label;
+
+         // if this was a v1: App param:
+         if (Label.Label) {
+            L = Label.Label;
+         }
+      }
    }
 
+   /**
+    * @method getSeparateItems()
+    * Return the options of how the CSV values are separated.
+    * @return {array}  [ {id, value} ... ]
+    */
    getSeparateItems() {
       return [
-         { id: ",", value: this.labels.comma },
-         { id: "\t", value: this.labels.tab },
-         { id: ";", value: this.labels.semicolon },
-         { id: "s", value: this.labels.space }
+         { id: ",", value: L("Comma (,)") },
+         { id: "\t", value: L("Tab (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)") },
+         { id: ";", value: L("Semicolon (;)") },
+         { id: "s", value: L("Space ( )") },
       ];
    }
 
    /**
     * @method validateFile
     * Validate file extension
-    *
-    * @param {*} fileInfo - https://docs.webix.com/api__ui.uploader_onbeforefileadd_event.html
-    *
+    * @param {*} fileInfo
+    *        https://docs.webix.com/api__ui.uploader_onbeforefileadd_event.html
     * @return {boolean}
     */
    validateFile(fileInfo) {
@@ -98,18 +101,21 @@ module.exports = class CSVImporter {
 
    /**
     * @method getGuessDataType
-    *
-    * @param dataRows {Array} - [
-    * 								["Value 1.1", "Value 1.2", "Value 1.3"],
-    * 								["Value 2.1", "Value 2.2", "Value 2.3"],
-    * 							]
+    * return our best guess of what type of data for the requested column.
+    * @param {array} dataRows
+    *        The data we are evaluating:
+    *        [
+    *           ["Value 1.1", "Value 1.2", "Value 1.3"],
+    *           ["Value 2.1", "Value 2.2", "Value 2.3"],
+    * 		 ]
     * @param colIndex {Number}
-    *
     * @return {string}
     */
    getGuessDataType(dataRows, colIndex) {
       var data,
+         // {various} the data pulled from the requested row/column
          repeatNum = 10;
+      // {integer} how many rows do we want to scan trying to find a value
 
       // Loop to find a value
       for (var i = 1; i <= repeatNum; i++) {
@@ -137,6 +143,7 @@ module.exports = class CSVImporter {
       } else if (Date.parse(data)) {
          return "date";
       } else {
+         // determine which type of string this might be:
          if (data.length > 100) return "LongText";
          else return "string";
       }
@@ -144,15 +151,11 @@ module.exports = class CSVImporter {
 
    /**
     * @method reformat
-    *
     * @param {string} str
     */
    reformat(str) {
       if (!str) return "";
 
-      return str
-         .trim()
-         .replace(/"/g, "")
-         .replace(/'/g, "");
+      return str.trim().replace(/"/g, "").replace(/'/g, "");
    }
 };

@@ -1,5 +1,6 @@
 const ABViewDataviewCore = require("../../core/views/ABViewDataviewCore");
-const ABViewPropertyLinkPage = require("./viewProperties/ABViewPropertyLinkPage");
+const ABViewPropertyLinkPage = require("./viewProperties/ABViewPropertyLinkPage")
+   .default;
 
 const ABViewDataviewDefaults = ABViewDataviewCore.defaultValues();
 

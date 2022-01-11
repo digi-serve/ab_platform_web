@@ -14,7 +14,8 @@ import ABPopupExport from "./ABViewGridPopupExport";
 import ABPopupMassUpdateClass from "./ABViewGridPopupMassUpdate";
 import ABPopupSortField from "./ABViewGridPopupSortFields";
 import ABViewGridFilter from "./viewProperties/ABViewPropertyFilterData";
-// const ABViewPropertyLinkPage = require("./viewProperties/ABViewPropertyLinkPage");
+const ABViewPropertyLinkPage = require("./viewProperties/ABViewPropertyLinkPage")
+   .default;
 
 const KEY_STORAGE_SETTINGS = "abviewgrid_settings";
 // {string}
@@ -738,13 +739,13 @@ class ABViewGridComponent extends ClassUI {
       }
 
       if (this.settings.hideHeader == true) {
-         DataTable.hideHeader();
+         this.hideHeader();
       }
 
       if (!this.datacollection) {
          if (this.settings.dataviewID) {
             var dv = this.AB.datacollectionByID(this.settings.dataviewID);
-            this.dataCollectionLoad(dv);
+            this.datacollectionLoad(dv);
          }
       }
 
@@ -1199,6 +1200,12 @@ class ABViewGridComponent extends ClassUI {
       });
    }
 
+   hideHeader() {
+      var DataTable = this.getDataTable();
+      DataTable.define("header", false);
+      DataTable.refresh();
+   }
+
    /**
     * @function onAfterColumnDrop
     * When an editor drops a column to save a new column order
@@ -1613,7 +1620,7 @@ class ABViewGridComponent extends ClassUI {
          if (!f) return;
 
          // if it's a hidden field:
-         if (settings.hiddenFields.indexOf(f.id) > -1) {
+         if (settings.hiddenFields.indexOf(f.columnName) > -1) {
             c.hidden = true;
          }
          // add summary footer:
@@ -1689,7 +1696,7 @@ class ABViewGridComponent extends ClassUI {
             settings.groupBy &&
             (settings.groupBy || "").indexOf(col.id) > -1
          ) {
-            var groupField = CurrentObject.fieldbyID(col.id);
+            var groupField = CurrentObject.fieldByID(col.id);
             if (groupField) {
                col.template = function (obj, common) {
                   // return common.treetable(obj, common) + obj.value;
@@ -1893,10 +1900,7 @@ class ABViewGridComponent extends ClassUI {
       this.columnSplitRight = addedColumns.length - 1;
 
       // freeze columns:
-      let frozenColumnID =
-         settings.frozenColumnID != null
-            ? settings.frozenColumnID
-            : CurrentObject.workspaceFrozenColumnID;
+      let frozenColumnID = settings.frozenColumnID;
       if (frozenColumnID != "") {
          DataTable.define(
             "leftSplit",
@@ -3540,26 +3544,24 @@ export default class ABViewGrid extends ABViewGridCore {
    //    };
    // }
 
-   componentV2() {
-      return new ABViewGridComponent(this);
-      // var mockApp;
-      // if (this.AB._App) {
-      //    mockApp = this.AB._App;
-      // } else {
-      //    mockApp = {
-      //       AB: this.AB,
-      //       actions: {},
-      //       custom: this.AB.custom,
-      //       unique: (s) => s,
-      //       Label: (...params) => this.AB.Multilingual.label(...params),
-      //    };
-      // }
-      // var component = this.component(mockApp);
-      // return {
-      //    ui: () => component.ui,
-      //    init: component.init,
-      //    onShow: component.onShow,
-      // };
+   component(v1App = false) {
+      var component = new ABViewGridComponent(this);
+
+      // if this is our v1Interface
+      if (v1App) {
+         var newComponent = component;
+         component = {
+            ui: component.ui(),
+            init: (options, accessLevel) => {
+               return newComponent.init(this.AB, accessLevel);
+            },
+            onShow: (...params) => {
+               return newComponent.onShow?.(...params);
+            },
+         };
+      }
+
+      return component;
    }
 
    populateEditor(ids, view) {
@@ -3692,8 +3694,7 @@ export default class ABViewGrid extends ABViewGridCore {
 
    get linkPageHelper() {
       if (this.__linkPageHelper == null)
-         console.error("TODO: __linkPageHelper");
-      // this.__linkPageHelper = new ABViewPropertyLinkPage();
+         this.__linkPageHelper = new ABViewPropertyLinkPage();
 
       return this.__linkPageHelper;
    }
