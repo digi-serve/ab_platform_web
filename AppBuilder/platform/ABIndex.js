@@ -7,10 +7,7 @@ module.exports = class ABIndex extends ABIndexCore {
 
    /**
     * @method save()
-    *
-    * persist this instance of ABObject with it's parent ABApplication
-    *
-    *
+    * persist this instance of ABIndex with it's parent ABObject
     * @return {Promise}
     */
    save() {
@@ -22,11 +19,8 @@ module.exports = class ABIndex extends ABIndexCore {
 
    /**
     * @method destroy()
-    *
-    * destroy the current instance of ABObject
-    *
-    * also remove it from our parent application
-    *
+    * destroy the current instance of ABIndex
+    * also remove it from our parent ABObject
     * @return {Promise}
     */
    destroy() {
@@ -51,14 +45,14 @@ module.exports = class ABIndex extends ABIndexCore {
 
    migrateCreate() {
       return this.AB.Network.post({
-         url: `/app_builder/migrate/object/${this.object.id}/index/${this.id}`,
-         data: this.toObj(),
+         url: `/definition/migrate/object/${this.object.id}/index/${this.id}`,
+         // data: this.toObj(),
       });
    }
 
    migrateDrop() {
       return this.AB.Network["delete"]({
-         url: `/app_builder/migrate/object/${this.object.id}/index/${this.id}`,
+         url: `/definition/migrate/object/${this.object.id}/index/${this.id}`,
       });
    }
 };

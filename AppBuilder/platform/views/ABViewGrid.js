@@ -157,8 +157,15 @@ class ABViewGridComponent extends ClassUI {
     * @return {integer}
     */
    getColumnIndex(id) {
-      console.error("TODO: ABViewGridComponent.getColumnIndex()");
-      return null;
+      var indx = this.getDataTable().getColumnIndex(id);
+      if (!this.settings.massUpdate) {
+         // the index is 0 based. So if the massUpdate feature isn't
+         // enabled, we need to add 1 to the result so they look like
+         // a 1, 2, ...
+
+         indx++;
+      }
+      return indx;
    }
 
    uiDatatable() {
@@ -251,11 +258,13 @@ class ABViewGridComponent extends ClassUI {
             onCheck: function (row, col, val) {
                // Update checkbox data
                if (col == "appbuilder_select_item") {
-                  // do nothing because we will parse the table once we decide if we are deleting or updating rows
+                  // do nothing because we will parse the table once we decide
+                  // if we are deleting or updating rows
                   self.toggleUpdateDelete();
                } else {
                   if (this.settings.isEditable) {
-                     // if the colum is not the select item column move on to the next step to save
+                     // if the colum is not the select item column move on to
+                     // the next step to save
                      var state = {
                         value: val,
                      };
@@ -1027,6 +1036,8 @@ class ABViewGridComponent extends ClassUI {
    disableUpdateDelete() {
       $$(this.ids.buttonMassUpdate)?.disable();
       $$(this.ids.buttonDeleteSelected)?.disable();
+      // externally indicate that no rows are selected
+      this.emit("selection.cleared");
    }
 
    /**
@@ -1038,6 +1049,8 @@ class ABViewGridComponent extends ClassUI {
    enableUpdateDelete() {
       $$(this.ids.buttonMassUpdate)?.enable();
       $$(this.ids.buttonDeleteSelected)?.enable();
+      // externally indicate that a row has been selected
+      this.emit("selection");
    }
 
    freezeDeleteColumn() {
@@ -1267,7 +1280,12 @@ class ABViewGridComponent extends ClassUI {
 
       // Now emit this event, in case an external object is wanting to
       // respond to this: ABDesigner.objectBuilder, Interface  Designer,
-      this.emit("column.order", sourceId, targetId);
+      // we send back an array[ ABField.id, ...] in the order we have
+      // them.
+      this.emit(
+         "column.order",
+         columnConfig.map((c) => c.fieldID)
+      );
 
       this.refreshHeader();
 
@@ -1576,6 +1594,8 @@ class ABViewGridComponent extends ClassUI {
 
       var ids = this.ids;
       var DataTable = $$(ids.datatable);
+      if (!DataTable) return;
+
       var accessLevel = DataTable.config.accessLevel;
       DataTable.define("leftSplit", 0);
       DataTable.define("rightSplit", 0);
