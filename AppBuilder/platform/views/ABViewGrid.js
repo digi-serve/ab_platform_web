@@ -603,6 +603,14 @@ class ABViewGridComponent extends ClassUI {
             if (scrollStarted) clearTimeout(scrollStarted);
             customDisplays(this.data);
          }, 350);
+
+         AB.ClassUI.CYPRESS_REF(Datatable);
+         Object.keys(this.ids).forEach((key) => {
+            var $el = $$(this.ids[key]);
+            if ($el) {
+               AB.ClassUI.CYPRESS_REF($el);
+            }
+         });
       });
 
       // we have some data types that have custom displays that don't look
