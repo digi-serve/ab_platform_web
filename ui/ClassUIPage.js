@@ -53,24 +53,10 @@ class ClassUIPage extends ClassUI {
          // some pages can take a while to initialize.
          // I bet
          placeholder = {
-            rows: [
-               {},
-               {
-                  cols: [
-                     {},
-                     {
-                        type: "clean",
-                        width: 100,
-                        height: 100,
-                        css: { "text-align": "center", "line-height": "100px" },
-                        template:
-                           '<div class="webix_progress_icon"><div class="webix_progress_state wxi-sync webix_spin"></div></div>',
-                     },
-                     {},
-                  ],
-               },
-               {},
-            ],
+            type: "clean",
+            css: { "text-align": "center" },
+            template:
+               '<div style="height: 100vh; width: 100%; background: #ebedf0;" class="webix_progress_icon"><div class="webix_progress_state wxi-sync webix_spin"></div></div>',
          };
       }
       return {
