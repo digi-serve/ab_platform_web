@@ -53,9 +53,24 @@ class ClassUIPage extends ClassUI {
          // some pages can take a while to initialize.
          // I bet
          placeholder = {
-            // James:  here ya go.
-            view: "label",
-            label: "initializing ... James can make this look good!",
+            rows: [
+               {},
+               {
+                  cols: [
+                     {},
+                     {
+                        type: "clean",
+                        width: 100,
+                        height: 100,
+                        css: { "text-align": "center", "line-height": "100px" },
+                        template:
+                           '<div class="webix_progress_icon"><div class="webix_progress_state wxi-sync webix_spin"></div></div>',
+                     },
+                     {},
+                  ],
+               },
+               {},
+            ],
          };
       }
       return {
@@ -64,6 +79,7 @@ class ClassUIPage extends ClassUI {
          css: "ab-main-container ab-generated-page",
          borderless: true,
          id: this.containerID,
+         animate: false,
          cells: [placeholder],
          on: {
             // onViewChange: (prevId, nextId) => {
@@ -272,10 +288,12 @@ class ClassUIPage extends ClassUI {
                         on: {
                            //Add data-cy attribute to the close button
                            onAfterRender: () => {
-                              const button = $$(page.id).queryView('button');
+                              const button = $$(page.id).queryView("button");
                               const dataCy = `Popup Close Button ${page.name} ${page.id}`;
-                              button.getInputNode().setAttribute('data-cy', dataCy);
-                           }
+                              button
+                                 .getInputNode()
+                                 .setAttribute("data-cy", dataCy);
+                           },
                         },
                      },
                   ],

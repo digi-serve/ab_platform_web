@@ -356,6 +356,7 @@ class PortalWork extends ClassUI {
                   {
                      view: "multiview",
                      keepViews: true,
+                     animate: false,
                      cells: allPlaceholders,
                   },
                   $$("abWorkPages")

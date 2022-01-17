@@ -16,6 +16,7 @@ class Portal extends ClassUI {
          body: {
             id: "portal",
             view: "multiview",
+            animate: false,
             rows: [PortalLoading.ui(), PortalAuth.ui(), PortalWork.ui()],
          },
       };
