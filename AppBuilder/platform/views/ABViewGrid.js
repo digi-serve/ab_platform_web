@@ -1925,7 +1925,7 @@ class ABViewGridComponent extends ClassUI {
 
       DataTable.refreshColumns(columnHeaders);
 
-      this.columnSplitRight = addedColumns.length - 1;
+      this.columnSplitRight = addedColumns.length;
 
       // freeze columns:
       let frozenColumnID = settings.frozenColumnID;
