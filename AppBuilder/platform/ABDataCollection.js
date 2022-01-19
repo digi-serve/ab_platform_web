@@ -16,15 +16,37 @@ module.exports = class ABDataCollection extends ABDataCollectionCore {
     * @return {Promise}
     *			.resolve( {this} )
     */
-   save() {
-      return super.save().then((myView) => {
-         // when it is done, then publish the update:
-         this.AB.emit("ab.datacollection.update", {
-            datacollectionId: this.id,
-         });
-
-         return myView;
+   async save() {
+      if (!this.id) {
+         this.label = this.label || this.name;
+      }
+      await super.save();
+      this.AB.emit("ab.datacollection.update", {
+         datacollectionId: this.id,
       });
+      return this;
+   }
+
+   isValid() {
+      var validator = this.AB.Validation.validator();
+      var L = this.AB.Label();
+
+      // label/name must be unique:
+      var isNameUnique =
+         this.AB.datacollections((o) => {
+            return (
+               o.id != this.id &&
+               o.name.toLowerCase() == this.name.toLowerCase()
+            );
+         }).length == 0;
+      if (!isNameUnique) {
+         validator.addError(
+            "name",
+            L('Name must be unique ("{0}" already in use)', [this.name])
+         );
+      }
+
+      return validator;
    }
 
    ///

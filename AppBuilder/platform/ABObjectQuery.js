@@ -72,12 +72,12 @@ module.exports = class ABObjectQuery extends ABObjectQueryCore {
     *
     * @return {Promise}
     */
-   destroy() {
-      return super.destroy().then(() => {
-         console.error("Move .queryRemove() to Appbuilder Designer.");
-         // return this.AB.queryRemove(this);
-      });
-   }
+   // destroy() {
+   //    return super.destroy().then(() => {
+   //       console.error("Move .queryRemove() to Appbuilder Designer.");
+   //       // return this.AB.queryRemove(this);
+   //    });
+   // }
 
    /**
     * @method save()
@@ -87,16 +87,18 @@ module.exports = class ABObjectQuery extends ABObjectQueryCore {
     * @return {Promise}
     *						.resolve( {this} )
     */
-   save() {
-      return Promise.resolve()
-         .then(() => {
-            return super.save();
-         })
-         .then(() => {
-            console.error("Move .queryInsert() to AppBuilder Designer.");
-            // return this.AB.queryInsert(this);
-         });
-   }
+   // async save() {
+   //    try {
+   //       await super.save();
+   //       return this;
+   //    } catch (err) {
+   //       this.AB.notify.developer(err, {
+   //          context: "ABObjectQuery.save()",
+   //          query: this.toObj(),
+   //       });
+   //       throw err;
+   //    }
+   // }
 
    ///
    /// Fields

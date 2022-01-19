@@ -536,6 +536,7 @@ class ABViewGridComponent extends ClassUI {
          this.AB = AB;
       }
       var self = this;
+      var ids = this.ids;
 
       // WORKAROUND : Where should we define this ??
       // For include PDF.js
@@ -604,9 +605,9 @@ class ABViewGridComponent extends ClassUI {
             customDisplays(this.data);
          }, 350);
 
-         AB.ClassUI.CYPRESS_REF(Datatable);
-         Object.keys(this.ids).forEach((key) => {
-            var $el = $$(this.ids[key]);
+         AB.ClassUI.CYPRESS_REF(DataTable);
+         Object.keys(ids).forEach((key) => {
+            var $el = $$(ids[key]);
             if ($el) {
                AB.ClassUI.CYPRESS_REF($el);
             }
@@ -699,7 +700,6 @@ class ABViewGridComponent extends ClassUI {
       });
 
       // ABViewGrid Original init();
-      var ids = this.ids;
 
       if (this.settings.showToolbar) {
          if (

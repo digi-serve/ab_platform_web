@@ -72,22 +72,50 @@ module.exports = class ABClassApplication extends ABApplicationCore {
    ///
 
    /**
-    * @method objectRemove()
-    * remove the current ABObject from our list of .objectIDs.
-    * NOTE: this method persists the changes to the server.
-    * @param {ABObject} object
+    * @method _listInsert()
+    * save the given entity into our desired list:
+    * @param {varid} entity
+    * @param {string} key
+    *        the key of the list we are managing
     * @return {Promise}
     */
-   objectRemove(object) {
-      var begLen = this.objectIDs.length;
-      this.objectIDs = this.objectIDs.filter((id) => {
-         return id != object.id;
+   async _listInsert(entity, key) {
+      var isIncluded = this[key].indexOf(entity.id) != -1;
+      if (!isIncluded) {
+         this[key].push(entity.id);
+         await this.save();
+      }
+   }
+
+   async _listRemove(entity, key) {
+      var begLen = this[key].length;
+      this[key] = this[key].filter((id) => {
+         return id != entity.id;
       });
       // if there was a change then save this.
-      if (begLen != this.objectIDs.length) {
-         return this.save();
+      if (begLen != this[key].length) {
+         await this.save();
       }
-      return Promise.resolve();
+   }
+
+   /**
+    * @method datacollectionInsert()
+    * persist the current ABDataCollection in our list of .datacollectionIDs.
+    * @param {ABDataCollection} dc
+    * @return {Promise}
+    */
+   datacollectionInsert(dc) {
+      return this._listInsert(dc, "datacollectionIDs");
+   }
+
+   /**
+    * @method datacollectionRemove()
+    * remove the given ABDataCollection from our list of .datacollectionIDs.
+    * @param {ABDataCollection} dc
+    * @return {Promise}
+    */
+   datacollectionRemove(dc) {
+      return this._listRemove(dc, "datacollectionIDs");
    }
 
    /**
@@ -97,13 +125,39 @@ module.exports = class ABClassApplication extends ABApplicationCore {
     * @return {Promise}
     */
    objectInsert(object) {
-      var isIncluded = this.objectIDs.indexOf(object.id) != -1;
-      if (!isIncluded) {
-         this.objectIDs.push(object.id);
-         // Save our own Info:
-         return this.save();
-      }
-      return Promise.resolve();
+      return this._listInsert(object, "objectIDs");
+   }
+
+   /**
+    * @method objectRemove()
+    * remove the current ABObject from our list of .objectIDs.
+    * NOTE: this method persists the changes to the server.
+    * @param {ABObject} object
+    * @return {Promise}
+    */
+   objectRemove(object) {
+      return this._listRemove(object, "objectIDs");
+   }
+
+   /**
+    * @method queryInsert()
+    * persist the current ABObjectQuery in our list of .queryIDs.
+    * @param {ABObjectQuery} query
+    * @return {Promise}
+    */
+   queryInsert(query) {
+      return this._listInsert(query, "queryIDs");
+   }
+
+   /**
+    * @method queryRemove()
+    * remove the current ABObjectQuery from our list of .queryIDs.
+    * NOTE: this method persists the changes to the server.
+    * @param {ABObjectQuery} query
+    * @return {Promise}
+    */
+   queryRemove(query) {
+      return this._listRemove(query, "queryIDs");
    }
 
    /**

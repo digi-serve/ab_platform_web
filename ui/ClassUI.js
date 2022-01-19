@@ -1,9 +1,25 @@
 var EventEmitter = require("events").EventEmitter;
 
 class ClassUI extends EventEmitter {
-   constructor(base) {
+   constructor(base, ids) {
       super();
 
+      this.ids = {};
+      // {hash}
+      // An internal reference of webix.ids that we use to reference webix
+      // components.
+
+      // We can be called in several ways:
+      // 1) super("base_id");
+      //    in this case we create a default this.ids.component = base_id;
+      //
+      // 2) super({ id1:"id1", id2:"id2", ... })
+      //    in this case we create a this.ids = base;
+      //    we look for a this.ids.base || or this.ids.component and use that
+      //    as our "base" reference.
+      //
+      // 3) super(base, ids);
+      //
       if (base) {
          if ("string" == typeof base) {
             this.ids = {
@@ -11,12 +27,35 @@ class ClassUI extends EventEmitter {
             };
          } else {
             this.ids = base;
+            base = this.ids.base ?? this.ids.component;
          }
       }
 
-      // if (!base) {
-      //    console.warn("new ClassUI() called without a base component id. ");
+      // a shortcut way to enter the ids is to simply put the keys:
+      // {
+      //    form:"",
+      //    form_button:"",
+      //    ...
       // }
+      // so we need to make sure the actual values are set according to
+      // `{base}_{key}` format.
+      //
+      if (ids) {
+         Object.keys(ids).forEach((k) => {
+            if (ids[k]) {
+               return (this.ids[k] = ids[k]);
+            }
+            this.ids[k] = `${base}_${k}`;
+         });
+      }
+
+      // verify this.ids are properly set:
+      Object.keys(this.ids).forEach((k) => {
+         this.ids[k] = this.ids[k] || `${base}_${k}`;
+      });
+
+      // and make sure there is a .component set:
+      this.ids.component = this.ids.component || base;
    }
 
    /**
