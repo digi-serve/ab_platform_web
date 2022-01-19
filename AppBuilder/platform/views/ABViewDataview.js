@@ -304,9 +304,9 @@ module.exports = class ABViewDataview extends ABViewDataviewCore {
          let flexlayout = {
             id: ids.dataFlexView,
             view: "flexlayout",
-            paddingX: 15,
-            paddingY: 19,
-            type: "space",
+            type: "clean",
+            padding: 10,
+            css: { background: "#ebedf0 !important" },
             cols: [],
          };
          webix.ui(flexlayout, $$(ids.scrollview), $$(ids.dataFlexView));

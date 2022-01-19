@@ -703,6 +703,30 @@ module.exports = class ABViewGrid extends ABViewGridCore {
 
       var CurrentObject = null;
 
+      // in transition to v2:
+
+      let hiddenFields =
+         this.settings.objectWorkspace?.hiddenFields ??
+         this.settings.hiddenFields;
+      let frozenColumnID =
+         this.settings.objectWorkspace?.frozenColumnID ??
+         this.settings.frozenColumnID;
+      let summaryColumns =
+         this.settings.objectWorkspace?.summaryColumns ??
+         this.settings.summaryColumns;
+      let countColumns =
+         this.settings.objectWorkspace?.countColumns ??
+         this.settings.countColumns;
+
+      if (!this.settings.objectWorkspace) {
+         this.settings.objectWorkspace = {
+            hiddenFields,
+            frozenColumnID,
+            summaryColumns,
+            countColumns,
+         };
+      }
+
       var settings = {
          allowDelete: this.settings.allowDelete,
          detailsView: this.settings.detailsPage,
@@ -712,14 +736,14 @@ module.exports = class ABViewGrid extends ABViewGridCore {
          gridFilter: this.settings.gridFilter,
          massUpdate: this.settings.massUpdate,
          configureHeaders: false,
-         summaryColumns: this.settings.objectWorkspace.summaryColumns,
-         countColumns: this.settings.objectWorkspace.countColumns,
+         summaryColumns,
+         countColumns,
          hideHeader: this.settings.hideHeader,
          labelAsField: this.settings.labelAsField,
          hideButtons: this.settings.hideButtons,
          groupBy: this.settings.groupBy,
-         hiddenFields: this.settings.objectWorkspace.hiddenFields,
-         frozenColumnID: this.settings.objectWorkspace.frozenColumnID || "",
+         hiddenFields,
+         frozenColumnID,
          isTreeDatable: this.datacollection && this.datacollection.isGroup,
       };
 
@@ -933,7 +957,7 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                            DataTable.idBase
                         );
                         for (const key in ids) {
-                           if (Object.prototype.hasOwnProperty.call(ids, key)) {
+                           if (Object.hasOwnProperty.call(ids, key)) {
                               let element = ids[key].toString();
                               if ($$(element)) {
                                  $$(element).$view.setAttribute(
@@ -1259,9 +1283,11 @@ module.exports = class ABViewGrid extends ABViewGridCore {
                         let deleteTasks = [];
 
                         deletedRowIds.forEach((rowId) => {
-                           deleteTasks.push(CurrentObject.model().delete(rowId));
+                           deleteTasks.push(
+                              CurrentObject.model().delete(rowId)
+                           );
                         });
-      
+
                         await Promise.all(deleteTasks);
 
                         // Anything we need to do after we are done.
