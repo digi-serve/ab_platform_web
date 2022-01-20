@@ -5,9 +5,7 @@ const ABViewPropertyLinkPage = require("./viewProperties/ABViewPropertyLinkPage"
 
 const ABFieldImage = require("../dataFields/ABFieldImage");
 
-function L(key, altText) {
-   return AD.lang.label.getLabel(key) || altText;
-}
+let L = (...params) => AB.Multilingual.label(...params);
 
 let PopupCarouselFilterMenu = null;
 
@@ -89,7 +87,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
             cols: [
                {
                   view: "label",
-                  label: L("ab.component.grid.filterMenu", "*Filter Menu"),
+                  label: L("Filter Menu"),
                },
             ],
          },
@@ -131,8 +129,8 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
       return commonUI.concat([
          {
             view: "fieldset",
-            label: L("ab.component.label.dataSource", "*Data:"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Data:"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -140,8 +138,8 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
                   {
                      view: "select",
                      name: "datacollection",
-                     label: L("ab.component.label.dataSource", "*Object:"),
-                     labelWidth: App.config.labelWidthLarge,
+                     label: L("Object:"),
+                     labelWidth: this.AB.UISettings.config().labelWidthLarge,
                      options: [],
                      on: {
                         onChange: function (newv, oldv) {
@@ -153,7 +151,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
 
                               let dataCollection = _logic
                                  .currentEditObject()
-                                 .AB.datacollections((dc) => dc.id == newv)[0];
+                                 .AB.datacollectionByID(newv);
                               if (dataCollection) {
                                  let datasource = dataCollection.datasource;
                                  if (datasource) {
@@ -173,18 +171,12 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
                               if (imageFields.length > 0) {
                                  imageFields.unshift({
                                     id: "",
-                                    value: L(
-                                       "ab.component.label.selectField",
-                                       "*Select a field"
-                                    ),
+                                    value: L("Select a field"),
                                  });
                               } else {
                                  imageFields.unshift({
                                     id: "",
-                                    value: L(
-                                       "ab.component.label.noImageFields",
-                                       "*no image fields."
-                                    ),
+                                    value: L("no image fields."),
                                  });
                               }
 
@@ -198,8 +190,8 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
                   {
                      view: "select",
                      name: "field",
-                     label: L("ab.component.label.imageField", "*Image Field:"),
-                     labelWidth: App.config.labelWidthLarge,
+                     label: L("Image Field:"),
+                     labelWidth: this.AB.UISettings.config().labelWidthLarge,
                      options: [],
                   },
                ],
@@ -210,7 +202,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
          // {
          // 	view: "fieldset",
          // 	label: L('ab.component.label.linkedPages', '*Linked Pages:'),
-         // 	labelWidth: App.config.labelWidthLarge,
+         // 	labelWidth: this.AB.UISettings.config().labelWidthLarge,
          // 	body: {
          // 		type: "clean",
          // 		padding: 10,
@@ -219,14 +211,14 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
          // 				view: "select",
          // 				name: "detailsPage",
          // 				label: L('ab.component.label.detailsPage', '*Details Page:'),
-         // 				labelWidth: App.config.labelWidthLarge,
+         // 				labelWidth: this.AB.UISettings.config().labelWidthLarge,
          // 				options: []
          // 			},
          // 			{
          // 				view: "select",
          // 				name: "editPage",
          // 				label: L('ab.component.label.editForm', '*Edit Form:'),
-         // 				labelWidth: App.config.labelWidthLarge,
+         // 				labelWidth: this.AB.UISettings.config().labelWidthLarge,
          // 				options: []
          // 			}
          // 		]
@@ -234,11 +226,8 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
          // },
          {
             view: "fieldset",
-            label: L(
-               "ab.component.label.customizeDisplay",
-               "*Customize Display:"
-            ),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Customize Display:"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -246,77 +235,62 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
                   {
                      view: "select",
                      name: "navigationType",
-                     label: L(
-                        "ab.component.carousel.navigationType",
-                        "*Navigation Type"
-                     ),
-                     labelWidth: App.config.labelWidthLarge,
+                     label: L("Navigation Type"),
+                     labelWidth: this.AB.UISettings.config().labelWidthLarge,
                      options: [
-                        { id: "corner", value: "Corner" },
-                        { id: "side", value: "Side" },
+                        { id: "corner", value: L("Corner") },
+                        { id: "side", value: L("Side") },
                      ],
                   },
 
                   {
                      view: "checkbox",
                      name: "showLabel",
-                     labelRight: L(
-                        "ab.component.carousel.showLabel",
-                        "*Show label of image"
-                     ),
-                     labelWidth: App.config.labelWidthCheckbox,
+                     labelRight: L("Show label of image"),
+                     labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
                   },
 
                   {
                      view: "checkbox",
                      name: "hideItem",
-                     labelRight: L(
-                        "ab.component.carousel.hideItem",
-                        "*Hide item list"
-                     ),
-                     labelWidth: App.config.labelWidthCheckbox,
+                     labelRight: L("Hide item list"),
+                     labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
                   },
 
                   {
                      view: "checkbox",
                      name: "hideButton",
-                     labelRight: L(
-                        "ab.component.carousel.hideButton",
-                        "*Hide navigation buttons"
-                     ),
-                     labelWidth: App.config.labelWidthCheckbox,
+                     labelRight: L("Hide navigation buttons"),
+                     labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
                   },
 
                   {
                      view: "counter",
                      name: "width",
-                     label: L("ab.component.grid.width", "*Width:"),
-                     labelWidth: App.config.labelWidthXLarge,
+                     label: L("Width:"),
+                     labelWidth: this.AB.UISettings.config().labelWidthXLarge,
                   },
 
                   {
                      view: "counter",
                      name: "height",
-                     label: L("ab.component.grid.height", "*Height:"),
-                     labelWidth: App.config.labelWidthXLarge,
+                     label: L("Height:"),
+                     labelWidth: this.AB.UISettings.config().labelWidthXLarge,
                   },
 
                   {
                      cols: [
                         {
                            view: "label",
-                           label: L(
-                              "ab.component.label.filterData",
-                              "*Filter Option:"
-                           ),
+                           label: L("Filter Option:"),
                            css: "ab-text-bold",
-                           width: App.config.labelWidthXLarge,
+                           width: this.AB.UISettings.config().labelWidthXLarge,
                         },
                         {
                            view: "button",
                            id: ids.gridFilterMenuButton,
                            css: "webix_primary",
-                           label: L("ab.component.label.settings", "*Settings"),
+                           label: L("Settings"),
                            icon: "fa fa-gear",
                            type: "icon",
                            badge: 0,
@@ -396,7 +370,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
    component(App) {
       var idBase = "ABViewCarousel_" + this.id;
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       var dv = this.datacollection;
@@ -408,9 +382,17 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
       let filterUI = this.filterHelper.component(App, idBase);
       let linkPage = this.linkPageHelper.component(App, idBase);
 
+      let spacer = {};
+      if (this.settings.width == 0) {
+         spacer = {
+            width: 1,
+         };
+      }
+
       let _ui = {
          borderless: true,
          cols: [
+            spacer, // spacer
             {
                borderless: true,
                rows: [
@@ -435,7 +417,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
                   },
                ],
             },
-            {}, // spacer
+            spacer, // spacer
          ],
       };
 
@@ -503,6 +485,8 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
                   (this.settings.editPage || this.settings.editTab
                      ? `<span ab-row-id="${row.id}" class="ab-carousel-edit webix_icon fa fa-pencil"></span>`
                      : "") +
+                  `<span class="webix_icon ab-carousel-fullscreen fa fa-arrows-alt"></span>` +
+                  `<span style="display: none;" class="webix_icon ab-carousel-exit-fullscreen fa fa-times"></span>` +
                   `</div>` +
                   `</div>`;
 
@@ -527,7 +511,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
             if (Carousel.hideProgress) Carousel.hideProgress();
          },
 
-         switchImage: (current_position) => {
+         switchImage: async (current_position) => {
             let dv = this.datacollection;
             if (!dv) return;
 
@@ -539,13 +523,15 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
                // loading cursor
                _logic.busy();
 
-               dv.loadData(this._rowCount || 0)
-                  .catch(() => {
-                     _logic.ready();
-                  })
-                  .then(() => {
-                     _logic.ready();
+               try {
+                  await dv.loadData(this._rowCount || 0);
+               } catch (err) {
+                  App.AB.notify.developer(err, {
+                     message: "Error when load data from a Data collection",
                   });
+               }
+
+               _logic.ready();
             }
          },
 
@@ -578,7 +564,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
                if (imgFile) {
                   let imgData = {
                      id: r.id,
-                     src: `/opsportal/image/${obj.application.name}/${imgFile}`,
+                     src: `/file/${imgFile}`,
                   };
 
                   // label of row data
@@ -588,6 +574,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
 
                   images.push({
                      css: "image",
+                     borderless: true,
                      template: _logic.myTemplate,
                      data: imgData,
                   });
@@ -600,9 +587,9 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
                   css: "image",
                   template: _logic.myTemplate,
                   data: {
-                     id: OP.Util.uuid(),
-                     src: `/opsportal/image/${obj.application.name}/${field.settings.defaultImageUrl}`,
-                     label: "Default image",
+                     id: this.AB.uuid(),
+                     src: `/file/${field.settings.defaultImageUrl}`,
+                     label: L("Default image"),
                   },
                });
             }
@@ -621,7 +608,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
                      {
                         view: "label",
                         align: "center",
-                        label: "No image",
+                        label: L("No image"),
                      },
                   ],
                });
@@ -642,41 +629,58 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
             if (Carousel) webix.extend(Carousel, webix.ProgressBar);
 
             // link pages events
-            var editPage = this.settings.editPage;
-            var detailsPage = this.settings.detailsPage;
-            if (detailsPage || editPage) {
-               $$(ids.component).$view.onclick = (e) => {
-                  var clicked = false;
-                  if (editPage) {
-                     for (let p of e.path) {
-                        if (
-                           p.className &&
-                           p.className.indexOf("ab-carousel-edit") > -1
-                        ) {
-                           clicked = true;
+            let editPage = this.settings.editPage;
+            let detailsPage = this.settings.detailsPage;
 
-                           let rowId = p.getAttribute("ab-row-id");
-                           linkPage.changePage(editPage, rowId);
-
-                           break;
-                        }
-                     }
+            // if (detailsPage || editPage) {
+            $$(ids.component).$view.onclick = (e) => {
+               if (e.target.className) {
+                  if (e.target.className.indexOf("ab-carousel-edit") > -1) {
+                     webix.html.removeCss(
+                        $$(ids.component).getNode(),
+                        "fullscreen"
+                     );
+                     webix.fullscreen.exit();
+                     let rowId = e.target.getAttribute("ab-row-id");
+                     linkPage.changePage(editPage, rowId);
+                  } else if (
+                     e.target.className.indexOf("ab-carousel-detail") > -1
+                  ) {
+                     webix.html.removeCss(
+                        $$(ids.component).getNode(),
+                        "fullscreen"
+                     );
+                     webix.fullscreen.exit();
+                     let rowId = e.target.getAttribute("ab-row-id");
+                     linkPage.changePage(detailsPage, rowId);
+                  } else if (
+                     e.target.className.indexOf("ab-carousel-fullscreen") > -1
+                  ) {
+                     $$(ids.component).define("css", "fullscreen");
+                     webix.fullscreen.set(ids.component, {
+                        head: {
+                           view: "toolbar",
+                           css: "webix_dark",
+                           elements: [
+                              {},
+                              {
+                                 view: "icon",
+                                 icon: "fa fa-times",
+                                 click: function () {
+                                    webix.html.removeCss(
+                                       $$(ids.component).getNode(),
+                                       "fullscreen"
+                                    );
+                                    webix.fullscreen.exit();
+                                 },
+                              },
+                           ],
+                        },
+                     });
                   }
-                  if (detailsPage && !clicked) {
-                     for (let p of e.path) {
-                        if (
-                           p.className &&
-                           p.className.indexOf("ab-carousel-detail") > -1
-                        ) {
-                           let rowId = p.getAttribute("ab-row-id");
-                           linkPage.changePage(detailsPage, rowId);
-
-                           break;
-                        }
-                     }
-                  }
-               };
-            }
+               }
+            };
+            // }
          },
 
          showFilterPopup: ($view) => {

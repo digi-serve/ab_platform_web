@@ -55,25 +55,12 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
       this._settings = settings;
 
       var L = this.Label();
-      var labels = {
-         common: App.labels,
-         component: {
-            confirmDeleteRowTitle: L(
-               "ab.object.deleteRow.title",
-               "*Delete data"
-            ),
-            confirmDeleteRowMessage: L(
-               "ab.object.deleteRow.message",
-               "*Do you want to delete this row?"
-            ),
-         },
-      };
 
       // internal list of Webix IDs to reference our UI components.
       var ids = {
-         component: this.unique(idBase + "_datatable"),
-         tooltip: this.unique(idBase + "_datatable_tooltip"),
-         rules: this.unique(idBase + "_datatable_rules"),
+         component: this.unique(`${idBase}_datatable`),
+         tooltip: this.unique(`${idBase}_datatable_tooltip`),
+         rules: this.unique(`${idBase}_datatable_rules`),
       };
 
       var defaultHeight = 0;
@@ -121,8 +108,8 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
          },
          dragColumn: true,
          on: {
-            onBeforeSelect: function (data, preserve) {
-               var skippable = [
+            onBeforeSelect: function (data, preserve, evt) {
+               let skippable = [
                   "appbuilder_select_item",
                   "appbuilder_view_detail",
                   "appbuilder_view_track",
@@ -350,24 +337,13 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
          let customDisplays = (data) => {
             if (!CurrentObject || !DataTable.data) return;
 
-            var displayRecords = [];
+            let displayRecords = [];
 
-            let verticalScrollState = DataTable.getScrollState().y,
-               rowHeight = DataTable.config.rowHeight,
-               height = DataTable.$view.querySelector(".webix_ss_body")
-                  .clientHeight,
-               startRecIndex = Math.floor(verticalScrollState / rowHeight),
-               endRecIndex = startRecIndex + DataTable.getVisibleCount(),
-               index = 0;
+            DataTable.eachRow(function (row) {
+               displayRecords.push(row);
+            }, false);
 
-            DataTable.data.order.each(function (id) {
-               if (id != null && startRecIndex <= index && index <= endRecIndex)
-                  displayRecords.push(id);
-
-               index++;
-            });
-
-            var editable = settings.isEditable;
+            let editable = settings.isEditable;
             if (DataTable.config.accessLevel < 2) {
                editable = false;
             }
@@ -449,9 +425,9 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
             } else if (e.target.className.indexOf("trash") > -1) {
                // if this was our trash icon:
 
-               App.AB.Dialog.Confirm({
-                  title: labels.component.confirmDeleteRowTitle,
-                  text: labels.component.confirmDeleteRowMessage,
+               webix.confirm({
+                  title: L("Delete data"),
+                  text: L("Do you want to delete this row?"),
                   callback: function (result) {
                      if (result) {
                         CurrentObject.model()
@@ -461,17 +437,16 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
                                  DataTable.remove(id);
                                  DataTable.clearSelection();
                               } else {
-                                 App.AB.Dialog.Alert({
+                                 webix.alert({
                                     text: L(
-                                       "key.no.rows.effected",
-                                       "No rows were effected.  This does not seem right."
+                                       "No rows were effected. This does not seem right."
                                     ),
                                  });
                               }
                            })
                            .catch((err) => {
-                              App.AB.log("Error deleting item:", {
-                                 error: err,
+                              App.AB.notify.developer(err, {
+                                 message: "Error deleting item"
                               });
 
                               //// TODO: what do we do here?
@@ -654,8 +629,8 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
                   DataTable.refreshColumns();
                })
                .catch((err) => {
-                  App.AB.error("Error saving new column order:", {
-                     error: err,
+                  App.AB.notify.developer(err, {
+                     message: "Error saving new column order:",
                   });
                });
          },
@@ -727,8 +702,8 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
                         }
                      })
                      .catch((err) => {
-                        App.AB.error("Error saving item:", {
-                           error: err,
+                        App.AB.notify.developer(err, {
+                           message: "Error saving item:",
                         });
 
                         DataTable.clearSelection();
@@ -841,8 +816,8 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
                   DataTable.refreshColumns();
                })
                .catch((err) => {
-                  App.AB.error("Error saving new column size:", {
-                     error: err,
+                  App.AB.notify.developer(err, {
+                     message: "Error saving new column size:",
                   });
                });
          },
@@ -871,7 +846,9 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
                .update(item.id, item)
                .then(() => {})
                .catch((err) => {
-                  App.AB.error("Error saving item:", { error: err });
+                  App.AB.notify.developer(err, {
+                     message: "Error saving item:",
+                  });
                });
          },
 
@@ -1107,7 +1084,7 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
                      col.template = function (obj, common) {
                         // return common.treetable(obj, common) + obj.value;
                         if (obj.$group) {
-                           let rowData = _.clone(obj);
+                           let rowData = App.AB.cloneDeep(obj);
                            rowData[groupField.columnName] = rowData.value;
 
                            return (
@@ -1438,7 +1415,7 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
             groupBys = groupBys.reverse();
             groupBys.forEach((colName, gIndex) => {
                let by;
-               let groupMap = _.clone(baseGroupMap);
+               let groupMap = App.AB.cloneDeep(baseGroupMap);
 
                // Root
                if (gIndex == groupBys.length - 1) {
@@ -1527,7 +1504,7 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
             ) {
                tip = obj[columnName + "__relation"].text;
             } else if (imageFields.indexOf(columnName) != -1) {
-               if (obj[columnName] == null) {
+               if (obj[columnName] == null || obj[columnName] == "") {
                   return "";
                } else {
                   // TODO: we need to get this URL from the ABFieldImage object!
@@ -1662,7 +1639,9 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
                   DataTable.refresh();
                })
                .catch((err) => {
-                  this.AB.error("Error saving item:", { error: err });
+                  this.AB.notify.developer(err, {
+                     message: "Error saving item:",
+                  });
                });
          },
       });

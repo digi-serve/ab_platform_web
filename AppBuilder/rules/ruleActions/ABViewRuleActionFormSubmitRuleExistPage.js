@@ -5,7 +5,11 @@
 //
 const ABViewRuleAction = require("../ABViewRuleAction");
 
-module.exports = class ABViewRuleActionFormSubmitRuleExistPage extends ABViewRuleAction {
+let L = (...params) => AB.Multilingual.label(...params);
+
+module.exports = class ABViewRuleActionFormSubmitRuleExistPage extends (
+   ABViewRuleAction
+) {
    /**
     * @param {object} App
     *      The shared App object that is created in OP.Component
@@ -14,14 +18,10 @@ module.exports = class ABViewRuleActionFormSubmitRuleExistPage extends ABViewRul
     */
    constructor(App, idBase) {
       super();
-      var L = App.Label;
 
       this.App = App;
       this.key = "ABViewRuleActionFormSubmitRuleExistPage";
-      this.label = L(
-         "ab.component.ruleaction.abviewruleActionFormSubmitRuleExistPage",
-         "*Redirect to an existing page"
-      );
+      this.label = L("Redirect to an existing page");
 
       this.currentObject = null; // the object this Action is tied to.
 
@@ -29,12 +29,6 @@ module.exports = class ABViewRuleActionFormSubmitRuleExistPage extends ABViewRul
       // [
       //		{ fieldId: xxx, value:yyy, type:key['string', 'number', 'date',...]}
       // ]
-
-      // Labels for UI components
-      var labels = (this.labels = {
-         // common: App.labels,
-         component: {},
-      });
    }
 
    // conditionFields() {
@@ -70,7 +64,7 @@ module.exports = class ABViewRuleActionFormSubmitRuleExistPage extends ABViewRul
    //
    valueDisplayComponent(idBase) {
       var ids = {
-         pagesAndTabs: idBase + "_PagesAndTabs",
+         pagesAndTabs: `${idBase}_PagesAndTabs`,
       };
 
       this._ui = {

@@ -2,7 +2,11 @@ const ABViewFormSelectMultipleCore = require("../../core/views/ABViewFormSelectM
 
 const ABViewFormSelectMultiplePropertyComponentDefaults = ABViewFormSelectMultipleCore.defaultValues();
 
-module.exports = class ABViewFormSelectMultiple extends ABViewFormSelectMultipleCore {
+let L = (...params) => AB.Multilingual.label(...params);
+
+module.exports = class ABViewFormSelectMultiple extends (
+   ABViewFormSelectMultipleCore
+) {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
    // }
@@ -22,8 +26,8 @@ module.exports = class ABViewFormSelectMultiple extends ABViewFormSelectMultiple
    editorComponent(App, mode) {
       var idBase = "ABViewFormSelectMultipleEditorComponent";
       var ids = {
-         component: App.unique(idBase + "_component"),
-         options: App.unique(idBase + "_option"),
+         component: App.unique(`${idBase}_component`),
+         options: App.unique(`${idBase}_option`),
       };
 
       var selectlist = this.component(App).ui;
@@ -55,7 +59,6 @@ module.exports = class ABViewFormSelectMultiple extends ABViewFormSelectMultiple
          _logic,
          ObjectDefaults
       );
-      var L = App.Label;
 
       // in addition to the common .label  values, we
       // ask for:
@@ -63,22 +66,16 @@ module.exports = class ABViewFormSelectMultiple extends ABViewFormSelectMultiple
          {
             name: "type",
             view: "richselect",
-            label: L("ab.component.select.type", "*Type"),
+            label: L("Type"),
             options: [
                {
                   id: "multicombo",
-                  value: L(
-                     "ab.component.selectmultiple.multicombo",
-                     "*Multi Combo"
-                  ),
+                  value: L("Multi Combo"),
                },
 
                {
                   id: "checkbox",
-                  value: L(
-                     "ab.component.selectmultiple.checkboxes",
-                     "*Checkboxes"
-                  ),
+                  value: L("Checkboxes"),
                },
             ],
          },
@@ -111,10 +108,10 @@ module.exports = class ABViewFormSelectMultiple extends ABViewFormSelectMultiple
       var field = this.field();
 
       var idBase = this.parentFormUniqueID(
-         "ABViewFormSelectMultiple_" + this.id + "_f_"
+         `ABViewFormSelectMultiple_${this.id}_f_`
       );
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       component.ui.view =
@@ -160,7 +157,7 @@ module.exports = class ABViewFormSelectMultiple extends ABViewFormSelectMultiple
       if (component.ui.view == "checkbox") {
          component.ui.options.push({
             id: "temp",
-            value: "Option",
+            value: L("Option"),
          });
       }
 
@@ -169,7 +166,7 @@ module.exports = class ABViewFormSelectMultiple extends ABViewFormSelectMultiple
 
       component.logic = {
          getValue: (elem) => {
-            var elem = $$(ids.component);
+            elem = elem || $$(ids.component);
 
             return field.getValue(elem);
          },

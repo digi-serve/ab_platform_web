@@ -10,6 +10,8 @@ const RowFilter = require("../RowFilter");
 
 let FilterComponent = null;
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 function _onShow(App, compId, instance, component) {
    let elem = $$(compId);
    if (!elem) return;
@@ -20,10 +22,46 @@ function _onShow(App, compId, instance, component) {
    let rowData = {},
       node = elem.$view;
 
+   // we need to use the element id stored in the settings to find out what the
+   // ui component id is so later we can use it to look up its current value
+   let filterValue = null;
+
+   // we also need the id of the field that we are going to filter on
+   let filterKey = null;
+
+   // finally if this is a custom foreign key we need the stored columnName by
+   // default uuid is passed for all non CFK
+   let filterColumn = null;
+
+   // the value stored is hash1:hash2:columnName
+   // hash1 = component view id of the element we want to get the value from
+   // hash2 = the id of the field we are using to filter our options
+   // filterColumn = the name of the column to get the value from
+   if (
+      instance.settings.filterConnectedValue &&
+      instance.settings.filterConnectedValue.indexOf(":") > -1
+   ) {
+      Object.keys(instance.parent.viewComponents).forEach((key, index) => {
+         if (
+            instance.parent.viewComponents[key].ui.name ==
+            instance.settings.filterConnectedValue.split(":")[0]
+         ) {
+            filterValue = instance.parent.viewComponents[key];
+         }
+      });
+
+      // if not found stop
+      if (!filterValue) return;
+      filterKey = instance.settings.filterConnectedValue.split(":")[1];
+      filterColumn = instance.settings.filterConnectedValue.split(":")[2];
+   }
+
    field.customDisplay(rowData, App, node, {
-      editable: true,
       formView: instance.settings.formView,
       filters: instance.settings.objectWorkspace.filterConditions,
+      filterValue: filterValue,
+      filterKey: filterKey,
+      filterColumn: filterColumn,
       editable: instance.settings.disable == 1 ? false : true,
       editPage:
          !instance.settings.editForm || instance.settings.editForm == "none"
@@ -81,7 +119,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
    editorComponent(App, mode) {
       let idBase = "ABViewFormConnectEditorComponent";
       let ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       let baseComp = this.component(App);
@@ -130,7 +168,6 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
          _logic,
          ObjectDefaults
       );
-      var L = App.Label;
 
       let idBase = "ABViewFormConnectPropertyEditor";
       this.App = App;
@@ -199,11 +236,8 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
          {
             view: "fieldset",
             name: "addNewSettings",
-            label: L(
-               "ab.component.connect.addNewSettings",
-               "*Add New Popup Settings:"
-            ),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Add New Popup Settings:"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -211,23 +245,17 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
                   {
                      view: "text",
                      name: "popupWidth",
-                     placeholder: L(
-                        "ab.component.connect.popupWidthPlaceholder",
-                        "*Set popup width"
-                     ),
-                     label: L("ab.component.page.popupWidth", "*Width:"),
-                     labelWidth: App.config.labelWidthLarge,
+                     placeholder: L("Set popup width"),
+                     label: L("Width:"),
+                     labelWidth: this.AB.UISettings.config().labelWidthLarge,
                      validate: webix.rules.isNumber,
                   },
                   {
                      view: "text",
                      name: "popupHeight",
-                     placeholder: L(
-                        "ab.component.connect.popupHeightPlaceholder",
-                        "*Set popup height"
-                     ),
-                     label: L("ab.component.page.popupHeight", "*Height:"),
-                     labelWidth: App.config.labelWidthLarge,
+                     placeholder: L("Set popup height"),
+                     label: L("Height:"),
+                     labelWidth: this.AB.UISettings.config().labelWidthLarge,
                      validate: webix.rules.isNumber,
                   },
                ],
@@ -236,11 +264,8 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
          {
             view: "fieldset",
             name: "advancedOption",
-            label: L(
-               "ab.component.connect.advancedOptions",
-               "*Advanced Options:"
-            ),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Advanced Options:"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -249,26 +274,33 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
                      cols: [
                         {
                            view: "label",
-                           label: L(
-                              "ab.component.connect.filterData",
-                              "*Filter Options:"
-                           ),
-                           width: App.config.labelWidthLarge,
+                           label: L("Filter Options:"),
+                           width: this.AB.UISettings.config().labelWidthLarge,
                         },
                         {
                            view: "button",
                            name: "buttonFilter",
                            css: "webix_primary",
-                           label: L(
-                              "ab.component.connect.settings",
-                              "*Settings"
-                           ),
+                           label: L("Settings"),
                            icon: "fa fa-gear",
                            type: "icon",
                            badge: 0,
                            click: function () {
                               _logic.showFilterPopup(this.$view);
                            },
+                        },
+                     ],
+                  },
+                  {
+                     rows: [
+                        {
+                           view: "label",
+                           label: L("Filter by Connected Field Value:"),
+                        },
+                        {
+                           view: "combo",
+                           name: "filterConnectedValue",
+                           options: [], // we will add these in propertyEditorPopulate
                         },
                      ],
                   },
@@ -281,9 +313,92 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
    static propertyEditorPopulate(App, ids, view) {
       super.propertyEditorPopulate(App, ids, view);
 
+      // Default set of options for filter connected combo
+      let filterConnectedOptions = [{ id: "", value: "" }];
+
+      // get the definitions for the connected field
+      let fieldDefs = view.AB.definitionForID(view.settings.fieldId);
+
+      // get the definition for the object that the field is related to
+      let objectDefs = view.AB.definitionForID(fieldDefs.settings.linkObject);
+
+      // we need these definitions later as we check to find out which field
+      // we are filtering by so push them into an array for later
+      let fieldsDefs = [];
+      objectDefs.fieldIDs.forEach((fld) => {
+         fieldsDefs.push(view.AB.definitionForID(fld));
+      });
+
+      // find out what connected objects this field has
+      let connectedObjs = view.application.connectedObjects(
+         fieldDefs.settings.linkObject
+      );
+
+      // loop through the form's elements (need to ensure that just looking at parent is okay in all cases)
+      view.parent.views().forEach((element) => {
+         // identify if element is a connected field
+         if (element.key == "connect") {
+            // we need to get the fields defs to find out what it is connected to
+            let formElementsDefs = view.AB.definitionForID(
+               element.settings.fieldId
+            );
+
+            // loop through the connected objects discovered above
+            connectedObjs.forEach((connObj) => {
+               // see if the connected object matches the connected object of the form element
+               if (connObj.id == formElementsDefs.settings.linkObject) {
+                  // get the ui id of this component that matches the link Object
+                  let fieldToCheck;
+                  fieldsDefs.forEach((fdefs) => {
+                     // if the field has a custom foreign key we need to store it
+                     // so selectivity later can know what value to get, otherwise
+                     // we just get the uuid of the record
+                     if (
+                        fdefs.settings.isCustomFK &&
+                        fdefs.settings.indexField != "" &&
+                        fdefs.settings.linkObject &&
+                        fdefs.settings.linkType == "one" &&
+                        fdefs.settings.linkObject ==
+                           formElementsDefs.settings.linkObject
+                     ) {
+                        fieldToCheck = fdefs.id;
+                        let customFK = view.application.definitionForID(
+                           fdefs.settings.indexField
+                        );
+
+                        // if the index definitions were found
+                        if (customFK) {
+                           fieldToCheck = `${fdefs.id}:${customFK.columnName}`;
+                        }
+                     } else if (
+                        fdefs.settings.linkObject &&
+                        fdefs.settings.linkType == "one" &&
+                        fdefs.settings.linkObject ==
+                           formElementsDefs.settings.linkObject
+                     ) {
+                        fieldToCheck = `${fdefs.id}:uuid`;
+                     }
+                  });
+
+                  // only add optinos that have a fieldToCheck
+                  if (fieldToCheck) {
+                     // get the component we are referencing so we can display its label
+                     let formComponent = view.parent.viewComponents[element.id]; // need to ensure that just looking at parent is okay in all cases
+                     filterConnectedOptions.push({
+                        id: `${formComponent.ui.name}:${fieldToCheck}`, // store the columnName name because the ui id changes on each load
+                        value: formComponent.ui.label, // should be the translated field label
+                     });
+                  }
+               }
+            });
+         }
+      });
+
       // Set the options of the possible edit forms
       this.addPageProperty.setSettings(view, view.settings);
       this.editPageProperty.setSettings(view, view.settings);
+      $$(ids.filterConnectedValue).define("options", filterConnectedOptions);
+      $$(ids.filterConnectedValue).setValue(view.settings.filterConnectedValue);
 
       $$(ids.popupWidth).setValue(
          view.settings.popupWidth ||
@@ -317,6 +432,9 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
 
       view.settings.popupWidth = $$(ids.popupWidth).getValue();
       view.settings.popupHeight = $$(ids.popupHeight).getValue();
+      view.settings.filterConnectedValue = $$(
+         ids.filterConnectedValue
+      ).getValue();
       view.settings.objectWorkspace = {
          filterConditions: FilterComponent.getValue(),
       };
@@ -349,7 +467,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
    static initPopupEditors(App, ids, _logic) {
       var idBase = "ABViewFormConnectPropertyEditor";
 
-      FilterComponent = new RowFilter(App, idBase + "_filter");
+      FilterComponent = new RowFilter(App, `${idBase}_filter`);
       FilterComponent.init({
          // when we make a change in the popups we want to make sure we save the new workspace to the properties to do so just fire an onChange event
          onChange: _logic.onFilterChange,
@@ -412,9 +530,9 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
          "ABViewFormConnect_" + this.id + "_f_"
       );
       var ids = {
-         component: App.unique(idBase + "_component"),
-         popup: App.unique(idBase + "_popup_add_new"),
-         editpopup: App.unique(idBase + "_popup_edit_form_popup_add_new"),
+         component: App.unique(`${idBase}_component`),
+         popup: App.unique(`${idBase}_popup_add_new`),
+         editpopup: App.unique(`${idBase}_popup_edit_form_popup_add_new`),
       };
 
       var settings = {};
@@ -451,12 +569,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
       let addPageComponent = this.addPageTool.component(App, idBase);
       let editPageComponent;
 
-      let template = (
-         '<div class="customField">' +
-         templateLabel +
-         "#plusButton##template#" +
-         "</div>"
-      )
+      let template = `<div class="customField">${templateLabel}#plusButton##template#</div>`
          .replace(/#width#/g, settings.labelWidth)
          .replace(/#label#/g, field.label)
          .replace(/#plusButton#/g, addPageComponent.ui)
@@ -615,6 +728,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
          labelWidth: 0,
          paddingY: 0,
          paddingX: 0,
+         label: field.label,
          css: "ab-custom-field",
          name: field.columnName,
          body: {

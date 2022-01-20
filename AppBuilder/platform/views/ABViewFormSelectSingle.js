@@ -2,7 +2,11 @@ const ABViewFormSelectSingleCore = require("../../core/views/ABViewFormSelectSin
 
 const ABViewFormSelectSinglePropertyComponentDefaults = ABViewFormSelectSingleCore.defaultValues();
 
-module.exports = class ABViewFormSelectSingle extends ABViewFormSelectSingleCore {
+let L = (...params) => AB.Multilingual.label(...params);
+
+module.exports = class ABViewFormSelectSingle extends (
+   ABViewFormSelectSingleCore
+) {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
    // }
@@ -22,8 +26,8 @@ module.exports = class ABViewFormSelectSingle extends ABViewFormSelectSingleCore
    editorComponent(App, mode) {
       var idBase = "ABViewFormSelectSingleEditorComponent";
       var ids = {
-         component: App.unique(idBase + "_component"),
-         options: App.unique(idBase + "_option"),
+         component: App.unique(`${idBase}_component`),
+         options: App.unique(`${idBase}_option`),
       };
 
       var selectlist = this.component(App).ui;
@@ -55,7 +59,6 @@ module.exports = class ABViewFormSelectSingle extends ABViewFormSelectSingleCore
          _logic,
          ObjectDefaults
       );
-      var L = App.Label;
 
       // in addition to the common .label  values, we
       // ask for:
@@ -63,18 +66,15 @@ module.exports = class ABViewFormSelectSingle extends ABViewFormSelectSingleCore
          {
             name: "type",
             view: "richselect",
-            label: L("ab.component.selectsingle.type", "*Type"),
+            label: L("Type"),
             options: [
                {
                   id: "richselect",
-                  value: L(
-                     "ab.component.selectsingle.selectlist",
-                     "*Select list"
-                  ),
+                  value: L("Select list"),
                },
                {
                   id: "radio",
-                  value: L("ab.component.selectsingle.radio", "*Radio"),
+                  value: L("Radio"),
                },
             ],
          },
@@ -107,10 +107,10 @@ module.exports = class ABViewFormSelectSingle extends ABViewFormSelectSingleCore
       var field = this.field();
 
       var idBase = this.parentFormUniqueID(
-         "ABViewFormSelectSingle_" + this.id + "_f_"
+         `ABViewFormSelectSingle_${this.id}_f_`
       );
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       component.ui.view =
@@ -136,7 +136,7 @@ module.exports = class ABViewFormSelectSingle extends ABViewFormSelectSingleCore
       if (component.ui.view == "radio" && component.ui.options.length < 1) {
          component.ui.options.push({
             id: "temp",
-            value: "Option",
+            value: L("Option"),
          });
       }
 

@@ -1,5 +1,7 @@
 const ObjectQueryBuilder = require("./ABViewQueryBuilderObjectFieldConditions");
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 module.exports = class ABViewGridFilterRule {
    /**
     * @param {object} App
@@ -21,24 +23,11 @@ module.exports = class ABViewGridFilterRule {
       this.App = App;
       this.idBase = idBase;
 
-      var L = App.Label;
-
-      var labels = (this.labels = {
-         common: App.labels,
-         component: {
-            ruleName: L("ab.component.grid.ruleNamePlaceholder", "*Rule Name"),
-            ruleNamePlaceholder: L(
-               "ab.component.grid.ruleNamePlaceholder",
-               "*Name"
-            ),
-         },
-      });
-
       // this is different because multiple instances of this View can be displayed
       // at the same time.  So make each instance Unique:
       var uniqueInstanceID = webix.uid();
       var myUnique = (key) => {
-         return idBase + "_" + key + "_" + uniqueInstanceID;
+         return `${idBase}_${key}_${uniqueInstanceID}`;
       };
 
       // internal list of Webix IDs to reference our UI components.
@@ -102,8 +91,8 @@ module.exports = class ABViewGridFilterRule {
             },
             {
                view: "text",
-               label: this.labels.component.ruleName,
-               placeholder: this.labels.component.ruleNamePlaceholder,
+               label: L("Rule Name"),
+               placeholder: L("Name"),
                id: this.ids.ruleName,
             },
 

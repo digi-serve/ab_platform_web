@@ -1,8 +1,6 @@
 import ABViewPropertyAddPage from "./ABViewPropertyAddPage";
 
-let L = (key, altText) => {
-   return AD.lang.label.getLabel(key) || altText;
-};
+let L = (...params) => AB.Multilingual.label(...params);
 
 export default class ABViewPropertyEditPage extends ABViewPropertyAddPage {
    /**
@@ -19,20 +17,18 @@ export default class ABViewPropertyEditPage extends ABViewPropertyAddPage {
 
    static propertyComponent(App, idBase) {
       let ids = {
-         formEdit: idBase + "_editForm",
+         formEdit: `${idBase}_editForm`,
       };
 
       let ui = {
          id: ids.formEdit,
          name: "editForm",
          view: "richselect",
-         label: L("ab.view.property.editForm", "*Edit Form"),
-         labelWidth: App.config.labelWidthXLarge,
+         label: L("Edit Form"),
+         labelWidth: this.AB.UISettings.config().labelWidthXLarge,
          on: {
             onChange: (newVal, oldVal) => {
-               if (
-                  newVal == L("ab.component.connect.no", "*No add new option")
-               ) {
+               if (newVal == L("No add new option")) {
                   $$(ids.formEdit).setValue("");
                }
 
@@ -61,7 +57,8 @@ export default class ABViewPropertyEditPage extends ABViewPropertyAddPage {
             let editForms = [
                {
                   id: "none",
-                  value: L("ab.component.connect.no", "*No add new option"),
+
+                  value: L("No add new option"),
                },
             ];
 
@@ -127,7 +124,7 @@ export default class ABViewPropertyEditPage extends ABViewPropertyAddPage {
    }
 
    component(App, idBase) {
-      idBase = idBase + "_popup_edit_form";
+      idBase = `${idBase}_popup_edit_form`;
 
       let comp = super.component(App, idBase);
 

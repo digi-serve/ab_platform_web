@@ -9,6 +9,8 @@
 //
 const UpdateConnected = require("./ABViewRuleActionFormRecordRuleUpdateConnected");
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 module.exports = class ABViewRuleActionFormRecordRuleInsertConnected extends (
    UpdateConnected
 ) {
@@ -20,13 +22,9 @@ module.exports = class ABViewRuleActionFormRecordRuleInsertConnected extends (
     */
    constructor(App, idBase, currentForm) {
       super(App, idBase, currentForm);
-      var L = App.Label;
 
       this.key = "ABViewRuleActionFormRecordRuleInsertConnected";
-      this.label = L(
-         "ab.component.ruleaction.insertConnectedObject",
-         "*Insert Connected Object"
-      );
+      this.label = L("Insert Connected Object");
    }
 
    /**

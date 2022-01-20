@@ -6,7 +6,7 @@ var L = null;
 
 export default class RowUpdater extends ClassUI {
    constructor(idBase, AB) {
-      super({
+      super(idBase, {
          form: `${idBase}_rowUpdaterForm`,
          addNew: `${idBase}_rowUpdaterAddNew`,
          field: `${idBase}_rowUpdaterField`,

@@ -12,7 +12,7 @@ var configDefaults = {
    "appbuilder-tenant": null,
    // tenant {string} the tenant uuid for this AppBuilder instance.
 
-   "appbuilder-tenant-prefix": null
+   "appbuilder-tenant-prefix": null,
    // TESTING! Remove this
 };
 

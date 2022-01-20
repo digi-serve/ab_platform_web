@@ -1,8 +1,6 @@
 import ABViewProperty from "./ABViewProperty";
 
-var L = (key, altText) => {
-   return AD.lang.label.getLabel(key) || altText;
-};
+let L = (...params) => AB.Multilingual.label(...params);
 
 export default class ABViewPropertyLinkPage extends ABViewProperty {
    constructor() {
@@ -26,6 +24,7 @@ export default class ABViewPropertyLinkPage extends ABViewProperty {
 
    static propertyComponent(App, idBase) {
       let base = super.propertyComponent();
+      const uiConfig = this.AB.Config.uiSettings();
 
       let ids = {
          detailsPage: idBase + "_linkPage_detailsPage",
@@ -41,8 +40,8 @@ export default class ABViewPropertyLinkPage extends ABViewProperty {
 
       let ui = {
          view: "fieldset",
-         label: L("ab.component.label.linkedPages", "*Linked Pages:"),
-         labelWidth: App.config.labelWidthLarge,
+         label: L("Linked Pages:"),
+         labelWidth: uiConfig.labelWidthLarge,
          body: {
             type: "clean",
             padding: 10,
@@ -51,15 +50,15 @@ export default class ABViewPropertyLinkPage extends ABViewProperty {
                   id: ids.detailsPage,
                   view: "select",
                   name: "detailsPage",
-                  label: L("ab.component.label.detailsPage", "*Details Page:"),
-                  labelWidth: App.config.labelWidthLarge,
+                  label: L("Details Page:"),
+                  labelWidth: uiConfig.labelWidthLarge,
                },
                {
                   id: ids.editPage,
                   view: "select",
                   name: "editPage",
-                  label: L("ab.component.label.editForm", "*Edit Form:"),
-                  labelWidth: App.config.labelWidthLarge,
+                  label: L("Edit Form:"),
+                  labelWidth: uiConfig.labelWidthLarge,
                },
             ],
          },
@@ -122,7 +121,7 @@ export default class ABViewPropertyLinkPage extends ABViewProperty {
 
             pagesHasDetail.unshift({
                id: "",
-               value: L("ab.component.label.noLinkedView", "*No linked view"),
+               value: L("No linked view"),
             });
             $$(ids.detailsPage).define("options", pagesHasDetail);
             $$(ids.detailsPage).refresh();
@@ -162,7 +161,7 @@ export default class ABViewPropertyLinkPage extends ABViewProperty {
 
             pagesHasForm.unshift({
                id: "",
-               value: L("ab.component.label.noLinkedForm", "*No linked form"),
+               value: L("No linked form"),
             });
             $$(ids.editPage).define("options", pagesHasForm);
             $$(ids.editPage).refresh();

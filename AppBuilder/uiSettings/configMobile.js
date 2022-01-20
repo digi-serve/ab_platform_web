@@ -49,5 +49,5 @@ export default {
    labelWidthCheckbox: 0,
 
    // hide elements for mobile
-   hideMobile: true
+   hideMobile: true,
 };

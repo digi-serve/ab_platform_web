@@ -16,20 +16,12 @@ module.exports = class AB_Work_Object_Workspace_PopupSummaryColumns extends ABCo
       idBase = idBase || "ab_work_object_workspace_popupSummaryColumns";
 
       super(App, idBase);
-      var L = this.Label;
-
-      var labels = {
-         common: App.labels,
-         component: {
-            showAll: L("ab.summary_columns.showAll", "*Show All"),
-            hideAll: L("ab.summary_columns.hideAll", "*Hide All"),
-         },
-      };
+      var L = this.Label();
 
       // internal list of Webix IDs to reference our UI components
       var ids = {
-         component: this.unique(idBase + "_popupSummary"),
-         list: this.unique(idBase + "_popupSummary_list"),
+         component: this.unique(`${idBase}_popupSummary`),
+         list: this.unique(`${idBase}_popupSummary_list`),
       };
 
       // Our webix UI definition:
@@ -42,7 +34,7 @@ module.exports = class AB_Work_Object_Workspace_PopupSummaryColumns extends ABCo
                   cols: [
                      {
                         view: "button",
-                        value: labels.component.hideAll,
+                        value: L("Hide All"),
                         on: {
                            onItemClick: function () {
                               _logic.clickHideAll();
@@ -52,7 +44,7 @@ module.exports = class AB_Work_Object_Workspace_PopupSummaryColumns extends ABCo
                      {
                         view: "button",
                         css: "webix_primary",
-                        value: labels.component.showAll,
+                        value: L("Show All"),
                         on: {
                            onItemClick: function () {
                               _logic.clickShowAll();

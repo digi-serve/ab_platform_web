@@ -4,6 +4,8 @@ const ABViewPropertyLinkPage = require("./viewProperties/ABViewPropertyLinkPage"
 
 const ABViewDataviewDefaults = ABViewDataviewCore.defaultValues();
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 module.exports = class ABViewDataview extends ABViewDataviewCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -15,7 +17,6 @@ module.exports = class ABViewDataview extends ABViewDataviewCore {
 
    static propertyEditorDefaultElements(App, ids, _logic, ObjectDefaults) {
       var idBase = "ABViewDataviewPropertyEditor";
-      var L = App.Label;
 
       var commonUI = super.propertyEditorDefaultElements(
          App,
@@ -34,8 +35,8 @@ module.exports = class ABViewDataview extends ABViewDataviewCore {
             view: "counter",
             name: "xCount",
             min: 1, // we cannot have 0 columns per row so lets not accept it
-            label: L("ab.components.dataview.xCount", "*Items in a row"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Items in a row"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             step: 1,
          },
          this.linkPageComponent.ui,
@@ -94,43 +95,46 @@ module.exports = class ABViewDataview extends ABViewDataviewCore {
 
       var idBase = "ABViewDataview_" + this.id;
       var ids = {
-         scrollview: App.unique(idBase + "_scrollview"),
-         component: App.unique(idBase + "_component"),
-         dataFlexView: App.unique(idBase + "_dataFlexView"),
+         scrollview: App.unique(`${idBase}_scrollview`),
+         component: App.unique(`${idBase}_component`),
+         dataFlexView: App.unique(`${idBase}_dataFlexView`),
       };
 
       let linkPage = this.linkPageHelper.component(App, idBase);
 
       com.ui = {
          id: ids.component,
-         body: {
-            id: ids.scrollview,
-            view: "scrollview",
-            scroll: "y",
-            body: {
-               id: ids.dataFlexView,
-               view: "flexlayout",
-               paddingX: 15,
-               paddingY: 19,
-               type: "space",
-               cols: [],
-            },
-            on: {
-               onAfterScroll: function () {
-                  let pos = this.getScrollState();
+         rows: [
+            {
+               id: ids.scrollview,
+               view: "scrollview",
+               scroll: "y",
+               body: {
+                  id: ids.dataFlexView,
+                  view: "flexlayout",
+                  paddingX: 15,
+                  paddingY: 19,
+                  type: "space",
+                  cols: [],
+               },
+               on: {
+                  onAfterScroll: function () {
+                     let pos = this.getScrollState();
 
-                  com.logic.scroll(pos);
+                     com.logic.scroll(pos);
+                  },
                },
             },
-         },
+         ],
       };
 
       if (this.settings.height) com.ui.height = this.settings.height;
 
       com.init = (options) => {
          var dc = this.datacollection;
-         var dataView = $$(ids.dataFlexView);
          if (!dc) return;
+
+         let dataView = $$(ids.dataFlexView);
 
          // initial the link page helper
          linkPage.init({
@@ -138,6 +142,11 @@ module.exports = class ABViewDataview extends ABViewDataviewCore {
             datacollection: dc,
          });
 
+         // if (dc.datacollectionLink && dc.fieldLink) {
+         //    dc.bind(dataView, dc.datacollectionLink, dc.fieldLink);
+         // } else {
+         //    dc.bind(dataView);
+         // }
          // track all flexlayout component IDs on the data collectino so we can notify them of changes
          dc.attachFlexlayout(dataView);
          dc.on("initializingData", () => {
@@ -163,8 +172,6 @@ module.exports = class ABViewDataview extends ABViewDataviewCore {
             com.renderData();
          });
 
-         // com.logic.busy();
-         //
          // this.eventClear();
          //
          // this.eventAdd({
@@ -243,7 +250,7 @@ module.exports = class ABViewDataview extends ABViewDataviewCore {
           * 					y: {integer}
           * 				}
           */
-         scroll: (pos) => {
+         scroll: async (pos) => {
             let loadWhen = 40;
 
             let y = pos.y;
@@ -263,9 +270,9 @@ module.exports = class ABViewDataview extends ABViewDataviewCore {
                // loading cursor
                com.logic.busy();
 
-               dc.loadData($$(ids.dataFlexView).getChildViews().length || 0)
-                  .catch(() => {})
-                  .then(() => {});
+               await dc.loadData(
+                  $$(ids.dataFlexView).getChildViews().length || 0
+               );
 
                this.loadMoreTimer = setTimeout(() => {
                   this.loadMoreTimer = null;
@@ -295,7 +302,7 @@ module.exports = class ABViewDataview extends ABViewDataviewCore {
       };
 
       com.emptyView = () => {
-         var flexlayout = {
+         let flexlayout = {
             id: ids.dataFlexView,
             view: "flexlayout",
             type: "clean",
@@ -307,8 +314,8 @@ module.exports = class ABViewDataview extends ABViewDataviewCore {
       };
 
       com.renderData = () => {
-         var editPage = this.settings.editPage;
-         var detailsPage = this.settings.detailsPage;
+         let editPage = this.settings.editPage;
+         let detailsPage = this.settings.detailsPage;
          var editTab = this.settings.editTab;
          var detailsTab = this.settings.detailsTab;
          var accessLevel = this.parent.getUserAccess();
@@ -320,14 +327,14 @@ module.exports = class ABViewDataview extends ABViewDataviewCore {
             return;
          }
 
-         var Layout = $$(ids.dataFlexView) || $$(ids.component);
+         let Layout = $$(ids.dataFlexView) || $$(ids.component);
 
          if (!Layout || isNaN(Layout.$width)) {
             com.logic.ready();
             return;
          }
 
-         var recordWidth = Math.floor(
+         let recordWidth = Math.floor(
             (Layout.$width - 20 - parseInt(this.settings.xCount) * 20) /
                parseInt(this.settings.xCount)
          );
@@ -350,11 +357,7 @@ module.exports = class ABViewDataview extends ABViewDataviewCore {
          let stopPos = rows.length;
 
          if (this._startPos == 0) {
-            if (rows.length < 20) {
-               stopPos = rows.length;
-            } else {
-               stopPos = 20;
-            }
+            stopPos = rows.length;
          } else if (rows.length - this._startPos > 20) {
             stopPos = this._startPos + 20;
          }
@@ -403,9 +406,9 @@ module.exports = class ABViewDataview extends ABViewDataviewCore {
                type: "space",
                cols: records,
             };
-            webix.ui(flexlayout, $$(ids.component));
+            webix.ui(flexlayout, $$(ids.scrollview), $$(ids.dataFlexView));
 
-            for (var i = this._startPos; i < stopPos; i++) {
+            for (let i = this._startPos; i < stopPos; i++) {
                let detailCom = App.AB.cloneDeep(
                   super.component(App, rows[i].id)
                );

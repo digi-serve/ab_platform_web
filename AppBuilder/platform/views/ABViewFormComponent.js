@@ -1,7 +1,8 @@
 const ABViewFormComponentCore = require("../../core/views/ABViewFormComponentCore");
 
-const ABViewFormFieldPropertyComponentDefaults =
-   ABViewFormComponentCore.defaultValues();
+const ABViewFormFieldPropertyComponentDefaults = ABViewFormComponentCore.defaultValues();
+
+let L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABViewFormComponent extends ABViewFormComponentCore {
    // constructor(values, application, parent, defaultValues) {
@@ -15,26 +16,25 @@ module.exports = class ABViewFormComponent extends ABViewFormComponentCore {
          _logic,
          ObjectDefaults
       );
-      var L = App.Label;
 
       return commonUI.concat([
          {
             name: "fieldLabel",
             view: "text",
             disabled: true,
-            label: L("ab.component.form.field.label", "*Field"),
+            label: L("Field"),
          },
          {
             name: "required",
             view: "checkbox",
-            labelWidth: App.config.labelWidthCheckbox,
-            labelRight: L("ab.common.required", "*Required"),
+            labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
+            labelRight: L("Required"),
          },
          {
             name: "disable",
             view: "checkbox",
-            labelWidth: App.config.labelWidthCheckbox,
-            labelRight: L("ab.common.disable", "*Disable"),
+            labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
+            labelRight: L("Disable"),
          },
       ]);
    }
@@ -108,7 +108,10 @@ module.exports = class ABViewFormComponent extends ABViewFormComponentCore {
             _ui.label = field.label;
          }
 
-         if (field.settings.required || this.settings.required) {
+         if (
+            field.settings.required == true ||
+            this.settings.required == true
+         ) {
             _ui.required = 1;
          }
 

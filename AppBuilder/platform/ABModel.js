@@ -301,17 +301,19 @@ module.exports = class ABModel extends ABModelCore {
                if (err && err.code) {
                   switch (err.code) {
                      case "ER_PARSE_ERROR":
-                        this.AB.error(
-                           "AppBuilder:ABModel:findAll(): Parse Error with provided condition",
-                           { error: err, condition: cond }
-                        );
+                        this.AB.notify.developer(err, {
+                           message:
+                              "AppBuilder:ABModel:findAll(): Parse Error with provided condition",
+                           condition: cond,
+                        });
                         break;
 
                      default:
-                        this.AB.error(
-                           "AppBuilder:ABModel:findAll(): Unknown Error with provided condition",
-                           { error: err, condition: cond }
-                        );
+                        this.AB.notify.developer(err, {
+                           message:
+                              "AppBuilder:ABModel:findAll(): Unknown Error with provided condition",
+                           condition: cond,
+                        });
                         break;
                   }
                }
@@ -499,7 +501,7 @@ module.exports = class ABModel extends ABModelCore {
                url: this.object.urlRestItem(id),
                params: values,
             },
-            { key: jobID, context: {} }
+            { key: jobID, context: { resolve, reject } }
          )
             // .then((data) => {
             //    this.normalizeData(data);

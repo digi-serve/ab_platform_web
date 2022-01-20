@@ -5,7 +5,11 @@
 //
 const ABViewRuleAction = require("../ABViewRuleAction");
 
-module.exports = class ABViewRuleActionFormSubmitRuleConfirmMessage extends ABViewRuleAction {
+let L = (...params) => AB.Multilingual.label(...params);
+
+module.exports = class ABViewRuleActionFormSubmitRuleConfirmMessage extends (
+   ABViewRuleAction
+) {
    /**
     * @param {object} App
     *      The shared App object that is created in OP.Component
@@ -14,14 +18,10 @@ module.exports = class ABViewRuleActionFormSubmitRuleConfirmMessage extends ABVi
     */
    constructor(App, idBase) {
       super();
-      var L = App.Label;
 
       this.App = App;
       this.key = "ABViewRuleActionFormSubmitRuleConfirmMessage";
-      this.label = L(
-         "ab.component.ruleaction.abviewruleActionFormSubmitRuleConfirmMessage",
-         "*Show a confirmation message"
-      );
+      this.label = L("Show a confirmation message");
 
       this.currentObject = null; // the object this Action is tied to.
 
@@ -29,16 +29,6 @@ module.exports = class ABViewRuleActionFormSubmitRuleConfirmMessage extends ABVi
       // [
       //		{ fieldId: xxx, value:yyy, type:key['string', 'number', 'date',...]}
       // ]
-
-      // Labels for UI components
-      var labels = (this.labels = {
-         // common: App.labels,
-         component: {
-            message: L("ab.ruleAction.confirmMessage.message", "*Message"),
-            // set: L("ab.component.form.set", "*Set"),
-            // to: L("ab.component.form.to", "*To"),
-         },
-      });
    }
 
    // conditionFields() {
@@ -74,7 +64,7 @@ module.exports = class ABViewRuleActionFormSubmitRuleConfirmMessage extends ABVi
    //
    valueDisplayComponent(idBase) {
       var ids = {
-         message: idBase + "_message",
+         message: `${idBase}_message`,
       };
 
       this._ui = {
@@ -82,7 +72,7 @@ module.exports = class ABViewRuleActionFormSubmitRuleConfirmMessage extends ABVi
             id: ids.message,
             view: "textarea",
             // label: this.labels.component.message,
-            // labelWidth: this.App.config.labelWidthLarge,
+            // labelWidth: this.AB.UISettings.config().labelWidthLarge,
             height: 130,
          },
 

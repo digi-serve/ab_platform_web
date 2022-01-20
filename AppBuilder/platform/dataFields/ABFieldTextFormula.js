@@ -1,6 +1,8 @@
 var ABFieldTextFormulaCore = require("../../core/dataFields/ABFieldTextFormulaCore");
 var ABFieldComponent = require("./ABFieldComponent");
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 /**
  * ABFieldTextFormulaComponent
  *
@@ -22,20 +24,15 @@ var ABFieldTextFormulaComponent = new ABFieldComponent({
       };
       ids = field.idsUnique(ids, App);
 
-      var L = App.Label;
-
       return [
          {
             id: ids.textFormula,
             view: "textarea",
-            label: L("ab.dataField.textformula.formula", "*Text Formula"),
+            label: L("Text Formula"),
             name: "textFormula",
             editor: "text",
-            labelWidth: App.config.labelWidthLarge,
-            placeholder: L(
-               "ab.dataField.textformula.placeholder",
-               "*{Firstname} {Lastname}"
-            ),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
+            placeholder: L("{Firstname} {Lastname}"),
             on: {
                onFocus: (/* current_view, prev_view */) => {
                   $$(ids.formulaSuggest).show();
@@ -82,7 +79,7 @@ var ABFieldTextFormulaComponent = new ABFieldComponent({
          // 	view: "checkbox",
          // 	name:'supportMultilingual',
          // 	labelRight: L('ab.dataField.string.supportMultilingual', '*Support multilingual'),
-         // 	labelWidth: App.config.labelWidthCheckbox,
+         // 	labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
          // 	value: true
          // }
       ];

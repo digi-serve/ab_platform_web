@@ -5,6 +5,8 @@ const ABWorkspaceViewKanban = require("../workspaceViews/ABObjectWorkspaceViewKa
 
 const ABViewPropertyLinkPage = require("./viewProperties/ABViewPropertyLinkPage");
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 module.exports = class ABViewKanban extends ABViewKanbanCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -54,7 +56,6 @@ module.exports = class ABViewKanban extends ABViewKanbanCore {
          ObjectDefaults
       );
       let idBase = "ABViewKanbanPropertyEditor";
-      var L = App.Label;
 
       if (this._kanbanViewComponent == null)
          this._kanbanViewComponent = ABWorkspaceViewKanban.component(
@@ -65,7 +66,7 @@ module.exports = class ABViewKanban extends ABViewKanbanCore {
       if (this._linkPageComponent == null)
          this._linkPageComponent = ABViewPropertyLinkPage.propertyComponent(
             App,
-            idBase + "_gridlinkpage"
+            `${idBase}_gridlinkpage`
          );
 
       // _logic functions
@@ -80,8 +81,8 @@ module.exports = class ABViewKanban extends ABViewKanbanCore {
       return commonUI.concat([
          {
             view: "fieldset",
-            label: L("ab.component.label.dataSource", "*Kanban Data:"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Kanban Data:"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -89,8 +90,8 @@ module.exports = class ABViewKanban extends ABViewKanbanCore {
                   {
                      name: "datacollection",
                      view: "select",
-                     label: L("ab.components.list.dataSource", "*Data Source"),
-                     labelWidth: App.config.labelWidthXLarge,
+                     label: L("Data Source"),
+                     labelWidth: this.AB.UISettings.config().labelWidthXLarge,
                      value: null,
                      on: {
                         onChange: _logic.selectSource,
@@ -99,40 +100,25 @@ module.exports = class ABViewKanban extends ABViewKanbanCore {
                   {
                      name: "vGroup",
                      view: "select",
-                     label: L(
-                        "ab.add_view.kanban.vGroup",
-                        "*Vertical Grouping"
-                     ),
-                     placeholder: L(
-                        "ab.add_view.kanban.grouping_placeholder",
-                        "*Select a field"
-                     ),
-                     labelWidth: App.config.labelWidthXLarge,
+                     label: L("Vertical Grouping"),
+                     placeholder: L("Select a field"),
+                     labelWidth: this.AB.UISettings.config().labelWidthXLarge,
                      options: [],
                   },
                   {
                      name: "hGroup",
                      view: "select",
-                     label: L(
-                        "ab.add_view.kanban.hGroup",
-                        "*Horizontal Grouping"
-                     ),
-                     placeholder: L(
-                        "ab.add_view.kanban.grouping_placeholder",
-                        "*Select a field"
-                     ),
-                     labelWidth: App.config.labelWidthXLarge,
+                     label: L("Horizontal Grouping"),
+                     placeholder: L("Select a field"),
+                     labelWidth: this.AB.UISettings.config().labelWidthXLarge,
                      options: [],
                   },
                   {
                      name: "owner",
                      view: "select",
-                     label: L("ab.add_view.kanban.owner", "*Card Owner"),
-                     placeholder: L(
-                        "ab.add_view.kanban.owner_placeholder",
-                        "*Select a user field"
-                     ),
-                     labelWidth: App.config.labelWidthXLarge,
+                     label: L("Card Owner"),
+                     placeholder: L("Select a user field"),
+                     labelWidth: this.AB.UISettings.config().labelWidthXLarge,
                      options: [],
                   },
                ],
@@ -151,7 +137,7 @@ module.exports = class ABViewKanban extends ABViewKanbanCore {
     * @param {string} dvId - id of ABDatacollection
     */
    static propertyUpdateFieldOptions(ids, view, dvId) {
-      let datacollection = view.AB.datacollections((dc) => dc.id == dvId)[0];
+      let datacollection = view.AB.datacollectionByID(dvId);
       let object = datacollection ? datacollection.datasource : null;
 
       // Refresh options of fields by call ABObjectWorkspaceViewKanban's function
@@ -211,9 +197,8 @@ module.exports = class ABViewKanban extends ABViewKanbanCore {
 
    component(App, idBase) {
       let baseCom = super.component(App);
-      var L = App.Label;
 
-      idBase = idBase || "ABViewKanban_" + this.id;
+      idBase = idBase || `ABViewKanban_${this.id}`;
 
       // let ids = {
       // 	component: App.unique(idBase + '_component')
@@ -226,7 +211,7 @@ module.exports = class ABViewKanban extends ABViewKanbanCore {
       let Kanban = new ABWorkspaceKanban(App, idBase);
       let LinkPage = this.linkPageHelper.component(
          App,
-         idBase + "_kanbanlinkpage"
+         `${idBase}_kanbanlinkpage`
       );
       let datacollection = this.datacollection;
 
@@ -236,7 +221,7 @@ module.exports = class ABViewKanban extends ABViewKanbanCore {
          rows: [
             {
                view: "label",
-               label: L("key.viewkanban.select", "*Select an object to load."),
+               label: L("Select an object to load."),
                inputWidth: 200,
                align: "center",
             },
@@ -262,21 +247,19 @@ module.exports = class ABViewKanban extends ABViewKanbanCore {
             if (object) {
                Kanban.objectLoad(object);
 
-               let verticalGrouping = object.fields(
-                  (f) => f.id == this.settings.verticalGroupingField
-               )[0];
+               let verticalGrouping = object.fieldByID(
+                  this.settings.verticalGroupingField
+               );
                if (verticalGrouping)
                   fieldSettings.verticalGrouping = verticalGrouping;
 
-               let horizontalGrouping = object.fields(
-                  (f) => f.id == this.settings.horizontalGroupingField
-               )[0];
+               let horizontalGrouping = object.fieldByID(
+                  this.settings.horizontalGroupingField
+               );
                if (horizontalGrouping)
                   fieldSettings.horizontalGrouping = horizontalGrouping;
 
-               let ownerField = object.fields(
-                  (f) => f.id == this.settings.ownerField
-               )[0];
+               let ownerField = object.fieldByID(this.settings.ownerField);
                if (ownerField) fieldSettings.ownerField = ownerField;
             }
 

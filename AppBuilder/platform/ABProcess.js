@@ -1,5 +1,7 @@
 const ABProcessCore = require("../core/ABProcessCore");
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 module.exports = class ABProcess extends ABProcessCore {
    constructor(attributes, AB) {
       super(attributes, AB);
@@ -110,8 +112,6 @@ module.exports = class ABProcess extends ABProcessCore {
    isValid() {
       var validator = this.AB.Validation.validator();
 
-      var L = this.AB.Label();
-
       // label/name must be unique:
       var isNameUnique =
          this.AB.processes((o) => {
@@ -120,11 +120,7 @@ module.exports = class ABProcess extends ABProcessCore {
       if (!isNameUnique) {
          validator.addError(
             "name",
-            L(
-               "ab.validation.object.name.unique",
-               `Process name must be unique ("{0}" already in use)`,
-               [this.name]
-            )
+            L(`Process name must be unique ("{0}" already in use)`, [this.name])
          );
       }
 

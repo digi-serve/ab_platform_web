@@ -20,9 +20,7 @@ import ABViewProperty from "./ABViewProperty";
 
 const RowFilter = require("../../RowFilter");
 
-// var L = (key, altText) => {
-//    return AD.lang.label.getLabel(key) || altText;
-// };
+let L = (...params) => AB.Multilingual.label(...params);
 
 // var getRule = (object, App, idBase) => {
 //    var FilterRule = new ABViewGridFilterRule();
@@ -564,10 +562,6 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
 
    /** == UI == */
    ui() {
-      var L = (...params) => {
-         return this.AB.Multilingual.label(...params);
-      };
-
       var self = this;
       var ids = this.ids;
 
@@ -921,13 +915,12 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
     */
    component(App, idBase) {
       super.component(App, idBase);
-      var L = App.Label;
 
       this.App = App;
       this.idBase = idBase;
 
-      this.rowFilter = new RowFilter(App, idBase + "_filter", App.AB);
-      this.rowFilterForm = new RowFilter(App, idBase + "_filter_form", App.AB);
+      this.rowFilter = new RowFilter(App, `${idBase}_filter`, App.AB);
+      this.rowFilterForm = new RowFilter(App, `${idBase}_filter_form`, App.AB);
 
       if (this.object) {
          // this.rowFilter.applicationLoad(this.object.application);
@@ -939,14 +932,14 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
 
       let ids = {
          /** UI */
-         filterPanel: App.unique(idBase + "_filterPanel"),
+         filterPanel: App.unique(`${idBase}_filterPanel`),
          globalFilterFormContainer: App.unique(
-            idBase + "_globalFilterFormContainer"
+            `${idBase}_globalFilterFormContainer`
          ),
-         globalFilterForm: App.unique(idBase + "_globalFilterForm"),
-         filterMenutoolbar: App.unique(idBase + "_filterMenuToolbar"),
-         resetFilterButton: App.unique(idBase + "_resetFilterButton"),
-         component: App.unique(idBase + "_filterData_popup"),
+         globalFilterForm: App.unique(`${idBase}_globalFilterForm`),
+         filterMenutoolbar: App.unique(`${idBase}_filterMenuToolbar`),
+         resetFilterButton: App.unique(`${idBase}_resetFilterButton`),
+         component: App.unique(`${idBase}_filterData_popup`),
       };
 
       let instance = this;
@@ -967,7 +960,7 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
                   {
                      id: ids.globalFilterForm,
                      view: "text",
-                     placeholder: "Search or scan a barcode to see results",
+                     placeholder: L("Search or scan a barcode to see results"),
                      on: {
                         onTimedKeyPress: function () {
                            var searchText = this.getValue();
@@ -1001,7 +994,7 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
                      view: "button",
                      css: "webix_primary",
                      id: ids.resetFilterButton,
-                     label: L("ab.object.toolbar.resetFilter", "*Reset Filter"),
+                     label: L("Reset Filter"),
                      icon: "fa fa-ban",
                      type: "icon",
                      badge: 0,

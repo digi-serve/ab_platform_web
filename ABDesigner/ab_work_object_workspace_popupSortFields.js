@@ -14,35 +14,13 @@ module.exports = class AB_Work_Object_Workspace_PopupSortFields extends ABCompon
       idBase = idBase || "ab_work_object_workspace_popupSortFields";
 
       super(App, idBase);
-      var L = this.Label;
-
-      var labels = {
-         common: App.labels,
-         component: {
-            addNewSort: L("ab.sort_fields.addNewSort", "*Add new sort"),
-            selectField: L(
-               "ab.sort_fields.selectField",
-               "*Please select field"
-            ),
-            textAsc: L("ab.sort_fields.textAsc", "*A -> Z"),
-            textDesc: L("ab.sort_fields.textDesc", "*Z -> A"),
-            dateAsc: L("ab.sort_fields.dateAsc", "*Before -> After"),
-            dateDesc: L("ab.sort_fields.dateDesc", "*After -> Before"),
-            numberAsc: L("ab.sort_fields.numberAsc", "*1 -> 9"),
-            numberDesc: L("ab.sort_fields.numberDesc", "*9 -> 1"),
-            booleanAsc: L("ab.sort_fields.booleanAsc", "*Checked -> Unchecked"),
-            booleanDesc: L(
-               "ab.sort_fields.booleanDesc",
-               "*Unchecked -> Checked"
-            ),
-         },
-      };
+      var L = this.Label();
 
       // internal list of Webix IDs to reference our UI components
       var ids = {
-         component: this.unique(idBase + "_popupSort"),
-         list: this.unique(idBase + "_popupSort_list"),
-         form: this.unique(idBase + "_popupSort_form"),
+         component: this.unique(`${idBase}_popupSort`),
+         list: this.unique(`${idBase}_popupSort_list`),
+         form: this.unique(`${idBase}_popupSort_form`),
       };
 
       // Our webix UI definition:
@@ -56,7 +34,7 @@ module.exports = class AB_Work_Object_Workspace_PopupSortFields extends ABCompon
                view: "button",
                type: "form",
                css: "webix_primary",
-               value: labels.component.addNewSort,
+               value: L("Add new sort"),
                on: {
                   onItemClick: function (id, e, node) {
                      _logic.clickAddNewSort();
@@ -137,7 +115,7 @@ module.exports = class AB_Work_Object_Workspace_PopupSortFields extends ABCompon
                         options: [
                            {
                               id: "",
-                              value: labels.component.selectField,
+                              value: L("Please select field"),
                            },
                         ],
                         on: {
@@ -319,26 +297,26 @@ module.exports = class AB_Work_Object_Workspace_PopupSortFields extends ABCompon
             switch (columnConfig.key) {
                case "string":
                   options = [
-                     { id: "asc", value: labels.component.textAsc },
-                     { id: "desc", value: labels.component.textDesc },
+                     { id: "asc", value: L("A -> Z") },
+                     { id: "desc", value: L("Z -> A") },
                   ];
                   break;
                case "date":
                   options = [
-                     { id: "asc", value: labels.component.dateAsc },
-                     { id: "desc", value: labels.component.dateDesc },
+                     { id: "asc", value: L("Before -> After") },
+                     { id: "desc", value: L("After -> Before") },
                   ];
                   break;
                case "number":
                   options = [
-                     { id: "asc", value: labels.component.numberAsc },
-                     { id: "desc", value: labels.component.numberDesc },
+                     { id: "asc", value: L("1 -> 9") },
+                     { id: "desc", value: L("9 -> 1") },
                   ];
                   break;
                default:
                   options = [
-                     { id: "asc", value: labels.component.textAsc },
-                     { id: "desc", value: labels.component.textDesc },
+                     { id: "asc", value: L("A -> Z") },
+                     { id: "desc", value: L("Z -> A") },
                   ];
                   break;
             }
@@ -543,7 +521,7 @@ module.exports = class AB_Work_Object_Workspace_PopupSortFields extends ABCompon
                   var fieldId = cView.getChildViews()[0].getValue();
                   var dir = cView.getChildViews()[1].getValue();
 
-                  var field = CurrentObject.fields((f) => f.id == fieldId)[0];
+                  var field = CurrentObject.fieldByID(fieldId);
                   if (!field) return;
 
                   var by = field.columnName; // column name

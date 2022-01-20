@@ -1,6 +1,8 @@
 var ABFieldEmailCore = require("../../core/dataFields/ABFieldEmailCore");
 var ABFieldComponent = require("./ABFieldComponent");
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 /**
  * ABFieldBooleanComponent
  *
@@ -17,19 +19,14 @@ var ABFieldEmailComponent = new ABFieldComponent({
       };
       ids = field.idsUnique(ids, App);
 
-      var L = App.Label;
-
       return [
          {
             view: "text",
             id: ids.default,
             name: "default",
-            labelWidth: App.config.labelWidthXLarge,
-            label: L("ab.common.default", "*Default"),
-            placeholder: L(
-               "ab.common.defaultPlaceholder",
-               "*Enter default value"
-            ),
+            labelWidth: this.AB.UISettings.config().labelWidthXLarge,
+            label: L("Default"),
+            placeholder: L("Enter default value"),
          },
       ];
    },
@@ -75,7 +72,7 @@ var ABFieldEmailComponent = new ABFieldComponent({
             if (!webix.rules.isEmail(emailDefault)) {
                $$(ids.component).markInvalid(
                   "default",
-                  "*This email is invalid"
+                  L("*This email is invalid")
                );
                return false;
             } else return true;

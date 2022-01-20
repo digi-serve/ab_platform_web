@@ -121,9 +121,7 @@ module.exports = class ABObjectQuery extends ABObjectQueryCore {
       this._fields.forEach((fieldEntry) => {
          // include object name {aliasName}.{columnName}
          // to use it in grid headers & hidden fields
-         fieldEntry.field.columnName = "{aliasName}.{columnName}"
-            .replace("{aliasName}", fieldEntry.alias)
-            .replace("{columnName}", fieldEntry.field.columnName);
+         fieldEntry.field.columnName = `${fieldEntry.alias}.${fieldEntry.field.columnName}`;
       });
    }
 
@@ -200,7 +198,7 @@ module.exports = class ABObjectQuery extends ABObjectQueryCore {
          let object = this.objectByAlias(h.alias);
          if (!object) return;
 
-         let field = object.fields((f) => f.id == h.fieldID)[0];
+         let field = object.fieldByID(h.fieldID);
          if (!field) return;
 
          // NOTE: query v1
@@ -213,9 +211,7 @@ module.exports = class ABObjectQuery extends ABObjectQueryCore {
 
          // include object name {aliasName}.{columnName}
          // to use it in grid headers & hidden fields
-         h.id = "{aliasName}.{columnName}"
-            .replace("{aliasName}", alias)
-            .replace("{columnName}", field.columnName);
+         h.id = `${alias}.${field.columnName}`;
 
          // label
          if (this.settings && this.settings.hidePrefix) {
@@ -226,11 +222,9 @@ module.exports = class ABObjectQuery extends ABObjectQueryCore {
 
          // icon
          if (field.settings && field.settings.showIcon) {
-            h.header =
-               '<span class="webix_icon fa fa-{icon}"></span>'.replace(
-                  "{icon}",
-                  field.fieldIcon()
-               ) + h.header;
+            h.header = `<span class="webix_icon fa fa-${field.fieldIcon()}"></span>${
+               h.header
+            }`;
          }
 
          // If this query supports grouping, then add folder icon to display in grid

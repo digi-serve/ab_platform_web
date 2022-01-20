@@ -2,6 +2,8 @@ const ABViewContainerCore = require("../../core/views/ABViewContainerCore");
 
 const ABPropertyComponentDefaults = ABViewContainerCore.defaultValues();
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 module.exports = class ABViewContainer extends ABViewContainerCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -22,7 +24,7 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
    editorComponent(App, mode) {
       var idBase = "ABViewContainerEditorComponent";
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       var subComponents = {}; // { viewId: viewComponent, ..., viewIdn: viewComponent }
@@ -138,20 +140,16 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
           * @param {obj} common  Webix provided object with common UI tools
           */
          template: (child) => {
-            return (
-               "<div>" +
-               '<i class="fa fa-#icon# webix_icon_btn"></i> ' +
-               " #label#" +
-               '<div class="ab-component-tools">' +
-               (child.settings.removable == false
-                  ? ""
-                  : '<i class="fa fa-trash ab-component-remove"></i>') +
-               '<i class="fa fa-edit ab-component-edit"></i>' +
-               "</div>" +
-               "</div>"
-            )
-               .replace("#icon#", child.icon)
-               .replace("#label#", child.label);
+            return `<div>
+               <i class="fa fa-${child.icon} webix_icon_btn"></i> ${child.label}
+               <div class="ab-component-tools">
+               ${
+                  child.settings.removable == false
+                     ? ""
+                     : '<i class="fa fa-trash ab-component-remove"></i>'
+               }
+               <i class="fa fa-edit ab-component-edit"></i>
+               </div></div>`;
          },
 
          /**
@@ -163,70 +161,59 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
           */
          viewDelete: (e, id, trg) => {
             var deletedView = this.views((v) => v.id == id)[0];
-
-            var L = App.Label;
-
             if (!deletedView) return false;
 
-            App.AB.Dialog.Confirm({
-               title: L(
-                  "ab.interface.component.confirmDeleteTitle",
-                  "*Delete component"
-               ),
-               text: L(
-                  "ab.interface.component.confirmDeleteMessage",
-                  "Do you want to delete <b>{0}</b>?"
-               ).replace("{0}", deletedView.label),
-               callback: (result) => {
-                  if (result) {
-                     // let Dashboard = $$(ids.component);
+            webix.confirm({
+               title: L("Delete component"),
+               text: L("Do you want to delete <b>{0}</b>?", [
+                  deletedView.label,
+               ]),
+               callback: async (result) => {
+                  if (!result) return;
+                  // let Dashboard = $$(ids.component);
 
-                     // // remove UI of this component in template
-                     // var deletedElem = Dashboard.queryView({ name: id });
-                     // if (deletedElem) {
+                  // // remove UI of this component in template
+                  // var deletedElem = Dashboard.queryView({ name: id });
+                  // if (deletedElem) {
 
-                     // 	// store the removed view to signal event in .onChange
-                     // 	this.__deletedView = deletedView;
+                  // 	// store the removed view to signal event in .onChange
+                  // 	this.__deletedView = deletedView;
 
-                     // 	// remove view
-                     // 	var remainingViews = this.views((v) => { return v.id != deletedView.id; })
-                     // 	this._views = remainingViews;
+                  // 	// remove view
+                  // 	var remainingViews = this.views((v) => { return v.id != deletedView.id; })
+                  // 	this._views = remainingViews;
 
-                     // 	// this calls the remove REST to API server
-                     // 	Dashboard.removeView(deletedElem);
-                     // }
+                  // 	// this calls the remove REST to API server
+                  // 	Dashboard.removeView(deletedElem);
+                  // }
 
-                     _logic.busy();
+                  _logic.busy();
 
-                     deletedView
-                        .destroy()
-                        .then(() => {
-                           // signal the current view has been deleted.
-                           deletedView.emit("destroyed", deletedView);
+                  try {
+                     await deletedView.destroy();
 
-                           let Dashboard = $$(ids.component);
+                     // signal the current view has been deleted.
+                     deletedView.emit("destroyed", deletedView);
 
-                           // Update UI
-                           var deletedElem = Dashboard.queryView({ name: id });
-                           if (deletedElem) {
-                              Dashboard.blockEvent();
-                              Dashboard.removeView(deletedElem);
-                              Dashboard.unblockEvent();
-                           }
+                     let Dashboard = $$(ids.component);
 
-                           _logic.showEmptyPlaceholder();
+                     // Update UI
+                     var deletedElem = Dashboard.queryView({ name: id });
+                     if (deletedElem) {
+                        Dashboard.blockEvent();
+                        Dashboard.removeView(deletedElem);
+                        Dashboard.unblockEvent();
+                     }
 
-                           _logic.ready();
-                        })
-                        .catch((err) => {
-                           App.AB.error(
-                              "Error trying to delete selected View:",
-                              { error: err, view: deletedView }
-                           );
-
-                           _logic.ready();
-                        });
+                     _logic.showEmptyPlaceholder();
+                  } catch (err) {
+                     App.AB.notify.developer(err, {
+                        message: "Error trying to delete selected View:",
+                        view: deletedView,
+                     });
                   }
+
+                  _logic.ready();
                },
             });
             e.preventDefault();
@@ -257,65 +244,48 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
             return false;
          },
 
-         onReorder: () => {
-            return new Promise((resolve, reject) => {
-               _logic.busy();
+         onReorder: async () => {
+            _logic.busy();
 
-               var Dashboard = $$(ids.component);
+            var Dashboard = $$(ids.component);
 
-               // ignore in "preview" mode
-               // if (Dashboard == null || Dashboard.config.view != "dashboard") return;
+            // ignore in "preview" mode
+            // if (Dashboard == null || Dashboard.config.view != "dashboard") return;
 
-               var viewState = Dashboard.serialize();
+            var viewState = Dashboard.serialize();
 
-               var allViewUpdates = [];
+            var allViewUpdates = [];
 
-               // save view position state to views
-               this.views().forEach((v) => {
-                  var state = viewState.filter((vs) => vs.name == v.id)[0];
-                  if (state) {
-                     v.position.x = state.x;
-                     v.position.y = state.y;
+            // save view position state to views
+            this.views().forEach((v) => {
+               var state = viewState.filter((vs) => vs.name == v.id)[0];
+               if (state) {
+                  v.position.x = state.x;
+                  v.position.y = state.y;
 
-                     // validate position data
-                     if (v.position.x < 0) v.position.x = 0;
-                     if (v.position.y < 0) v.position.y = 0;
+                  // validate position data
+                  if (v.position.x < 0) v.position.x = 0;
+                  if (v.position.y < 0) v.position.y = 0;
 
-                     allViewUpdates.push(v.save());
-                  }
-               });
+                  allViewUpdates.push(v.save());
+               }
+            });
 
+            try {
                // save template layout
                // this.saveReorder()
-               Promise.all(allViewUpdates)
-                  .then(() => {
-                     return this.save();
-                  })
-                  .catch((err) => {
-                     App.AB.error("Error trying to save selected View:", {
-                        error: err,
-                        view: this,
-                     });
+               await Promise.all(allViewUpdates);
 
-                     _logic.ready();
+               await this.save();
 
-                     reject(err);
-                  })
-                  .then(() => {
-                     // // signal the current view has been deleted.
-                     // // this variable is stored in .viewDelete
-                     // if (this.__deletedView) {
-                     // 	this.__deletedView.emit('destroyed', this.__deletedView);
-
-                     // 	// clear
-                     // 	delete this.__deletedView;
-                     // }
-
-                     _logic.ready();
-
-                     resolve();
-                  });
-            });
+               _logic.ready();
+            } catch (err) {
+               App.AB.notify.developer(err, {
+                  message: "Error trying to save selected View:",
+                  view: this.toObj(),
+               });
+               _logic.ready();
+            }
          },
 
          showEmptyPlaceholder: () => {
@@ -398,8 +368,6 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
          ObjectDefaults
       );
 
-      var L = App.Label;
-
       _logic.addColumnGravity = (newVal, oldVal) => {
          var pos = $$(ids.gravity).getParentView().index($$(ids.gravity));
          $$(ids.gravity)
@@ -409,12 +377,12 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
                   view: "counter",
                   value: "1",
                   min: 1,
-                  label: "Column " + newVal + " Gravity",
-                  labelWidth: App.config.labelWidthXLarge,
+                  label: L("Column {0} Gravity", [newVal]),
+                  labelWidth: this.AB.UISettings.config().labelWidthXLarge,
                   css: "gravity_counter",
                   on: {
                      onChange: () => {
-                        logic.onChange();
+                        _logic.onChange();
                      },
                   },
                },
@@ -439,8 +407,8 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
             name: "columns",
             view: "counter",
             min: 1,
-            label: L("ab.components.container.columns", "*Columns"),
-            labelWidth: App.config.labelWidthXLarge,
+            label: L("Columns"),
+            labelWidth: this.AB.UISettings.config().labelWidthXLarge,
             on: {
                onChange: function (newVal, oldVal) {
                   if (newVal > 8) $$(ids.columns).setValue(8);
@@ -481,10 +449,9 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
             .addView(
                {
                   view: "counter",
-                  value: "1",
                   min: 1,
-                  label: "Column " + step + " Gravity",
-                  labelWidth: App.config.labelWidthXLarge,
+                  label: L("Column {0} Gravity", [step]),
+                  labelWidth: this.AB.UISettings.config().labelWidthXLarge,
                   css: "gravity_counter",
                   value:
                      view.settings.gravity && view.settings.gravity[step - 1]
@@ -530,22 +497,18 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
       view.settings.gravity = gravity;
    }
 
-   static propertyEditorSave(ids, view) {
-      return Promise.resolve()
-         .then(() => {
-            this.propertyEditorValues(ids, view);
+   static async propertyEditorSave(ids, view) {
+      this.propertyEditorValues(ids, view);
 
-            // Save .settings of container
-            return view.save();
-         })
-         .then(() => {
-            // signal the current view has been updated.
-            view.emit("properties.updated", view);
+      // Save .settings of container
+      await view.save();
 
-            // Save reorder of subviews
-            let editorComponent = view.editorComponent(this._App);
-            return editorComponent.logic.onReorder();
-         });
+      // signal the current view has been updated.
+      view.emit("properties.updated", view);
+
+      // Save reorder of subviews
+      let editorComponent = view.editorComponent(this._App);
+      await editorComponent.logic.onReorder();
    }
 
    /**
@@ -559,7 +522,7 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
    component(App, idPrefix) {
       var idBase = "ABViewContainer_" + (idPrefix || "") + this.id;
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       this.viewComponents = this.viewComponents || {}; // { viewId: viewComponent, ..., viewIdn: viewComponent }
@@ -622,7 +585,7 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
                var getGrav = 1;
 
                if (curRow.cols[newPos] && curRow.cols[newPos].gravity) {
-                  var getGrav = curRow.cols[newPos].gravity;
+                  getGrav = curRow.cols[newPos].gravity;
                }
 
                component.ui.gravity = getGrav;

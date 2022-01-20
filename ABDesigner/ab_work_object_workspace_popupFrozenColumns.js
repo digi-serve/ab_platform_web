@@ -13,24 +13,12 @@ module.exports = class AB_Work_Object_Workspace_PopupFrozenColumns extends ABCom
    constructor(App, idBase) {
       idBase = idBase || "ab_work_object_workspace_popupFrozenColumns";
       super(App, idBase);
-      var L = this.Label;
-
-      var labels = {
-         common: App.labels,
-         component: {
-            clearAll: L("ab.frozen_fields.clearAll", "*Clear All"),
-            errorHidden: L(
-               "ab.visible_fields.errorHidden",
-               "*Sorry, you cannot freeze a hidden column."
-            ),
-            // hideAll: L('ab.visible_fields.hideAll', "*Hide All"),
-         },
-      };
+      var L = this.Label();
 
       // internal list of Webix IDs to reference our UI components
       var ids = {
-         component: this.unique(idBase + "_popupFrozen"),
-         list: this.unique(idBase + "_popupFrozen_list"),
+         component: this.unique(`${idBase}_popupFrozen`),
+         list: this.unique(`${idBase}_popupFrozen_list`),
       };
 
       // Our webix UI definition:
@@ -60,7 +48,7 @@ module.exports = class AB_Work_Object_Workspace_PopupFrozenColumns extends ABCom
                {
                   view: "button",
                   css: "webix_primary",
-                  value: labels.component.clearAll,
+                  value: L("Clear All"),
                   type: "form",
                   on: {
                      onItemClick: function (id, e, node) {
@@ -126,8 +114,8 @@ module.exports = class AB_Work_Object_Workspace_PopupFrozenColumns extends ABCom
             var label = recordClicked.columnName;
 
             if ((this._hiddenFields || []).indexOf(label) != -1) {
-               this.AB.Dialog.Alert({
-                  text: labels.component.errorHidden,
+               webix.alert({
+                  text: L("Sorry, you cannot freeze a hidden column."),
                });
                return;
             }

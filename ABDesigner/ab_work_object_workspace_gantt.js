@@ -36,25 +36,12 @@ module.exports = class ABWorkObjectGantt extends ABComponent {
       super(App, idBase);
 
       let L = this.Label();
-      let labels = {
-         common: App.labels,
-         component: {
-            confirmDeleteTaskTitle: L(
-               "ab.object.deleteTask.title",
-               "*Remove task"
-            ),
-            confirmDeleteTaskMessage: L(
-               "ab.object.deleteTask.message",
-               "*Do you want to delete this task?"
-            ),
-         },
-      };
 
       // internal list of Webix IDs to reference our UI components.
       let ids = {
-         component: this.unique(idBase + "_workspace_gantt_component"),
-         menu: this.unique(idBase + "_workspace_gantt_menu"),
-         gantt: this.unique(idBase + "_workspace_gantt"),
+         component: this.unique(`${idBase}_workspace_gantt_component`),
+         menu: this.unique(`${idBase}_workspace_gantt_menu`),
+         gantt: this.unique(`${idBase}_workspace_gantt`),
       };
 
       let CurrentObject = null,
@@ -68,6 +55,7 @@ module.exports = class ABWorkObjectGantt extends ABComponent {
          CurrentNotesField = null;
 
       // Our webix UI definition:
+      let gantt = require("../js/webix/components/gantt/gantt");
       this.ui = {
          id: ids.component,
          rows: [
@@ -82,19 +70,19 @@ module.exports = class ABWorkObjectGantt extends ABComponent {
                      data: [
                         {
                            id: "day",
-                           value: "Day",
+                           value: L("Day"),
                         },
                         {
                            id: "week",
-                           value: "Week",
+                           value: L("Week"),
                         },
                         {
                            id: "month",
-                           value: "Month",
+                           value: L("Month"),
                         },
                         {
                            id: "year",
-                           value: "Year",
+                           value: L("Year"),
                         },
                      ],
                      on: {
@@ -113,72 +101,33 @@ module.exports = class ABWorkObjectGantt extends ABComponent {
                   [
                      gantt.services.Backend,
                      class MyBackend extends gantt.services.Backend {
-                        tasks() {
-                           return Promise.resolve()
-                              .then(
-                                 () =>
-                                    new Promise((next, bad) => {
-                                       if (
-                                          CurrentDatacollection &&
-                                          CurrentDatacollection.dataStatus !=
-                                             CurrentDatacollection
-                                                .dataStatusFlag.initialized
-                                       ) {
-                                          CurrentDatacollection.loadData()
-                                             .catch(bad)
-                                             .then(() => {
-                                                next();
-                                             });
-                                       } else {
-                                          next();
-                                       }
-                                    })
-                              )
-                              .then(
-                                 () =>
-                                    new Promise((next, bad) => {
-                                       if (!CurrentDatacollection)
-                                          return next([]);
+                        async tasks() {
+                           if (!CurrentDatacollection) return [];
 
-                                       next(
-                                          (
-                                             CurrentDatacollection.getData() ||
-                                             []
-                                          ).map((d, index) =>
-                                             _logic.convertFormat(d)
-                                          )
-                                       );
-                                    })
-                              );
+                           if (
+                              CurrentDatacollection.dataStatus !=
+                              CurrentDatacollection.dataStatusFlag.initialized
+                           )
+                              await CurrentDatacollection.loadData();
+
+                           return (
+                              CurrentDatacollection.getData() || []
+                           ).map((d, index) => _logic.convertFormat(d));
                         }
-                        links() {
-                           return Promise.resolve([]);
+                        async links() {
+                           return [];
                         }
-                        addTask(obj, index, parent) {
-                           return new webix.promise((success, fail) => {
-                              _logic
-                                 .addTask(obj)
-                                 .then((newTask) =>
-                                    success({ id: (newTask || {}).id })
-                                 )
-                                 .catch(fail);
-                           });
+                        async addTask(obj, index, parent) {
+                           let newTask = await _logic.addTask(obj);
+                           return { id: (newTask || {}).id };
                         }
-                        updateTask(id, obj) {
-                           return new webix.promise((success, fail) => {
-                              _logic
-                                 .updateTask(obj.id, obj)
-                                 .then(() => success({}))
-                                 .catch(fail);
-                           });
+                        async updateTask(id, obj) {
+                           await _logic.updateTask(obj.id, obj);
+                           return {};
                         }
-                        removeTask(id) {
-                           return new webix.promise((success, fail) => {
-                              _logic
-                                 .removeTask(id)
-                                 .then(() => success({}))
-                                 .catch(fail);
-                           });
+                        async removeTask(id) {
+                           await _logic.removeTask(id);
+                           return {};
                         }
                      },
                   ],
@@ -448,54 +397,42 @@ module.exports = class ABWorkObjectGantt extends ABComponent {
             return patch;
          },
 
-         addTask: (taskData) => {
+         addTask: async (taskData) => {
             let patch = _logic.convertValues(taskData);
 
-            return new Promise((resolve, reject) => {
-               CurrentObject.model()
-                  .create(patch)
-                  .then((result) => {
-                     resolve(result);
-                  })
-                  .catch((err) => {
-                     this.AB.error("Error saving item:", { error: err });
+            try {
+               return await CurrentObject.model().create(patch);
+            } catch (err) {
+               this.AB.notify.developer(err, {
+                  message: "Error when's adding a task in gantt workspace",
+               });
 
-                     reject(err);
-                  });
-            });
+               throw err;
+            }
          },
 
-         updateTask: (rowId, updatedTask) => {
+         updateTask: async (rowId, updatedTask) => {
             let patch = _logic.convertValues(updatedTask);
 
-            return new Promise((resolve, reject) => {
-               CurrentObject.model()
-                  .update(rowId, patch)
-                  .then((updatedTask) => {
-                     resolve();
-                  })
-                  .catch((err) => {
-                     this.AB.error("Error saving item:", { error: err });
+            try {
+               await CurrentObject.model().update(rowId, patch);
+            } catch (err) {
+               this.AB.notify.developer(err, {
+                  message: "Error when's updating a task in gantt workspace",
+               });
 
-                     reject(err);
-                  });
-            });
+               throw err;
+            }
          },
 
-         removeTask: (rowId) => {
-            return new Promise((resolve, reject) => {
-               CurrentObject.model()
-                  .delete(rowId)
-                  .then((response) => {
-                     resolve();
-                  })
-                  .catch((err) => {
-                     this.AB.error("Error deleting item:", { error: err });
-
-                     //// TODO: what do we do here?
-                     reject(err);
-                  });
-            });
+         removeTask: async (rowId) => {
+            try {
+               await CurrentObject.model().delete(rowId);
+            } catch (err) {
+               this.AB.notify.developer(err, {
+                  message: "Error when's deleting a task in gantt workspace",
+               });
+            }
          },
 
          sort: () => {

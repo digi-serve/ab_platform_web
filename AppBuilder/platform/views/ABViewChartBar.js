@@ -2,6 +2,8 @@ const ABViewChartBarCore = require("../../core/views/ABViewChartBarCore");
 
 const ABViewChartBarPropertyComponentDefaults = ABViewChartBarCore.defaultValues();
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 module.exports = class ABViewChartBar extends ABViewChartBarCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -22,7 +24,7 @@ module.exports = class ABViewChartBar extends ABViewChartBarCore {
    editorComponent(App, mode) {
       let idBase = "ABViewChartBarEditorComponent";
       let ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       let baseEditor = super.editorComponent(App, mode, {
@@ -43,7 +45,6 @@ module.exports = class ABViewChartBar extends ABViewChartBarCore {
          _logic,
          ObjectDefaults
       );
-      var L = App.Label;
 
       // in addition to the common .label  values, we
       // ask for:
@@ -51,36 +52,36 @@ module.exports = class ABViewChartBar extends ABViewChartBarCore {
          {
             name: "barType",
             view: "richselect",
-            label: L("ab.component.chart.bar.barType", "*Chart Type"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Chart Type"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             options: [
                {
                   id: "bar",
-                  value: L("ab.component.chart.bar.column", "*Vertical"),
+                  value: L("Vertical"),
                },
                {
                   id: "barH",
-                  value: L("ab.component.chart.bar.stick", "*Horizontal"),
+                  value: L("Horizontal"),
                },
             ],
          },
          {
             name: "barPreset",
             view: "richselect",
-            label: L("ab.component.chart.bar.barPreset", "*Chart Preset"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Chart Preset"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             options: [
                {
                   id: "column",
-                  value: L("ab.component.chart.bar.column", "*Column"),
+                  value: L("Column"),
                },
                {
                   id: "stick",
-                  value: L("ab.component.chart.bar.stick", "*Stick"),
+                  value: L("Stick"),
                },
                {
                   id: "alpha",
-                  value: L("ab.component.chart.bar.alpha", "*Alpha"),
+                  value: L("Alpha"),
                },
             ],
          },
@@ -94,35 +95,32 @@ module.exports = class ABViewChartBar extends ABViewChartBarCore {
             name: "height",
             view: "counter",
             min: 1,
-            label: L("ab.component.chart.bar.chartHeight", "*Height"),
+            label: L("Height"),
          },
          {
             name: "stepValue",
             view: "counter",
             min: 1,
-            label: L("ab.component.chart.bar.stepValue", "*Step"),
+            label: L("Step"),
          },
          {
             name: "maxValue",
             view: "counter",
             min: 1,
-            label: L("ab.component.chart.bar.maxValue", "*Max Value"),
+            label: L("Max Value"),
          },
          {
             name: "labelFontSize",
             view: "counter",
             min: 1,
-            label: L(
-               "ab.component.chart.bar.labelFontSize",
-               "*Label Font Size"
-            ),
-            labelWidth: App.config.labelWidthXLarge,
+            label: L("Label Font Size"),
+            labelWidth: this.AB.UISettings.config().labelWidthXLarge,
          },
          {
             name: "isLegend",
             view: "checkbox",
-            labelRight: L("ab.component.chart.isLegend", "*Show Legend"),
-            labelWidth: App.config.labelWidthCheckbox,
+            labelRight: L("Show Legend"),
+            labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
          },
       ]);
    }
@@ -200,11 +198,12 @@ module.exports = class ABViewChartBar extends ABViewChartBarCore {
 
       var idBase = "ABViewChartBar_" + this.id;
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
+      var _ui;
 
       if (this.settings.barType == "bar" || this.settings.barType == null) {
-         var _ui = {
+         _ui = {
             id: ids.component,
             view: "chart",
             type:
@@ -250,7 +249,7 @@ module.exports = class ABViewChartBar extends ABViewChartBarCore {
             // data: reportData
          };
       } else {
-         var _ui = {
+         _ui = {
             id: ids.component,
             view: "chart",
             type:

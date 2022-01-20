@@ -7,6 +7,8 @@
  */
 var ABProcessParticipantCore = require("../../core/process/ABProcessParticipantCore");
 
+const L = (...params) => AB.Multilingual.label(...params);
+
 module.exports = class ABProcessParticipant extends ABProcessParticipantCore {
    // constructor(attributes, process, AB) {
    //    super(attributes, process, AB);
@@ -138,7 +140,7 @@ module.exports = class ABProcessParticipant extends ABProcessParticipantCore {
                   {
                      id: ids.name,
                      view: "text",
-                     label: "Name",
+                     label: L("Name"),
                      name: "name",
                      value: this.name,
                   },
@@ -202,12 +204,12 @@ module.exports = class ABProcessParticipant extends ABProcessParticipantCore {
       console.warn("!!! Where is this used???");
 
       var L = (...params) => {
-         return AB.Multilingual.label(...params);
+         return this.AB.Multilingual.label(...params);
       };
 
       var ids = ABProcessParticipant.propertyIDs(id);
-      var __Roles = AB.Account.rolesAll();
-      var __Users = AB.Account.userList();
+      var __Roles = this.AB.Account.rolesAll();
+      var __Users = this.AB.Account.userList();
 
       __Roles.unshift({ id: "--", value: L("select a role") });
       __Users.unshift({ id: "--", value: L("select a user") });

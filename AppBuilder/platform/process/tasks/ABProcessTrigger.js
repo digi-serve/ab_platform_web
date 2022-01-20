@@ -2,6 +2,8 @@
 // const ABApplication = require("./ABApplication"); // NOTE: change to require()
 const ABProcessTriggerCore = require("../../../core/process/tasks/ABProcessTriggerCore.js");
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 module.exports = class ABProcessTrigger extends ABProcessTriggerCore {
    propertyIDs(id) {
       return {
@@ -17,7 +19,6 @@ module.exports = class ABProcessTrigger extends ABProcessTriggerCore {
     */
    propertiesShow(id) {
       var ids = this.propertyIDs(id);
-      var L = this.AB.Label();
 
       var ui = {
          id: id,
@@ -25,7 +26,7 @@ module.exports = class ABProcessTrigger extends ABProcessTriggerCore {
             {
                id: ids.name,
                view: "text",
-               label: L("ab.process.task.email.name", "*Name"),
+               label: L("Name"),
                name: "name",
                value: this.name,
             },

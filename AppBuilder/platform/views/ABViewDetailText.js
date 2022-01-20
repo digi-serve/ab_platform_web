@@ -2,6 +2,8 @@ const ABViewDetailTextCore = require("../../core/views/ABViewDetailTextCore");
 
 const ABViewDetailTextPropertyComponentDefaults = ABViewDetailTextCore.defaultValues();
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 module.exports = class ABViewDetailText extends ABViewDetailTextCore {
    /**
     * @param {obj} values  key=>value hash of ABView values
@@ -27,7 +29,7 @@ module.exports = class ABViewDetailText extends ABViewDetailTextCore {
    editorComponent(App, mode) {
       var idBase = "ABViewDetailTextEditorComponent";
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       var textElem = this.component(App).ui;
@@ -59,7 +61,6 @@ module.exports = class ABViewDetailText extends ABViewDetailTextCore {
          _logic,
          ObjectDefaults
       );
-      var L = App.Label;
 
       // in addition to the common .label  values, we
       // ask for:
@@ -67,8 +68,8 @@ module.exports = class ABViewDetailText extends ABViewDetailTextCore {
          {
             view: "counter",
             name: "height",
-            label: L("ab.components.common.height", "*Height:"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Height:"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
       ]);
    }
@@ -101,7 +102,7 @@ module.exports = class ABViewDetailText extends ABViewDetailTextCore {
       var field = this.field();
       var idBase = "ABViewDetailText_" + (idPrefix || "") + this.id;
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
          detail: this.parentDetailComponent()?.id || this.parent.id,
       };
 
@@ -115,8 +116,8 @@ module.exports = class ABViewDetailText extends ABViewDetailTextCore {
          //Add data-cy attribute for Cypress Testing
          onAfterRender: () => {
             const dataCy = `detail text ${field?.columnName} ${field?.id} ${ids.detail}`;
-            $$(ids.component)?.$view.setAttribute('data-cy', dataCy);
-         }
+            $$(ids.component)?.$view.setAttribute("data-cy", dataCy);
+         },
       };
 
       return {

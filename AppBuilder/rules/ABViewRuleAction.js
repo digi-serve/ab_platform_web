@@ -19,6 +19,8 @@
 // initialize itself from those settings.
 //
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 module.exports = class ABViewRuleAction {
    /**
     * @param {object} App
@@ -46,31 +48,16 @@ module.exports = class ABViewRuleAction {
       this.App = App;
       this.idBase = idBase;
 
-      var L = App.Label;
-
-      this.label = L(
-         "ab.component.ruleaction.abviewruleAction",
-         "*generic abviewruleaction"
-      );
-
-      // Labels for UI components
-      var labels = (this.labels = {
-         common: App.labels,
-         component: {
-            action: L("ab.component.form.action", "*Action"),
-            when: L("ab.component.form.when", "*When"),
-            values: L("ab.component.form.values", "*Values"),
-         },
-      });
+      this.label = L("generic abviewruleaction");
 
       function myUnique(key) {
-         return App.unique(idBase + "_" + key);
+         return App.unique(`${idBase}_${key}`);
       }
 
       // internal list of Webix IDs to reference our UI components.
       var ids = (this.ids = {
          // each instance must be unique
-         component: myUnique("component") + "_" + webix.uid(),
+         component: `${myUnique("component")}_${webix.uid()}`,
       });
 
       this._ui = null; // internally track our UI Component value Rules
@@ -105,11 +92,6 @@ module.exports = class ABViewRuleAction {
    //					]
    condition() {
       return [this.conditionRules(), this.conditionFields()];
-   }
-
-   component(App, idBase) {
-      this.App = App;
-      this.idBase = idBase;
    }
 
    // stashCondition

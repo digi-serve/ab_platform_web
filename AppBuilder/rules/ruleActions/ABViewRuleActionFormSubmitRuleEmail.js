@@ -7,6 +7,8 @@ const ABViewRuleAction = require("../ABViewRuleAction");
 const ABFieldConnect = require("../../platform/dataFields/ABFieldConnect");
 const ABFieldEmail = require("../../platform/dataFields/ABFieldEmail");
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 module.exports = class ABViewRuleActionFormSubmitRuleEmail extends (
    ABViewRuleAction
 ) {
@@ -18,14 +20,10 @@ module.exports = class ABViewRuleActionFormSubmitRuleEmail extends (
     */
    constructor(App, idBase) {
       super();
-      var L = App.Label;
 
       this.App = App;
       this.key = "ABViewRuleActionFormSubmitRuleEmail";
-      this.label = L(
-         "ab.component.ruleaction.abviewruleActionFormSubmitRuleEmail",
-         "*Send a custom email"
-      );
+      this.label = L("Send a custom email");
 
       this.queryObject = null; // the object this Action is tied to.
 
@@ -33,12 +31,6 @@ module.exports = class ABViewRuleActionFormSubmitRuleEmail extends (
       // [
       //		{ fieldId: xxx, value:yyy, type:key['string', 'number', 'date',...]}
       // ]
-
-      // Labels for UI components
-      var labels = (this.labels = {
-         // common: App.labels,
-         component: {},
-      });
    }
 
    // conditionFields() {
@@ -74,12 +66,12 @@ module.exports = class ABViewRuleActionFormSubmitRuleEmail extends (
    //
    valueDisplayComponent(idBase) {
       var ids = {
-         form: idBase + "form",
-         popup: idBase + "popup",
-         list: idBase + "fieldList",
-         toEmailsContainer: idBase + "toEmailsContainer",
-         toEmails: idBase + "toEmails",
-         message: idBase + "message",
+         form: `${idBase}_form`,
+         popup: `${idBase}_popup`,
+         list: `${idBase}_fieldList`,
+         toEmailsContainer: `${idBase}_toEmailsContainer`,
+         toEmails: `${idBase}_toEmails`,
+         message: `${idBase}_message`,
       };
 
       this._ui = {
@@ -99,12 +91,12 @@ module.exports = class ABViewRuleActionFormSubmitRuleEmail extends (
                      {
                         view: "text",
                         name: "fromName",
-                        label: "From Name",
+                        label: L("From Name"),
                      },
                      {
                         view: "text",
                         name: "fromEmail",
-                        label: "From Email",
+                        label: L("From Email"),
                         validate: webix.rules.isEmail,
                         on: {
                            onChange: function (newVal, oldVal) {
@@ -123,7 +115,7 @@ module.exports = class ABViewRuleActionFormSubmitRuleEmail extends (
                         id: ids.toEmailsContainer,
                         view: "forminput",
                         name: "toEmails",
-                        label: "Send",
+                        label: L("Send"),
                         css: "ab-rich-text",
                         width: 320,
                         body: {
@@ -143,7 +135,7 @@ module.exports = class ABViewRuleActionFormSubmitRuleEmail extends (
                                  css: "webix_primary",
                                  type: "icon",
                                  icon: "fa fa-plus",
-                                 label: "Add a recipient",
+                                 label: L("Add a recipient"),
                                  width: 150,
                                  click: () => {
                                     _logic.toEmailAdd();
@@ -155,13 +147,13 @@ module.exports = class ABViewRuleActionFormSubmitRuleEmail extends (
                      {
                         view: "text",
                         name: "subject",
-                        label: "Subject",
+                        label: L("Subject"),
                      },
                      {
                         view: "textarea",
                         id: ids.message,
                         name: "message",
-                        label: "Message",
+                        label: L("Message"),
                         width: 320,
                         height: 400,
                      },
@@ -319,10 +311,10 @@ module.exports = class ABViewRuleActionFormSubmitRuleEmail extends (
                      options: [
                         {
                            id: "email",
-                           value: "A custom email address",
+                           value: L("A custom email address"),
                         },
-                        { id: "field", value: "An email field" },
-                        { id: "query", value: "From query" },
+                        { id: "field", value: L("An email field") },
+                        { id: "query", value: L("From query") },
                      ],
                      on: {
                         onChange: function (newVal, oldVal) {
@@ -457,9 +449,7 @@ module.exports = class ABViewRuleActionFormSubmitRuleEmail extends (
          },
 
          fieldTemplate: (field, common) => {
-            return "<i class='fa fa-#icon# webix_icon_btn' aria-hidden='true'></i> #label#"
-               .replace("#icon#", field.icon)
-               .replace("#label#", field.label);
+            return `<i class='fa fa-${field.icon} webix_icon_btn' aria-hidden='true'></i> ${field.label}`;
          },
 
          emailFieldOptions: () => {
@@ -474,16 +464,11 @@ module.exports = class ABViewRuleActionFormSubmitRuleEmail extends (
                         optLabel = "";
 
                      if (fLink) {
-                        optId = fLink.id + "|" + f.urlPointer();
-                        optLabel = "{objLabel}.{fieldLabel} ({fieldLink})"
-                           .replace("{objLabel}", currObj.label)
-                           .replace("{fieldLabel}", f.label)
-                           .replace("{fieldLink}", fLink.label);
+                        optId = `${fLink.id}|${f.urlPointer()}`;
+                        optLabel = `${currObj.label}.${f.label} (${fLink.label})`;
                      } else {
-                        optId = "|" + f.urlPointer();
-                        optLabel = "{objLabel}.{fieldLabel}"
-                           .replace("{objLabel}", currObj.label)
-                           .replace("{fieldLabel}", f.label);
+                        optId = `|${f.urlPointer()}`;
+                        optLabel = `${currObj.label}.${f.label}`;
                      }
 
                      return {
@@ -538,10 +523,8 @@ module.exports = class ABViewRuleActionFormSubmitRuleEmail extends (
                      .fields((f) => f.key == "email")
                      .forEach((f) => {
                         options.push({
-                           id: dv.id + "|" + f.id, // ABDatacollectionID|fieldID
-                           value: "{dcLabel}.{fieldLabel}"
-                              .replace("{dcLabel}", dv.label)
-                              .replace("{fieldLabel}", f.label),
+                           id: `${dv.id}|${f.id}`, // ABDatacollectionID|fieldID
+                           value: `${dv.label}.${f.label}`,
                         });
                      });
                }
@@ -561,9 +544,7 @@ module.exports = class ABViewRuleActionFormSubmitRuleEmail extends (
                if (focusElem.getValue) val = focusElem.getValue();
 
                if (focusElem.setValue)
-                  focusElem.setValue(
-                     val + "{#label#}".replace("#label#", field.label)
-                  );
+                  focusElem.setValue(`${val}${field.label}`);
 
                webix.UIManager.setFocus(focusElem);
             }
@@ -691,7 +672,7 @@ module.exports = class ABViewRuleActionFormSubmitRuleEmail extends (
          .then(() => {
             // send out
             return new Promise((resolve, reject) => {
-               recipients = _.uniq(recipients).filter((r) => r);
+               recipients = this.AB.uniq(recipients).filter((r) => r);
 
                if (!recipients || recipients.length < 1) return resolve();
 
@@ -703,7 +684,7 @@ module.exports = class ABViewRuleActionFormSubmitRuleEmail extends (
                this.queryObject
                   .fields((f) => f.fieldUseAsLabel())
                   .forEach((f) => {
-                     var template = new RegExp("{" + f.label + "}", "g"),
+                     var template = new RegExp(`{${f.label}}`, "g"),
                         data = f.format(options.data);
 
                      fromName = fromName.replace(template, data);
@@ -712,14 +693,14 @@ module.exports = class ABViewRuleActionFormSubmitRuleEmail extends (
                   });
 
                // send a email
-               OP.Comm.Service.post({
+               this.AB.Network.post({
                   url: "/app_builder/email",
                   params: {
                      fromName: fromName,
                      fromEmail: this.valueRules.fromEmail,
                      subject: subject,
                      message: message,
-                     recipients: _.uniq(recipients),
+                     recipients: this.AB.uniq(recipients),
                   },
                })
                   .then(() => {

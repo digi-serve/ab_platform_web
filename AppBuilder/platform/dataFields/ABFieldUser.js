@@ -2,6 +2,8 @@ var ABFieldConnectCore = require("../../core/dataFields/ABFieldConnectCore");
 var ABFieldUserCore = require("../../core/dataFields/ABFieldUserCore");
 var ABFieldComponent = require("./ABFieldComponent");
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 var ids = {
    editable: "ab-user-editable",
    isMultiple: "ab-user-multiple-option",
@@ -22,7 +24,6 @@ var ABFieldUserComponent = new ABFieldComponent({
 
    elements: function (App, field) {
       ids = field.idsUnique(ids, App);
-      var L = App.Label;
 
       return [
          {
@@ -30,21 +31,15 @@ var ABFieldUserComponent = new ABFieldComponent({
             name: "isMultiple",
             id: ids.isMultiple,
             disallowEdit: true,
-            labelRight: L(
-               "ab.dataField.user.isMultiple",
-               "*Allow multiple users"
-            ),
-            labelWidth: App.config.labelWidthCheckbox,
+            labelRight: L("Allow multiple users"),
+            labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
          },
          {
             view: "checkbox",
             name: "isCurrentUser",
             id: ids.isCurrentUser,
-            labelRight: L(
-               "ab.dataField.user.isCurrentUser",
-               "*Default value as current user"
-            ),
-            labelWidth: App.config.labelWidthCheckbox,
+            labelRight: L("Default value as current user"),
+            labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
             on: {
                onChange: function (newValue, oldValue) {
                   if (newValue == 0) {
@@ -62,25 +57,22 @@ var ABFieldUserComponent = new ABFieldComponent({
             name: "editable",
             hidden: true,
             id: ids.editable,
-            labelRight: L("ab.dataField.user.editableLabel", "*Editable"),
-            labelWidth: App.config.labelWidthCheckbox,
+            labelRight: L("Editable"),
+            labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
          },
          {
             view: "checkbox",
             name: "isShowProfileImage",
             id: ids.isShowProfileImage,
-            labelRight: L(
-               "ab.dataField.user.isShowProfileImage",
-               "*Show Profile Image"
-            ),
-            labelWidth: App.config.labelWidthCheckbox,
+            labelRight: L("Show Profile Image"),
+            labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
          },
          {
             view: "checkbox",
             name: "isShowUsername",
             id: ids.isShowUsername,
-            labelRight: L("ab.dataField.user.showUsername", "*Show Username"),
-            labelWidth: App.config.labelWidthCheckbox,
+            labelRight: L("Show Username"),
+            labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
          },
       ];
    },
@@ -153,7 +145,7 @@ module.exports = class ABFieldUser extends ABFieldUserCore {
    /// Working with Actual Object Values:
    ///
 
-   save() {
+   async save() {
       // Add new
       if (this.id == null) {
          var SiteUser = this.AB.objectUser();
@@ -194,31 +186,38 @@ module.exports = class ABFieldUser extends ABFieldUserCore {
                isSource: 0,
             },
          });
-         return (
-            Promise.resolve()
-               // Create definitions of the connected fields
-               // NOTE: skip directly to the ABMLClass.save() to avoid the
-               // migrations caused during the ABField.save() operations.
-               .then(() => ABMLClass.prototype.save.call(this))
-               .then(() => {
-                  linkCol.settings.linkColumn = this.id;
-                  return ABMLClass.prototype.save.call(linkCol);
-               })
-               // Update the id value of linked field to connect together
-               .then(() => {
-                  this.settings.linkColumn = linkCol.id;
-                  return ABMLClass.prototype.save.call(this);
-               })
-               // Add fields to Objects
-               .then(() => this.object.fieldAdd(this))
-               .then(() => SiteUser.fieldAdd(linkCol))
-               // Create column to DB
-               .then(() => this.migrateCreate())
-               // .then(() => linkCol.migrateCreate())
-               .then(() => {
-                  return this;
-               })
-         );
+
+         // // Create definitions of the connected fields
+         // // NOTE: skip directly to the ABMLClass.save() to avoid the
+         // // migrations caused during the ABField.save() operations.
+         // await ABFieldUserCore.prototype.save.call(this);
+
+         // linkCol.settings.linkColumn = this.id;
+         // await ABFieldUserCore.prototype.save.call(linkCol);
+
+         // // Update the id value of linked field to connect together
+         // this.settings.linkColumn = linkCol.id;
+         // await ABFieldUserCore.prototype.save.call(this);
+
+         await this.save();
+
+         linkCol.settings.linkColumn = this.id;
+         await linkCol.save();
+
+         this.settings.linkColumn = linkCol.id;
+         await this.save();
+
+         // Add fields to Objects
+         await this.object.fieldAdd(this);
+
+         await SiteUser.fieldAdd(linkCol);
+
+         // Create column to DB
+         await this.migrateCreate();
+
+         // await linkCol.migrateCreate();
+
+         return this;
       } else {
          return super.save();
       }

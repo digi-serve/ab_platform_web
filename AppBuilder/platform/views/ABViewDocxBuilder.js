@@ -11,6 +11,8 @@ const JSZip = require("../../../js/jszip.min.js");
 
 const ABViewDocxBuilderPropertyComponentDefaults = ABViewDocxBuilderCore.defaultValues();
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 function letUserDownload(blob, filename) {
    let url = window.URL.createObjectURL(blob);
 
@@ -59,7 +61,6 @@ module.exports = class ABViewDocxBuilder extends ABViewDocxBuilderCore {
          _logic,
          ObjectDefaults
       );
-      var L = App.Label;
 
       _logic.validateType = (item) => {
          // verify file type
@@ -121,8 +122,8 @@ module.exports = class ABViewDocxBuilder extends ABViewDocxBuilderCore {
       return commonUI.concat([
          {
             view: "fieldset",
-            label: L("ab.component.label.dataSource", "*Data:"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Data:"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -131,11 +132,8 @@ module.exports = class ABViewDocxBuilder extends ABViewDocxBuilderCore {
                      name: "datacollection",
                      // view: 'richselect',
                      view: "multicombo",
-                     label: L(
-                        "ab.components.docxBuilder.dataSource",
-                        "*Data Source"
-                     ),
-                     labelWidth: App.config.labelWidthLarge,
+                     label: L("Data Source"),
+                     labelWidth: this.AB.UISettings.config().labelWidthLarge,
                   },
                ],
             },
@@ -143,11 +141,8 @@ module.exports = class ABViewDocxBuilder extends ABViewDocxBuilderCore {
 
          {
             view: "fieldset",
-            label: L(
-               "ab.component.docxBuilder.templateFile",
-               "*Template file:"
-            ),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Template file:"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -156,16 +151,13 @@ module.exports = class ABViewDocxBuilder extends ABViewDocxBuilderCore {
                      cols: [
                         {
                            view: "label",
-                           label: L(
-                              "ab.component.docxBuilder.title",
-                              "*DOCX file:"
-                           ),
+                           label: L("DOCX file:"),
                            css: "ab-text-bold",
-                           width: App.config.labelWidthXLarge,
+                           width: this.AB.UISettings.config().labelWidthXLarge,
                         },
                         {
                            view: "uploader",
-                           value: "*Upload",
+                           value: L("Upload"),
                            name: "docxFile",
                            apiOnly: true,
                            inputName: "file",
@@ -187,11 +179,8 @@ module.exports = class ABViewDocxBuilder extends ABViewDocxBuilderCore {
                   {
                      name: "filelabel",
                      view: "text",
-                     label: L(
-                        "ab.components.docxBuilder.filename",
-                        "*Filename"
-                     ),
-                     labelWidth: App.config.labelWidthLarge,
+                     label: L("Filename"),
+                     labelWidth: this.AB.UISettings.config().labelWidthLarge,
                   },
                   {
                      name: "docxDownload",
@@ -199,7 +188,7 @@ module.exports = class ABViewDocxBuilder extends ABViewDocxBuilderCore {
                      type: "icon",
                      css: "webix_primary",
                      icon: "fa fa-file-word-o",
-                     label: "Download Template File",
+                     label: L("Download Template File"),
                      click: () => {
                         _logic.downloadFile();
                      },
@@ -210,8 +199,8 @@ module.exports = class ABViewDocxBuilder extends ABViewDocxBuilderCore {
 
          {
             view: "fieldset",
-            label: L("ab.component.docxBuilder.language", "*Language:"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Language:"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -219,11 +208,8 @@ module.exports = class ABViewDocxBuilder extends ABViewDocxBuilderCore {
                   {
                      name: "language",
                      view: "richselect",
-                     label: L(
-                        "ab.components.docxBuilder.language",
-                        "*Language"
-                     ),
-                     labelWidth: App.config.labelWidthLarge,
+                     label: L("Language"),
+                     labelWidth: this.AB.UISettings.config().labelWidthLarge,
                   },
                ],
             },
@@ -231,11 +217,8 @@ module.exports = class ABViewDocxBuilder extends ABViewDocxBuilderCore {
 
          {
             view: "fieldset",
-            label: L(
-               "ab.component.label.customizeDisplay",
-               "*Customize Display:"
-            ),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Customize Display:"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -243,45 +226,33 @@ module.exports = class ABViewDocxBuilder extends ABViewDocxBuilderCore {
                   {
                      name: "buttonlabel",
                      view: "text",
-                     label: L("ab.components.docxBuilder.text", "*Label"),
-                     labelWidth: App.config.labelWidthXLarge,
+                     label: L("Label"),
+                     labelWidth: this.AB.UISettings.config().labelWidthXLarge,
                   },
 
                   {
                      view: "counter",
                      name: "width",
-                     label: L("ab.components.docxBuilder.width", "*Width:"),
-                     labelWidth: App.config.labelWidthXLarge,
+                     label: L("Width:"),
+                     labelWidth: this.AB.UISettings.config().labelWidthXLarge,
                   },
                   {
                      view: "richselect",
                      name: "toolbarBackground",
-                     label: L(
-                        "ab.component.page.toolbarBackground",
-                        "*Page background:"
-                     ),
-                     labelWidth: App.config.labelWidthXLarge,
+                     label: L("Page background:"),
+                     labelWidth: this.AB.UISettings.config().labelWidthXLarge,
                      options: [
                         {
                            id: "ab-background-default",
-                           value: L(
-                              "ab.component.page.toolbarBackgroundDefault",
-                              "*White (default)"
-                           ),
+                           value: L("White (default)"),
                         },
                         {
                            id: "webix_dark",
-                           value: L(
-                              "ab.component.page.toolbarBackgroundDark",
-                              "*Dark"
-                           ),
+                           value: L("Dark"),
                         },
                         {
                            id: "ab-background-lightgray",
-                           value: L(
-                              "ab.component.page.toolbarBackgroundDark",
-                              "*Gray"
-                           ),
+                           value: L("Gray"),
                         },
                      ],
                   },
@@ -289,32 +260,20 @@ module.exports = class ABViewDocxBuilder extends ABViewDocxBuilderCore {
                   {
                      view: "richselect",
                      name: "buttonPosition",
-                     label: L(
-                        "ab.component.page.buttonPosition",
-                        "*Button Position:"
-                     ),
-                     labelWidth: App.config.labelWidthXLarge,
+                     label: L("Button Position:"),
+                     labelWidth: this.AB.UISettings.config().labelWidthXLarge,
                      options: [
                         {
                            id: "left",
-                           value: L(
-                              "ab.component.page.buttonPositionLeft",
-                              "*Left (default)"
-                           ),
+                           value: L("Left (default)"),
                         },
                         {
                            id: "center",
-                           value: L(
-                              "ab.component.page.buttonPositionCenter",
-                              "*Centered"
-                           ),
+                           value: L("Centered"),
                         },
                         {
                            id: "right",
-                           value: L(
-                              "ab.component.page.buttonPositionRight",
-                              "*Right"
-                           ),
+                           value: L("Right"),
                         },
                      ],
                   },
@@ -395,8 +354,8 @@ module.exports = class ABViewDocxBuilder extends ABViewDocxBuilderCore {
 
       var idBase = "ABViewDocxBuilder_" + this.id;
       var ids = {
-         button: App.unique(idBase + "_button"),
-         noFile: App.unique(idBase + "_noFile"),
+         button: App.unique(`${idBase}_button`),
+         noFile: App.unique(`${idBase}_noFile`),
       };
 
       var autowidth = false;
@@ -465,16 +424,18 @@ module.exports = class ABViewDocxBuilder extends ABViewDocxBuilderCore {
                on: {
                   // Add data-cy attribute for cypress tests
                   onAfterRender: () => {
-                     const name = this.name.replace('.docxBuilder', '');
+                     const name = this.name.replace(".docxBuilder", "");
                      const dataCy = `docx download ${name} ${this.id}`;
-                     $$(ids.button)?.$view.querySelector('button').setAttribute('data-cy', dataCy);
-                 },
+                     $$(ids.button)
+                        ?.$view.querySelector("button")
+                        .setAttribute("data-cy", dataCy);
+                  },
                },
             },
             {
                id: ids.noFile,
                view: "label",
-               label: "No template file",
+               label: L("No template file"),
             },
             {
                type: "spacer",
@@ -721,10 +682,14 @@ module.exports = class ABViewDocxBuilder extends ABViewDocxBuilderCore {
                         dcValues.push(resultData);
                      });
 
-                     // If data sources have more than 1, then add label of data source
+                     // If data sources have more than 1 or the result data more than 1 items, then add label of data source
                      let datacollectionData =
                         dcValues.length > 1 ? dcValues : dcValues[0];
-                     if (isDcLabelAdded) {
+                     if (
+                        isDcLabelAdded ||
+                        (Array.isArray(datacollectionData) &&
+                           datacollectionData.length > 1)
+                     ) {
                         (dc.translations || []).forEach((tran) => {
                            reportValues[tran.label] = datacollectionData;
                         });

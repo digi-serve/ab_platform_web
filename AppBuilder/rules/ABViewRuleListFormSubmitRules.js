@@ -36,13 +36,13 @@ module.exports = class ABViewRuleListFormSubmitRules extends ABViewRuleList {
       var listActions = [
          new RoleConfirmMessage(
             this.App,
-            this.idBase + "_ruleActionConfirmMessage"
+            `${this.idBase}_ruleActionConfirmMessage`
          ),
-         new RuleExistPage(this.App, this.idBase + "_ruleActionExistPage"),
-         new RuleParentPage(this.App, this.idBase + "_ruleActionParentPage"),
-         new RuleClosePopup(this.App, this.idBase + "_ruleActionClosePopup"),
-         new RuleWebsite(this.App, this.idBase + "_ruleActionWebsite"),
-         new RuleEmail(this.App, this.idBase + "_ruleActionEmail"),
+         new RuleExistPage(this.App, `${this.idBase}_ruleActionExistPage`),
+         new RuleParentPage(this.App, `${this.idBase}_ruleActionParentPage`),
+         new RuleClosePopup(this.App, `${this.idBase}_ruleActionClosePopup`),
+         new RuleWebsite(this.App, `${this.idBase}_ruleActionWebsite`),
+         new RuleEmail(this.App, `${this.idBase}_ruleActionEmail`),
       ];
 
       var Rule = new ABViewRule(listActions);

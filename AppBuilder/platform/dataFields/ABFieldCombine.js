@@ -1,6 +1,8 @@
 var ABFieldCombineCore = require("../../core/dataFields/ABFieldCombineCore");
 var ABFieldComponent = require("./ABFieldComponent");
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 var ids = {
    combinedFields: "ab-new-combined-combinedFields",
 };
@@ -22,30 +24,29 @@ var ABFieldCombineComponent = new ABFieldComponent({
 
    elements: (App, field) => {
       ids = field.idsUnique(ids, App);
-      var L = App.Label;
 
       return [
          {
             id: ids.combinedFields,
             name: "combinedFields",
             view: "multicombo",
-            label: L("ab.combined.combinedFields", "*Combined Fields"),
-            labelWidth: App.config.labelWidthXLarge,
+            label: L("Combined Fields"),
+            labelWidth: this.AB.UISettings.config().labelWidthXLarge,
             disallowEdit: true,
             options: [],
          },
          {
             view: "richselect",
             name: "delimiter",
-            label: L("ab.combined.delimiter", "*Delimiter"),
+            label: L("Delimiter"),
             value: defaultValues.delimiter,
-            labelWidth: App.config.labelWidthXLarge,
+            labelWidth: this.AB.UISettings.config().labelWidthXLarge,
             disallowEdit: true,
             options: [
-               { id: "plus", value: "Plus ( + )" },
-               { id: "dash", value: "Dash ( - )" },
-               { id: "period", value: "Period ( . )" },
-               { id: "space", value: "Space ( )" },
+               { id: "plus", value: L("Plus ( + )") },
+               { id: "dash", value: L("Dash ( - )") },
+               { id: "period", value: L("Period ( . )") },
+               { id: "space", value: L("Space ( )") },
             ],
          },
       ];

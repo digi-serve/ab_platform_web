@@ -8,23 +8,21 @@
 const ABComponent = require("../AppBuilder/platform/ABComponent");
 const RowUpdater = require("../AppBuilder/platform/RowUpdater");
 
-module.exports = class AB_Work_Object_Workspace_PopupMassUpdate extends ABComponent {
+module.exports = class AB_Work_Object_Workspace_PopupMassUpdate extends (
+   ABComponent
+) {
    //.extend(idBase, function(App) {
 
    constructor(App, idBase) {
       idBase = idBase || "ab_work_object_workspace_popupMassUpdate";
 
       super(App, idBase);
-      let L = this.Label;
-
-      let labels = {
-         common: App.labels,
-      };
+      let L = this.Label();
 
       // internal list of Webix IDs to reference our UI components
       let ids = {
-         component: this.unique(idBase + "_popupMassUpdate"),
-         submit: this.unique(idBase + "_submitMassUpdate"),
+         component: this.unique(`${idBase}_popupMassUpdate`),
+         submit: this.unique(`${idBase}_submitMassUpdate`),
       };
 
       let rowUpdater = new RowUpdater(App, idBase);
@@ -45,7 +43,7 @@ module.exports = class AB_Work_Object_Workspace_PopupMassUpdate extends ABCompon
                      {},
                      {
                         view: "button",
-                        value: L("ab.common.cancel", "*Cancel"),
+                        value: L("Cancel"),
                         width: 100,
                         click: () => {
                            _logic.hide();
@@ -55,7 +53,7 @@ module.exports = class AB_Work_Object_Workspace_PopupMassUpdate extends ABCompon
                         id: ids.submit,
                         css: "webix_primary",
                         view: "button",
-                        label: L("ab.common.update", "*Update"),
+                        label: L("Update"),
                         type: "form",
                         width: 120,
                         click: () => {
@@ -195,19 +193,16 @@ module.exports = class AB_Work_Object_Workspace_PopupMassUpdate extends ABCompon
 
             let vals = {};
             update_items.forEach((item) => {
-               let fieldInfo = CurrentObject.fields(
-                  (f) => f.id == item.fieldId
-               )[0];
+               let fieldInfo = CurrentObject.fieldByID(item.fieldId);
                if (!fieldInfo) return;
 
                vals[fieldInfo.columnName] = item.value;
             });
 
             if (updatedRowIds.length > 0) {
-               this.AB.Dialog.Confirm({
-                  title: L("key.updating.mutiple", "Updating Multiple Records"),
+               webix.confirm({
+                  title: L("Updating Multiple Records"),
                   text: L(
-                     "key.are.you.sure",
                      "Are you sure you want to update the selected records?"
                   ),
                   callback: function (result) {
@@ -250,10 +245,9 @@ module.exports = class AB_Work_Object_Workspace_PopupMassUpdate extends ABCompon
                   },
                });
             } else {
-               this.AB.Dialog.Alert({
-                  title: L("key.no.records.selected", "No Records Selected"),
+               webix.alert({
+                  title: L("No Records Selected"),
                   text: L(
-                     "key.select.one",
                      "You need to select at least one record...did you drink your coffee today?"
                   ),
                });

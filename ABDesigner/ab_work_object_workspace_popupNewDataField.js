@@ -8,32 +8,25 @@
 const ABComponent = require("../AppBuilder/platform/ABComponent");
 const ABFieldManager = require("../AppBuilder/core/ABFieldManager");
 
-module.exports = class AB_Work_Object_Workspace_PopupNewDataField extends ABComponent {
+module.exports = class AB_Work_Object_Workspace_PopupNewDataField extends (
+   ABComponent
+) {
    //.extend(idBase, function(App) {
 
    constructor(App, idBase) {
       idBase = idBase || "ab_work_object_workspace_popupNewDataField";
 
       super(App, idBase);
-      var L = this.Label;
-
-      var labels = {
-         common: App.labels,
-         component: {
-            fieldType: L("ab.add_fields.fieldType", "*Field type"),
-            label: L("ab.add_fields.label", "*Label"),
-            addNewField: L("ab.add_fields.addNewField", "*Add Column"),
-         },
-      };
+      var L = this.Label();
 
       // internal list of Webix IDs to reference our UI components.
       var ids = {
-         component: this.unique(idBase + "_popNewField"),
-         types: this.unique(idBase + "_popNewField_types"),
-         editDefinitions: this.unique(idBase + "_popNewField_editDefinitions"),
+         component: this.unique(`${idBase}_popNewField`),
+         types: this.unique(`${idBase}_popNewField_types`),
+         editDefinitions: this.unique(`${idBase}_popNewField_editDefinitions`),
 
-         buttonSave: this.unique(idBase + "_popNewField_buttonSave"),
-         buttonCancel: this.unique(idBase + "_popNewField_buttonCancel"),
+         buttonSave: this.unique(`${idBase}_popNewField_buttonSave`),
+         buttonCancel: this.unique(`${idBase}_popNewField_buttonCancel`),
       };
 
       // Our webix UI definition:
@@ -51,13 +44,13 @@ module.exports = class AB_Work_Object_Workspace_PopupNewDataField extends ABComp
             cols: [
                {
                   view: "label",
-                  label: L("ab.add_fields.fieldAddNew", "*Add new field"),
+                  label: L("Add new field"),
                   css: "modal_title",
                   align: "center",
                },
                {
                   view: "button",
-                  label: labels.common.close,
+                  label: L("Close"),
                   autowidth: true,
                   align: "center",
                   click: function () {
@@ -82,8 +75,8 @@ module.exports = class AB_Work_Object_Workspace_PopupNewDataField extends ABComp
                   {
                      view: "richselect",
                      id: ids.types,
-                     label: labels.component.fieldType,
-                     labelWidth: App.config.labelWidthLarge,
+                     label: L("Field type"),
+                     labelWidth: this.AB.UISettings.config().labelWidthLarge,
                      options: [
                         //We will add these later
                         { id: "temporary", view: "temporary" },
@@ -107,7 +100,7 @@ module.exports = class AB_Work_Object_Workspace_PopupNewDataField extends ABComp
                         {
                            id: "del_me",
                            view: "label",
-                           label: "edit definition here",
+                           label: L("edit definition here"),
                         },
                      ],
                   },
@@ -117,7 +110,7 @@ module.exports = class AB_Work_Object_Workspace_PopupNewDataField extends ABComp
                         { fillspace: true },
                         {
                            view: "button",
-                           value: labels.common.cancel,
+                           value: L("Cancel"),
                            css: "ab-cancel-button",
                            autowidth: true,
                            click: function () {
@@ -128,7 +121,7 @@ module.exports = class AB_Work_Object_Workspace_PopupNewDataField extends ABComp
                            view: "button",
                            css: "webix_primary",
                            id: ids.buttonSave,
-                           label: labels.component.addNewField,
+                           label: L("Add Column"),
                            autowidth: true,
                            type: "form",
                            click: function () {
@@ -166,7 +159,7 @@ module.exports = class AB_Work_Object_Workspace_PopupNewDataField extends ABComp
       // Our init() function for setting up our UI
       this.init = (options) => {
          // register our callbacks:
-         for (var c in _logic.callbacks) {
+         for (let c in _logic.callbacks) {
             _logic.callbacks[c] = options[c] || _logic.callbacks[c];
          }
 
@@ -220,7 +213,7 @@ module.exports = class AB_Work_Object_Workspace_PopupNewDataField extends ABComp
          webix.ui(newEditorList, $$(ids.editDefinitions));
 
          // init & hide all the unused editors:
-         for (var c in _componentHash) {
+         for (let c in _componentHash) {
             _componentHash[c].init();
 
             _componentHash[c].hide();
@@ -279,7 +272,7 @@ module.exports = class AB_Work_Object_Workspace_PopupNewDataField extends ABComp
             $$(ids.component).hide();
          },
 
-         buttonSave: function () {
+         buttonSave: async function () {
             $$(ids.buttonSave).disable();
             // show progress
             $$(ids.component).showProgress();
@@ -288,7 +281,7 @@ module.exports = class AB_Work_Object_Workspace_PopupNewDataField extends ABComp
             if (editor) {
                // the editor can define some basic form validations.
                if (editor.isValid()) {
-                  var vals = _.cloneDeep(editor.values());
+                  var vals = this.AB.cloneDeep(editor.values());
 
                   var field = null;
                   var oldData = null;
@@ -372,7 +365,7 @@ module.exports = class AB_Work_Object_Workspace_PopupNewDataField extends ABComp
                      oldData = _editField.toObj();
 
                      // update changed values to old data
-                     var updateValues = _.cloneDeep(oldData);
+                     var updateValues = this.AB.cloneDeep(oldData);
                      for (let key in vals) {
                         // update each values of .settings
                         if (
@@ -390,7 +383,7 @@ module.exports = class AB_Work_Object_Workspace_PopupNewDataField extends ABComp
                         } else {
                            updateValues[key] = vals[key];
                         }
-		     }
+                     }
 
                      _editField.fromValues(updateValues);
 
@@ -410,112 +403,85 @@ module.exports = class AB_Work_Object_Workspace_PopupNewDataField extends ABComp
                      $$(ids.buttonSave).enable();
                      $$(ids.component).hideProgress();
                   } else {
-                     field
-                        .save()
-                        .then(() => {
-                           var finishUpdateField = () => {
-                              $$(ids.buttonSave).enable();
-                              $$(ids.component).hideProgress();
-                              _currentEditor.clear();
-                              _logic.hide();
-                              _logic.callbacks.onSave(field);
-                           };
+                     try {
+                        await field.save();
 
-                           var refreshModels = () => {
-                              // refresh linked object model
-                              linkCol.object.model().refresh();
+                        let finishUpdateField = () => {
+                           $$(ids.buttonSave).enable();
+                           $$(ids.component).hideProgress();
+                           _currentEditor.clear();
+                           _logic.hide();
+                           _logic.callbacks.onSave(field);
+                        };
 
-                              // refresh source object model
-                              // NOTE: M:1 relation has to refresh model after linked object's refreshed
-                              field.object.model().refresh();
-                           };
+                        let refreshModels = () => {
+                           // refresh linked object model
+                           linkCol.object.model().refresh();
 
-                           // TODO workaround : update link column id
-                           if (linkCol != null) {
-                              linkCol.settings.linkColumn = field.id;
-                              return linkCol
-                                 .save()
-                                 .then(() => {
-                                    // now linkCol has an .id, so update our field:
-                                    field.settings.linkColumn = linkCol.id;
-                                    return field.save();
-                                 })
-                                 .then(() => {
-                                    // when add new link fields, then run create migrate fields here
-                                    if (!_editField) {
-                                       return Promise.resolve()
-                                          .then(() => {
-                                             return new Promise((next, err) => {
-                                                field
-                                                   .migrateCreate()
-                                                   .catch(err)
-                                                   .then(() => next());
-                                             });
-                                          })
-                                          .then(() => {
-                                             return new Promise((next, err) => {
-                                                linkCol
-                                                   .migrateCreate()
-                                                   .catch(err)
-                                                   .then(() => next());
-                                             });
-                                          })
-                                          .then(() => {
-                                             // return new Promise((next, err) => {
-                                             refreshModels();
-                                             finishUpdateField();
+                           // refresh source object model
+                           // NOTE: M:1 relation has to refresh model after linked object's refreshed
+                           field.object.model().refresh();
+                        };
 
-                                             //    next();
-                                             // });
-                                          });
-                                    } else {
-                                       refreshModels();
-                                       finishUpdateField();
-                                    }
-                                 });
-                           } else {
-                              finishUpdateField();
+                        // TODO workaround : update link column id
+                        if (linkCol != null) {
+                           linkCol.settings.linkColumn = field.id;
+                           await linkCol.save();
+
+                           // now linkCol has an .id, so update our field:
+                           field.settings.linkColumn = linkCol.id;
+                           await field.save();
+
+                           // when add new link fields, then run create migrate fields here
+                           if (!_editField) {
+                              await field.migrateCreate();
+                              await linkCol.migrateCreate();
                            }
-                        })
-                        .catch((err) => {
-                           if (
-                              OP.Validation.isFormValidationError(
-                                 err,
-                                 $$(editor.ui.id)
-                              )
-                           ) {
-                              // for validation errors, keep things in place
-                              // and let the user fix the data:
-                              $$(ids.buttonSave).enable();
-                              $$(ids.component).hideProgress();
-                           } else {
-                              var errMsg = err.toString();
-                              if (err.message) {
-                                 errMsg = err.message;
-                              }
-                              webix.alert({
-                                 title: "Error saving fields.",
-                                 ok: "tell appdev",
-                                 text: errMsg,
-                                 type: "alert-error",
-                              });
 
-                              // Q: if not validation error, do we
-                              // then field.destroy() ? and let them try again?
-                              // $$(ids.buttonSave).enable();
-                              // $$(ids.component).hideProgress();
-                           }
-                        });
+                           refreshModels();
+                           finishUpdateField();
+                        } else {
+                           finishUpdateField();
+                        }
+                     } catch (err) {
+                        // if (
+                        //    OP.Validation.isFormValidationError(
+                        //       err,
+                        //       $$(editor.ui.id)
+                        //    )
+                        // ) {
+                        //    // for validation errors, keep things in place
+                        //    // and let the user fix the data:
+                        //    $$(ids.buttonSave).enable();
+                        //    $$(ids.component).hideProgress();
+                        // } else {
+                        //    var errMsg = err.toString();
+                        //    if (err.message) {
+                        //       errMsg = err.message;
+                        //    }
+                        //    webix.alert({
+                        //       title: "Error saving fields.",
+                        //       ok: "tell appdev",
+                        //       text: errMsg,
+                        //       type: "alert-error",
+                        //    });
+                        //    // Q: if not validation error, do we
+                        //    // then field.destroy() ? and let them try again?
+                        //    // $$(ids.buttonSave).enable();
+                        //    // $$(ids.component).hideProgress();
+                        // }
+                     }
                   }
                } else {
                   $$(ids.buttonSave).enable();
                   $$(ids.component).hideProgress();
                }
             } else {
-               OP.Dialog.Alert({
-                  title: "! Could not find the current editor.",
-                  text: "go tell a developer about this.",
-               });
+               this.AB.notify.developer(
+                  new Error("Could not find the current editor."),
+                  {}
+               );
+
                $$(ids.buttonSave).enable();
                $$(ids.component).hideProgress();
             }
@@ -589,7 +555,7 @@ module.exports = class AB_Work_Object_Workspace_PopupNewDataField extends ABComp
             $$(ids.types).show();
 
             // change button text to 'add'
-            $$(ids.buttonSave).define("label", labels.component.addNewField);
+            $$(ids.buttonSave).define("label", L("Add Column"));
             $$(ids.buttonSave).refresh();
          },
 
@@ -637,7 +603,7 @@ module.exports = class AB_Work_Object_Workspace_PopupNewDataField extends ABComp
             $$(ids.types).hide();
 
             // change button text to 'save'
-            $$(ids.buttonSave).define("label", labels.common.save);
+            $$(ids.buttonSave).define("label", L("Save"));
             $$(ids.buttonSave).refresh();
          },
 

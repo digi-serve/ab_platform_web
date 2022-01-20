@@ -12,8 +12,10 @@
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 module.exports = {
    env: {
+      browser: true,
       node: true,
       es6: true,
+      amd: true,
    },
 
    globals: {
@@ -49,5 +51,16 @@ module.exports = {
 
       // eslint rule customization here:
       "no-console": 0, // allow console.log() in our services
+      "no-unused-vars": 0, // allow unused variables (webpack will remove them)
+   },
+
+   globals: {
+      AB: true, // global ABFactory
+      io: true, // socket.io
+      reports: true, // webix's Report Manager widget
+      tinymce: true,
+      Selectivity: true,
+      webix: true, // webix
+      $$: true, // webix element
    },
 };

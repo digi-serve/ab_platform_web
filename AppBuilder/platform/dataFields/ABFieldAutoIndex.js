@@ -1,6 +1,8 @@
 var ABFieldAutoIndexCore = require("../../core/dataFields/ABFieldAutoIndexCore");
 var ABFieldComponent = require("./ABFieldComponent");
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 var ids = {
    prefixText: "prefixText",
    delimiterText: "delimiterText",
@@ -47,16 +49,14 @@ var ABFieldAutoIndexComponent = new ABFieldComponent({
    elements: (App, field) => {
       ids = field.idsUnique(ids, App);
 
-      var L = App.Label;
-
       return [
          {
             id: ids.prefixText,
             view: "text",
             name: "prefix",
-            labelWidth: App.config.labelWidthLarge,
-            label: L("ab.dataField.prefixText", "*Prefix"),
-            placeholder: L("ab.dataField.prefixTextPlaceholder", "*US"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
+            label: L("Prefix"),
+            placeholder: L("US"),
             on: {
                onChange: (newVal, oldVal) => {
                   previewChange();
@@ -67,8 +67,8 @@ var ABFieldAutoIndexComponent = new ABFieldComponent({
             id: ids.delimiterText,
             view: "richselect",
             name: "delimiter",
-            labelWidth: App.config.labelWidthLarge,
-            label: L("ab.dataField.delimiter", "*Delimiter"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
+            label: L("Delimiter"),
             value: "dash",
             options: ABFieldAutoIndexCore.delimiterList(),
             on: {
@@ -81,8 +81,8 @@ var ABFieldAutoIndexComponent = new ABFieldComponent({
             id: ids.displayLength,
             view: "counter",
             name: "displayLength",
-            labelWidth: App.config.labelWidthLarge,
-            label: L("ab.dataField.displayLength", "*Length"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
+            label: L("Length"),
             step: 1,
             value: 4,
             min: 1,
@@ -97,8 +97,8 @@ var ABFieldAutoIndexComponent = new ABFieldComponent({
             id: ids.previewText,
             view: "text",
             name: "previewText",
-            labelWidth: App.config.labelWidthLarge,
-            label: L("ab.dataField.previewText", "*Preview"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
+            label: L("Preview"),
             disabled: true,
          },
          // {
@@ -112,7 +112,7 @@ var ABFieldAutoIndexComponent = new ABFieldComponent({
          // 	view: "checkbox",
          // 	name:'supportMultilingual',
          // 	labelRight: L('ab.dataField.string.supportMultilingual', '*Support multilingual'),
-         // 	labelWidth: App.config.labelWidthCheckbox,
+         // 	labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
          // 	value: true
          // }
       ];

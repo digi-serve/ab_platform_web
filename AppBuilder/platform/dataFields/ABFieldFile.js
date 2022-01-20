@@ -1,6 +1,8 @@
 var ABFieldFileCore = require("../../core/dataFields/ABFieldFileCore");
 var ABFieldComponent = require("./ABFieldComponent");
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 /**
  * ABFieldFileComponent
  *
@@ -20,7 +22,6 @@ var ABFieldFileComponent = new ABFieldComponent({
          fileType: "",
       };
       ids = field.idsUnique(ids, App);
-      var L = App.Label;
 
       return [
          {
@@ -28,7 +29,7 @@ var ABFieldFileComponent = new ABFieldComponent({
                {
                   view: "checkbox",
                   name: "limitFileSize",
-                  labelRight: L("ab.dataField.file.fileSize", "*Size (MB)"),
+                  labelRight: L("Size (MB)"),
                   width: 120,
                   labelWidth: 0,
                   value: 1,
@@ -49,7 +50,7 @@ var ABFieldFileComponent = new ABFieldComponent({
                {
                   view: "checkbox",
                   name: "limitFileType",
-                  labelRight: L("ab.dataField.file.fileType", "*Type"),
+                  labelRight: L("Type"),
                   width: 120,
                   labelWidth: 0,
                   value: 1,
@@ -61,10 +62,7 @@ var ABFieldFileComponent = new ABFieldComponent({
                {
                   view: "text",
                   name: "fileType",
-                  placeholder: L(
-                     "ab.dataField.file.fileTypePlaceholder",
-                     "txt,rtf,doc,docx,..."
-                  ),
+                  placeholder: L("txt,rtf,doc,docx,..."),
                   id: ids.fileType,
                },
             ],
@@ -157,41 +155,44 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
     * @function destroy
     * On a destroy operation, ask if the user wants to keep the related file.
     */
-   destroy() {
-      var L = this.AB.Label();
-
+   async destroy() {
       return new Promise((resolve, reject) => {
          // verify we have been .save()d before:
-         if (this.id) {
-            // Ask the user what to do about the existing file:
-            this.AB.Dialog.Confirm({
-               title: L("ab.dataField.file.keepFiles", "*Keep Files?"),
-               message: L(
-                  "ab.dataField.file.keepFIlesDescription",
-                  "*Do you want to keep the files referenced by {0}?",
-                  [this.label]
-               ),
-               callback: (result) => {
-                  // update this setting so the server can respond correctly in
-                  // ABFieldFile.migrateDrop()
-                  this.settings.removeExistingData = result ? 0 : 1;
-                  this.save()
-                     .then(() => {
-                        // TODO: a reminder that you still got alot on the server to do!
-                        this.AB.Dialog.Alert({
-                           title: "!! TODO !!",
-                           text:
-                              "Tell a Developer to actually pay attention to this!",
-                        });
-                        // now the default .destroy()
-                        super.destroy().then(resolve).catch(reject);
-                     })
-                     .catch(reject);
-               },
-            });
-         } else {
-            resolve(); // nothing to do really
+         if (!this.id) {
+            resolve();
+            return;
          }
+
+         // Ask the user what to do about the existing file:
+         webix.confirm({
+            title: L("Keep Files?"),
+            message: L("Do you want to keep the files referenced by {0}?", [
+               this.label,
+            ]),
+            callback: async (result) => {
+               // update this setting so the server can respond correctly in
+               // ABFieldFile.migrateDrop()
+               this.settings.removeExistingData = result ? 0 : 1;
+
+               try {
+                  await this.save();
+
+                  // TODO: a reminder that you still got alot on the server to do!
+                  webix.alert({
+                     title: "!! TODO !!",
+                     text:
+                        "Tell a Developer to actually pay attention to this!",
+                  });
+
+                  // now the default .destroy()
+                  await super.destroy();
+
+                  resolve();
+               } catch (err) {
+                  reject(err);
+               }
+            },
+         });
       });
    }
 
@@ -242,8 +243,6 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
       if (!node) {
          return;
       }
-      var L = App.Label;
-
       options = options || {};
 
       var typesList = [];
@@ -311,11 +310,9 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
                      var type = item.type.toLowerCase();
                      if (acceptableTypes.indexOf(type) == -1) {
                         webix.message(
-                           L(
-                              "Only [{0}] files are supported",
-                              "Only [{0}] files are supported",
-                              [acceptableTypes.join(", ")]
-                           )
+                           L("Only [{0}] files are supported", [
+                              acceptableTypes.join(", "),
+                           ])
                         );
                         return false;
                      }
@@ -327,11 +324,7 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
                      var acceptableSizes = maximumSize * 1000000;
                      if (item.size > acceptableSizes) {
                         webix.message(
-                           L(
-                              "Maximum file size is {0}MB",
-                              "Maximum file size is {0}MB",
-                              [maximumSize]
-                           )
+                           L("Maximum file size is {0}MB", [maximumSize])
                         );
                         return false;
                      }
@@ -345,7 +338,7 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
                },
 
                // when upload is complete:
-               onFileUpload: (item, response) => {
+               onFileUpload: async (item, response) => {
                   webixContainer.hideProgress();
                   // this.showFile(idBase, response.data.uuid);
 
@@ -356,25 +349,23 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
 
                   // update just this value on our current object.model
                   if (row.id) {
-                     this.object
-                        .model()
-                        .update(row.id, values)
-                        .then(() => {
-                           // update the client side data object as well so other data changes won't cause this save to be reverted
-                           if ($$(node) && $$(node).updateItem)
-                              $$(node).updateItem(row.id, values);
-                        })
-                        .catch((err) => {
-                           node.classList.add("webix_invalid");
-                           node.classList.add("webix_invalid_cell");
+                     try {
+                        await this.object.model().update(row.id, values);
 
-                           this.AB.notify.developer(err, {
-                              context:
-                                 "ABFieldFile.onFileUpload(): Error updating our entry.",
-                              row: row,
-                              values: values,
-                           });
+                        // update the client side data object as well so other data changes won't cause this save to be reverted
+                        if ($$(node) && $$(node).updateItem)
+                           $$(node).updateItem(row.id, values);
+                     } catch (err) {
+                        node.classList.add("webix_invalid");
+                        node.classList.add("webix_invalid_cell");
+
+                        this.AB.notify.developer(err, {
+                           context:
+                              "ABFieldFile.onFileUpload(): Error updating our entry.",
+                           row: row,
+                           values: values,
                         });
+                     }
                   }
 
                   // update value in the form component
@@ -383,7 +374,10 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
 
                // if an error was returned
                onFileUploadError: (item, response) => {
-                  this.AB.error("Error loading file", response);
+                  this.AB.notify.developer(new Error("Error loading file"), {
+                     message: "Error loading file",
+                     response,
+                  });
                   webixContainer.hideProgress();
                },
             },
@@ -411,20 +405,15 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
     * @param {HtmlDOM} node  the HTML Dom object for this field's display.
     */
    customEdit(row, App, node) {
-      var L = App.Label;
-
       if (this.deleteFile == true) {
          // remove the property because it is only needed to prevent the file dialog from showing
          delete this.deleteFile;
 
          // Ask the user if they really want to delete the photo
-         this.AB.Dialog.Confirm({
+         webix.confirm({
             title: "",
-            message: L(
-               "ab.dataField.file.removeFileDescription",
-               "*Are you sure you want to remove this file?"
-            ),
-            callback: (result) => {
+            message: L("Are you sure you want to remove this file?"),
+            callback: async (result) => {
                var confirmDelete = result ? 1 : 0;
                if (confirmDelete) {
                   // update just this value on our current object.model
@@ -432,24 +421,22 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
                   values[this.columnName] = "";
 
                   if (row.id) {
-                     this.object
-                        .model()
-                        .update(row.id, values)
-                        .then(() => {
-                           // update the client side data object as well so other data changes won't cause this save to be reverted
-                           if ($$(node) && $$(node).updateItem)
-                              $$(node).updateItem(row.id, values);
-                        })
-                        .catch((err) => {
-                           node.classList.add("webix_invalid");
-                           node.classList.add("webix_invalid_cell");
+                     try {
+                        await this.object.model().update(row.id, values);
 
-                           this.AB.error("Error updating our entry.", {
-                              error: err,
-                              row: row,
-                              values: values,
-                           });
+                        // update the client side data object as well so other data changes won't cause this save to be reverted
+                        if ($$(node) && $$(node).updateItem)
+                           $$(node).updateItem(row.id, values);
+                     } catch (err) {
+                        node.classList.add("webix_invalid");
+                        node.classList.add("webix_invalid_cell");
+
+                        this.AB.notify.developer(err, {
+                           message: "Error updating our entry.",
+                           row: row,
+                           values: values,
                         });
+                     }
                   }
                   // update value in the form component
                   else {
@@ -500,8 +487,6 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
    //File Template
 
    fileTemplate(obj, editable) {
-      var L = this.AB.Label();
-
       var iconDisplay = "";
       var fileDisplay = "display:none;";
       var fileURL = "";
@@ -522,35 +507,17 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
       }
 
       var html = [
-         '<div class="file-data-field-icon" style="text-align: center; height: inherit; display: table-cell; vertical-align: middle; border: 2px dotted #CCC; background: #FFF; border-radius: 10px; font-size: 11px; line-height: 13px; padding: 0 10px; ' +
-            iconDisplay +
-            '"><i class="fa fa-file fa-2x" style="opacity: 0.6; font-size: 32px; margin-top: 3px; margin-bottom: 5px;"></i>#drag#</div>',
-         '<div class="file-data-field-name" style="' +
-            fileDisplay +
-            ' width:100%; height:100%; position:relative; "><a target="_blank" href="' +
-            fileURL +
-            '">' +
-            (name || "") +
-            "</a>#remove#</div>",
+         `<div class="file-data-field-icon" style="text-align: center; height: inherit; display: table-cell; vertical-align: middle; border: 2px dotted #CCC; background: #FFF; border-radius: 10px; font-size: 11px; line-height: 13px; padding: 0 10px; ${iconDisplay}"><i class="fa fa-file fa-2x" style="opacity: 0.6; font-size: 32px; margin-top: 3px; margin-bottom: 5px;"></i>${
+            editable ? `<br/>${L("Drag and drop or click here")}` : ""
+         }</div>`,
+         `<div class="file-data-field-name" style=" width:100%; height:100%; position:relative; "><a target="_blank" href="${fileURL}">${
+            name || ""
+         }</a>${
+            editable
+               ? `<a style="${fileDisplay}" class="ab-delete-photo" href="javascript:void(0);"><i class="fa fa-times delete-image"></i></a>`
+               : ""
+         }</div>`,
       ].join("");
-
-      html = html.replace(
-         "#drag#",
-         editable
-            ? `<br/>${L(
-                 "Drag and drop or click here",
-                 "Drag and drop or click here"
-              )}`
-            : ""
-      );
-      html = html.replace(
-         "#remove#",
-         editable
-            ? '<a style="' +
-                 fileDisplay +
-                 '" class="ab-delete-photo" href="javascript:void(0);"><i class="fa fa-times delete-image"></i></a>'
-            : ""
-      );
 
       return html;
    }

@@ -2,6 +2,8 @@ const ABEmitter = require("./ABEmitter");
 
 const CustomComponentManager = require("../../webix_custom_components/customComponentManager");
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 module.exports = class ABComponent extends ABEmitter {
    /**
     * @param {object} App
@@ -23,8 +25,6 @@ module.exports = class ABComponent extends ABEmitter {
          this.AB = AB;
          // {ABFactory} AB
       }
-
-      var L = this.Label();
 
       if (!App) {
          if (AB._App) {
@@ -137,7 +137,7 @@ module.exports = class ABComponent extends ABEmitter {
                 * @return {string}
                 */
                unique: function (key) {
-                  return key + this.uuid;
+                  return `${key}${this.uuid}`;
                },
             };
             AB._App = App;
@@ -175,6 +175,6 @@ module.exports = class ABComponent extends ABEmitter {
    }
 
    unique(key) {
-      return this.App.unique(this.idBase + "_" + key);
+      return this.App.unique(`${this.idBase}_${key}`);
    }
 };

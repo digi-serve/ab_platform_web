@@ -2,6 +2,8 @@ const ABViewChartAreaCore = require("../../core/views/ABViewChartAreaCore");
 
 const ABViewChartAreaPropertyComponentDefaults = ABViewChartAreaCore.defaultValues();
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 module.exports = class ABViewChartArea extends ABViewChartAreaCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -22,7 +24,7 @@ module.exports = class ABViewChartArea extends ABViewChartAreaCore {
    editorComponent(App, mode) {
       let idBase = "ABViewChartAreaEditorComponent";
       let ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
       let baseEditor = super.editorComponent(App, mode, {
          componentId: ids.component,
@@ -42,7 +44,6 @@ module.exports = class ABViewChartArea extends ABViewChartAreaCore {
          _logic,
          ObjectDefaults
       );
-      var L = App.Label;
 
       // in addition to the common .label  values, we
       // ask for:
@@ -50,19 +51,16 @@ module.exports = class ABViewChartArea extends ABViewChartAreaCore {
          {
             name: "areaType",
             view: "richselect",
-            label: L("ab.component.chart.area.areaType", "*Chart Type"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Chart Type"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             options: [
                {
                   id: "area",
-                  value: L("ab.component.chart.area.area", "*Area"),
+                  value: L("Area"),
                },
                {
                   id: "stackedArea",
-                  value: L(
-                     "ab.component.chart.area.stackedArea",
-                     "*Stacked Area"
-                  ),
+                  value: L("Stacked Area"),
                },
             ],
          },
@@ -76,35 +74,32 @@ module.exports = class ABViewChartArea extends ABViewChartAreaCore {
             name: "chartHeight",
             view: "counter",
             min: 1,
-            label: L("ab.component.chart.area.chartHeight", "*Height"),
+            label: L("Height"),
          },
          {
             name: "stepValue",
             view: "counter",
             min: 1,
-            label: L("ab.component.chart.area.stepValue", "*Step"),
+            label: L("Step"),
          },
          {
             name: "maxValue",
             view: "counter",
             min: 1,
-            label: L("ab.component.chart.area.maxValue", "*Max Value"),
+            label: L("Max Value"),
          },
          {
             name: "labelFontSize",
             view: "counter",
             min: 1,
-            label: L(
-               "ab.component.chart.area.labelFontSize",
-               "*Label Font Size"
-            ),
-            labelWidth: App.config.labelWidthXLarge,
+            label: L("Label Font Size"),
+            labelWidth: this.AB.UISettings.config().labelWidthXLarge,
          },
          {
             name: "isLegend",
             view: "checkbox",
-            labelRight: L("ab.component.chart.isLegend", "*Show Legend"),
-            labelWidth: App.config.labelWidthCheckbox,
+            labelRight: L("Show Legend"),
+            labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
          },
       ]);
    }
@@ -176,7 +171,7 @@ module.exports = class ABViewChartArea extends ABViewChartAreaCore {
 
       var idBase = "ABViewChartArea_" + this.id;
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       var _ui = {

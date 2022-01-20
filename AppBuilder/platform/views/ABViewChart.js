@@ -2,6 +2,8 @@ const ABViewChartCore = require("../../core/views/ABViewChartCore");
 
 const ABViewChartPropertyComponentDefaults = ABViewChartCore.defaultValues();
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 module.exports = class ABViewChart extends ABViewChartCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -35,7 +37,6 @@ module.exports = class ABViewChart extends ABViewChartCore {
          _logic,
          ObjectDefaults
       );
-      var L = App.Label;
       this._App = App; // #Hack!!
 
       _logic.enableMultipleSeries = (isEnable) => {
@@ -53,8 +54,8 @@ module.exports = class ABViewChart extends ABViewChartCore {
          {
             name: "multipleSeries",
             view: "checkbox",
-            label: L("ab.component.chart.isMultipleSeries", "*Multiple Series"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Multiple Series"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             on: {
                onChange: _logic.enableMultipleSeries,
             },
@@ -62,66 +63,66 @@ module.exports = class ABViewChart extends ABViewChartCore {
          {
             name: "dataview",
             view: "richselect",
-            label: L("ab.component.chart.dataSource", "*Chart Data"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Chart Data"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             name: "columnLabel",
             view: "richselect",
-            label: L("ab.component.chart.columnLabel", "*Label Column"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Label Column"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             name: "columnValue",
             view: "richselect",
-            label: L("ab.component.chart.columnValue", "*Value Column"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Value Column"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             name: "columnValue2",
             view: "richselect",
-            label: L("ab.component.chart.columnValue2", "*Value Column 2"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Value Column 2"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             name: "isPercentage",
             view: "checkbox",
-            labelRight: L("ab.component.chart.isPercentage", "*Percentage"),
-            labelWidth: App.config.labelWidthCheckbox,
+            labelRight: L("Percentage"),
+            labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
          },
          {
             name: "showLabel",
             view: "checkbox",
-            label: L("ab.components.common.showlabel", "*Display Label"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Display Label"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             name: "labelPosition",
             view: "richselect",
-            label: L("ab.components.common.labelPosition", "*Label Position"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Label Position"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             options: [
                {
                   id: "left",
-                  value: L("ab.components.common.left", "*Left"),
+                  value: L("Left"),
                },
                {
                   id: "top",
-                  value: L("ab.components.common.top", "*Top"),
+                  value: L("Top"),
                },
             ],
          },
          {
             name: "labelWidth",
             view: "counter",
-            label: L("ab.components.common.labelWidth", "*Label Width"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Label Width"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             view: "counter",
             name: "height",
-            label: L("ab.component.common.height", "*Height:"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Height:"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
       ]);
    }
@@ -151,7 +152,7 @@ module.exports = class ABViewChart extends ABViewChartCore {
       $$(ids.isPercentage).setValue(
          view.settings.isPercentage != null
             ? view.settings.isPercentage
-            : ABViewChartPiePropertyComponentDefaults.isPercentage
+            : ABViewChartPropertyComponentDefaults.isPercentage
       );
 
       $$(ids.showLabel).setValue(
@@ -215,12 +216,6 @@ module.exports = class ABViewChart extends ABViewChartCore {
    }
 
    static populateFieldOptions(ids, view) {
-      // #Hack!!
-      var L = (a, b) => b;
-      if (this._App) {
-         L = this._App.Label;
-      }
-
       // clear options
       $$(ids.columnLabel).define("options", []);
       $$(ids.columnLabel).refresh();
@@ -252,7 +247,7 @@ module.exports = class ABViewChart extends ABViewChartCore {
 
       var defaultOption = {
          id: "",
-         value: L("ab.component.label.selectColumn", "*Select a column"),
+         value: L("Select a column"),
          key: "",
       };
       columnLabelOptions.unshift(defaultOption);
@@ -269,12 +264,6 @@ module.exports = class ABViewChart extends ABViewChartCore {
 
    static populateFieldOptions2(ids, view) {
       // clear options
-      // #Hack!!
-      var L = (a, b) => b;
-      if (this._App) {
-         L = this._App.Label;
-      }
-
       $$(ids.columnValue2).define("options", []);
       $$(ids.columnValue2).refresh();
       $$(ids.columnValue2).enable();
@@ -299,7 +288,7 @@ module.exports = class ABViewChart extends ABViewChartCore {
 
       var defaultOption = {
          id: "",
-         value: L("ab.component.label.selectColumn", "*Select a column"),
+         value: L("Select a column"),
          key: "",
       };
       columnValueOptions.unshift(defaultOption);
@@ -317,7 +306,7 @@ module.exports = class ABViewChart extends ABViewChartCore {
    component(App) {
       var idBase = "ABViewChart_" + this.id;
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       // get webix.dashboard
@@ -443,26 +432,21 @@ module.exports = class ABViewChart extends ABViewChartCore {
       var sumNumber = 0;
       var sumNumber2 = 0;
       var countNumber = dInfo.length;
+      var obj;
 
       switch (valueCol.key) {
          case "formula":
             {
-               var obj = valueCol.object;
-               var objLink = this.AB.objects(
-                  (obj) => obj.id == valueCol.settings.object
-               )[0];
-               var fieldBase = obj.fields(
-                  (f) => f.id == valueCol.settings.field
-               )[0];
-               var fieldLink = objLink.fields(
-                  (f) => f.id == valueCol.settings.fieldLink
-               )[0];
+               obj = valueCol.object;
+               var objLink = this.AB.objectByID(valueCol.settings.object);
+               var fieldBase = obj.fieldByID(valueCol.settings.field);
+               var fieldLink = objLink.fieldByID(valueCol.settings.fieldLink);
             }
             break;
 
          case "calculate":
             {
-               var obj = valueCol.object;
+               obj = valueCol.object;
                var place = valueCol.settings.decimalPlaces;
             }
             break;
@@ -549,49 +533,39 @@ module.exports = class ABViewChart extends ABViewChartCore {
                         colName = colName.split(".")[1];
 
                      // if template does not contain, then should skip
-                     if (formula.indexOf("{" + colName + "}") < 0) return;
+                     if (formula.indexOf(`{${colName}}`) < 0) return;
 
                      // number fields
                      if (f.key == "number") {
-                        let numberVal = "(#numberVal#)".replace(
-                           "#numberVal#",
-                           item[f.columnName] || 0
-                        ); // (number) - NOTE : (-5) to support negative number
+                        let numberVal = `(${item[f.columnName] || 0})`; // (number) - NOTE : (-5) to support negative number
                         formula = formula.replace(
-                           new RegExp("{" + colName + "}", "g"),
+                           new RegExp(`{${colName}}`, "g"),
                            numberVal
                         );
                      }
                      // calculate and formula fields
                      else if (f.key == "calculate" || f.key == "formula") {
-                        let calVal = "(#calVal#)".replace(
-                           "#calVal#",
-                           f.format(item) || 0
-                        );
+                        let calVal = `(${f.format(item) || 0})`;
                         formula = formula.replace(
-                           new RegExp("{" + colName + "}", "g"),
+                           new RegExp(`{${colName}}`, "g"),
                            calVal
                         );
                      }
                      // date fields
                      else if (f.key == "date") {
-                        let dateVal = '"#dataVal#"'.replace(
-                           "#dataVal#",
+                        let dateVal = `"${
                            item[f.columnName] ? item[f.columnName] : ""
-                        ); // "date"
+                        }"`; // "date"
                         formula = formula.replace(
-                           new RegExp("{" + colName + "}", "g"),
+                           new RegExp(`{${colName}}`, "g"),
                            dateVal
                         );
                      }
                      // boolean fields
                      else if (f.key == "boolean") {
-                        let booleanVal = "(#booleanVal#)".replace(
-                           "#booleanVal#",
-                           item[f.columnName] || 0
-                        ); // show 1 or 0 for boolean
+                        let booleanVal = `(${item[f.columnName] || 0})`; // show 1 or 0 for boolean
                         formula = formula.replace(
-                           new RegExp("{" + colName + "}", "g"),
+                           new RegExp(`{${colName}}`, "g"),
                            booleanVal
                         );
                      }

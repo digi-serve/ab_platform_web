@@ -5,7 +5,11 @@
 //
 const ABViewRuleAction = require("../ABViewRuleAction");
 
-module.exports = class ABViewRuleActionFormSubmitRuleClosePopup extends ABViewRuleAction {
+let L = (...params) => AB.Multilingual.label(...params);
+
+module.exports = class ABViewRuleActionFormSubmitRuleClosePopup extends (
+   ABViewRuleAction
+) {
    /**
     * @param {object} App
     *      The shared App object that is created in OP.Component
@@ -14,14 +18,10 @@ module.exports = class ABViewRuleActionFormSubmitRuleClosePopup extends ABViewRu
     */
    constructor(App, idBase) {
       super();
-      var L = App.Label;
 
       this.App = App;
       this.key = "ABViewRuleActionFormSubmitRuleClosePopup";
-      this.label = L(
-         "ab.component.ruleaction.abviewruleActionFormSubmitRuleClosePopup",
-         "*Close the current popup"
-      );
+      this.label = L("Close the current popup");
 
       this.currentObject = null; // the object this Action is tied to.
 
@@ -29,11 +29,6 @@ module.exports = class ABViewRuleActionFormSubmitRuleClosePopup extends ABViewRu
       // [
       //		{ fieldId: xxx, value:yyy, type:key['string', 'number', 'date',...]}
       // ]
-
-      // Labels for UI components
-      var labels = (this.labels = {
-         component: {},
-      });
    }
 
    // conditionFields() {

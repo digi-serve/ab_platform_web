@@ -785,6 +785,6 @@ export default {
       "yoast",
       "youtube",
       "youtube-play",
-      "youtube-square"
-   ]
+      "youtube-square",
+   ],
 };

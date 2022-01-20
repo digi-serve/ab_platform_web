@@ -46,7 +46,7 @@ module.exports = class ABClassApplication extends ABApplicationCore {
    }
 
    areaKey() {
-      return _.kebabCase(`ab-${this.name}`);
+      return this.AB.kebabCase(`ab-${this.name}`);
    }
 
    /**
@@ -192,9 +192,7 @@ module.exports = class ABClassApplication extends ABApplicationCore {
          if (def) {
             ids.push(dID);
             if (def.settings.datasourceID) {
-               var object = this.AB.objects((o) => {
-                  return o.id == def.settings.datasourceID;
-               })[0];
+               var object = this.AB.objectByID(def.settings.datasourceID);
                if (object) {
                   object.exportIDs(ids);
                }
@@ -237,7 +235,7 @@ module.exports = class ABClassApplication extends ABApplicationCore {
       });
 
       // return only unique entries:
-      ids = _.uniq(ids);
+      ids = this.AB.uniq(ids);
    }
 
    /**

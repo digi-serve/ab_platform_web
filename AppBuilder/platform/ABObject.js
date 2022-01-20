@@ -1,6 +1,8 @@
 const ABObjectCore = require("../core/ABObjectCore");
 const ABObjectWorkspaceViewCollection = require("./workspaceViews/ABObjectWorkspaceViewCollection");
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 // NOTE: this has been moved to NetworkRestSocket:
 //
 // // Start listening for server events for object updates and call triggerEvent as the callback
@@ -136,7 +138,6 @@ module.exports = class ABObject extends ABObjectCore {
 
    isValid() {
       var validator = this.AB.Validation.validator();
-      var L = this.AB.Label();
 
       // label/name must be unique:
       var isNameUnique =
@@ -631,10 +632,10 @@ module.exports = class ABObject extends ABObjectCore {
 
       if (rowIds != null) {
          rowIds.forEach((id) => {
-            var row = data.getItem(id);
+            let row = data.getItem(id);
             if (row) {
                fields.forEach((f) => {
-                  var node = DataTable.getItemNode({
+                  let node = DataTable.getItemNode({
                      row: row.id,
                      column: f.columnName,
                   });
@@ -645,7 +646,7 @@ module.exports = class ABObject extends ABObjectCore {
             }
          });
       } else {
-         var id = data.getFirstId();
+         let id = data.getFirstId();
          while (id) {
             var row = data.getItem(id);
             if (row) {

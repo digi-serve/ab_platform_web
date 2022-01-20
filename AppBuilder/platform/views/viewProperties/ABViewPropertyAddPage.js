@@ -1,8 +1,6 @@
 import ABViewProperty from "./ABViewProperty";
 
-let L = (key, altText) => {
-   return AD.lang.label.getLabel(key) || altText;
-};
+let L = (...params) => AB.Multilingual.label(...params);
 
 export default class ABViewPropertyAddPage extends ABViewProperty {
    /**
@@ -19,20 +17,18 @@ export default class ABViewPropertyAddPage extends ABViewProperty {
 
    static propertyComponent(App, idBase) {
       let ids = {
-         formView: idBase + "_formView",
+         formView: `${idBase}_formView`,
       };
 
       let ui = {
          id: ids.formView,
          name: "formView",
          view: "richselect",
-         label: L("ab.component.connect.form", "*Add New Form"),
-         labelWidth: App.config.labelWidthXLarge,
+         label: L("Add New Form"),
+         labelWidth: this.AB.UISettings.config().labelWidthXLarge,
          on: {
             onChange: (newVal, oldVal) => {
-               if (
-                  newVal == L("ab.component.connect.no", "*No add new option")
-               ) {
+               if (newVal == L("No add new option")) {
                   $$(ids.formView).setValue("");
                }
 
@@ -61,7 +57,7 @@ export default class ABViewPropertyAddPage extends ABViewProperty {
             let editForms = [
                {
                   id: "none",
-                  value: L("ab.component.connect.no", "*No add new option"),
+                  value: L("No add new option"),
                },
             ];
 
@@ -124,7 +120,7 @@ export default class ABViewPropertyAddPage extends ABViewProperty {
 
    component(App, idBase) {
       let ids = {
-         popup: App.unique(idBase + "_popup_add_new"),
+         popup: App.unique(`${idBase}_popup_add_new`),
          field: idBase.split('_')[1],
       };
 
@@ -216,7 +212,7 @@ export default class ABViewPropertyAddPage extends ABViewProperty {
                         },
                         {
                            view: "button",
-                           label: "Close",
+                           label: L("Close"),
                            autowidth: true,
                            align: "center",
                            click: function () {

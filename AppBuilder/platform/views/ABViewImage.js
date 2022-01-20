@@ -1,5 +1,7 @@
 const ABViewImageCore = require("../../core/views/ABViewImageCore");
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 module.exports = class ABViewImage extends ABViewImageCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -36,7 +38,6 @@ module.exports = class ABViewImage extends ABViewImageCore {
          _logic,
          ObjectDefaults
       );
-      var L = App.Label;
 
       _logic.validateType = (item) => {
          // verify file type
@@ -44,7 +45,7 @@ module.exports = class ABViewImage extends ABViewImageCore {
          var type = item.type.toLowerCase();
          if (acceptableTypes.indexOf(type) == -1) {
             webix.message(
-               L("key.image.types", "Only [{0}] images are supported", [
+               L("Only [{0}] images are supported", [
                   acceptableTypes.join(", "),
                ])
             );
@@ -52,19 +53,11 @@ module.exports = class ABViewImage extends ABViewImageCore {
          } else {
             // set upload url to uploader
             var currView = _logic.currentEditObject();
-            var actionKey =
-               "opstool.AB_" +
-               currView.application.name.replace("_", "") +
-               ".view";
-            var url =
-               "/" +
-               [
-                  "opsportal",
-                  "image",
-                  currView.application.name,
-                  actionKey,
-                  "1",
-               ].join("/");
+            let actionKey = `opstool.AB_${currView.application.name.replace(
+               "_",
+               ""
+            )}.view`;
+            let url = `/file/upload/${currView.application.name}/${actionKey}/1`;
 
             $$(ids.file).define("upload", url);
             $$(ids.file).refresh();
@@ -100,13 +93,13 @@ module.exports = class ABViewImage extends ABViewImageCore {
             cols: [
                {
                   view: "label",
-                  label: L("ab.component.image.image", "*Image:"),
+                  label: L("Image:"),
                   css: "ab-text-bold",
-                  width: App.config.labelWidthXLarge,
+                  width: this.AB.UISettings.config().labelWidthXLarge,
                },
                {
                   view: "uploader",
-                  value: "*Upload image",
+                  value: L("Upload image"),
                   name: "file",
                   apiOnly: true,
                   inputName: "image",
@@ -128,14 +121,14 @@ module.exports = class ABViewImage extends ABViewImageCore {
          {
             view: "counter",
             name: "width",
-            label: L("ab.component.image.width", "*Width:"),
-            labelWidth: App.config.labelWidthXLarge,
+            label: L("Width:"),
+            labelWidth: this.AB.UISettings.config().labelWidthXLarge,
          },
          {
             view: "counter",
             name: "height",
-            label: L("ab.component.image.height", "*Height:"),
-            labelWidth: App.config.labelWidthXLarge,
+            label: L("Height:"),
+            labelWidth: this.AB.UISettings.config().labelWidthXLarge,
          },
       ]);
    }
@@ -161,9 +154,9 @@ module.exports = class ABViewImage extends ABViewImageCore {
     * @return {obj} UI component
     */
    component(App) {
-      var idBase = "ABViewImage_" + this.id;
+      var idBase = `ABViewImage_${this.id}`;
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       // an ABViewLabel is a simple Label
@@ -185,11 +178,7 @@ module.exports = class ABViewImage extends ABViewImageCore {
          if (!$$(ids.component)) return;
 
          if (this.settings.filename) {
-            var imgTag = '<img src="/opsportal/image/{application}/{filename}" height="{height}" width="{width}">'
-               .replace("{application}", this.application.name)
-               .replace("{filename}", this.settings.filename)
-               .replace("{height}", this.settings.height)
-               .replace("{width}", this.settings.width);
+            let imgTag = `<img src="/file/${this.settings.filename}" height="${this.settings.height}" width="${this.settings.width}">`;
 
             $$(ids.component).define("template", imgTag);
          } else {

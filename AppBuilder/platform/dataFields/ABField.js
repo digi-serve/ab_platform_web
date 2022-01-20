@@ -8,6 +8,8 @@
 var ABFieldCore = require("../../core/dataFields/ABFieldCore");
 var FilterComplex = require("../FilterComplex");
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 module.exports = class ABField extends ABFieldCore {
    constructor(values, object, fieldDefaults) {
       super(values, object, fieldDefaults);
@@ -113,7 +115,9 @@ module.exports = class ABField extends ABFieldCore {
          if (typeof rules == "string") {
             try {
                rules = JSON.parse(rules);
-            } catch (e) {}
+            } catch (e) {
+               // continue regardless of error
+            }
          }
          (rules || []).forEach((settings) => {
             field.addValidation(ids, settings);
@@ -144,8 +148,6 @@ module.exports = class ABField extends ABFieldCore {
    static definitionEditor(App, ids, _logic, Field) {
       /// TODO: maybe just pass in onChange instead of _logic
       /// if not onChange, then use our default:
-
-      var L = App.Label;
 
       // setup our default labelOnChange functionality:
       var labelOnChange = function (newVal, oldVal) {
@@ -180,7 +182,7 @@ module.exports = class ABField extends ABFieldCore {
          requiredOnChange = _logic.requiredOnChange;
       }
 
-      var getNumberOfNullValue = (isRequired) => {
+      var getNumberOfNullValue = async (isRequired) => {
          if (
             isRequired &&
             this._CurrentField &&
@@ -190,37 +192,31 @@ module.exports = class ABField extends ABFieldCore {
             // TODO: disable save button
 
             // get count number
-            this._CurrentField.object
-               .model()
-               .count({
-                  where: {
-                     glue: "and",
-                     rules: [
-                        {
-                           key: this._CurrentField.id,
-                           rule: "is_null",
-                        },
-                     ],
-                  },
-               })
-               .then((data) => {
-                  if (data.count > 0) {
-                     var messageTemplate =
-                        "** There are #count# rows that will be updated to default value";
+            let data = await this._CurrentField.object.model().count({
+               where: {
+                  glue: "and",
+                  rules: [
+                     {
+                        key: this._CurrentField.id,
+                        rule: "is_null",
+                     },
+                  ],
+               },
+            });
 
-                     $$(ids.numberOfNull).setValue(
-                        messageTemplate.replace("#count#", data.count)
-                     );
-                     $$(ids.numberOfNull).show();
-                  } else {
-                     $$(ids.numberOfNull).hide();
-                  }
+            if (data.count > 0) {
+               let messageTemplate = L(
+                  "** There are {0} rows that will be updated to default value",
+                  [data.count]
+               );
 
-                  // TODO: enable save button
-               })
-               .catch((err) => {
-                  // TODO: enable save button
-               });
+               $$(ids.numberOfNull).setValue(messageTemplate);
+               $$(ids.numberOfNull).show();
+            } else {
+               $$(ids.numberOfNull).hide();
+            }
+
+            // TODO: enable save button
          } else {
             $$(ids.numberOfNull).hide();
          }
@@ -237,9 +233,9 @@ module.exports = class ABField extends ABFieldCore {
                view: "text",
                id: ids.label,
                name: "label",
-               label: App.labels.dataFieldLabel, // Label
-               placeholder: App.labels.dataFieldLabelPlaceholder, // Label
-               labelWidth: App.config.labelWidthLarge,
+               label: L("Label"),
+               placeholder: L("Label"),
+               labelWidth: this.AB.UISettings.config().labelWidthLarge,
                css: "ab-new-label-name",
                on: {
                   onChange: function (newVal, oldVal) {
@@ -252,14 +248,14 @@ module.exports = class ABField extends ABFieldCore {
                id: ids.columnName,
                name: "columnName",
                disallowEdit: true,
-               label: App.labels.dataFieldColumnName, // 'Field Name',
-               labelWidth: App.config.labelWidthLarge,
-               placeholder: App.labels.dataFieldColumnNamePlaceholder, // 'Database field name',
+               label: L("Field Name"),
+               labelWidth: this.AB.UISettings.config().labelWidthLarge,
+               placeholder: L("Database field name"),
             },
             {
                view: "label",
                id: ids.fieldDescription,
-               label: Field.description,
+               label: L("Description"),
                align: "right",
             },
             {
@@ -267,7 +263,7 @@ module.exports = class ABField extends ABFieldCore {
                id: ids.showIcon,
                name: "showIcon",
                labelRight: App.labels.dataFieldShowIcon, // 'Show icon',
-               labelWidth: App.config.labelWidthCheckbox,
+               labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
                value: true,
             },
             {
@@ -277,13 +273,13 @@ module.exports = class ABField extends ABFieldCore {
                hidden: !Field.supportRequire,
                labelRight: App.labels.required,
                // disallowEdit: true,
-               labelWidth: App.config.labelWidthCheckbox,
+               labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
                on: {
-                  onChange: (newVal, oldVal) => {
+                  onChange: async (newVal, oldVal) => {
                      requiredOnChange(newVal, oldVal, ids);
 
                      // If check require on edit field, then show warning message
-                     getNumberOfNullValue(newVal);
+                     await getNumberOfNullValue(newVal);
                   },
                },
             },
@@ -303,7 +299,7 @@ module.exports = class ABField extends ABFieldCore {
                hidden: !Field.supportUnique,
                labelRight: App.labels.unique,
                disallowEdit: true,
-               labelWidth: App.config.labelWidthCheckbox,
+               labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
             },
             {
                id: ids.filterComplex,
@@ -312,7 +308,7 @@ module.exports = class ABField extends ABFieldCore {
             {
                id: ids.addValidation,
                view: "button",
-               label: L("ab.field.addfieldvalidation", "Add Field Validation"),
+               label: L("Add Field Validation"),
                css: "webix_primary",
                click: () => {
                   addValidation(ids);
@@ -346,8 +342,6 @@ module.exports = class ABField extends ABFieldCore {
    }
 
    addValidation(ids, settings) {
-      var L = this.AB.Label();
-
       var App = this.object.application.App;
       var Filter = new FilterComplex(App, "field_validation_rules");
       $$(ids.filterComplex).addView({
@@ -359,15 +353,12 @@ module.exports = class ABField extends ABFieldCore {
                   {
                      view: "text",
                      name: "invalidMessage",
-                     labelWidth: App.config.labelWidthLarge,
+                     labelWidth: this.AB.UISettings.config().labelWidthLarge,
                      value:
                         settings && settings.invalidMessage
                            ? settings.invalidMessage
                            : "",
-                     label: L(
-                        "ab.validataion.invalidMessage",
-                        "Invalid Message"
-                     ),
+                     label: L("Invalid Message"),
                   },
                   Filter.ui,
                ],
@@ -399,7 +390,6 @@ module.exports = class ABField extends ABFieldCore {
     * @return null or [{OP.Validation.validator()}] objects.
     */
    isValid() {
-      var L = this.AB.Label();
       var validator = this.AB.Validation.validator();
 
       // .columnName must be unique among fileds on the same object
@@ -415,8 +405,7 @@ module.exports = class ABField extends ABFieldCore {
          validator.addError(
             "columnName",
             L(
-               "ab.validation.object.name.unique",
-               "*Field columnName must be unique ({0} already used in this Application)",
+               "Field columnName must be unique ({0} already used in this Application)",
                [this.columnName]
             )
          );
@@ -440,29 +429,21 @@ module.exports = class ABField extends ABFieldCore {
     *
     * @return {Promise}
     */
-   destroy() {
-      return new Promise((resolve, reject) => {
-         // verify we have been .save() before:
-         if (this.id) {
-            // NOTE: our .migrateXXX() routines expect the object to currently exist
-            // in the DB before we perform the DB operations.  So we need to
-            // .migrateDrop()  before we actually .objectDestroy() this.
-            this.migrateDrop()
-               .then(() => {
-                  // the server still references an ABField in relationship to it's
-                  // ABObject, so we need to destroy the Field 1st, then remove it
-                  // from it's object.
-                  return super.destroy();
-               })
-               .then(() => {
-                  return this.object.fieldRemove(this);
-               })
-               .then(resolve)
-               .catch(reject);
-         } else {
-            resolve(); // nothing to do really
-         }
-      });
+   async destroy() {
+      // verify we have been .save() before:
+      if (!this.id) return;
+
+      // NOTE: our .migrateXXX() routines expect the object to currently exist
+      // in the DB before we perform the DB operations.  So we need to
+      // .migrateDrop()  before we actually .objectDestroy() this.
+      await this.migrateDrop();
+
+      // the server still references an ABField in relationship to it's
+      // ABObject, so we need to destroy the Field 1st, then remove it
+      // from it's object.
+      await super.destroy();
+
+      await this.object.fieldRemove(this);
    }
 
    /**
@@ -474,87 +455,64 @@ module.exports = class ABField extends ABFieldCore {
     * @return {Promise}
     *						.resolve( {this} )
     */
-   save() {
-      return new Promise((resolve, reject) => {
-         var isAdd = false;
-         // if this is our initial save()
-         if (!this.id) {
-            isAdd = true;
-         }
+   async save() {
+      let isAdd = false;
+      // if this is our initial save()
+      if (!this.id) {
+         isAdd = true;
+      }
 
-         Promise.resolve()
-            .then(() => {
-               // Whenever we update our settings, make sure any
-               // existing rows that have NULL values for this field
-               // are updated to have our current .default value.
-               return new Promise((next, error) => {
-                  if (
-                     isAdd ||
-                     !this.settings.required ||
-                     !this.settings.default
-                  )
-                     return next();
+      // Whenever we update our settings, make sure any
+      // existing rows that have NULL values for this field
+      // are updated to have our current .default value.
+      if (!isAdd && this.settings.required && this.settings.default) {
+         let model = this.object.model();
 
-                  var model = this.object.model();
+         // pull rows that has null value
+         let result = await model.findAll({
+            where: {
+               glue: "and",
+               rules: [
+                  {
+                     key: this.id,
+                     rule: "is_null",
+                  },
+               ],
+            },
+         });
 
-                  // pull rows that has null value
-                  model
-                     .findAll({
-                        where: {
-                           glue: "and",
-                           rules: [
-                              {
-                                 key: this.id,
-                                 rule: "is_null",
-                              },
-                           ],
-                        },
-                     })
-                     .then((result) => {
-                        var tasks = [];
+         let tasks = [];
 
-                        // updating ...
-                        result.data.forEach((d) => {
-                           if (!d[this.columnName])
-                              d[this.columnName] = this.settings.default;
+         // updating ...
+         result.data.forEach((d) => {
+            if (!d[this.columnName]) d[this.columnName] = this.settings.default;
 
-                           tasks.push(model.update(d.id, d));
-                        });
+            tasks.push(model.update(d.id, d));
+         });
 
-                        Promise.all(tasks).then(next).catch(error);
-                     })
-                     .catch(error);
-               });
-            })
-            .then(() => {
-               // New ABDefinition method of saving:
-               // when this is done, we now have an .id
-               return super.save();
-            })
-            .then(() => {
-               // incase this was an ADD operation, make sure the
-               // parent Obj now includes this object:
-               // NOTE: must be done after the .save() so we have an .id
-               return this.object.fieldAdd(this);
-            })
-            .then(() => {
-               // perform any server side migrations for this Field:
+         await Promise.all(tasks);
+      }
 
-               // but not connectObject fields:
-               // ABFieldConnect.migrateXXX() gets called from the UI popupNewDataField
-               // in order to handle the timings of the 2 fields that need to be created
-               if (this.isConnection) return;
+      // New ABDefinition method of saving:
+      // when this is done, we now have an .id
+      await super.save();
 
-               var fnMigrate = isAdd
-                  ? this.migrateCreate()
-                  : this.migrateUpdate();
-               return fnMigrate;
-            })
-            .then(() => {
-               resolve(this);
-            })
-            .catch(reject);
-      });
+      // incase this was an ADD operation, make sure the
+      // parent Obj now includes this object:
+      // NOTE: must be done after the .save() so we have an .id
+      await this.object.fieldAdd(this);
+
+      // perform any server side migrations for this Field:
+
+      // but not connectObject fields:
+      // ABFieldConnect.migrateXXX() gets called from the UI popupNewDataField
+      // in order to handle the timings of the 2 fields that need to be created
+      if (!this.isConnection) {
+         let fnMigrate = isAdd ? this.migrateCreate() : this.migrateUpdate();
+         await fnMigrate;
+      }
+
+      return this;
    }
 
    ///
@@ -605,11 +563,9 @@ module.exports = class ABField extends ABFieldCore {
       };
 
       if (options.isObjectWorkspace && this.settings.showIcon) {
-         config.header =
-            '<span class="webix_icon fa fa-{icon}"></span>'.replace(
-               "{icon}",
-               this.fieldIcon()
-            ) + config.header;
+         config.header = `<span class="webix_icon fa fa-${this.fieldIcon()}"></span>${
+            config.header
+         }`;
       }
 
       return config;

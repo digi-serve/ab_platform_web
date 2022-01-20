@@ -7,6 +7,8 @@ const ABViewRuleAction = require("../ABViewRuleAction");
 
 const RowFilter = require("../../platform/RowFilter");
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 var ABViewRuleActionObjectUpdaterDefaults = {
    filterConditions: {
       // array of filters to apply to the data table
@@ -24,10 +26,9 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
     */
    constructor(App, idBase, currentForm) {
       super(App, idBase, currentForm);
-      var L = App.Label;
 
       this.key = "ABViewRuleActionFormRecordRuleUpdate";
-      this.label = L("ab.component.ruleaction.updateRecord", "*Update Record");
+      this.label = L("Update Record");
 
       this.updateObject = null; // the object this Action will Update.
 
@@ -37,35 +38,6 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
       // ]
 
       this.stashRules = {}; // keep track of rule settings among our selected objects.
-
-      // Labels for UI components
-      var labels = (this.labels = {
-         // common: App.labels,
-         component: {
-            errorRequired: L(
-               "ab.ruleAction.Update.required",
-               "*A value is required"
-            ),
-            set: L("ab.component.form.set", "*Set"),
-            setPlaceholder: L(
-               "ab.component.form.setPlaceholder",
-               "*Choose a field"
-            ),
-            to: L("ab.component.form.to", "*To"),
-            chooseSource: L(
-               "ab.component.ruleaction.chooseSource",
-               "*Choose a data source"
-            ),
-            chooseField: L(
-               "ab.component.ruleaction.chooseField",
-               "*Choose value from..."
-            ),
-            selectBy: L(
-               "ab.component.ruleaction.selectBy",
-               "*Choose select option"
-            ),
-         },
-      });
    }
 
    // valueDisplayComponent
@@ -86,7 +58,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
       var uniqueInstanceID = webix.uid();
       var myUnique = (key) => {
          // return idBase + '_' + key  + '_' + uniqueInstanceID;
-         return idBase + "_" + key + "_" + uniqueInstanceID;
+         return `${idBase}_${key}_${uniqueInstanceID}`;
       };
       var ids = {
          updateForm: myUnique("updateForm"),
@@ -414,7 +386,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                ) {
                   validator.addError(
                      field.columnName,
-                     this.labels.component.errorRequired
+                     L("A value is required")
                   );
                }
 
@@ -433,10 +405,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                var fieldField = $$(ids.row)
                   .getChildViews()[0]
                   .getChildViews()[1];
-               fieldField.define(
-                  "invalidMessage",
-                  this.labels.component.errorRequired
-               );
+               fieldField.define("invalidMessage", L("A value is required"));
                fieldField.define("invalid", true);
                fieldField.refresh();
                // fieldField.markInvalid(this.labels.component.errorRequired);
@@ -469,10 +438,10 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
 
             // create a droplist with select options
             var optionsSelectBy = [
-               { id: "select-one", value: "*Current selection" },
+               { id: "select-one", value: L("Current selection") },
                {
                   id: "filter-select-one",
-                  value: "*Select first after filter by...",
+                  value: L("Select first after filter by..."),
                },
             ];
 
@@ -485,7 +454,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                            id: ids.selectDc,
                            view: "combo",
                            options: optionsDataSources,
-                           placeholder: this.labels.component.chooseSource,
+                           placeholder: L("Choose a data source"),
                            on: {
                               onChange: (newv, oldv) => {
                                  var selectedDC =
@@ -523,7 +492,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                            id: ids.queryField,
                            view: "combo",
                            hidden: true,
-                           placeholder: this.labels.component.chooseField,
+                           placeholder: L("Choose value from..."),
                            options: [{ id: 1, value: "figure this out" }],
                         },
                      ],
@@ -532,7 +501,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                      id: ids.selectBy,
                      view: "combo",
                      options: optionsSelectBy,
-                     placeholder: this.labels.component.selectBy,
+                     placeholder: L("Choose select option"),
                      on: {
                         onChange: (newv, oldv) => {
                            var $row = $$(ids.row);
@@ -552,7 +521,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
 
                               FilterComponent = new RowFilter(
                                  this.App,
-                                 idBase + "_filter"
+                                 `${idBase}_filter`
                               );
                               // FilterComponent.applicationLoad(
                               //    this.currentForm.application
@@ -583,7 +552,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                $componentView.options = $componentView.options || [];
                $componentView.options.unshift({
                   id: "ab-current-user",
-                  value: "*[Current User]",
+                  value: L("[Current User]"),
                });
             }
 
@@ -623,7 +592,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                // add select an array value option
                optionsSelectBy.push({
                   id: "filter-select-all",
-                  value: "*Select all after filter by...",
+                  value: L("Select all after filter by..."),
                });
 
                $inputView = $optionUpdateExsits;
@@ -647,7 +616,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                            $componentView,
                            {
                               view: "label",
-                              label: "<a>Or exists value</a>",
+                              label: `<a>${L("Or exists value")}</a>`,
                               on: {
                                  onItemClick: function () {
                                     var $container = this.getParentView(),
@@ -666,7 +635,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                            $optionUpdateExsits,
                            {
                               view: "label",
-                              label: "<a>Or custom value</a>",
+                              label: `<a>${L("Or custom value")}</a>`,
                               on: {
                                  onItemClick: function () {
                                     var $container = this.getParentView(),
@@ -767,7 +736,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
          },
 
          populateFilters: (dataView, filterConditions) => {
-            var filterConditions =
+            filterConditions =
                filterConditions ||
                ABViewRuleActionObjectUpdaterDefaults.filterConditions;
 
@@ -832,14 +801,14 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                   {
                      // Label
                      view: "label",
-                     width: this.App.config.labelWidthSmall,
-                     label: this.labels.component.set,
+                     width: this.currentForm.AB.Config.labelWidthSmall,
+                     label: L("Set"),
                   },
                   {
                      // Field list
                      view: "combo",
                      name: "field",
-                     placeholder: this.labels.component.setPlaceholder,
+                     placeholder: L("Choose a field"),
                      id: ids.field,
                      height: 32,
                      options: _logic.getFieldList(true),
@@ -852,8 +821,8 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                   {
                      // Label
                      view: "label",
-                     width: this.App.config.labelWidthSmall,
-                     label: this.labels.component.to,
+                     width: this.currentForm.AB.Config.labelWidthSmall,
+                     label: L("To"),
                   },
 
                   // Field value
@@ -971,7 +940,9 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
 
             // loop through rules to find "same-as-field" or "not-same-as-field"
             // adjust operator and switch key value to actual value when found
-            var filterConditions = _.cloneDeep(op.filterConditions);
+            var filterConditions = this.currentForm.AB.cloneDeep(
+               op.filterConditions
+            );
             if (filterConditions && filterConditions.rules) {
                filterConditions.rules
                   .filter((r) => {
@@ -1038,7 +1009,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                            value[field.datasourceLink.PK()];
                         objectToUpdate[field.columnName][
                            field.datasourceLink.PK()
-                        ] = value[field.datasourceLink.PK()];
+                        ] = value[field.datasourceLink.PK()] || value;
 
                         field.datasourceLink
                            .fields(
@@ -1077,10 +1048,12 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                                  op.queryField
                               );
 
-                           var newValue = currRow[fieldWithValue.columnName];
+                           var newValue =
+                              currRow[fieldWithValue.columnName];
 
                            if (typeof newValue == "undefined") {
-                              newValue = currRow[fieldWithValue.relationName()];
+                              newValue =
+                                 currRow[fieldWithValue.relationName()];
 
                               if (Array.isArray(newValue)) {
                                  newValue = newValue.map((v) => {
@@ -1091,7 +1064,9 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                               }
                            }
 
-                           newValues = _.uniq(newValues.concat(newValue));
+                           newValues = this.currentForm.AB.uniq(
+                              newValues.concat(newValue)
+                           );
 
                            break;
                      }
@@ -1105,8 +1080,9 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                         if (field.linkType() == "one") {
                            var updates = [];
                            newValues.forEach((v) => {
-                              var objectToUpdateClone =
-                                 _.cloneDeep(objectToUpdate);
+                              var objectToUpdateClone = this.currentForm.AB.cloneDeep(
+                                 objectToUpdate
+                              );
                               objectToUpdateClone[field.columnName] = v;
                               updates.push(objectToUpdateClone);
                            });
@@ -1114,7 +1090,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                         } else {
                            objectToUpdate[field.columnName] = newValues;
                         }
-                        break;
+                     break;
                   }
                   break;
 
@@ -1131,12 +1107,11 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                         clonedDataCollection.sourceType == "query" ||
                         (op.valueType == "exist" && op.queryField)
                      ) {
-                        var fieldWithValue =
-                           clonedDataCollection.datasource.fieldByID(
-                              op.queryField
-                           );
+                        fieldWithValue = clonedDataCollection.datasource.fieldByID(
+                           op.queryField
+                        );
 
-                        var newValue = value[fieldWithValue.columnName];
+                        newValue = value[fieldWithValue.columnName];
 
                         if (typeof newValue == "undefined") {
                            newValue = value[fieldWithValue.relationName()];
@@ -1214,6 +1189,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
             var model = dv.model;
             model
                .update(options.data.id, options.data)
+               .then(resolve)
                .catch((err) => {
                   this.currentForm.AB.notify.developer(err, {
                      context:
@@ -1222,8 +1198,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                      data: options.data,
                   });
                   reject(err);
-               })
-               .then(resolve);
+               });
          }
       });
    }

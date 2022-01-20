@@ -2,6 +2,8 @@ const ABViewCommentCore = require("../../core/views/ABViewCommentCore");
 
 const ABViewCommentPropertyComponentDefaults = ABViewCommentCore.defaultValues();
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 module.exports = class ABViewComment extends ABViewCommentCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -42,7 +44,6 @@ module.exports = class ABViewComment extends ABViewCommentCore {
          _logic,
          ObjectDefaults
       );
-      var L = App.Label;
 
       // _logic functions
 
@@ -61,8 +62,8 @@ module.exports = class ABViewComment extends ABViewCommentCore {
          {
             name: "dataSource",
             view: "richselect",
-            label: L("ab.component.form.dataSource", "*Data Source"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Data Source"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             on: {
                onChange: _logic.selectSource,
             },
@@ -70,29 +71,26 @@ module.exports = class ABViewComment extends ABViewCommentCore {
          {
             name: "columnUser",
             view: "richselect",
-            label: L("ab.component.comment.columnUser", "*Select a user field"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Select a user field"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             name: "columnComment",
             view: "richselect",
-            label: L(
-               "ab.component.comment.columnComment",
-               "*Select a comment field"
-            ),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Select a comment field"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             name: "columnDate",
             view: "richselect",
-            label: L("ab.component.comment.columnDate", "*Select a date field"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Select a date field"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             view: "counter",
             name: "height",
-            label: L("ab.component.common.height", "*Height:"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Height:"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
       ]);
    }
@@ -151,7 +149,7 @@ module.exports = class ABViewComment extends ABViewCommentCore {
    }
 
    static propertyUpdateUserFieldOptions(ids, view, dcId) {
-      var datacollection = view.AB.datacollections((dc) => dc.id == dcId)[0];
+      var datacollection = view.AB.datacollectionByID(dcId);
       var object = datacollection ? datacollection.datasource : null;
 
       // Pull field list
@@ -175,7 +173,7 @@ module.exports = class ABViewComment extends ABViewCommentCore {
    }
 
    static propertyUpdateCommentFieldOptions(ids, view, dcId) {
-      var datacollection = view.AB.datacollections((dc) => dc.id == dcId)[0];
+      var datacollection = view.AB.datacollectionByID(dcId);
       var object = datacollection ? datacollection.datasource : null;
 
       // Pull field list
@@ -199,7 +197,7 @@ module.exports = class ABViewComment extends ABViewCommentCore {
    }
 
    static propertyUpdateDateFieldOptions(ids, view, dcId) {
-      var datacollection = view.AB.datacollections((dc) => dc.id == dcId)[0];
+      var datacollection = view.AB.datacollectionByID(dcId);
       var object = datacollection ? datacollection.datasource : null;
 
       // Pull field list
@@ -231,7 +229,7 @@ module.exports = class ABViewComment extends ABViewCommentCore {
    component(App) {
       var idBase = "ABViewComment_" + this.id;
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       let base = super.component(App);
@@ -483,16 +481,21 @@ module.exports = class ABViewComment extends ABViewCommentCore {
       return currentUserId;
    }
 
-   saveData(commentText, dateTime) {
+   async saveData(commentText, dateTime) {
       if (commentText == null || commentText == "") return Promise.resolve();
 
       let dv = this.datacollection;
-      if (!dv) return null;
+      if (!dv) return Promise.resolve();
 
       let model = this.model();
       if (model == null) {
-         this.AB.error(
-            "ABViewComment.saveData(): could not pull a model to work with."
+         this.AB.notify.builder(
+            {},
+            {
+               message:
+                  "ABViewComment.saveData(): could not pull a model to work with.",
+               viewName: this.label,
+            }
          );
          return Promise.resolve();
       }
@@ -522,15 +525,6 @@ module.exports = class ABViewComment extends ABViewCommentCore {
          }
       }
 
-      return new Promise((resolve, reject) => {
-         model
-            .create(comment)
-            .then(() => {
-               resolve();
-            })
-            .catch((err) => {
-               reject(err);
-            });
-      });
+      return await model.create(comment);
    }
 };

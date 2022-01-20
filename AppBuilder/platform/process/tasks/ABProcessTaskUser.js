@@ -3,6 +3,8 @@
 const ABProcessTaskUserCore = require("../../../core/process/tasks/ABProcessTaskUserCore.js");
 const ABProcessTaskUserApproval = require("./ABProcessTaskUserApproval.js");
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 module.exports = class ABProcessTaskUser extends ABProcessTaskUserCore {
    ////
    //// Process Instance Methods
@@ -69,31 +71,27 @@ module.exports = class ABProcessTaskUser extends ABProcessTaskUserCore {
     */
    propertiesShow(id) {
       // var ids = this.propertyIDs(id);
-      var L = this.AB.Label();
 
       var ui = {
          id: id,
          rows: [
             {
                view: "button",
-               label: L(
-                  "ab.process.task.user.manual",
-                  "*Confirm Off-Line Task"
-               ),
+               label: L("Confirm Off-Line Task"),
                click: () => {
                   console.log("manual clicked");
                },
             },
             {
                view: "button",
-               label: L("ab.process.task.user.approval", "*Approval Task"),
+               label: L("Approval Task"),
                click: () => {
                   this.switchTo("approval", id);
                },
             },
             {
                view: "button",
-               label: L("ab.process.task.user.form", "*Form Task"),
+               label: L("Form Task"),
                click: () => {
                   console.log("form clicked");
                },

@@ -8,7 +8,7 @@ module.exports = class ABViewChartComponent extends ABViewWidget {
 
       let _init = () => {
          component.init({
-            componentId: _ui.id
+            componentId: _ui.id,
          });
       };
       let _logic = component.logic;
@@ -18,7 +18,7 @@ module.exports = class ABViewChartComponent extends ABViewWidget {
          ui: _ui,
          init: _init,
          logic: _logic,
-         onShow: _onShow
+         onShow: _onShow,
       };
    }
 
@@ -39,7 +39,7 @@ module.exports = class ABViewChartComponent extends ABViewWidget {
             listener: (reportData) => {
                // If this widget does not show, then will not refresh data
                if (this._isShow) _logic.refreshData(reportData);
-            }
+            },
          });
       };
 
@@ -62,7 +62,7 @@ module.exports = class ABViewChartComponent extends ABViewWidget {
          refreshData: (reportData) => {
             let comp = $$(this._componentId);
             if (comp && comp.data) comp.data.sync(reportData);
-         }
+         },
       };
 
       return {
@@ -70,7 +70,7 @@ module.exports = class ABViewChartComponent extends ABViewWidget {
          init: _init,
          logic: _logic,
 
-         onShow: _logic.onShow
+         onShow: _logic.onShow,
       };
    }
 };

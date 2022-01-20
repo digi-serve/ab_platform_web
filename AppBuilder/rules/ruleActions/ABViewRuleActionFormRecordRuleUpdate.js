@@ -7,7 +7,11 @@
 //
 const ABViewRuleActionObjectUpdater = require("./ABViewRuleActionObjectUpdater");
 
-module.exports = class ABViewRuleActionFormRecordRuleUpdate extends ABViewRuleActionObjectUpdater {
+let L = (...params) => AB.Multilingual.label(...params);
+
+module.exports = class ABViewRuleActionFormRecordRuleUpdate extends (
+   ABViewRuleActionObjectUpdater
+) {
    /**
     * @param {object} App
     *      The shared App object that is created in OP.Component
@@ -16,10 +20,9 @@ module.exports = class ABViewRuleActionFormRecordRuleUpdate extends ABViewRuleAc
     */
    constructor(App, idBase, currentForm) {
       super(App, idBase, currentForm);
-      var L = App.Label;
 
       this.key = "ABViewRuleActionFormRecordRuleUpdate";
-      this.label = L("ab.component.ruleaction.updateRecord", "*Update Record");
+      this.label = L("Update Record");
    }
 
    get isPreProcess() {

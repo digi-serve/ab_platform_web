@@ -1,7 +1,10 @@
 const ABViewDetailCore = require("../../core/views/ABViewDetailCore");
 const ABViewDetailComponent = require("./ABViewDetailComponent");
+const ABObjectQuery = require("../ABObjectQuery");
 
 const ABViewDetailPropertyComponentDefaults = ABViewDetailCore.defaultValues();
+
+let L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABViewDetail extends ABViewDetailCore {
    // constructor(values, application, parent, defaultValues) {
@@ -37,11 +40,9 @@ module.exports = class ABViewDetail extends ABViewDetailCore {
          ObjectDefaults
       );
 
-      var L = App.Label;
-
       // _logic functions
 
-      _logic.selectSource = (dcId, oldDcId) => {
+      _logic.selectSource = async (dcId, oldDcId) => {
          // TODO : warning message
 
          _logic.busy();
@@ -52,71 +53,42 @@ module.exports = class ABViewDetail extends ABViewDetailCore {
          // clear sub views
          currView._views = [];
 
-         return (
-            Promise.resolve()
-               // .then(() => {
+         this.propertyUpdateFieldOptions(ids, currView, dcId);
 
-               // 	// remove all old field components
-               // 	if (oldDcId != null)
-               // 		return currView.clearFieldComponents();
+         // add all fields to editor by default
+         if (currView._views.length > 0) return Promise.resolve();
 
-               // })
-               .then(() => {
-                  // refresh UI
-                  // currView.emit('properties.updated', currView);
+         let fieldSaves = [];
+         let fields = $$(ids.fields).find({});
+         fields.reverse();
+         fields.forEach((f, index) => {
+            if (!f.selected) {
+               let yPosition = fields.length - index - 1;
 
-                  // _logic.busy();
+               var fieldView = currView.addFieldToView(f, yPosition, ids, App);
+               fieldSaves.push(fieldView.save());
 
-                  // Update field options in property
-                  this.propertyUpdateFieldOptions(ids, currView, dcId);
+               // update item to UI list
+               f.selected = 1;
+               $$(ids.fields).updateItem(f.id, f);
+            }
+         });
 
-                  // add all fields to editor by default
-                  if (currView._views.length > 0) return Promise.resolve();
+         await Promise.all(fieldSaves);
 
-                  let fieldSaves = [];
-                  let fields = $$(ids.fields).find({});
-                  fields.reverse();
-                  fields.forEach((f, index) => {
-                     if (!f.selected) {
-                        let yPosition = fields.length - index - 1;
+         // Saving
+         await currView.save();
 
-                        var fieldView = currView.addFieldToView(
-                           f,
-                           yPosition,
-                           ids,
-                           App
-                        );
-                        fieldSaves.push(fieldView.save());
+         currView.emit("properties.updated", currView);
 
-                        // update item to UI list
-                        f.selected = 1;
-                        $$(ids.fields).updateItem(f.id, f);
-                     }
-                  });
-
-                  return Promise.all(fieldSaves);
-               })
-               // Saving
-               .then(() => {
-                  return currView.save();
-               })
-               // Finally
-               .then(() => {
-                  currView.emit("properties.updated", currView);
-
-                  _logic.ready();
-               })
-         );
+         _logic.ready();
       };
 
       _logic.listTemplate = (field, common) => {
-         return (
-            common.markCheckbox(field) +
-            " #label#".replace("#label#", field.label)
-         );
+         return `${common.markCheckbox(field)} ${field.label}`;
       };
 
-      _logic.check = (e, fieldId) => {
+      _logic.check = async (e, fieldId) => {
          var currView = _logic.currentEditObject();
 
          // update UI list
@@ -126,16 +98,13 @@ module.exports = class ABViewDetail extends ABViewDetailCore {
 
          // add a field to the form
          if (item.selected) {
-            currView
-               .addFieldToView(item, null, ids, App)
-               .save()
-               .then(() => {
-                  // Refresh UI
-                  currView.emit("properties.updated", currView);
+            await currView.addFieldToView(item, null, ids, App).save();
 
-                  // .addFieldToView() does not auto update the currView:
-                  return currView.save();
-               });
+            // Refresh UI
+            currView.emit("properties.updated", currView);
+
+            // .addFieldToView() does not auto update the currView:
+            await currView.save();
          }
          // remove field in the form
          else {
@@ -146,10 +115,10 @@ module.exports = class ABViewDetail extends ABViewDetailCore {
                // let remainingViews = currView.views(c => c.settings.fieldId != fieldId);
                // currView._views = remainingViews;
 
-               fieldView.destroy().then(() => {
-                  // Refresh UI
-                  currView.emit("properties.updated", currView);
-               });
+               await fieldView.destroy();
+
+               // Refresh UI
+               currView.emit("properties.updated", currView);
             }
          }
 
@@ -161,11 +130,11 @@ module.exports = class ABViewDetail extends ABViewDetailCore {
          {
             name: "datacollection",
             view: "richselect",
-            label: L("ab.components.detail.dataSource", "*Data Source"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Data Source"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             skipAutoSave: true,
             on: {
-               onChange: _logic.selectSource,
+               onChange: (dcId, oldDcId) => _logic.selectSource(dcId, oldDcId),
             },
          },
          {
@@ -184,42 +153,42 @@ module.exports = class ABViewDetail extends ABViewDetailCore {
                },
             },
             onClick: {
-               check: _logic.check,
+               check: (e, fieldId) => _logic.check(e, fieldId),
             },
          },
          {
             name: "showLabel",
             view: "checkbox",
-            label: L("ab.components.common.showlabel", "*Display Label"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Display Label"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             name: "labelPosition",
             view: "richselect",
-            label: L("ab.components.common.labelPosition", "*Label Position"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Label Position"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             options: [
                {
                   id: "left",
-                  value: L("ab.components.common.left", "*Left"),
+                  value: L("Left"),
                },
                {
                   id: "top",
-                  value: L("ab.components.common.top", "*Top"),
+                  value: L("Top"),
                },
             ],
          },
          {
             name: "labelWidth",
             view: "counter",
-            label: L("ab.components.common.labelWidth", "*Label Width"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Label Width"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             view: "counter",
             name: "height",
-            label: L("ab.component.common.height", "*Height:"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Height:"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
       ]);
    }
@@ -277,7 +246,7 @@ module.exports = class ABViewDetail extends ABViewDetailCore {
    }
 
    static propertyUpdateFieldOptions(ids, view, dcId) {
-      var datacollection = view.AB.datacollections((dc) => dc.id == dcId)[0];
+      var datacollection = view.AB.datacollectionByID(dcId);
       var object = datacollection ? datacollection.datasource : null;
 
       // Pull field list
@@ -331,7 +300,25 @@ module.exports = class ABViewDetail extends ABViewDetailCore {
          displayData: (rowData) => {
             rowData = rowData || {};
 
-            this.views().forEach((f) => {
+            let views = this.views() || [];
+            views = views.sort((a, b) => {
+               if (!a || !b || !a.field || !b.field) return 0;
+
+               // NOTE: sort order of calculated fields.
+               // FORMULA field type should be calculated before CALCULATE field type
+               if (a.field.key == "formula" && b.field.key == "calculate") {
+                  return -1;
+               } else if (
+                  a.field.key == "calculate" &&
+                  b.field.key == "formula"
+               ) {
+                  return 1;
+               } else {
+                  return 0;
+               }
+            });
+
+            views.forEach((f) => {
                if (f.field) {
                   var field = f.field();
                   var val;
@@ -376,6 +363,16 @@ module.exports = class ABViewDetail extends ABViewDetailCore {
                         break;
                      case "file":
                         val = rowData[field.columnName];
+                        break;
+                     case "formula":
+                        if (rowData) {
+                           let dv = this.datacollection;
+                           let ds = dv ? dv.datasource : null;
+                           let needRecalculate =
+                              !ds || ds instanceof ABObjectQuery ? false : true;
+
+                           val = field.format(rowData, needRecalculate);
+                        }
                         break;
                      default:
                         val = field.format(rowData);

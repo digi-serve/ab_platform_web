@@ -1,9 +1,5 @@
 const ABViewReportsManagerCore = require("../../core/views/ABViewReportsManagerCore");
 
-function L(key, altText) {
-   return AD.lang.label.getLabel(key) || altText;
-}
-
 module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
    constructor(values, application, parent, defaultValues) {
       super(values, application, parent, defaultValues);
@@ -24,7 +20,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
    editorComponent(App, mode) {
       let idBase = "ABViewReportsManagerEditorComponent";
       let ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       let component = this.component(App);
@@ -70,9 +66,9 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
    component(App) {
       let baseCom = super.component(App);
 
-      let idBase = "ABViewReportManager_" + this.id;
+      let idBase = `ABViewReportManager_${this.id}`;
       let ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       let compInstance = this;
@@ -86,7 +82,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                reports.services.Backend,
                class MyBackend extends reports.services.Backend {
                   getModules() {
-                     return webix.promise.resolve(
+                     return Promise.resolve(
                         compInstance.settings.moduleList || []
                      );
                   }
@@ -144,56 +140,54 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                   getModels() {
                      let reportModels = {};
 
-                     (compInstance.application.datacollections() || []).forEach(
-                        (dc) => {
-                           let obj = dc.datasource;
-                           if (!obj) return;
+                     (compInstance.AB.datacollections() || []).forEach((dc) => {
+                        let obj = dc.datasource;
+                        if (!obj) return;
 
-                           let reportFields = _logic.getReportFields(dc);
+                        let reportFields = _logic.getReportFields(dc);
 
-                           // get connected data collections
-                           // let linkedFields = [];
-                           // (obj.connectFields() || []).forEach((f, index) => {
-                           //    let connectedDcs = compInstance.application.datacollections(
-                           //       (dColl) =>
-                           //          dColl &&
-                           //          dColl.datasource &&
-                           //          dColl.datasource.id == f.settings.linkObject
-                           //    );
-                           //    (connectedDcs || []).forEach((linkedDc) => {
-                           //       linkedFields.push({
-                           //          id: index + 1,
-                           //          name: linkedDc.label,
-                           //          source: dc.id,
-                           //          target: linkedDc.id
-                           //       });
-                           //    });
-                           // });
+                        // get connected data collections
+                        // let linkedFields = [];
+                        // (obj.connectFields() || []).forEach((f, index) => {
+                        //    let connectedDcs = compInstance.AB.datacollections(
+                        //       (dColl) =>
+                        //          dColl &&
+                        //          dColl.datasource &&
+                        //          dColl.datasource.id == f.settings.linkObject
+                        //    );
+                        //    (connectedDcs || []).forEach((linkedDc) => {
+                        //       linkedFields.push({
+                        //          id: index + 1,
+                        //          name: linkedDc.label,
+                        //          source: dc.id,
+                        //          target: linkedDc.id
+                        //       });
+                        //    });
+                        // });
 
-                           // // MOCK UP for testing
-                           // let linkedFields = [
-                           //    {
-                           //       id: "id",
-                           //       name: "id",
-                           //       source: "39378ee0-38f0-4b9d-a5aa-dddc61137fcd", // Player
-                           //       target: "0de82362-4ab5-4f0f-8cfa-d1288d173cba" // Team
-                           //    }
-                           // ];
+                        // // MOCK UP for testing
+                        // let linkedFields = [
+                        //    {
+                        //       id: "id",
+                        //       name: "id",
+                        //       source: "39378ee0-38f0-4b9d-a5aa-dddc61137fcd", // Player
+                        //       target: "0de82362-4ab5-4f0f-8cfa-d1288d173cba" // Team
+                        //    }
+                        // ];
 
-                           reportModels[dc.id] = {
-                              id: dc.id,
-                              name: dc.label,
-                              data: reportFields,
-                              refs: [],
-                           };
-                        }
-                     );
+                        reportModels[dc.id] = {
+                           id: dc.id,
+                           name: dc.label,
+                           data: reportFields,
+                           refs: [],
+                        };
+                     });
 
-                     return webix.promise.resolve(reportModels);
+                     return Promise.resolve(reportModels);
                   }
 
                   getQueries() {
-                     return webix.promise.resolve(
+                     return Promise.resolve(
                         compInstance.settings.queryList || []
                      );
                   }
@@ -253,6 +247,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                      let pullDataTasks = [];
                      let dcIds = [];
                      let dcData = {};
+                     let reportFields = [];
 
                      // pull data of the base and join DCs
                      dcIds.push(config.data);
@@ -260,7 +255,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                         dcIds.push(j.sid);
                         dcIds.push(j.tid);
                      });
-                     dcIds = _.uniq(dcIds);
+                     dcIds = compInstance.AB.uniq(dcIds);
                      dcIds.forEach((dcId) => {
                         pullDataTasks.push(
                            new Promise((next, bad) => {
@@ -271,6 +266,19 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                     dcData[dcId] = data || [];
                                     next();
                                  });
+                           })
+                        );
+                     });
+
+                     dcIds.forEach((dcId) => {
+                        let dataCol = compInstance.AB.datacollectionByID(dcId);
+                        if (!dataCol) return;
+
+                        reportFields = reportFields.concat(
+                           _logic.getReportFields(dataCol).map((f) => {
+                              // change format of id to match the report widget
+                              f.id = `${dcId}.${f.id}`; // dc_id.field_id
+                              return f;
                            })
                         );
                      });
@@ -290,28 +298,28 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                     }
 
                                     (config.joins || []).forEach((j) => {
-                                       let sourceDc = compInstance.application.datacollections(
-                                          (dc) => dc.id == j.sid
-                                       )[0];
+                                       let sourceDc = compInstance.AB.datacollectionByID(
+                                          j.sid
+                                       );
                                        if (!sourceDc) return;
 
                                        let sourceObj = sourceDc.datasource;
                                        if (!sourceObj) return;
 
-                                       let targetDc = compInstance.application.datacollections(
-                                          (dc) => dc.id == j.tid
-                                       )[0];
+                                       let targetDc = compInstance.AB.datacollectionByID(
+                                          j.tid
+                                       );
                                        if (!targetDc) return;
 
                                        let targetObj = targetDc.datasource;
                                        if (!targetObj) return;
 
-                                       let sourceLinkField = sourceObj.fields(
-                                          (f) => f.id == j.sf
-                                       )[0];
-                                       let targetLinkField = targetObj.fields(
-                                          (f) => f.id == j.tf
-                                       )[0];
+                                       let sourceLinkField = sourceObj.fieldByID(
+                                          j.sf
+                                       );
+                                       let targetLinkField = targetObj.fieldByID(
+                                          j.tf
+                                       );
                                        if (!sourceLinkField && !targetLinkField)
                                           return;
 
@@ -373,8 +381,12 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                                 } else {
                                                    result.push(
                                                       Object.assign(
-                                                         _.clone(sData),
-                                                         _.clone(tData)
+                                                         compInstance.AB.cloneDeep(
+                                                            sData
+                                                         ),
+                                                         compInstance.AB.cloneDeep(
+                                                            tData
+                                                         )
                                                       )
                                                    );
                                                 }
@@ -390,30 +402,74 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                            .then(
                               () =>
                                  new Promise((next, bad) => {
-                                    let reportFields = [];
-
-                                    dcIds.forEach((dcId) => {
-                                       let dataCol = compInstance.application.datacollections(
-                                          (dc) => dc.id == dcId
-                                       )[0];
-                                       if (!dataCol) return;
-
-                                       reportFields = reportFields.concat(
-                                          _logic
-                                             .getReportFields(dataCol)
-                                             .map((f) => {
-                                                // change format of id to match the report widget
-                                                f.id = `${dcId}.${f.id}`; // dc_id.field_id
-                                                return f;
-                                             })
+                                    let queryVal;
+                                    try {
+                                       queryVal = JSON.parse(
+                                          config.query || "{}"
                                        );
-                                    });
+                                    } catch (err) {
+                                       bad(err);
+                                    }
+
+                                    if (
+                                       queryVal &&
+                                       queryVal.rules &&
+                                       queryVal.rules.length
+                                    ) {
+                                       queryVal.rules.forEach((r) => {
+                                          if (!r || !r.type || !r.condition)
+                                             return;
+
+                                          switch (r.type) {
+                                             case "date":
+                                             case "datetime":
+                                                // Convert string to Date object
+                                                if (r.condition.filter) {
+                                                   if (
+                                                      this.AB.isString(
+                                                         r.condition.filter
+                                                      )
+                                                   ) {
+                                                      r.condition.filter = this.AB.toDate(
+                                                         r.condition.filter
+                                                      );
+                                                   }
+
+                                                   if (
+                                                      r.condition.filter
+                                                         .start &&
+                                                      this.AB.isString(
+                                                         r.condition.filter
+                                                            .start
+                                                      )
+                                                   ) {
+                                                      r.condition.filter.start = this.AB.toDate(
+                                                         r.condition.filter
+                                                            .start
+                                                      );
+                                                   }
+
+                                                   if (
+                                                      r.condition.filter.end &&
+                                                      this.AB.isString(
+                                                         r.condition.filter.end
+                                                      )
+                                                   ) {
+                                                      r.condition.filter.end = this.AB.toDate(
+                                                         r.condition.filter.end
+                                                      );
+                                                   }
+                                                }
+                                                break;
+                                          }
+                                       });
+                                    }
 
                                     // create a new query widget to get the filter function
                                     let filterElem = webix.ui({
                                        view: "query",
                                        fields: reportFields,
-                                       value: JSON.parse(config.query || "{}"),
+                                       value: queryVal,
                                     });
 
                                     // create a new data collection and apply the query filter
@@ -424,7 +480,9 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                     let filterFn;
                                     try {
                                        filterFn = filterElem.getFilterFunction();
-                                    } catch (error) {}
+                                    } catch (error) {
+                                       // continue regardless of error
+                                    }
                                     if (filterFn) tempDc.filter(filterFn);
 
                                     // sorting
@@ -469,7 +527,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                                       case "sum":
                                                          groupedResult[
                                                             col
-                                                         ] = _.sumBy(
+                                                         ] = compInstance.AB.sumBy(
                                                             groupedData,
                                                             rawCol
                                                          );
@@ -477,7 +535,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                                       case "avg":
                                                          groupedResult[
                                                             col
-                                                         ] = _.meanBy(
+                                                         ] = compInstance.AB.meanBy(
                                                             groupedData,
                                                             rawCol
                                                          );
@@ -489,7 +547,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                                          break;
                                                       case "max":
                                                          groupedResult[col] =
-                                                            (_.maxBy(
+                                                            (compInstance.AB.maxBy(
                                                                groupedData,
                                                                rawCol
                                                             ) || {})[rawCol] ||
@@ -497,7 +555,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                                          break;
                                                       case "min":
                                                          groupedResult[col] =
-                                                            (_.minBy(
+                                                            (compInstance.AB.minBy(
                                                                groupedData,
                                                                rawCol
                                                             ) || {})[rawCol] ||
@@ -519,7 +577,7 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                     next();
                                  })
                            )
-                           .then(() => webix.promise.resolve(result))
+                           .then(() => Promise.resolve(result))
                      );
                   }
                   getOptions(fields) {
@@ -529,11 +587,49 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                      //    {"id":"2","value":"North"},
                      //    // other options
                      //  ]
-                     return webix.promise.resolve([]);
+                     return Promise.resolve([]);
                   }
                   getFieldData(fieldId) {
                      // TODO
-                     return webix.promise.resolve([]);
+                     return Promise.resolve([]);
+                  }
+               },
+            ],
+            [
+               reports.views.table,
+               class MyTable extends reports.views.table {
+                  // NOTE: fix format of date column type
+                  GetColumnConfig(a) {
+                     if (a.type === "date") {
+                        return {
+                           id: a.id,
+                           header:
+                              !a.meta.header || a.meta.header === "none"
+                                 ? a.meta.name || a.name
+                                 : [
+                                      a.meta.name || a.name,
+                                      {
+                                         content:
+                                            a.header === "text"
+                                               ? "textFilter"
+                                               : "richSelectFilter",
+                                      },
+                                   ],
+                           type: a.type,
+                           sort: "date",
+                           width: a.width || 200,
+                           format: (val) => {
+                              // check valid date
+                              if (val && val.getTime && !isNaN(val.getTime())) {
+                                 return webix.i18n.dateFormatStr(val);
+                              } else {
+                                 return "";
+                              }
+                           },
+                        };
+                     } else {
+                        return super.GetColumnConfig(a);
+                     }
                   }
                },
             ],
@@ -571,15 +667,11 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                   ref: "",
                   key: false,
                   show: true,
+                  abField: f,
                });
 
                if (f.isConnection && f.settings.isSource) {
-                  let linkedDcs = compInstance.application.datacollections(
-                     (dc) =>
-                        dc &&
-                        dc.datasource &&
-                        dc.datasource.id == f.settings.linkObject
-                  );
+                  let linkedDcs = compInstance.AB.datacollectionByID(f.settings.linkObject);
                   (linkedDcs || []).forEach((linkDc) => {
                      fields.push({
                         id: f.id,
@@ -599,9 +691,9 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
          },
 
          getData: (datacollectionId) => {
-            let datacollection = compInstance.application.datacollections(
-               (dcItem) => dcItem.id == datacollectionId
-            )[0];
+            let datacollection = compInstance.AB.datacollectionByID(
+               datacollectionId
+            );
             if (!datacollection) return Promise.resolve([]);
 
             let object = datacollection.datasource;
@@ -680,8 +772,25 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                     break;
                                  case "number":
                                     reportRow[col] = parseFloat(
-                                       reportRow[col] || 0
+                                       (reportRow[col] || 0)
+                                          .toString()
+                                          .replace(/[^\d.-]/g, "")
                                     );
+                                    break;
+                                 case "date":
+                                 case "datetime":
+                                    reportRow[col] = row[columnName];
+                                    if (reportRow[col]) {
+                                       if (!(reportRow[col] instanceof Date)) {
+                                          reportRow[
+                                             col
+                                          ] = compInstance.AB.toDate(
+                                             row[columnName]
+                                          );
+                                       }
+                                    } else {
+                                       reportRow[col] = "";
+                                    }
                                     break;
                               }
                            });

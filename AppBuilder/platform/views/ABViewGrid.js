@@ -1914,9 +1914,7 @@ class ABViewGridComponent extends ClassUI {
             }
          }
       }
-      // columnHeaders[
-      //    columnHeaders.length - hiddenFields - columnSplitRight - 1
-      // ];
+
       if (lastCol) {
          lastCol.fillspace = true;
          lastCol.minWidth = lastCol.width;
@@ -1925,7 +1923,13 @@ class ABViewGridComponent extends ClassUI {
 
       DataTable.refreshColumns(columnHeaders);
 
+      // the addedColumns represent the additional icons that can be added.
       this.columnSplitRight = addedColumns.length;
+      // the .massUpdate gets added to Left so don't include that in split right:
+      if (addedColumns.indexOf("appbuilder_select_item") > -1)
+         this.columnSplitRight -= 1;
+      // .columnSplitRight can't be < 0
+      if (this.columnSplitRight < 0) this.columnSplitRight = 0;
 
       // freeze columns:
       let frozenColumnID = settings.frozenColumnID;
@@ -2225,7 +2229,7 @@ export default class ABViewGrid extends ABViewGridCore {
    }
 
    //
-   //	Editor Related
+   // Editor Related
    //
 
    /**
@@ -2969,7 +2973,7 @@ export default class ABViewGrid extends ABViewGridCore {
    //          );
 
    //          PopupMassUpdateComponent.init({
-   //             // onSave:_logic.callbackAddFields			// be notified of something...who knows...
+   //             // onSave:_logic.callbackAddFields        // be notified of something...who knows...
    //          });
 
    //          PopupSortDataTableComponent.init({
@@ -3158,7 +3162,7 @@ export default class ABViewGrid extends ABViewGridCore {
    //             );
 
    //             // $$(DataTable.ui.id).attachEvent('onBeforeRender', function (data) {
-   //             // 	_logic.clientSideDataFilter();
+   //             //    _logic.clientSideDataFilter();
    //             // });
 
    //             $$(DataTable.ui.id).adjust();
@@ -3261,16 +3265,16 @@ export default class ABViewGrid extends ABViewGridCore {
    //                      },
    //                   },
    //                   /*
-   // 				{
-   // 					view: view,
-   // 					id: ids.buttonExport,
-   // 					label: labels.component.export,
-   // 					icon: "fa fa-download",
-   // 					type: "icon",
-   // 					click: function() {
-   // 						_logic.toolbarButtonExport(this.$view);
-   // 					}
-   // 				}
+   //             {
+   //                view: view,
+   //                id: ids.buttonExport,
+   //                label: labels.component.export,
+   //                icon: "fa fa-download",
+   //                type: "icon",
+   //                click: function() {
+   //                   _logic.toolbarButtonExport(this.$view);
+   //                }
+   //             }
    //                          */
    //                   {},
    //                   {

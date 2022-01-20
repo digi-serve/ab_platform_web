@@ -1,5 +1,7 @@
 const ABViewListCore = require("../../core/views/ABViewListCore");
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 module.exports = class ABViewList extends ABViewListCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -49,8 +51,6 @@ module.exports = class ABViewList extends ABViewListCore {
          ObjectDefaults
       );
 
-      var L = App.Label;
-
       // _logic functions
 
       _logic.selectSource = (dcId, oldDcId) => {
@@ -64,8 +64,8 @@ module.exports = class ABViewList extends ABViewListCore {
          {
             name: "datacollection",
             view: "richselect",
-            label: L("ab.components.list.dataSource", "*Data Source"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Data Source"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             on: {
                onChange: _logic.selectSource,
             },
@@ -73,14 +73,14 @@ module.exports = class ABViewList extends ABViewListCore {
          {
             name: "field",
             view: "richselect",
-            label: L("ab.components.list.field", "*Field"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Field"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             view: "counter",
             name: "height",
-            label: L("ab.component.list.height", "*Height:"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Height:"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
       ]);
    }
@@ -94,7 +94,7 @@ module.exports = class ABViewList extends ABViewListCore {
     * @param {string} dvId - id of ABDatacollection
     */
    static propertyUpdateFieldOptions(ids, view, dvId) {
-      var datacollection = view.AB.datacollections((dc) => dc.id == dvId)[0];
+      var datacollection = view.AB.datacollectionByID(dvId);
       var object = datacollection ? datacollection.datasource : null;
 
       // Pull field list
@@ -153,7 +153,7 @@ module.exports = class ABViewList extends ABViewListCore {
 
       var idBase = "ABViewListEditorComponent";
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       var _ui = {

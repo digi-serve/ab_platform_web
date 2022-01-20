@@ -1,7 +1,11 @@
 const ABProcessGatewayExclusiveCore = require("../../../core/process/tasks/ABProcessGatewayExclusiveCore.js");
 const RowFilter = require("../../RowFilter");
 
-module.exports = class ABProcessGatewayExclusive extends ABProcessGatewayExclusiveCore {
+let L = (...params) => AB.Multilingual.label(...params);
+
+module.exports = class ABProcessGatewayExclusive extends (
+   ABProcessGatewayExclusiveCore
+) {
    ////
    //// Process Instance Methods
    ////
@@ -20,7 +24,6 @@ module.exports = class ABProcessGatewayExclusive extends ABProcessGatewayExclusi
     */
    propertiesShow(id, App) {
       var ids = this.propertyIDs(id);
-      var L = App.Label;
 
       var ui = {
          id: id,
@@ -29,7 +32,7 @@ module.exports = class ABProcessGatewayExclusive extends ABProcessGatewayExclusi
             {
                id: ids.name,
                view: "text",
-               label: L("ab.process.element.name", "*Name"),
+               label: L("Name"),
                name: "name",
                value: this.name,
             },
@@ -62,17 +65,17 @@ module.exports = class ABProcessGatewayExclusive extends ABProcessGatewayExclusi
 
          var connUI = {
             view: "fieldset",
-            label: `to ${
+            label: L("to {0}", [
                connectedElement
                   ? connectedElement.name
-                  : "unlabeled Task(" + conn.id + ")"
-            }`,
+                  : L("unlabeled Task({0})", [conn.id]),
+            ]),
             body: {
                rows: [
                   {
                      id: `${id}_${conn.id}_label`,
                      view: "text",
-                     label: "Label",
+                     label: L("Label"),
                      value: condition.label || "",
                   },
                   DF.ui,

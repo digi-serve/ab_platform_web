@@ -7,24 +7,18 @@
 //
 const ABViewRuleActionFormRecordRuleUpdateConnected = require("./ABViewRuleActionFormRecordRuleUpdateConnected");
 
-module.exports = class ABViewRuleActionFormRecordRuleRemoveConnected extends ABViewRuleActionFormRecordRuleUpdateConnected {
+let L = (...params) => AB.Multilingual.label(...params);
+
+module.exports = class ABViewRuleActionFormRecordRuleRemoveConnected extends (
+   ABViewRuleActionFormRecordRuleUpdateConnected
+) {
    constructor(App, idBase, currentForm) {
       super(App, idBase, currentForm);
 
-      var L = App.Label;
-
       this.key = "ABViewRuleActionFormRecordRuleRemoveConnected";
-      this.label = L(
-         "ab.component.ruleaction.removeConnectedRecord",
-         "*Remove Connected Record"
-      );
+      this.label = L("Remove Connected Record");
 
       this.isUpdateValueDisabled = true; // disable update data of each fields
-
-      this.labels.component.selectField = L(
-         "ab.ruleAction.RemoveConnected.selectField",
-         "*Select which connected object to remove"
-      );
    }
 
    /**
@@ -52,14 +46,15 @@ module.exports = class ABViewRuleActionFormRecordRuleRemoveConnected extends ABV
 
          model
             .update(options.data.id, updatedVals)
+            .then(resolve)
             .catch((err) => {
-               this.AB.error(
-                  "!!! ABViewRuleActionFormRecordRuleUpdate.process(): update error:",
-                  { error: err, data: options.data }
-               );
+               this.AB.notify.developer(err, {
+                  message:
+                     "!!! ABViewRuleActionFormRecordRuleUpdate.process(): update error:",
+                  data: options.data,
+               });
                reject(err);
-            })
-            .then(resolve);
+            });
       });
    }
 };

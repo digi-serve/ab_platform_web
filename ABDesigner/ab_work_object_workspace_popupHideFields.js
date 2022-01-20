@@ -12,24 +12,12 @@ module.exports = class AB_Work_Object_Workspace_PopupHideFields extends ABCompon
       idBase = idBase || "ab_work_object_workspace_popupHideFields";
 
       super(App, idBase);
-      var L = this.Label;
-
-      var labels = {
-         common: App.labels,
-         component: {
-            showAll: L("ab.visible_fields.showAll", "*Show All"),
-            hideAll: L("ab.visible_fields.hideAll", "*Hide All"),
-            errorFrozen: L(
-               "ab.visible_fields.errorFrozen",
-               "*Sorry, you cannot hide your last frozen column."
-            ),
-         },
-      };
+      var L = this.Label();
 
       // internal list of Webix IDs to reference our UI components
       var ids = {
-         component: this.unique(idBase + "_popupHide"),
-         list: this.unique(idBase + "_popupHide_list"),
+         component: this.unique(`${idBase}_popupHide`),
+         list: this.unique(`${idBase}_popupHide_list`),
       };
 
       // Our webix UI definition:
@@ -59,7 +47,7 @@ module.exports = class AB_Work_Object_Workspace_PopupHideFields extends ABCompon
                   cols: [
                      {
                         view: "button",
-                        value: labels.component.hideAll,
+                        value: L("Hide All"),
                         on: {
                            onItemClick: function () {
                               _logic.clickHideAll();
@@ -69,7 +57,7 @@ module.exports = class AB_Work_Object_Workspace_PopupHideFields extends ABCompon
                      {
                         view: "button",
                         css: "webix_primary",
-                        value: labels.component.showAll,
+                        value: L("Show All"),
                         type: "form",
                         on: {
                            onItemClick: function () {
@@ -152,8 +140,8 @@ module.exports = class AB_Work_Object_Workspace_PopupHideFields extends ABCompon
             var List = $$(ids.list);
             var item = List.getItem(id);
             if (this._frozenColumnID == item.columnName) {
-               this.AB.Dialog.Alert({
-                  text: labels.component.errorFrozen,
+               webix.alert({
+                  text: L("Sorry, you cannot hide your last frozen column."),
                });
                return;
             }

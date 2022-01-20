@@ -2,6 +2,8 @@ const ABViewTextCore = require("../../core/views/ABViewTextCore");
 
 const ABViewTextPropertyComponentDefaults = ABViewTextCore.defaultValues();
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 module.exports = class ABViewText extends ABViewTextCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -24,7 +26,7 @@ module.exports = class ABViewText extends ABViewTextCore {
 
       var idBase = "ABViewTextEditorComponent";
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       var _ui = {
@@ -95,7 +97,6 @@ module.exports = class ABViewText extends ABViewTextCore {
          _logic,
          ObjectDefaults
       );
-      var L = App.Label;
 
       // _logic functions
 
@@ -119,14 +120,14 @@ module.exports = class ABViewText extends ABViewTextCore {
          {
             view: "counter",
             name: "height",
-            label: L("ab.component.list.height", "*Height:"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Height:"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             name: "datacollection",
             view: "richselect",
-            label: L("ab.components.list.dataSource", "*Data Source"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Data Source"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             on: {
                onChange: _logic.selectSource,
             },
@@ -156,12 +157,12 @@ module.exports = class ABViewText extends ABViewTextCore {
     * @param {string} dvId - id of ABDatacollection
     */
    static propertyUpdateFieldOptions(ids, view, dvId) {
-      var datacollection = view.AB.datacollections((dc) => dc.id == dvId)[0];
+      var datacollection = view.AB.datacollectionByID(dvId);
 
       if (!datacollection && view.parent.key == "dataview") {
-         datacollection = view.AB.datacollections(
-            (dc) => dc.id == view.parent.settings.dataviewID
-         )[0];
+         datacollection = view.AB.datacollectionByID(
+            view.parent.settings.dataviewID
+         );
          $$(ids.datacollection).setValue(view.parent.settings.dataviewID);
       }
 
@@ -208,9 +209,9 @@ module.exports = class ABViewText extends ABViewTextCore {
    component(App, idPrefix) {
       let baseCom = super.component(App);
 
-      var idBase = "ABViewText_" + (idPrefix ? idPrefix : "") + this.id;
+      var idBase = `ABViewText_${idPrefix ? idPrefix : ""}${this.id}`;
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       var _logic = {

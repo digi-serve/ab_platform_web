@@ -1,6 +1,8 @@
 var ABFieldImageCore = require("../../core/dataFields/ABFieldImageCore");
 var ABFieldComponent = require("./ABFieldComponent");
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 /**
  * ABFieldImageComponent
  *
@@ -22,15 +24,13 @@ var ABFieldImageComponent = new ABFieldComponent({
       };
       ids = field.idsUnique(ids, App);
 
-      var L = App.Label;
-
       return [
          {
             cols: [
                {
                   view: "checkbox",
                   name: "useWidth",
-                  labelRight: L("ab.dataField.image.width", "*Width"),
+                  labelRight: L("Width"),
                   width: 80,
                   labelWidth: 0,
                   value: 1,
@@ -52,7 +52,7 @@ var ABFieldImageComponent = new ABFieldComponent({
                   view: "checkbox",
                   name: "useHeight",
                   // id:componentIds.useHeight,
-                  labelRight: L("ab.dataField.image.height", "*Height"),
+                  labelRight: L("Height"),
                   width: 80,
                   labelWidth: 0,
                   value: 1,
@@ -73,10 +73,7 @@ var ABFieldImageComponent = new ABFieldComponent({
                {
                   view: "checkbox",
                   name: "useDefaultImage",
-                  labelRight: L(
-                     "ab.dataField.image.defaultImage",
-                     "*Default image"
-                  ),
+                  labelRight: L("Default image"),
                   width: 200,
                   labelWidth: 0,
                   value: 0,
@@ -90,12 +87,12 @@ var ABFieldImageComponent = new ABFieldComponent({
                   view: "uploader",
                   id: ids.defaultImageUrl,
                   template:
-                     '<div class="default-image-holder" style="height:66; width:100; position:relative;">' +
-                     '<div class="image-data-field-icon" style="text-align: center; height: inherit; display: table-cell; vertical-align: middle; border: 2px dotted #CCC; background: #FFF; border-radius: 10px; font-size: 11px; line-height: 13px; padding: 0 8px;">' +
-                     '<i class="fa fa-picture-o fa-2x" style="opacity: 0.6; font-size: 32px; margin-bottom: 5px;"></i>' +
-                     "<br/>Drag and drop or click here" +
+                     '<div class="default-image-holder">' +
+                     '<div class="image-data-field-icon">' +
+                     '<i class="fa fa-picture-o fa-2x"></i>' +
+                     `<div>${L("Drag and drop or click here")}</div>` +
                      "</div>" +
-                     '<div class="image-data-field-image" style="display:none; width:100%; height:100%; background-repeat: no-repeat; background-position: center center; background-size: cover; position: relative;">' +
+                     '<div class="image-data-field-image" style="display:none;">' +
                      '<a style="" class="ab-delete-photo" href="javascript:void(0);"><i class="fa fa-times delete-image" style="display:none;"></i></a>' +
                      "</div>" +
                      "</div>",
@@ -104,7 +101,7 @@ var ABFieldImageComponent = new ABFieldComponent({
                   multiple: false,
                   disabled: true,
                   name: "defaultImageUrl",
-                  height: 66,
+                  height: 150,
                   width: 100,
                   on: {
                      // when a file is added to the uploader
@@ -131,7 +128,13 @@ var ABFieldImageComponent = new ABFieldComponent({
 
                      // if an error was returned
                      onFileUploadError: function (item, response) {
-                        App.AB.error("Error loading image", response);
+                        App.AB.notify.developer(
+                           new Error("Error loading image"),
+                           {
+                              message: "Error loading image",
+                              response,
+                           }
+                        );
                      },
                   },
                },
@@ -325,36 +328,37 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
     * @function destroy
     * On a destroy operation, ask if the user wants to keep the related images.
     */
-   destroy() {
-      var L = this.AB.Label();
-
+   async destroy() {
       return new Promise((resolve, reject) => {
          // verify we have been .save()d before:
          if (this.id) {
             // Ask the user what to do about the existing images:
-            this.AB.Dialog.Confirm({
-               title: L("ab.dataField.image.keepImages", "*Keep Images?"),
-               message: L(
-                  "ab.dataField.image.keepImagesDescription",
-                  "*Do you want to keep the images referenced by {0}?",
-                  [this.label]
-               ),
-               callback: (result) => {
+            webix.confirm({
+               title: L("Keep Images?"),
+               message: L("Do you want to keep the images referenced by {0}?", [
+                  this.label,
+               ]),
+               callback: async (result) => {
                   // update this setting so the server can respond correctly in
                   // ABFieldImage.migrateDrop()
                   this.settings.removeExistingData = result ? 0 : 1;
-                  this.save()
-                     .then(() => {
-                        // TODO: a reminder that you still got alot on the server to do!
-                        this.AB.Dialog.Alert({
-                           title: "!! TODO !!",
-                           text:
-                              "ABFieldImage.destroy(): Tell a Developer to actually pay attention to this!",
-                        });
-                        // now the default .destroy()
-                        super.destroy().then(resolve).catch(reject);
-                     })
-                     .catch(reject);
+
+                  try {
+                     await this.save();
+
+                     // TODO: a reminder that you still got alot on the server to do!
+                     webix.alert({
+                        title: "!! TODO !!",
+                        text:
+                           "ABFieldImage.destroy(): Tell a Developer to actually pay attention to this!",
+                     });
+
+                     await super.destroy();
+
+                     resolve();
+                  } catch (err) {
+                     reject(err);
+                  }
                },
             });
          } else {
@@ -372,13 +376,9 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
       // we won't have the obj and each time this
       // field is in a form it will conflict with the last one rendered
       if (formId) {
-         return "#columnName#-#id#-image"
-            .replace("#id#", formId)
-            .replace("#columnName#", this.columnName.replace(/ /g, "_"));
+         return `${this.columnName.replace(/ /g, "_")}-${formId}-image`;
       } else {
-         return "#columnName#-#id#-image"
-            .replace("#id#", obj.id)
-            .replace("#columnName#", this.columnName.replace(/ /g, "_"));
+         return `${this.columnName.replace(/ /g, "_")}-${obj.id}-image`;
       }
    }
 
@@ -386,49 +386,62 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
    columnHeader(options) {
       options = options || {};
 
-      var config = super.columnHeader(options);
-      var field = this;
+      let config = super.columnHeader(options);
+      let field = this;
 
       config.editor = false; // 'text';  // '[edit_type]'   for your unique situation
       // config.sort   = 'string' // '[sort_type]'   for your unique situation
 
-      var height = "100%";
-      var width = "100%";
-      if (this.settings.useWidth) {
+      let containerHeight = "100%";
+      let imageHeight = "100%";
+      let width = "100%";
+      let imageSrcHeight = "100%";
+      if (field.settings.useWidth) {
          config.width = field.settings.imageWidth || 100;
-         height = (field.settings.imageHeight || 33) + "px";
-         width = (field.settings.imageWidth || 100) + "px";
+         let heightVal =
+            field.settings.useHeight && field.settings.imageHeight
+               ? field.settings.imageHeight + 20
+               : 80;
+         containerHeight = `${heightVal} px`;
+         width = `${field.settings.imageWidth || 100} px`;
+         imageHeight =
+            field.settings.useHeight && field.settings.imageHeight
+               ? field.settings.imageHeight
+               : 80;
+         imageHeight = `${imageHeight} px`;
+         imageSrcHeight =
+            field.settings.useHeight && field.settings.imageHeight
+               ? field.settings.imageHeight
+               : 60;
+         imageSrcHeight = `${imageSrcHeight} px`;
       }
-      if (options.height) {
-         height = options.height + "px";
-      }
-      if (options.width) {
-         width = options.width + "px";
+      if (field.settings.useHeight) {
+         containerHeight = parseInt(field.settings.imageHeight) + 20;
+         containerHeight = `${containerHeight} px`;
+         imageHeight = parseInt(field.settings.imageHeight);
+         imageHeight = `${imageHeight} px`;
+         imageSrcHeight = parseInt(field.settings.imageHeight);
+         imageSrcHeight = `${imageSrcHeight} px`;
       }
 
-      var editable = options.editable;
+      let editable = options.editable;
 
       // populate our default template:
+      // debugger;
       config.template = (obj) => {
          if (obj.$group) return obj[this.columnName];
 
-         var widthStyle = "width: #width#; height: #height#"
-            .replace("#width#", width)
-            .replace("#height#", height);
+         let widthStyle = `width: ${width}; height: ${containerHeight}`;
 
-         var imgDiv = [
-            '<div class="ab-image-data-field" style="float: left; #useWidth#">'.replace(
-               "#useWidth#",
-               widthStyle
-            ),
-            '<div class="webix_view ab-image-holder" style="#useWidth#">'.replace(
-               "#useWidth#",
-               widthStyle
-            ),
+         let imageStyle = `width: ${width}; height: ${imageHeight}`;
+
+         let imgDiv = [
+            `<div class="ab-image-data-field" style="${widthStyle}">`,
+            `<div class="webix_view ab-image-holder" style="${imageStyle}">`,
             '<div class="webix_template">',
             this.imageTemplate(obj, {
                editable: editable,
-               height: height,
+               height: imageSrcHeight,
                width: width,
             }),
             "</div>",
@@ -546,11 +559,9 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
                   var type = item.type.toLowerCase();
                   if (acceptableTypes.indexOf(type) == -1) {
                      webix.message(
-                        L(
-                           "Only [{0}] images are supported",
-                           "Only [{0}] images are supported",
-                           [acceptableTypes.join(", ")]
-                        )
+                        L("Only [{0}] images are supported", [
+                           acceptableTypes.join(", "),
+                        ])
                      );
                      return false;
                   }
@@ -563,7 +574,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
                },
 
                // when upload is complete:
-               onFileUpload: (item, response) => {
+               onFileUpload: async (item, response) => {
                   webixContainer.hideProgress();
                   this.showImage(response.data.uuid, node);
 
@@ -574,41 +585,36 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
 
                   // update just this value on our current object.model
                   if (row.id) {
-                     this.object
-                        .model()
-                        .update(row.id, values)
-                        .then(() => {
-                           // update the client side data object as well so other data changes won't cause this save to be reverted
-                           if (
-                              $$(node) &&
-                              $$(node).getItem &&
-                              $$(node).getItem(row.id)
-                           ) {
-                              $$(node).updateItem(row.id, values);
-                           } else {
-                              // if you scroll the table the connection to the datatable is lost so we need to find it again
-                              var dataTable = document.querySelector(
-                                 ".webix_dtable"
-                              );
-                              if (
-                                 $$(dataTable) &&
-                                 $$(dataTable).getItem(row.id)
-                              )
-                                 $$(dataTable).updateItem(row.id, values);
-                           }
-                        })
-                        .catch((err) => {
-                           node.classList.add("webix_invalid");
-                           node.classList.add("webix_invalid_cell");
+                     try {
+                        await this.object.model().update(row.id, values);
 
-                           this.AB.notify.developer(err, {
-                              context:
-                                 "ABFieldImage.onFileUpload(): model.update(): error updating our entry",
-                              field: this,
-                              row,
-                              values,
-                           });
+                        // update the client side data object as well so other data changes won't cause this save to be reverted
+                        if (
+                           $$(node) &&
+                           $$(node).getItem &&
+                           $$(node).getItem(row.id)
+                        ) {
+                           $$(node).updateItem(row.id, values);
+                        } else {
+                           // if you scroll the table the connection to the datatable is lost so we need to find it again
+                           var dataTable = document.querySelector(
+                              ".webix_dtable"
+                           );
+                           if ($$(dataTable) && $$(dataTable).getItem(row.id))
+                              $$(dataTable).updateItem(row.id, values);
+                        }
+                     } catch (err) {
+                        node.classList.add("webix_invalid");
+                        node.classList.add("webix_invalid_cell");
+
+                        this.AB.notify.developer(err, {
+                           context:
+                              "ABFieldImage.onFileUpload(): model.update(): error updating our entry",
+                           field: this,
+                           row,
+                           values,
                         });
+                     }
                   }
 
                   // update value in the form component
@@ -631,12 +637,15 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
          // store upload id into html element (it will be used in .customEdit)
          node.dataset["uploaderId"] = uploader.config.id;
 
-         // open file upload dialog when clicked
-         node.addEventListener("click", (e) => {
-            if (e.target.className.indexOf("delete-image") > -1) {
-               this.deleteImage = true;
-            }
-         });
+         // if we are working in a datagrid we need to add a click event to
+         // check if the user is clicking on the delete button
+         if (node.className == "webix_cell") {
+            node.addEventListener("click", (e) => {
+               if (e.target.className.indexOf("delete-image") > -1) {
+                  this.deleteImage = true;
+               }
+            });
+         }
       }
    }
 
@@ -648,11 +657,11 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
     *					unique id references.
     * @param {HtmlDOM} node  the HTML Dom object for this field's display.
     */
-   customEdit(row, App, node) {
-      var L = App.Label;
-
-      if (this.deleteImage == true) {
-         // remove the property because it is only needed to prevent the file dialog from showing
+   customEdit(row, App, node, id, evt) {
+      if (
+         (evt && evt.target.className.indexOf("delete-image") > -1) ||
+         this.deleteImage
+      ) {
          delete this.deleteImage;
          if (!row.removeDefaultImage) {
             row.removeDefaultImage = [];
@@ -660,47 +669,42 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
          row.removeDefaultImage[this.columnName] = true;
 
          // Ask the user if they really want to delete the photo
-         this.AB.Dialog.Confirm({
+         webix.confirm({
             title: "",
-            message: L(
-               "ab.dataField.image.removeImageDescription",
-               "*Are you sure you want to remove this image?"
-            ),
-            callback: (result) => {
+            message: L("Are you sure you want to remove this image?"),
+            callback: async (result) => {
                var confirmDelete = result ? 1 : 0;
                if (confirmDelete) {
                   // update just this value on our current object.model
                   var values = {};
                   values[this.columnName] = ""; // removing the reference to the image here
 
-                  this.object
-                     .model()
-                     .update(row.id, values)
-                     .then(() => {
-                        // update the client side data object as well so other data changes won't cause this save to be reverted
-                        if ($$(node) && $$(node).updateItem)
-                           $$(node).updateItem(row.id, values);
-                     })
-                     .catch((err) => {
-                        node.classList.add("webix_invalid");
-                        node.classList.add("webix_invalid_cell");
+                  try {
+                     await this.object.model().update(row.id, values);
 
-                        this.AB.notify.developer(err, {
-                           context:
-                              "ABFieldImage: customEdit(): Error updating our entry",
-                           field: this,
-                           row: row,
-                           values: values,
-                        });
+                     // update the client side data object as well so other data changes won't cause this save to be reverted
+                     if ($$(node) && $$(node).updateItem)
+                        $$(node).updateItem(row.id, values);
+
+                     // update value in the form component
+                     this.setValue($$(node), values);
+                  } catch (err) {
+                     node.classList.add("webix_invalid");
+                     node.classList.add("webix_invalid_cell");
+
+                     this.AB.notify.developer(err, {
+                        context:
+                           "ABFieldImage: customEdit(): Error updating our entry",
+                        field: this,
+                        row: row,
+                        values: values,
                      });
-
-                  // update value in the form component
-                  this.setValue($$(node), values);
+                  }
                }
             },
          });
-      } else if (!row[this.columnName]) {
-         var uploaderId = node.dataset["uploaderId"],
+      } else {
+         let uploaderId = node.dataset["uploaderId"],
             uploader = $$(uploaderId);
 
          if (uploader && uploader.fileDialog)
@@ -736,7 +740,6 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
    }
 
    imageTemplate(obj, options) {
-      var L = this.AB.Label();
       options = options || {};
       options.height = options.height || "100%";
       options.width = options.width || "100%";
@@ -772,27 +775,20 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
       }
 
       var html = [
-         '<div class="image-data-field-icon" style="text-align: center; height: inherit; display: table-cell; vertical-align: middle; border: 2px dotted #CCC; background: #FFF; border-radius: 10px; font-size: 11px; line-height: 13px; padding: 0 8px; ' +
-            iconDisplay +
-            '"><i class="fa fa-picture-o fa-2x" style="opacity: 0.6; font-size: 32px; margin-bottom: 5px;"></i>#drag#</div>',
-         `<div class="image-data-field-image" style="${imageDisplay} width:${options.width}; height:${options.height}; background-repeat: no-repeat; background-position: center center; background-size: cover; ${imageURL}">#remove#</div>`,
+         `<div class="image-data-field-icon" style="${iconDisplay}"><i class="fa fa-picture-o fa-2x"></i>#drag#</div>` +
+            `<div class="image-data-field-image" style="${imageDisplay} width:${options.width}; height:${options.height}; ${imageURL}">#remove#</div>`,
       ].join("");
 
       html = html.replace(
          "#drag#",
          options.editable
-            ? `<br/>${L(
-                 "Drag and drop or click here",
-                 "Drag and drop or click here"
-              )}`
+            ? `<div>${L("Drag and drop or click here")}</div>`
             : ""
       );
       html = html.replace(
          "#remove#",
          options.editable
-            ? '<a style="' +
-                 imageDisplay +
-                 '" class="ab-delete-photo" href="javascript:void(0);"><i class="fa fa-times delete-image"></i></a>'
+            ? `<a style="${imageDisplay}" class="ab-delete-photo" href="javascript:void(0);"><i class="fa fa-times delete-image"></i></a>`
             : ""
       );
 
@@ -832,12 +828,12 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
          // }
       }
 
-      var imageIcon = domNode.querySelector(".image-data-field-icon");
-      if (imageIcon) imageIcon.style.display = val ? "none" : "block";
+      let imageIcon = domNode.querySelector(".image-data-field-icon");
+      if (imageIcon) imageIcon.style.display = val ? "none" : "";
 
-      var image = domNode.querySelector(".image-data-field-image");
+      let image = domNode.querySelector(".image-data-field-image");
       if (image) {
-         var imageDeleteIcon = image.querySelector(".ab-delete-photo");
+         let imageDeleteIcon = image.querySelector(".ab-delete-photo");
          if (imageDeleteIcon)
             imageDeleteIcon.style.display = val ? "block" : "none";
 

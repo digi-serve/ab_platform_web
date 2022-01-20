@@ -5,7 +5,11 @@
 //
 const ABViewRuleAction = require("../ABViewRuleAction");
 
-module.exports = class ABViewRuleActionFormSubmitRuleParentPage extends ABViewRuleAction {
+let L = (...params) => AB.Multilingual.label(...params);
+
+module.exports = class ABViewRuleActionFormSubmitRuleParentPage extends (
+   ABViewRuleAction
+) {
    /**
     * @param {object} App
     *      The shared App object that is created in OP.Component
@@ -14,14 +18,10 @@ module.exports = class ABViewRuleActionFormSubmitRuleParentPage extends ABViewRu
     */
    constructor(App, idBase) {
       super();
-      var L = App.Label;
 
       this.App = App;
       this.key = "ABViewRuleActionFormSubmitRuleParentPage";
-      this.label = L(
-         "ab.component.ruleaction.abviewพuleActionFormSubmitRuleParentPage",
-         "*Redirect to the parent page"
-      );
+      this.label = L("Redirect to the parent page");
 
       this.currentObject = null; // the object this Action is tied to.
 
@@ -29,12 +29,6 @@ module.exports = class ABViewRuleActionFormSubmitRuleParentPage extends ABViewRu
       // [
       //		{ fieldId: xxx, value:yyy, type:key['string', 'number', 'date',...]}
       // ]
-
-      // Labels for UI components
-      var labels = (this.labels = {
-         // common: App.labels,
-         component: {},
-      });
    }
 
    // conditionFields() {

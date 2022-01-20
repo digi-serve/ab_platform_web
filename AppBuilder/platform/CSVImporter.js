@@ -68,7 +68,7 @@ module.exports = class CSVImporter {
 
       return new Promise((resolve, reject) => {
          // read CSV file
-         let reader = new FileReader();
+         let reader = new window.FileReader();
          reader.onload = (e) => {
             let result = [];
 

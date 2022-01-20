@@ -2,6 +2,8 @@ const ABFieldFormulaCore = require("../../core/dataFields/ABFieldFormulaCore");
 const ABFieldComponent = require("./ABFieldComponent");
 const RowFilter = require("../RowFilter");
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 var ids = {
    field: "ab-field-formula-field",
    fieldList: "ab-field-formula-field-list",
@@ -19,7 +21,6 @@ var ABFieldFormulaComponent = new ABFieldComponent({
 
    elements: (App, field) => {
       ids = field.idsUnique(ids, App);
-      var L = App.Label;
 
       ABFieldFormulaComponent.rowFilter = new RowFilter(
          App,
@@ -30,20 +31,20 @@ var ABFieldFormulaComponent = new ABFieldComponent({
          {
             view: "richselect",
             name: "type",
-            label: L("ab.dataField.formula.type", "*Type"),
-            labelWidth: App.config.labelWidthMedium,
+            label: L("Type"),
+            labelWidth: this.AB.UISettings.config().labelWidthMedium,
             value: "sum",
             options: [
-               { id: "sum", value: L("ab.dataField.formula.type.sum", "*Sum") },
-               { id: "max", value: L("ab.dataField.formula.type.max", "*Max") },
-               { id: "min", value: L("ab.dataField.formula.type.min", "*Min") },
+               { id: "sum", value: L("Sum") },
+               { id: "max", value: L("Max") },
+               { id: "min", value: L("Min") },
                {
                   id: "average",
-                  value: L("ab.dataField.formula.type.average", "*Average"),
+                  value: L("Average"),
                },
                {
                   id: "count",
-                  value: L("ab.dataField.formula.type.count", "*Count"),
+                  value: L("Count"),
                },
             ],
          },
@@ -51,8 +52,8 @@ var ABFieldFormulaComponent = new ABFieldComponent({
             id: ids.field,
             view: "richselect",
             name: "field",
-            label: L("ab.dataField.formula.field", "*Field"),
-            labelWidth: App.config.labelWidthMedium,
+            label: L("Field"),
+            labelWidth: this.AB.UISettings.config().labelWidthMedium,
             options: {
                view: "suggest",
                body: {
@@ -98,7 +99,8 @@ var ABFieldFormulaComponent = new ABFieldComponent({
                // pull 'number' and 'calculate' fields from link objects
                // if (fLink.key == "number" || fLink.key == "calculate") {
                // NOTE: calculate fields does not support in queries
-               if (fLink.key == 'number') { // NOTE: calculate fields does not support in queries
+               if (fLink.key == "number") {
+                  // NOTE: calculate fields does not support in queries
                   options.push({
                      // UUID:UUID
                      id: `${f.id}:${fLink.id}`,

@@ -23,7 +23,7 @@ module.exports = class ABViewFormCustom extends ABViewFormCustomCore {
    editorComponent(App, mode) {
       var idBase = "ABViewFormCustomEditorComponent";
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       var templateElem = this.component(App).ui;
@@ -58,11 +58,9 @@ module.exports = class ABViewFormCustom extends ABViewFormCustomCore {
       // this field may be deleted
       if (!field) return component;
 
-      var idBase = this.parentFormUniqueID(
-         "ABViewFormCustom_" + this.id + "_f_"
-      );
+      var idBase = this.parentFormUniqueID(`ABViewFormCustom_${this.id}_f_`);
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       var settings = {};
@@ -95,9 +93,18 @@ module.exports = class ABViewFormCustom extends ABViewFormCustomCore {
       let height = 38;
       if (field instanceof ABFieldImage) {
          if (field.settings.useHeight) {
-            height = parseInt(field.settings.imageHeight) || DEFAULT_HEIGHT;
+            if (settings.labelPosition == "top") {
+               height = parseInt(field.settings.imageHeight) || DEFAULT_HEIGHT;
+               height += 38;
+            } else {
+               height = parseInt(field.settings.imageHeight) || DEFAULT_HEIGHT;
+            }
+         } else if (settings.labelPosition == "top") {
+            height = DEFAULT_HEIGHT + 38;
          } else {
-            height = DEFAULT_HEIGHT + 300;
+            if (DEFAULT_HEIGHT > 38) {
+               height = DEFAULT_HEIGHT;
+            }
          }
       } else if (
          settings.showLabel == true &&
@@ -106,12 +113,7 @@ module.exports = class ABViewFormCustom extends ABViewFormCustomCore {
          height = DEFAULT_HEIGHT;
       }
 
-      var template = (
-         '<div class="customField">' +
-         templateLabel +
-         "#template#" +
-         "</div>"
-      )
+      let template = `<div class="customField ${settings.labelPosition}">${templateLabel}#template#</div>`
          .replace(/#width#/g, settings.labelWidth)
          .replace(/#label#/g, field.label)
          .replace(
@@ -144,30 +146,30 @@ module.exports = class ABViewFormCustom extends ABViewFormCustomCore {
             template: template,
             height: height,
             onClick: {
-               customField: (id, e, trg) => {
+               customField: (evt, e, trg) => {
                   if (this.settings.disable == 1) return;
 
-                  var rowData = {};
+                  let rowData = {};
 
-                  var formView = this.parentFormComponent();
+                  let formView = this.parentFormComponent();
                   if (formView) {
-                     var dv = formView.datacollection;
+                     let dv = formView.datacollection;
                      if (dv) rowData = dv.getCursor() || {};
                   }
 
                   // var node = $$(ids.component).$view;
-                  var node = $$(trg).getParentView().$view;
-                  field.customEdit(rowData, App, node, ids.component);
+                  let node = $$(trg).getParentView().$view;
+                  field.customEdit(rowData, App, node, ids.component, evt);
                },
             },
          },
       };
 
       component.onShow = () => {
-         var elem = $$(ids.component);
+         let elem = $$(ids.component);
          if (!elem) return;
 
-         var rowData = {},
+         let rowData = {},
             node = elem.$view;
 
          // Add data-cy attributes
@@ -198,7 +200,7 @@ module.exports = class ABViewFormCustom extends ABViewFormCustomCore {
 
       component.logic = {
          getValue: (rowData) => {
-            var elem = $$(ids.component);
+            let elem = $$(ids.component);
 
             return field.getValue(elem, rowData);
          },

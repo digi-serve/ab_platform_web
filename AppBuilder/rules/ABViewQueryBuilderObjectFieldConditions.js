@@ -97,7 +97,7 @@ module.exports = class ABViewQueryBuilderObjectFieldConditions {
       var uniqueInstanceID = webix.uid();
       var myUnique = (key) => {
          // return this.unique(idBase + key ) + '_' + uniqueInstanceID;
-         return idBase + "_" + key + "_" + uniqueInstanceID;
+         return `${idBase}_${key}_${uniqueInstanceID}`;
       };
 
       // internal list of Webix IDs to reference our UI components.
@@ -124,7 +124,7 @@ module.exports = class ABViewQueryBuilderObjectFieldConditions {
                      view: "button",
                      css: "webix_primary",
                      name: "addqb",
-                     value: "Add Custom Conditions",
+                     value: L("Add Custom Conditions"),
                      autowidth: true,
                      click: function () {
                         $$(ids.queryBuilderContainer).show();
@@ -155,7 +155,7 @@ module.exports = class ABViewQueryBuilderObjectFieldConditions {
             view: "label",
             css: "ab-text-bold",
             label: this.label,
-            width: this.App.config.labelWidthLarge,
+            width: this.AB.UISettings.config().labelWidthLarge,
          });
       }
 

@@ -201,16 +201,21 @@ module.exports = class ABDataCollection extends ABDataCollectionCore {
        // 
 
       // calculate default value of $height of rows
-      var obj = this.datasource;
-      var defaultHeight = 0;
-      var minHeight = 0;
-      var imageFields = obj.fields((f) => f.key == "image");
+      let obj = this.datasource;
+      let defaultHeight = 0;
+      let minHeight = 0;
+      let imageFields = obj.fields((f) => f.key == "image");
+      let hiddenFields = obj.objectWorkspace.hiddenFields;
       imageFields.forEach(function (f) {
-         if (
-            parseInt(f.settings.useHeight) == 1 &&
-            parseInt(f.settings.imageHeight) > minHeight
-         ) {
-            minHeight = parseInt(f.settings.imageHeight) + 20;
+         if (hiddenFields.indexOf(f.columnName) == -1) {
+            if (
+               parseInt(f.settings.useHeight) == 1 &&
+               parseInt(f.settings.imageHeight) > minHeight
+            ) {
+               minHeight = parseInt(f.settings.imageHeight) + 20;
+            } else {
+               minHeight = 100;
+            }
          }
       });
       if (minHeight > 0) {

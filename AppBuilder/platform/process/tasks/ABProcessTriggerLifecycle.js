@@ -2,7 +2,11 @@
 // const ABApplication = require("./ABApplication"); // NOTE: change to require()
 const ABProcessTriggerLifecycleCore = require("../../../core/process/tasks/ABProcessTriggerLifecycleCore.js");
 
-module.exports = class ABProcessTriggerLifecycle extends ABProcessTriggerLifecycleCore {
+let L = (...params) => AB.Multilingual.label(...params);
+
+module.exports = class ABProcessTriggerLifecycle extends (
+   ABProcessTriggerLifecycleCore
+) {
    propertyIDs(id) {
       return {
          name: `${id}_name`,
@@ -19,7 +23,6 @@ module.exports = class ABProcessTriggerLifecycle extends ABProcessTriggerLifecyc
     */
    propertiesShow(id) {
       var ids = this.propertyIDs(id);
-      var L = this.AB.Label();
 
       var allObjects = this.application.objectsIncluded();
       var listObj = [];
@@ -34,26 +37,26 @@ module.exports = class ABProcessTriggerLifecycle extends ABProcessTriggerLifecyc
             {
                id: ids.name,
                view: "text",
-               label: L("ab.process.task.email.name", "*Name"),
+               label: L("Name"),
                name: "name",
                value: this.name,
             },
             {
                id: ids.objList,
                view: "select",
-               label: "Object",
+               label: L("Object"),
                value: this.objectID,
                options: listObj,
             },
             {
                id: ids.lifecycleList,
                view: "select",
-               label: "lifecycle",
+               label: L("lifecycle"),
                value: this.lifecycleKey,
                options: [
-                  { id: "added", value: "after Add" },
-                  { id: "updated", value: "after Update" },
-                  { id: "deleted", value: "after Delete" },
+                  { id: "added", value: L("after Add") },
+                  { id: "updated", value: L("after Update") },
+                  { id: "deleted", value: L("after Delete") },
                ],
             },
          ],

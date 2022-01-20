@@ -2,6 +2,8 @@ const ABViewFormTextboxCore = require("../../core/views/ABViewFormTextboxCore");
 
 const ABViewFormTextboxPropertyComponentDefaults = ABViewFormTextboxCore.defaultValues();
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 module.exports = class ABViewFormTextbox extends ABViewFormTextboxCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -22,7 +24,7 @@ module.exports = class ABViewFormTextbox extends ABViewFormTextboxCore {
    editorComponent(App, mode) {
       var idBase = "ABViewFormTextboxEditorComponent";
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
       var textView = this.component(App);
 
@@ -58,28 +60,26 @@ module.exports = class ABViewFormTextbox extends ABViewFormTextboxCore {
          ObjectDefaults
       );
 
-      var L = App.Label;
-
       // in addition to the common .label  values, we
       // ask for:
       return commonUI.concat([
          {
             name: "type",
             view: "radio",
-            label: L("ab.component.textbox.type", "*Type"),
+            label: L("Type"),
             vertical: true,
             options: [
                {
                   id: "single",
-                  value: L("ab.component.textbox.single", "*Single line"),
+                  value: L("Single line"),
                },
                {
                   id: "multiple",
-                  value: L("ab.component.textbox.multiple", "*Multiple lines"),
+                  value: L("Multiple lines"),
                },
                {
                   id: "rich",
-                  value: L("ab.component.textbox.rich", "*Rich editor"),
+                  value: L("Rich editor"),
                },
             ],
          },
@@ -109,11 +109,9 @@ module.exports = class ABViewFormTextbox extends ABViewFormTextboxCore {
    component(App) {
       var component = super.component(App);
 
-      var idBase = this.parentFormUniqueID(
-         "ABViewFormTextbox_" + this.id + "_f_"
-      );
+      var idBase = this.parentFormUniqueID(`ABViewFormTextbox_${this.id}_f_`);
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       component.ui.id = ids.component;

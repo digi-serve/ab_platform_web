@@ -324,7 +324,9 @@ class Network extends EventEmitter {
                resolve();
             })
             .catch((err) => {
-               this.AB.error("Error while queueing data", err);
+               this.AB.notify.developer(err, {
+                  message: "Error while queueing data"
+               });
                this.AB.Analytics.logError(err);
                reject(err);
 
@@ -423,7 +425,9 @@ class Network extends EventEmitter {
 
             // respond to errors:
             .catch((err) => {
-               this.AB.error("commAPI queueFlush error", err);
+               this.AB.notify.developer(err, {
+                  message: "commAPI queueFlush error"
+               });
                this.AB.Analytics.logError(err);
 
                this.queueLock.release().then(() => {

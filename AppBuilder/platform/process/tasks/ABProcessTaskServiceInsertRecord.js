@@ -1,5 +1,7 @@
 const InsertRecordTaskCore = require("../../../core/process/tasks/ABProcessTaskServiceInsertRecordCore.js");
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 module.exports = class InsertRecordTask extends InsertRecordTaskCore {
    ////
    //// Process Instance Methods
@@ -24,7 +26,6 @@ module.exports = class InsertRecordTask extends InsertRecordTaskCore {
     */
    propertiesShow(id) {
       let ids = this.propertyIDs(id);
-      var L = this.AB.Label();
       let objectList = this.AB.objects().map((o) => {
          return { id: o.id, value: o.label || o.name };
       });
@@ -42,7 +43,7 @@ module.exports = class InsertRecordTask extends InsertRecordTaskCore {
          let result = [];
          result.push({
             id: "PK",
-            value: "[Primary Key]",
+            value: L("[Primary Key]"),
          });
 
          object.fields().forEach((f) => {
@@ -52,7 +53,7 @@ module.exports = class InsertRecordTask extends InsertRecordTaskCore {
                if (linkDS) {
                   result.push({
                      id: `${f.id}|PK`,
-                     value: `${f.label} -> [Primary Key]`,
+                     value: `${f.label} -> ${L("[Primary Key]")}`,
                   });
 
                   linkDS.fields().forEach((linkF) => {
@@ -97,27 +98,23 @@ module.exports = class InsertRecordTask extends InsertRecordTaskCore {
          }
 
          let setOptions = [
-            { id: 0, value: L("Not Set", "Not Set") },
-            { id: 1, value: L("Set by custom value", "Set by custom value") },
+            { id: 0, value: L("Not Set") },
+            { id: 1, value: L("Set by custom value") },
             {
                id: 2,
-               value: L(
-                  "Set by the root data [{0}]",
-                  "Set by the root data [{0}]",
-                  [startElemObj ? startElemObj.label : ""]
-               ),
+               value: L("Set by the root data [{0}]", [
+                  startElemObj ? startElemObj.label : "",
+               ]),
             },
             {
                id: 3,
-               value: L(
-                  "Set by previous step data [{0}]",
-                  "Set by previous step data [{0}]",
-                  [prevElemObj ? prevElemObj.label : ""]
-               ),
+               value: L("Set by previous step data [{0}]", [
+                  prevElemObj ? prevElemObj.label : "",
+               ]),
             },
             {
                id: 4,
-               value: L("Set by formula format", "Set by formula format"),
+               value: L("Set by formula format"),
             },
          ];
 
@@ -126,11 +123,9 @@ module.exports = class InsertRecordTask extends InsertRecordTaskCore {
          if (fieldRepeat && fieldRepeat.datasourceLink) {
             setOptions.push({
                id: 5,
-               value: L(
-                  "Set by the instance [{0}]",
-                  "Set by the instance [{0}]",
-                  [this.fieldRepeat ? this.fieldRepeat.label : ""]
-               ),
+               value: L("Set by the instance [{0}]", [
+                  this.fieldRepeat ? this.fieldRepeat.label : "",
+               ]),
             });
 
             repeatObjectFields = getFieldOptions(fieldRepeat.datasourceLink);
@@ -212,14 +207,14 @@ module.exports = class InsertRecordTask extends InsertRecordTaskCore {
             {
                id: ids.name,
                view: "text",
-               label: L("ab.process.element.name", "*Name"),
+               label: L("Name"),
                name: "name",
                value: this.name,
             },
             {
                id: ids.objectID,
                view: "select",
-               label: L("ab.process.insertRecord.object", "*Object"),
+               label: L("Object"),
                value: this.objectID,
                name: "objectID",
                options: objectList,
@@ -237,17 +232,14 @@ module.exports = class InsertRecordTask extends InsertRecordTaskCore {
                   {
                      id: ids.repeatMode,
                      view: "select",
-                     label: L("ab.process.insertRecord.repeatMode", "*Repeat"),
+                     label: L("Repeat"),
                      value: this.repeatMode,
                      name: "repeatMode",
                      width: 330,
                      options: [
                         {
                            id: "rootData",
-                           value: L(
-                              "ab.process.insertRecord.repeatConnectRootData",
-                              "*For Connection in root data"
-                           ),
+                           value: L("For Connection in root data"),
                         },
                      ],
                      on: {
@@ -281,7 +273,7 @@ module.exports = class InsertRecordTask extends InsertRecordTaskCore {
             },
             {
                view: "fieldset",
-               label: "Values",
+               label: L("Values"),
                body: {
                   id: ids.fieldValues,
                   view: "form",

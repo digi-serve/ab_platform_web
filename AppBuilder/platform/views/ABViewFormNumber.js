@@ -2,6 +2,8 @@ const ABViewFormNumberCore = require("../../core/views/ABViewFormNumberCore");
 
 const ABViewFormNumberPropertyComponentDefaults = ABViewFormNumberCore.defaultValues();
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 module.exports = class ABViewFormNumber extends ABViewFormNumberCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -22,7 +24,7 @@ module.exports = class ABViewFormNumber extends ABViewFormNumberCore {
    editorComponent(App, mode) {
       var idBase = "ABViewFormNumberEditorComponent";
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       var numberElem = this.component(App).ui;
@@ -55,7 +57,6 @@ module.exports = class ABViewFormNumber extends ABViewFormNumberCore {
          _logic,
          ObjectDefaults
       );
-      var L = App.Label;
 
       // in addition to the common .label  values, we
       // ask for:
@@ -63,11 +64,8 @@ module.exports = class ABViewFormNumber extends ABViewFormNumberCore {
          {
             name: "isStepper",
             view: "checkbox",
-            labelWidth: App.config.labelWidthCheckbox,
-            labelRight: L(
-               "ab.component.button.isStepper",
-               "*Plus/Minus Buttons"
-            ),
+            labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
+            labelRight: L("Plus/Minus Buttons"),
          },
       ]);
    }
@@ -98,11 +96,9 @@ module.exports = class ABViewFormNumber extends ABViewFormNumberCore {
       var component = super.component(App);
       var field = this.field();
 
-      var idBase = this.parentFormUniqueID(
-         "ABViewFormNumber_" + this.id + "_f_"
-      );
+      var idBase = this.parentFormUniqueID(`ABViewFormNumber_${this.id}_f_`);
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       var viewType = this.settings.isStepper

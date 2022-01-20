@@ -1,6 +1,8 @@
 var ABFieldTreeCore = require("../../core/dataFields/ABFieldTreeCore");
 var ABFieldComponent = require("./ABFieldComponent");
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 var ids = {
    options: "ab-tree-option",
    popup: "ab-tree-popup",
@@ -31,12 +33,11 @@ var ABFieldTreeComponent = new ABFieldComponent({
          });
       }
       ids = field.idsUnique(ids, App);
-      var L = App.Label;
 
       return [
          {
             view: "label",
-            label: `<b>${L("ab.dataField.tree.options", "*Options")}</b>`,
+            label: `<b>${L("Options")}</b>`,
          },
          {
             id: ids.options,
@@ -83,7 +84,7 @@ var ABFieldTreeComponent = new ABFieldComponent({
          {
             view: "button",
             css: "webix_primary",
-            value: L("ab.dataField.tree.addNewOption", "*Add new option"),
+            value: L("Add new option"),
             click: () => {
                var itemId = webix.uid().toString();
                treeCol.data.add({
@@ -241,8 +242,6 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
    columnHeader(options) {
       options = options || {};
 
-      var L = this.AB.Label();
-
       var config = super.columnHeader(options);
       var field = this;
 
@@ -252,7 +251,7 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
          formClass = " form-entry";
          placeHolder =
             "<span style='color: #CCC; padding: 0 5px;'>" +
-            L("ab.dataField.tree.placeholder", "*Select items") +
+            L("Select items") +
             "</span>";
       }
 
@@ -262,7 +261,7 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
          if (obj.$group) return obj[field.columnName];
 
          var branches = [];
-         var selectOptions = _.cloneDeep(field.settings.options);
+         var selectOptions = this.AB.cloneDeep(field.settings.options);
          selectOptions = new webix.TreeCollection({
             data: selectOptions,
          });
@@ -350,7 +349,6 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
       if (!node) {
          return;
       }
-      var L = App.Label;
 
       options = options || {};
 
@@ -360,14 +358,13 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
          if (!row || row.length == 0) {
             node.innerHTML =
                "<div class='list-data-values form-entry'><span style='color: #CCC; padding: 0 5px;'>" +
-               L("ab.dataField.tree.placeholder", "*Select items") +
+               L("Select items") +
                "</span></div>";
             return;
          }
 
-         var row = row;
          var branches = [];
-         var options = _.cloneDeep(field.settings.options);
+         options = this.AB.cloneDeep(field.settings.options);
          options = new webix.TreeCollection({
             data: options,
          });
@@ -428,16 +425,12 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
     */
    customEdit(row, App, node, component) {
       var idBase = App.unique(this.idCustomContainer(row));
-      var idPopup = idBase + "-popup";
-      var idTree = idBase + "-tree";
-      var App = App;
-      // var node = node;
+      var idPopup = `${idBase}-popup`;
+      var idTree = `${idBase}-tree`;
       var view = $$(node);
       var field = this;
       var parentComponent = component;
       var values = {};
-      var options = {};
-      var row = row;
       var firstRender = true;
 
       function getValues(field, row) {
@@ -457,7 +450,7 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
 
          $$(idTree).blockEvent(); // prevents endless loop
 
-         var options = _.cloneDeep(field.settings.options);
+         var options = this.AB.cloneDeep(field.settings.options);
          $$(idTree).clearAll();
          $$(idTree).parse(options);
          $$(idTree).refresh();
@@ -507,7 +500,7 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
                      );
                   },
                   on: {
-                     onItemCheck: function (id, value, event) {
+                     onItemCheck: async function (id, value, event) {
                         var dom = this.getItemNode(id);
                         var tree = this;
                         if (value == true) {
@@ -546,25 +539,23 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
                            if (values[field.columnName].length == 0)
                               values[field.columnName] = "";
 
-                           field.object
-                              .model()
-                              .update(row.id, values)
-                              .then(() => {
-                                 // update the client side data object as well so other data changes won't cause this save to be reverted
-                                 if (view && view.updateItem) {
-                                    view.updateItem(row.id, values);
-                                 }
-                              })
-                              .catch((err) => {
-                                 node.classList.add("webix_invalid");
-                                 node.classList.add("webix_invalid_cell");
+                           try {
+                              await field.object.model().update(row.id, values);
 
-                                 this.AB.error("Error updating our entry.", {
-                                    error: err,
-                                    row: row,
-                                    values: values,
-                                 });
+                              // update the client side data object as well so other data changes won't cause this save to be reverted
+                              if (view && view.updateItem) {
+                                 view.updateItem(row.id, values);
+                              }
+                           } catch (err) {
+                              node.classList.add("webix_invalid");
+                              node.classList.add("webix_invalid_cell");
+
+                              this.AB.notify.developer(err, {
+                                 message: "Error updating our entry.",
+                                 row: row,
+                                 values: values,
                               });
+                           }
                         } else {
                            var rowData = {};
                            rowData[field.columnName] = $$(idTree).getChecked();

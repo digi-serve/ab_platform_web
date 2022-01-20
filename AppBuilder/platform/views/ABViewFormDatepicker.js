@@ -20,7 +20,7 @@ module.exports = class ABViewFormDatepicker extends ABViewFormDatepickerCore {
    editorComponent(App, mode) {
       var idBase = "ABViewFormDatepickerEditorComponent";
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       var datepickerElem = this.component(App).ui;
@@ -52,10 +52,10 @@ module.exports = class ABViewFormDatepicker extends ABViewFormDatepickerCore {
       var field = this.field();
 
       var idBase = this.parentFormUniqueID(
-         "ABViewFormDatepicker_" + this.id + "_f_"
+         `ABViewFormDatepicker_${this.id}_f_`
       );
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       component.ui.id = ids.component;

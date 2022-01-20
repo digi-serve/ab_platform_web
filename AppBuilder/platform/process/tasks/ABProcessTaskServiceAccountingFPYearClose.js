@@ -1,5 +1,7 @@
 const AccountingFPYearCloseCore = require("../../../core/process/tasks/ABProcessTaskServiceAccountingFPYearCloseCore.js");
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 module.exports = class AccountingFPYearClose extends AccountingFPYearCloseCore {
    ////
    //// Process Instance Methods
@@ -39,9 +41,8 @@ module.exports = class AccountingFPYearClose extends AccountingFPYearCloseCore {
     */
    propertiesShow(id) {
       var ids = this.propertyIDs(id);
-      var L = this.AB.Label();
 
-      var processValues = [{ id: 0, value: "Select a Process Value" }];
+      var processValues = [{ id: 0, value: L("Select a Process Value") }];
       var processDataFields = this.process.processDataFields(this);
       (processDataFields || []).forEach((row) => {
          processValues.push({ id: row.key, value: row.label });
@@ -52,14 +53,14 @@ module.exports = class AccountingFPYearClose extends AccountingFPYearCloseCore {
       });
       objectList.unshift({
          id: 0,
-         value: L("ab.process.accounting.selectObject", "*Select an Object"),
+         value: L("Select an Object"),
       });
 
       let getFieldOptions = (objID, fieldKey) => {
          let fields = [
             {
                id: 0,
-               value: L("ab.process.accounting.selectField", "*Select a Field"),
+               value: L("Select a Field"),
             },
          ];
 
@@ -78,10 +79,10 @@ module.exports = class AccountingFPYearClose extends AccountingFPYearCloseCore {
 
       let getListOptions = (objectId, fieldId) => {
          let result = [];
-         let object = this.AB.objects((obj) => obj.id == objectId)[0];
+         let object = this.AB.objectByID(objectId);
          if (!object) return result;
 
-         let fpStatusField = object.fields((f) => f.id == fieldId)[0];
+         let fpStatusField = object.fieldByID(fieldId);
          if (
             !fpStatusField ||
             !fpStatusField.settings ||
@@ -184,17 +185,14 @@ module.exports = class AccountingFPYearClose extends AccountingFPYearCloseCore {
             {
                id: ids.name,
                view: "text",
-               label: L("ab.process.element.name", "*Name"),
+               label: L("Name"),
                name: "name",
                value: this.name,
             },
             {
                id: ids.processFPYearValue,
                view: "select",
-               label: L(
-                  "ab.process.accounting.processFPYearValue",
-                  "*Process Fiscal Period Year Value"
-               ),
+               label: L("Process Fiscal Period Year Value"),
                value: this.processFPYearValue,
                name: "processFPYearValue",
                options: processValues,
@@ -202,10 +200,7 @@ module.exports = class AccountingFPYearClose extends AccountingFPYearCloseCore {
             {
                id: ids.objectFPYear,
                view: "select",
-               label: L(
-                  "ab.process.accounting.objectFPYear",
-                  "*FP Year Object"
-               ),
+               label: L("FP Year Object"),
                value: this.objectFPYear,
                name: "objectFPYear",
                options: objectList,
@@ -224,10 +219,7 @@ module.exports = class AccountingFPYearClose extends AccountingFPYearCloseCore {
             {
                id: ids.objectFPMonth,
                view: "select",
-               label: L(
-                  "ab.process.accounting.objectFPMonth",
-                  "*FP Month Object"
-               ),
+               label: L("FP Month Object"),
                value: this.objectFPMonth,
                name: "objectFPMonth",
                options: objectList,
@@ -243,7 +235,7 @@ module.exports = class AccountingFPYearClose extends AccountingFPYearCloseCore {
             {
                id: ids.objectGL,
                view: "select",
-               label: L("ab.process.accounting.objectGL", "*Balance Object"),
+               label: L("Balance Object"),
                value: this.objectGL,
                name: "objectGL",
                options: objectList,
@@ -262,10 +254,7 @@ module.exports = class AccountingFPYearClose extends AccountingFPYearCloseCore {
             {
                id: ids.objectAccount,
                view: "select",
-               label: L(
-                  "ab.process.accounting.objectAccount",
-                  "*Account Object"
-               ),
+               label: L("Account Object"),
                value: this.objectAccount,
                name: "objectAccount",
                options: objectList,
@@ -284,30 +273,21 @@ module.exports = class AccountingFPYearClose extends AccountingFPYearCloseCore {
             {
                id: ids.valueFundBalances,
                view: "text",
-               label: L(
-                  "ab.process.accounting.valueFundBalances",
-                  "*Fund Balances Code"
-               ),
+               label: L("Fund Balances Code"),
                value: this.valueFundBalances,
                name: "valueFundBalances",
             },
             {
                id: ids.valueNetIncome,
                view: "text",
-               label: L(
-                  "ab.process.accounting.valueNetIncome",
-                  "*Net Income Code"
-               ),
+               label: L("Net Income Code"),
                value: this.valueNetIncome,
                name: "valueNetIncome",
             },
             {
                id: ids.fieldFPYearStart,
                view: "select",
-               label: L(
-                  "ab.process.accounting.fieldFPYearStart",
-                  "*FP Year -> Start"
-               ),
+               label: L("FP Year -> Start"),
                value: this.fieldFPYearStart,
                name: "fieldFPYearStart",
                options: fpYearDateFields,
@@ -315,10 +295,7 @@ module.exports = class AccountingFPYearClose extends AccountingFPYearCloseCore {
             {
                id: ids.fieldFPYearEnd,
                view: "select",
-               label: L(
-                  "ab.process.accounting.fieldFPYearEnd",
-                  "*FP Year -> End"
-               ),
+               label: L("FP Year -> End"),
                value: this.fieldFPYearEnd,
                name: "fieldFPYearEnd",
                options: fpYearDateFields,
@@ -326,10 +303,7 @@ module.exports = class AccountingFPYearClose extends AccountingFPYearCloseCore {
             {
                id: ids.fieldFPYearStatus,
                view: "select",
-               label: L(
-                  "ab.process.accounting.fieldFPYearStatus",
-                  "*FP Year -> Status"
-               ),
+               label: L("FP Year -> Status"),
                value: this.fieldFPYearStatus,
                name: "fieldFPYearStatus",
                options: fpYearStatusFields,
@@ -348,10 +322,7 @@ module.exports = class AccountingFPYearClose extends AccountingFPYearCloseCore {
             {
                id: ids.fieldFPYearActive,
                view: "select",
-               label: L(
-                  "ab.process.accounting.fieldFPYearActive",
-                  "*FP Year -> Active"
-               ),
+               label: L("FP Year -> Active"),
                value: this.fieldFPYearActive,
                name: "fieldFPYearActive",
                options: fpYearStatusOptions,
@@ -359,10 +330,7 @@ module.exports = class AccountingFPYearClose extends AccountingFPYearCloseCore {
             {
                id: ids.fieldFPMonthStart,
                view: "select",
-               label: L(
-                  "ab.process.accounting.fieldFPMonthStart",
-                  "*FP Month -> Start"
-               ),
+               label: L("FP Month -> Start"),
                value: this.fieldFPMonthStart,
                name: "fieldFPMonthStart",
                options: fpMonthDateFields,
@@ -370,10 +338,7 @@ module.exports = class AccountingFPYearClose extends AccountingFPYearCloseCore {
             {
                id: ids.fieldFPMonthEnd,
                view: "select",
-               label: L(
-                  "ab.process.accounting.fieldFPMonthEnd",
-                  "*FP Month -> End"
-               ),
+               label: L("FP Month -> End"),
                value: this.fieldFPMonthEnd,
                name: "fieldFPMonthEnd",
                options: fpMonthDateFields,
@@ -381,10 +346,7 @@ module.exports = class AccountingFPYearClose extends AccountingFPYearCloseCore {
             {
                id: ids.fieldGLStartBalance,
                view: "select",
-               label: L(
-                  "ab.process.accounting.fieldGLStartBalance",
-                  "*GL -> Start Balance"
-               ),
+               label: L("GL -> Start Balance"),
                value: this.fieldGLStartBalance,
                name: "fieldGLStartBalance",
                options: glNumberFields,
@@ -392,10 +354,7 @@ module.exports = class AccountingFPYearClose extends AccountingFPYearCloseCore {
             {
                id: ids.fieldGLRunningBalance,
                view: "select",
-               label: L(
-                  "ab.process.accounting.fieldGLRunningBalance",
-                  "*GL -> Running Balance"
-               ),
+               label: L("GL -> Running Balance"),
                value: this.fieldGLRunningBalance,
                name: "fieldGLRunningBalance",
                options: glNumberFields,
@@ -403,7 +362,7 @@ module.exports = class AccountingFPYearClose extends AccountingFPYearCloseCore {
             {
                id: ids.fieldGLrc,
                view: "select",
-               label: L("ab.process.accounting.fieldGLrc", "*GL -> RC"),
+               label: L("GL -> RC"),
                value: this.fieldGLrc,
                name: "fieldGLrc",
                options: glRcFields,
@@ -411,10 +370,7 @@ module.exports = class AccountingFPYearClose extends AccountingFPYearCloseCore {
             {
                id: ids.fieldAccNumber,
                view: "select",
-               label: L(
-                  "ab.process.accounting.fieldAccNumber",
-                  "*Acc -> Account Number"
-               ),
+               label: L("Acc -> Account Number"),
                value: this.fieldAccNumber,
                name: "fieldAccNumber",
                options: accNumberFields,
@@ -422,7 +378,7 @@ module.exports = class AccountingFPYearClose extends AccountingFPYearCloseCore {
             {
                id: ids.fieldAccType,
                view: "select",
-               label: L("ab.process.accounting.fieldAccType", "*Acc -> Type"),
+               label: L("Acc -> Type"),
                value: this.fieldAccType,
                name: "fieldAccType",
                options: accTypeFields,
@@ -442,10 +398,7 @@ module.exports = class AccountingFPYearClose extends AccountingFPYearCloseCore {
             {
                id: ids.fieldAccTypeIncome,
                view: "select",
-               label: L(
-                  "ab.process.accounting.fieldAccTypeIncome",
-                  "*Acc -> Income"
-               ),
+               label: L("Acc -> Income"),
                value: this.fieldAccTypeIncome,
                name: "fieldAccTypeIncome",
                options: accTypeOptions,
@@ -453,10 +406,7 @@ module.exports = class AccountingFPYearClose extends AccountingFPYearCloseCore {
             {
                id: ids.fieldAccTypeExpense,
                view: "select",
-               label: L(
-                  "ab.process.accounting.fieldAccTypeExpense",
-                  "*Acc -> Expense"
-               ),
+               label: L("Acc -> Expense"),
                value: this.fieldAccTypeExpense,
                name: "fieldAccTypeExpense",
                options: accTypeOptions,
@@ -464,10 +414,7 @@ module.exports = class AccountingFPYearClose extends AccountingFPYearCloseCore {
             {
                id: ids.fieldAccTypeEquity,
                view: "select",
-               label: L(
-                  "ab.process.accounting.fieldAccTypeEquity",
-                  "*Acc -> Equity"
-               ),
+               label: L("Acc -> Equity"),
                value: this.fieldAccTypeEquity,
                name: "fieldAccTypeEquity",
                options: accTypeOptions,

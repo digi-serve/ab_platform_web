@@ -3,7 +3,11 @@
 const ABProcessTaskUserApprovalCore = require("../../../core/process/tasks/ABProcessTaskUserApprovalCore.js");
 const ABProcessParticipant = require("../ABProcessParticipant.js");
 
-module.exports = class ABProcessTaskUserApproval extends ABProcessTaskUserApprovalCore {
+let L = (...params) => AB.Multilingual.label(...params);
+
+module.exports = class ABProcessTaskUserApproval extends (
+   ABProcessTaskUserApprovalCore
+) {
    ////
    //// Process Instance Methods
    ////
@@ -71,7 +75,6 @@ module.exports = class ABProcessTaskUserApproval extends ABProcessTaskUserApprov
     */
    propertiesShow(id) {
       var ids = this.propertyIDs(id);
-      var L = this.AB.Label();
 
       var toUserUI = ABProcessParticipant.selectUsersUi(
          id + "_who_",
@@ -82,18 +85,12 @@ module.exports = class ABProcessTaskUserApproval extends ABProcessTaskUserApprov
          // current lane/participant
          {
             id: 0,
-            value: L(
-               "ab.process.task.email.to.currentParticipant",
-               "*Current Participant"
-            ),
+            value: L("Current Participant"),
          },
          // manually select User/Role
          {
             id: 1,
-            value: L(
-               "ab.process.task.email.to.selectRoleUser",
-               "*Select Role or User"
-            ),
+            value: L("Select Role or User"),
          },
       ];
 
@@ -120,14 +117,14 @@ module.exports = class ABProcessTaskUserApproval extends ABProcessTaskUserApprov
             {
                id: ids.name,
                view: "text",
-               label: L("ab.process.task.email.name", "*Name"),
+               label: L("Name"),
                name: "name",
                value: this.name,
             },
             {
                id: ids.who,
                view: "select",
-               label: L("ab.process.task.approval.who", "*Who"),
+               label: L("Who"),
                name: "who",
                value: this.who,
                options: whoOptions,
@@ -158,14 +155,14 @@ module.exports = class ABProcessTaskUserApproval extends ABProcessTaskUserApprov
                cols: [
                   {
                      view: "label",
-                     label: "Data To Approve",
+                     label: L("Data To Approve"),
                   },
                   {
                      view: "spacer",
                   },
                   {
                      view: "button",
-                     value: "Customize Layout",
+                     value: L("Customize Layout"),
                      autowidth: true,
                      click: () => {
                         webix
@@ -185,14 +182,16 @@ module.exports = class ABProcessTaskUserApproval extends ABProcessTaskUserApprov
                                     },
                                     {
                                        view: "label",
-                                       label: "Customize the approval layout",
+                                       label: L(
+                                          "Customize the approval layout"
+                                       ),
                                     },
                                     {
                                        view: "spacer",
                                     },
                                     {
                                        view: "button",
-                                       label: "Cancel",
+                                       label: L("Cancel"),
                                        autowidth: true,
                                        click: function () {
                                           $$(ids.modalWindow).close();
@@ -201,7 +200,7 @@ module.exports = class ABProcessTaskUserApproval extends ABProcessTaskUserApprov
                                     {
                                        view: "button",
                                        css: "webixtype_form",
-                                       label: "Save",
+                                       label: L("Save"),
                                        autowidth: true,
                                        click: () => {
                                           this.formBuilder = $$(

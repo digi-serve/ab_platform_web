@@ -20,8 +20,8 @@ module.exports = class ABViewFormTree extends ABViewFormTreeCore {
    editorComponent(App, mode) {
       var idBase = "ABViewFormTreeEditorComponent";
       var ids = {
-         component: App.unique(idBase + "_component"),
-         options: App.unique(idBase + "_option"),
+         component: App.unique(`${idBase}_component`),
+         options: App.unique(`${idBase}_option`),
       };
 
       var selectlist = this.component(App).ui;
@@ -102,9 +102,9 @@ module.exports = class ABViewFormTree extends ABViewFormTreeCore {
       // this field may be deleted
       if (!field) return component;
 
-      var idBase = this.parentFormUniqueID("ABViewFormTree_" + this.id + "_f_");
+      var idBase = this.parentFormUniqueID(`ABViewFormTree_${this.id}_f_`);
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       var settings = {};

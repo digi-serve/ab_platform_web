@@ -1,5 +1,7 @@
 let ABViewDetailTreeCore = require("../../core/views/ABViewDetailTreeCore");
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 module.exports = class ABViewDetailTree extends ABViewDetailTreeCore {
    /**
     * @param {obj} values  key=>value hash of ABView values
@@ -25,7 +27,7 @@ module.exports = class ABViewDetailTree extends ABViewDetailTreeCore {
    editorComponent(App, mode) {
       var idBase = "ABViewDetailTreeEditorComponent";
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       var elem = this.component(App).ui;
@@ -84,9 +86,9 @@ module.exports = class ABViewDetailTree extends ABViewDetailTreeCore {
       var field = this.field();
       var detailView = this.detailComponent();
 
-      var idBase = "ABViewDetailTree_" + (idPrefix || "") + this.id;
+      var idBase = `ABViewDetailTree_${idPrefix || ""}${this.id}`;
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
       var className = "ab-detail-tree";
 
@@ -96,10 +98,7 @@ module.exports = class ABViewDetailTree extends ABViewDetailTreeCore {
          component.init(options);
 
          // add div of tree to detail
-         var divTree = '<div class="#className#"></div>'.replace(
-            "#className#",
-            className
-         );
+         var divTree = `<div class="${className}"></div>`;
          component.logic.setValue(ids.component, divTree);
       };
 

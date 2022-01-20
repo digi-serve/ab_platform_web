@@ -1,5 +1,7 @@
 const ABViewGridFilterRule = require("./ABViewGridFilterRule");
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 module.exports = class ABViewGridFilterMenu {
    /**
     * @param {object} App
@@ -25,33 +27,20 @@ module.exports = class ABViewGridFilterMenu {
       this.App = App;
       this.idBase = idBase;
 
-      var L = App.Label;
-
       this.currentForm = null;
-
-      var labels = (this.labels = {
-         common: App.labels,
-         component: {
-            header: L("ab.component.grid.filterMenu", "*Filter Menu"),
-            addNewFilter: L(
-               "ab.components.grid.addNewFilter",
-               "*Add new filter"
-            ),
-         },
-      });
 
       // internal list of Webix IDs to reference our UI components.
       var ids = (this.ids = {
-         component: idBase + "_component",
-         filterRules: idBase + "_rules",
-         filterRulesScrollview: idBase + "_filterRulesScrollview",
+         component: `${idBase}_component`,
+         filterRules: `${idBase}_rules`,
+         filterRulesScrollview: `${idBase}_filterRulesScrollview`,
 
-         filterOptionRadio: idBase + "_filterOptionRadio",
-         filterUser: idBase + "_filterUser",
-         filterGlobal: idBase + "_filterGlobal",
-         filterMenuLayout: idBase + "_filterMenuLayout",
+         filterOptionRadio: `${idBase}_filterOptionRadio`,
+         filterUser: `${idBase}_filterUser`,
+         filterGlobal: `${idBase}_filterGlobal`,
+         filterMenuLayout: `${idBase}_filterMenuLayout`,
 
-         needLoadAllLabel: idBase + "_needLoadAll",
+         needLoadAllLabel: `${idBase}_needLoadAll`,
       });
 
       // webix UI definition:
@@ -66,7 +55,7 @@ module.exports = class ABViewGridFilterMenu {
          css: "ab-main-container",
          head: {
             view: "toolbar",
-            cols: [{ view: "label", label: labels.component.header }],
+            cols: [{ view: "label", label: L("Filter Menu") }],
          },
          body: {
             type: "form",
@@ -76,14 +65,14 @@ module.exports = class ABViewGridFilterMenu {
                   id: ids.filterOptionRadio,
                   value: 0,
                   options: [
-                     { id: 0, value: "Do not Allow User filters" },
-                     { id: 1, value: "Enable User filters" },
-                     { id: 2, value: "Use a filter menu" },
-                     { id: 3, value: "Use a global filter input" },
+                     { id: 0, value: L("Do not Allow User filters") },
+                     { id: 1, value: L("Enable User filters") },
+                     { id: 2, value: L("Use a filter menu") },
+                     { id: 3, value: L("Use a global filter input") },
                   ],
                   vertical: true,
-                  label: "Filter Option",
-                  labelWidth: App.config.labelWidthLarge,
+                  label: L("Filter Option"),
+                  labelWidth: this.AB.UISettings.config().labelWidthLarge,
                   on: {
                      onChange: (newValue, oldValue) => {
                         _logic.setFilterOption(newValue);
@@ -96,11 +85,11 @@ module.exports = class ABViewGridFilterMenu {
                   id: ids.filterGlobal,
                   hidden: true,
                   vertical: true,
-                  label: "Show",
-                  labelWidth: App.config.labelWidthLarge,
+                  label: L("Show"),
+                  labelWidth: this.AB.UISettings.config().labelWidthLarge,
                   options: [
-                     { id: "default", value: "All matching records" },
-                     { id: "single", value: "Single records only" },
+                     { id: "default", value: L("All matching records") },
+                     { id: "single", value: L("Single records only") },
                   ],
                },
 
@@ -110,11 +99,11 @@ module.exports = class ABViewGridFilterMenu {
                   id: ids.filterUser,
                   hidden: true,
                   value: "toolbar",
-                  label: "Display",
-                  labelWidth: App.config.labelWidthLarge,
+                  label: L("Display"),
+                  labelWidth: this.AB.UISettings.config().labelWidthLarge,
                   options: [
-                     { id: "toolbar", value: "Toolbar" },
-                     { id: "form", value: "Form" },
+                     { id: "toolbar", value: L("Toolbar") },
+                     { id: "form", value: L("Form") },
                   ],
                },
 
@@ -131,7 +120,7 @@ module.exports = class ABViewGridFilterMenu {
                               css: "webix_primary",
                               icon: "fa fa-plus",
                               type: "iconButton",
-                              label: labels.component.addNewFilter,
+                              label: L("Add new filter"),
                               width: 150,
                               click: () => {
                                  this.addFilterRule();
@@ -139,7 +128,7 @@ module.exports = class ABViewGridFilterMenu {
                            },
                            {
                               view: "label",
-                              label: '*need "LoadAll" from datasource',
+                              label: L('need "LoadAll" from datasource'),
                               css: { color: "red" },
                               id: ids.needLoadAllLabel,
                               hidden: true,
@@ -168,7 +157,7 @@ module.exports = class ABViewGridFilterMenu {
                      {
                         view: "button",
                         name: "cancel",
-                        value: labels.common.cancel,
+                        value: L("Cancel"),
                         css: "ab-cancel-button",
                         autowidth: true,
                         click: function () {
@@ -179,7 +168,7 @@ module.exports = class ABViewGridFilterMenu {
                         view: "button",
                         css: "webix_primary",
                         name: "save",
-                        label: labels.common.save,
+                        label: L("Save"),
                         type: "form",
                         autowidth: true,
                         click: function () {

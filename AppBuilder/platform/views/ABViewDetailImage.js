@@ -2,6 +2,8 @@ const ABViewDetailImageCore = require("../../core/views/ABViewDetailImageCore");
 
 const ABViewDetailImagePropertyComponentDefaults = ABViewDetailImageCore.defaultValues();
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 module.exports = class ABViewDetailImage extends ABViewDetailImageCore {
    /**
     * @param {obj} values  key=>value hash of ABView values
@@ -27,7 +29,7 @@ module.exports = class ABViewDetailImage extends ABViewDetailImageCore {
    editorComponent(App, mode) {
       var idBase = "ABViewDetailImageEditorComponent";
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       var elem = this.component(App).ui;
@@ -59,7 +61,6 @@ module.exports = class ABViewDetailImage extends ABViewDetailImageCore {
          _logic,
          ObjectDefaults
       );
-      var L = App.Label;
 
       // in addition to the common .label  values, we
       // ask for:
@@ -67,14 +68,14 @@ module.exports = class ABViewDetailImage extends ABViewDetailImageCore {
          {
             view: "counter",
             name: "height",
-            label: L("ab.components.common.height", "*Height:"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Height:"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             view: "counter",
             name: "width",
-            label: L("ab.components.common.width", "*Width:"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Width:"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
       ]);
    }
@@ -110,9 +111,9 @@ module.exports = class ABViewDetailImage extends ABViewDetailImageCore {
       var component = super.component(App);
       var field = this.field();
 
-      var idBase = "ABViewDetailImage_" + (idPrefix || "") + this.id;
+      var idBase = `ABViewDetailImage_${idPrefix || ""}${this.id}`;
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
          detail: this.parentDetailComponent()?.id || this.parent.id,
       };
 
@@ -129,8 +130,8 @@ module.exports = class ABViewDetailImage extends ABViewDetailImageCore {
          //Add data-cy attribute for Cypress Testing
          onAfterRender: () => {
             const dataCy = `detail image ${field?.columnName} ${field?.id} ${ids.detail}`;
-            $$(ids.component)?.$view.setAttribute('data-cy', dataCy);
-         }
+            $$(ids.component)?.$view.setAttribute("data-cy", dataCy);
+         },
       };
 
       var _logic = {

@@ -21,17 +21,11 @@ module.exports = class ABWorkObjectKanBan extends ABComponent {
       super(App, idBase);
 
       var L = this.Label();
-      var labels = {
-         common: App.labels,
-         component: {
-            editRecord: L("ab._workspace_formSidePanel", "*Edit Record"),
-         },
-      };
 
       // internal list of Webix IDs to reference our UI components.
       var ids = {
-         component: this.unique(idBase + "_workspace_kanban_side"),
-         form: this.unique(idBase + "_workspace_kanban_side_form"),
+         component: this.unique(`${idBase}_workspace_kanban_side`),
+         form: this.unique(`${idBase}_workspace_kanban_side_form`),
       };
 
       let CurrentObject = null; // current ABObject being displayed
@@ -48,7 +42,7 @@ module.exports = class ABWorkObjectKanBan extends ABComponent {
                cols: [
                   {
                      view: "label",
-                     label: labels.component.editRecord,
+                     label: L("Edit Record"),
                   },
                   {
                      view: "icon",
@@ -189,7 +183,7 @@ module.exports = class ABWorkObjectKanBan extends ABComponent {
                         })
                         .catch((err) => {
                            // TODO : error message
-                           App.AB.error(err);
+                           App.AB.notify.developer(err);
 
                            if ($formView.hideProgress)
                               $formView.hideProgress({ type: "icon" });
@@ -207,7 +201,7 @@ module.exports = class ABWorkObjectKanBan extends ABComponent {
                         })
                         .catch((err) => {
                            // TODO : error message
-                           App.AB.error(err);
+                           App.AB.notify.developer(err);
 
                            if ($formView.hideProgress)
                               $formView.hideProgress({ type: "icon" });

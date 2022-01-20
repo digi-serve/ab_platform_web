@@ -20,6 +20,8 @@ var defaultValues = {
    ownerField: null,
 };
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 module.exports = class ABObjectWorkspaceViewKanban extends (
    ABObjectWorkspaceView
 ) {
@@ -56,10 +58,6 @@ module.exports = class ABObjectWorkspaceViewKanban extends (
          vGroupInput: `${idBase}_popupAddViewVGroup`,
          hGroupInput: `${idBase}_popupAddViewHGroup`,
          ownerInput: `${idBase}_popupAddViewOwner`,
-      };
-
-      let L = function (...params) {
-         return AB.Multilingual.labelPlugin("ABDesigner", ...params);
       };
 
       // let labels = {
@@ -161,7 +159,7 @@ module.exports = class ABObjectWorkspaceViewKanban extends (
 
       var PopupNewDataFieldComponent = new ABPopupNewDataField(
          AB,
-         idBase + "_kanban"
+         `${idBase}_kanban`
       );
 
       return new ABObjectWorkspaceViewComponent({

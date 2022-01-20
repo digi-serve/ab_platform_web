@@ -9,18 +9,16 @@ const ABViewRuleActionObjectUpdater = require("./ABViewRuleActionObjectUpdater")
 const ABFieldConnect = require("../../platform/dataFields/ABFieldConnect");
 const ObjectQueryBuilder = require("../ABViewQueryBuilderObjectFieldConditions");
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 module.exports = class ABViewRuleActionFormRecordRuleUpdateConnected extends (
    ABViewRuleActionObjectUpdater
 ) {
    constructor(App, idBase, currentForm) {
       super(App, idBase, currentForm);
-      var L = App.Label;
 
       this.key = "ABViewRuleActionFormRecordRuleUpdateConnected";
-      this.label = L(
-         "ab.component.ruleaction.updateConnectedRecord",
-         "*Update Connected Record"
-      );
+      this.label = L("Update Connected Record");
 
       this.baseObject = null; // the object the current form is working with.
       // Use this to find our connected fields.
@@ -32,15 +30,6 @@ module.exports = class ABViewRuleActionFormRecordRuleUpdateConnected extends (
 
       this.objectQB = null; // the QueryBuilder used for offering conditions based upon our connected Object.
       this.qbCondition = null; // the QB condition entered for selecting which remote object.
-
-      this.labels.component.selectField = L(
-         "ab.ruleAction.UpdateConnected.selectField",
-         "*Select which connected object to update."
-      );
-      this.labels.component.remoteCondition = L(
-         "ab.ruleAction.UpdateConnected.remoteCondition",
-         "*How to choose which object:"
-      );
    }
 
    // field
@@ -155,7 +144,7 @@ module.exports = class ABViewRuleActionFormRecordRuleUpdateConnected extends (
             {
                id: ids.selectConnectedField,
                view: "richselect",
-               label: this.labels.component.selectField,
+               label: L("Select which connected object to update."),
                labelWidth: 300,
                value: this.selectedField,
                options: this.fieldDropList,
@@ -230,7 +219,7 @@ module.exports = class ABViewRuleActionFormRecordRuleUpdateConnected extends (
                   }
                }
             } else {
-               this.AB.error("!!! No connectedObject found.", {
+               this.AB.notify.builder(new Error("No connectedObject found."), {
                   fieldID: this.selectedFieldID,
                });
             }
@@ -317,7 +306,7 @@ module.exports = class ABViewRuleActionFormRecordRuleUpdateConnected extends (
    queryBuilderDisplay() {
       if (!this.objectQB) {
          this.objectQB = new ObjectQueryBuilder(
-            this.labels.component.remoteCondition
+            L("How to choose which object:")
          );
 
          var connObj = this.connectedObject();
@@ -411,10 +400,11 @@ module.exports = class ABViewRuleActionFormRecordRuleUpdateConnected extends (
                      cb();
                   })
                   .catch((err) => {
-                     this.AB.error(
-                        "!!! ABViewRuleActionFormRecordRuleUpdateConnected.process(): update error:",
-                        { error: err, data: options.data }
-                     );
+                     this.AB.notify.developer(err, {
+                        message:
+                           "!!! ABViewRuleActionFormRecordRuleUpdateConnected.process(): update error:",
+                        data: options.data,
+                     });
                      cb(err);
                   });
             }

@@ -2,7 +2,11 @@ const ABViewDetailSelectivityCore = require("../../core/views/ABViewDetailSelect
 
 const ABViewDetailPropertyComponentDefaults = ABViewDetailSelectivityCore.defaultValues();
 
-module.exports = class ABViewDetailSelectivity extends ABViewDetailSelectivityCore {
+let L = (...params) => AB.Multilingual.label(...params);
+
+module.exports = class ABViewDetailSelectivity extends (
+   ABViewDetailSelectivityCore
+) {
    /**
     * @param {obj} values  key=>value hash of ABView values
     * @param {ABApplication} application the application object this view is under
@@ -27,7 +31,7 @@ module.exports = class ABViewDetailSelectivity extends ABViewDetailSelectivityCo
    editorComponent(App, mode) {
       var idBase = "ABViewDetailSelectivityEditorComponent";
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       var elem = this.component(App).ui;
@@ -59,7 +63,6 @@ module.exports = class ABViewDetailSelectivity extends ABViewDetailSelectivityCo
          _logic,
          ObjectDefaults
       );
-      var L = App.Label;
 
       // in addition to the common .label  values, we
       // ask for:
@@ -67,8 +70,8 @@ module.exports = class ABViewDetailSelectivity extends ABViewDetailSelectivityCo
          {
             view: "counter",
             name: "height",
-            label: L("ab.components.common.height", "*Height:"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Height:"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
       ]);
    }
@@ -99,9 +102,9 @@ module.exports = class ABViewDetailSelectivity extends ABViewDetailSelectivityCo
       var component = super.component(App);
       var field = this.field();
 
-      var idBase = "ABViewDetailSelectivity_" + (idPrefix || "") + this.id;
+      var idBase = `ABViewDetailSelectivity_${idPrefix || ""}${this.id}`;
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
          detail: this.parentDetailComponent()?.id || this.parent.id,
       };
       var className = "ab-detail-selectivity";
@@ -112,8 +115,8 @@ module.exports = class ABViewDetailSelectivity extends ABViewDetailSelectivityCo
          //Add data-cy attribute for Cypress Testing
          onAfterRender: () => {
             const dataCy = `detail selectivity ${field?.columnName} ${field?.id} ${ids.detail}`;
-            $$(ids.component)?.$view.setAttribute('data-cy', dataCy);
-         }
+            $$(ids.component)?.$view.setAttribute("data-cy", dataCy);
+         },
       };
 
       if (this.settings.height) component.ui.height = this.settings.height;
@@ -122,10 +125,7 @@ module.exports = class ABViewDetailSelectivity extends ABViewDetailSelectivityCo
          component.init(options);
 
          // add div of selectivity to detail
-         var divSelectivity = '<div class="#className#"></div>'.replace(
-            "#className#",
-            className
-         );
+         var divSelectivity = `<div class="${className}"></div>`;
          component.logic.setValue(ids.component, divSelectivity);
       };
 

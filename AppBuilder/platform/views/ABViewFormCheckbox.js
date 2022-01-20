@@ -20,7 +20,7 @@ module.exports = class ABViewFormCheckbox extends ABViewFormCheckboxCore {
    editorComponent(App, mode) {
       var idBase = "ABViewFormCheckboxEditorComponent";
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       var checkboxElem = this.component(App).ui;
@@ -50,11 +50,9 @@ module.exports = class ABViewFormCheckbox extends ABViewFormCheckboxCore {
    component(App) {
       var component = super.component(App);
 
-      var idBase = this.parentFormUniqueID(
-         "ABViewFormCheckbox_" + this.id + "_f_"
-      );
+      var idBase = this.parentFormUniqueID(`ABViewFormCheckbox_${this.id}_f_`);
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       component.ui.id = ids.component;

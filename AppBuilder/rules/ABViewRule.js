@@ -22,6 +22,8 @@
 //
 const ObjectQueryBuilder = require("./ABViewQueryBuilderObjectFieldConditions");
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 module.exports = class ABViewRule {
    /**
     * @param {object} App
@@ -56,27 +58,12 @@ module.exports = class ABViewRule {
       this.App = App;
       this.idBase = idBase;
 
-      var L = App.Label;
-
-      var labels = (this.labels = {
-         common: App.labels,
-         component: {
-            action: L("ab.component.form.action", "*Action"),
-            actionPlaceholder: L(
-               "ab.component.form.actionPlaceholder",
-               "*Choose an action"
-            ),
-            when: L("ab.component.form.when", "*When"),
-            values: L("ab.component.form.values", "*Values"),
-         },
-      });
-
       // this is different because multiple instances of this View can be displayed
       // at the same time.  So make each instance Unique:
       var uniqueInstanceID = webix.uid();
       var myUnique = (key) => {
          // return this.unique(idBase + key ) + '_' + uniqueInstanceID;
-         return idBase + "_" + key + "_" + uniqueInstanceID;
+         return `${idBase}_${key}_${uniqueInstanceID}`;
       };
 
       // internal list of Webix IDs to reference our UI components.
@@ -91,7 +78,7 @@ module.exports = class ABViewRule {
          valueDisplay: myUnique("valueArea"),
       });
 
-      this.objectQB.label = this.labels.component.when;
+      this.objectQB.label = L("When");
       this.objectQB.component(this.App, this.idBase);
       this.ui = this._generateUI();
 
@@ -186,7 +173,7 @@ module.exports = class ABViewRule {
          padding: 20,
          // margin: 10,
 
-         // this should be a CSS setting: App.config.xxxx
+         // this should be a CSS setting: this.AB.Config.xxxx
          // width: 680,
          type: "line",
          rows: [
@@ -207,9 +194,9 @@ module.exports = class ABViewRule {
             {
                id: this.ids.selectAction,
                view: "richselect",
-               label: this.labels.component.action,
-               placeholder: this.labels.component.actionPlaceholder,
-               labelWidth: this.App.config.labelWidthLarge,
+               label: L("Action"),
+               placeholder: L("Choose an action"),
+               labelWidth: this.AB.UISettings.config().labelWidthLarge,
                options: this.actionDropList,
                on: {
                   onChange: (newVal, oldVal) => {
@@ -228,17 +215,18 @@ module.exports = class ABViewRule {
                      cols: [
                         {
                            view: "label",
-                           label: this.labels.component.values,
+                           label: L("Values"),
                            css: "ab-text-bold",
-                           width: this.App.config.labelWidthLarge,
+                           width: this.AB.UISettings.config().labelWidthLarge,
                         },
                         {
                            id: this.ids.valueDisplay,
                            view: "layout",
                            rows: [
                               {
-                                 label:
-                                    " ABViewRule: This should be the Set Area",
+                                 label: L(
+                                    " ABViewRule: This should be the Set Area"
+                                 ),
                                  css: "ab-text-bold",
                                  height: 30,
                               },
@@ -283,8 +271,7 @@ module.exports = class ABViewRule {
          a.objectLoad(object);
       });
 
-      var label = "*When";
-      if (this.labels) label = this.labels.component.when;
+      var label = L("When");
 
       this.objectQB = new ObjectQueryBuilder(label);
       this.objectQB.objectLoad(object);
@@ -434,7 +421,9 @@ module.exports = class ABViewRule {
                if (data[f.id] && typeof data[f.id] === "string") {
                   data[f.id] = convertToNumber(data[f.id]);
                }
-            } catch (e) {}
+            } catch (e) {
+               // continue regardless of error
+            }
          });
 
       // hiddenQB.setValue(QBCondition);

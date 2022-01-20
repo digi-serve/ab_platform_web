@@ -1,6 +1,10 @@
 const AccountingBatchProcessingCore = require("../../../core/process/tasks/ABProcessTaskServiceAccountingBatchProcessingCore.js");
 
-module.exports = class AccountingBatchProcessing extends AccountingBatchProcessingCore {
+let L = (...params) => AB.Multilingual.label(...params);
+
+module.exports = class AccountingBatchProcessing extends (
+   AccountingBatchProcessingCore
+) {
    ////
    //// Process Instance Methods
    ////
@@ -33,9 +37,8 @@ module.exports = class AccountingBatchProcessing extends AccountingBatchProcessi
     */
    propertiesShow(id) {
       var ids = this.propertyIDs(id);
-      var L = this.AB.Label();
 
-      var processValues = [{ id: 0, value: "Select a Process Value" }];
+      var processValues = [{ id: 0, value: L("Select a Process Value") }];
       var processDataFields = this.process.processDataFields(this);
       (processDataFields || []).forEach((row) => {
          processValues.push({ id: row.key, value: row.label });
@@ -46,7 +49,7 @@ module.exports = class AccountingBatchProcessing extends AccountingBatchProcessi
       });
       objectList.unshift({
          id: 0,
-         value: L("ab.process.accounting.selectObject", "*Select an Object"),
+         value: L("Select an Object"),
       });
 
       //
@@ -55,7 +58,7 @@ module.exports = class AccountingBatchProcessing extends AccountingBatchProcessi
 
       var blankField = {
          id: 0,
-         value: L("ab.process.accounting.selectField", "*Select a Field"),
+         value: L("Select a Field"),
       };
       // blankField : generic Select a field entry
 
@@ -114,7 +117,7 @@ module.exports = class AccountingBatchProcessing extends AccountingBatchProcessi
       //      object.
 
       function compileStatusValues(statusField) {
-         var values = [{ id: 0, value: "Select the Complete Value" }];
+         var values = [{ id: 0, value: L("Select the Complete Value") }];
          if (statusField && statusField.options) {
             statusField.options().forEach((o) => {
                values.push({ id: o.id, value: o.text });
@@ -139,7 +142,7 @@ module.exports = class AccountingBatchProcessing extends AccountingBatchProcessi
          var jeEntryID = $$(ids.objectJE).getValue();
          var jeEntry = objectList.find((o) => o.id == jeEntryID);
          if (jeEntry && jeEntry.object) {
-            var statusField = jeEntry.object.fields((f) => f.id == newVal)[0];
+            var statusField = jeEntry.object.fieldByID(newVal);
             if (statusField && statusField.options) {
                // get the options as an []
                jeFieldStatusValues = compileStatusValues(statusField);
@@ -172,17 +175,14 @@ module.exports = class AccountingBatchProcessing extends AccountingBatchProcessi
             {
                id: ids.name,
                view: "text",
-               label: L("ab.process.element.name", "*Name"),
+               label: L("Name"),
                name: "name",
                value: this.name,
             },
             {
                id: ids.processBatchValue,
                view: "select",
-               label: L(
-                  "ab.process.accounting.processBatchValue",
-                  "*Process Batch Value"
-               ),
+               label: L("Process Batch Value"),
                value: this.processBatchValue,
                name: "processBatchValue",
                options: processValues,
@@ -190,7 +190,7 @@ module.exports = class AccountingBatchProcessing extends AccountingBatchProcessi
             {
                id: ids.objectBatch,
                view: "select",
-               label: L("ab.process.accounting.batchObject", "*Batch Object"),
+               label: L("Batch Object"),
                value: this.objectBatch,
                name: "objectBatch",
                options: objectList,
@@ -208,10 +208,7 @@ module.exports = class AccountingBatchProcessing extends AccountingBatchProcessi
             {
                id: ids.fieldBatchEntries,
                view: "select",
-               label: L(
-                  "ab.process.accounting.fieldBatchEntries",
-                  "*Batch->JE[]"
-               ),
+               label: L("Batch->JE[]"),
                value: this.fieldBatchEntries,
                name: "fieldBatchEntries",
                options: batchFields,
@@ -220,10 +217,7 @@ module.exports = class AccountingBatchProcessing extends AccountingBatchProcessi
             {
                id: ids.fieldBatchFinancialPeriod,
                view: "select",
-               label: L(
-                  "ab.process.accounting.fieldBatchFinancialPeriod",
-                  "*Batch->FinancialPeriod"
-               ),
+               label: L("Batch->FinancialPeriod"),
                value: this.fieldBatchFinancialPeriod,
                name: "fieldBatchFinancialPeriod",
                options: batchFields,
@@ -232,10 +226,7 @@ module.exports = class AccountingBatchProcessing extends AccountingBatchProcessi
             {
                id: ids.objectJE,
                view: "select",
-               label: L(
-                  "ab.process.accounting.batchJE",
-                  "*Journal Entry Object"
-               ),
+               label: L("Journal Entry Object"),
                value: this.objectJE,
                name: "objectJE",
                options: objectList,
@@ -253,7 +244,7 @@ module.exports = class AccountingBatchProcessing extends AccountingBatchProcessi
             {
                id: ids.fieldJEAccount,
                view: "select",
-               label: L("ab.process.accounting.fieldJEAccount", "*JE->Account"),
+               label: L("JE->Account"),
                value: this.fieldJEAccount,
                name: "fieldJEAccount",
                options: jeFields,
@@ -262,7 +253,7 @@ module.exports = class AccountingBatchProcessing extends AccountingBatchProcessi
             {
                id: ids.fieldJERC,
                view: "select",
-               label: L("ab.process.accounting.fieldJERC", "*JE->RC"),
+               label: L("JE->RC"),
                value: this.fieldJERC,
                name: "fieldJERC",
                options: jeFields,
@@ -271,7 +262,7 @@ module.exports = class AccountingBatchProcessing extends AccountingBatchProcessi
             {
                id: ids.fieldJEStatus,
                view: "select",
-               label: L("ab.process.accounting.fieldJEStatus", "*JE->Status"),
+               label: L("JE->Status"),
                value: this.fieldJEStatus,
                name: "fieldJEStatus",
                options: jeFields,
@@ -287,10 +278,7 @@ module.exports = class AccountingBatchProcessing extends AccountingBatchProcessi
             {
                id: ids.fieldJEStatusComplete,
                view: "select",
-               label: L(
-                  "ab.process.accounting.fieldJEStatusComplete",
-                  "*JE->Status->Complete"
-               ),
+               label: L("JE->Status->Complete"),
                value: this.fieldJEStatusComplete,
                name: "fieldJEStatusComplete",
                options: jeFieldStatusValues,
@@ -299,7 +287,7 @@ module.exports = class AccountingBatchProcessing extends AccountingBatchProcessi
             {
                id: ids.objectBR,
                view: "select",
-               label: L("ab.process.accounting.objectBR", "*Balance Record"),
+               label: L("Balance Record"),
                value: this.objectBR,
                name: "objectBR",
                options: objectList,
@@ -317,10 +305,7 @@ module.exports = class AccountingBatchProcessing extends AccountingBatchProcessi
             {
                id: ids.fieldBRFinancialPeriod,
                view: "select",
-               label: L(
-                  "ab.process.accounting.fieldBRFinancialPeriod",
-                  "*BR->FP"
-               ),
+               label: L("BR->FP"),
                value: this.fieldBRFinancialPeriod,
                name: "fieldBRFinancialPeriod",
                options: brFields,
@@ -329,7 +314,7 @@ module.exports = class AccountingBatchProcessing extends AccountingBatchProcessi
             {
                id: ids.fieldBRAccount,
                view: "select",
-               label: L("ab.process.accounting.fieldBRAccount", "*BR->Account"),
+               label: L("BR->Account"),
                value: this.fieldBRAccount,
                name: "fieldBRAccount",
                options: brFields,
@@ -338,7 +323,7 @@ module.exports = class AccountingBatchProcessing extends AccountingBatchProcessi
             {
                id: ids.fieldBRRC,
                view: "select",
-               label: L("ab.process.accounting.fieldBRRC", "*BR->RC"),
+               label: L("BR->RC"),
                value: this.fieldBRRC,
                name: "fieldBRRC",
                options: brFields,
@@ -347,7 +332,7 @@ module.exports = class AccountingBatchProcessing extends AccountingBatchProcessi
             {
                id: ids.fieldBREntries,
                view: "select",
-               label: L("ab.process.accounting.fieldBREntries", "*BR->Entries"),
+               label: L("BR->Entries"),
                value: this.fieldBREntries,
                name: "fieldBREntries",
                options: brFields,

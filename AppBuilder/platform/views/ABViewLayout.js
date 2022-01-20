@@ -1,6 +1,8 @@
 const ABViewContainer = require("../../platform/views/ABViewContainer");
 const ABViewLayoutCore = require("../../core/views/ABViewLayoutCore");
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 module.exports = class ABViewLayout extends ABViewLayoutCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -21,28 +23,21 @@ module.exports = class ABViewLayout extends ABViewLayoutCore {
    editorComponent(App, mode) {
       var idBase = "ABViewLayoutEditorComponent";
       var ids = {
-         component: App.unique(idBase + "_component"),
-         view: App.unique(idBase + "_view"),
+         component: App.unique(`${idBase}_component`),
+         view: App.unique(`${idBase}_view`),
       };
-      var L = App.Label;
 
       var component = this.component(App);
 
       /** Logic */
       var _logic = {
          templateButton: function (obj) {
-            return (
-               '<div class="ab-widget-header ab-layout-header">' +
-               '<i class="fa fa-#icon# webix_icon_btn"></i> ' +
-               " #label#" +
-               '<div class="ab-component-tools">' +
-               '<i class="fa fa-trash ab-component-remove"></i>' +
-               '<i class="fa fa-edit ab-component-edit"></i>' +
-               "</div>" +
-               "</div>"
-            )
-               .replace("#icon#", obj.icon)
-               .replace("#label#", obj.label);
+            return `<div class="ab-widget-header ab-layout-header">
+               <i class="fa fa-${obj.icon} webix_icon_btn"></i> ${obj.label}
+               <div class="ab-component-tools">'
+               <i class="fa fa-trash ab-component-remove"></i>
+               <i class="fa fa-edit ab-component-edit"></i>
+               </div></div>`;
          },
 
          viewEdit: (e, id, trg) => {
@@ -69,15 +64,9 @@ module.exports = class ABViewLayout extends ABViewLayoutCore {
                return v.id == id;
             })[0];
 
-            App.AB.Dialog.Confirm({
-               title: L(
-                  "ab.interface.component.confirmDeleteTitle",
-                  "*Delete component"
-               ),
-               text: L(
-                  "ab.interface.component.confirmDeleteMessage",
-                  "*Do you want to delete <b>{0}</b>?"
-               ).replace("{0}", view.label),
+            webix.confirm({
+               title: L("Delete component"),
+               text: L("Do you want to delete <b>{0}</b>?", [view.label]),
                callback: (result) => {
                   if (result) {
                      // this.viewDestroy(view)
@@ -171,8 +160,6 @@ module.exports = class ABViewLayout extends ABViewLayoutCore {
          ObjectDefaults
       );
 
-      var L = App.Label;
-
       // if I don't create my own propertyEditorComponent, then I need to
       // create the onClick handler that will cause the current view instance
       // to create a vew sub view/ column
@@ -189,7 +176,7 @@ module.exports = class ABViewLayout extends ABViewLayoutCore {
          {
             view: "button",
             css: "webix_primary",
-            value: L("ab.component.layout.addColumn", "*Add Column "),
+            value: L("Add Column "),
             click: _logic.onClick,
          },
       ]);
@@ -204,9 +191,9 @@ module.exports = class ABViewLayout extends ABViewLayoutCore {
     * @return {obj} UI component
     */
    component(App, idPrefix) {
-      let idBase = "ABViewLayout_" + (idPrefix || "") + this.id;
+      let idBase = `ABViewLayout_${idPrefix || ""}${this.id}`;
       let ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       this.viewComponents = this.viewComponents || {}; // { viewId: viewComponent, ..., viewIdn: viewComponent }

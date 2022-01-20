@@ -842,6 +842,26 @@ class ABFactory extends ABFactoryCore {
       return _.uniq(...params);
    }
 
+   kebabCase(...params) {
+      return _.kebabCase(...params);
+   }
+
+   sumBy(...params) {
+      return _.sumBy(...params);
+   }
+
+   meanBy(...params) {
+      return _.meanBy(...params);
+   }
+
+   maxBy(...params) {
+      return _.maxBy(...params);
+   }
+
+   minBy(...params) {
+      return _.minBy(...params);
+   }
+
    uuid() {
       return uuid.v4();
    }
@@ -933,6 +953,10 @@ class ABFactory extends ABFactoryCore {
     */
    addDate(date, number, unit) {
       return moment(date).add(number, unit).toDate();
+   }
+
+   isString(...params) {
+      return _.isString(params);
    }
 }
 

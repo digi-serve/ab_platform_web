@@ -7,41 +7,36 @@ const ABRecordRule = require("../../rules/ABViewRuleListFormRecordRules");
 
 const ABViewCSVImporterPropertyComponentDefaults = ABViewCSVImporterCore.defaultValues();
 
+let L = (...params) => AB.Multilingual.label(...params);
+// multilingual Label fn()
+
 var FilterComplex = require("../FilterComplex");
 
 let PopupRecordRule = null;
 
-var L = null;
-// multilingual Label fn()
-
 class ABViewCSVImporterComponent extends ClassUI {
    constructor(viewCSVImporter, idBase) {
       idBase = idBase || `ABCSVImporter_${viewCSVImporter.id}`;
-      if (!L) {
-         L = (...params) => {
-            return AB.Multilingual.label(...params);
-         };
-      }
 
-      super({
-         button: `${idBase}_button`,
-         popup: `${idBase}_popup`,
+      super(idBase, {
+         button: "",
+         popup: "",
 
-         form: `${idBase}_form`,
-         uploader: `${idBase}_uploader`,
-         uploadFileList: `${idBase}_uploadList`,
-         separatedBy: `${idBase}_separatedBy`,
-         headerOnFirstLine: `${idBase}_headerOnFirstLine`,
-         columnList: `${idBase}_columnList`,
+         form: "",
+         uploader: "",
+         uploadFileList: "",
+         separatedBy: "",
+         headerOnFirstLine: "",
+         columnList: "",
 
-         search: `${idBase}_search`,
-         datatable: `${idBase}_datatable`,
+         search: "",
+         datatable: "",
 
-         statusMessage: `${idBase}_statusMessage`,
-         progressBar: `${idBase}_progressBar`,
+         statusMessage: "",
+         progressBar: "",
 
-         importButton: `${idBase}_importButton`,
-         rules: `${idBase}_datatable_rules`,
+         importButton: "",
+         rules: "",
       });
 
       this.viewCSVImporter = viewCSVImporter;
@@ -219,7 +214,6 @@ class ABViewCSVImporterComponent extends ClassUI {
             {
                id: ids.datatable,
                view: "datatable",
-               tooltip: true,
                resizeColumn: true,
                editable: true,
                editaction: "dblclick",

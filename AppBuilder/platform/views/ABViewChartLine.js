@@ -2,6 +2,8 @@ const ABViewChartLineCore = require("../../core/views/ABViewChartLineCore");
 
 const ABViewChartLinePropertyComponentDefaults = ABViewChartLineCore.defaultValues();
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 module.exports = class ABViewChartLine extends ABViewChartLineCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -22,7 +24,7 @@ module.exports = class ABViewChartLine extends ABViewChartLineCore {
    editorComponent(App, mode) {
       let idBase = "ABViewChartLineEditorComponent";
       let ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       let baseEditor = super.editorComponent(App, mode, {
@@ -43,7 +45,6 @@ module.exports = class ABViewChartLine extends ABViewChartLineCore {
          _logic,
          ObjectDefaults
       );
-      var L = App.Label;
 
       // in addition to the common .label  values, we
       // ask for:
@@ -51,36 +52,36 @@ module.exports = class ABViewChartLine extends ABViewChartLineCore {
          {
             name: "lineType",
             view: "richselect",
-            label: L("ab.component.chart.line.lineType", "*Chart Type"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Chart Type"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             options: [
                {
                   id: "line",
-                  value: L("ab.component.chart.line.line", "*Line"),
+                  value: L("Line"),
                },
                {
                   id: "spline",
-                  value: L("ab.component.chart.line.spline", "*Spline"),
+                  value: L("Spline"),
                },
             ],
          },
          {
             name: "linePreset",
             view: "richselect",
-            label: L("ab.component.chart.line.linePreset", "*Chart Preset"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Chart Preset"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             options: [
                {
                   id: "plot",
-                  value: L("ab.component.chart.line.plot", "*Plot"),
+                  value: L("Plot"),
                },
                {
                   id: "diamond",
-                  value: L("ab.component.chart.line.diamond", "*Diamond"),
+                  value: L("Diamond"),
                },
                {
                   id: "simple",
-                  value: L("ab.component.chart.line.simple", "*Simple"),
+                  value: L("Simple"),
                },
             ],
          },
@@ -94,35 +95,32 @@ module.exports = class ABViewChartLine extends ABViewChartLineCore {
             name: "chartHeight",
             view: "counter",
             min: 1,
-            label: L("ab.component.chart.line.chartHeight", "*Height"),
+            label: L("Height"),
          },
          {
             name: "stepValue",
             view: "counter",
             min: 1,
-            label: L("ab.component.chart.line.stepValue", "*Step"),
+            label: L("Step"),
          },
          {
             name: "maxValue",
             view: "counter",
             min: 1,
-            label: L("ab.component.chart.line.maxValue", "*Max Value"),
+            label: L("Max Value"),
          },
          {
             name: "labelFontSize",
             view: "counter",
             min: 1,
-            label: L(
-               "ab.component.chart.line.labelFontSize",
-               "*Label Font Size"
-            ),
-            labelWidth: App.config.labelWidthXLarge,
+            label: L("Label Font Size"),
+            labelWidth: this.AB.UISettings.config().labelWidthXLarge,
          },
          {
             name: "isLegend",
             view: "checkbox",
-            labelRight: L("ab.component.chart.isLegend", "*Show Legend"),
-            labelWidth: App.config.labelWidthCheckbox,
+            labelRight: L("Show Legend"),
+            labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
          },
       ]);
    }
@@ -200,7 +198,7 @@ module.exports = class ABViewChartLine extends ABViewChartLineCore {
 
       var idBase = "ABViewChartLine_" + this.id;
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       var _ui = {

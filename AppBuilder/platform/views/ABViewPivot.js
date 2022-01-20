@@ -1,11 +1,15 @@
 const ABViewPivotCore = require("../../core/views/ABViewPivotCore");
+const ABFieldCalculate = require("../dataFields/ABFieldCalculate");
+const ABFieldFormula = require("../dataFields/ABFieldFormula");
 const ABFieldNumber = require("../dataFields/ABFieldNumber");
 const ABObjectQuery = require("../ABObjectQuery");
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 module.exports = class ABViewPivot extends ABViewPivotCore {
-   // constructor(values, application, parent, defaultValues) {
-   //    super(values, application, parent, defaultValues);
-   // }
+   constructor(values, application, parent, defaultValues) {
+      super(values, application, parent, defaultValues);
+   }
 
    //
    //	Editor Related
@@ -22,7 +26,7 @@ module.exports = class ABViewPivot extends ABViewPivotCore {
    editorComponent(App, mode) {
       var idBase = "ABViewPivotEditorComponent";
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       var componentBase = this.component(App);
@@ -55,71 +59,66 @@ module.exports = class ABViewPivot extends ABViewPivotCore {
    // }
 
    static propertyEditorDefaultElements(App, ids, _logic, ObjectDefaults) {
-      var commonUI = super.propertyEditorDefaultElements(
+      let commonUI = super.propertyEditorDefaultElements(
          App,
          ids,
          _logic,
          ObjectDefaults
       );
-      var L = App.Label;
 
       return commonUI.concat([
          {
             name: "datacollection",
             view: "richselect",
-            label: L("ab.components.pivot.dataSource", "*Data Source"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Data Source"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             view: "counter",
             name: "height",
-            label: L("ab.component.pivot.height", "*Height:"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Height:"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             view: "checkbox",
             name: "removeMissed",
-            labelRight: L(
-               "ab.component.pivot.removeMissed",
-               "*Remove empty data."
-            ),
-            labelWidth: App.config.labelWidthCheckbox,
+            labelRight: L("Remove empty data."),
+            labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
          },
          {
             view: "checkbox",
             name: "totalColumn",
-            labelRight: L(
-               "ab.component.pivot.totalColumn",
-               "*Show a total column."
-            ),
-            labelWidth: App.config.labelWidthCheckbox,
+            labelRight: L("Show a total column."),
+            labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
          },
          {
             view: "checkbox",
             name: "separateLabel",
-            labelRight: L(
-               "ab.component.pivot.separateLabel",
-               "*Separate header label."
-            ),
-            labelWidth: App.config.labelWidthCheckbox,
+            labelRight: L("Separate header label."),
+            labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
          },
          {
             view: "checkbox",
             name: "min",
             labelRight: L(
-               "ab.component.pivot.min",
-               "*Highlighting of a cell(s) with the least value in a row."
+               "Highlighting of a cell(s) with the least value in a row."
             ),
-            labelWidth: App.config.labelWidthCheckbox,
+            labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
          },
          {
             view: "checkbox",
             name: "max",
             labelRight: L(
-               "ab.component.pivot.max",
-               "*Highlighting of a cell(s) with the biggest value in a row."
+               "Highlighting of a cell(s) with the biggest value in a row."
             ),
-            labelWidth: App.config.labelWidthCheckbox,
+            labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
+         },
+         {
+            name: "decimalPlaces",
+            view: "counter",
+            min: 1,
+            label: L("Decimal Places"),
+            labelWidth: this.AB.UISettings.config().labelWidthXLarge,
          },
       ]);
    }
@@ -144,6 +143,9 @@ module.exports = class ABViewPivot extends ABViewPivotCore {
       $$(ids.min).setValue(view.settings.min);
       $$(ids.max).setValue(view.settings.max);
       $$(ids.height).setValue(view.settings.height);
+      $$(ids.decimalPlaces).setValue(
+         view.settings.decimalPlaces == null ? 2 : view.settings.decimalPlaces
+      );
    }
 
    static propertyEditorValues(ids, view) {
@@ -168,9 +170,9 @@ module.exports = class ABViewPivot extends ABViewPivotCore {
    component(App) {
       let baseCom = super.component(App);
 
-      var idBase = "ABViewPivot_" + this.id;
+      var idBase = `ABViewPivot_${this.id}`;
       var ids = {
-         component: App.unique(idBase + "_component"),
+         component: App.unique(`${idBase}_component`),
       };
 
       // an ABViewLabel is a simple Label
@@ -183,7 +185,12 @@ module.exports = class ABViewPivot extends ABViewPivotCore {
          separateLabel: this.settings.separateLabel,
          min: this.settings.min,
          max: this.settings.max,
-         height: this.settings.height,
+         format: (value) => {
+            let decimalPlaces = this.settings.decimalPlaces || 2;
+            return value && value != "0"
+               ? parseFloat(value).toFixed(decimalPlaces || 0)
+               : value;
+         },
       };
 
       // make sure each of our child views get .init() called
@@ -213,7 +220,11 @@ module.exports = class ABViewPivot extends ABViewPivotCore {
                let result = {};
 
                object.fields().forEach((f) => {
-                  if (f instanceof ABFieldNumber)
+                  if (
+                     f instanceof ABFieldCalculate ||
+                     f instanceof ABFieldFormula ||
+                     f instanceof ABFieldNumber
+                  )
                      result[f.columnName] = d[f.columnName];
                   else result[f.columnName] = f.format(d);
                });

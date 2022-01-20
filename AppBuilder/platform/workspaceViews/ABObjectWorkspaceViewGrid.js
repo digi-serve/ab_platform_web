@@ -9,7 +9,7 @@ var defaultValues = {
    sortFields: [], // array of columns with their sort configurations
    filterConditions: [], // array of filters to apply to the data table
    frozenColumnID: "", // id of column you want to stop freezing
-   hiddenFields: [] // array of [ids] to add hidden:true to
+   hiddenFields: [], // array of [ids] to add hidden:true to
 };
 
 module.exports = class ABObjectWorkspaceViewGrid extends ABObjectWorkspaceView {

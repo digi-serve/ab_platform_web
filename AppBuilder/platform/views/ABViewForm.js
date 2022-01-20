@@ -18,6 +18,8 @@ let PopupSubmitRule = null;
 ////
 const ABViewFormPropertyComponentDefaults = ABViewFormCore.defaultValues();
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 module.exports = class ABViewForm extends ABViewFormCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -54,15 +56,13 @@ module.exports = class ABViewForm extends ABViewFormCore {
 
       var idBase = "ABViewForm";
 
-      var L = App.Label;
-
       // PopupDisplayRule = new ABDisplayRule(App, idBase + "_displayrule");
 
       PopupRecordRule = new ABRecordRule();
-      PopupRecordRule.component(App, idBase + "_recordrule"); // prepare the UI component.
+      PopupRecordRule.component(App, `${idBase}_recordrule`); // prepare the UI component.
 
       PopupSubmitRule = new ABSubmitRule();
-      PopupSubmitRule.component(App, idBase + "_submitrule");
+      PopupSubmitRule.component(App, `${idBase}_submitrule`);
 
       // _logic functions
 
@@ -184,19 +184,13 @@ module.exports = class ABViewForm extends ABViewFormCore {
             (v) => v.common().key == componentKey
          )[0];
 
-         return (
-            common.markCheckbox(field) +
-            " #label# <div class='ab-component-form-fields-component-info'> <i class='fa fa-#icon#'></i> #component# </div>"
-               .replace("#label#", field.label)
-               .replace(
-                  "#icon#",
-                  formComponent ? formComponent.common().icon : "fw"
-               )
-               .replace(
-                  "#component#",
-                  formComponent ? L(formComponent.common().labelKey, "") : ""
-               )
-         );
+         return `${common.markCheckbox(field)} ${
+            field.label
+         } <div class='ab-component-form-fields-component-info'> <i class='fa fa-${
+            formComponent ? formComponent.common().icon : "fw"
+         }'></i> ${
+            formComponent ? L(formComponent.common().labelKey) : ""
+         } </div>`;
       };
 
       _logic.check = (e, fieldId) => {
@@ -327,8 +321,8 @@ module.exports = class ABViewForm extends ABViewFormCore {
          {
             name: "datacollection",
             view: "richselect",
-            label: L("ab.components.form.dataSource", "*Data Source"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Data Source"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             skipAutoSave: true,
             on: {
                onChange: _logic.selectSource,
@@ -337,8 +331,8 @@ module.exports = class ABViewForm extends ABViewFormCore {
 
          {
             view: "fieldset",
-            label: L("ab.components.form.formFields", "*Form Fields:"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Form Fields:"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -368,53 +362,53 @@ module.exports = class ABViewForm extends ABViewFormCore {
          {
             name: "showLabel",
             view: "checkbox",
-            label: L("ab.components.common.showlabel", "*Display Label"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Display Label"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             name: "labelPosition",
             view: "richselect",
-            label: L("ab.components.common.labelPosition", "*Label Position"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Label Position"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             options: [
                {
                   id: "left",
-                  value: L("ab.components.common.left", "*Left"),
+                  value: L("Left"),
                },
                {
                   id: "top",
-                  value: L("ab.components.common.top", "*Top"),
+                  value: L("Top"),
                },
             ],
          },
          {
             name: "labelWidth",
             view: "counter",
-            label: L("ab.components.common.labelWidth", "*Label Width"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Label Width"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             view: "counter",
             name: "height",
-            label: L("ab.components.common.height", "*Height:"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Height:"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             name: "clearOnLoad",
             view: "checkbox",
-            label: L("ab.components.form.clearOnLoad", "*Clear on load"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Clear on load"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             name: "clearOnSave",
             view: "checkbox",
-            label: L("ab.components.form.clearOnSave", "*Clear on save"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Clear on save"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
          },
          {
             view: "fieldset",
-            label: L("ab.components.form.rules", "*Rules:"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Rules:"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -423,17 +417,14 @@ module.exports = class ABViewForm extends ABViewFormCore {
                      cols: [
                         {
                            view: "label",
-                           label: L(
-                              "ab.components.form.submitRules",
-                              "*Submit Rules:"
-                           ),
-                           width: App.config.labelWidthLarge,
+                           label: L("Submit Rules:"),
+                           width: this.AB.UISettings.config().labelWidthLarge,
                         },
                         {
                            view: "button",
                            css: "webix_primary",
                            name: "buttonSubmitRules",
-                           label: L("ab.components.form.settings", "*Settings"),
+                           label: L("Settings"),
                            icon: "fa fa-gear",
                            type: "icon",
                            badge: 0,
@@ -447,17 +438,14 @@ module.exports = class ABViewForm extends ABViewFormCore {
                      cols: [
                         {
                            view: "label",
-                           label: L(
-                              "ab.components.form.displayRules",
-                              "*Display Rules:"
-                           ),
-                           width: App.config.labelWidthLarge,
+                           label: L("Display Rules:"),
+                           width: this.AB.UISettings.config().labelWidthLarge,
                         },
                         {
                            view: "button",
                            name: "buttonDisplayRules",
                            css: "webix_primary",
-                           label: L("ab.components.form.settings", "*Settings"),
+                           label: L("Settings"),
                            icon: "fa fa-gear",
                            type: "icon",
                            badge: 0,
@@ -471,17 +459,14 @@ module.exports = class ABViewForm extends ABViewFormCore {
                      cols: [
                         {
                            view: "label",
-                           label: L(
-                              "ab.components.form.recordRules",
-                              "*Record Rules:"
-                           ),
-                           width: App.config.labelWidthLarge,
+                           label: L("Record Rules:"),
+                           width: this.AB.UISettings.config().labelWidthLarge,
                         },
                         {
                            view: "button",
                            name: "buttonRecordRules",
                            css: "webix_primary",
-                           label: L("ab.components.form.settings", "*Settings"),
+                           label: L("Settings"),
                            icon: "fa fa-gear",
                            type: "icon",
                            badge: 0,
@@ -589,7 +574,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
    static propertyUpdateFieldOptions(ids, view, dcId) {
       var formComponent = view.parentFormComponent();
       var existsFields = formComponent.fieldComponents();
-      var datacollection = view.AB.datacollections((dc) => dc.id == dcId)[0];
+      var datacollection = view.AB.datacollectionByID(dcId);
       var object = datacollection ? datacollection.datasource : null;
 
       // Pull field list
@@ -673,7 +658,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
       var idBase = "ABViewForm_" + this.id;
       this.uniqueInstanceID = webix.uid();
       var myUnique = (key) => {
-         return App.unique(idBase + "_" + key + "_" + this.uniqueInstanceID);
+         return App.unique(`${idBase}_${key}_${this.uniqueInstanceID}`);
       };
       var ids = {
          component: myUnique("_component"),
@@ -928,9 +913,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
                rule.actionSettings.valueRules.fieldOperations.forEach((op) => {
                   if (op.valueType != "exist") return;
 
-                  let pullDataDC = this.AB.datacollections(
-                     (dc) => dc.id == op.value
-                  )[0];
+                  let pullDataDC = this.AB.datacollectionByID(op.value);
 
                   if (
                      pullDataDC &&
@@ -1267,27 +1250,58 @@ module.exports = class ABViewForm extends ABViewFormCore {
     * @return {boolean} isValid
     */
    validateData(formView, object, formVals) {
-      var isValid = true;
+      let isValid = true;
 
       // validate required fields
-      var requiredFields = this.fieldComponents(
-         (fComp) => fComp.settings.required == true
+      let requiredFields = this.fieldComponents(
+         (fComp) =>
+            (fComp.field &&
+               fComp.field() &&
+               fComp.field().settings.required == true) ||
+            fComp.settings.required == true
       ).map((fComp) => fComp.field());
-      requiredFields.forEach((f) => {
-         if (f && !formVals[f.columnName] && formVals[f.columnName] != "0") {
-            formView.markInvalid(f.columnName, "*This is a required field.");
-            isValid = false;
-         }
-      });
 
       // validate data
-      var validator;
+      let validator;
       if (isValid) {
          validator = object.isValidData(formVals);
          isValid = validator.pass();
       }
 
       $$(formView).validate();
+
+      // Display required messages
+      requiredFields.forEach((f) => {
+         if (f && !formVals[f.columnName] && formVals[f.columnName] != "0") {
+            formView.markInvalid(f.columnName, L("This is a required field."));
+            isValid = false;
+
+            // Fix position of invalid message
+            let $forminput = formView.elements[f.columnName];
+            if ($forminput) {
+               // Y position
+               let height = $forminput.$height;
+               if (height < 56) {
+                  $forminput.define("height", 60);
+                  $forminput.resize();
+               }
+
+               // X position
+               let domInvalidMessage = $forminput.$view.getElementsByClassName(
+                  "webix_inp_bottom_label"
+               )[0];
+               if (
+                  domInvalidMessage &&
+                  !domInvalidMessage.style["margin-left"]
+               ) {
+                  domInvalidMessage.style.marginLeft = `${
+                     this.settings.labelWidth ||
+                     ABViewFormPropertyComponentDefaults.labelWidth
+                  }px`;
+               }
+            }
+         }
+      });
 
       // if data is invalid
       if (!isValid) {
@@ -1402,7 +1416,10 @@ module.exports = class ABViewForm extends ABViewFormCore {
                   text: "System could not save your data",
                   type: "error",
                });
-               this.AB.error(err);
+               this.AB.notify.developer(err, {
+                  message: "Could not save your data",
+                  view: this.toObj(),
+               });
             }
          }
 
@@ -1425,8 +1442,9 @@ module.exports = class ABViewForm extends ABViewFormCore {
                         resolve(newFormVals);
                      })
                      .catch((err) => {
-                        this.AB.error("Error processing Record Rules.", {
-                           error: err,
+                        this.AB.notify.developer(err, {
+                           message: "Error processing Record Rules.",
+                           view: this.toObj(),
                            newFormVals: newFormVals,
                         });
                         // Question:  how do we respond to an error?
@@ -1453,8 +1471,9 @@ module.exports = class ABViewForm extends ABViewFormCore {
                         resolve(newFormVals);
                      })
                      .catch((err) => {
-                        this.AB.error("Error processing Record Rules.", {
-                           error: err,
+                        this.AB.notify.developer(err, {
+                           message: "Error processing Record Rules.",
+                           view: this.toObj(),
                            newFormVals: newFormVals,
                         });
                         // Question:  how do we respond to an error?

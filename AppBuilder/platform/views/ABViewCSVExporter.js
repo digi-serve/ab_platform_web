@@ -4,6 +4,8 @@ const RowFilter = require("../RowFilter");
 
 const ABViewCSVExporterPropertyComponentDefaults = ABViewCSVExporterCore.defaultValues();
 
+let L = (...params) => AB.Multilingual.label(...params);
+
 let PropertyFilter = null;
 
 module.exports = class ABViewCSVExporter extends ABViewCSVExporterCore {
@@ -36,8 +38,6 @@ module.exports = class ABViewCSVExporter extends ABViewCSVExporterCore {
 
    static propertyEditorDefaultElements(App, ids, _logic, ObjectDefaults) {
       let idBase = "ABViewCSVExporter";
-
-      let L = App.Label;
 
       let commonUI = super.propertyEditorDefaultElements(
          App,
@@ -97,15 +97,15 @@ module.exports = class ABViewCSVExporter extends ABViewCSVExporterCore {
       return commonUI.concat([
          {
             view: "fieldset",
-            label: L("ab.component.label.dataSource", "*Data:"),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Data:"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             body: {
                rows: [
                   {
                      name: "datacollection",
                      view: "richselect",
-                     label: L("ab.components.form.dataSource", "*Data Source"),
-                     labelWidth: App.config.labelWidthLarge,
+                     label: L("Data Source"),
+                     labelWidth: this.AB.UISettings.config().labelWidthLarge,
                      skipAutoSave: true,
                      on: {
                         onChange: _logic.selectSource,
@@ -114,28 +114,22 @@ module.exports = class ABViewCSVExporter extends ABViewCSVExporterCore {
                   {
                      name: "hasHeader",
                      view: "checkbox",
-                     label: L(
-                        "ab.components.csvExporter.hasHeader",
-                        "*Header on first line"
-                     ),
-                     labelWidth: App.config.labelWidthXLarge,
+                     label: L("Header on first line"),
+                     labelWidth: this.AB.UISettings.config().labelWidthXLarge,
                   },
                   {
                      cols: [
                         {
                            view: "label",
-                           label: L(
-                              "ab.component.label.filterData",
-                              "*Filter Option:"
-                           ),
+                           label: L("Filter Option:"),
                            css: "ab-text-bold",
-                           width: App.config.labelWidthLarge,
+                           width: this.AB.UISettings.config().labelWidthLarge,
                         },
                         {
                            view: "button",
                            name: "filterMenuButton",
                            css: "webix_primary",
-                           label: L("ab.component.label.settings", "*Settings"),
+                           label: L("Settings"),
                            icon: "fa fa-gear",
                            type: "icon",
                            badge: 0,
@@ -150,11 +144,8 @@ module.exports = class ABViewCSVExporter extends ABViewCSVExporterCore {
          },
          {
             view: "fieldset",
-            label: L(
-               "ab.component.label.customizeDisplay",
-               "*Customize Display:"
-            ),
-            labelWidth: App.config.labelWidthLarge,
+            label: L("Customize Display:"),
+            labelWidth: this.AB.UISettings.config().labelWidthLarge,
             body: {
                type: "clean",
                padding: 10,
@@ -162,23 +153,20 @@ module.exports = class ABViewCSVExporter extends ABViewCSVExporterCore {
                   {
                      name: "buttonLabel",
                      view: "text",
-                     label: L("ab.components.csvExporter.label", "*Label"),
-                     labelWidth: App.config.labelWidthLarge,
+                     label: L("Label"),
+                     labelWidth: this.AB.UISettings.config().labelWidthLarge,
                   },
                   {
                      name: "filename",
                      view: "text",
-                     label: L(
-                        "ab.components.csvExporter.filename",
-                        "*File name"
-                     ),
-                     labelWidth: App.config.labelWidthLarge,
+                     label: L("File name"),
+                     labelWidth: this.AB.UISettings.config().labelWidthLarge,
                   },
                   {
                      view: "counter",
                      name: "width",
-                     label: L("ab.components.csvExporter.width", "*Width:"),
-                     labelWidth: App.config.labelWidthLarge,
+                     label: L("Width:"),
+                     labelWidth: this.AB.UISettings.config().labelWidthLarge,
                   },
                ],
             },
@@ -245,7 +233,7 @@ module.exports = class ABViewCSVExporter extends ABViewCSVExporterCore {
    static initPopupEditors(App, ids, _logic) {
       var idBase = "ABViewCSVExporterPropertyEditor";
 
-      PropertyFilter = new RowFilter(App, idBase + "_filter");
+      PropertyFilter = new RowFilter(App, `${idBase}_filter`, AB);
       PropertyFilter.init({
          // when we make a change in the popups we want to make sure we save the new workspace to the properties to do so just fire an onChange event
          onChange: _logic.onFilterChange,
@@ -297,16 +285,12 @@ module.exports = class ABViewCSVExporter extends ABViewCSVExporterCore {
    component(App, idBase) {
       idBase = idBase || "ABCSVExporter_" + this.id;
       let ids = {
-         button: App.unique(idBase + "_button"),
-         buttonFilter: App.unique(idBase + "_button_filter"),
-         popupFilter: App.unique(idBase + "_popup_filter"),
-      };
-      let labels = {
-         common: App.labels,
-         component: {},
+         button: App.unique(`${idBase}_button`),
+         buttonFilter: App.unique(`${idBase}_button_filter`),
+         popupFilter: App.unique(`${idBase}_popup_filter`),
       };
 
-      let ClientFilter = new RowFilter(App, idBase + "_filter");
+      let ClientFilter = new RowFilter(App, `${idBase}_filter`, AB);
 
       let _ui = {
          view: "layout",

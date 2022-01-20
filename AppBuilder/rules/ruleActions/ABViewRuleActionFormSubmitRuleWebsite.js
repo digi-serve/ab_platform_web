@@ -5,7 +5,11 @@
 //
 const ABViewRuleAction = require("../ABViewRuleAction");
 
-module.exports = class ABViewRuleActionFormSubmitRuleWebsite extends ABViewRuleAction {
+let L = (...params) => AB.Multilingual.label(...params);
+
+module.exports = class ABViewRuleActionFormSubmitRuleWebsite extends (
+   ABViewRuleAction
+) {
    /**
     * @param {object} App
     *      The shared App object that is created in OP.Component
@@ -14,14 +18,10 @@ module.exports = class ABViewRuleActionFormSubmitRuleWebsite extends ABViewRuleA
     */
    constructor(App, idBase) {
       super();
-      var L = App.Label;
 
       this.App = App;
       this.key = "ABViewRuleActionFormSubmitRuleWebsite";
-      this.label = L(
-         "ab.component.ruleaction.abviewruleActionFormSubmitRuleWebsite",
-         "*Redirect to another website URL"
-      );
+      this.label = L("Redirect to another website URL");
 
       this.currentObject = null; // the object this Action is tied to.
 
@@ -29,12 +29,6 @@ module.exports = class ABViewRuleActionFormSubmitRuleWebsite extends ABViewRuleA
       // [
       //		{ fieldId: xxx, value:yyy, type:key['string', 'number', 'date',...]}
       // ]
-
-      // Labels for UI components
-      var labels = (this.labels = {
-         // common: App.labels,
-         component: {},
-      });
    }
 
    // conditionFields() {
@@ -70,7 +64,7 @@ module.exports = class ABViewRuleActionFormSubmitRuleWebsite extends ABViewRuleA
    //
    valueDisplayComponent(idBase) {
       var ids = {
-         website: idBase + "website",
+         website: `${idBase}_website`,
       };
 
       this._ui = {
@@ -117,7 +111,7 @@ module.exports = class ABViewRuleActionFormSubmitRuleWebsite extends ABViewRuleA
          // redirect to website
          if (this.valueRules.website)
             window.open(
-               "http://" + this.valueRules.website.replace("http://", ""),
+               `http://${this.valueRules.website.replace("http://", "")}`,
                "_blank"
             );
 
