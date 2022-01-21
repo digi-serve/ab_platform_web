@@ -99,7 +99,10 @@ class ABViewGridComponent extends ClassUI {
       // {bool}
       // Has a Validation Error occured?
 
-      this.linkPage = this.viewGrid.linkPageHelper;
+      this.linkPage = this.viewGrid.linkPageHelper.component(
+         this.AB._App,
+         `${base}_gridlinkpage`
+      );
       // {ABViewPropertyLinkPage}
       //
 
@@ -774,6 +777,11 @@ class ABViewGridComponent extends ClassUI {
       if (this.datacollection?.datasource) {
          // TRANSITION: ABViewGrid_orig line 862 ...
 
+         this.linkPage.init({
+            view: this.viewGrid,
+            datacollection: this.datacollection,
+         });
+
          var CurrentObject = this.datacollection.datasource;
 
          this.refreshHeader();
@@ -942,7 +950,7 @@ class ABViewGridComponent extends ClassUI {
       }
 
       // Pass settings to link page module
-      console.error("!!!! TODO: implement linkPageHelper() !!!!");
+      // console.error("!!!! TODO: implement linkPageHelper() !!!!");
       if (this.linkPage) {
          this.linkPage.changePage(page, rowId);
       }
