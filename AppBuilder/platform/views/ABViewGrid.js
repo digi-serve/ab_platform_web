@@ -1,5 +1,5 @@
 const ABViewGridCore = require("../../core/views/ABViewGridCore");
-import ClassUI from "../../../ui/ClassUI";
+import ABViewComponent from "./ABViewComponent";
 
 // const ABWorkspaceDatatable = require("../../../ABDesigner/ab_work_object_workspace_datatable");
 // const ABPopupHideFields = require("../../../ABDesigner/ab_work_object_workspace_popupHideFields");
@@ -35,23 +35,23 @@ let PopupCountColumnsComponent = null;
 var L = null;
 // multilingual Label fn()
 
-class ABViewGridComponent extends ClassUI {
+class ABViewGridComponent extends ABViewComponent {
    constructor(viewGrid, idBase) {
       var base = idBase || `ABViewGrid_${viewGrid.id}`;
 
-      super({
-         component: `${base}_component`,
-         toolbar: `${base}_toolbar`,
-         buttonDeleteSelected: `${base}_deleteSelected`,
+      super(base, {
+         // component: `${base}_component`,
+         toolbar: "",
+         buttonDeleteSelected: "",
 
-         buttonFilter: `${base}_buttonFilter`,
-         buttonMassUpdate: `${base}_buttonMassUpdate`,
-         buttonSort: `${base}_buttonSort`,
-         buttonExport: `${base}_buttonExport`,
+         buttonFilter: "",
+         buttonMassUpdate: "",
+         buttonSort: "",
+         buttonExport: "",
 
-         globalSearchToolbar: `${base}_globalSearchToolbar`,
+         globalSearchToolbar: "",
 
-         datatable: `${base}_datatable`,
+         datatable: "",
       });
 
       this.viewGrid = viewGrid;
@@ -144,6 +144,14 @@ class ABViewGridComponent extends ClassUI {
       // // {HTML DOM}
       // // The webix.$node where the ABField Header is that our PopupHeader
       // // should be displayed at.
+
+      this.handler_select = (...params) => {
+         this.selectRow(...params);
+      };
+      // {fn} .handler_select
+      // the callback fn for our selectRow()
+      // We want this called when the .datacollection we are linked to
+      // emits an "onChange" event.
 
       if (!L) {
          L = (...params) => {
@@ -554,7 +562,7 @@ class ABViewGridComponent extends ClassUI {
 
       // NOTE: register the onAfterRender() here, so it only registers
       // one.
-      var DataTable = this.getDataTable(); //$$(this.ids.datatable);
+      var DataTable = this.getDataTable();
       var throttleCustomDisplay = null;
       var scrollStarted = null;
 
@@ -782,8 +790,6 @@ class ABViewGridComponent extends ClassUI {
             datacollection: this.datacollection,
          });
 
-         var CurrentObject = this.datacollection.datasource;
-
          this.refreshHeader();
       }
 
@@ -796,8 +802,7 @@ class ABViewGridComponent extends ClassUI {
     * data.
     */
    busy() {
-      var dt = $$(this.ids.datatable);
-      if (dt?.showProgress) dt.showProgress({ type: "icon" });
+      this.getDataTable()?.showProgress?.({ type: "icon" });
    }
 
    /**
@@ -1586,12 +1591,31 @@ class ABViewGridComponent extends ClassUI {
    }
 
    /**
+    * @method onShow()
+    * perform any preparations necessary when showing this component.
+    */
+   onShow() {
+      super.onShow();
+
+      // make sure our grid is properly .adjust()ed to the screen.
+      this.getDataTable()?.adjust();
+
+      var dv = this.datacollection;
+      if (dv) {
+         this.eventAdd({
+            emitter: dv,
+            eventName: "changeCursor",
+            listener: this.handler_select,
+         });
+      }
+   }
+
+   /**
     * @method ready()
     * Indicate that our datatable is currently ready for operation.
     */
    ready() {
-      var dt = $$(this.ids.datatable);
-      if (dt?.hideProgress) dt.hideProgress();
+      this.getDataTable()?.hideProgress?.();
    }
 
    /**
@@ -1986,6 +2010,23 @@ class ABViewGridComponent extends ClassUI {
    }
 
    /**
+    * @method selectRow()
+    * Select the grid row that correspondes to the provided rowData.
+    * @param {json} rowData
+    *        A key=>value hash of data that matches an entry in the grid.
+    *        rowData.id should match an existing entry.
+    */
+   selectRow(rowData) {
+      let $DataTable = this.getDataTable();
+      if (!$DataTable) return;
+
+      if (rowData == null) $DataTable.unselect();
+      else if (rowData?.id && $DataTable.exists(rowData.id))
+         $DataTable.select(rowData.id, false);
+      else $DataTable.select(null, false);
+   }
+
+   /**
     * @method settingsID()
     * return the unique key for this Grid + object combo to store data
     * in our localStorage.
@@ -2032,7 +2073,7 @@ class ABViewGridComponent extends ClassUI {
    }
 
    toggleUpdateDelete() {
-      var DataTable = $$(this.ids.datatable);
+      var DataTable = this.getDataTable();
       var checkedItems = 0;
       DataTable.data.each(function (obj) {
          if (
@@ -2051,7 +2092,7 @@ class ABViewGridComponent extends ClassUI {
    }
 
    toolbarDeleteSelected($view) {
-      var DataTable = $$(this.ids.datatable);
+      var DataTable = this.getDataTable();
       let CurrentObject = this.datacollection.datasource;
       var deleteTasks = [];
       DataTable.data.each(function (row) {
