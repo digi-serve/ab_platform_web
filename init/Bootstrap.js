@@ -153,8 +153,8 @@ class Bootstrap extends EventEmitter {
                      // UI. The experience becomes more like a touch interface
                      // with the exception that scroll bars appear when user
                      // hovers over a scrollable area
-                     if (!webix.env.touch && webix.env.scrollSize)
-                        webix.CustomScroll.init();
+                     /* if (!webix.env.touch  && webix.env.scrollSize ) */
+                     webix.CustomScroll.init();
 
                      var div = this.div();
 
