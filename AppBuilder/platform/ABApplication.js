@@ -242,13 +242,48 @@ module.exports = class ABClassApplication extends ABApplicationCore {
     * @method viewNew()
     *
     *
-    * @return {ABView}
+    * @return {ABViewPage}
     */
    pageNew(values) {
-      // make sure this is an ABViewPage description
-      values.key = ABViewPage.common().key;
+      return new ABViewPage(values, this);
+   }
 
-      return ABViewManager.newView(values, this, null);
+   /**
+    * @method pageInsert()
+    *
+    *
+    * @param {ABField} field The instance of the field to save.
+    * @return {Promise}
+    */
+   pageInsert(page) {
+      // var isIncluded = this.pageByID(page.id);
+      var isIncluded = this._pages.filter((p) => p.id == page.id)[0];
+      if (!isIncluded) {
+         this._pages.push(page);
+         // Save our own Info:
+         return this.save();
+      }
+      return Promise.resolve();
+   }
+
+   /**
+    * @method pageRemove()
+    * remove the current ABViewPage from our list of pages.
+    * @param {ABViewPage} page
+    * @return {Promise}
+    */
+   pageRemove(page) {
+      var origLen = this._pages.length;
+      this._pages = this.pages(function (p) {
+         return p.id != page.id;
+      });
+
+      if (this._pages.length < origLen) {
+         return this.save();
+      }
+
+      // if we get here, then nothing changed so nothing to do.
+      return Promise.resolve();
    }
 
    save() {
