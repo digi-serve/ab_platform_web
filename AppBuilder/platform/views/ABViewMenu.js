@@ -832,17 +832,14 @@ module.exports = class ABViewMenu extends ABViewMenuCore {
             onAfterRender: () => {
                const Menu = $$(ids.component);
                if (!Menu) return;
-               const views = this.application.views();
                Menu?.data.each((item) => {
                   const node = Menu.getItemNode(item.id);
                   if (!node) return;
                   // get linked page/tab info so we can use its name in the data-cy
-                  const viewInfo = views.filter((view) => {
-                     return view.id == item.id;
-                  })[0];
+                  const viewInfo = this.AB.definitionByID(item.id);
                   node.setAttribute(
                      "data-cy",
-                     `menu-item ${viewInfo.name} ${item.id} ${this.id}`
+                     `menu-item ${viewInfo?.name} ${item.id} ${this.id}`
                   );
                });
             },

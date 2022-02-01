@@ -707,6 +707,16 @@ class ABViewGridComponent extends ABViewComponent {
                   return true;
                },
             });
+         } else if (self.settings.detailsPage.length) {
+            // If an icon wasn't selected but a details page is set
+            // view the details page
+            self.changePage(dv, id, self.settings.detailsPage);
+            self.toggleTab(self.settings.detailsTab, this);
+         } else if (self.settings.editPage.length) {
+            // If an icon wasn't selected but an edit page is set
+            // view the edit page
+            self.changePage(dv, id, self.settings.editPage);
+            self.toggleTab(self.settings.editTab, this);
          }
       });
 
