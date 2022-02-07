@@ -1485,6 +1485,9 @@ div.amp .fa-unlock-alt {
    -webkit-animation: 1s ease 0.5s normal forwards 1 fadein;
    animation: 1s ease 0.5s normal forwards 1 fadein;
 }
+div.webix_dataview_item.webix_transparent{
+   padding: 0px;
+}
 @keyframes fadein {
    0% {
       opacity: 0;
