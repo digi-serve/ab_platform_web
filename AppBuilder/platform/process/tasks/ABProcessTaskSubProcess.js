@@ -138,6 +138,8 @@ module.exports = class SubProcess extends SubProcessCore {
     * @return {Promise}
     */
    destroy() {
+      // reuse .destroy function of ABProcess 
+      // to clear tasks within this sub process
       return this.process.destroy.call(this);
    }
 
@@ -151,6 +153,8 @@ module.exports = class SubProcess extends SubProcessCore {
     *						.resolve( {this} )
     */
    save() {
+      // reuse .save function of ABProcess 
+      // to update tasks within this sub process
       return this.process.save.call(this);
    }
 
