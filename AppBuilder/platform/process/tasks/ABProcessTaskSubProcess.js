@@ -130,10 +130,7 @@ module.exports = class SubProcess extends SubProcessCore {
 
    /**
     * @method destroy()
-    *
-    * destroy the current instance of ABObject
-    *
-    * also remove it from our parent application
+    * destroy this sub process and inside tasks
     *
     * @return {Promise}
     */
@@ -145,9 +142,7 @@ module.exports = class SubProcess extends SubProcessCore {
 
    /**
     * @method save()
-    *
-    * persist this instance of ABObject with it's parent ABApplication
-    *
+    * persist this sub process
     *
     * @return {Promise}
     *						.resolve( {this} )
@@ -175,6 +170,8 @@ module.exports = class SubProcess extends SubProcessCore {
          element,
          this
       );
+
+      // Add a new task to this sub process
       if (task) {
          this.elementAdd(task);
       }
