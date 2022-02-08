@@ -239,9 +239,10 @@ module.exports = class ABClassApplication extends ABApplicationCore {
    }
 
    /**
-    * @method viewNew()
-    *
-    *
+    * @method pageNew()
+    * return a new instance of an ABViewPage
+    * @param values
+    *        The initial settings for the page.
     * @return {ABViewPage}
     */
    pageNew(values) {
@@ -250,12 +251,12 @@ module.exports = class ABClassApplication extends ABApplicationCore {
 
    /**
     * @method pageInsert()
-    *
-    *
-    * @param {ABField} field The instance of the field to save.
+    * Insert a new ABViewPage into this Application.
+    * @param {ABViewPage} page
+    *        The instance of the page to save.
     * @return {Promise}
     */
-   pageInsert(page) {
+   async pageInsert(page) {
       // var isIncluded = this.pageByID(page.id);
       var isIncluded = this._pages.filter((p) => p.id == page.id)[0];
       if (!isIncluded) {
@@ -263,7 +264,6 @@ module.exports = class ABClassApplication extends ABApplicationCore {
          // Save our own Info:
          return this.save();
       }
-      return Promise.resolve();
    }
 
    /**
@@ -272,7 +272,7 @@ module.exports = class ABClassApplication extends ABApplicationCore {
     * @param {ABViewPage} page
     * @return {Promise}
     */
-   pageRemove(page) {
+   async pageRemove(page) {
       var origLen = this._pages.length;
       this._pages = this.pages(function (p) {
          return p.id != page.id;
@@ -283,7 +283,6 @@ module.exports = class ABClassApplication extends ABApplicationCore {
       }
 
       // if we get here, then nothing changed so nothing to do.
-      return Promise.resolve();
    }
 
    save() {
