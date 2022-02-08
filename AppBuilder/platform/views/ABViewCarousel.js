@@ -1,7 +1,11 @@
+
 const ABViewCarouselCore = require("../../core/views/ABViewCarouselCore");
 
-const ABViewPropertyFilterData = require("./viewProperties/ABViewPropertyFilterData");
-const ABViewPropertyLinkPage = require("./viewProperties/ABViewPropertyLinkPage");
+// const ABViewPropertyFilterData = require("./viewProperties/ABViewPropertyFilterData");
+// const ABViewPropertyLinkPage = require("./viewProperties/ABViewPropertyLinkPage");
+
+import ABViewPropertyFilterData from "./viewProperties/ABViewPropertyFilterData";
+import ABViewPropertyLinkPage from "./viewProperties/ABViewPropertyLinkPage";
 
 const ABFieldImage = require("../dataFields/ABFieldImage");
 
@@ -9,7 +13,7 @@ let L = (...params) => AB.Multilingual.label(...params);
 
 let PopupCarouselFilterMenu = null;
 
-module.exports = class ABViewCarousel extends ABViewCarouselCore {
+export default class ABViewCarousel extends ABViewCarouselCore {
    constructor(values, application, parent, defaultValues) {
       super(values, application, parent, defaultValues);
    }
@@ -368,7 +372,7 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
     * @return {obj} UI component
     */
    component(App) {
-      var idBase = "ABViewCarousel_" + this.id;
+      var idBase = this.idBase;
       var ids = {
          component: App.unique(`${idBase}_component`),
       };
@@ -697,9 +701,13 @@ module.exports = class ABViewCarousel extends ABViewCarouselCore {
       };
    }
 
+   get idBase() {
+      return `ABViewCarousel_${this.id}`;
+   }
+
    get filterHelper() {
       if (this.__filterHelper == null)
-         this.__filterHelper = new ABViewPropertyFilterData();
+         this.__filterHelper = new ABViewPropertyFilterData(this.AB, this.idBase);
 
       return this.__filterHelper;
    }
