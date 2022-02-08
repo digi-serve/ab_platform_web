@@ -221,6 +221,7 @@ export default class RowUpdater extends ClassUI {
     *         [
     *            {
     *               fieldId: {UUID}
+    *               isProcessValue: {Boolean} - If it is true, then value is from Process parameter
     *               value: {Object}
     *            },
     *            ...
