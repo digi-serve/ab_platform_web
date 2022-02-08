@@ -163,7 +163,8 @@ module.exports = class SubProcess extends SubProcessCore {
     *
     * @param {BPMN:Element} element
     *        the BPMN modeler diagram element definition
-    * @return {ABProcess[OBJ]}
+    * @return {ABProcessParticipant|ABProcessLane|ABProcessElement}
+    * 
     */
    elementNewForModelDefinition(element) {
       let task = this.application.processElementNewForModelDefinition(
