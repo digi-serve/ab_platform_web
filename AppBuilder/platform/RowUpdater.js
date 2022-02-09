@@ -40,46 +40,79 @@ export default class RowUpdater extends ClassUI {
    uiItem() {
       var self = this;
       return {
-         view: "layout",
-         isolate: true,
-         cols: [
+         rows: [
             {
-               // Label
-               view: "label",
-               width: 40,
-               label: L("Set"),
-            },
-            {
-               // Field list
-               view: "combo",
-               id: this.ids.field,
-               options: this.getFieldList(true),
-               on: {
-                  onChange: function (columnId) {
-                     let $viewCond = this.getParentView();
-                     self.selectField(columnId, $viewCond);
+               view: "layout",
+               isolate: true,
+               cols: [
+                  {
+                     // Label
+                     view: "label",
+                     width: 40,
+                     label: L("Set")
                   },
-               },
-            },
-            {
-               // Label
-               view: "label",
-               width: 40,
-               label: L("To"),
-            },
-            // Field value
-            {},
-            {
-               // "Remove" button
-               view: "button",
-               css: "webix_danger",
-               icon: "fa fa-trash",
-               type: "icon",
-               autowidth: true,
-               click: function () {
-                  let $viewCond = this.getParentView();
-                  self.removeItem($viewCond);
-               },
+                  {
+                     // Field list
+                     view: "combo",
+                     id: this.ids.field,
+                     options: this.getFieldList(true),
+                     on: {
+                        onChange: function(columnId) {
+                           let $viewItem = this.getParentView();
+                           self.selectField(columnId, $viewItem);
+                        }
+                     }
+                  },
+                  {
+                     // Label
+                     view: "label",
+                     width: 40,
+                     label: L("To")
+                  },
+                  {
+                     view: "segmented",
+                     value: "custom",
+                     height: 40,
+                     maxWidth: 160,
+                     options: [
+                        { id: "custom", value: L("Custom") },
+                        { id: "process", value: L("Process") }
+                     ],
+                     hidden:
+                        this._extendedOptions == null ||
+                        !this._extendedOptions.length,
+                     on: {
+                        onChange: function(val) {
+                           let $viewItem = this.getParentView();
+
+                           self.toggleCustomProcessOption(
+                              $viewItem,
+                              val == "process"
+                           );
+                        }
+                     }
+                  },
+                  // Field value
+                  {},
+                  // Extended value
+                  {
+                     hidden: true
+                  },
+                  {
+                     // "Remove" button
+                     view: "button",
+                     css: "webix_danger",
+                     icon: "fa fa-trash",
+                     type: "icon",
+                     autowidth: true,
+
+                     click: function() {
+                        let $viewCond = this.getParentView().getParentView();
+
+                        self.removeItem($viewCond);
+                     }
+                  },
+               ]
             },
          ],
       };
@@ -104,7 +137,6 @@ export default class RowUpdater extends ClassUI {
             {
                view: "button",
                id: this.ids.addNew,
-               css: "webix_primary",
                icon: "fa fa-plus",
                type: "iconButton",
                label: L("Add field to edit"),
@@ -189,6 +221,7 @@ export default class RowUpdater extends ClassUI {
     *         [
     *            {
     *               fieldId: {UUID}
+    *               isProcessValue: {Boolean} - If it is true, then value is from Process parameter
     *               value: {Object}
     *            },
     *            ...
@@ -199,29 +232,46 @@ export default class RowUpdater extends ClassUI {
 
       let $form = $$(this.ids.form);
       if ($form) {
-         $form.getChildViews().forEach(($viewCond) => {
-            // Ignore "Add new" button
-            if (!$viewCond || !$viewCond.$$) return;
+         $form.getChildViews().forEach(($viewContainer) => {
+            let $viewItem = $viewContainer.getChildViews()[0];
 
-            let $fieldElem = $viewCond.$$(this.ids.field);
+            // Ignore "Add new" button
+            if (!$viewItem || !$viewItem.$$) return;
+
+            let $fieldElem = $viewItem.$$(this.ids.field);
             if (!$fieldElem) return;
 
             let fieldId = $fieldElem.getValue();
             if (!fieldId) return;
 
-            let $valueElem = $viewCond.getChildViews()[3];
-            if (!$valueElem) return;
+            let $customValueElem = $viewItem.getChildViews()[3];
+            let $processValueElem = $viewItem.getChildViews()[4];
+            if (!$customValueElem && !$processValueElem) return;
 
             let fieldInfo = this._Object.fieldByID(fieldId);
 
-            let val;
-            if (fieldInfo.key == "date" || fieldInfo.key == "datetime") {
-               let currDateCheckbox = $valueElem.getChildViews()[0];
-               if (currDateCheckbox.getValue() == true) {
-                  val = "ab-current-date";
-               } else {
-                  let datePicker = $valueElem.getChildViews()[1];
-                  val = fieldInfo.getValue(datePicker);
+            let val = {
+               fieldId: fieldId
+            };
+
+            // Custom value
+            if ($customValueElem && $customValueElem.isVisible()) {
+               if (
+                  fieldInfo.key == "date" ||
+                  fieldInfo.key == "datetime"
+               ) {
+                  let currDateCheckbox = $customValueElem.getChildViews()[0];
+                  if (currDateCheckbox.getValue() == true) {
+                     val.value = "ab-current-date";
+                  } else {
+                     // Get value from data field manager
+                     val.value = fieldInfo.getValue($customValueElem);
+                  }
+               }
+               // Process value
+               else if ($processValueElem && $processValueElem.isVisible()) {
+                  val.isProcessValue = true;
+                  val.value = $processValueElem.getValue();
                }
             } else {
                // Get value from data field manager
@@ -229,10 +279,7 @@ export default class RowUpdater extends ClassUI {
             }
 
             // Add to output
-            result.push({
-               fieldId: fieldId,
-               value: val,
-            });
+            result.push(val);
          });
       }
 
@@ -281,11 +328,11 @@ export default class RowUpdater extends ClassUI {
     * different field will change the types of values that can be entered.
     * @param {string} columnId
     *        The field.uuid of the object that was selected.
-    * @param {webix.view} $viewCond
+    * @param {webix.view} $viewItem
     *        The webix.view that contains the value expression of the field
     *        that was selected.
     */
-   selectField(columnId, $viewCond) {
+   selectField(columnId, $viewItem) {
       let field = this._Object.fieldByID(columnId);
       if (!field) {
          this.AB.notify.builder(
@@ -344,24 +391,47 @@ export default class RowUpdater extends ClassUI {
             break;
       }
 
+      let childViews = $viewItem.getChildViews();
+
       // Change component to display value
-      $viewCond.removeView($viewCond.getChildViews()[3]);
-      $viewCond.addView(inputView, 3);
+      $viewItem.removeView(childViews[3]);
+      $viewItem.addView(inputView, 3);
 
       formFieldComponent.init();
 
       // Show custom display of data field
       if (field.customDisplay)
-         field.customDisplay(
-            {},
-            this.AB._App,
-            $viewCond.getChildViews()[3].$view
+         field.customDisplay({}, this.AB._App, childViews[4].$view);
+
+      // Add extended value options
+      $viewItem.removeView(childViews[5]);
+      if (this._extendedOptions && this._extendedOptions.length) {
+         $viewItem.addView(
+            {
+               view: "richselect",
+               options: this._extendedOptions,
+               hidden: true
+            },
+            5
          );
+      } else {
+         $viewItem.addView(
+            {
+               hidden: true
+            },
+            5
+         );
+      }
+
+      this.toggleCustomProcessOption(
+         $viewItem,
+         childViews[3].getValue() == "process"
+      );
 
       // _logic.refreshFieldList();
       // $$(this).adjust();
-      $$($viewCond).adjust();
-      $viewCond.getFormView().adjust();
+      $$($viewItem).adjust();
+      $viewItem.getFormView().adjust();
    }
 
    /**
@@ -387,20 +457,32 @@ export default class RowUpdater extends ClassUI {
       if (settings.length < 1) return;
 
       settings.forEach((item) => {
-         let $viewItem = $$(this.addItem());
+         let $viewContainer = $$(this.addItem());
+         let $viewItem = $viewContainer.getChildViews()[0];
 
          $viewItem.$$(this.ids.field).setValue(item.fieldId);
+         let $valueTypeButton = $viewItem.queryView(
+            { view: "segmented" },
+            "self"
+         );
+         $valueTypeButton.setValue(
+            item.isProcessValue ? "process" : "custom"
+         );
 
-         let $valueElem = $viewItem.getChildViews()[3];
-         if (!$valueElem) return;
+         let $customValueElem = $viewItem.getChildViews()[4];
+         let $processValueElem = $viewItem.getChildViews()[5];
+         if (!$customValueElem && !$processValueElem) return;
 
          let fieldInfo = this._Object.fieldByID(item.fieldId);
          if (!fieldInfo) return;
 
-         // Set value
+         // Set custom value
          let rowData = {};
          rowData[fieldInfo.columnName] = item.value;
-         fieldInfo.setValue($valueElem, rowData);
+         fieldInfo.setValue($customValueElem, rowData);
+
+         // Set process value
+         $processValueElem.setValue(item.value);
       });
 
       this.toggleForm();
@@ -419,6 +501,24 @@ export default class RowUpdater extends ClassUI {
          } else {
             $form.hide();
          }
+         $form.adjust();
+      }
+   }
+
+   setExtendedOptions(options) {
+      this._extendedOptions = options;
+   }
+
+   toggleCustomProcessOption($viewItem, showProcessOption) {
+      let $customOption = $viewItem.getChildViews()[4];
+      let $processOption = $viewItem.getChildViews()[5];
+
+      if (showProcessOption) {
+         $customOption.hide();
+         $processOption.show();
+      } else {
+         $customOption.show();
+         $processOption.hide();
       }
    }
 }
