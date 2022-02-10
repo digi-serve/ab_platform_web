@@ -764,8 +764,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             placeholderReadOnly = L("Must select item from '{0}' first.", [
                L("PARENT ELEMENT"),
             ]);
-         }
-         else {
+         } else {
             let val = this.getValue($$(options.filterValue.ui.id));
             if (!val) {
                // if there isn't a value on the parent select element set this one to readonly and change placeholder text
@@ -799,13 +798,12 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             editPage: options.editPage,
             isLabelHidden: options.isLabelHidden,
             additionalText: options.additionalText,
-            dataCy:
-               `${this.key} ${this.columnName} ${this.id} ${formId}`,
+            dataCy: `${this.key} ${this.columnName} ${this.id} ${formId}`,
             ajax: {
                url: "It will call url in .getOptions function", // require
                minimumInputLength: 0,
                quietMillis: 250,
-               fetch: async (url, init, queryOptions) => {
+               fetch: (url, init, queryOptions) => {
                   // if we are filtering based off another selectivity's value we
                   // need to do it on fetch each time because the value can change
                   // copy the filters so we don't add to them every time there is a change
@@ -834,14 +832,22 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                      }
                   }
 
-                  let data = await this.getOptions(
+                  this.once("option.data", (options) => {
+                     domNode.selectivity.setOptions({
+                        items: options,
+                     });
+                     domNode.selectivity.close();
+                     domNode.selectivity.open();
+                  });
+
+                  return this.getOptions(
                      combineFilters,
                      queryOptions.term
-                  );
-
-                  return {
-                     results: data,
-                  };
+                  ).then((data) => {
+                     return {
+                        results: data,
+                     };
+                  });
                },
             },
          },
@@ -1008,131 +1014,142 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
     *
     * @return {Promise}
     */
-   async getOptions(where, term) {
-      where = where || {};
+   getOptions(where, term) {
+      return new Promise((resolve, reject) => {
+         var haveResolved = false;
+         // {bool}
+         // have we already passed back a result?
 
-      if (!where.glue) where.glue = "and";
-
-      if (!where.rules) where.rules = [];
-
-      term = term || "";
-
-      // check if linked object value is not define, should return a empty array
-      if (!this.settings.linkObject) return [];
-
-      // if options was cached
-      // if (this._options != null) return resolve(this._options);
-
-      var linkedObj = this.datasourceLink;
-
-      // System could not found the linked object - It may be deleted ?
-      if (linkedObj == null) throw new Error("No linked object");
-
-      var linkedCol = this.fieldLink;
-
-      // System could not found the linked field - It may be deleted ?
-      if (linkedCol == null) throw new Error("No linked column");
-
-      // Get linked object model
-      var linkedModel = linkedObj.model();
-
-      // M:1 - get data that's only empty relation value
-      if (
-         this.settings.linkType == "many" &&
-         this.settings.linkViaType == "one"
-      ) {
-         where.rules.push({
-            key: linkedCol.id,
-            rule: "is_null",
-         });
-         // where[linkedCol.columnName] = null;
-      }
-      // 1:1
-      else if (
-         this.settings.linkType == "one" &&
-         this.settings.linkViaType == "one"
-      ) {
-         // 1:1 - get data is not match link id that we have
-         if (this.settings.isSource == true) {
-            // NOTE: make sure "haveNoRelation" shows up as an operator
-            // the value ":0" doesn't matter, we just need 'haveNoRelation' as an operator.
-            // newRule[linkedCol.id] = { 'haveNoRelation': 0 };
-            where.rules.push({
-               key: linkedCol.id,
-               rule: "haveNoRelation",
+         var respond = (options) => {
+            // filter the raw lookup with the provided search term
+            options = options.filter(function (item) {
+               if (item.text.toLowerCase().includes(term.toLowerCase())) {
+                  return true;
+               }
             });
-         }
-         // 1:1 - get data that's only empty relation value by query null value from link table
-         else {
+
+            if (!haveResolved) {
+               haveResolved = true;
+               resolve(options);
+            } else {
+               // if we have already resolved() then .emit() that we have
+               // updated "option.data".
+               this.emit("option.data", options);
+            }
+         };
+
+         // Prepare Where clause
+
+         where = where || {};
+
+         if (!where.glue) where.glue = "and";
+
+         if (!where.rules) where.rules = [];
+
+         term = term || "";
+
+         // check if linked object value is not define, should return a empty array
+         if (!this.settings.linkObject) return [];
+
+         // if options was cached
+         // if (this._options != null) return resolve(this._options);
+
+         var linkedObj = this.datasourceLink;
+
+         // System could not found the linked object - It may be deleted ?
+         if (linkedObj == null) throw new Error("No linked object");
+
+         var linkedCol = this.fieldLink;
+
+         // System could not found the linked field - It may be deleted ?
+         if (linkedCol == null) throw new Error("No linked column");
+
+         // Get linked object model
+         var linkedModel = linkedObj.model();
+
+         // M:1 - get data that's only empty relation value
+         if (
+            this.settings.linkType == "many" &&
+            this.settings.linkViaType == "one"
+         ) {
             where.rules.push({
                key: linkedCol.id,
                rule: "is_null",
             });
-            // newRule[linkedCol.id] = 'null';
-            // where[linkedCol.id] = null;
+            // where[linkedCol.columnName] = null;
          }
-      }
-
-      var haveResolved = false;
-      // {bool}
-      // have we already passed back a result?
-
-      var respond = (options) => {
-         // filter the raw lookup with the provided search term
-         options = options.filter(function (item) {
-            if (item.text.toLowerCase().includes(term.toLowerCase())) {
-               return true;
+         // 1:1
+         else if (
+            this.settings.linkType == "one" &&
+            this.settings.linkViaType == "one"
+         ) {
+            // 1:1 - get data is not match link id that we have
+            if (this.settings.isSource == true) {
+               // NOTE: make sure "haveNoRelation" shows up as an operator
+               // the value ":0" doesn't matter, we just need 'haveNoRelation' as an operator.
+               // newRule[linkedCol.id] = { 'haveNoRelation': 0 };
+               where.rules.push({
+                  key: linkedCol.id,
+                  rule: "haveNoRelation",
+               });
             }
-         });
-
-         if (!haveResolved) {
-            haveResolved = true;
-            return options;
-         } else {
-            // if we have already resolved() then .emit() that we have
-            // updated "option.data".
-            this.emit("option.data", options);
+            // 1:1 - get data that's only empty relation value by query null value from link table
+            else {
+               where.rules.push({
+                  key: linkedCol.id,
+                  rule: "is_null",
+               });
+               // newRule[linkedCol.id] = 'null';
+               // where[linkedCol.id] = null;
+            }
          }
-      };
 
-      // We store the .findAll() results locally and return that for a
-      // quick response:
-      var storageID = `${this.id}-${JSON.stringify(where)}`;
-      var storedOptions = await this.AB.Storage.get(storageID);
-      if (storedOptions) {
-         // immediately respond with our stored options.
-         this._options = storedOptions;
-         return  respond(storedOptions);
-      }
+         var storageID = `${this.id}-${JSON.stringify(where)}`;
 
-      try {
-         // Pull linked object data
-         var result = await linkedModel.findAll({
-            where: where,
-            populate: false,
-         });
+         Promise.resolve()
+            .then(async () => {
+               // Get Local Storage
 
-         // cache linked object data
-         this._options = result.data || result || [];
+               // We store the .findAll() results locally and return that for a
+               // quick response:
+               var storedOptions = await this.AB.Storage.get(storageID);
+               if (storedOptions) {
+                  // immediately respond with our stored options.
+                  this._options = storedOptions;
+                  return respond(storedOptions);
+               }
+            })
+            .then(async () => {
+               try {
+                  // Pull linked object data
+                  var result = await linkedModel.findAll({
+                     where: where,
+                     populate: false,
+                  });
 
-         // populate display text
-         (this._options || []).forEach((opt) => {
-            opt.text = linkedObj.displayData(opt);
-         });
+                  // cache linked object data
+                  this._options = result.data || result || [];
 
-         this.AB.Storage.set(storageID, this._options);
-         return respond(this._options);
-      } catch (err) {
-         this.AB.notify.developer(err, {
-            context:
-               "ABFieldConnect:getOptions(): unable to retrieve options from server",
-            field: this.toObj(),
-            where,
-         });
+                  // populate display text
+                  (this._options || []).forEach((opt) => {
+                     opt.text = linkedObj.displayData(opt);
+                  });
 
-         haveResolved = true;
-         throw err;
-      }
+                  this.AB.Storage.set(storageID, this._options);
+                  return respond(this._options);
+               } catch (err) {
+                  this.AB.notify.developer(err, {
+                     context:
+                        "ABFieldConnect:getOptions(): unable to retrieve options from server",
+                     field: this.toObj(),
+                     where,
+                  });
+
+                  haveResolved = true;
+                  throw err;
+               }
+            });
+      });
    }
 
    getValue(item) {
