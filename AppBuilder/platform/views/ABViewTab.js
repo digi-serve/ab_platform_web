@@ -609,10 +609,13 @@ module.exports = class ABViewTab extends ABViewTabCore {
       // get a UI component for each of our child views
       this._viewComponents = [];
       this.views().forEach((v) => {
-         this._viewComponents.push({
-            view: v,
-            // component: v.component(App)
-         });
+         var accessLevel = v.getUserAccess();
+         if (accessLevel > 0) {
+            this._viewComponents.push({
+               view: v,
+               // component: v.component(App)
+            });
+         }
       });
 
       var idBase = "ABViewTab_" + this.id;
@@ -661,239 +664,255 @@ module.exports = class ABViewTab extends ABViewTabCore {
                };
             });
 
-            // create a menu item for the collapse option to use later
-            var collapseMenu = {
-               id: ids.collapseMenu,
-               value: L("Collapse Menu"),
-               icon: "chevron-circle-left",
-            };
+            if (menuItems.length) {
+               // create a menu item for the collapse option to use later
+               var collapseMenu = {
+                  id: ids.collapseMenu,
+                  value: L("Collapse Menu"),
+                  icon: "chevron-circle-left",
+               };
 
-            // create a menu item from the expand option to use later
-            var expandMenu = {
-               id: ids.expandMenu,
-               value: L("Expand Menu"),
-               icon: "chevron-circle-right",
-               hidden: true,
-            };
+               // create a menu item from the expand option to use later
+               var expandMenu = {
+                  id: ids.expandMenu,
+                  value: L("Expand Menu"),
+                  icon: "chevron-circle-right",
+                  hidden: true,
+               };
 
-            // find out what the first option is so we can set it later
-            var selectedItem = this._viewComponents[0].view.id + "_menu";
+               // find out what the first option is so we can set it later
+               var selectedItem = this._viewComponents[0].view.id + "_menu";
 
-            var sidebar = {
-               view: "sidebar",
-               type: "customIcons", // define the sidebar type with the new template created above
-               id: ids.sidebar,
-               width: this.settings.sidebarWidth
-                  ? this.settings.sidebarWidth
-                  : 0,
-               scroll: true,
-               position: this.settings.sidebarPos
-                  ? this.settings.sidebarPos
-                  : "left",
-               css: this.settings.darkTheme ? "webix_dark" : "",
-               data: menuItems.concat(collapseMenu), // add you menu items along with the collapse option to start
-               on: {
-                  onItemClick: function (id, e, node) {
-                     // when a menu item is clicked
-                     if (id == ids.collapseMenu) {
-                        // if it was the collapse menu item
-                        setTimeout(function () {
-                           // remove the collapse option from the menu
-                           $$(ids.sidebar).remove(ids.collapseMenu);
-                           // add the expand option to the menu
-                           $$(ids.sidebar).add(expandMenu);
-                           // toggle the sidebar state
-                           $$(ids.sidebar).toggle();
-                           // we just clicked the collapse...but we don't wanted highlighted
-                           // so highlight the previously selected menu item
-                           $$(ids.sidebar).select(selectedItem);
-                           // store this state in local storage the user preference is
-                           // remembered next time they see this sidebar
-                           this.AB.Storage.set(
-                              `${idBase}-state`,
-                              $$(ids.sidebar).getState()
+               var sidebar = {
+                  view: "sidebar",
+                  type: "customIcons", // define the sidebar type with the new template created above
+                  id: ids.sidebar,
+                  width: this.settings.sidebarWidth
+                     ? this.settings.sidebarWidth
+                     : 0,
+                  scroll: true,
+                  position: this.settings.sidebarPos
+                     ? this.settings.sidebarPos
+                     : "left",
+                  css: this.settings.darkTheme ? "webix_dark" : "",
+                  data: menuItems.concat(collapseMenu), // add you menu items along with the collapse option to start
+                  on: {
+                     onItemClick: function (id, e, node) {
+                        // when a menu item is clicked
+                        if (id == ids.collapseMenu) {
+                           // if it was the collapse menu item
+                           setTimeout(function () {
+                              // remove the collapse option from the menu
+                              $$(ids.sidebar).remove(ids.collapseMenu);
+                              // add the expand option to the menu
+                              $$(ids.sidebar).add(expandMenu);
+                              // toggle the sidebar state
+                              $$(ids.sidebar).toggle();
+                              // we just clicked the collapse...but we don't wanted highlighted
+                              // so highlight the previously selected menu item
+                              $$(ids.sidebar).select(selectedItem);
+                              // store this state in local storage the user preference is
+                              // remembered next time they see this sidebar
+                              this.AB.Storage.set(
+                                 `${idBase}-state`,
+                                 $$(ids.sidebar).getState()
+                              );
+                           }, 0);
+                        } else if (id == ids.expandMenu) {
+                           setTimeout(function () {
+                              // remove the expand option from the menu
+                              $$(ids.sidebar).remove(ids.expandMenu);
+                              // add the collapse option to the menu
+                              $$(ids.sidebar).add(collapseMenu);
+                              // toggle the sidebar state
+                              $$(ids.sidebar).toggle();
+                              // we just clicked the collapse...but we don't wanted highlighted
+                              // so highlight the previously selected menu item
+                              $$(ids.sidebar).select(selectedItem);
+                              // store this state in local storage the user preference is
+                              // remembered next time they see this sidebar
+                              this.AB.Storage.set(
+                                 `${idBase}-state`,
+                                 $$(ids.sidebar).getState()
+                              );
+                           }, 0);
+                        } else {
+                           // store the selecte menu item just in case someone toggles the menu later
+                           selectedItem = id;
+                           // if the menu item is a regular menu item
+                           // call the onShow with the view id to load the view
+                           id = id.replace("_menu", "");
+                           $$(id).show(false, false);
+                           // _onShow(id);
+                        }
+                     },
+                     onAfterRender: () => {
+                        // set ids of controller buttons
+                        let collapseNode = $$(ids.sidebar).$view.querySelector(
+                           `[webix_tm_id="${ids.collapseMenu}"]`
+                        );
+                        if (collapseNode) {
+                           collapseNode.setAttribute(
+                              "data-cy",
+                              `tab-collapseMenu-${ids.collapseMenu}`
                            );
-                        }, 0);
-                     } else if (id == ids.expandMenu) {
-                        setTimeout(function () {
-                           // remove the expand option from the menu
-                           $$(ids.sidebar).remove(ids.expandMenu);
-                           // add the collapse option to the menu
-                           $$(ids.sidebar).add(collapseMenu);
-                           // toggle the sidebar state
-                           $$(ids.sidebar).toggle();
-                           // we just clicked the collapse...but we don't wanted highlighted
-                           // so highlight the previously selected menu item
-                           $$(ids.sidebar).select(selectedItem);
-                           // store this state in local storage the user preference is
-                           // remembered next time they see this sidebar
-                           this.AB.Storage.set(
-                              `${idBase}-state`,
-                              $$(ids.sidebar).getState()
+                        }
+                        let expandNode = $$(ids.sidebar).$view.querySelector(
+                           `[webix_tm_id="${ids.expandMenu}"]`
+                        );
+                        if (expandNode) {
+                           expandNode.setAttribute(
+                              "data-cy",
+                              `tab-expandMenu-${ids.expandMenu}`
                            );
-                        }, 0);
-                     } else {
-                        // store the selecte menu item just in case someone toggles the menu later
-                        selectedItem = id;
-                        // if the menu item is a regular menu item
-                        // call the onShow with the view id to load the view
-                        id = id.replace("_menu", "");
-                        $$(id).show(false, false);
-                        // _onShow(id);
-                     }
+                        }
+                        this.views((view) => {
+                           var node = $$(ids.sidebar).$view.querySelector(
+                              `[webix_tm_id="${view.id}_menu"]`
+                           );
+                           if (!node) return;
+                           node.setAttribute(
+                              "data-cy",
+                              `tab-${view.label.replace(" ", "")}-${view.id}-${
+                                 this.id
+                              }`
+                           );
+                        });
+                     },
                   },
-                  onAfterRender: () => {
-                     // set ids of controller buttons
-                     let collapseNode = $$(ids.sidebar).$view.querySelector(
-                        `[webix_tm_id="${ids.collapseMenu}"]`
-                     );
-                     if (collapseNode) {
-                        collapseNode.setAttribute(
-                           "data-cy",
-                           `tab-collapseMenu-${ids.collapseMenu}`
-                        );
-                     }
-                     let expandNode = $$(ids.sidebar).$view.querySelector(
-                        `[webix_tm_id="${ids.expandMenu}"]`
-                     );
-                     if (expandNode) {
-                        expandNode.setAttribute(
-                           "data-cy",
-                           `tab-expandMenu-${ids.expandMenu}`
-                        );
-                     }
-                     this.views((view) => {
-                        var node = $$(ids.sidebar).$view.querySelector(
-                           `[webix_tm_id="${view.id}_menu"]`
-                        );
-                        if (!node) return;
-                        node.setAttribute(
-                           "data-cy",
-                           `tab-${view.label.replace(" ", "")}-${view.id}-${
-                              this.id
-                           }`
-                        );
-                     });
+               };
+
+               var multiview = {
+                  view: "multiview",
+                  id: ids.component,
+                  keepViews: true,
+                  minWidth: this.settings.minWidth,
+                  height: this.settings.height,
+                  cells: this._viewComponents.map((v) => {
+                     var tabUi = {
+                        id: v.view.id,
+                        // ui will be loaded when its tab is opened
+                        view: "layout",
+                        rows: [],
+                     };
+
+                     return tabUi;
+                  }),
+                  on: {
+                     onViewChange: function (prevId, nextId) {
+                        _onShow(nextId);
+                     },
                   },
-               },
-            };
+               };
 
-            var multiview = {
-               view: "multiview",
-               id: ids.component,
-               keepViews: true,
-               minWidth: this.settings.minWidth,
-               height: this.settings.height,
-               cells: this._viewComponents.map((v) => {
-                  var tabUi = {
-                     id: v.view.id,
-                     // ui will be loaded when its tab is opened
-                     view: "layout",
-                     rows: [],
-                  };
+               var columns = [sidebar, multiview];
+               if (this.settings.sidebarPos == "right") {
+                  columns = [multiview, sidebar];
+               }
 
-                  return tabUi;
-               }),
-               on: {
-                  onViewChange: function (prevId, nextId) {
-                     _onShow(nextId);
-                  },
-               },
-            };
-
-            var columns = [sidebar, multiview];
-            if (this.settings.sidebarPos == "right") {
-               columns = [multiview, sidebar];
+               _ui = {
+                  cols: columns,
+               };
+            } else {
+               _ui = {
+                  view: "spacer",
+               };
             }
-
-            _ui = {
-               cols: columns,
-            };
          } else {
-            _ui = {
-               rows: [
-                  {
-                     view: "tabview",
-                     id: ids.component,
-                     minWidth: this.settings.minWidth,
-                     tabbar: {
-                        height: 60,
-                        type: "bottom",
-                        css: this.settings.darkTheme ? "webix_dark" : "",
-                        on: {
-                           onAfterRender: () => {
-                              this.views((view) => {
-                                 var node = $$(
-                                    ids.component
-                                 ).$view.querySelector(
-                                    '[button_id="' + view.id + '"]'
-                                 );
-                                 if (!node) return;
-                                 node.setAttribute(
-                                    "data-cy",
-                                    "tab " +
-                                       view.name +
-                                       " " +
-                                       view.id +
-                                       " " +
-                                       this.id
-                                 );
-                              });
+            var cells = this.views((view) => {
+               var accessLevel = view.getUserAccess();
+               if (accessLevel > 0) {
+                  return view;
+               }
+            }).map((v) => {
+               var tabUi = {
+                  id: v.id,
+                  // ui will be loaded when its tab is opened
+                  view: "layout",
+                  rows: [],
+               };
+
+               var tabTemplate = "";
+               // tab icon
+               if (v.tabicon) {
+                  if (this.settings.iconOnTop) {
+                     tabTemplate =
+                        "<div class='ab-tabIconContainer'><span class='fa fa-lg fa-fw fa-" +
+                        v.tabicon +
+                        "'></span><br/>" +
+                        v.label +
+                        "</div>";
+                  } else {
+                     tabTemplate =
+                        "<span class='fa fa-lg fa-fw fa-" +
+                        v.tabicon +
+                        "'></span> " +
+                        v.label;
+                  }
+               }
+               // no icon
+               else {
+                  tabTemplate = v.label;
+               }
+
+               return {
+                  header: tabTemplate,
+                  body: tabUi,
+               };
+            });
+
+            // if there are cells to display then return a tabview
+            if (cells.length) {
+               _ui = {
+                  rows: [
+                     {
+                        view: "tabview",
+                        id: ids.component,
+                        minWidth: this.settings.minWidth,
+                        tabbar: {
+                           height: 60,
+                           type: "bottom",
+                           css: this.settings.darkTheme ? "webix_dark" : "",
+                           on: {
+                              onAfterRender: () => {
+                                 this.views((view) => {
+                                    var node = $$(
+                                       ids.component
+                                    ).$view.querySelector(
+                                       '[button_id="' + view.id + '"]'
+                                    );
+                                    if (!node) return;
+                                    node.setAttribute(
+                                       "data-cy",
+                                       "tab " +
+                                          view.name +
+                                          " " +
+                                          view.id +
+                                          " " +
+                                          this.id
+                                    );
+                                 });
+                              },
                            },
                         },
-                     },
-                     multiview: {
-                        height: this.settings.height,
-                        on: {
-                           onViewChange: function (prevId, nextId) {
-                              _onShow(nextId);
+                        multiview: {
+                           height: this.settings.height,
+                           on: {
+                              onViewChange: function (prevId, nextId) {
+                                 _onShow(nextId);
+                              },
                            },
                         },
+                        cells: cells,
                      },
-                     cells: this.views((view) => {
-                        var accessLevel = view.getUserAccess();
-                        if (accessLevel > 0) {
-                           return view;
-                        }
-                     }).map((v) => {
-                        var tabUi = {
-                           id: v.id,
-                           // ui will be loaded when its tab is opened
-                           view: "layout",
-                           rows: [],
-                        };
-
-                        var tabTemplate = "";
-                        // tab icon
-                        if (v.tabicon) {
-                           if (this.settings.iconOnTop) {
-                              tabTemplate =
-                                 "<div class='ab-tabIconContainer'><span class='fa fa-lg fa-fw fa-" +
-                                 v.tabicon +
-                                 "'></span><br/>" +
-                                 v.label +
-                                 "</div>";
-                           } else {
-                              tabTemplate =
-                                 "<span class='fa fa-lg fa-fw fa-" +
-                                 v.tabicon +
-                                 "'></span> " +
-                                 v.label;
-                           }
-                        }
-                        // no icon
-                        else {
-                           tabTemplate = v.label;
-                        }
-
-                        return {
-                           header: tabTemplate,
-                           body: tabUi,
-                        };
-                     }),
-                  },
-               ],
-            };
+                  ],
+               };
+            } else {
+               // else we return a spacer
+               _ui = {
+                  view: "spacer",
+               };
+            }
          }
       } else {
          _ui = {
