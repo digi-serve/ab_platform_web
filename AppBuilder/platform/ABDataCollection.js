@@ -149,7 +149,10 @@ module.exports = class ABDataCollection extends ABDataCollectionCore {
             }
 
             // this is the same item that was already bound...don't reload data
-            if (JSON.stringify(this.__reloadWheres) == JSON.stringify(wheres)) {
+            if (
+               JSON.stringify(this.__reloadWheres) == JSON.stringify(wheres) ||
+               (wheres.rules && wheres.rules.length == 0)
+            ) {
                return;
             } else {
                // now that we have the modified wheres the dataCollections wheres
@@ -198,7 +201,7 @@ module.exports = class ABDataCollection extends ABDataCollectionCore {
 
       /*
        // In v2: we move the row height calculation into the Interface designer.
-       // 
+       //
 
       // calculate default value of $height of rows
       let obj = this.datasource;

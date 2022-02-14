@@ -273,7 +273,7 @@ class ABViewGridComponent extends ABViewComponent {
                   // if we are deleting or updating rows
                   self.toggleUpdateDelete();
                } else {
-                  if (this.settings.isEditable) {
+                  if (self.settings.isEditable) {
                      // if the colum is not the select item column move on to
                      // the next step to save
                      var state = {
