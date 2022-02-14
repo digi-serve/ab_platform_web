@@ -13,7 +13,7 @@ var L = null;
 // multilingual Label fn()
 
 module.exports = class ABWorkObjectKanBan extends ABViewComponent {
-   constructor(comKanBan, idBase) {
+   constructor(comKanBan, idBase, editFields) {
       idBase = idBase || `${comKanBan.id}_formSidePanel`;
       super(idBase, {
          form: "",
@@ -30,6 +30,11 @@ module.exports = class ABWorkObjectKanBan extends ABViewComponent {
       this.CurrentObjectID = null;
       // {string}
       // the ABObject.id of the object we are working with.
+
+      this.editFields = editFields;
+      // {array}
+      // An array of {ABField.id} that determines which fields should show up
+      // in the editor.
 
       this._mockApp = this.AB.applicationNew({});
       // {ABApplication}
@@ -148,13 +153,16 @@ module.exports = class ABWorkObjectKanBan extends ABViewComponent {
       };
 
       // let form = new ABViewForm(formAttrs, this._mockApp);
-      let form = this._mockApp.viewNew(formAttrs, this._mockApp);
+      let form = this.AB.viewNewDetatched(formAttrs);
 
       form.objectLoad(CurrentObject);
 
       // Populate child elements
       CurrentObject.fields().forEach((f, index) => {
-         form.addFieldToForm(f, index);
+         // if this is one of our .editFields
+         if (!this.editFields || this.editFields.indexOf(f.id) > -1) {
+            form.addFieldToForm(f, index);
+         }
       });
 
       // add default button (Save button)
@@ -176,7 +184,6 @@ module.exports = class ABWorkObjectKanBan extends ABViewComponent {
       );
 
       // add temp id to views
-      //// TODO: debug setting the v.id's here:
       form._views.forEach(
          (v, index) => (v.id = `${form.id}_${v.key}_${index}`)
       );

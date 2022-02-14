@@ -4,7 +4,8 @@ import ABViewComponent from "./ABViewComponent";
 const ABWorkspaceKanban = require("../../../ABDesigner/ab_work_object_workspace_kanban");
 const ABWorkspaceViewKanban = require("../workspaceViews/ABObjectWorkspaceViewKanban");
 
-const ABViewPropertyLinkPage = require("./viewProperties/ABViewPropertyLinkPage");
+const ABViewPropertyLinkPage = require("./viewProperties/ABViewPropertyLinkPage")
+   .default;
 
 const ABFormSidePanel = require("./ABViewKanbanFormSidePanel");
 
@@ -30,7 +31,11 @@ class ABViewKanBanComponent extends ABViewComponent {
 
       this.settings = viewKanBan.settings;
 
-      this.FormSide = new ABFormSidePanel(this, `${base}_formSidePanel`);
+      this.FormSide = new ABFormSidePanel(
+         this,
+         `${base}_formSidePanel`,
+         this.settings.editFields
+      );
 
       this.CurrentObjectID = null;
       // {string}
@@ -43,6 +48,8 @@ class ABViewKanBanComponent extends ABViewComponent {
       this.CurrentVerticalField = null;
       this.CurrentHorizontalField = null;
       this.CurrentOwnerField = null;
+
+      this.TextTemplate = viewKanBan.TextTemplate;
 
       this._updatingOwnerRowId = null;
 
@@ -193,13 +200,11 @@ class ABViewKanBanComponent extends ABViewComponent {
          // template for item body
          // show item image and text
          templateBody: (data) => {
-            return this.CurrentObject?.displayData(data);
-
-            // var html = "";
-            // if (obj.image)
-            //    html += "<img class='image' src='../common/imgs/attachments/" + obj.image + "'/>";
-            // html += "<div>" + obj.text + "</div>";
-            // return html;
+            if (!this.settings.template) {
+               return this.CurrentObject?.displayData(data);
+            }
+            // return our default text template
+            return this.TextTemplate.displayText(data);
          },
       };
    }
@@ -382,6 +387,7 @@ class ABViewKanBanComponent extends ABViewComponent {
    objectLoad(object) {
       this.CurrentObjectID = object.id;
 
+      this.TextTemplate.objectLoad(object);
       this.FormSide.objectLoad(object);
    }
 
@@ -751,8 +757,6 @@ export default class ABViewKanban extends ABViewKanbanCore {
       }
    }
 
-   ///// LEFT OFF HERE:
-
    component(v1App = false) {
       var component = new ABViewKanBanComponent(this);
 
@@ -772,7 +776,7 @@ export default class ABViewKanban extends ABViewKanbanCore {
 
       return component;
    }
-
+   /*
    componentOld(App, idBase) {
       let baseCom = super.component(App);
 
@@ -884,6 +888,7 @@ export default class ABViewKanban extends ABViewKanbanCore {
          onShow: _onShow,
       };
    }
+   */
 
    get linkPageHelper() {
       if (this.__linkPageHelper == null)
