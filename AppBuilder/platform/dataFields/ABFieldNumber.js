@@ -19,18 +19,6 @@ module.exports = class ABFieldNumber extends ABFieldNumberCore {
       }
       super(values, object);
    }
-   /*
-    * @function propertiesComponent
-    *
-    * return a UI Component that contains the property definitions for this Field.
-    *
-    * @param {App} App the UI App instance passed around the Components.
-    * @param {stirng} idBase
-    * @return {Component}
-    */
-   // static propertiesComponent(App, idBase) {
-   //    return ABFieldNumberComponent.component(App, idBase);
-   // }
 
    ///
    /// Working with Actual Object Values:
