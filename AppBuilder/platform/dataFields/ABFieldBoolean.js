@@ -1,6 +1,4 @@
-var ABFieldBooleanCore = require("../../core/dataFields/ABFieldBooleanCore");
-
-let L = (...params) => AB.Multilingual.label(...params);
+const ABFieldBooleanCore = require("../../core/dataFields/ABFieldBooleanCore");
 
 module.exports = class ABFieldBoolean extends ABFieldBooleanCore {
    constructor(values, object) {
@@ -12,7 +10,7 @@ module.exports = class ABFieldBoolean extends ABFieldBooleanCore {
    ///
 
    isValid() {
-      var validator = super.isValid();
+      const validator = super.isValid();
 
       // validator.addError('columnName', L('ab.validation.object.name.unique', 'Field columnName must be unique (#name# already used in this Application)').replace('#name#', this.name) );
 
@@ -27,7 +25,7 @@ module.exports = class ABFieldBoolean extends ABFieldBooleanCore {
    columnHeader(options) {
       options = options || {};
 
-      var config = super.columnHeader(options);
+      const config = super.columnHeader(options);
 
       config.editor = "template";
       config.css = "center";
@@ -69,7 +67,7 @@ module.exports = class ABFieldBoolean extends ABFieldBooleanCore {
    }
 
    detailComponent() {
-      var detailComponentSetting = super.detailComponent();
+      const detailComponentSetting = super.detailComponent();
 
       detailComponentSetting.common = () => {
          return {

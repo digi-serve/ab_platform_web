@@ -1,5 +1,5 @@
-var ABFieldConnectCore = require("../../core/dataFields/ABFieldConnectCore");
-var ABFieldUserCore = require("../../core/dataFields/ABFieldUserCore");
+const ABFieldConnectCore = require("../../core/dataFields/ABFieldConnectCore");
+const ABFieldUserCore = require("../../core/dataFields/ABFieldUserCore");
 
 module.exports = class ABFieldUser extends ABFieldUserCore {
    // constructor(values, object) {
@@ -13,7 +13,7 @@ module.exports = class ABFieldUser extends ABFieldUserCore {
    async save() {
       // Add new
       if (this.id == null) {
-         var SiteUser = this.AB.objectUser();
+         const SiteUser = this.AB.objectUser();
          const Defaults = ABFieldUserCore.defaults();
 
          this.settings.linkObject = SiteUser.id;
@@ -36,7 +36,7 @@ module.exports = class ABFieldUser extends ABFieldUserCore {
          //       connection.
          //       However, the SiteUser will see the data as a ABFieldConnect
          //       connection
-         let linkCol = SiteUser.fieldNew({
+         const linkCol = SiteUser.fieldNew({
             key: ABFieldConnectCore.defaults().key,
             columnName: this.object.tableName,
             label: this.object.label,
@@ -152,7 +152,7 @@ module.exports = class ABFieldUser extends ABFieldUserCore {
    }
 
    setValue(item, rowData) {
-      var val = rowData[this.columnName];
+      let val = rowData[this.columnName];
       // Select "[Current user]" to update
       if (val == "ab-current-user") val = this.AB.Account.username();
 
@@ -163,7 +163,7 @@ module.exports = class ABFieldUser extends ABFieldUserCore {
 
    getUsers() {
       return this.AB.Account.userList().map((u) => {
-         var result = {
+         const result = {
             id: u.username,
             image: u.image_id,
          };

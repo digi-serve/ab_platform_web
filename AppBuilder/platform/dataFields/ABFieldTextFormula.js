@@ -1,4 +1,4 @@
-var ABFieldTextFormulaCore = require("../../core/dataFields/ABFieldTextFormulaCore");
+const ABFieldTextFormulaCore = require("../../core/dataFields/ABFieldTextFormulaCore");
 
 module.exports = class ABFieldTextFormula extends ABFieldTextFormulaCore {
    // constructor(values, object) {
@@ -10,7 +10,7 @@ module.exports = class ABFieldTextFormula extends ABFieldTextFormulaCore {
    ///
 
    // isValid() {
-   //    var validator = super.isValid();
+   //    const validator = super.isValid();
 
    //    // validator.addError('columnName', L('ab.validation.object.name.unique', 'Field columnName must be unique (#name# already used in this Application)').replace('#name#', this.name) );
 
@@ -23,7 +23,7 @@ module.exports = class ABFieldTextFormula extends ABFieldTextFormulaCore {
 
    // return the grid column header definition for this instance of ABFieldTextFormula
    columnHeader(options) {
-      var config = super.columnHeader(options);
+      const config = super.columnHeader(options);
 
       config.editor = null; // read only
       config.css = "textCell";
@@ -59,7 +59,7 @@ module.exports = class ABFieldTextFormula extends ABFieldTextFormulaCore {
    }
 
    detailComponent() {
-      var detailComponentSetting = super.detailComponent();
+      const detailComponentSetting = super.detailComponent();
 
       detailComponentSetting.common = () => {
          return {

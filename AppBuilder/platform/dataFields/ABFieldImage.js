@@ -1,6 +1,6 @@
-var ABFieldImageCore = require("../../core/dataFields/ABFieldImageCore");
+const ABFieldImageCore = require("../../core/dataFields/ABFieldImageCore");
 
-let L = (...params) => AB.Multilingual.label(...params);
+const L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABFieldImage extends ABFieldImageCore {
    constructor(values, object) {
@@ -73,8 +73,8 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
    columnHeader(options) {
       options = options || {};
 
-      let config = super.columnHeader(options);
-      let field = this;
+      const config = super.columnHeader(options);
+      const field = this;
 
       config.editor = false; // 'text';  // '[edit_type]'   for your unique situation
       // config.sort   = 'string' // '[sort_type]'   for your unique situation
@@ -85,7 +85,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
       let imageSrcHeight = "100%";
       if (field.settings.useWidth) {
          config.width = field.settings.imageWidth || 100;
-         let heightVal =
+         const heightVal =
             field.settings.useHeight && field.settings.imageHeight
                ? field.settings.imageHeight + 20
                : 80;
@@ -111,18 +111,18 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
          imageSrcHeight = `${imageSrcHeight} px`;
       }
 
-      let editable = options.editable;
+      const editable = options.editable;
 
       // populate our default template:
       // debugger;
       config.template = (obj) => {
          if (obj.$group) return obj[this.columnName];
 
-         let widthStyle = `width: ${width}; height: ${containerHeight}`;
+         const widthStyle = `width: ${width}; height: ${containerHeight}`;
 
-         let imageStyle = `width: ${width}; height: ${imageHeight}`;
+         const imageStyle = `width: ${width}; height: ${imageHeight}`;
 
-         let imgDiv = [
+         const imgDiv = [
             `<div class="ab-image-data-field" style="${widthStyle}">`,
             `<div class="webix_view ab-image-holder" style="${imageStyle}">`,
             '<div class="webix_template">',
@@ -159,26 +159,26 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
       if (!node) {
          return;
       }
-      var L = App.Label;
+      const L = App.Label;
 
       options = options || {};
 
-      var idBase = App.unique(this.idCustomContainer(row, options.formId));
+      const idBase = App.unique(this.idCustomContainer(row, options.formId));
 
       // safety check:
       // webix seems to crash if you specify a .container that doesn't exists:
       // Note: when the template is first created, we don't have App.unique()
-      var parentContainer = node.querySelector(".ab-image-holder");
+      const parentContainer = node.querySelector(".ab-image-holder");
       if (parentContainer) {
          parentContainer.innerHTML = "";
          // parentContainer.id = idBase;	// change it to the unique one.
 
-         var imgHeight = 0;
+         let imgHeight = 0;
          if (this.settings.useHeight) {
             imgHeight = parseInt(this.settings.imageHeight) || imgHeight;
          }
 
-         var imgWidth = 0;
+         let imgWidth = 0;
          if (this.settings.useWidth) {
             imgWidth = parseInt(this.settings.imageWidth) || imgWidth;
          }
@@ -191,7 +191,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
 
          // use a webix component for displaying the content.
          // do this so I can use the progress spinner
-         var webixContainer = webix.ui({
+         const webixContainer = webix.ui({
             view: "template",
             css: "ab-image-holder",
             // id: ids.container,
@@ -214,15 +214,15 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
          ////
 
          if (!options.editable) {
-            var domNode = parentContainer.querySelector(".delete-image");
+            const domNode = parentContainer.querySelector(".deconste-image");
             if (domNode) domNode.style.display = "none";
 
             return;
          }
 
-         var url = this.urlUpload();
+         const url = this.urlUpload();
 
-         var uploader = webix.ui({
+         const uploader = webix.ui({
             view: "uploader",
             // id:ids.uploader,
             apiOnly: true,
@@ -242,12 +242,18 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
                   node.classList.remove("webix_invalid_cell");
 
                   // verify file type
-                  var acceptableTypes = ["jpg", "jpeg", "bmp", "png", "gif"];
-                  var type = item.type.toLowerCase();
-                  if (acceptableTypes.indexOf(type) == -1) {
+                  const acceptabconstypes = [
+                     "jpg",
+                     "jpeg",
+                     "bmp",
+                     "png",
+                     "gif",
+                  ];
+                  const type = item.type.toLowerCase();
+                  if (acceptabconstypes.indexOf(type) == -1) {
                      webix.message(
                         L("Only [{0}] images are supported", [
-                           acceptableTypes.join(", "),
+                           acceptabconstypes.join(", "),
                         ])
                      );
                      return false;
@@ -260,14 +266,14 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
                   });
                },
 
-               // when upload is complete:
+               // when upload is compconste:
                onFileUpload: async (item, response) => {
                   webixContainer.hideProgress();
                   this.showImage(response.data.uuid, node);
 
-                  // TODO: delete previous image from our OPsPortal service?
+                  // TODO: deconste previous image from our OPsPortal service?
 
-                  var values = {};
+                  const values = {};
                   values[this.columnName] = response.data.uuid;
 
                   // update just this value on our current object.model
@@ -284,7 +290,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
                            $$(node).updateItem(row.id, values);
                         } else {
                            // if you scroll the table the connection to the datatable is lost so we need to find it again
-                           var dataTable = document.querySelector(
+                           const dataTable = document.querySelector(
                               ".webix_dtable"
                            );
                            if ($$(dataTable) && $$(dataTable).getItem(row.id))
@@ -325,11 +331,11 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
          node.dataset["uploaderId"] = uploader.config.id;
 
          // if we are working in a datagrid we need to add a click event to
-         // check if the user is clicking on the delete button
+         // check if the user is clicking on the deconste button
          if (node.className == "webix_cell") {
             node.addEventListener("click", (e) => {
-               if (e.target.className.indexOf("delete-image") > -1) {
-                  this.deleteImage = true;
+               if (e.target.className.indexOf("deconste-image") > -1) {
+                  this.deconsteImage = true;
                }
             });
          }
@@ -346,24 +352,24 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
     */
    customEdit(row, App, node, id, evt) {
       if (
-         (evt && evt.target.className.indexOf("delete-image") > -1) ||
-         this.deleteImage
+         (evt && evt.target.className.indexOf("deconste-image") > -1) ||
+         this.deconsteImage
       ) {
-         delete this.deleteImage;
+         delete this.deconsteImage;
          if (!row.removeDefaultImage) {
             row.removeDefaultImage = [];
          }
          row.removeDefaultImage[this.columnName] = true;
 
-         // Ask the user if they really want to delete the photo
+         // Ask the user if they really want to deconste the photo
          webix.confirm({
             title: "",
             message: L("Are you sure you want to remove this image?"),
             callback: async (result) => {
-               var confirmDelete = result ? 1 : 0;
-               if (confirmDelete) {
+               const confirmDeconste = result ? 1 : 0;
+               if (confirmDeconste) {
                   // update just this value on our current object.model
-                  var values = {};
+                  const values = {};
                   values[this.columnName] = ""; // removing the reference to the image here
 
                   try {
@@ -391,7 +397,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
             },
          });
       } else {
-         let uploaderId = node.dataset["uploaderId"],
+         const uploaderId = node.dataset["uploaderId"],
             uploader = $$(uploaderId);
 
          if (uploader && uploader.fileDialog)
@@ -415,7 +421,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
    }
 
    detailComponent() {
-      var detailComponentSetting = super.detailComponent();
+      const detailComponentSetting = super.detailComponent();
 
       detailComponentSetting.common = () => {
          return {
@@ -432,12 +438,12 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
       options.width = options.width || "100%";
 
       // deault view is icon:
-      var iconDisplay = "";
-      var imageDisplay = "display:none";
-      var imageURL = "";
+      let iconDisplay = "";
+      let imageDisplay = "display:none";
+      let imageURL = "";
 
-      var value = "";
-      var isRemoveDefaultImage = false;
+      let value = "";
+      let isRemoveDefaultImage = false;
       if (obj[this.columnName]) {
          value = obj[this.columnName];
       }
@@ -461,7 +467,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
          }
       }
 
-      var html = [
+      let html = [
          `<div class="image-data-field-icon" style="${iconDisplay}"><i class="fa fa-picture-o fa-2x"></i>#drag#</div>` +
             `<div class="image-data-field-image" style="${imageDisplay} width:${options.width}; height:${options.height}; ${imageURL}">#remove#</div>`,
       ].join("");
@@ -475,7 +481,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
       html = html.replace(
          "#remove#",
          options.editable
-            ? `<a style="${imageDisplay}" class="ab-delete-photo" href="javascript:void(0);"><i class="fa fa-times delete-image"></i></a>`
+            ? `<a style="${imageDisplay}" class="ab-deconste-photo" href="javascript:void(0);"><i class="fa fa-times deconste-image"></i></a>`
             : ""
       );
 
@@ -483,11 +489,11 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
    }
 
    showImage(uuid, node) {
-      var parentContainer = node.querySelector(".ab-image-holder");
+      const parentContainer = node.querySelector(".ab-image-holder");
       if (parentContainer) {
          parentContainer.querySelector(".image-data-field-icon").style.display =
             "none";
-         var image = parentContainer.querySelector(".image-data-field-image");
+         const image = parentContainer.querySelector(".image-data-field-image");
          image.style.display = "";
          image.style.backgroundImage = `url('${this.urlImage(uuid)}')`;
          image.setAttribute("image-uuid", uuid);
@@ -495,17 +501,17 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
    }
 
    getValue(item, rowData) {
-      var image = item.$view.querySelector(".image-data-field-image");
+      const image = item.$view.querySelector(".image-data-field-image");
       return image.getAttribute("image-uuid");
    }
 
    setValue(item, rowData) {
       if (!item) return;
 
-      var domNode = item.$view;
+      const domNode = item.$view;
       if (!domNode) return;
 
-      var val = null;
+      let val = null;
       if (rowData) {
          val = this.dataValue(rowData);
 
@@ -515,14 +521,14 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
          // }
       }
 
-      let imageIcon = domNode.querySelector(".image-data-field-icon");
+      const imageIcon = domNode.querySelector(".image-data-field-icon");
       if (imageIcon) imageIcon.style.display = val ? "none" : "";
 
-      let image = domNode.querySelector(".image-data-field-image");
+      const image = domNode.querySelector(".image-data-field-image");
       if (image) {
-         let imageDeleteIcon = image.querySelector(".ab-delete-photo");
-         if (imageDeleteIcon)
-            imageDeleteIcon.style.display = val ? "block" : "none";
+         const imageDeconsteIcon = image.querySelector(".ab-deconste-photo");
+         if (imageDeconsteIcon)
+            imageDeconsteIcon.style.display = val ? "block" : "none";
 
          image.style.display = val ? "block" : "none";
 
@@ -547,22 +553,22 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
     * }
     */
    toBase64(rowData) {
-      var promise = new Promise((resolve, reject) => {
+      const promise = new Promise((resolve, reject) => {
          if (!rowData[this.columnName]) return resolve(null);
 
-         var img = new Image();
+         const img = new Image();
          img.crossOrigin = "Anonymous";
          img.onerror = function (err) {
             reject(err);
          };
          img.onload = function () {
-            var canvas = document.createElement("canvas");
+            const canvas = document.createElement("canvas");
             canvas.width = img.width;
             canvas.height = img.height;
-            var ctx = canvas.getContext("2d");
+            const ctx = canvas.getContext("2d");
             ctx.drawImage(img, 0, 0);
-            var dataURL = canvas.toDataURL();
-            var imageData = {
+            const dataURL = canvas.toDataURL();
+            const imageData = {
                data: dataURL,
                width: img.width,
                height: img.height,

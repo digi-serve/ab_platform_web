@@ -7,7 +7,7 @@
 
 const ABField = require("./ABField");
 
-let defaultSettings = {
+const defaultSettings = {
    allowClear: true,
    removeOnly: false,
    readOnly: false,
@@ -16,7 +16,7 @@ let defaultSettings = {
    multiple: false,
 };
 
-let ABFieldSelectivityDefaults = {
+const ABFieldSelectivityDefaults = {
    key: "Selectivity",
 };
 
@@ -38,12 +38,12 @@ module.exports = class ABFieldSelectivity extends ABField {
    selectivityRender(domNode, settings, App, row) {
       if (domNode == null) return;
 
-      var cypress = settings.dataCy || "";
+      const cypress = settings.dataCy || "";
       domNode.setAttribute("data-cy", cypress);
 
       // setting up our specific settings:
       settings = settings || {};
-      for (var dv in defaultSettings) {
+      for (const dv in defaultSettings) {
          if (settings[dv] === null) {
             settings[dv] = null;
          } else {
@@ -58,7 +58,7 @@ module.exports = class ABFieldSelectivity extends ABField {
          settings.data.length
       ) {
          settings.data.forEach(function (d) {
-            var matchHex = settings.items.map(function (i) {
+            settings.items.map(function (i) {
                if (i.id == d.id) d.hex = i.hex;
             });
          });
@@ -89,7 +89,7 @@ module.exports = class ABFieldSelectivity extends ABField {
       settings.element = domNode;
 
       // Render selectivity
-      var selectivityInput;
+      let selectivityInput;
       if (settings.multiple) {
          if (settings.isUsers) {
             settings.templates = {
@@ -177,13 +177,13 @@ module.exports = class ABFieldSelectivity extends ABField {
       }
 
       if (settings.editPage) {
-         let trigerEditPageEvent = () => {
-            let instance = this;
-            let editMenus = document.querySelectorAll(
+         const trigerEditPageEvent = () => {
+            const instance = this;
+            const editMenus = document.querySelectorAll(
                ".selectivity-single-selected-item-edit, .selectivity-multiple-selected-item-edit"
             );
             for (let i = 0; i < editMenus.length; i++) {
-               let eMenu = editMenus[i];
+               const eMenu = editMenus[i];
                if (eMenu && !eMenu.__hasClickEvent) {
                   eMenu.addEventListener(
                      "click",
@@ -191,16 +191,16 @@ module.exports = class ABFieldSelectivity extends ABField {
                         e.stopPropagation();
                         e.preventDefault();
 
-                        let parentElm = this.parentElement;
+                        const parentElm = this.parentElement;
                         if (!parentElm) return;
 
-                        let rowId = parentElm.getAttribute("data-item-id");
+                        const rowId = parentElm.getAttribute("data-item-id");
                         if (!rowId) return;
 
-                        let fieldId = parentElm.getAttribute("data-field-id");
+                        const fieldId = parentElm.getAttribute("data-field-id");
                         if (!fieldId) return;
 
-                        let thisField = instance.object.fieldByID(fieldId);
+                        const thisField = instance.object.fieldByID(fieldId);
                         if (!thisField) return;
 
                         thisField.emit("editPage", rowId);
@@ -215,7 +215,7 @@ module.exports = class ABFieldSelectivity extends ABField {
          setTimeout(() => {
             trigerEditPageEvent();
 
-            domNode.addEventListener("change", (e) => {
+            domNode.addEventListener("change", () => {
                trigerEditPageEvent();
             });
          }, 500);
@@ -223,9 +223,9 @@ module.exports = class ABFieldSelectivity extends ABField {
 
       // WORKAROUND : remove caret icon of selectivity
       if (settings.readOnly) {
-         let caretElems = domNode.getElementsByClassName("selectivity-caret");
+         const caretElems = domNode.getElementsByClassName("selectivity-caret");
          for (let i = 0; i < caretElems.length; i++) {
-            let caretElm = caretElems[i];
+            const caretElm = caretElems[i];
             if (caretElm) {
                caretElm.parentNode.removeChild(caretElm);
             }
@@ -252,7 +252,7 @@ module.exports = class ABFieldSelectivity extends ABField {
       }
    }
 
-   selectivitySet(domNode, data, App, row) {
+   selectivitySet(domNode, data) {
       if (!domNode || !domNode.selectivity) return;
 
       data = this.prepareData(data, domNode.selectivity.options.multiple);
@@ -319,32 +319,33 @@ module.exports = class ABFieldSelectivity extends ABField {
       return data;
    }
 
-   selectivitySetBadge(domNode, App, row) {
-      var field = this;
+   selectivitySetBadge(domNode) {
       if (!domNode.clientHeight) return;
-      var innerHeight = domNode.clientHeight;
-      var outerHeight = domNode.parentElement.clientHeight;
+      const innerHeight = domNode.clientHeight;
+      const outerHeight = domNode.parentElement.clientHeight;
       if (innerHeight - outerHeight > 5) {
-         var count = 0;
+         let count = 0;
          let values = [];
          if (domNode && domNode.selectivity)
             values = domNode.selectivity.getValue() || [];
 
          count = values.length;
          if (count > 1) {
-            var badge = domNode.querySelector(".webix_badge.selectivityBadge");
+            const badge = domNode.querySelector(
+               ".webix_badge.selectivityBadge"
+            );
             if (badge != null) {
                badge.innerHTML = count;
             } else {
-               var anchor = document.createElement("A");
+               const anchor = document.createElement("A");
                anchor.href = "javascript:void(0);";
                // v2: this just updated the $height property for this row
                // we don't do that anymore:
                // anchor.addEventListener("click", function () {
                //    App.actions.onRowResizeAuto(row.id, innerHeight);
                // });
-               var node = document.createElement("SPAN");
-               var textnode = document.createTextNode(count);
+               const node = document.createElement("SPAN");
+               const textnode = document.createTextNode(count);
                node.classList.add("webix_badge", "selectivityBadge");
                node.appendChild(textnode);
                anchor.appendChild(node);

@@ -1,4 +1,4 @@
-var ABFieldAutoIndexCore = require("../../core/dataFields/ABFieldAutoIndexCore");
+const ABFieldAutoIndexCore = require("../../core/dataFields/ABFieldAutoIndexCore");
 
 module.exports = class ABFieldAutoIndex extends ABFieldAutoIndexCore {
    // constructor(values, object) {
@@ -10,7 +10,7 @@ module.exports = class ABFieldAutoIndex extends ABFieldAutoIndexCore {
    ///
 
    isValid() {
-      var validator = super.isValid();
+      const validator = super.isValid();
 
       // validator.addError('columnName', L('ab.validation.object.name.unique', 'Field columnName must be unique (#name# already used in this Application)').replace('#name#', this.name) );
 
@@ -23,7 +23,7 @@ module.exports = class ABFieldAutoIndex extends ABFieldAutoIndexCore {
 
    // return the grid column header definition for this instance of ABFieldAutoIndex
    columnHeader(options) {
-      var config = super.columnHeader(options);
+      const config = super.columnHeader(options);
 
       config.editor = null; // read only
       config.css = "textCell";
@@ -48,7 +48,7 @@ module.exports = class ABFieldAutoIndex extends ABFieldAutoIndexCore {
    }
 
    detailComponent() {
-      let detailComponentSetting = super.detailComponent();
+      const detailComponentSetting = super.detailComponent();
 
       detailComponentSetting.common = () => {
          return {

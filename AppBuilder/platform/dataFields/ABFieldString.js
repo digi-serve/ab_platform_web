@@ -1,4 +1,4 @@
-var ABFieldStringCore = require("../../core/dataFields/ABFieldStringCore");
+const ABFieldStringCore = require("../../core/dataFields/ABFieldStringCore");
 
 module.exports = class ABFieldString extends ABFieldStringCore {
    // constructor(values, object) {
@@ -19,7 +19,7 @@ module.exports = class ABFieldString extends ABFieldStringCore {
 
    // return the grid column header definition for this instance of ABFieldString
    columnHeader(options) {
-      var config = super.columnHeader(options);
+      const config = super.columnHeader(options);
 
       config.editor = "text";
       config.css = "textCell";
@@ -63,10 +63,10 @@ module.exports = class ABFieldString extends ABFieldStringCore {
       super.isValidData(data, validator);
 
       if (data && data[this.columnName]) {
-         var max_length = this.constructor.defaults().MAX_CHAR_LENGTH;
+         const max_length = this.constructor.defaults().MAX_CHAR_LENGTH;
 
          if (data[this.columnName].length > max_length) {
-            var L = this.AB.Label();
+            const L = this.AB.Label();
             validator.addError(
                this.columnName,
                L("should NOT be longer than {0} characters", [max_length])
@@ -96,7 +96,7 @@ module.exports = class ABFieldString extends ABFieldStringCore {
    formComponent() {
       // NOTE: what is being returned here needs to mimic an ABView CLASS.
       // primarily the .common() and .newInstance() methods.
-      var formComponentSetting = super.formComponent();
+      const formComponentSetting = super.formComponent();
 
       // .common() is used to create the display in the list
       formComponentSetting.common = () => {
@@ -112,7 +112,7 @@ module.exports = class ABFieldString extends ABFieldStringCore {
    }
 
    detailComponent() {
-      var detailComponentSetting = super.detailComponent();
+      const detailComponentSetting = super.detailComponent();
 
       detailComponentSetting.common = () => {
          return {

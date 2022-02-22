@@ -1,4 +1,4 @@
-var ABFieldEmailCore = require("../../core/dataFields/ABFieldEmailCore");
+const ABFieldEmailCore = require("../../core/dataFields/ABFieldEmailCore");
 
 module.exports = class ABFieldEmail extends ABFieldEmailCore {
    // constructor(values, object) {
@@ -10,7 +10,7 @@ module.exports = class ABFieldEmail extends ABFieldEmailCore {
    ///
 
    // isValid() {
-   //    var validator = super.isValid();
+   //    const validator = super.isValid();
 
    //    // validator.addError('columnName', L('ab.validation.object.name.unique', 'Field columnName must be unique (#name# already used in this Application)').replace('#name#', this.name) );
 
@@ -23,7 +23,7 @@ module.exports = class ABFieldEmail extends ABFieldEmailCore {
 
    // return the grid column header definition for this instance of ABFieldBoolean
    columnHeader(options) {
-      var config = super.columnHeader(options);
+      const config = super.columnHeader(options);
 
       config.editor = "text";
 
@@ -42,7 +42,7 @@ module.exports = class ABFieldEmail extends ABFieldEmailCore {
    formComponent() {
       // NOTE: what is being returned here needs to mimic an ABView CLASS.
       // primarily the .common() and .newInstance() methods.
-      var formComponentSetting = super.formComponent();
+      const formComponentSetting = super.formComponent();
 
       // .common() is used to create the display in the list
       formComponentSetting.common = () => {
@@ -58,7 +58,7 @@ module.exports = class ABFieldEmail extends ABFieldEmailCore {
    }
 
    detailComponent() {
-      var detailComponentSetting = super.detailComponent();
+      const detailComponentSetting = super.detailComponent();
 
       detailComponentSetting.common = () => {
          return {

@@ -1,4 +1,4 @@
-var ABFieldJsonCore = require("../../core/dataFields/ABFieldJsonCore");
+const ABFieldJsonCore = require("../../core/dataFields/ABFieldJsonCore");
 
 module.exports = class ABFieldJson extends ABFieldJsonCore {
    // constructor(values, object) {
@@ -11,7 +11,7 @@ module.exports = class ABFieldJson extends ABFieldJsonCore {
 
    // return the grid column header definition for this instance of ABFieldJson
    columnHeader(options) {
-      var config = super.columnHeader(options);
+      const config = super.columnHeader(options);
 
       // config.editor = null; // read only for now
       config.editor = "text";
@@ -39,7 +39,7 @@ module.exports = class ABFieldJson extends ABFieldJsonCore {
    }
 
    detailComponent() {
-      var detailComponentSetting = super.detailComponent();
+      const detailComponentSetting = super.detailComponent();
 
       detailComponentSetting.common = () => {
          return {

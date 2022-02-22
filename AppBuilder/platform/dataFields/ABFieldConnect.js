@@ -1,6 +1,6 @@
-var ABFieldConnectCore = require("../../core/dataFields/ABFieldConnectCore");
+const ABFieldConnectCore = require("../../core/dataFields/ABFieldConnectCore");
 
-let L = (...params) => AB.Multilingual.label(...params);
+const L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABFieldConnect extends ABFieldConnectCore {
    constructor(values, object, fieldDefaults) {
@@ -39,10 +39,10 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
       // Now we need to remove our linked Object->field
 
-      var linkObject = this.datasourceLink;
+      const linkObject = this.datasourceLink;
       if (!linkObject) return Promise.resolve(); // already notified
 
-      var linkField = this.fieldLink;
+      const linkField = this.fieldLink;
       if (!linkField) return Promise.resolve(); // already notified
 
       // destroy linked field
@@ -63,10 +63,10 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
     * @return {array}
     */
    pullRelationValues(row) {
-      var selectedData = [];
+      let selectedData = [];
 
-      var data = super.pullRelationValues(row);
-      var linkedObject = this.datasourceLink;
+      const data = super.pullRelationValues(row);
+      const linkedObject = this.datasourceLink;
 
       if (data && linkedObject) {
          // if this select value is array
@@ -90,41 +90,40 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
    // return the grid column header definition for this instance of ABFieldConnect
    columnHeader(options) {
       options = options || {};
+      const config = super.columnHeader(options);
+      const field = this;
+      const App = field.AB._App;
 
-      var config = super.columnHeader(options);
-      var field = this;
-      var App = App;
-
-      var width = options.width,
+      const width = options.width,
          editable = options.editable;
 
       config.template = (row) => {
          if (row.$group) return row[field.columnName];
 
-         var node = document.createElement("div");
+         const node = document.createElement("div");
          node.classList.add("connect-data-values");
          if (typeof width != "undefined") {
             node.style.marginLeft = width + "px";
          }
 
-         var domNode = node;
+         const domNode = node;
 
-         var multiselect = field.settings.linkType == "many";
+         const multiselect = field.settings.linkType == "many";
 
-         var placeholder = L("Select item");
+         let placeholder = L("Select item");
          if (multiselect) {
             placeholder = L("Select items");
          }
-         var readOnly = false;
+         let readOnly = false;
          if (editable != null && !editable) {
             readOnly = true;
             placeholder = "";
          }
 
-         // var domNode = node.querySelector('.list-data-values');
+         // const domNode = node.querySelector('.list-data-values');
 
          // get selected values
-         var selectedData = field.pullRelationValues(row);
+         const selectedData = field.pullRelationValues(row);
 
          // Render selectivity
          if (!options.skipRenderSelectivity) {
@@ -172,25 +171,25 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
    customDisplay(row, App, node, options) {
       options = options || {};
 
-      var isFormView = options.formView != null ? options.formView : false;
+      const isFormView = options.formView != null ? options.formView : false;
       // sanity check.
       if (!node) {
          return;
       }
 
-      var domNode = node.querySelector(".connect-data-values");
+      const domNode = node.querySelector(".connect-data-values");
       if (!domNode) return;
 
-      var multiselect = this.settings.linkType == "many";
+      const multiselect = this.settings.linkType == "many";
 
       // get selected values
-      var selectedData = this.pullRelationValues(row);
+      const selectedData = this.pullRelationValues(row);
 
-      var placeholder = L("Select item");
+      let placeholder = L("Select item");
       if (multiselect) {
          placeholder = L("Select items");
       }
-      var readOnly = false;
+      let readOnly = false;
       if (options.editable != null && options.editable == false) {
          readOnly = true;
          placeholder = "";
@@ -211,11 +210,11 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                L("PARENT ELEMENT"),
             ]);
          } else {
-            let val = this.getValue($$(options.filterValue.ui.id));
+            const val = this.getValue($$(options.filterValue.ui.id));
             if (!val) {
                // if there isn't a value on the parent select element set this one to readonly and change placeholder text
                readOnly = true;
-               let label = $$(options.filterValue.ui.id);
+               const label = $$(options.filterValue.ui.id);
                placeholderReadOnly = L("Must select item from '{0}' first.", [
                   label.config.label,
                ]);
@@ -223,9 +222,9 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          }
       }
 
-      var formId = "";
+      let formId = "";
       if ($$(domNode).getFormView) {
-         var formNode = $$(domNode).getFormView();
+         const formNode = $$(domNode).getFormView();
          if (formNode && formNode.config && formNode.config.abid) {
             formId = formNode.config.abid;
          }
@@ -249,11 +248,11 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                url: "It will call url in .getOptions function", // require
                minimumInputLength: 0,
                quietMillis: 250,
-               fetch: (url, init, queryOptions) => {
+               fetch: async (url, init, queryOptions) => {
                   // if we are filtering based off another selectivity's value we
                   // need to do it on fetch each time because the value can change
                   // copy the filters so we don't add to them every time there is a change
-                  let combineFilters = JSON.parse(
+                  const combineFilters = JSON.parse(
                      JSON.stringify(options.filters)
                   );
 
@@ -264,12 +263,12 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                      $$(options.filterValue.ui.id)
                   ) {
                      // get the current value of the parent select box
-                     let parentVal = this.getValue(
+                     const parentVal = this.getValue(
                         $$(options.filterValue.ui.id)
                      );
                      if (parentVal) {
                         // if there is a value create a new filter rule
-                        let filter = {
+                        const filter = {
                            key: options.filterKey,
                            rule: "equals",
                            value: parentVal[options.filterColumn],
@@ -311,7 +310,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                "change",
                async (/* e */) => {
                   // update just this value on our current object.model
-                  var values = {};
+                  const values = {};
                   values[this.columnName] = this.selectivityGet(domNode);
 
                   // check data does not be changed
@@ -356,7 +355,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                "change",
                (/* e */) => {
                   if (domNode.clientHeight > 32) {
-                     var item = $$(node);
+                     const item = $$(node);
                      item.define("height", domNode.clientHeight + 6);
                      item.resizeChildren();
                      item.resize();
@@ -367,13 +366,13 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
             // add a change listener to the selectivity instance we are filtering our options list by.
             if (options.filterValue && $$(options.filterValue.ui.id)) {
-               let parentDomNode = $$(
+               const parentDomNode = $$(
                   options.filterValue.ui.id
                ).$view.querySelector(".connect-data-values");
                parentDomNode.addEventListener(
                   "change",
                   (e) => {
-                     let parentVal = this.selectivityGet(parentDomNode);
+                     const parentVal = this.selectivityGet(parentDomNode);
                      if (parentVal) {
                         // if there is a value set allow the user to edit and
                         // put back the placeholder text to the orignal value
@@ -417,7 +416,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
    ////       object constructor and have it internally track these things?
    customEdit(row, App, node) {
       if (this.settings.linkType == "many") {
-         var domNode = node.querySelector(".connect-data-values");
+         const domNode = node.querySelector(".connect-data-values");
 
          if (domNode.selectivity != null) {
             // Open selectivity
@@ -443,7 +442,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
    }
 
    detailComponent() {
-      var detailComponentSetting = super.detailComponent();
+      const detailComponentSetting = super.detailComponent();
 
       detailComponentSetting.common = () => {
          return {
@@ -462,11 +461,11 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
     */
    getOptions(where, term) {
       return new Promise((resolve, reject) => {
-         var haveResolved = false;
+         let haveResolved = false;
          // {bool}
          // have we already passed back a result?
 
-         var respond = (options) => {
+         const respond = (options) => {
             // filter the raw lookup with the provided search term
             options = options.filter(function (item) {
                if (item.text.toLowerCase().includes(term.toLowerCase())) {
@@ -500,18 +499,18 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          // if options was cached
          // if (this._options != null) return resolve(this._options);
 
-         var linkedObj = this.datasourceLink;
+         const linkedObj = this.datasourceLink;
 
-         // System could not found the linked object - It may be deleted ?
+         // System could not found the linked object - It may be deconsted ?
          if (linkedObj == null) throw new Error("No linked object");
 
-         var linkedCol = this.fieldLink;
+         const linkedCol = this.fieldLink;
 
-         // System could not found the linked field - It may be deleted ?
+         // System could not found the linked field - It may be deconsted ?
          if (linkedCol == null) throw new Error("No linked column");
 
          // Get linked object model
-         var linkedModel = linkedObj.model();
+         const linkedModel = linkedObj.model();
 
          // M:1 - get data that's only empty relation value
          if (
@@ -550,7 +549,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             }
          }
 
-         var storageID = `${this.id}-${JSON.stringify(where)}`;
+         const storageID = `${this.id}-${JSON.stringify(where)}`;
 
          Promise.resolve()
             .then(async () => {
@@ -558,7 +557,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
                // We store the .findAll() results locally and return that for a
                // quick response:
-               var storedOptions = await this.AB.Storage.get(storageID);
+               const storedOptions = await this.AB.Storage.get(storageID);
                if (storedOptions) {
                   // immediately respond with our stored options.
                   this._options = storedOptions;
@@ -568,7 +567,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             .then(async () => {
                try {
                   // Pull linked object data
-                  var result = await linkedModel.findAll({
+                  const result = await linkedModel.findAll({
                      where: where,
                      populate: false,
                   });
@@ -599,8 +598,8 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
    }
 
    getValue(item) {
-      var domNode = item.$view.querySelector(".connect-data-values");
-      var values = this.selectivityGet(domNode);
+      const domNode = item.$view.querySelector(".connect-data-values");
+      const values = this.selectivityGet(domNode);
       return values;
    }
 
@@ -610,10 +609,10 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       // if (AB.isEmpty(rowData)) return; removed because sometimes we will
       // want to set this to empty
 
-      let val = this.pullRelationValues(rowData);
+      const val = this.pullRelationValues(rowData);
 
       // get selectivity dom
-      var domSelectivity = item.$view.querySelector(".connect-data-values");
+      const domSelectivity = item.$view.querySelector(".connect-data-values");
 
       if (domSelectivity) {
          // set value to selectivity

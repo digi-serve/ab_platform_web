@@ -1,4 +1,4 @@
-var ABFieldCombineCore = require("../../core/dataFields/ABFieldCombineCore");
+const ABFieldCombineCore = require("../../core/dataFields/ABFieldCombineCore");
 
 module.exports = class ABFieldCombine extends ABFieldCombineCore {
    constructor(values, object) {
@@ -10,7 +10,7 @@ module.exports = class ABFieldCombine extends ABFieldCombineCore {
    ///
 
    isValid() {
-      var validator = super.isValid();
+      const validator = super.isValid();
 
       // validator.addError('columnName', L('ab.validation.object.name.unique', 'Field columnName must be unique (#name# already used in this Application)').replace('#name#', this.name) );
 
@@ -23,7 +23,7 @@ module.exports = class ABFieldCombine extends ABFieldCombineCore {
 
    // return the grid column header definition for this instance of ABFieldCombine
    columnHeader(options) {
-      var config = super.columnHeader(options);
+      const config = super.columnHeader(options);
 
       config.editor = null; // read only
       config.css = "textCell";
@@ -48,7 +48,7 @@ module.exports = class ABFieldCombine extends ABFieldCombineCore {
    }
 
    detailComponent() {
-      let detailComponentSetting = super.detailComponent();
+      const detailComponentSetting = super.detailComponent();
 
       detailComponentSetting.common = () => {
          return {

@@ -1,4 +1,4 @@
-var ABFieldCalculateCore = require("../../core/dataFields/ABFieldCalculateCore");
+const ABFieldCalculateCore = require("../../core/dataFields/ABFieldCalculateCore");
 
 module.exports = class ABFieldCalculate extends ABFieldCalculateCore {
    constructor(values, object) {
@@ -10,7 +10,7 @@ module.exports = class ABFieldCalculate extends ABFieldCalculateCore {
    ///
 
    isValid() {
-      var validator = super.isValid();
+      const validator = super.isValid();
 
       // validator.addError('columnName', L('ab.validation.object.name.unique', 'Field columnName must be unique (#name# already used in this Application)').replace('#name#', this.name) );
 
@@ -23,7 +23,7 @@ module.exports = class ABFieldCalculate extends ABFieldCalculateCore {
 
    // return the grid column header definition for this instance of ABFieldCalculate
    columnHeader(options) {
-      var config = super.columnHeader(options);
+      const config = super.columnHeader(options);
 
       config.editor = null; // read only
       config.css = "textCell";
@@ -50,7 +50,7 @@ module.exports = class ABFieldCalculate extends ABFieldCalculateCore {
    }
 
    detailComponent() {
-      var detailComponentSetting = super.detailComponent();
+      const detailComponentSetting = super.detailComponent();
 
       detailComponentSetting.common = () => {
          return {

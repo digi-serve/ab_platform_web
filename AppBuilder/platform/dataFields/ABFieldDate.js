@@ -1,4 +1,4 @@
-var ABFieldDateCore = require("../../core/dataFields/ABFieldDateCore");
+const ABFieldDateCore = require("../../core/dataFields/ABFieldDateCore");
 
 module.exports = class ABFieldDate extends ABFieldDateCore {
    constructor(values, object) {
@@ -10,7 +10,7 @@ module.exports = class ABFieldDate extends ABFieldDateCore {
    ///
 
    isValid() {
-      var validator = super.isValid();
+      const validator = super.isValid();
 
       // validator.addError('columnName', L('ab.validation.object.name.unique', 'Field columnName must be unique (#name# already used in this Application)').replace('#name#', this.name) );
 
@@ -23,7 +23,7 @@ module.exports = class ABFieldDate extends ABFieldDateCore {
 
    // return the grid column header definition for this instance of ABFieldDate
    columnHeader(options) {
-      var config = super.columnHeader(options);
+      const config = super.columnHeader(options);
 
       // if (this.settings.includeTime)
       // config.editor = "datetime";
@@ -45,7 +45,7 @@ module.exports = class ABFieldDate extends ABFieldDateCore {
       };
 
       config.format = (d) => {
-         var rowData = {};
+         const rowData = {};
          rowData[this.columnName] = d;
 
          return this.format(rowData);
@@ -77,7 +77,7 @@ module.exports = class ABFieldDate extends ABFieldDateCore {
    formComponent() {
       // NOTE: what is being returned here needs to mimic an ABView CLASS.
       // primarily the .common() and .newInstance() methods.
-      var formComponentSetting = super.formComponent("datepicker");
+      const formComponentSetting = super.formComponent("datepicker");
 
       // .common() is used to create the display in the list
       formComponentSetting.common = () => {
@@ -90,7 +90,7 @@ module.exports = class ABFieldDate extends ABFieldDateCore {
    }
 
    detailComponent() {
-      var detailComponentSetting = super.detailComponent();
+      const detailComponentSetting = super.detailComponent();
 
       detailComponentSetting.common = () => {
          return {
