@@ -318,7 +318,6 @@ module.exports = class ABViewDataview extends ABViewDataviewCore {
          let detailsPage = this.settings.detailsPage;
          var editTab = this.settings.editTab;
          var detailsTab = this.settings.detailsTab;
-         var accessLevel = this.parent.getUserAccess();
          var records = [];
 
          var dc = this.datacollection;
@@ -390,7 +389,7 @@ module.exports = class ABViewDataview extends ABViewDataviewCore {
 
             if (Layout.addView) {
                Layout.addView(detailCom.ui, -1);
-               detailCom.init(null, accessLevel);
+               detailCom.init(null, 2); // 2 - Always allow access to components inside data view
                setTimeout(detailCom.logic.displayData(rows[i]), 0);
             } else {
                records.push(detailCom.ui);
@@ -412,7 +411,7 @@ module.exports = class ABViewDataview extends ABViewDataviewCore {
                let detailCom = App.AB.cloneDeep(
                   super.component(App, rows[i].id)
                );
-               detailCom.init(null, accessLevel);
+               detailCom.init(null, 2); // 2 - Always allow access to components inside data view
                setTimeout(detailCom.logic.displayData(rows[i]), 0);
             }
          }
