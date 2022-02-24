@@ -437,13 +437,13 @@ export default class ABViewCarousel extends ABViewCarouselCore {
             _logic.onShow();
          });
          dv.on("update", () => {
-            dc.reloadData();
+            dv.reloadData();
          });
          dv.on("delete", () => {
-            dc.reloadData();
+            dv.reloadData();
          });
          dv.on("create", () => {
-            dc.reloadData();
+            dv.reloadData();
          });
 
          // filter helper
