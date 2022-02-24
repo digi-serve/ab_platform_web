@@ -296,7 +296,7 @@ module.exports = class ABViewRule {
       let currentAction = this.currentAction();
       if (!currentAction) return;
 
-      currentAction.processUpdateObject({}, options.data);
+      currentAction.process(options);
    }
 
    // process
