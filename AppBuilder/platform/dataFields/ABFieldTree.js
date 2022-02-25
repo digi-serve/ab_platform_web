@@ -3,9 +3,9 @@ const ABFieldTreeCore = require("../../core/dataFields/ABFieldTreeCore");
 const L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABFieldTree extends ABFieldTreeCore {
-   // constructor(values, object) {
-   //    super(values, object);
-   // }
+   constructor(values, object) {
+      super(values, object);
+   }
 
    ///
    /// Instance Methods
@@ -241,7 +241,7 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
 
          $$(idTree).blockEvent(); // prevents endless loop
 
-         const options = this.AB.cloneDeep(field.settings.options);
+         const options = field.AB.cloneDeep(field.settings.options);
          $$(idTree).clearAll();
          $$(idTree).parse(options);
          $$(idTree).refresh();
