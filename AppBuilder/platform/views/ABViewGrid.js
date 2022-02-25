@@ -1680,11 +1680,16 @@ class ABViewGridComponent extends ABViewComponent {
 
       // default our columnConfig values to our columnHeaders:
       columnHeaders.forEach((c) => {
-         // localStorage won't save any .template() functions.
+         // we want to overwrite our default settings with anything stored
+         // in local storage
          var origCol = objColumnHeaders.find((h) => h.fieldID == c.fieldID);
-         if (origCol?.template) {
-            c.template = origCol.template;
-         }
+         // to do this we use _.merge() on duplicate keys the second passed
+         // object wins the tie
+         var mergedCol = _.merge(c, origCol);
+         // if (origCol?.template) {
+         //    c.template = origCol.template;
+         // }
+         c = mergedCol;
 
          var f = CurrentObject.fieldByID(c.fieldID);
          if (!f) return;

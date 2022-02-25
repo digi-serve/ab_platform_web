@@ -125,7 +125,23 @@ module.exports = class ABViewDetailConnect extends ABViewDetailConnectCore {
          ui: baseComp.ui,
 
          init: _init,
-         logic: baseComp.logic,
+         logic: {
+            setValue: (val) => {
+               let vals = [];
+               if (Array.isArray(val)) {
+                  val.forEach((record) => {
+                     vals.push(
+                        `<span class="webix_multicombo_value">${record.text}</span>`
+                     );
+                  });
+               } else {
+                  vals.push(
+                     `<span class="webix_multicombo_value">${val.text}</span>`
+                  );
+               }
+               baseComp.logic.setValue(baseComp.ui.id, vals.join(""));
+            },
+         },
       };
    }
 

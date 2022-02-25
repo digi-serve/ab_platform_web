@@ -140,6 +140,10 @@ module.exports = class ABViewFormSelectSingle extends (
          });
       }
 
+      component.ui = {
+         rows: [component.ui],
+      };
+
       // make sure each of our child views get .init() called
       component.init = (options) => {};
 

@@ -611,7 +611,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
     * @method pullRelationValues
     *
     * On the Web client, we want our returned relation values to be
-    * ready for Webix objects that require a .text field.
+    * ready for Webix objects that require a .text and .value field.
     *
     * @param {*} row
     * @return {array}
@@ -627,7 +627,10 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          if (data.map) {
             selectedData = data.map(function (d) {
                // display label in format
-               if (d) d.text = d.text || linkedObject.displayData(d);
+               if (d) {
+                  d.text = d.text || linkedObject.displayData(d);
+                  d.value = d.text;
+               }
 
                return d;
             });
@@ -635,6 +638,45 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             selectedData = data;
             selectedData.text =
                selectedData.text || linkedObject.displayData(selectedData);
+            selectedData.value = selectedData.text;
+         }
+      }
+
+      return selectedData;
+   }
+
+   /**
+    * @method pullRecordRelationValues
+    *
+    * On the Web client, we want our returned relation values to be
+    * ready for Webix objects that require a .text and .value field.
+    *
+    * @param {*} row
+    * @return {array}
+    */
+   pullRecordRelationValues(record) {
+      var selectedData = [];
+
+      var data = record;
+      var linkedObject = this.datasourceLink;
+
+      if (data && linkedObject) {
+         // if this select value is array
+         if (data.map) {
+            selectedData = data.map(function (d) {
+               // display label in format
+               if (d) {
+                  d.text = d.text || linkedObject.displayData(d);
+                  d.value = d.text;
+               }
+
+               return d;
+            });
+         } else if (data.id || data.uuid) {
+            selectedData = data;
+            selectedData.text =
+               selectedData.text || linkedObject.displayData(selectedData);
+            selectedData.value = selectedData.text;
          }
       }
 
@@ -642,64 +684,166 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
    }
 
    // return the grid column header definition for this instance of ABFieldConnect
+   // columnHeader(options) {
+   //    options = options || {};
+   //
+   //    var config = super.columnHeader(options);
+   //    var field = this;
+   //    var App = App;
+   //
+   //    var width = options.width,
+   //       editable = options.editable;
+   //
+   //    config.template = (row) => {
+   //       if (row.$group) return row[field.columnName];
+   //
+   //       var node = document.createElement("div");
+   //       node.classList.add("connect-data-values");
+   //       if (typeof width != "undefined") {
+   //          node.style.marginLeft = width + "px";
+   //       }
+   //
+   //       var domNode = node;
+   //
+   //       var multiselect = field.settings.linkType == "many";
+   //
+   //       var placeholder = L("Select item");
+   //       if (multiselect) {
+   //          placeholder = L("Select items");
+   //       }
+   //       var readOnly = false;
+   //       if (editable != null && !editable) {
+   //          readOnly = true;
+   //          placeholder = "";
+   //       }
+   //
+   //       // var domNode = node.querySelector('.list-data-values');
+   //
+   //       // get selected values
+   //       var selectedData = field.pullRelationValues(row);
+   //
+   //       // Render selectivity
+   //       if (!options.skipRenderSelectivity) {
+   //          field.selectivityRender(
+   //             domNode,
+   //             {
+   //                multiple: multiselect,
+   //                readOnly: readOnly,
+   //                editPage: options.editPage,
+   //                isLabelHidden: options.isLabelHidden,
+   //                additionalText: options.additionalText,
+   //                placeholder: placeholder,
+   //                data: selectedData,
+   //             },
+   //             App,
+   //             row
+   //          );
+   //       }
+   //
+   //       return domNode.outerHTML;
+   //    };
+   //
+   //    return config;
+   // }
+
    columnHeader(options) {
       options = options || {};
+
+      if (options.filters == null) {
+         options.filters = {};
+      }
 
       var config = super.columnHeader(options);
       var field = this;
       var App = App;
 
-      var width = options.width,
-         editable = options.editable;
+      var multiselect = field.settings.linkType == "many";
 
-      config.template = (row) => {
-         if (row.$group) return row[field.columnName];
-
-         var node = document.createElement("div");
-         node.classList.add("connect-data-values");
-         if (typeof width != "undefined") {
-            node.style.marginLeft = width + "px";
+      config.editor = multiselect ? "multiselect" : "combo";
+      config.editFormat = (value) => {
+         let vals = [];
+         if (Array.isArray(value)) {
+            value.forEach((val) => {
+               if (typeof val == "object") {
+                  vals.push(val.id);
+               } else {
+                  vals.push(field.getItemFromVal(val).id);
+               }
+            });
+         } else {
+            if (typeof value == "object") {
+               vals.push(value.id);
+            } else {
+               vals.push(field.getItemFromVal(value).id);
+            }
          }
-
-         var domNode = node;
-
-         var multiselect = field.settings.linkType == "many";
-
-         var placeholder = L("Select item");
+         return vals.join();
+      };
+      config.editParse = function (value) {
          if (multiselect) {
-            placeholder = L("Select items");
+            let returnVals = [];
+            let vals = value.split(",");
+            vals.forEach((val) => {
+               returnVals.push(val);
+            });
+            return returnVals;
+         } else {
+            let item = field.getItemFromUUID(value);
+            return item;
          }
-         var readOnly = false;
-         if (editable != null && !editable) {
-            readOnly = true;
-            placeholder = "";
-         }
-
-         // var domNode = node.querySelector('.list-data-values');
-
-         // get selected values
+      };
+      config.template = (row) => {
          var selectedData = field.pullRelationValues(row);
-
-         // Render selectivity
-         if (!options.skipRenderSelectivity) {
-            field.selectivityRender(
-               domNode,
-               {
-                  multiple: multiselect,
-                  readOnly: readOnly,
-                  editPage: options.editPage,
-                  isLabelHidden: options.isLabelHidden,
-                  additionalText: options.additionalText,
-                  placeholder: placeholder,
-                  data: selectedData,
-               },
-               App,
-               row
+         var values = [];
+         if (selectedData.length) {
+            selectedData.forEach((val) => {
+               values.push(
+                  `<div style="line-height: 24px; margin: 4px 1.5px;" class='webix_multicombo_value'><span>${val.value}</span><!-- span class="webix_multicombo_delete" role="button" aria-label="Remove item"></span --></div>`
+               );
+            });
+         } else if (selectedData.value) {
+            values.push(
+               `<div style="line-height: 24px; margin: 4px 1.5px;" class='webix_multicombo_value'><span>${selectedData.value}</span><!-- span class="webix_multicombo_delete" role="button" aria-label="Remove item"></span --></div>`
             );
          }
-
-         return domNode.outerHTML;
+         return values.join("");
       };
+      if (multiselect) {
+         config.suggest = {
+            view: "checksuggest",
+            button: true,
+            on: {
+               onBeforeShow: function () {
+                  let theEditor = this;
+                  field.once("option.data", (data) => {
+                     theEditor.getList().define("data", data);
+                     theEditor.setValue(theEditor.getValue());
+                  });
+                  field.getOptions().then((data) => {
+                     theEditor.getList().define("data", data);
+                     theEditor.setValue(theEditor.getValue());
+                  });
+               },
+            },
+         };
+      } else {
+         config.suggest = {
+            button: true,
+            on: {
+               onBeforeShow: function () {
+                  let theEditor = this;
+                  field.once("option.data", (data) => {
+                     theEditor.getList().define("data", data);
+                     // theEditor.setValue(theEditor.getValue());
+                  });
+                  field.getOptions().then((data) => {
+                     theEditor.getList().define("data", data);
+                     // theEditor.setValue(theEditor.getValue());
+                  });
+               },
+            },
+         };
+      }
 
       return config;
    }
@@ -723,239 +867,239 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
     *          .additionalText
     *
     */
-   customDisplay(row, App, node, options) {
-      options = options || {};
-
-      var isFormView = options.formView != null ? options.formView : false;
-      // sanity check.
-      if (!node) {
-         return;
-      }
-
-      var domNode = node.querySelector(".connect-data-values");
-      if (!domNode) return;
-
-      var multiselect = this.settings.linkType == "many";
-
-      // get selected values
-      var selectedData = this.pullRelationValues(row);
-
-      var placeholder = L("Select item");
-      if (multiselect) {
-         placeholder = L("Select items");
-      }
-      var readOnly = false;
-      if (options.editable != null && options.editable == false) {
-         readOnly = true;
-         placeholder = "";
-      }
-
-      if (options.filters == null) {
-         options.filters = {};
-      }
-
-      // if this field's options are filtered off another field's value we need
-      // to make sure the UX helps the user know what to do.
-      let placeholderReadOnly = null;
-      if (options.filterValue && options.filterKey) {
-         if (!$$(options.filterValue.ui.id)) {
-            // this happens in the Interface Builder when only the single form UI is displayed
-            readOnly = true;
-            placeholderReadOnly = L("Must select item from '{0}' first.", [
-               L("PARENT ELEMENT"),
-            ]);
-         } else {
-            let val = this.getValue($$(options.filterValue.ui.id));
-            if (!val) {
-               // if there isn't a value on the parent select element set this one to readonly and change placeholder text
-               readOnly = true;
-               let label = $$(options.filterValue.ui.id);
-               placeholderReadOnly = L("Must select item from '{0}' first.", [
-                  label.config.label,
-               ]);
-            }
-         }
-      }
-
-      var formId = "";
-      if ($$(domNode).getFormView) {
-         var formNode = $$(domNode).getFormView();
-         if (formNode && formNode.config && formNode.config.abid) {
-            formId = formNode.config.abid;
-         }
-      }
-
-      // Render selectivity
-      this.selectivityRender(
-         domNode,
-         {
-            multiple: multiselect,
-            data: selectedData,
-            placeholder: placeholderReadOnly
-               ? placeholderReadOnly
-               : placeholder,
-            readOnly: readOnly,
-            editPage: options.editPage,
-            isLabelHidden: options.isLabelHidden,
-            additionalText: options.additionalText,
-            dataCy: `${this.key} ${this.columnName} ${this.id} ${formId}`,
-            ajax: {
-               url: "It will call url in .getOptions function", // require
-               minimumInputLength: 0,
-               quietMillis: 250,
-               fetch: (url, init, queryOptions) => {
-                  // if we are filtering based off another selectivity's value we
-                  // need to do it on fetch each time because the value can change
-                  // copy the filters so we don't add to them every time there is a change
-                  let combineFilters = JSON.parse(
-                     JSON.stringify(options.filters)
-                  );
-
-                  // only add filters if we pass valid value and key
-                  if (
-                     options.filterValue &&
-                     options.filterKey &&
-                     $$(options.filterValue.ui.id)
-                  ) {
-                     // get the current value of the parent select box
-                     let parentVal = this.getValue(
-                        $$(options.filterValue.ui.id)
-                     );
-                     if (parentVal) {
-                        // if there is a value create a new filter rule
-                        let filter = {
-                           key: options.filterKey,
-                           rule: "equals",
-                           value: parentVal[options.filterColumn],
-                        };
-                        combineFilters.rules.push(filter);
-                     }
-                  }
-
-                  this.once("option.data", (options) => {
-                     domNode.selectivity.setOptions({
-                        items: options,
-                     });
-                     domNode.selectivity.close();
-                     domNode.selectivity.open();
-                  });
-
-                  return this.getOptions(
-                     combineFilters,
-                     queryOptions.term
-                  ).then((data) => {
-                     return {
-                        results: data,
-                     };
-                  });
-               },
-            },
-         },
-         App,
-         row
-      );
-
-      if (!domNode.dataset.isListened) {
-         // prevent listen duplicate
-         domNode.dataset.isListened = true;
-
-         // Listen event when selectivity value updates
-         if (domNode && row.id && !isFormView) {
-            domNode.addEventListener(
-               "change",
-               async (/* e */) => {
-                  // update just this value on our current object.model
-                  var values = {};
-                  values[this.columnName] = this.selectivityGet(domNode);
-
-                  // check data does not be changed
-                  if (Object.is(values[this.columnName], row[this.columnName]))
-                     return;
-
-                  // pass empty string because it could not put empty array in REST api
-                  // added check for null because default value of field is null
-                  if (
-                     values[this.columnName] == null ||
-                     values[this.columnName].length == 0
-                  )
-                     values[this.columnName] = "";
-
-                  try {
-                     await this.object.model().update(row.id, values);
-
-                     // update values of relation to display in grid
-                     values[this.relationName()] = values[this.columnName];
-
-                     // update new value to item of DataTable .updateItem
-                     if (values[this.columnName] == "")
-                        values[this.columnName] = [];
-                     if ($$(node) && $$(node).updateItem)
-                        $$(node).updateItem(row.id, values);
-                  } catch (err) {
-                     node.classList.add("webix_invalid");
-                     node.classList.add("webix_invalid_cell");
-
-                     this.AB.notify.developer(err, {
-                        context:
-                           "ABFieldConnect:customDisplay():onChange: Error updating our entry.",
-                        row: row,
-                        values: values,
-                     });
-                  }
-               },
-               false
-            );
-         } else {
-            domNode.addEventListener(
-               "change",
-               (/* e */) => {
-                  if (domNode.clientHeight > 32) {
-                     var item = $$(node);
-                     item.define("height", domNode.clientHeight + 6);
-                     item.resizeChildren();
-                     item.resize();
-                  }
-               },
-               false
-            );
-
-            // add a change listener to the selectivity instance we are filtering our options list by.
-            if (options.filterValue && $$(options.filterValue.ui.id)) {
-               let parentDomNode = $$(
-                  options.filterValue.ui.id
-               ).$view.querySelector(".connect-data-values");
-               parentDomNode.addEventListener(
-                  "change",
-                  (e) => {
-                     let parentVal = this.selectivityGet(parentDomNode);
-                     if (parentVal) {
-                        // if there is a value set allow the user to edit and
-                        // put back the placeholder text to the orignal value
-                        domNode.selectivity.setOptions({
-                           readOnly: false,
-                           placeholder: placeholder,
-                        });
-
-                        // clear any previous value because it could be invalid
-                        domNode.selectivity.setValue(null);
-                     } else {
-                        // if there is not a value set make field read only and
-                        // set the placeholder text to a read only version
-                        domNode.selectivity.setOptions({
-                           readOnly: true,
-                           placeholder: placeholderReadOnly,
-                        });
-
-                        // clear any previous value because it could be invalid
-                        domNode.selectivity.setValue(null);
-                     }
-                  },
-                  false
-               );
-            }
-         }
-      }
-   }
+   // customDisplay(row, App, node, options) {
+   //    options = options || {};
+   //
+   //    var isFormView = options.formView != null ? options.formView : false;
+   //    // sanity check.
+   //    if (!node) {
+   //       return;
+   //    }
+   //
+   //    var domNode = node.querySelector(".connect-data-values");
+   //    if (!domNode) return;
+   //
+   //    var multiselect = this.settings.linkType == "many";
+   //
+   //    // get selected values
+   //    var selectedData = this.pullRelationValues(row);
+   //
+   //    var placeholder = L("Select item");
+   //    if (multiselect) {
+   //       placeholder = L("Select items");
+   //    }
+   //    var readOnly = false;
+   //    if (options.editable != null && options.editable == false) {
+   //       readOnly = true;
+   //       placeholder = "";
+   //    }
+   //
+   //    if (options.filters == null) {
+   //       options.filters = {};
+   //    }
+   //
+   //    // if this field's options are filtered off another field's value we need
+   //    // to make sure the UX helps the user know what to do.
+   //    let placeholderReadOnly = null;
+   //    if (options.filterValue && options.filterKey) {
+   //       if (!$$(options.filterValue.ui.id)) {
+   //          // this happens in the Interface Builder when only the single form UI is displayed
+   //          readOnly = true;
+   //          placeholderReadOnly = L("Must select item from '{0}' first.", [
+   //             L("PARENT ELEMENT"),
+   //          ]);
+   //       } else {
+   //          let val = this.getValue($$(options.filterValue.ui.id));
+   //          if (!val) {
+   //             // if there isn't a value on the parent select element set this one to readonly and change placeholder text
+   //             readOnly = true;
+   //             let label = $$(options.filterValue.ui.id);
+   //             placeholderReadOnly = L("Must select item from '{0}' first.", [
+   //                label.config.label,
+   //             ]);
+   //          }
+   //       }
+   //    }
+   //
+   //    var formId = "";
+   //    if ($$(domNode).getFormView) {
+   //       var formNode = $$(domNode).getFormView();
+   //       if (formNode && formNode.config && formNode.config.abid) {
+   //          formId = formNode.config.abid;
+   //       }
+   //    }
+   //
+   //    // Render selectivity
+   //    this.selectivityRender(
+   //       domNode,
+   //       {
+   //          multiple: multiselect,
+   //          data: selectedData,
+   //          placeholder: placeholderReadOnly
+   //             ? placeholderReadOnly
+   //             : placeholder,
+   //          readOnly: readOnly,
+   //          editPage: options.editPage,
+   //          isLabelHidden: options.isLabelHidden,
+   //          additionalText: options.additionalText,
+   //          dataCy: `${this.key} ${this.columnName} ${this.id} ${formId}`,
+   //          ajax: {
+   //             url: "It will call url in .getOptions function", // require
+   //             minimumInputLength: 0,
+   //             quietMillis: 250,
+   //             fetch: (url, init, queryOptions) => {
+   //                // if we are filtering based off another selectivity's value we
+   //                // need to do it on fetch each time because the value can change
+   //                // copy the filters so we don't add to them every time there is a change
+   //                let combineFilters = JSON.parse(
+   //                   JSON.stringify(options.filters)
+   //                );
+   //
+   //                // only add filters if we pass valid value and key
+   //                if (
+   //                   options.filterValue &&
+   //                   options.filterKey &&
+   //                   $$(options.filterValue.ui.id)
+   //                ) {
+   //                   // get the current value of the parent select box
+   //                   let parentVal = this.getValue(
+   //                      $$(options.filterValue.ui.id)
+   //                   );
+   //                   if (parentVal) {
+   //                      // if there is a value create a new filter rule
+   //                      let filter = {
+   //                         key: options.filterKey,
+   //                         rule: "equals",
+   //                         value: parentVal[options.filterColumn],
+   //                      };
+   //                      combineFilters.rules.push(filter);
+   //                   }
+   //                }
+   //
+   //                this.once("option.data", (options) => {
+   //                   domNode.selectivity.setOptions({
+   //                      items: options,
+   //                   });
+   //                   domNode.selectivity.close();
+   //                   domNode.selectivity.open();
+   //                });
+   //
+   //                return this.getOptions(
+   //                   combineFilters,
+   //                   queryOptions.term
+   //                ).then((data) => {
+   //                   return {
+   //                      results: data,
+   //                   };
+   //                });
+   //             },
+   //          },
+   //       },
+   //       App,
+   //       row
+   //    );
+   //
+   //    if (!domNode.dataset.isListened) {
+   //       // prevent listen duplicate
+   //       domNode.dataset.isListened = true;
+   //
+   //       // Listen event when selectivity value updates
+   //       if (domNode && row.id && !isFormView) {
+   //          domNode.addEventListener(
+   //             "change",
+   //             async (/* e */) => {
+   //                // update just this value on our current object.model
+   //                var values = {};
+   //                values[this.columnName] = this.selectivityGet(domNode);
+   //
+   //                // check data does not be changed
+   //                if (Object.is(values[this.columnName], row[this.columnName]))
+   //                   return;
+   //
+   //                // pass empty string because it could not put empty array in REST api
+   //                // added check for null because default value of field is null
+   //                if (
+   //                   values[this.columnName] == null ||
+   //                   values[this.columnName].length == 0
+   //                )
+   //                   values[this.columnName] = "";
+   //
+   //                try {
+   //                   await this.object.model().update(row.id, values);
+   //
+   //                   // update values of relation to display in grid
+   //                   values[this.relationName()] = values[this.columnName];
+   //
+   //                   // update new value to item of DataTable .updateItem
+   //                   if (values[this.columnName] == "")
+   //                      values[this.columnName] = [];
+   //                   if ($$(node) && $$(node).updateItem)
+   //                      $$(node).updateItem(row.id, values);
+   //                } catch (err) {
+   //                   node.classList.add("webix_invalid");
+   //                   node.classList.add("webix_invalid_cell");
+   //
+   //                   this.AB.notify.developer(err, {
+   //                      context:
+   //                         "ABFieldConnect:customDisplay():onChange: Error updating our entry.",
+   //                      row: row,
+   //                      values: values,
+   //                   });
+   //                }
+   //             },
+   //             false
+   //          );
+   //       } else {
+   //          domNode.addEventListener(
+   //             "change",
+   //             (/* e */) => {
+   //                if (domNode.clientHeight > 32) {
+   //                   var item = $$(node);
+   //                   item.define("height", domNode.clientHeight + 6);
+   //                   item.resizeChildren();
+   //                   item.resize();
+   //                }
+   //             },
+   //             false
+   //          );
+   //
+   //          // add a change listener to the selectivity instance we are filtering our options list by.
+   //          if (options.filterValue && $$(options.filterValue.ui.id)) {
+   //             let parentDomNode = $$(
+   //                options.filterValue.ui.id
+   //             ).$view.querySelector(".connect-data-values");
+   //             parentDomNode.addEventListener(
+   //                "change",
+   //                (e) => {
+   //                   let parentVal = this.selectivityGet(parentDomNode);
+   //                   if (parentVal) {
+   //                      // if there is a value set allow the user to edit and
+   //                      // put back the placeholder text to the orignal value
+   //                      domNode.selectivity.setOptions({
+   //                         readOnly: false,
+   //                         placeholder: placeholder,
+   //                      });
+   //
+   //                      // clear any previous value because it could be invalid
+   //                      domNode.selectivity.setValue(null);
+   //                   } else {
+   //                      // if there is not a value set make field read only and
+   //                      // set the placeholder text to a read only version
+   //                      domNode.selectivity.setOptions({
+   //                         readOnly: true,
+   //                         placeholder: placeholderReadOnly,
+   //                      });
+   //
+   //                      // clear any previous value because it could be invalid
+   //                      domNode.selectivity.setValue(null);
+   //                   }
+   //                },
+   //                false
+   //             );
+   //          }
+   //       }
+   //    }
+   // }
 
    /*
     * @function customEdit
@@ -969,19 +1113,19 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
    //// NOTE: why do we pass in row, App, and node?  is this something we do in our external components?
    ////       are these values present when this Object is instanciated? Can't we just pass these into the
    ////       object constructor and have it internally track these things?
-   customEdit(row, App, node) {
-      if (this.settings.linkType == "many") {
-         var domNode = node.querySelector(".connect-data-values");
-
-         if (domNode.selectivity != null) {
-            // Open selectivity
-            domNode.selectivity.open();
-            return false;
-         }
-         return false;
-      }
-      return false;
-   }
+   // customEdit(row, App, node) {
+   //    if (this.settings.linkType == "many") {
+   //       var domNode = node.querySelector(".connect-data-values");
+   //
+   //       if (domNode.selectivity != null) {
+   //          // Open selectivity
+   //          domNode.selectivity.open();
+   //          return false;
+   //       }
+   //       return false;
+   //    }
+   //    return false;
+   // }
 
    /*
     * @funciton formComponent
@@ -1090,7 +1234,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                // newRule[linkedCol.id] = { 'haveNoRelation': 0 };
                where.rules.push({
                   key: linkedCol.id,
-                  rule: "haveNoRelation",
+                  rule: "have_no_relation",
                });
             }
             // 1:1 - get data that's only empty relation value by query null value from link table
@@ -1133,6 +1277,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                   // populate display text
                   (this._options || []).forEach((opt) => {
                      opt.text = linkedObj.displayData(opt);
+                     opt.value = opt.text;
                   });
 
                   this.AB.Storage.set(storageID, this._options);
@@ -1152,32 +1297,75 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       });
    }
 
+   getItemFromUUID(uuid) {
+      let item;
+      this._options.forEach((option) => {
+         if (option.uuid == uuid) {
+            item = option;
+            return false;
+         }
+      });
+      return item;
+   }
+
+   getItemFromVal(val) {
+      let item;
+      this._options.forEach((option) => {
+         if (this.indexField) {
+            if (option[this.indexField.columnName] == val) {
+               item = option;
+               return false;
+            }
+         } else if (this.indexField2) {
+            if (option[this.indexField2.columnName] == val) {
+               item = option;
+               return false;
+            }
+         }
+      });
+      return item;
+   }
+
    getValue(item) {
-      var domNode = item.$view.querySelector(".connect-data-values");
-      var values = this.selectivityGet(domNode);
-      return values;
+      debugger;
+      var multiselect = this.settings.linkType == "many";
+      if (multiselect) {
+         let vals = [];
+         let val = item.getValue().split(",");
+         val.forEach((record) => {
+            vals.push(item.getList().getItem(record));
+         });
+         return vals;
+      } else {
+         return item.getList().getItem(item.getValue());
+      }
+      var values = item.getList().getItem(item.getValue());
    }
 
    setValue(item, rowData) {
       if (!item) return;
-
       // if (AB.isEmpty(rowData)) return; removed because sometimes we will
       // want to set this to empty
-
       let val = this.pullRelationValues(rowData);
-
-      // get selectivity dom
-      var domSelectivity = item.$view.querySelector(".connect-data-values");
-
-      if (domSelectivity) {
-         // set value to selectivity
-         this.selectivitySet(domSelectivity, val);
-
-         if (domSelectivity.clientHeight > 32) {
-            item.define("height", domSelectivity.clientHeight + 6);
-            item.resizeChildren();
-            item.resize();
-         }
+      // put in current values as options so we can display them before
+      // the rest of the options are fetched when field is clicked
+      if (item.getList && item.getList().count() == 0) {
+         item.getList().define("data", val);
       }
+      item.setValue(val.id);
+
+      // // get selectivity dom
+      // var domSelectivity = item.$view.querySelector(".connect-data-values");
+      //
+      // if (domSelectivity) {
+      //    // set value to selectivity
+      //    this.selectivitySet(domSelectivity, val);
+      //
+      //    if (domSelectivity.clientHeight > 32) {
+      //       item.define("height", domSelectivity.clientHeight + 6);
+      //       item.resizeChildren();
+      //       item.resize();
+      //    }
+      // }
    }
 };

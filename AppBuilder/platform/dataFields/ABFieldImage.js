@@ -402,26 +402,31 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
             field.settings.useHeight && field.settings.imageHeight
                ? field.settings.imageHeight + 20
                : 80;
-         containerHeight = `${heightVal} px`;
-         width = `${field.settings.imageWidth || 100} px`;
+         containerHeight = `${heightVal}px`;
+         width = `${field.settings.imageWidth || 100}px`;
          imageHeight =
             field.settings.useHeight && field.settings.imageHeight
                ? field.settings.imageHeight
                : 80;
-         imageHeight = `${imageHeight} px`;
+         imageHeight = `${imageHeight}px`;
          imageSrcHeight =
             field.settings.useHeight && field.settings.imageHeight
                ? field.settings.imageHeight
                : 60;
-         imageSrcHeight = `${imageSrcHeight} px`;
+         imageSrcHeight = `${imageSrcHeight}px`;
       }
-      if (field.settings.useHeight) {
-         containerHeight = parseInt(field.settings.imageHeight) + 20;
-         containerHeight = `${containerHeight} px`;
-         imageHeight = parseInt(field.settings.imageHeight);
-         imageHeight = `${imageHeight} px`;
-         imageSrcHeight = parseInt(field.settings.imageHeight);
-         imageSrcHeight = `${imageSrcHeight} px`;
+      if (
+         field.settings.useHeight &&
+         field.settings.imageHeight &&
+         field.settings.imageHeight != "NaN"
+      ) {
+         config.height = field.settings.imageHeight || 0;
+         containerHeight = parseInt(config.height) + 20;
+         containerHeight = `${containerHeight}px`;
+         imageHeight = parseInt(config.height);
+         imageHeight = `${imageHeight}px`;
+         imageSrcHeight = parseInt(config.height);
+         imageSrcHeight = `${imageSrcHeight}px`;
       }
 
       let editable = options.editable;
