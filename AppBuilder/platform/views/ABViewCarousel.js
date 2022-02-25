@@ -198,6 +198,13 @@ export default class ABViewCarousel extends ABViewCarouselCore {
                      labelWidth: this.AB.UISettings.config().labelWidthLarge,
                      options: [],
                   },
+
+                  {
+                     view: "checkbox",
+                     name: "filterByCursor",
+                     labelWidth: 0,
+                     labelRight: L("Filter images by cursor")
+                  },
                ],
             },
          },
@@ -323,6 +330,7 @@ export default class ABViewCarousel extends ABViewCarouselCore {
 
       $$(ids.datacollection).setValue(view.settings.dataviewID);
       $$(ids.field).setValue(view.settings.field);
+      $$(ids.filterByCursor).setValue(view.settings.filterByCursor);
 
       $$(ids.width).setValue(view.settings.width);
       $$(ids.height).setValue(view.settings.height);
@@ -347,6 +355,7 @@ export default class ABViewCarousel extends ABViewCarouselCore {
 
       view.settings.dataviewID = $$(ids.datacollection).getValue();
       view.settings.field = $$(ids.field).getValue();
+      view.settings.filterByCursor = $$(ids.filterByCursor).getValue() || false;
 
       view.settings.width = $$(ids.width).getValue();
       view.settings.height = $$(ids.height).getValue();
@@ -445,6 +454,12 @@ export default class ABViewCarousel extends ABViewCarouselCore {
          dv.on("create", () => {
             dv.reloadData();
          });
+
+         if (this.settings.filterByCursor) {
+            dv.on("changeCursor", () => {
+               _logic.onShow();
+            });
+         }
 
          // filter helper
          this.filterHelper.objectLoad(object);
@@ -565,6 +580,18 @@ export default class ABViewCarousel extends ABViewCarouselCore {
             fnFilter = fnFilter || filterUI.getFilter();
 
             let rows = dv.getData(fnFilter);
+
+            // Filter images by cursor
+            if (this.settings.filterByCursor) {
+               let cursor = dv.getCursor();
+               if (cursor) {
+                  rows = rows.filter(
+                     (r) =>
+                        (r[obj.PK()] || r.id || r) ==
+                        (cursor[obj.PK()] || cursor.id || cursor)
+                  );
+               }
+            }
 
             let images = [];
 
