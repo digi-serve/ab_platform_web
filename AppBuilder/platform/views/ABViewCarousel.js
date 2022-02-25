@@ -454,6 +454,12 @@ export default class ABViewCarousel extends ABViewCarouselCore {
          dv.on("create", () => {
             dv.reloadData();
          });
+         dv.on("initializingData", () => {
+            _logic.busy();
+         });
+         dv.on("initializedData", () => {
+            _logic.ready();
+         });
 
          if (this.settings.filterByCursor) {
             dv.on("changeCursor", () => {
