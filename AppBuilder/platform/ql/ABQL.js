@@ -531,7 +531,7 @@ class ABQL extends ABQLCore {
                   id: this.ids.popup,
                   view: "popup",
                   position: "center",
-                  minWidth: 600,
+                  minWidth: 700,
                   modal: true,
                   resize: true,
                   body: {
