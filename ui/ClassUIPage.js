@@ -51,7 +51,7 @@ class ClassUIPage extends ClassUI {
       var placeholder = {};
       if (this.page && this.page.isRoot()) {
          // some pages can take a while to initialize.
-         // I bet
+         // add a spinner to indicate it is busy
          placeholder = {
             type: "clean",
             css: { "text-align": "center" },

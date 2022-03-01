@@ -55,6 +55,10 @@ class Account extends EventEmitter {
       );
    }
 
+   email() {
+      return this._config?.email ?? "";
+   }
+
    language() {
       return this._config?.languageCode ?? "en";
    }
