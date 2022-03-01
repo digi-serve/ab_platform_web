@@ -761,36 +761,10 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
       config.editor = multiselect ? "multiselect" : "combo";
       config.editFormat = (value) => {
-         let vals = [];
-         if (Array.isArray(value)) {
-            value.forEach((val) => {
-               if (typeof val == "object") {
-                  vals.push(val.id);
-               } else {
-                  vals.push(field.getItemFromVal(val).id);
-               }
-            });
-         } else {
-            if (typeof value == "object") {
-               vals.push(value.id);
-            } else {
-               vals.push(field.getItemFromVal(value).id);
-            }
-         }
-         return vals.join();
+         return field.editFormat(value);
       };
       config.editParse = function (value) {
-         if (multiselect) {
-            let returnVals = [];
-            let vals = value.split(",");
-            vals.forEach((val) => {
-               returnVals.push(val);
-            });
-            return returnVals;
-         } else {
-            let item = field.getItemFromUUID(value);
-            return item;
-         }
+         return field.editParse(value);
       };
       config.template = (row) => {
          var selectedData = field.pullRelationValues(row);
@@ -798,51 +772,26 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          if (selectedData.length) {
             selectedData.forEach((val) => {
                values.push(
-                  `<div style="line-height: 24px; margin: 4px 1.5px;" class='webix_multicombo_value'><span>${val.value}</span><!-- span class="webix_multicombo_delete" role="button" aria-label="Remove item"></span --></div>`
+                  `<div style="line-height: 26px; margin: 4px 1.5px;" class='webix_multicombo_value'><span>${val.value}</span><!-- span data-uuid="${val.id}" class="webix_multicombo_delete" role="button" aria-label="Remove item"></span --></div>`
                );
             });
          } else if (selectedData.value) {
             values.push(
-               `<div style="line-height: 24px; margin: 4px 1.5px;" class='webix_multicombo_value'><span>${selectedData.value}</span><!-- span class="webix_multicombo_delete" role="button" aria-label="Remove item"></span --></div>`
+               `<div style="line-height: 26px; margin: 4px 1.5px;" class='webix_multicombo_value'><span>${selectedData.value}</span><!-- span data-uuid="${selectedData.id}" class="webix_multicombo_delete" role="button" aria-label="Remove item"></span --></div>`
             );
          }
          return values.join("");
       };
+      config.suggest = {
+         button: true,
+         on: {
+            onBeforeShow: function () {
+               field.getAndPopulateOptions(this);
+            },
+         },
+      };
       if (multiselect) {
-         config.suggest = {
-            view: "checksuggest",
-            button: true,
-            on: {
-               onBeforeShow: function () {
-                  let theEditor = this;
-                  field.once("option.data", (data) => {
-                     theEditor.getList().define("data", data);
-                     theEditor.setValue(theEditor.getValue());
-                  });
-                  field.getOptions().then((data) => {
-                     theEditor.getList().define("data", data);
-                     theEditor.setValue(theEditor.getValue());
-                  });
-               },
-            },
-         };
-      } else {
-         config.suggest = {
-            button: true,
-            on: {
-               onBeforeShow: function () {
-                  let theEditor = this;
-                  field.once("option.data", (data) => {
-                     theEditor.getList().define("data", data);
-                     // theEditor.setValue(theEditor.getValue());
-                  });
-                  field.getOptions().then((data) => {
-                     theEditor.getList().define("data", data);
-                     // theEditor.setValue(theEditor.getValue());
-                  });
-               },
-            },
-         };
+         config.suggest.view = "checksuggest";
       }
 
       return config;
@@ -1113,19 +1062,10 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
    //// NOTE: why do we pass in row, App, and node?  is this something we do in our external components?
    ////       are these values present when this Object is instanciated? Can't we just pass these into the
    ////       object constructor and have it internally track these things?
-   // customEdit(row, App, node) {
-   //    if (this.settings.linkType == "many") {
-   //       var domNode = node.querySelector(".connect-data-values");
-   //
-   //       if (domNode.selectivity != null) {
-   //          // Open selectivity
-   //          domNode.selectivity.open();
-   //          return false;
-   //       }
-   //       return false;
-   //    }
-   //    return false;
-   // }
+   customEdit(row, App, node) {
+      var selectedData = this.pullRelationValues(row);
+      this._selectedData = selectedData;
+   }
 
    /*
     * @funciton formComponent
@@ -1260,7 +1200,16 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                if (storedOptions) {
                   // immediately respond with our stored options.
                   this._options = storedOptions;
-                  return respond(storedOptions);
+                  let options = [];
+                  if (this._selectedData && this._selectedData.length) {
+                     options = options.concat(
+                        this._selectedData,
+                        storedOptions
+                     );
+                  } else {
+                     options = storedOptions;
+                  }
+                  return respond(options);
                }
             })
             .then(async () => {
@@ -1281,7 +1230,16 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                   });
 
                   this.AB.Storage.set(storageID, this._options);
-                  return respond(this._options);
+                  let options = [];
+                  if (this._selectedData && this._selectedData.length) {
+                     options = options.concat(
+                        this._selectedData,
+                        this._options
+                     );
+                  } else {
+                     options = this._options;
+                  }
+                  return respond(options);
                } catch (err) {
                   this.AB.notify.developer(err, {
                      context:
@@ -1297,37 +1255,106 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       });
    }
 
-   getItemFromUUID(uuid) {
-      let item;
-      this._options.forEach((option) => {
-         if (option.uuid == uuid) {
-            item = option;
-            return false;
+   editFormat(value) {
+      if (!value) return "";
+      let vals = [];
+      if (Array.isArray(value)) {
+         value.forEach((val) => {
+            if (typeof val == "object") {
+               vals.push(val.id);
+            } else {
+               let itemObj = this.getItemFromVal(val);
+               vals.push(itemObj.id);
+            }
+         });
+      } else {
+         if (typeof value == "object") {
+            vals.push(value.id);
+         } else {
+            let itemObj = this.getItemFromVal(value);
+            if (itemObj && itemObj.id) {
+               vals.push(itemObj.id);
+            }
          }
+      }
+      return vals.join();
+   }
+
+   editParse(value) {
+      var multiselect = this.settings.linkType == "many";
+      if (multiselect) {
+         let returnVals = [];
+         let vals = value.split(",");
+         vals.forEach((val) => {
+            returnVals.push(val);
+         });
+         return returnVals;
+      } else {
+         let item = this.getItemFromVal(value);
+         return item;
+      }
+   }
+
+   getAndPopulateOptions(editor) {
+      let theEditor = editor;
+      this.once("option.data", (data) => {
+         this.populateOptions(theEditor, data);
       });
-      return item;
+      this.getOptions().then((data) => {
+         this.populateOptions(theEditor, data);
+      });
+   }
+
+   populateOptions(theEditor, data) {
+      theEditor.blockEvent();
+      theEditor.getList().clearAll();
+      theEditor.getList().define("data", data);
+      if (theEditor.getValue && theEditor.getValue()) {
+         theEditor.setValue(theEditor.getValue());
+      } else if (this._selectedData && this._selectedData.length) {
+         theEditor.setValue(this.editFormat(this._selectedData));
+      }
+      theEditor.unblockEvent();
    }
 
    getItemFromVal(val) {
       let item;
-      this._options.forEach((option) => {
-         if (this.indexField) {
-            if (option[this.indexField.columnName] == val) {
-               item = option;
-               return false;
-            }
-         } else if (this.indexField2) {
-            if (option[this.indexField2.columnName] == val) {
-               item = option;
-               return false;
-            }
+      let options = [];
+      if (this._selectedData) {
+         if (Array.isArray(this._selectedData)) {
+            options = options.concat(this._selectedData);
+         } else {
+            options = options.concat([this._selectedData]);
          }
-      });
-      return item;
+      }
+      if (this._options) {
+         options = options.concat(this._options);
+      }
+      if (options.length > 0) {
+         options.forEach((option) => {
+            if (this.indexField && option[this.indexField.columnName] == val) {
+               item = option;
+               return false;
+            } else if (
+               this.indexField2 &&
+               option[this.indexField2.columnName] == val
+            ) {
+               item = option;
+               return false;
+            } else {
+               if (option.id == val) {
+                  item = option;
+                  return false;
+               }
+            }
+         });
+         return item;
+      } else {
+         return "";
+      }
    }
 
    getValue(item) {
-      debugger;
       var multiselect = this.settings.linkType == "many";
       if (multiselect) {
          let vals = [];
@@ -1353,19 +1380,5 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          item.getList().define("data", val);
       }
       item.setValue(val.id);
-
-      // // get selectivity dom
-      // var domSelectivity = item.$view.querySelector(".connect-data-values");
-      //
-      // if (domSelectivity) {
-      //    // set value to selectivity
-      //    this.selectivitySet(domSelectivity, val);
-      //
-      //    if (domSelectivity.clientHeight > 32) {
-      //       item.define("height", domSelectivity.clientHeight + 6);
-      //       item.resizeChildren();
-      //       item.resize();
-      //    }
-      // }
    }
 };

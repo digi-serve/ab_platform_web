@@ -1,7 +1,7 @@
 var ABFieldListCore = require("../../core/dataFields/ABFieldListCore");
 var ABFieldComponent = require("./ABFieldComponent");
 
-var ABFieldSelectivity = require("./ABFieldSelectivity");
+// var ABFieldSelectivity = require("./ABFieldSelectivity");
 
 var defaultValues = ABFieldListCore.defaultValues();
 
@@ -455,7 +455,7 @@ module.exports = class ABFieldList extends ABFieldListCore {
    constructor(values, object) {
       super(values, object);
 
-      this._Selectivity = new ABFieldSelectivity(values, object);
+      // this._Selectivity = new ABFieldSelectivity(values, object);
    }
 
    /*
@@ -594,106 +594,114 @@ module.exports = class ABFieldList extends ABFieldListCore {
       var App = App;
 
       // Multiple select list
-      if (this.settings.isMultiple == true) {
-         var width = options.width,
-            editable = options.editable;
-
-         config.template = (row) => {
-            var node = document.createElement("div");
-            node.classList.add("list-data-values");
-            if (typeof width != "undefined") {
-               node.style.marginLeft = width + "px";
-            }
-
-            var domNode = node;
-
-            var placeholder = L("Select items");
-            var readOnly = false;
-            if (editable != null && editable == false) {
-               readOnly = true;
-               placeholder = "";
-            }
-
-            // var domNode = node.querySelector('.list-data-values');
-
-            // get selected values
-            let selectedData = _getSelectedOptions(field, row);
-
-            // Render selectivity
-            field._Selectivity.selectivityRender(
-               domNode,
-               {
-                  multiple: true,
-                  readOnly: readOnly,
-                  placeholder: placeholder,
-                  hasColors: field.settings.hasColors,
-                  items: field.settings.options,
-                  data: selectedData,
-               },
-               App,
-               row
-            );
-
-            return node.outerHTML;
-         };
+      // if (this.settings.isMultiple == true) {
+      //    var width = options.width,
+      //       editable = options.editable;
+      //
+      //    config.template = (row) => {
+      //       var node = document.createElement("div");
+      //       node.classList.add("list-data-values");
+      //       if (typeof width != "undefined") {
+      //          node.style.marginLeft = width + "px";
+      //       }
+      //
+      //       var domNode = node;
+      //
+      //       var placeholder = L("Select items");
+      //       var readOnly = false;
+      //       if (editable != null && editable == false) {
+      //          readOnly = true;
+      //          placeholder = "";
+      //       }
+      //
+      //       // var domNode = node.querySelector('.list-data-values');
+      //
+      //       // get selected values
+      //       let selectedData = _getSelectedOptions(field, row);
+      //
+      //       // Render selectivity
+      //       field._Selectivity.selectivityRender(
+      //          domNode,
+      //          {
+      //             multiple: true,
+      //             readOnly: readOnly,
+      //             placeholder: placeholder,
+      //             hasColors: field.settings.hasColors,
+      //             items: field.settings.options,
+      //             data: selectedData,
+      //          },
+      //          App,
+      //          row
+      //       );
+      //
+      //       return node.outerHTML;
+      //    };
+      // }
+      // // Single select list
+      // else {
+      var formClass = "";
+      var placeHolder = "";
+      if (options.editable) {
+         formClass = " form-entry";
+         placeHolder = `<span style='color: #CCC; padding: 0 5px;'>${L(
+            "Select item"
+         )}</span>`;
       }
-      // Single select list
-      else {
-         var formClass = "";
-         var placeHolder = "";
-         if (options.editable) {
-            formClass = " form-entry";
-            placeHolder = `<span style='color: #CCC; padding: 0 5px;'>${L(
-               "Select item"
-            )}"</span>`;
-         }
-         var isRemovable = options.editable && !this.settings.required;
+      var isRemovable = options.editable && !this.settings.required;
 
-         config.template = (obj) => {
-            var myHex = "#666666";
-            var myText = placeHolder;
-            field.settings.options.forEach((h) => {
-               if (h.id == obj[field.columnName]) {
-                  myHex = h.hex;
-                  myText = h.text;
+      config.editFormat = (value) => {
+         return field.editFormat(value);
+      };
+      config.editParse = function (value) {
+         return field.editParse(value);
+      };
+
+      config.template = (obj) => {
+         let selectedData = obj[field.columnName];
+         var values = [];
+         let hasCustomColor = "";
+         if (
+            selectedData &&
+            Array.isArray(selectedData) &&
+            selectedData.length
+         ) {
+            selectedData.forEach((val) => {
+               if (val.hex) {
+                  hasCustomColor = "hascustomcolor";
                }
-            });
-            if (field.settings.hasColors && obj[field.columnName]) {
-               return (
-                  '<span class="selectivity-single-selected-item rendered' +
-                  formClass +
-                  '" style="background-color:' +
-                  myHex +
-                  ' !important;">' +
-                  myText +
-                  (isRemovable
-                     ? ' <a class="selectivity-single-selected-item-remove"><i class="fa fa-remove"></i></a>'
-                     : "") +
-                  "</span>"
+               values.push(
+                  `<div style="background: ${val.hex};" class='webix_multicombo_value ${hasCustomColor}'><span>${val.text}</span><!-- span data-uuid="${val.id}" class="webix_multicombo_delete" role="button" aria-label="Remove item"></span --></div>`
                );
-            } else {
-               if (myText != placeHolder) {
-                  return (
-                     myText +
-                     (isRemovable
-                        ? ' <a class="selectivity-single-selected-item-remove" style="color: #333;"><i class="fa fa-remove"></i></a>'
-                        : "")
-                  );
-               } else {
-                  return myText;
-               }
+            });
+         } else if (selectedData) {
+            let selectedObj = selectedData;
+            if (typeof selectedData == "string") {
+               selectedObj = field.getItemFromVal(selectedData);
             }
-         };
-
-         config.editor = "richselect";
-         config.options = field.settings.options.map(function (opt) {
+            if (selectedObj.hex) {
+               hasCustomColor = "hascustomcolor";
+            }
+            values.push(
+               `<div style="background: ${selectedObj.hex};" class='webix_multicombo_value ${hasCustomColor}'><span>${selectedObj.text}</span><!-- span data-uuid="${selectedObj.id}" class="webix_multicombo_delete" role="button" aria-label="Remove item"></span --></div>`
+            );
+         }
+         return values.join("");
+      };
+      config.editor = this.settings.isMultiple ? "multiselect" : "combo";
+      config.suggest = {
+         button: true,
+         data: field.settings.options.map(function (opt) {
             return {
                id: opt.id,
                value: opt.text,
                hex: opt.hex,
             };
-         });
+         }),
+      };
+      if (this.settings.isMultiple) {
+         config.suggest.view = "checksuggest";
       }
+      // }
 
       return config;
    }
@@ -714,105 +722,105 @@ module.exports = class ABFieldList extends ABFieldListCore {
 
       options = options || {};
 
-      if (this.settings.isMultiple == true) {
-         var placeholder = L("Select items");
-         var readOnly = false;
-         if (options.editable != null && options.editable == false) {
-            readOnly = true;
-            placeholder = "";
-         }
+      // if (this.settings.isMultiple == true) {
+      //    var placeholder = L("Select items");
+      //    var readOnly = false;
+      //    if (options.editable != null && options.editable == false) {
+      //       readOnly = true;
+      //       placeholder = "";
+      //    }
+      //
+      //    var domNode = node.querySelector(".list-data-values");
+      //
+      //    // get selected values
+      //    var selectedData = _getSelectedOptions(this, row);
+      //
+      //    // Render selectivity
+      //    this._Selectivity.selectivityRender(
+      //       domNode,
+      //       {
+      //          multiple: true,
+      //          readOnly: readOnly,
+      //          placeholder: placeholder,
+      //          hasColors: this.settings.hasColors,
+      //          items: this.settings.options,
+      //          data: selectedData,
+      //       },
+      //       App,
+      //       row
+      //    );
+      //
+      //    // Listen event when selectivity value updates
+      //    if (domNode && !readOnly && row.id && node) {
+      //       domNode.addEventListener(
+      //          "change",
+      //          (/* e */) => {
+      //             // update just this value on our current object.model
+      //             var values = {};
+      //             values[this.columnName] = this._Selectivity.selectivityGet(
+      //                domNode
+      //             );
+      //
+      //             // pass null because it could not put empty array in REST api
+      //             if (values[this.columnName].length == 0)
+      //                values[this.columnName] = "";
+      //
+      //             this.object
+      //                .model()
+      //                .update(row.id, values)
+      //                .then(() => {
+      //                   // update the client side data object as well so other data changes won't cause this save to be reverted
+      //                   if (values[this.columnName] == "")
+      //                      values[this.columnName] = [];
+      //                   if ($$(node) && $$(node).updateItem)
+      //                      $$(node).updateItem(row.id, values);
+      //                })
+      //                .catch((err) => {
+      //                   node.classList.add("webix_invalid");
+      //                   node.classList.add("webix_invalid_cell");
+      //
+      //                   this.AB.notify.developer(err, {
+      //                      message: "Error updating our entry.",
+      //                      row: row,
+      //                      values: values,
+      //                   });
+      //                });
+      //          },
+      //          false
+      //       );
+      //    }
+      // } else {
+      if (!node.querySelector) return;
 
-         var domNode = node.querySelector(".list-data-values");
+      var clearButton = node.querySelector(
+         ".selectivity-single-selected-item-remove"
+      );
+      if (clearButton) {
+         clearButton.addEventListener("click", (e) => {
+            e.stopPropagation();
+            var values = {};
+            values[this.columnName] = "";
+            this.object
+               .model()
+               .update(row.id, values)
+               .then(() => {
+                  // update the client side data object as well so other data changes won't cause this save to be reverted
+                  if ($$(node) && $$(node).updateItem)
+                     $$(node).updateItem(row.id, values);
+               })
+               .catch((err) => {
+                  node.classList.add("webix_invalid");
+                  node.classList.add("webix_invalid_cell");
 
-         // get selected values
-         var selectedData = _getSelectedOptions(this, row);
-
-         // Render selectivity
-         this._Selectivity.selectivityRender(
-            domNode,
-            {
-               multiple: true,
-               readOnly: readOnly,
-               placeholder: placeholder,
-               hasColors: this.settings.hasColors,
-               items: this.settings.options,
-               data: selectedData,
-            },
-            App,
-            row
-         );
-
-         // Listen event when selectivity value updates
-         if (domNode && !readOnly && row.id && node) {
-            domNode.addEventListener(
-               "change",
-               (/* e */) => {
-                  // update just this value on our current object.model
-                  var values = {};
-                  values[this.columnName] = this._Selectivity.selectivityGet(
-                     domNode
-                  );
-
-                  // pass null because it could not put empty array in REST api
-                  if (values[this.columnName].length == 0)
-                     values[this.columnName] = "";
-
-                  this.object
-                     .model()
-                     .update(row.id, values)
-                     .then(() => {
-                        // update the client side data object as well so other data changes won't cause this save to be reverted
-                        if (values[this.columnName] == "")
-                           values[this.columnName] = [];
-                        if ($$(node) && $$(node).updateItem)
-                           $$(node).updateItem(row.id, values);
-                     })
-                     .catch((err) => {
-                        node.classList.add("webix_invalid");
-                        node.classList.add("webix_invalid_cell");
-
-                        this.AB.notify.developer(err, {
-                           message: "Error updating our entry.",
-                           row: row,
-                           values: values,
-                        });
-                     });
-               },
-               false
-            );
-         }
-      } else {
-         if (!node.querySelector) return;
-
-         var clearButton = node.querySelector(
-            ".selectivity-single-selected-item-remove"
-         );
-         if (clearButton) {
-            clearButton.addEventListener("click", (e) => {
-               e.stopPropagation();
-               var values = {};
-               values[this.columnName] = "";
-               this.object
-                  .model()
-                  .update(row.id, values)
-                  .then(() => {
-                     // update the client side data object as well so other data changes won't cause this save to be reverted
-                     if ($$(node) && $$(node).updateItem)
-                        $$(node).updateItem(row.id, values);
-                  })
-                  .catch((err) => {
-                     node.classList.add("webix_invalid");
-                     node.classList.add("webix_invalid_cell");
-
-                     this.AB.notify.developer(err, {
-                        message: "Error updating our entry.",
-                        row: row,
-                        values: "",
-                     });
+                  this.AB.notify.developer(err, {
+                     message: "Error updating our entry.",
+                     row: row,
+                     values: "",
                   });
-            });
-         }
+               });
+         });
       }
+      // }
    }
 
    /*
@@ -824,18 +832,18 @@ module.exports = class ABFieldList extends ABFieldListCore {
     * @param {HtmlDOM} node  the HTML Dom object for this field's display.
     */
    customEdit(row, App, node) {
-      if (this.settings.isMultiple == true) {
-         var domNode = node.querySelector(".list-data-values");
-
-         if (domNode.selectivity != null) {
-            // Open selectivity
-            domNode.selectivity.open();
-            return false;
-         }
-         return false;
-      } else {
-         return super.customEdit(row, App, node);
-      }
+      // if (this.settings.isMultiple == true) {
+      //    var domNode = node.querySelector(".list-data-values");
+      //
+      //    if (domNode.selectivity != null) {
+      //       // Open selectivity
+      //       domNode.selectivity.open();
+      //       return false;
+      //    }
+      //    return false;
+      // } else {
+      return super.customEdit(row, App, node);
+      // }
    }
 
    /*
@@ -881,6 +889,60 @@ module.exports = class ABFieldList extends ABFieldListCore {
       };
 
       return detailComponentSetting;
+   }
+
+   editFormat(value) {
+      if (!value) return "";
+      let vals = [];
+      if (Array.isArray(value)) {
+         value.forEach((val) => {
+            if (typeof val == "object") {
+               vals.push(val.id);
+            } else {
+               let itemObj = this.getItemFromVal(val);
+               vals.push(itemObj.id);
+            }
+         });
+      } else {
+         if (typeof value == "object") {
+            vals.push(value.id);
+         } else {
+            let itemObj = this.getItemFromVal(value);
+            if (itemObj && itemObj.id) {
+               vals.push(itemObj.id);
+            }
+         }
+      }
+      return vals.join();
+   }
+
+   editParse(value) {
+      if (this.settings.isMultiple) {
+         let returnVals = [];
+         let vals = value.split(",");
+         vals.forEach((val) => {
+            returnVals.push(this.getItemFromVal(val));
+         });
+         return returnVals;
+      } else {
+         return value;
+      }
+   }
+
+   getItemFromVal(val) {
+      let item;
+      let options = this.options();
+      if (options.length > 1) {
+         options.forEach((option) => {
+            if (option.id == val) {
+               item = option;
+               return false;
+            }
+         });
+         return item;
+      } else {
+         return "";
+      }
    }
 
    getValue(item /*, rowData */) {

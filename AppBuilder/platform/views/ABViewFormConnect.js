@@ -42,11 +42,34 @@ function _onShow(App, compId, instance, component) {
       instance.settings.filterConnectedValue.indexOf(":") > -1
    ) {
       Object.keys(instance.parent.viewComponents).forEach((key, index) => {
+         // find component name, I (James) adjusted the ui to display better,
+         // but the result is two different ui types.
+         let uiName = "";
          if (
-            instance.parent.viewComponents[key].ui.name ==
-            instance.settings.filterConnectedValue.split(":")[0]
+            instance.parent.viewComponents[key].ui &&
+            instance.parent.viewComponents[key].ui.rows
          ) {
-            filterValue = instance.parent.viewComponents[key];
+            if (instance.parent.viewComponents[key].ui.rows[0].name) {
+               uiName = instance.parent.viewComponents[key].ui.rows[0].name;
+               if (
+                  uiName == instance.settings.filterConnectedValue.split(":")[0]
+               ) {
+                  filterValue = instance.parent.viewComponents[key].ui.rows[0];
+               }
+            } else if (
+               instance.parent.viewComponents[key].ui.rows[0].cols &&
+               instance.parent.viewComponents[key].ui.rows[0].cols[2] &&
+               instance.parent.viewComponents[key].ui.rows[0].cols[2].name
+            ) {
+               uiName =
+                  instance.parent.viewComponents[key].ui.rows[0].cols[2].name;
+               if (
+                  uiName == instance.settings.filterConnectedValue.split(":")[0]
+               ) {
+                  filterValue =
+                     instance.parent.viewComponents[key].ui.rows[0].cols[2];
+               }
+            }
          }
       });
 
@@ -56,7 +79,7 @@ function _onShow(App, compId, instance, component) {
       filterColumn = instance.settings.filterConnectedValue.split(":")[2];
    }
 
-   field.customDisplay(rowData, App, node, {
+   instance.options = {
       formView: instance.settings.formView,
       filters: instance.settings.objectWorkspace.filterConditions,
       filterValue: filterValue,
@@ -67,7 +90,112 @@ function _onShow(App, compId, instance, component) {
          !instance.settings.editForm || instance.settings.editForm == "none"
             ? false
             : true,
-   });
+   };
+
+   var multiselect = field.settings.linkType == "many";
+
+   var placeholder = L("Select item");
+   if (multiselect) {
+      placeholder = L("Select items");
+   }
+
+   var readOnly = false;
+   if (
+      instance.options.editable != null &&
+      instance.options.editable == false
+   ) {
+      readOnly = true;
+      placeholder = "";
+   }
+
+   // if this field's options are filtered off another field's value we need
+   // to make sure the UX helps the user know what to do.
+   let placeholderReadOnly = null;
+   if (instance.options.filterValue && instance.options.filterKey) {
+      if (!$$(instance.options.filterValue.id)) {
+         // this happens in the Interface Builder when only the single form UI is displayed
+         readOnly = true;
+         placeholderReadOnly = L("Must select item from '{0}' first.", [
+            L("PARENT ELEMENT"),
+         ]);
+      } else {
+         let val = field.getValue($$(instance.options.filterValue.id));
+         if (!val) {
+            // if there isn't a value on the parent select element set this one to readonly and change placeholder text
+            readOnly = true;
+            let label = $$(instance.options.filterValue.id);
+            placeholderReadOnly = L("Must select item from '{0}' first.", [
+               label.config.label,
+            ]);
+         }
+      }
+   }
+
+   // fetch the options and set placeholder text for this view
+   if (node) {
+      if (readOnly) {
+         $$(node).define("placeholder", placeholderReadOnly);
+         $$(node).define("disabled", true);
+      } else {
+         $$(node).define("placeholder", placeholder);
+      }
+      $$(node).refresh();
+
+      field.once("option.data", (data) => {
+         data.forEach((item) => {
+            item.value = item.text;
+         });
+         $$(node).getList().clearAll();
+         $$(node).getList().define("data", data);
+      });
+
+      field
+         .getOptions(instance.settings.objectWorkspace.filterConditions, "")
+         .then((data) => {
+            data.forEach((item) => {
+               item.value = item.text;
+            });
+            $$(node).getList().clearAll();
+            $$(node).getList().define("data", data);
+         });
+   }
+
+   if (instance.options.filterValue && $$(instance.options.filterValue.id)) {
+      // let parentDomNode = $$(options.filterValue.ui.id).$view.querySelector(
+      //    ".connect-data-values"
+      // );
+      $$(instance.options.filterValue.id).attachEvent(
+         "onChange",
+         (e) => {
+            let parentVal = $$(instance.options.filterValue.id).getValue();
+            if (parentVal) {
+               $$(node).define("disabled", false);
+               $$(node).define("placeholder", placeholder);
+               $$(node).setValue("");
+               $$(node).refresh();
+            } else {
+               $$(node).define("disabled", true);
+               $$(node).define("placeholder", placeholderReadOnly);
+               $$(node).setValue("");
+               $$(node).refresh();
+            }
+         },
+         false
+      );
+   }
+
+   // field.customDisplay(rowData, App, node, {
+   //    formView: instance.settings.formView,
+   //    filters: instance.settings.objectWorkspace.filterConditions,
+   //    filterValue: filterValue,
+   //    filterKey: filterKey,
+   //    filterColumn: filterColumn,
+   //    editable: instance.settings.disable == 1 ? false : true,
+   //    editPage:
+   //       !instance.settings.editForm || instance.settings.editForm == "none"
+   //          ? false
+   //          : true,
+   // });
 
    // listen 'editPage' event
    if (!instance._editPageEvent) {
@@ -596,59 +724,6 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
          var options = optionsParam || {};
          if (form) settings = form.settings;
 
-         var multiselect = field.settings.linkType == "many";
-
-         var placeholder = L("Select item");
-         if (multiselect) {
-            placeholder = L("Select items");
-         }
-
-         // if this field's options are filtered off another field's value we need
-         // to make sure the UX helps the user know what to do.
-         let placeholderReadOnly = null;
-         if (options.filterValue && options.filterKey) {
-            if (!$$(options.filterValue.ui.id)) {
-               // this happens in the Interface Builder when only the single form UI is displayed
-               readOnly = true;
-               placeholderReadOnly = L("Must select item from '{0}' first.", [
-                  L("PARENT ELEMENT"),
-               ]);
-            } else {
-               let val = this.getValue($$(options.filterValue.ui.id));
-               if (!val) {
-                  // if there isn't a value on the parent select element set this one to readonly and change placeholder text
-                  readOnly = true;
-                  let label = $$(options.filterValue.ui.id);
-                  placeholderReadOnly = L(
-                     "Must select item from '{0}' first.",
-                     [label.config.label]
-                  );
-               }
-            }
-         }
-
-         // fetch the options and set placeholder text for this view
-         if ($$(ids.component)) {
-            $$(ids.component).define("placeholder", placeholder);
-            $$(ids.component).refresh();
-
-            field.once("option.data", (data) => {
-               data.forEach((item) => {
-                  item.value = item.text;
-               });
-               $$(ids.component).getList().define("data", data);
-            });
-
-            field
-               .getOptions(this.settings.objectWorkspace.filterConditions, "")
-               .then((data) => {
-                  data.forEach((item) => {
-                     item.value = item.text;
-                  });
-                  $$(ids.component).getList().define("data", data);
-               });
-         }
-
          addPageComponent.applicationLoad(this.application);
          addPageComponent.init({
             onSaveData: component.logic.callbackSaveData,
@@ -688,6 +763,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
                data.forEach((item) => {
                   item.value = item.text;
                });
+               $$(ids.component).getList().clearAll();
                $$(ids.component).getList().define("data", data);
                if (field.settings.linkType == "many") {
                   let currentVals = $$(ids.component).getValue();
@@ -705,7 +781,8 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
             field
                .getOptions(this.settings.objectWorkspace.filterConditions, "")
                .then(function (data) {
-                  // we need new option that will be returned from server
+                  // we need new option that will be returned from server (above)
+                  // so we will not set this and then just reset it.
                });
          },
 
@@ -793,21 +870,22 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
                   if (typeof record != "object") {
                      // we need to convert either index or uuid to full data object
                      recordObj = field.getItemFromVal(record);
-                     if (!recordObj) {
-                        recordObj = field.getItemFromUUID(record);
-                     }
+                     // if (!recordObj) {
+                     //    recordObj = field.getItemFromUUID(record);
+                     // }
                   }
                   // recordObj = field.pullRecordRelationValues(recordObj);
-                  selectedValues.push(recordObj.id);
+                  if (recordObj && recordObj.id)
+                     selectedValues.push(recordObj.id);
                });
             } else {
                selectedValues = data;
                if (typeof data != "object") {
                   // we need to convert either index or uuid to full data object
                   selectedValues = field.getItemFromVal(data);
-                  if (!selectedValues) {
-                     selectedValues = field.getItemFromUUID(data);
-                  }
+                  // if (!selectedValues) {
+                  //    selectedValues = field.getItemFromUUID(data);
+                  // }
                }
                // selectedValues = field.pullRecordRelationValues(selectedValues);
                if (selectedValues && selectedValues.id) {
@@ -819,7 +897,10 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
             // We can now set the new value but we need to block event listening
             // so it doesn't trigger onChange again
             $$(ids.component).blockEvent();
-            $$(ids.component).setValue(selectedValues);
+            let prepedVals = selectedValues.join
+               ? selectedValues.join()
+               : selectedValues;
+            $$(ids.component).setValue(prepedVals);
             $$(ids.component).unblockEvent();
          },
       };
@@ -831,19 +912,58 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
          },
          on: {
             onShow: () => {
-               field.once("option.data", (data) => {
-                  $$(ids.component).getList().define("data", data);
-                  $$(ids.component).setValue($$(ids.component).getValue());
-               });
-               field
-                  .getOptions(
-                     this.settings.objectWorkspace.filterConditions,
-                     ""
-                  )
-                  .then((data) => {
+               if (this.options.filterValue && this.options.filterValue.id) {
+                  let parentVal = $$(this.options.filterValue.id).getValue();
+                  if (parentVal) {
+                     // if we are filtering based off another selectivity's value we
+                     // need to do it on fetch each time because the value can change
+                     // copy the filters so we don't add to them every time there is a change
+                     let combineFilters = JSON.parse(
+                        JSON.stringify(this.options.filters)
+                     );
+
+                     // if there is a value create a new filter rule
+                     let filter = {
+                        key: this.options.filterKey,
+                        rule: "equals",
+                        value: parentVal,
+                     };
+                     combineFilters.rules.push(filter);
+
+                     field.once("option.data", (data) => {
+                        $$(ids.component).getList().clearAll();
+                        $$(ids.component).getList().define("data", data);
+                        $$(ids.component).setValue(
+                           $$(ids.component).getValue()
+                        );
+                     });
+                     field.getOptions(combineFilters, "").then((data) => {
+                        $$(ids.component).getList().clearAll();
+                        $$(ids.component).getList().define("data", data);
+                        $$(ids.component).setValue(
+                           $$(ids.component).getValue()
+                        );
+                     });
+                  }
+               } else {
+                  field.once("option.data", (data) => {
+                     $$(ids.component).getList().clearAll();
                      $$(ids.component).getList().define("data", data);
                      $$(ids.component).setValue($$(ids.component).getValue());
                   });
+                  field
+                     .getOptions(
+                        this.settings.objectWorkspace.filterConditions,
+                        ""
+                     )
+                     .then((data) => {
+                        $$(ids.component).getList().clearAll();
+                        $$(ids.component).getList().define("data", data);
+                        $$(ids.component).setValue(
+                           $$(ids.component).getValue()
+                        );
+                     });
+               }
             },
          },
       };
