@@ -327,20 +327,14 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
                            cols: [
                               {
                                  view: "label",
-                                 label: L(
-                                    "ab.component.connect.sortData",
-                                    "*Sort Options:"
-                                 ),
+                                 label: L("Sort Options:"),
                                  width: App.config.labelWidthLarge
                               },
                               {
                                  view: "button",
                                  name: "buttonSort",
                                  css: "webix_primary",
-                                 label: L(
-                                    "ab.component.connect.sort",
-                                    "*Settings"
-                                 ),
+                                 label: L("Settings"),
                                  icon: "fa fa-gear",
                                  type: "icon",
                                  badge: 0,
