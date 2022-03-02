@@ -44,7 +44,7 @@ module.exports = class CalculateTask extends CalculateTaskCore {
             {
                id: ids.name,
                view: "text",
-               label: L("ab.process.element.name", "*Name"),
+               label: L("Name"),
                name: "name",
                value: this.name,
             },
@@ -52,7 +52,7 @@ module.exports = class CalculateTask extends CalculateTaskCore {
                id: ids.formulaText,
                view: "texthighlight",
                height: 200,
-               label: L("ab.process.calculate.formula", "*Formula"),
+               label: L("Formula"),
                type: "textarea",
                value: this.formulaText || "",
                highlight: (text) => {
@@ -76,7 +76,7 @@ module.exports = class CalculateTask extends CalculateTaskCore {
                      css: "webix_primary",
                      type: "icon",
                      icon: "fa fa-at",
-                     label: L("ab.process.calculate.parameters", "*Parameters"),
+                     label: L("Parameters"),
                      click: function () {
                         // show popup
                         $$(ids.variablePopup).show(this.$view);
@@ -87,7 +87,7 @@ module.exports = class CalculateTask extends CalculateTaskCore {
                      css: "webix_primary",
                      type: "icon",
                      icon: "fa fa-hashtag",
-                     label: L("ab.process.calculate.operators", "*Operators"),
+                     label: L("Operators"),
                      click: function () {
                         // show popup
                         $$(ids.operatorPopup).show(this.$view);
@@ -147,33 +147,27 @@ module.exports = class CalculateTask extends CalculateTaskCore {
                },
                data: [
                   {
-                     label: L("ab.dataField.calculate.add", "+ Adds"),
+                     label: L("+ Adds"),
                      symbol: "+",
                   },
                   {
-                     label: L("ab.dataField.calculate.subtract", "- Subtracts"),
+                     label: L("- Subtracts"),
                      symbol: "-",
                   },
                   {
-                     label: L("ab.dataField.calculate.multiple", "* Multiples"),
+                     label: L("* Multiples"),
                      symbol: "*",
                   },
                   {
-                     label: L("ab.dataField.calculate.divide", "/ Divides"),
+                     label: L("/ Divides"),
                      symbol: "/",
                   },
                   {
-                     label: L(
-                        "ab.dataField.calculate.openBracket",
-                        "( Open Bracket"
-                     ),
+                     label: L("( Open Bracket"),
                      symbol: "(",
                   },
                   {
-                     label: L(
-                        "ab.dataField.calculate.closedBracket",
-                        ") Closed Bracket"
-                     ),
+                     label: L(") Closed Bracket"),
                      symbol: ")",
                   },
                ],
