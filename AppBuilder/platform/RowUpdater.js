@@ -244,8 +244,8 @@ export default class RowUpdater extends ClassUI {
             let fieldId = $fieldElem.getValue();
             if (!fieldId) return;
 
-            let $customValueElem = $viewItem.getChildViews()[3];
-            let $processValueElem = $viewItem.getChildViews()[4];
+            let $customValueElem = $viewItem.getChildViews()[4];
+            let $processValueElem = $viewItem.getChildViews()[5];
             if (!$customValueElem && !$processValueElem) return;
 
             let fieldInfo = this._Object.fieldByID(fieldId);
@@ -264,18 +264,18 @@ export default class RowUpdater extends ClassUI {
                   if (currDateCheckbox.getValue() == true) {
                      val.value = "ab-current-date";
                   } else {
-                     // Get value from data field manager
-                     val.value = fieldInfo.getValue($customValueElem);
+                     let datePicker = $customValueElem.getChildViews()[1];
+                     val.value = fieldInfo.getValue(datePicker);
                   }
+               } else {
+                  // Get value from data field manager
+                  val = fieldInfo.getValue($customValueElem);
                }
-               // Process value
-               else if ($processValueElem && $processValueElem.isVisible()) {
-                  val.isProcessValue = true;
-                  val.value = $processValueElem.getValue();
-               }
-            } else {
-               // Get value from data field manager
-               val = fieldInfo.getValue($valueElem);
+            }
+            // Process value
+            else if ($processValueElem && $processValueElem.isVisible()) {
+               val.isProcessValue = true;
+               val.value = $processValueElem.getValue();
             }
 
             // Add to output
@@ -394,8 +394,8 @@ export default class RowUpdater extends ClassUI {
       let childViews = $viewItem.getChildViews();
 
       // Change component to display value
-      $viewItem.removeView(childViews[3]);
-      $viewItem.addView(inputView, 3);
+      $viewItem.removeView(childViews[4]);
+      $viewItem.addView(inputView, 4);
 
       formFieldComponent.init();
 
