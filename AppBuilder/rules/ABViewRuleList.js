@@ -381,6 +381,17 @@ module.exports = class ABViewRuleList {
       this.App = this.App || form.App;
    }
 
+   /**
+    * @method isReady()
+    * returns a promise that gets resolved once our action is ready to work.
+    * @return {Promise}
+    */
+   rulesReady() {
+      // This base class should be overwritten by any subclass that needs
+      // to prepare:
+      return Promise.resolve();
+   }
+
    // NOTE: Querybuilder v5.2 has a bug where it won't display the [and/or]
    // choosers properly if it hasn't been shown before the .setValue() call.
    // so this work around allows us to refresh the display after the .show()

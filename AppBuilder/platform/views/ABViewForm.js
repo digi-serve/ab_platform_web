@@ -1335,51 +1335,63 @@ module.exports = class ABViewForm extends ABViewFormCore {
    }
 
    /**
+    * @method recordRulesReady()
+    * This returns a Promise that gets resolved when all record rules report
+    * that they are ready.
+    * @return {Promise}
+    */
+   async recordRulesReady() {
+      return this.RecordRule.rulesReady();
+   }
+
+   /**
     * @method saveData
     * save data in to database
     * @param formView - webix's form element
     *
     * @return {Promise}
     */
-   saveData(formView) {
+   async saveData(formView) {
       // call .onBeforeSaveData event
       // if this function returns false, then it will not go on.
-      if (!this._logic.callbacks.onBeforeSaveData()) return Promise.resolve();
+      if (!this._logic.callbacks.onBeforeSaveData()) return;
 
       // form validate
       if (!formView || !formView.validate()) {
          // TODO : error message
-
-         return Promise.resolve();
+         return;
       }
 
       formView.clearValidation();
 
       // get ABDatacollection
       var dv = this.datacollection;
-      if (dv == null) return Promise.resolve();
+      if (dv == null) return;
 
       // get ABObject
       var obj = dv.datasource;
-      if (obj == null) return Promise.resolve();
+      if (obj == null) return;
 
       // get ABModel
       var model = dv.model;
-      if (model == null) return Promise.resolve();
+      if (model == null) return;
 
       // get update data
       var formVals = this.getFormValues(formView, obj, dv.datacollectionLink);
+
+      // wait for our Record Rules to be ready before we continue.
+      await this.recordRulesReady();
 
       // update value from the record rule (pre-update)
       this.doRecordRulesPre(formVals);
 
       // validate data
       if (!this.validateData(formView, obj, formVals)) {
-         return Promise.resolve();
+         return;
       }
 
       // show progress icon
-      if (formView.showProgress) formView.showProgress({ type: "icon" });
+      formView.showProgress?.({ type: "icon" });
 
       // form ready function
       var formReady = (newFormVals) => {
@@ -1393,7 +1405,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
             }
          }
 
-         if (formView.hideProgress) formView.hideProgress();
+         formView.hideProgress?.();
 
          // if there was saved data pass it up to the onSaveData callback
          if (newFormVals) this._logic.callbacks.onSaveData(newFormVals);
@@ -1432,72 +1444,46 @@ module.exports = class ABViewForm extends ABViewFormCore {
             }
          }
 
-         if (saveButton) saveButton.enable();
+         saveButton?.enable();
 
-         if (formView.hideProgress) formView.hideProgress();
+         formView?.hideProgress?.();
       };
 
-      return new Promise((resolve, reject) => {
-         // If this object already exists, just .update()
+      let newFormVals;
+      // {obj}
+      // The fully populated values returned back from service call
+      // We use this in our post processing Rules
+
+      try {
+         // is this an update or create?
          if (formVals.id) {
-            model
-               .update(formVals.id, formVals)
-               .then((newFormVals) => {
-                  this.doRecordRules(newFormVals)
-                     .then(() => {
-                        // make sure any updates from RecordRules get passed along here.
-                        this.doSubmitRules(newFormVals);
-                        formReady(newFormVals);
-                        resolve(newFormVals);
-                     })
-                     .catch((err) => {
-                        this.AB.notify.developer(err, {
-                           message: "Error processing Record Rules.",
-                           view: this.toObj(),
-                           newFormVals: newFormVals,
-                        });
-                        // Question:  how do we respond to an error?
-                        // ?? just keep going ??
-                        this.doSubmitRules(newFormVals);
-                        formReady(newFormVals);
-                        resolve();
-                     });
-               })
-               .catch((err) => {
-                  formError(err.data);
-                  reject(err);
-               });
+            newFormVals = await model.update(formVals.id, formVals);
+         } else {
+            newFormVals = await model.create(formVals);
          }
-         // else add new row
-         else {
-            model
-               .create(formVals)
-               .then((newFormVals) => {
-                  this.doRecordRules(newFormVals)
-                     .then(() => {
-                        this.doSubmitRules(newFormVals);
-                        formReady(newFormVals);
-                        resolve(newFormVals);
-                     })
-                     .catch((err) => {
-                        this.AB.notify.developer(err, {
-                           message: "Error processing Record Rules.",
-                           view: this.toObj(),
-                           newFormVals: newFormVals,
-                        });
-                        // Question:  how do we respond to an error?
-                        // ?? just keep going ??
-                        this.doSubmitRules(newFormVals);
-                        formReady(newFormVals);
-                        resolve();
-                     });
-               })
-               .catch((err) => {
-                  formError(err.data || err);
-                  reject(err);
-               });
-         }
-      });
+      } catch (err) {
+         formError(err.data);
+         throw err;
+      }
+
+      try {
+         await this.doRecordRules(newFormVals);
+         // make sure any updates from RecordRules get passed along here.
+         this.doSubmitRules(newFormVals);
+         formReady(newFormVals);
+         return newFormVals;
+      } catch (err) {
+         this.AB.notify.developer(err, {
+            message: "Error processing Record Rules.",
+            view: this.toObj(),
+            newFormVals: newFormVals,
+         });
+         // Question:  how do we respond to an error?
+         // ?? just keep going ??
+         this.doSubmitRules(newFormVals);
+         formReady(newFormVals);
+         return;
+      }
    }
 
    focusOnFirst() {
