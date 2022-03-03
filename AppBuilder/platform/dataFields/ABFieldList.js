@@ -18,12 +18,12 @@ module.exports = class ABFieldList extends ABFieldListCore {
    async save() {
       return super.save().then(() => {
          // Now we want to clear out any entries that had values == to item removed from our list:
-         if (this.pendingDeconstions.length) {
+         if (this.pendingDeletions.length) {
             const model = this.object.model();
 
             if (this.settings.isMultiple == true) {
-               // find all the entries that have one of the deconsted values:
-               // use Promise to prevent issues with data being loaded before it is deconsted on client side
+               // find all the entries that have one of the deleted values:
+               // use Promise to prevent issues with data being loaded before it is deleted on client side
                return new Promise((resolve, reject) => {
                   let numDone = 0;
                   let numToDo = 0;
@@ -36,12 +36,12 @@ module.exports = class ABFieldList extends ABFieldListCore {
                         // for each list item
                         list.forEach((item) => {
                            if (Array.isArray(item[this.columnName])) {
-                              // get fields not in pendingDeconstions
+                              // get fields not in pendingDeletions
                               let remainingFields = item[
                                  this.columnName
                               ].filter((i) => {
                                  return (
-                                    this.pendingDeconstions.indexOf(i.id) == -1
+                                    this.pendingDeletions.indexOf(i.id) == -1
                                  );
                               });
 
@@ -75,9 +75,9 @@ module.exports = class ABFieldList extends ABFieldListCore {
                      .catch(reject);
                });
             } else {
-               // find all the entries that have one of the deconsted values:
+               // find all the entries that have one of the deleted values:
                const where = {};
-               where[this.columnName] = this.pendingDeconstions;
+               where[this.columnName] = this.pendingDeletions;
                return new Promise((resolve, reject) => {
                   let numDone = 0;
 

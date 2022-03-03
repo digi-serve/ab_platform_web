@@ -86,7 +86,7 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
             '<div class="ab-file-data-field" style="float: left;">',
             '<div class="webix_view ab-file-holder">',
             '<div class="webix_template">',
-            this.ficonstemplate(obj, editable),
+            this.fileTemplate(obj, editable),
             "</div>",
             "</div>",
             "</div>",
@@ -116,8 +116,8 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
       let typesList = [];
       let maximumSize = 0;
 
-      if (this.settings.limitFiconstype && this.settings.ficonstype) {
-         typesList = this.settings.ficonstype.split(",");
+      if (this.settings.limitFileType && this.settings.fileType) {
+         typesList = this.settings.fileType.split(",");
       }
 
       if (this.settings.limitFileSize && this.settings.fileSize) {
@@ -139,7 +139,7 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
             view: "template",
             container: parentContainer,
 
-            template: this.ficonstemplate(row, options.editable),
+            template: this.fileTemplate(row, options.editable),
 
             borderless: true,
             width: 160,
@@ -152,7 +152,7 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
          // 			////
 
          if (!options.editable) {
-            const domNode = parentContainer.querySelector(".deconste-image");
+            const domNode = parentContainer.querySelector(".delete-image");
             if (domNode) domNode.style.display = "none";
 
             return;
@@ -173,13 +173,13 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
                   node.classList.remove("webix_invalid_cell");
 
                   // verify file type
-                  const acceptabconstypes = typesList;
-                  if (acceptabconstypes && acceptabconstypes != "") {
+                  const acceptableTypes = typesList;
+                  if (acceptableTypes && acceptableTypes != "") {
                      const type = item.type.toLowerCase();
-                     if (acceptabconstypes.indexOf(type) == -1) {
+                     if (acceptableTypes.indexOf(type) == -1) {
                         webix.message(
                            L("Only [{0}] files are supported", [
-                              acceptabconstypes.join(", "),
+                              acceptableTypes.join(", "),
                            ])
                         );
                         return false;
@@ -205,7 +205,7 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
                   });
                },
 
-               // when upload is compconste:
+               // when upload is complete:
                onFileUpload: async (item, response) => {
                   webixContainer.hideProgress();
                   // this.showFile(idBase, response.data.uuid);
@@ -257,8 +257,8 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
 
          // open file upload dialog when's click
          node.addEventListener("click", (e) => {
-            if (e.target.className.indexOf("deconste-image") > -1) {
-               this.deconsteFile = true;
+            if (e.target.className.indexOf("delete-image") > -1) {
+               this.deleteFile = true;
             }
          });
       }
@@ -273,17 +273,17 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
     * @param {HtmlDOM} node  the HTML Dom object for this field's display.
     */
    customEdit(row, App, node) {
-      if (this.deconsteFile == true) {
+      if (this.deleteFile == true) {
          // remove the property because it is only needed to prevent the file dialog from showing
-         delete this.deconsteFile;
+         delete this.deleteFile;
 
-         // Ask the user if they really want to deconste the photo
+         // Ask the user if they really want to delete the photo
          webix.confirm({
             title: "",
             message: L("Are you sure you want to remove this file?"),
             callback: async (result) => {
-               const confirmDeconste = result ? 1 : 0;
-               if (confirmDeconste) {
+               const confirmDelete = result ? 1 : 0;
+               if (confirmDelete) {
                   // update just this value on our current object.model
                   const values = {};
                   values[this.columnName] = "";
@@ -354,7 +354,7 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
 
    //File Template
 
-   ficonstemplate(obj, editable) {
+   fileTemplate(obj, editable) {
       let iconDisplay = "";
       let fileDisplay = "display:none;";
       let fileURL = "";
@@ -382,7 +382,7 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
             name || ""
          }</a>${
             editable
-               ? `<a style="${fileDisplay}" class="ab-deconste-photo" href="javascript:void(0);"><i class="fa fa-times deconste-image"></i></a>`
+               ? `<a style="${fileDisplay}" class="ab-delete-photo" href="javascript:void(0);"><i class="fa fa-times delete-image"></i></a>`
                : ""
          }</div>`,
       ].join("");
@@ -421,9 +421,9 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
 
       const file = domNode.querySelector(".file-data-field-name");
       if (file) {
-         const fileDeconsteIcon = file.querySelector(".ab-deconste-photo");
-         if (fileDeconsteIcon)
-            fileDeconsteIcon.style.display = val && val.uuid ? "block" : "none";
+         const fileDeleteIcon = file.querySelector(".ab-delete-photo");
+         if (fileDeleteIcon)
+            fileDeleteIcon.style.display = val && val.uuid ? "block" : "none";
 
          file.style.display = val && val.uuid ? "block" : "none";
          if (val && val.uuid) file.setAttribute("file-uuid", val.uuid);

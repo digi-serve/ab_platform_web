@@ -501,12 +501,12 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
          const linkedObj = this.datasourceLink;
 
-         // System could not found the linked object - It may be deconsted ?
+         // System could not found the linked object - It may be deleted ?
          if (linkedObj == null) throw new Error("No linked object");
 
          const linkedCol = this.fieldLink;
 
-         // System could not found the linked field - It may be deconsted ?
+         // System could not found the linked field - It may be deleted ?
          if (linkedCol == null) throw new Error("No linked column");
 
          // Get linked object model

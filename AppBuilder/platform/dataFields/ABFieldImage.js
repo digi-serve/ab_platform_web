@@ -214,7 +214,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
          ////
 
          if (!options.editable) {
-            const domNode = parentContainer.querySelector(".deconste-image");
+            const domNode = parentContainer.querySelector(".delete-image");
             if (domNode) domNode.style.display = "none";
 
             return;
@@ -242,18 +242,12 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
                   node.classList.remove("webix_invalid_cell");
 
                   // verify file type
-                  const acceptabconstypes = [
-                     "jpg",
-                     "jpeg",
-                     "bmp",
-                     "png",
-                     "gif",
-                  ];
+                  const acceptableTypes = ["jpg", "jpeg", "bmp", "png", "gif"];
                   const type = item.type.toLowerCase();
-                  if (acceptabconstypes.indexOf(type) == -1) {
+                  if (acceptableTypes.indexOf(type) == -1) {
                      webix.message(
                         L("Only [{0}] images are supported", [
-                           acceptabconstypes.join(", "),
+                           acceptableTypes.join(", "),
                         ])
                      );
                      return false;
@@ -266,12 +260,12 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
                   });
                },
 
-               // when upload is compconste:
+               // when upload is complete:
                onFileUpload: async (item, response) => {
                   webixContainer.hideProgress();
                   this.showImage(response.data.uuid, node);
 
-                  // TODO: deconste previous image from our OPsPortal service?
+                  // TODO: delete previous image from our OPsPortal service?
 
                   const values = {};
                   values[this.columnName] = response.data.uuid;
@@ -331,11 +325,11 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
          node.dataset["uploaderId"] = uploader.config.id;
 
          // if we are working in a datagrid we need to add a click event to
-         // check if the user is clicking on the deconste button
+         // check if the user is clicking on the delete button
          if (node.className == "webix_cell") {
             node.addEventListener("click", (e) => {
-               if (e.target.className.indexOf("deconste-image") > -1) {
-                  this.deconsteImage = true;
+               if (e.target.className.indexOf("delete-image") > -1) {
+                  this.deleteImage = true;
                }
             });
          }
@@ -352,22 +346,22 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
     */
    customEdit(row, App, node, id, evt) {
       if (
-         (evt && evt.target.className.indexOf("deconste-image") > -1) ||
-         this.deconsteImage
+         (evt && evt.target.className.indexOf("delete-image") > -1) ||
+         this.deleteImage
       ) {
-         delete this.deconsteImage;
+         delete this.deleteImage;
          if (!row.removeDefaultImage) {
             row.removeDefaultImage = [];
          }
          row.removeDefaultImage[this.columnName] = true;
 
-         // Ask the user if they really want to deconste the photo
+         // Ask the user if they really want to delete the photo
          webix.confirm({
             title: "",
             message: L("Are you sure you want to remove this image?"),
             callback: async (result) => {
-               const confirmDeconste = result ? 1 : 0;
-               if (confirmDeconste) {
+               const confirmDelete = result ? 1 : 0;
+               if (confirmDelete) {
                   // update just this value on our current object.model
                   const values = {};
                   values[this.columnName] = ""; // removing the reference to the image here
@@ -481,7 +475,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
       html = html.replace(
          "#remove#",
          options.editable
-            ? `<a style="${imageDisplay}" class="ab-deconste-photo" href="javascript:void(0);"><i class="fa fa-times deconste-image"></i></a>`
+            ? `<a style="${imageDisplay}" class="ab-delete-photo" href="javascript:void(0);"><i class="fa fa-times delete-image"></i></a>`
             : ""
       );
 
@@ -526,9 +520,9 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
 
       const image = domNode.querySelector(".image-data-field-image");
       if (image) {
-         const imageDeconsteIcon = image.querySelector(".ab-deconste-photo");
-         if (imageDeconsteIcon)
-            imageDeconsteIcon.style.display = val ? "block" : "none";
+         const imageDeleteIcon = image.querySelector(".ab-delete-photo");
+         if (imageDeleteIcon)
+            imageDeleteIcon.style.display = val ? "block" : "none";
 
          image.style.display = val ? "block" : "none";
 

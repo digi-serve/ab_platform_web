@@ -531,7 +531,7 @@ module.exports = class ABField extends ABFieldCore {
    }
 
    migrateDrop() {
-      return this.AB.Network["deconste"]({
+      return this.AB.Network["delete"]({
          url: `/definition/migrate/object/${this.object.id}/field/${this.id}`,
       });
    }
