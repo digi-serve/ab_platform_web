@@ -3,9 +3,9 @@ const ABFieldTreeCore = require("../../core/dataFields/ABFieldTreeCore");
 const L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABFieldTree extends ABFieldTreeCore {
-   constructor(values, object) {
-      super(values, object);
-   }
+   // constructor(values, object) {
+   //    super(values, object);
+   // }
 
    ///
    /// Instance Methods
