@@ -1192,7 +1192,8 @@ module.exports = class ABViewForm extends ABViewFormCore {
       var customFields = this.fieldComponents(
          (comp) =>
             comp instanceof ABViewFormCustom ||
-            comp instanceof ABViewFormConnect
+            comp instanceof ABViewFormConnect ||
+            comp instanceof ABViewFormSelectMultiple
       );
       customFields.forEach((f) => {
          var vComponent = this.viewComponents[f.id];

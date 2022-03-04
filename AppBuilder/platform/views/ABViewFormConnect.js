@@ -47,7 +47,8 @@ function _onShow(App, compId, instance, component) {
          let uiName = "";
          if (
             instance.parent.viewComponents[key].ui &&
-            instance.parent.viewComponents[key].ui.rows
+            instance.parent.viewComponents[key].ui.rows &&
+            instance.parent.viewComponents[key].ui.rows.length
          ) {
             if (instance.parent.viewComponents[key].ui.rows[0].name) {
                uiName = instance.parent.viewComponents[key].ui.rows[0].name;
@@ -184,6 +185,12 @@ function _onShow(App, compId, instance, component) {
       );
    }
 
+   if (instance.options.editPage) {
+      setTimeout(() => {
+         _trigerEditPageEvent(instance, node, elem);
+      }, 500);
+   }
+
    // field.customDisplay(rowData, App, node, {
    //    formView: instance.settings.formView,
    //    filters: instance.settings.objectWorkspace.filterConditions,
@@ -201,6 +208,44 @@ function _onShow(App, compId, instance, component) {
    if (!instance._editPageEvent) {
       instance._editPageEvent = true;
       field.on("editPage", component.logic.goToEditPage);
+   }
+}
+
+function _trigerEditPageEvent(instance, node, elem) {
+   let editMenus = node.querySelectorAll(
+      ".selectivity-single-selected-item-edit, .selectivity-multiple-selected-item-edit"
+   );
+   for (let i = 0; i < editMenus.length; i++) {
+      let eMenu = editMenus[i];
+      if (eMenu && !eMenu.__hasClickEvent) {
+         eMenu.addEventListener(
+            "click",
+            function (e) {
+               e.stopPropagation();
+               e.preventDefault();
+
+               let currentTarget = e.currentTarget;
+
+               let parentElm = elem;
+               if (!parentElm) return;
+
+               let rowId = currentTarget.getAttribute("data-item-id");
+               if (!rowId) return;
+
+               let fieldId = parentElm.config.dataFieldId;
+               if (!fieldId) return;
+
+               let thisField = instance.field((fld) => {
+                  return fld.id == fieldId;
+               });
+               if (!thisField) return;
+
+               thisField.emit("editPage", rowId);
+            },
+            true
+         );
+         eMenu.__hasClickEvent = true;
+      }
    }
 }
 
@@ -861,7 +906,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
       component.ui.id = ids.component;
       component.ui.view = multiselect ? "multicombo" : "combo";
       component.ui.on = {
-         onChange: function (data) {
+         onChange: (data) => {
             let selectedValues;
             if (Array.isArray(data)) {
                selectedValues = [];
@@ -902,13 +947,22 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
                : selectedValues;
             $$(ids.component).setValue(prepedVals);
             $$(ids.component).unblockEvent();
+            _trigerEditPageEvent(
+               this,
+               $$(ids.component).$view,
+               $$(ids.component)
+            );
          },
       };
+      // component.ui.attributes = {
+      //    "data-cy": `${this.key} ${field.key} ${field.columnName} ${this.id} ${this.parent.id}`,
+      // };
+      component.ui.dataFieldId = field.id;
       component.ui.suggest = {
          selectAll: multiselect ? true : false,
          body: {
             data: [],
-            template: "#value#",
+            template: `<a data-item-id="#id#" class="selectivity-multiple-selected-item-edit"><i class="fa fa-edit"></i></a> #value#`,
          },
          on: {
             onShow: () => {
@@ -1081,6 +1135,14 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
 
       component.onShow = () => {
          _onShow(App, ids.component, this, component);
+         let elem = $$(ids.component);
+         if (!elem) return;
+
+         let node = elem.$view;
+
+         // Add data-cy attributes
+         const dataCy = `${this.key} ${field.key} ${field.columnName} ${this.id} ${this.parent.id}`;
+         node.setAttribute("data-cy", dataCy);
       };
 
       return component;

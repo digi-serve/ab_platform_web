@@ -96,33 +96,46 @@ module.exports = class ABViewDetailConnect extends ABViewDetailConnectCore {
       };
 
       // Add plus button in front of template
-      baseComp.ui.template = baseComp.ui.template.replace(
-         "#display#",
-         `${addPageComponent.ui} #display#`
-      );
+      // baseComp.ui.template = baseComp.ui.template.replace(
+      //    "#display#",
+      //    `${addPageComponent.ui} #display#`
+      // );
 
       // Click to open new data form
-      baseComp.ui.onClick = baseComp.ui.onClick || {};
-      baseComp.ui.onClick["ab-connect-add-new-link"] = (e, id, trg) => {
-         e.stopPropagation();
+      // addPageComponent.ui.onClick = addPageComponent.ui.onClick || {};
+      let ui = {};
+      if (addPageComponent.ui) {
+         addPageComponent.ui.click = (e, id, trg) => {
+            // e.stopPropagation();
 
-         // TODO: busy cursor
+            // TODO: busy cursor
 
-         let dc;
-         let detail = this.detailComponent();
-         if (detail) dc = detail.datacollection;
+            let dc;
+            let detail = this.detailComponent();
+            if (detail) dc = detail.datacollection;
 
-         setTimeout(() => {
-            addPageComponent.onClick(dc).then(() => {
-               // TODO: ready cursor
-            });
-         }, 50);
+            setTimeout(() => {
+               addPageComponent.onClick(dc).then(() => {
+                  // TODO: ready cursor
+               });
+            }, 50);
 
-         return false;
-      };
+            return false;
+         };
+
+         ui = {
+            rows: [
+               {
+                  cols: [baseComp.ui, addPageComponent.ui],
+               },
+            ],
+         };
+      } else {
+         ui = baseComp.ui;
+      }
 
       return {
-         ui: baseComp.ui,
+         ui: ui,
 
          init: _init,
          logic: {

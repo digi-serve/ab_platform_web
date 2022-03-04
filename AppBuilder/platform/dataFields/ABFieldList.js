@@ -656,21 +656,27 @@ module.exports = class ABFieldList extends ABFieldListCore {
          return field.editParse(value);
       };
 
-      config.template = (obj) => {
-         let selectedData = obj[field.columnName];
+      config.template = (rowData) => {
+         let selectedData = rowData[field.columnName];
+         if (selectedData == null) return "";
+         if (this.settings.isMultiple) {
+            selectedData = _getSelectedOptions(field, rowData);
+         }
          var values = [];
          let hasCustomColor = "";
+         let optionHex = "";
          if (
             selectedData &&
             Array.isArray(selectedData) &&
             selectedData.length
          ) {
             selectedData.forEach((val) => {
-               if (val.hex) {
+               if (field.settings.hasColors && val.hex) {
                   hasCustomColor = "hascustomcolor";
+                  optionHex = `background: ${val.hex};`;
                }
                values.push(
-                  `<div style="background: ${val.hex};" class='webix_multicombo_value ${hasCustomColor}'><span>${val.text}</span><!-- span data-uuid="${val.id}" class="webix_multicombo_delete" role="button" aria-label="Remove item"></span --></div>`
+                  `<div style="${optionHex}" class='webix_multicombo_value ${hasCustomColor}'><span>${val.text}</span><!-- span data-uuid="${val.id}" class="webix_multicombo_delete" role="button" aria-label="Remove item"></span --></div>`
                );
             });
          } else if (selectedData) {
@@ -678,11 +684,13 @@ module.exports = class ABFieldList extends ABFieldListCore {
             if (typeof selectedData == "string") {
                selectedObj = field.getItemFromVal(selectedData);
             }
-            if (selectedObj.hex) {
+            if (!selectedObj) return "";
+            if (field.settings.hasColors && selectedObj.hex) {
                hasCustomColor = "hascustomcolor";
+               optionHex = `background: ${selectedObj.hex};`;
             }
             values.push(
-               `<div style="background: ${selectedObj.hex};" class='webix_multicombo_value ${hasCustomColor}'><span>${selectedObj.text}</span><!-- span data-uuid="${selectedObj.id}" class="webix_multicombo_delete" role="button" aria-label="Remove item"></span --></div>`
+               `<div style="${optionHex}" class='webix_multicombo_value ${hasCustomColor}'><span>${selectedObj.text}</span><!-- span data-uuid="${selectedObj.id}" class="webix_multicombo_delete" role="button" aria-label="Remove item"></span --></div>`
             );
          }
          return values.join("");
@@ -863,7 +871,7 @@ module.exports = class ABFieldList extends ABFieldListCore {
       // .common() is used to create the display in the list
       formComponentSetting.common = () => {
          return {
-            key: this.settings.isMultiple ? "fieldcustom" : "selectsingle",
+            key: this.settings.isMultiple ? "selectmultiple" : "selectsingle",
             settings: {
                options: this.settings.options.map(function (opt) {
                   return {
@@ -884,7 +892,7 @@ module.exports = class ABFieldList extends ABFieldListCore {
 
       detailComponentSetting.common = () => {
          return {
-            key: this.settings.isMultiple ? "detailcustom" : "detailtext",
+            key: this.settings.isMultiple ? "detailtext" : "detailtext",
          };
       };
 
@@ -945,35 +953,51 @@ module.exports = class ABFieldList extends ABFieldListCore {
       }
    }
 
-   getValue(item /*, rowData */) {
-      var values = {};
+   getValue(item, rowData) {
+      return this.editParse(item.getValue());
+   }
 
-      if (!item) return values;
-
-      if (this.settings.isMultiple) {
-         var domNode = item.$view.querySelector(".list-data-values");
-         values = this._Selectivity.selectivityGet(domNode);
-      } else {
-         values = $$(item).getValue();
+   getSelectedOptions(field, rowData = {}) {
+      let result = [];
+      if (rowData[field.columnName] != null) {
+         result = rowData[field.columnName];
+      } else if (rowData) {
+         if (Array.isArray(rowData)) {
+            result = rowData;
+         } else {
+            result.push(rowData);
+         }
       }
-      return values;
+      if (result.length) {
+         if (typeof result == "string") result = JSON.parse(result);
+
+         // Pull text with current language
+         if (field.settings) {
+            result = (field.settings.options || []).filter((opt) => {
+               return (
+                  (result || []).filter((v) => (opt.id || opt) == (v.id || v))
+                     .length > 0
+               );
+            });
+         }
+      }
+
+      return result;
    }
 
    setValue(item, rowData) {
       if (!item) return;
 
       if (this.settings.isMultiple) {
-         let selectedOpts = _getSelectedOptions(this, rowData);
-
+         // let selectedOpts = _getSelectedOptions(this, rowData);
          // get selectivity dom
-         var domSelectivity = item.$view.querySelector(".list-data-values");
-
+         // var domSelectivity = item.$view.querySelector(".list-data-values");
          // set value to selectivity
-         this._Selectivity.selectivitySet(
-            domSelectivity,
-            selectedOpts,
-            this.App
-         );
+         // this._Selectivity.selectivitySet(
+         //    domSelectivity,
+         //    selectedOpts,
+         //    this.App
+         // );
       } else {
          super.setValue(item, rowData);
       }

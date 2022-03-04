@@ -772,12 +772,12 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          if (selectedData.length) {
             selectedData.forEach((val) => {
                values.push(
-                  `<div style="line-height: 26px; margin: 4px 1.5px;" class='webix_multicombo_value'><span>${val.value}</span><!-- span data-uuid="${val.id}" class="webix_multicombo_delete" role="button" aria-label="Remove item"></span --></div>`
+                  `<div class='webix_multicombo_value'><span>${val.value}</span><!-- span data-uuid="${val.id}" class="webix_multicombo_delete" role="button" aria-label="Remove item"></span --></div>`
                );
             });
          } else if (selectedData.value) {
             values.push(
-               `<div style="line-height: 26px; margin: 4px 1.5px;" class='webix_multicombo_value'><span>${selectedData.value}</span><!-- span data-uuid="${selectedData.id}" class="webix_multicombo_delete" role="button" aria-label="Remove item"></span --></div>`
+               `<div class='webix_multicombo_value'><span>${selectedData.value}</span><!-- span data-uuid="${selectedData.id}" class="webix_multicombo_delete" role="button" aria-label="Remove item"></span --></div>`
             );
          }
          return values.join("");
@@ -1358,15 +1358,16 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       var multiselect = this.settings.linkType == "many";
       if (multiselect) {
          let vals = [];
-         let val = item.getValue().split(",");
-         val.forEach((record) => {
-            vals.push(item.getList().getItem(record));
-         });
+         if (item.getValue()) {
+            let val = item.getValue().split(",");
+            val.forEach((record) => {
+               vals.push(item.getList().getItem(record));
+            });
+         }
          return vals;
       } else {
          return item.getList().getItem(item.getValue());
       }
-      var values = item.getList().getItem(item.getValue());
    }
 
    setValue(item, rowData) {

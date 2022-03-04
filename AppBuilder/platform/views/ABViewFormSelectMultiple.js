@@ -137,19 +137,25 @@ module.exports = class ABViewFormSelectMultiple extends (
          component.ui.tagMode = false;
          component.ui.css = "hideWebixMulticomboTag";
          component.ui.tagTemplate = function (values) {
-            var items = "";
+            let selectedOptions = [];
             values.forEach((val) => {
-               var item = $$(ids.component).getList().getItem(val);
-               items +=
-                  '<li class="webix_multicombo_value" style="line-height:24px; color: white; background: ' +
-                  item.hex +
-                  ';" optvalue="' +
-                  item.id +
-                  '"><span>' +
-                  item.value +
-                  '</span><span class="webix_multicombo_delete" role="button" aria-label="Remove item">x</span></li>';
+               selectedOptions.push($$(ids.component).getList().getItem(val));
             });
-            return items;
+            let vals = field.getSelectedOptions(field, selectedOptions);
+
+            var items = [];
+            vals.forEach((val) => {
+               var hasCustomColor = "";
+               var optionHex = "";
+               if (field.settings.hasColors && val.hex) {
+                  hasCustomColor = "hascustomcolor";
+                  optionHex = `background: ${val.hex};`;
+               }
+               items.push(
+                  `<span class="webix_multicombo_value ${hasCustomColor}" style="${optionHex}" optvalue="${val.id}"><span>${val.text}</span><span class="webix_multicombo_delete" role="button" aria-label="Remove item"></span></span>`
+               );
+            });
+            return items.join("");
          };
       }
 
@@ -165,10 +171,10 @@ module.exports = class ABViewFormSelectMultiple extends (
       component.init = (options) => {};
 
       component.logic = {
-         getValue: (elem) => {
-            elem = elem || $$(ids.component);
+         getValue: (rowData) => {
+            var elem = $$(ids.component);
 
-            return field.getValue(elem);
+            return field.getValue(elem, rowData);
          },
       };
 
