@@ -398,6 +398,12 @@ module.exports = class ABViewDetail extends ABViewDetailCore {
 
       var _onShow = () => {
          container.onShow();
+         try {
+            const dataCy = `Detail ${this.name.split(".")[0]} ${this.id}`;
+            $$(container.ui.id).$view.setAttribute("data-cy", dataCy);
+         } catch (e) {
+            console.warn("Problem setting data-cy", e);
+         }
 
          // listen DC events
          let dv = this.datacollection;

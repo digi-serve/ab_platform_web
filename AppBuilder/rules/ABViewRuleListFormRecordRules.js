@@ -60,4 +60,15 @@ module.exports = class ABViewRuleListFormRecordRules extends ABViewRuleList {
       }
       return Rule;
    }
+
+   /**
+    * @method isReady()
+    * returns a promise that gets resolved once our list of Rules is
+    * ready to work.
+    * @return {Promise}
+    */
+   async rulesReady() {
+      var allReady = (this.listRules || []).map((r) => r.isReady());
+      await Promise.all(allReady);
+   }
 };

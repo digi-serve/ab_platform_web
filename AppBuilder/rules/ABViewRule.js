@@ -369,6 +369,19 @@ module.exports = class ABViewRule {
       }
    }
 
+   /**
+    * @method isReady()
+    * returns a promise that gets resolved once our action is ready to work.
+    * @return {Promise}
+    */
+   async isReady() {
+      let currentAction = this.currentAction();
+      if (currentAction) {
+         return currentAction.isReady();
+      }
+      return Promise.resolve();
+   }
+
    isValid(data = {}) {
       var id = "hiddenQB_" + webix.uid();
 

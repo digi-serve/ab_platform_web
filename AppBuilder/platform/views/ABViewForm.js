@@ -929,6 +929,8 @@ module.exports = class ABViewForm extends ABViewFormCore {
          // _onShow();
       };
 
+      this.timerId = undefined;
+
       var _logic = (this._logic = {
          callbacks: {
             onBeforeSaveData: function () {
@@ -941,76 +943,83 @@ module.exports = class ABViewForm extends ABViewFormCore {
          },
 
          displayData: (rowData) => {
-            var customFields = this.fieldComponents((comp) => {
-               return (
-                  comp instanceof ABViewFormCustom ||
-                  // rich text
-                  (comp instanceof ABViewFormTextbox &&
-                     comp.settings.type == "rich")
-               );
-            });
+            // If setTimeout is already scheduled, no need to do anything
+            if (this.timerId) {
+               return;
+            }
 
-            // Set default values
-            if (rowData == null) {
-               customFields.forEach((f) => {
-                  var field = f.field();
-                  if (!field) return;
-
-                  var comp = this.viewComponents[f.id];
-                  if (comp == null) return;
-
-                  // var colName = field.columnName;
-                  if (this._showed && comp.onShow) comp.onShow();
-
-                  // set value to each components
-                  var defaultRowData = {};
-                  field.defaultValue(defaultRowData);
-                  field.setValue($$(comp.ui.id), defaultRowData);
-
-                  comp.logic?.refresh?.(defaultRowData);
+            this.timerId = setTimeout(() => {
+               var customFields = this.fieldComponents((comp) => {
+                  return (
+                     comp instanceof ABViewFormCustom ||
+                     // rich text
+                     (comp instanceof ABViewFormTextbox &&
+                        comp.settings.type == "rich")
+                  );
                });
-               var normalFields = this.fieldComponents(
-                  (comp) =>
-                     comp instanceof ABViewFormComponent &&
-                     !(comp instanceof ABViewFormCustom)
-               );
-               normalFields.forEach((f) => {
-                  var field = f.field();
-                  if (!field) return;
 
-                  var comp = this.viewComponents[f.id];
-                  if (comp == null) return;
+               // Set default values
+               if (rowData == null) {
+                  customFields.forEach((f) => {
+                     var field = f.field();
+                     if (!field) return;
 
-                  if (f.key != "button") {
-                     var colName = field.columnName;
+                     var comp = this.viewComponents[f.id];
+                     if (comp == null) return;
+
+                     // var colName = field.columnName;
+                     if (this._showed && comp.onShow) comp.onShow();
 
                      // set value to each components
-                     var values = {};
-                     field.defaultValue(values);
+                     var defaultRowData = {};
+                     field.defaultValue(defaultRowData);
+                     field.setValue($$(comp.ui.id), defaultRowData);
 
-                     if ($$(comp.ui.id) && $$(comp.ui.id).setValue)
-                        $$(comp.ui.id).setValue(
-                           values[colName] == null ? "" : values[colName]
-                        );
-                  }
-               });
-            }
+                     comp.logic?.refresh?.(defaultRowData);
+                  });
+                  var normalFields = this.fieldComponents(
+                     (comp) =>
+                        comp instanceof ABViewFormComponent &&
+                        !(comp instanceof ABViewFormCustom)
+                  );
+                  normalFields.forEach((f) => {
+                     var field = f.field();
+                     if (!field) return;
 
-            // Populate value to custom fields
-            else {
-               customFields.forEach((f) => {
-                  var comp = this.viewComponents[f.id];
-                  if (comp == null) return;
+                     var comp = this.viewComponents[f.id];
+                     if (comp == null) return;
 
-                  if (this._showed && comp.onShow) comp.onShow();
+                     if (f.key != "button") {
+                        var colName = field.columnName;
 
-                  // set value to each components
-                  if (f.field()) f.field().setValue($$(comp.ui.id), rowData);
+                        // set value to each components
+                        var values = {};
+                        field.defaultValue(values);
 
-                  if (comp.logic && comp.logic.refresh)
-                     comp.logic.refresh(rowData);
-               });
-            }
+                        if ($$(comp.ui.id))
+                           $$(comp.ui.id).setValue?.(
+                              values[colName] == null ? "" : values[colName]
+                           );
+                     }
+                  });
+               }
+
+               // Populate value to custom fields
+               else {
+                  customFields.forEach((f) => {
+                     var comp = this.viewComponents[f.id];
+                     if (comp == null) return;
+
+                     if (this._showed) comp.onShow?.();
+
+                     // set value to each components
+                     if (f.field()) f.field().setValue($$(comp.ui.id), rowData);
+
+                     comp.logic?.refresh?.(rowData);
+                  });
+               }
+               this.timerId = undefined;
+            }, 80);
          },
 
          displayParentData: (rowData) => {
@@ -1326,51 +1335,63 @@ module.exports = class ABViewForm extends ABViewFormCore {
    }
 
    /**
+    * @method recordRulesReady()
+    * This returns a Promise that gets resolved when all record rules report
+    * that they are ready.
+    * @return {Promise}
+    */
+   async recordRulesReady() {
+      return this.RecordRule.rulesReady();
+   }
+
+   /**
     * @method saveData
     * save data in to database
     * @param formView - webix's form element
     *
     * @return {Promise}
     */
-   saveData(formView) {
+   async saveData(formView) {
       // call .onBeforeSaveData event
       // if this function returns false, then it will not go on.
-      if (!this._logic.callbacks.onBeforeSaveData()) return Promise.resolve();
+      if (!this._logic.callbacks.onBeforeSaveData()) return;
 
       // form validate
       if (!formView || !formView.validate()) {
          // TODO : error message
-
-         return Promise.resolve();
+         return;
       }
 
       formView.clearValidation();
 
       // get ABDatacollection
       var dv = this.datacollection;
-      if (dv == null) return Promise.resolve();
+      if (dv == null) return;
 
       // get ABObject
       var obj = dv.datasource;
-      if (obj == null) return Promise.resolve();
+      if (obj == null) return;
 
       // get ABModel
       var model = dv.model;
-      if (model == null) return Promise.resolve();
+      if (model == null) return;
 
       // get update data
       var formVals = this.getFormValues(formView, obj, dv.datacollectionLink);
+
+      // wait for our Record Rules to be ready before we continue.
+      await this.recordRulesReady();
 
       // update value from the record rule (pre-update)
       this.doRecordRulesPre(formVals);
 
       // validate data
       if (!this.validateData(formView, obj, formVals)) {
-         return Promise.resolve();
+         return;
       }
 
       // show progress icon
-      if (formView.showProgress) formView.showProgress({ type: "icon" });
+      formView.showProgress?.({ type: "icon" });
 
       // form ready function
       var formReady = (newFormVals) => {
@@ -1384,7 +1405,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
             }
          }
 
-         if (formView.hideProgress) formView.hideProgress();
+         formView.hideProgress?.();
 
          // if there was saved data pass it up to the onSaveData callback
          if (newFormVals) this._logic.callbacks.onSaveData(newFormVals);
@@ -1423,72 +1444,46 @@ module.exports = class ABViewForm extends ABViewFormCore {
             }
          }
 
-         if (saveButton) saveButton.enable();
+         saveButton?.enable();
 
-         if (formView.hideProgress) formView.hideProgress();
+         formView?.hideProgress?.();
       };
 
-      return new Promise((resolve, reject) => {
-         // If this object already exists, just .update()
+      let newFormVals;
+      // {obj}
+      // The fully populated values returned back from service call
+      // We use this in our post processing Rules
+
+      try {
+         // is this an update or create?
          if (formVals.id) {
-            model
-               .update(formVals.id, formVals)
-               .then((newFormVals) => {
-                  this.doRecordRules(newFormVals)
-                     .then(() => {
-                        // make sure any updates from RecordRules get passed along here.
-                        this.doSubmitRules(newFormVals);
-                        formReady(newFormVals);
-                        resolve(newFormVals);
-                     })
-                     .catch((err) => {
-                        this.AB.notify.developer(err, {
-                           message: "Error processing Record Rules.",
-                           view: this.toObj(),
-                           newFormVals: newFormVals,
-                        });
-                        // Question:  how do we respond to an error?
-                        // ?? just keep going ??
-                        this.doSubmitRules(newFormVals);
-                        formReady(newFormVals);
-                        resolve();
-                     });
-               })
-               .catch((err) => {
-                  formError(err.data);
-                  reject(err);
-               });
+            newFormVals = await model.update(formVals.id, formVals);
+         } else {
+            newFormVals = await model.create(formVals);
          }
-         // else add new row
-         else {
-            model
-               .create(formVals)
-               .then((newFormVals) => {
-                  this.doRecordRules(newFormVals)
-                     .then(() => {
-                        this.doSubmitRules(newFormVals);
-                        formReady(newFormVals);
-                        resolve(newFormVals);
-                     })
-                     .catch((err) => {
-                        this.AB.notify.developer(err, {
-                           message: "Error processing Record Rules.",
-                           view: this.toObj(),
-                           newFormVals: newFormVals,
-                        });
-                        // Question:  how do we respond to an error?
-                        // ?? just keep going ??
-                        this.doSubmitRules(newFormVals);
-                        formReady(newFormVals);
-                        resolve();
-                     });
-               })
-               .catch((err) => {
-                  formError(err.data || err);
-                  reject(err);
-               });
-         }
-      });
+      } catch (err) {
+         formError(err.data);
+         throw err;
+      }
+
+      try {
+         await this.doRecordRules(newFormVals);
+         // make sure any updates from RecordRules get passed along here.
+         this.doSubmitRules(newFormVals);
+         formReady(newFormVals);
+         return newFormVals;
+      } catch (err) {
+         this.AB.notify.developer(err, {
+            message: "Error processing Record Rules.",
+            view: this.toObj(),
+            newFormVals: newFormVals,
+         });
+         // Question:  how do we respond to an error?
+         // ?? just keep going ??
+         this.doSubmitRules(newFormVals);
+         formReady(newFormVals);
+         return;
+      }
    }
 
    focusOnFirst() {
