@@ -1,8 +1,8 @@
-var ABFieldListCore = require("../../core/dataFields/ABFieldListCore");
+const ABFieldListCore = require("../../core/dataFields/ABFieldListCore");
 
-var ABFieldSelectivity = require("./ABFieldSelectivity");
+const ABFieldSelectivity = require("./ABFieldSelectivity");
 
-let L = (...params) => AB.Multilingual.label(...params);
+const L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABFieldList extends ABFieldListCore {
    constructor(values, object) {
@@ -11,46 +11,25 @@ module.exports = class ABFieldList extends ABFieldListCore {
       this._Selectivity = new ABFieldSelectivity(values, object);
    }
 
-   /*
-    * @function propertiesComponent
-    *
-    * return a UI Component that contains the property definitions for this Field.
-    *
-    * @param {App} App the UI App instance passed around the Components.
-    * @param {stirng} idBase
-    * @return {Component}
-    */
-   // static propertiesComponent(App, idBase) {
-   //    return ABFieldListComponent.component(App, idBase);
-   // }
-
    ///
    /// Instance Methods
    ///
 
-   save() {
+   async save() {
       return super.save().then(() => {
-         // NOTE: the ABDesigner will add the option.id entries to
-         // this.pendingDeletions array to denote any option values that were
-         // deleted.  When we save the definitions we need to clear out any
-         // current values that had one of those old option settings.
+         // Now we want to clear out any entries that had values == to item removed from our list:
          if (this.pendingDeletions.length) {
-            var model = this.object.model();
-            var where = {
-               glue: "and",
-               rules: [],
-            };
+            const model = this.object.model();
 
             if (this.settings.isMultiple == true) {
                // find all the entries that have one of the deleted values:
-               // use Promise to prevent issues with data being loaded before
-               // it is deleted on client side
+               // use Promise to prevent issues with data being loaded before it is deleted on client side
                return new Promise((resolve, reject) => {
-                  var numDone = 0;
-                  var numToDo = 0;
+                  let numDone = 0;
+                  let numToDo = 0;
 
                   model
-                     .findAll({ where })
+                     .findAll({})
                      .then((list) => {
                         list = list.data || list;
 
@@ -58,7 +37,7 @@ module.exports = class ABFieldList extends ABFieldListCore {
                         list.forEach((item) => {
                            if (Array.isArray(item[this.columnName])) {
                               // get fields not in pendingDeletions
-                              var remainingFields = item[
+                              let remainingFields = item[
                                  this.columnName
                               ].filter((i) => {
                                  return (
@@ -76,11 +55,11 @@ module.exports = class ABFieldList extends ABFieldListCore {
                                  if (remainingFields.length == 0) {
                                     remainingFields = "";
                                  }
-                                 var value = {};
+                                 const value = {};
                                  value[this.columnName] = remainingFields;
                                  model.update(item.id, value).then(() => {
                                     // if ($$(node) && $$(node).updateItem)
-                                    // 	$$(node).updateItem(value.id, value);
+                                    //    $$(node).updateItem(value.id, value);
                                     numDone++;
                                     if (numDone >= numToDo) {
                                        resolve();
@@ -97,18 +76,13 @@ module.exports = class ABFieldList extends ABFieldListCore {
                });
             } else {
                // find all the entries that have one of the deleted values:
-               where.rules.push({
-                  key: this.id,
-                  rule: "in",
-                  value: this.pendingDeletions,
-               });
-
-               // [this.columnName] = this.pendingDeletions;
+               const where = {};
+               where[this.columnName] = this.pendingDeletions;
                return new Promise((resolve, reject) => {
-                  var numDone = 0;
+                  let numDone = 0;
 
                   model
-                     .findAll({ where })
+                     .findAll(where)
                      .then((list) => {
                         // make sure we just work with the { data:[] } that was returned
                         list = list.data || list;
@@ -116,8 +90,8 @@ module.exports = class ABFieldList extends ABFieldListCore {
                         // for each one, set the value to ''
                         // NOTE: jQuery ajax routines filter out null values, so we can't
                         // set them to null. :(
-                        // var numDone = 0;
-                        var value = {};
+                        // const numDone = 0;
+                        const value = {};
                         value[this.columnName] = "";
 
                         list.forEach((item) => {
@@ -139,13 +113,13 @@ module.exports = class ABFieldList extends ABFieldListCore {
       });
    }
 
-   // isValid() {
-   //    var validator = super.isValid();
+   isValid() {
+      const validator = super.isValid();
 
-   //    // validator.addError('columnName', L('ab.validation.object.name.unique', 'Field columnName must be unique (#name# already used in this Application)').replace('#name#', this.name) );
+      // validator.addError('columnName', L('ab.validation.object.name.unique', 'Field columnName must be unique (#name# already used in this Application)').replace('#name#', this.name) );
 
-   //    return validator;
-   // }
+      return validator;
+   }
 
    ///
    /// Working with Actual Object Values:
@@ -155,34 +129,35 @@ module.exports = class ABFieldList extends ABFieldListCore {
    columnHeader(options) {
       options = options || {};
 
-      var config = super.columnHeader(options);
-      var field = this;
+      const config = super.columnHeader(options);
+      const field = this;
+      const App = field.AB._App;
 
       // Multiple select list
       if (this.settings.isMultiple == true) {
-         var width = options.width,
+         const width = options.width,
             editable = options.editable;
 
          config.template = (row) => {
-            var node = document.createElement("div");
+            const node = document.createElement("div");
             node.classList.add("list-data-values");
             if (typeof width != "undefined") {
                node.style.marginLeft = width + "px";
             }
 
-            var domNode = node;
+            const domNode = node;
 
-            var placeholder = L("Select items");
-            var readOnly = false;
+            let placeholder = L("Select items");
+            let readOnly = false;
             if (editable != null && editable == false) {
                readOnly = true;
                placeholder = "";
             }
 
-            // var domNode = node.querySelector('.list-data-values');
+            // const domNode = node.querySelector('.list-data-values');
 
             // get selected values
-            let selectedData = _getSelectedOptions(field, row);
+            const selectedData = _getSelectedOptions(field, row);
 
             // Render selectivity
             field._Selectivity.selectivityRender(
@@ -195,7 +170,7 @@ module.exports = class ABFieldList extends ABFieldListCore {
                   items: field.settings.options,
                   data: selectedData,
                },
-               this.AB._App,
+               App,
                row
             );
 
@@ -204,19 +179,19 @@ module.exports = class ABFieldList extends ABFieldListCore {
       }
       // Single select list
       else {
-         var formClass = "";
-         var placeHolder = "";
+         let formClass = "";
+         let placeHolder = "";
          if (options.editable) {
             formClass = " form-entry";
             placeHolder = `<span style='color: #CCC; padding: 0 5px;'>${L(
                "Select item"
             )}"</span>`;
          }
-         var isRemovable = options.editable && !this.settings.required;
+         const isRemovable = options.editable && !this.settings.required;
 
          config.template = (obj) => {
-            var myHex = "#666666";
-            var myText = placeHolder;
+            let myHex = "#666666";
+            let myText = placeHolder;
             field.settings.options.forEach((h) => {
                if (h.id == obj[field.columnName]) {
                   myHex = h.hex;
@@ -266,32 +241,31 @@ module.exports = class ABFieldList extends ABFieldListCore {
    /*
     * @function customDisplay
     * perform any custom display modifications for this field.
-    * @param {object} row
-    *        the {name=>value} hash of the current row of data.
-    * @param {App} App
-    *        the shared ui App object useful more making globally
-    *        unique id references.
-    * @param {HtmlDOM} node
-    *        the HTML Dom object for this field's display.
+    * @param {object} row is the {name=>value} hash of the current row of data.
+    * @param {App} App the shared ui App object useful more making globally
+    *             unique id references.
+    * @param {HtmlDOM} node  the HTML Dom object for this field's display.
     */
-   customDisplay(row, App, node, options = {}) {
+   customDisplay(row, App, node, options) {
       // sanity check.
       if (!node) {
          return;
       }
 
+      options = options || {};
+
       if (this.settings.isMultiple == true) {
-         var placeholder = L("Select items");
-         var readOnly = false;
+         let placeholder = L("Select items");
+         let readOnly = false;
          if (options.editable != null && options.editable == false) {
             readOnly = true;
             placeholder = "";
          }
 
-         var domNode = node.querySelector(".list-data-values");
+         const domNode = node.querySelector(".list-data-values");
 
          // get selected values
-         var selectedData = _getSelectedOptions(this, row);
+         const selectedData = _getSelectedOptions(this, row);
 
          // Render selectivity
          this._Selectivity.selectivityRender(
@@ -314,7 +288,7 @@ module.exports = class ABFieldList extends ABFieldListCore {
                "change",
                (/* e */) => {
                   // update just this value on our current object.model
-                  var values = {};
+                  const values = {};
                   values[this.columnName] = this._Selectivity.selectivityGet(
                      domNode
                   );
@@ -350,13 +324,13 @@ module.exports = class ABFieldList extends ABFieldListCore {
       } else {
          if (!node.querySelector) return;
 
-         var clearButton = node.querySelector(
+         const clearButton = node.querySelector(
             ".selectivity-single-selected-item-remove"
          );
          if (clearButton) {
             clearButton.addEventListener("click", (e) => {
                e.stopPropagation();
-               var values = {};
+               const values = {};
                values[this.columnName] = "";
                this.object
                   .model()
@@ -383,17 +357,15 @@ module.exports = class ABFieldList extends ABFieldListCore {
 
    /*
     * @function customEdit
-    * @param {object} row
-    *        the {name=>value} hash of the current row of data.
-    * @param {App} App
-    *        the shared ui App object useful more making globally
-    *			 unique id references.
-    * @param {HtmlDOM} node
-    *        the HTML Dom object for this field's display.
+    *
+    * @param {object} row is the {name=>value} hash of the current row of data.
+    * @param {App} App the shared ui App object useful more making globally
+    *             unique id references.
+    * @param {HtmlDOM} node  the HTML Dom object for this field's display.
     */
    customEdit(row, App, node) {
       if (this.settings.isMultiple == true) {
-         var domNode = node.querySelector(".list-data-values");
+         const domNode = node.querySelector(".list-data-values");
 
          if (domNode.selectivity != null) {
             // Open selectivity
@@ -418,7 +390,7 @@ module.exports = class ABFieldList extends ABFieldListCore {
    formComponent() {
       // NOTE: what is being returned here needs to mimic an ABView CLASS.
       // primarily the .common() and .newInstance() methods.
-      var formComponentSetting = super.formComponent();
+      const formComponentSetting = super.formComponent();
 
       // .common() is used to create the display in the list
       formComponentSetting.common = () => {
@@ -440,7 +412,7 @@ module.exports = class ABFieldList extends ABFieldListCore {
    }
 
    detailComponent() {
-      var detailComponentSetting = super.detailComponent();
+      const detailComponentSetting = super.detailComponent();
 
       detailComponentSetting.common = () => {
          return {
@@ -452,12 +424,12 @@ module.exports = class ABFieldList extends ABFieldListCore {
    }
 
    getValue(item /*, rowData */) {
-      var values = {};
+      let values = {};
 
       if (!item) return values;
 
       if (this.settings.isMultiple) {
-         var domNode = item.$view.querySelector(".list-data-values");
+         const domNode = item.$view.querySelector(".list-data-values");
          values = this._Selectivity.selectivityGet(domNode);
       } else {
          values = $$(item).getValue();
@@ -469,10 +441,10 @@ module.exports = class ABFieldList extends ABFieldListCore {
       if (!item) return;
 
       if (this.settings.isMultiple) {
-         let selectedOpts = _getSelectedOptions(this, rowData);
+         const selectedOpts = _getSelectedOptions(this, rowData);
 
          // get selectivity dom
-         var domSelectivity = item.$view.querySelector(".list-data-values");
+         const domSelectivity = item.$view.querySelector(".list-data-values");
 
          // set value to selectivity
          this._Selectivity.selectivitySet(
