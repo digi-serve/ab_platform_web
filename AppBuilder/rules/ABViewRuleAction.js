@@ -242,6 +242,15 @@ module.exports = class ABViewRuleAction {
       return settings;
    }
 
+   /**
+    * @method isReady()
+    * returns a promise that gets resolved once our action is ready to work.
+    * @return {Promise}
+    */
+   isReady() {
+      return Promise.resolve();
+   }
+
    // NOTE: Querybuilder v5.2 has a bug where it won't display the [and/or]
    // choosers properly if it hasn't been shown before the .setValue() call.
    // so this work around allows us to refresh the display after the .show()

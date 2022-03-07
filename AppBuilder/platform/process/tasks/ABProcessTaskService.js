@@ -6,6 +6,7 @@ const AccountingFPYearClose = require("./ABProcessTaskServiceAccountingFPYearClo
 const AccountingJEArchive = require("./ABProcessTaskServiceAccountingJEArchive.js");
 const ABProcessTaskServiceInsertRecord = require("./ABProcessTaskServiceInsertRecord.js");
 const ABProcessTaskServiceQuery = require("./ABProcessTaskServiceQuery.js");
+const ABProcessTaskServiceCalculate = require("./ABProcessTaskServiceCalculate.js");
 
 let L = (...params) => AB.Multilingual.label(...params);
 
@@ -75,6 +76,13 @@ module.exports = class ABProcessTaskService extends ABProcessTaskServiceCore {
                   this.switchTo("insertRecord", id);
                },
             },
+            {
+               view: "button",
+               label: L("Calculate Task"),
+               click: () => {
+                  this.switchTo("calculate", id);
+               }
+            }
          ],
       };
 
@@ -142,6 +150,14 @@ module.exports = class ABProcessTaskService extends ABProcessTaskServiceCore {
 
          case "insertRecord":
             child = new ABProcessTaskServiceInsertRecord(
+               myValues,
+               this.process,
+               this.application
+            );
+            break;
+
+         case "calculate":
+            child = new ABProcessTaskServiceCalculate(
                myValues,
                this.process,
                this.application

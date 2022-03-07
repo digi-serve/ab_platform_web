@@ -6,6 +6,15 @@ import PortalWork from "./portal_work.js";
 class Portal extends ClassUI {
    constructor() {
       super();
+
+      this.ShownPortal = null;
+      // {UI.Portal} ShownPortal
+      // Keep track of which Portal is currently shown.
+
+      this.portalWorkReady = false;
+      // {bool}
+      // has the PortalWork UI emitted it's "ready" event?
+      //
    }
 
    ui() {
@@ -25,14 +34,14 @@ class Portal extends ClassUI {
    init(AB) {
       this.AB = AB;
 
+      this.AB.on("portal.show", (key) => {
+         this.showPortal(key);
+      });
+
       var allInits = [];
       // {array} allInits
       // all the .init() {Promise}s that are being generated during our
       // init().
-
-      var ShownPortal = null;
-      // {UI.Portal} ShownPortal
-      // Keep track of which Portal is currently shown.
 
       allInits.push(PortalAuth.init(AB));
 
@@ -42,26 +51,17 @@ class Portal extends ClassUI {
          // Setup our listeners BEFORE the .init()s
          this.AB.Account.on("logout", () => {
             // on logout show Auth Portal
-            if (ShownPortal != PortalAuth) {
-               PortalAuth.show();
-               ShownPortal = PortalAuth;
-            }
+            this.showAuthPortal();
          });
 
          this.AB.Network.on("reauth", () => {
             // on logout show Auth Portal
-            if (ShownPortal != PortalAuth) {
-               PortalAuth.show();
-               ShownPortal = PortalAuth;
-            }
+            this.showAuthPortal();
          });
 
          PortalWork.on("ready", () => {
-            if (ShownPortal != PortalWork) {
-               // when loading portal is done move to Work Portal
-               PortalWork.show();
-               ShownPortal = PortalWork;
-            }
+            this.portalWorkReady = true;
+            this.showDefaultView();
          });
 
          // Now trigger our other .init()s
@@ -70,20 +70,72 @@ class Portal extends ClassUI {
       }
 
       return Promise.all(allInits).then(() => {
-         // if authenticated then show the loading Portal
-         if (this.AB.Account.isAuthenticated) {
-            if (!ShownPortal) {
-               // if we haven't already shown a portal ... show the loading
-               PortalLoading.show();
-            }
+         this.showDefaultView();
+      });
+   }
+
+   showAuthPortal(defaultView) {
+      if (this.ShownPortal != PortalAuth) {
+         PortalAuth.show(defaultView);
+         this.ShownPortal = PortalAuth;
+      }
+   }
+
+   showWorkPortal() {
+      if (this.portalWorkReady) {
+         if (this.ShownPortal != PortalWork) {
+            // when loading portal is done move to Work Portal
+            PortalWork.show();
+            this.ShownPortal = PortalWork;
+         }
+      } else {
+         if (!this.ShownPortal) {
+            // if we haven't already shown a portal ... show the loading
+            PortalLoading.show();
+         }
+      }
+   }
+
+   showDefaultView() {
+      // At this point, all inits() are complete
+
+      // if authenticated then show our default view:
+      if (this.AB.Account.isAuthenticated) {
+         // do we have a specified defaultView?
+         let defaultView = this.AB.Config.setting("view");
+         if (defaultView) {
+            // defaultView should be in form:
+            //    "auth_login_form",
+            //    "auth_login_passwordReset",
+            //    "work"
+            var parts = defaultView.split("_");
+            this.showPortal(parts[0], defaultView);
          } else {
-            if (ShownPortal != PortalAuth) {
-               // if we are not authenticated, then move to Auth Portal
-               PortalAuth.show();
-               ShownPortal = PortalAuth;
+            // then default to our work view:
+            if (this.portalWorkReady) {
+               this.showWorkPortal();
+            } else {
+               if (!this.ShownPortal) {
+                  // if we haven't already shown a portal ... show the loading
+                  PortalLoading.show();
+               }
             }
          }
-      });
+      } else {
+         this.showAuthPortal();
+      }
+   }
+
+   showPortal(key, defaultView) {
+      switch (key) {
+         case "auth":
+            this.showAuthPortal(defaultView);
+            break;
+
+         case "work":
+            this.showWorkPortal();
+            break;
+      }
    }
 }
 

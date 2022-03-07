@@ -6,15 +6,22 @@ var _defaultsDeep = require("lodash/defaultsDeep");
 
 var divConfigDefaults = {
    "appbuilder-portal-autoenter": true,
-   // autoenter {bool} open up the portal as soon as we load.
-   //           false : just displays a link that will load the portal
+   // {bool} autoenter
+   // open up the portal as soon as we load.
+   //   false : just displays a link that will load the portal
 
    "appbuilder-portal-fullscreen": true,
-   // fullscreen {bool} take up the full browser window
-   //            false : the only take up the area the current div is
+   // {bool} fullscreen
+   // take up the full browser window?
+   //   false : only take up the area the current div is
 
    "appbuilder-tenant": null,
-   // tenant {string} the tenant uuid for this AppBuilder instance.
+   // {string} tenant
+   // the tenant uuid for this AppBuilder instance.
+
+   "appbuilder-view": "auth_login_form",
+   // {string} view
+   // the default view to display to the current user.
 
    "appbuilder-tenant-prefix": null,
    // TESTING! Remove this

@@ -1098,7 +1098,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
     *
     * @return {Promise}
     */
-   getOptions(where, term) {
+   getOptions(where, term, sort) {
       return new Promise((resolve, reject) => {
          var haveResolved = false;
          // {bool}
@@ -1125,6 +1125,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          // Prepare Where clause
 
          where = where || {};
+         sort = sort || [];
 
          if (!where.glue) where.glue = "and";
 
@@ -1217,6 +1218,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                   // Pull linked object data
                   var result = await linkedModel.findAll({
                      where: where,
+                     sort: sort,
                      populate: false,
                   });
 
@@ -1366,7 +1368,11 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          }
          return vals;
       } else {
-         return item.getList().getItem(item.getValue());
+         if (item.getValue()) {
+            return item.getList().getItem(item.getValue());
+         } else {
+            return "";
+         }
       }
    }
 

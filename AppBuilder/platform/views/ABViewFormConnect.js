@@ -7,8 +7,10 @@ const ABViewPropertyEditPage = require("./viewProperties/ABViewPropertyEditPage"
 const ABViewFormConnectPropertyComponentDefaults = ABViewFormConnectCore.defaultValues();
 
 const RowFilter = require("../RowFilter");
+const ABPopupSort = require("../../../ABDesigner/ab_work_object_workspace_popupSortFields");
 
 let FilterComponent = null;
+let SortComponent = null;
 
 let L = (...params) => AB.Multilingual.label(...params);
 
@@ -83,6 +85,7 @@ function _onShow(App, compId, instance, component) {
    instance.options = {
       formView: instance.settings.formView,
       filters: instance.settings.objectWorkspace.filterConditions,
+      sort: instance.settings.objectWorkspace.sortFields,
       filterValue: filterValue,
       filterKey: filterKey,
       filterColumn: filterColumn,
@@ -185,68 +188,11 @@ function _onShow(App, compId, instance, component) {
       );
    }
 
-   if (instance.options.editPage) {
-      setTimeout(() => {
-         _trigerEditPageEvent(instance, node, elem);
-      }, 500);
-   }
-
-   // field.customDisplay(rowData, App, node, {
-   //    formView: instance.settings.formView,
-   //    filters: instance.settings.objectWorkspace.filterConditions,
-   //    filterValue: filterValue,
-   //    filterKey: filterKey,
-   //    filterColumn: filterColumn,
-   //    editable: instance.settings.disable == 1 ? false : true,
-   //    editPage:
-   //       !instance.settings.editForm || instance.settings.editForm == "none"
-   //          ? false
-   //          : true,
-   // });
-
    // listen 'editPage' event
-   if (!instance._editPageEvent) {
-      instance._editPageEvent = true;
-      field.on("editPage", component.logic.goToEditPage);
-   }
-}
-
-function _trigerEditPageEvent(instance, node, elem) {
-   let editMenus = node.querySelectorAll(
-      ".selectivity-single-selected-item-edit, .selectivity-multiple-selected-item-edit"
-   );
-   for (let i = 0; i < editMenus.length; i++) {
-      let eMenu = editMenus[i];
-      if (eMenu && !eMenu.__hasClickEvent) {
-         eMenu.addEventListener(
-            "click",
-            function (e) {
-               e.stopPropagation();
-               e.preventDefault();
-
-               let currentTarget = e.currentTarget;
-
-               let parentElm = elem;
-               if (!parentElm) return;
-
-               let rowId = currentTarget.getAttribute("data-item-id");
-               if (!rowId) return;
-
-               let fieldId = parentElm.config.dataFieldId;
-               if (!fieldId) return;
-
-               let thisField = instance.field((fld) => {
-                  return fld.id == fieldId;
-               });
-               if (!thisField) return;
-
-               thisField.emit("editPage", rowId);
-            },
-            true
-         );
-         eMenu.__hasClickEvent = true;
-      }
-   }
+   // if (!instance._editPageEvent) {
+   //    instance._editPageEvent = true;
+   //    field.on("editPage", component.logic.goToEditPage);
+   // }
 }
 
 module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
@@ -350,6 +296,12 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
          this.filter_popup.show($view, null, { pos: "top" });
       };
 
+      _logic.showSortPopup = ($button) => {
+         SortComponent.show($button, null, {
+            pos: "top",
+         });
+      };
+
       _logic.onFilterChange = () => {
          let view = _logic.currentEditObject();
          let filterValues = FilterComponent.getValue() || {};
@@ -373,6 +325,11 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
                this.propertyEditorSave(ids, view);
             }, 10);
          }
+      };
+
+      _logic.onSortChange = () => {
+         let view = _logic.currentEditObject();
+         this.propertyEditorSave(ids, view);
       };
 
       // create filter & sort popups
@@ -477,6 +434,34 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
                         },
                      ],
                   },
+                  {
+                     height: 30,
+                  },
+                  {
+                     rows: [
+                        {
+                           cols: [
+                              {
+                                 view: "label",
+                                 label: L("Sort Options:"),
+                                 width: App.config.labelWidthLarge,
+                              },
+                              {
+                                 view: "button",
+                                 name: "buttonSort",
+                                 css: "webix_primary",
+                                 label: L("Settings"),
+                                 icon: "fa fa-gear",
+                                 type: "icon",
+                                 badge: 0,
+                                 click: function () {
+                                    _logic.showSortPopup(this.$view);
+                                 },
+                              },
+                           ],
+                        },
+                     ],
+                  },
                ],
             },
          },
@@ -568,8 +553,8 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
       });
 
       // Set the options of the possible edit forms
-      this.addPageProperty.setSettings(view, view.settings);
-      this.editPageProperty.setSettings(view, view.settings);
+      this.addPageProperty.setSettings(view, view.settingsAddPage);
+      this.editPageProperty.setSettings(view, view.settingsEditPage);
       $$(ids.filterConnectedValue).define("options", filterConnectedOptions);
       $$(ids.filterConnectedValue).setValue(view.settings.filterConnectedValue);
 
@@ -610,14 +595,15 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
       ).getValue();
       view.settings.objectWorkspace = {
          filterConditions: FilterComponent.getValue(),
+         sortFields: SortComponent.getValue(),
       };
 
-      view.settings = this.addPageProperty.getSettings(view);
-      view.settings = this.editPageProperty.getSettings(view);
+      view.settingsAddPage = this.addPageProperty.getSettings(view);
+      view.settingsEditPage = this.editPageProperty.getSettings(view);
 
       // refresh settings of app page tool
-      view.addPageTool.fromSettings(view.settings);
-      view.editPageTool.fromSettings(view.settings);
+      view.addPageTool.fromSettings(view.settingsAddPage);
+      view.editPageTool.fromSettings(view.settingsEditPage);
    }
 
    static populateBadgeNumber(ids, view) {
@@ -635,6 +621,21 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
          $$(ids.buttonFilter).define("badge", null);
          $$(ids.buttonFilter).refresh();
       }
+
+      if (
+         view.settings.objectWorkspace &&
+         view.settings.objectWorkspace.sortFields &&
+         view.settings.objectWorkspace.sortFields.length
+      ) {
+         $$(ids.buttonSort).define(
+            "badge",
+            view.settings.objectWorkspace.sortFields.length || null
+         );
+         $$(ids.buttonSort).refresh();
+      } else {
+         $$(ids.buttonSort).define("badge", null);
+         $$(ids.buttonSort).refresh();
+      }
    }
 
    static initPopupEditors(App, ids, _logic) {
@@ -644,6 +645,11 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
       FilterComponent.init({
          // when we make a change in the popups we want to make sure we save the new workspace to the properties to do so just fire an onChange event
          onChange: _logic.onFilterChange,
+      });
+
+      SortComponent = new ABPopupSort(this.App, `${idBase}_sort`);
+      SortComponent.init({
+         onChange: _logic.onSortChange,
       });
 
       this.filter_popup = webix.ui({
@@ -667,15 +673,19 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
 
       // Populate data to popups
       // FilterComponent.objectLoad(objectCopy);
+      let linkedObj;
       let field = view.field();
       if (field) {
-         let linkedObj = field.datasourceLink;
+         linkedObj = field.datasourceLink;
          if (linkedObj)
             FilterComponent.fieldsLoad(linkedObj.fields(), linkedObj);
       }
 
-      // FilterComponent.applicationLoad(view.application);
+      FilterComponent.applicationLoad(view.application);
       FilterComponent.setValue(filterConditions);
+
+      if (linkedObj) SortComponent.objectLoad(linkedObj);
+      SortComponent.setValue(view.settings.objectWorkspace.sortFields);
    }
 
    static get addPageProperty() {
@@ -812,9 +822,13 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
                $$(ids.component).getList().define("data", data);
                if (field.settings.linkType == "many") {
                   let currentVals = $$(ids.component).getValue();
-                  $$(ids.component).setValue(
-                     currentVals ? currentVals + "," + saveData.id : saveData.id
-                  );
+                  if (currentVals.indexOf(saveData.id) == -1) {
+                     $$(ids.component).setValue(
+                        currentVals
+                           ? currentVals + "," + saveData.id
+                           : saveData.id
+                     );
+                  }
                } else {
                   $$(ids.component).setValue(saveData.id);
                }
@@ -874,28 +888,19 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
                $form = $elem.getFormView();
             }
 
-            component.logic.formBusy($form);
+            // Open the form popup
+            editPageComponent.onClick().then(() => {
+               let dc = editForm.datacollection;
+               if (dc) {
+                  dc.setCursor(rowId);
 
-            setTimeout(() => {
-               // Open the form popup
-               editPageComponent.onClick().then(() => {
-                  let dc = editForm.datacollection;
-                  if (dc) {
-                     dc.setCursor(rowId);
-
-                     if (!this.__editFormDcEvent) {
-                        this.__editFormDcEvent = dc.on(
-                           "initializedData",
-                           () => {
-                              dc.setCursor(rowId);
-                           }
-                        );
-                     }
+                  if (!this.__editFormDcEvent) {
+                     this.__editFormDcEvent = dc.on("initializedData", () => {
+                        dc.setCursor(rowId);
+                     });
                   }
-
-                  component.logic.formReady($form);
-               });
-            }, 50);
+               }
+            });
          },
       };
 
@@ -906,6 +911,16 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
       component.ui.id = ids.component;
       component.ui.view = multiselect ? "multicombo" : "combo";
       component.ui.on = {
+         onItemClick: (id, e) => {
+            if (
+               e.target.classList.contains("editConnectedPage") &&
+               e.target.dataset.itemId
+            ) {
+               let rowId = e.target.dataset.itemId;
+               if (!rowId) return;
+               component.logic.goToEditPage(rowId);
+            }
+         },
          onChange: (data) => {
             let selectedValues;
             if (Array.isArray(data)) {
@@ -947,11 +962,6 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
                : selectedValues;
             $$(ids.component).setValue(prepedVals);
             $$(ids.component).unblockEvent();
-            _trigerEditPageEvent(
-               this,
-               $$(ids.component).$view,
-               $$(ids.component)
-            );
          },
       };
       // component.ui.attributes = {
@@ -962,7 +972,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
          selectAll: multiselect ? true : false,
          body: {
             data: [],
-            template: `<a data-item-id="#id#" class="selectivity-multiple-selected-item-edit"><i class="fa fa-edit"></i></a> #value#`,
+            template: `<i data-item-id="#id#" class="fa fa-cog editConnectedPage"></i>#value#`,
          },
          on: {
             onShow: () => {
@@ -1097,15 +1107,12 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
          addPageComponent.ui.on = {
             onItemClick: (id, evt) => {
                let $form = $$(id).getFormView();
-               component.logic.formBusy($form);
 
                let dc = form.datacollection;
 
-               setTimeout(() => {
-                  addPageComponent.onClick(dc).then(() => {
-                     component.logic.formReady($form);
-                  });
-               }, 50);
+               addPageComponent.onClick(dc).then(() => {
+                  // component.logic.formReady($form);
+               });
 
                return false;
             },
