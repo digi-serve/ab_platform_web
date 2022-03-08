@@ -142,7 +142,8 @@ export default class ABViewPropertyAddPage extends ABViewProperty {
             view: "button",
             type: "icon",
             icon: "fa fa-plus",
-            width: 50,
+            width: 32,
+            height: 32,
             css: "webix_primary ab-connect-add-new-link",
             on: {
                onAfterRender: () => {

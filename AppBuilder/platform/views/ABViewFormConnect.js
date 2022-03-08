@@ -145,23 +145,12 @@ function _onShow(App, compId, instance, component) {
       }
       $$(node).refresh();
 
-      field.once("option.data", (data) => {
-         data.forEach((item) => {
-            item.value = item.text;
-         });
-         $$(node).getList().clearAll();
-         $$(node).getList().define("data", data);
-      });
-
-      field
-         .getOptions(instance.settings.objectWorkspace.filterConditions, "")
-         .then((data) => {
-            data.forEach((item) => {
-               item.value = item.text;
-            });
-            $$(node).getList().clearAll();
-            $$(node).getList().define("data", data);
-         });
+      field.getAndPopulateOptions(
+         $$(node),
+         this.options,
+         field,
+         instance.parentFormComponent()
+      );
    }
 
    if (instance.options.filterValue && $$(instance.options.filterValue.id)) {
@@ -725,54 +714,8 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
       var settings = {};
       if (form) settings = form.settings;
 
-      // var requiredClass = "";
-      // if (field.settings.required == true || this.settings.required == true) {
-      //    requiredClass = "webix_required";
-      // }
-      // var templateLabel = "";
-      // if (settings.showLabel) {
-      //    if (settings.labelPosition == "top")
-      //       templateLabel =
-      //          '<label style="display:block; text-align: left; margin: 0; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;" class="webix_inp_top_label ' +
-      //          requiredClass +
-      //          '">#label#</label>';
-      //    else
-      //       templateLabel =
-      //          '<label style="width: #width#px; display: inline-block; line-height: 32px; float: left; margin: 0; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;" class="webix_inp_label ' +
-      //          requiredClass +
-      //          '">#label#</label>';
-      // }
-      //
-      // var newWidth = settings.labelWidth;
-      // if (this.settings.formView && this.settings.formView != "none") {
-      //    newWidth += 40;
-      // } else if (
-      //    settings.showLabel == true &&
-      //    settings.labelPosition == "top"
-      // ) {
-      //    newWidth = 0;
-      // }
-
       let addPageComponent = this.addPageTool.component(App, idBase);
       let editPageComponent;
-      // let template = `<div class="customField">${templateLabel}#plusButton##template#</div>`
-      //    .replace(/#width#/g, settings.labelWidth)
-      //    .replace(/#label#/g, field.label)
-      //    .replace(/#plusButton#/g, addPageComponent.ui)
-      //    .replace(
-      //       /#template#/g,
-      //       field.columnHeader({
-      //          width: newWidth,
-      //          editable: true,
-      //          skipRenderSelectivity: true,
-      //       })
-      //    );
-
-      // let template = field.columnHeader({
-      //    width: newWidth,
-      //    editable: true,
-      //    skipRenderSelectivity: true,
-      // });
 
       component.init = (optionsParam) => {
          var settings = {};
@@ -930,11 +873,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
                   if (typeof record != "object") {
                      // we need to convert either index or uuid to full data object
                      recordObj = field.getItemFromVal(record);
-                     // if (!recordObj) {
-                     //    recordObj = field.getItemFromUUID(record);
-                     // }
                   }
-                  // recordObj = field.pullRecordRelationValues(recordObj);
                   if (recordObj && recordObj.id)
                      selectedValues.push(recordObj.id);
                });
@@ -943,9 +882,6 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
                if (typeof data != "object") {
                   // we need to convert either index or uuid to full data object
                   selectedValues = field.getItemFromVal(data);
-                  // if (!selectedValues) {
-                  //    selectedValues = field.getItemFromUUID(data);
-                  // }
                }
                // selectedValues = field.pullRecordRelationValues(selectedValues);
                if (selectedValues && selectedValues.id) {
@@ -964,126 +900,32 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
             $$(ids.component).unblockEvent();
          },
       };
-      // component.ui.attributes = {
-      //    "data-cy": `${this.key} ${field.key} ${field.columnName} ${this.id} ${this.parent.id}`,
-      // };
+
       component.ui.dataFieldId = field.id;
+
+      let editForm = "";
+      if (settings.editForm && settings.editForm != "") {
+         editForm =
+            '<i data-item-id="#id#" class="fa fa-cog editConnectedPage"></i>';
+      }
       component.ui.suggest = {
+         button: true,
          selectAll: multiselect ? true : false,
          body: {
             data: [],
-            template: `<i data-item-id="#id#" class="fa fa-cog editConnectedPage"></i>#value#`,
+            template: editForm + "#value#",
          },
          on: {
             onShow: () => {
-               if (this.options.filterValue && this.options.filterValue.id) {
-                  let parentVal = $$(this.options.filterValue.id).getValue();
-                  if (parentVal) {
-                     // if we are filtering based off another selectivity's value we
-                     // need to do it on fetch each time because the value can change
-                     // copy the filters so we don't add to them every time there is a change
-                     let combineFilters = JSON.parse(
-                        JSON.stringify(this.options.filters)
-                     );
-
-                     // if there is a value create a new filter rule
-                     let filter = {
-                        key: this.options.filterKey,
-                        rule: "equals",
-                        value: parentVal,
-                     };
-                     combineFilters.rules.push(filter);
-
-                     field.once("option.data", (data) => {
-                        $$(ids.component).getList().clearAll();
-                        $$(ids.component).getList().define("data", data);
-                        $$(ids.component).setValue(
-                           $$(ids.component).getValue()
-                        );
-                     });
-                     field.getOptions(combineFilters, "").then((data) => {
-                        $$(ids.component).getList().clearAll();
-                        $$(ids.component).getList().define("data", data);
-                        $$(ids.component).setValue(
-                           $$(ids.component).getValue()
-                        );
-                     });
-                  }
-               } else {
-                  field.once("option.data", (data) => {
-                     $$(ids.component).getList().clearAll();
-                     $$(ids.component).getList().define("data", data);
-                     $$(ids.component).setValue($$(ids.component).getValue());
-                  });
-                  field
-                     .getOptions(
-                        this.settings.objectWorkspace.filterConditions,
-                        ""
-                     )
-                     .then((data) => {
-                        $$(ids.component).getList().clearAll();
-                        $$(ids.component).getList().define("data", data);
-                        $$(ids.component).setValue(
-                           $$(ids.component).getValue()
-                        );
-                     });
-               }
+               field.getAndPopulateOptions(
+                  $$(ids.component),
+                  this.options,
+                  field,
+                  form
+               );
             },
          },
       };
-
-      // component.ui = {
-      //    id: ids.component,
-      //    view: "forminput",
-      //    labelWidth: 0,
-      //    paddingY: 0,
-      //    paddingX: 0,
-      //    label: field.label,
-      //    css: "ab-custom-field",
-      //    name: field.columnName,
-      //    body: {
-      //       view: App.custom.focusabletemplate.view,
-      //       css: "webix_el_box",
-      //       borderless: true,
-      //       template: template,
-      //       onClick: {
-      //          customField: (id, e, trg) => {
-      //             if (this.settings.disable == 1) return;
-      //
-      //             var rowData = {};
-      //
-      //             if ($$(ids.component)) {
-      //                var node = $$(ids.component).$view;
-      //                field.customEdit(rowData, App, node);
-      //             }
-      //          },
-      //          "ab-connect-add-new-link": function (e, id, trg) {
-      //             e.stopPropagation();
-      //             // var topParentView = this.getTopParentView();
-      //             // component.logic.openFormPopup(topParentView.config.left, topParentView.config.top);
-      //
-      //             let $form = this.getFormView();
-      //             component.logic.formBusy($form);
-      //
-      //             let dc = form.datacollection;
-      //
-      //             setTimeout(() => {
-      //                addPageComponent.onClick(dc).then(() => {
-      //                   component.logic.formReady($form);
-      //                });
-      //             }, 50);
-      //
-      //             return false;
-      //          },
-      //       },
-      //    },
-      // };
-
-      // if (settings.showLabel == true && settings.labelPosition == "top") {
-      //    component.ui.body.height = 80;
-      // } else {
-      //    component.ui.body.height = 38;
-      // }
 
       component.ui.onClick = {
          customField: (id, e, trg) => {
@@ -1148,7 +990,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
          let node = elem.$view;
 
          // Add data-cy attributes
-         const dataCy = `${this.key} ${field.key} ${field.columnName} ${this.id} ${this.parent.id}`;
+         const dataCy = `${field.key} ${field.columnName} ${field.id} ${this.parent.id}`;
          node.setAttribute("data-cy", dataCy);
       };
 

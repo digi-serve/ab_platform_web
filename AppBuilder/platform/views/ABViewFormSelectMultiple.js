@@ -141,7 +141,10 @@ module.exports = class ABViewFormSelectMultiple extends (
             values.forEach((val) => {
                selectedOptions.push($$(ids.component).getList().getItem(val));
             });
-            let vals = field.getSelectedOptions(field, selectedOptions);
+            let vals = selectedOptions;
+            if (field.getSelectedOptions) {
+               vals = field.getSelectedOptions(field, selectedOptions);
+            }
 
             var items = [];
             vals.forEach((val) => {
@@ -151,8 +154,9 @@ module.exports = class ABViewFormSelectMultiple extends (
                   hasCustomColor = "hascustomcolor";
                   optionHex = `background: ${val.hex};`;
                }
+               let text = val.text ? val.text : val.value;
                items.push(
-                  `<span class="webix_multicombo_value ${hasCustomColor}" style="${optionHex}" optvalue="${val.id}"><span>${val.text}</span><span class="webix_multicombo_delete" role="button" aria-label="Remove item"></span></span>`
+                  `<span class="webix_multicombo_value ${hasCustomColor}" style="${optionHex}" optvalue="${val.id}"><span>${text}</span><span class="webix_multicombo_delete" role="button" aria-label="Remove item"></span></span>`
                );
             });
             return items.join("");

@@ -1063,8 +1063,8 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
    ////       are these values present when this Object is instanciated? Can't we just pass these into the
    ////       object constructor and have it internally track these things?
    customEdit(row, App, node) {
-      var selectedData = this.pullRelationValues(row);
-      this._selectedData = selectedData;
+      // var selectedData = this.pullRelationValues(row);
+      // this._selectedData = selectedData;
    }
 
    /*
@@ -1157,10 +1157,12 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             this.settings.linkType == "many" &&
             this.settings.linkViaType == "one"
          ) {
-            where.rules.push({
-               key: linkedCol.id,
-               rule: "is_null",
-            });
+            // Mar 8, 2022 I (James) removed this because we need these options
+            // to appear so we can put a checkbox next to them with the new UI
+            // where.rules.push({
+            //    key: linkedCol.id,
+            //    rule: "is_null",
+            // });
             // where[linkedCol.columnName] = null;
          }
          // 1:1
@@ -1201,16 +1203,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                if (storedOptions) {
                   // immediately respond with our stored options.
                   this._options = storedOptions;
-                  let options = [];
-                  if (this._selectedData && this._selectedData.length) {
-                     options = options.concat(
-                        this._selectedData,
-                        storedOptions
-                     );
-                  } else {
-                     options = storedOptions;
-                  }
-                  return respond(options);
+                  return respond(this._options);
                }
             })
             .then(async () => {
@@ -1232,16 +1225,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                   });
 
                   this.AB.Storage.set(storageID, this._options);
-                  let options = [];
-                  if (this._selectedData && this._selectedData.length) {
-                     options = options.concat(
-                        this._selectedData,
-                        this._options
-                     );
-                  } else {
-                     options = this._options;
-                  }
-                  return respond(options);
+                  return respond(this._options);
                } catch (err) {
                   this.AB.notify.developer(err, {
                      context:
@@ -1297,38 +1281,78 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       }
    }
 
-   getAndPopulateOptions(editor) {
+   getAndPopulateOptions(editor, options, field, form) {
       let theEditor = editor;
+
+      let combineFilters = {};
+      if (
+         options &&
+         options.filterValue &&
+         options.filterValue.id &&
+         combineFilters.rules
+      ) {
+         let parentVal = $$(options.filterValue.id).getValue();
+         if (parentVal) {
+            // if we are filtering based off another selectivity's value we
+            // need to do it on fetch each time because the value can change
+            // copy the filters so we don't add to them every time there is a change
+            let combineFilters = JSON.parse(JSON.stringify(options.filters));
+
+            // if there is a value create a new filter rule
+            let filter = {
+               key: options.filterKey,
+               rule: "equals",
+               value: parentVal,
+            };
+            combineFilters.rules.push(filter);
+         }
+      }
+
       this.once("option.data", (data) => {
-         this.populateOptions(theEditor, data);
+         this.populateOptions(theEditor, data, field, form, true);
       });
-      this.getOptions().then((data) => {
-         this.populateOptions(theEditor, data);
+      this.getOptions(combineFilters, "").then((data) => {
+         this.populateOptions(theEditor, data, field, form, false);
       });
    }
 
-   populateOptions(theEditor, data) {
+   populateOptions(theEditor, data, field, form, addCy) {
       theEditor.blockEvent();
       theEditor.getList().clearAll();
       theEditor.getList().define("data", data);
+      if (addCy) {
+         this.populateOptionsDataCy(theEditor, field, form);
+      }
       if (theEditor.getValue && theEditor.getValue()) {
          theEditor.setValue(theEditor.getValue());
-      } else if (this._selectedData && this._selectedData.length) {
-         theEditor.setValue(this.editFormat(this._selectedData));
+         // } else if (this._selectedData && this._selectedData.length) {
+         //    theEditor.setValue(this.editFormat(this._selectedData));
       }
       theEditor.unblockEvent();
+   }
+
+   populateOptionsDataCy(theEditor, field, form) {
+      // Add data-cy attributes
+      if (theEditor.getList) {
+         var popup = theEditor.getPopup();
+         if (!popup) return;
+         theEditor.getList().data.each((option) => {
+            if (!option) return;
+            var node = popup.$view.querySelector(
+               "[webix_l_id='" + option.id + "']"
+            );
+            if (!node) return;
+            node.setAttribute(
+               "data-cy",
+               `${field.key} options ${option.id} ${field.id} ${form.id}`
+            );
+         });
+      }
    }
 
    getItemFromVal(val) {
       let item;
       let options = [];
-      if (this._selectedData) {
-         if (Array.isArray(this._selectedData)) {
-            options = options.concat(this._selectedData);
-         } else {
-            options = options.concat([this._selectedData]);
-         }
-      }
       if (this._options) {
          options = options.concat(this._options);
       }

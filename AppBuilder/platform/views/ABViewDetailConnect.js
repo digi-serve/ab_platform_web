@@ -83,6 +83,9 @@ module.exports = class ABViewDetailConnect extends ABViewDetailConnectCore {
    component(App, idPrefix) {
       let idBase = "ABViewDetailConnect_" + (idPrefix || "") + this.id;
       let baseComp = super.component(App, idBase);
+      var ids = {
+         detail: this.parentDetailComponent()?.id || this.parent.id,
+      };
 
       let addPageComponent = this.addPageTool.component(App, idBase);
 
@@ -93,6 +96,17 @@ module.exports = class ABViewDetailConnect extends ABViewDetailConnectCore {
          addPageComponent.init({
             // TODO : callbacks
          });
+      };
+
+      baseComp.ui.on = {
+         //Add data-cy attribute for Cypress Testing
+         onAfterRender: () => {
+            let columnName = this.field((fld) => {
+               return fld.id == this.settings.fieldId;
+            }).columnName;
+            const dataCy = `detail connected ${columnName} ${this.settings.fieldId} ${ids.detail}`;
+            $$(baseComp.ui.id)?.$view.setAttribute("data-cy", dataCy);
+         },
       };
 
       // Add plus button in front of template
