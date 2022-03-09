@@ -313,7 +313,7 @@ export default class ABViewPropertyAddPage extends ABViewProperty {
                   let comp = v.viewComponents[fView.id];
                   if (!comp) return;
 
-                  field.setValue($$(comp.ui.id), data);
+                  field.setValue($$(comp.ui.inputId), data);
                });
             });
          },

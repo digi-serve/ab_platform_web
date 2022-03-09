@@ -1411,6 +1411,8 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       if (item.getList && item.getList().count() == 0) {
          item.getList().define("data", val);
       }
-      item.setValue(val.id);
+      setTimeout(function () {
+         item.setValue(val.id);
+      }, 50);
    }
 };

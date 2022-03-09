@@ -961,6 +961,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
          };
 
          component.ui = {
+            inputId: component.ui.id,
             rows: [
                {
                   cols: [
@@ -978,6 +979,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
          };
       } else {
          component.ui = {
+            inputId: component.ui.id,
             rows: [component.ui],
          };
       }
