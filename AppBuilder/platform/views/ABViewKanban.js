@@ -1,9 +1,6 @@
 const ABViewKanbanCore = require("../../core/views/ABViewKanbanCore");
 import ABViewComponent from "./ABViewComponent";
 
-const ABWorkspaceKanban = require("../../../ABDesigner/ab_work_object_workspace_kanban");
-const ABWorkspaceViewKanban = require("../workspaceViews/ABObjectWorkspaceViewKanban");
-
 const ABViewPropertyLinkPage = require("./viewProperties/ABViewPropertyLinkPage")
    .default;
 
@@ -36,14 +33,6 @@ class ABViewKanBanComponent extends ABViewComponent {
          `${base}_formSidePanel`,
          this.settings.editFields
       );
-
-      this.CurrentObjectID = null;
-      // {string}
-      // the ABObject.id of the object we are working with.
-
-      this.CurrentDatacollectionID = null;
-      // {string}
-      // the ABDataCollection.id of the DC we are working with
 
       this.CurrentVerticalField = null;
       this.CurrentHorizontalField = null;
@@ -158,23 +147,6 @@ class ABViewKanBanComponent extends ABViewComponent {
       return this._kb;
    }
 
-   /**
-    * @method CurrentObject()
-    * A helper to return the current ABObject we are working with.
-    * @return {ABObject}
-    */
-   get CurrentObject() {
-      return this.AB.objectByID(this.CurrentObjectID);
-   }
-   /**
-    * @method CurrentDatacollection()
-    * A helper to return the current ABDataCollection we are working with.
-    * @return {ABDataCollection}
-    */
-   get CurrentDatacollection() {
-      return this.AB.datacollectionByID(this.CurrentDatacollectionID);
-   }
-
    kanbanListTemplate() {
       return {
          icons: [
@@ -235,7 +207,6 @@ class ABViewKanBanComponent extends ABViewComponent {
 
       // Get vertical grouping field and populate to kanban list
       // NOTE: this field should be the select list type
-      // CurrentVerticalField = _logic.getVerticalGroupingField();
       var CurrentVerticalField = CurrentObject.fieldByID(
          this.settings.verticalGroupingField
       );
@@ -385,7 +356,7 @@ class ABViewKanBanComponent extends ABViewComponent {
    }
 
    objectLoad(object) {
-      this.CurrentObjectID = object.id;
+      super.objectLoad(object);
 
       this.TextTemplate.objectLoad(object);
       this.FormSide.objectLoad(object);
@@ -397,15 +368,20 @@ class ABViewKanBanComponent extends ABViewComponent {
     * @param datacollection {ABDatacollection}
     */
    datacollectionLoad(datacollection) {
-      this.CurrentDatacollectionID = datacollection.id;
+      super.datacollectionLoad(datacollection);
 
       var DC = this.CurrentDatacollection;
-      if (DC) DC.bind(this.$kb);
-      else if (datacollection) datacollection.bind(this.$kb);
-      else this.$kb.unbind();
+      if (!DC) {
+         DC = datacollection;
+      }
+      if (DC) {
+         DC.bind(this.$kb);
+         var obj = DC.datasource;
+         if (obj) this.objectLoad(obj);
+         return;
+      }
 
-      var obj = datacollection.datasource;
-      if (obj) this.objectLoad(obj);
+      this.$kb.unbind();
    }
 
    async updateStatus(rowId, status) {
@@ -431,7 +407,8 @@ class ABViewKanBanComponent extends ABViewComponent {
          if (patch[key] == null) {
             patch[key] = "";
 
-            // WORKAROUND: if update data is empty, then it will need to refresh the kanban after update
+            // WORKAROUND: if update data is empty, then it will need to refresh
+            // the kanban after update
             needRefresh = true;
          }
       }
@@ -570,10 +547,6 @@ class ABViewKanBanComponent extends ABViewComponent {
 }
 
 export default class ABViewKanban extends ABViewKanbanCore {
-   // constructor(values, application, parent, defaultValues) {
-   //    super(values, application, parent, defaultValues);
-   // }
-
    //
    //	Editor Related
    //
@@ -606,157 +579,6 @@ export default class ABViewKanban extends ABViewKanbanCore {
       };
    }
 
-   //
-   // Property Editor
-   //
-
-   static propertyEditorDefaultElements(App, ids, _logic, ObjectDefaults) {
-      let commonUI = super.propertyEditorDefaultElements(
-         App,
-         ids,
-         _logic,
-         ObjectDefaults
-      );
-      let idBase = "ABViewKanbanPropertyEditor";
-
-      if (this._kanbanViewComponent == null)
-         this._kanbanViewComponent = ABWorkspaceViewKanban.component(
-            App,
-            idBase
-         );
-
-      if (this._linkPageComponent == null)
-         this._linkPageComponent = ABViewPropertyLinkPage.propertyComponent(
-            App,
-            `${idBase}_gridlinkpage`
-         );
-
-      // _logic functions
-
-      _logic.selectSource = (dcId, oldDcId) => {
-         var currView = _logic.currentEditObject();
-
-         // Update field options in property
-         this.propertyUpdateFieldOptions(ids, currView, dcId);
-      };
-
-      return commonUI.concat([
-         {
-            view: "fieldset",
-            label: L("Kanban Data:"),
-            labelWidth: this.AB.UISettings.config().labelWidthLarge,
-            body: {
-               type: "clean",
-               padding: 10,
-               rows: [
-                  {
-                     name: "datacollection",
-                     view: "select",
-                     label: L("Data Source"),
-                     labelWidth: this.AB.UISettings.config().labelWidthXLarge,
-                     value: null,
-                     on: {
-                        onChange: _logic.selectSource,
-                     },
-                  },
-                  {
-                     name: "vGroup",
-                     view: "select",
-                     label: L("Vertical Grouping"),
-                     placeholder: L("Select a field"),
-                     labelWidth: this.AB.UISettings.config().labelWidthXLarge,
-                     options: [],
-                  },
-                  {
-                     name: "hGroup",
-                     view: "select",
-                     label: L("Horizontal Grouping"),
-                     placeholder: L("Select a field"),
-                     labelWidth: this.AB.UISettings.config().labelWidthXLarge,
-                     options: [],
-                  },
-                  {
-                     name: "owner",
-                     view: "select",
-                     label: L("Card Owner"),
-                     placeholder: L("Select a user field"),
-                     labelWidth: this.AB.UISettings.config().labelWidthXLarge,
-                     options: [],
-                  },
-               ],
-            },
-         },
-         this._linkPageComponent.ui,
-      ]);
-   }
-
-   /**
-    * @method propertyUpdateFieldOptions
-    * Populate fields of object to select list in property
-    *
-    * @param {Object} ids
-    * @param {ABViewForm} view - the current component
-    * @param {string} dvId - id of ABDatacollection
-    */
-   static propertyUpdateFieldOptions(ids, view, dvId) {
-      let datacollection = view.AB.datacollectionByID(dvId);
-      let object = datacollection ? datacollection.datasource : null;
-
-      // Refresh options of fields by call ABObjectWorkspaceViewKanban's function
-      if (this._kanbanViewComponent) {
-         this._kanbanViewComponent.logic.refreshOptions(
-            object,
-            view ? view.settings : null,
-            {
-               vGroupInput: $$(ids.vGroup),
-               hGroupInput: $$(ids.hGroup),
-               ownerInput: $$(ids.owner),
-            }
-         );
-      }
-   }
-
-   static propertyEditorPopulate(App, ids, view) {
-      super.propertyEditorPopulate(App, ids, view);
-
-      let datacollectionId = view.settings.dataviewID
-         ? view.settings.dataviewID
-         : null;
-      let SourceSelector = $$(ids.datacollection);
-
-      // Pull data collections to options
-      let dcOptions = view.propertyDatacollections(
-         (dc) => dc.settings && !dc.settings.isQuery
-      );
-      SourceSelector.define("options", dcOptions);
-      SourceSelector.define("value", datacollectionId);
-      SourceSelector.refresh();
-
-      this.propertyUpdateFieldOptions(ids, view, datacollectionId);
-
-      $$(ids.vGroup).setValue(view.settings.verticalGroupingField);
-      $$(ids.hGroup).setValue(view.settings.horizontalGroupingField);
-      $$(ids.owner).setValue(view.settings.ownerField);
-
-      this._linkPageComponent.viewLoad(view);
-      this._linkPageComponent.setSettings(view.settings);
-   }
-
-   static propertyEditorValues(ids, view) {
-      super.propertyEditorValues(ids, view);
-
-      view.settings.dataviewID = $$(ids.datacollection).getValue();
-      view.settings.verticalGroupingField = $$(ids.vGroup).getValue() || null;
-      view.settings.horizontalGroupingField = $$(ids.hGroup).getValue() || null;
-      view.settings.ownerField = $$(ids.owner).getValue() || null;
-
-      // link pages
-      let linkSettings = this._linkPageComponent.getSettings();
-      for (let key in linkSettings) {
-         view.settings[key] = linkSettings[key];
-      }
-   }
-
    component(v1App = false) {
       var component = new ABViewKanBanComponent(this);
 
@@ -776,119 +598,6 @@ export default class ABViewKanban extends ABViewKanbanCore {
 
       return component;
    }
-   /*
-   componentOld(App, idBase) {
-      let baseCom = super.component(App);
-
-      idBase = idBase || `ABViewKanban_${this.id}`;
-
-      // let ids = {
-      // 	component: App.unique(idBase + '_component')
-      // }
-
-      // let labels = {
-      // 	common: App.labels
-      // };
-
-      let Kanban = new ABWorkspaceKanban(App, idBase);
-      let LinkPage = this.linkPageHelper.component(
-         App,
-         `${idBase}_kanbanlinkpage`
-      );
-      let datacollection = this.datacollection;
-
-      // Show empty data source UI
-      let kanbanUI = {
-         type: "space",
-         rows: [
-            {
-               view: "label",
-               label: L("Select an object to load."),
-               inputWidth: 200,
-               align: "center",
-            },
-            {},
-         ],
-      };
-
-      if (datacollection) {
-         kanbanUI = Kanban.ui.cols[0];
-      }
-
-      let _init = () => {
-         Kanban.init({
-            onSelect: _logic.onSelect,
-         });
-
-         if (datacollection) {
-            Kanban.datacollectionLoad(datacollection);
-
-            // set fields
-            let fieldSettings = {};
-            let object = datacollection.datasource;
-            if (object) {
-               Kanban.objectLoad(object);
-
-               let verticalGrouping = object.fieldByID(
-                  this.settings.verticalGroupingField
-               );
-               if (verticalGrouping)
-                  fieldSettings.verticalGrouping = verticalGrouping;
-
-               let horizontalGrouping = object.fieldByID(
-                  this.settings.horizontalGroupingField
-               );
-               if (horizontalGrouping)
-                  fieldSettings.horizontalGrouping = horizontalGrouping;
-
-               let ownerField = object.fieldByID(this.settings.ownerField);
-               if (ownerField) fieldSettings.ownerField = ownerField;
-            }
-
-            Kanban.setFields(fieldSettings);
-         }
-
-         // link page helper
-         LinkPage.init({
-            view: this,
-            datacollection: datacollection,
-         });
-      };
-
-      // our internal business logic
-      let _logic = {
-         onSelect: (itemId) => {
-            let page;
-            if (this.settings.editPage) page = this.settings.editPage;
-            else if (this.settings.detailsPage)
-               page = this.settings.detailsPage;
-
-            if (!page) return;
-
-            // Pass settings to link page module
-            if (LinkPage) {
-               LinkPage.changePage(page, itemId);
-            }
-
-            super.changePage(page);
-         },
-      };
-
-      let _onShow = () => {
-         baseCom.onShow();
-
-         Kanban.show();
-      };
-
-      return {
-         ui: kanbanUI,
-         init: _init,
-         logic: _logic,
-
-         onShow: _onShow,
-      };
-   }
-   */
 
    get linkPageHelper() {
       if (this.__linkPageHelper == null)
