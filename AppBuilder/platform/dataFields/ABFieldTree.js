@@ -1,228 +1,18 @@
-var ABFieldTreeCore = require("../../core/dataFields/ABFieldTreeCore");
-var ABFieldComponent = require("./ABFieldComponent");
+const ABFieldTreeCore = require("../../core/dataFields/ABFieldTreeCore");
 
-let L = (...params) => AB.Multilingual.label(...params);
-
-var ids = {
-   options: "ab-tree-option",
-   popup: "ab-tree-popup",
-   tree: "ab-tree",
-};
-
-var treeCol = null;
-// {webix.TreeCollection}
-// Transition code:
-// webix is not available when this file is included, so now we create it
-// after the first .elements() is called.
-
-/**
- * ABFieldTreeComponent
- *
- * Defines the UI Component for this Data Field.  The ui component is responsible
- * for displaying the properties editor, populating existing data, retrieving
- * property values, etc.
- */
-var ABFieldTreeComponent = new ABFieldComponent({
-   fieldDefaults: ABFieldTreeCore.defaults(),
-
-   elements: (App, field) => {
-      // Transition Code:
-      if (!treeCol) {
-         treeCol = new webix.TreeCollection({
-            data: [],
-         });
-      }
-      ids = field.idsUnique(ids, App);
-
-      return [
-         {
-            view: "label",
-            label: `<b>${L("Options")}</b>`,
-         },
-         {
-            id: ids.options,
-            name: "options",
-            css: "padList",
-            view: App.custom.edittree.view,
-            template:
-               "<div style='position: relative;'><i class='ab-new-field-add fa fa-plus' style='position: relative; right: 5px;'></i>#text#<i class='ab-new-field-remove fa fa-remove' style='position: absolute; top: 7px; right: 7px;'></i></div>",
-            autoheight: true,
-            drag: true,
-            editor: "text",
-            editable: true,
-            editValue: "text",
-            onClick: {
-               "ab-new-field-remove": (e, itemId, trg) => {
-                  // Remove option item
-                  treeCol.remove(itemId);
-                  // stop the default click action for this item
-                  return false;
-               },
-               "ab-new-field-add": (e, thisId, trg) => {
-                  // Add option item
-                  var itemId = webix.uid().toString();
-                  var parentId = thisId.toString();
-                  treeCol.data.add(
-                     {
-                        id: itemId,
-                        text: "",
-                     },
-                     null,
-                     parentId
-                  );
-                  $$(ids.options).openAll();
-                  $$(ids.options).config.height =
-                     $$(ids.options).count() * 28 + 18; // Number of pages plus 9px of padding top and bottom
-                  $$(ids.options).resize();
-                  $$(ids.options).edit(itemId);
-
-                  // stop the default click action for this item
-                  return false;
-               },
-            },
-         },
-         {
-            view: "button",
-            css: "webix_primary",
-            value: L("Add new option"),
-            click: () => {
-               var itemId = webix.uid().toString();
-               treeCol.data.add({
-                  id: itemId,
-                  text: "",
-               });
-               $$(ids.options).openAll();
-               $$(ids.options).config.height =
-                  $$(ids.options).count() * 28 + 18; // Number of pages plus 9px of padding top and bottom
-               $$(ids.options).resize();
-               $$(ids.options).edit(itemId);
-            },
-         },
-         {
-            // id: idTree,
-            view: "tree",
-            css: "ab-data-tree",
-            template: function (obj, common) {
-               return (
-                  "<label>" +
-                  common.checkbox(obj, common) +
-                  "&nbsp;" +
-                  obj.text +
-                  "</label>"
-               );
-            },
-            on: {
-               onItemCheck: function (id, value, event) {
-                  var dom = this.getItemNode(id);
-                  var tree = this;
-                  if (value == true) {
-                     dom.classList.add("selected");
-                  } else {
-                     dom.classList.remove("selected");
-                  }
-                  // works for the same-level children only
-                  // except root items
-                  if (this.getParentId(id)) {
-                     tree.blockEvent(); // prevents endless loop
-
-                     var rootid = id;
-                     while (this.getParentId(rootid)) {
-                        rootid = this.getParentId(rootid);
-                        if (rootid != id) tree.uncheckItem(rootid);
-                     }
-
-                     this.data.eachSubItem(rootid, function (item) {
-                        if (item.id != id) tree.uncheckItem(item.id);
-                     });
-
-                     tree.unblockEvent();
-                  } else {
-                     tree.blockEvent(); // prevents endless loop
-                     this.data.eachSubItem(id, function (obj) {
-                        if (obj.id != id) tree.uncheckItem(obj.id);
-                     });
-                     tree.unblockEvent();
-                  }
-
-                  // var rowData = {};
-                  // rowData[field.columnName] = $$(idTree).getChecked();
-                  //
-                  // field.setValue($$(parentComponent.ui.id), rowData);
-               },
-            },
-         },
-      ];
-   },
-
-   // defaultValues: the keys must match a .name of your elements to set it's default value.
-   defaultValues: ABFieldTreeCore.defaultValues(),
-
-   // rules: basic form validation rules for webix form entry.
-   // the keys must match a .name of your .elements for it to apply
-   rules: {},
-
-   // include additional behavior on default component operations here:
-   // The base routines will be processed first, then these.  Any results
-   // from the base routine, will be passed on to these:
-   logic: {
-      clear: (ids) => {
-         $$(ids.options).clearAll();
-         $$(ids.options).config.height = 0;
-         $$(ids.options).resize();
-         $$(ids.options).refresh();
-      },
-
-      populate: (ids, field) => {
-         treeCol.clearAll();
-         treeCol.parse(field.settings.options);
-         $$(ids.options).openAll();
-         $$(ids.options).config.height = $$(ids.options).count() * 28 + 18; // Number of pages plus 9px of padding top and bottom
-         $$(ids.options).resize();
-         $$(ids.options).refresh();
-      },
-
-      values: (ids, values) => {
-         // Get options list from UI, then set them to settings
-         values.settings.options = treeCol.serialize();
-         return values;
-      },
-
-      show: (ids) => {
-         $$(ids.options).data.sync(treeCol);
-      },
-   },
-
-   // perform any additional setup actions here.
-   // @param {obj} ids  the hash of id values for all the current form elements.
-   // it should have your elements + the default Header elements:
-   // .label, .columnName, .fieldDescription, .showIcon
-   init: (ids) => {},
-});
+const L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABFieldTree extends ABFieldTreeCore {
    // constructor(values, object) {
    //    super(values, object);
    // }
 
-   /*
-    * @function propertiesComponent
-    *
-    * return a UI Component that contains the property definitions for this Field.
-    *
-    * @param {App} App the UI App instance passed around the Components.
-    * @param {stirng} idBase
-    * @return {Component}
-    */
-   static propertiesComponent(App, idBase) {
-      return ABFieldTreeComponent.component(App, idBase);
-   }
-
    ///
    /// Instance Methods
    ///
 
    // isValid() {
-   //    var validator = super.isValid();
+   //    const validator = super.isValid();
 
    //    // validator.addError('columnName', L('ab.validation.object.name.unique', 'Field columnName must be unique (#name# already used in this Application)').replace('#name#', this.name) );
 
@@ -232,6 +22,7 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
    ///
    /// Working with Actual Object Values:
    ///
+
    idCustomContainer(obj) {
       return "#columnName#-#id#-tree"
          .replace("#id#", obj.id)
@@ -242,11 +33,11 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
    columnHeader(options) {
       options = options || {};
 
-      var config = super.columnHeader(options);
-      var field = this;
+      const config = super.columnHeader(options);
+      const field = this;
 
-      var formClass = "";
-      var placeHolder = "";
+      let formClass = "";
+      let placeHolder = "";
       if (options.isForm) {
          formClass = " form-entry";
          placeHolder =
@@ -255,18 +46,18 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
             "</span>";
       }
 
-      var width = options.width;
+      const width = options.width;
 
       config.template = (obj) => {
          if (obj.$group) return obj[field.columnName];
 
-         var branches = [];
-         var selectOptions = this.AB.cloneDeep(field.settings.options);
+         const branches = [];
+         let selectOptions = this.AB.cloneDeep(field.settings.options);
          selectOptions = new webix.TreeCollection({
             data: selectOptions,
          });
 
-         var values = obj;
+         let values = obj;
          if (obj[field.columnName] != null) {
             values = obj[field.columnName];
          }
@@ -276,9 +67,9 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
                typeof values.indexOf != "undefined" &&
                values.indexOf(obj.id) != -1
             ) {
-               var html = "";
+               let html = "";
 
-               var rootid = obj.id;
+               let rootid = obj.id;
                while (this.getParentId(rootid)) {
                   selectOptions.data.each(function (par) {
                      if (selectOptions.data.getParentId(rootid) == par.id) {
@@ -293,8 +84,8 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
             }
          });
 
-         var myHex = "#4CAF50";
-         var nodeHTML = "";
+         const myHex = "#4CAF50";
+         let nodeHTML = "";
          nodeHTML += "<div class='list-data-values'>";
          if (branches.length == 0) {
             nodeHTML += placeHolder;
@@ -352,7 +143,7 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
 
       options = options || {};
 
-      var field = this;
+      const field = this;
 
       if (options.isForm) {
          if (!row || row.length == 0) {
@@ -363,13 +154,13 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
             return;
          }
 
-         var branches = [];
+         const branches = [];
          options = this.AB.cloneDeep(field.settings.options);
          options = new webix.TreeCollection({
             data: options,
          });
 
-         var values = row;
+         let values = row;
          if (row[field.columnName] != null) {
             values = row[field.columnName];
          }
@@ -379,9 +170,9 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
                typeof values.indexOf != "undefined" &&
                values.indexOf(obj.id) != -1
             ) {
-               var html = "";
+               let html = "";
 
-               var rootid = obj.id;
+               let rootid = obj.id;
                while (this.getParentId(rootid)) {
                   options.data.each(function (par) {
                      if (options.data.getParentId(rootid) == par.id) {
@@ -396,8 +187,8 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
             }
          });
 
-         var myHex = "#4CAF50";
-         var nodeHTML = "";
+         const myHex = "#4CAF50";
+         let nodeHTML = "";
          nodeHTML += "<div class='list-data-values form-entry'>";
          branches.forEach(function (item) {
             nodeHTML +=
@@ -424,17 +215,17 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
     * @param {HtmlDOM} node  the HTML Dom object for this field's display.
     */
    customEdit(row, App, node, component) {
-      var idBase = App.unique(this.idCustomContainer(row));
-      var idPopup = `${idBase}-popup`;
-      var idTree = `${idBase}-tree`;
-      var view = $$(node);
-      var field = this;
-      var parentComponent = component;
-      var values = {};
-      var firstRender = true;
+      const idBase = App.unique(this.idCustomContainer(row));
+      const idPopup = `${idBase}-popup`;
+      const idTree = `${idBase}-tree`;
+      const view = $$(node);
+      const field = this;
+      const parentComponent = component;
+      let values = {};
+      let firstRender = true;
 
       function getValues(field, row) {
-         var values = {};
+         let values = {};
          if (
             typeof field != "undefined" &&
             typeof field.columnName != "undefined" &&
@@ -450,7 +241,7 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
 
          $$(idTree).blockEvent(); // prevents endless loop
 
-         var options = this.AB.cloneDeep(field.settings.options);
+         const options = field.AB.cloneDeep(field.settings.options);
          $$(idTree).clearAll();
          $$(idTree).parse(options);
          $$(idTree).refresh();
@@ -461,7 +252,7 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
             values.forEach(function (id) {
                if ($$(idTree).exists(id)) {
                   $$(idTree).checkItem(id);
-                  var dom = $$(idTree).getItemNode(id);
+                  const dom = $$(idTree).getItemNode(id);
                   dom.classList.add("selected");
                }
             });
@@ -501,8 +292,8 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
                   },
                   on: {
                      onItemCheck: async function (id, value, event) {
-                        var dom = this.getItemNode(id);
-                        var tree = this;
+                        const dom = this.getItemNode(id);
+                        const tree = this;
                         if (value == true) {
                            dom.classList.add("selected");
                         } else {
@@ -513,7 +304,7 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
                         if (this.getParentId(id)) {
                            tree.blockEvent(); // prevents endless loop
 
-                           var rootid = id;
+                           let rootid = id;
                            while (this.getParentId(rootid)) {
                               rootid = this.getParentId(rootid);
                               if (rootid != id) tree.uncheckItem(rootid);
@@ -531,7 +322,7 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
                            });
                            tree.unblockEvent();
                         }
-                        var values = {};
+                        const values = {};
                         values[field.columnName] = $$(idTree).getChecked();
 
                         if (row.id) {
@@ -557,7 +348,7 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
                               });
                            }
                         } else {
-                           var rowData = {};
+                           const rowData = {};
                            rowData[field.columnName] = $$(idTree).getChecked();
 
                            field.setValue($$(parentComponent.ui.id), rowData);
@@ -573,23 +364,25 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
       return false;
    }
 
-   setBadge(domNode, App, row) {
-      var field = this;
+   setBadge(domNode, row) {
+      const field = this;
       domNode = domNode.querySelector(".list-data-values");
-      var innerHeight = domNode.scrollHeight;
-      var outerHeight = domNode.parentElement.clientHeight;
+      const innerHeight = domNode.scrollHeight;
+      const outerHeight = domNode.parentElement.clientHeight;
       if (innerHeight - outerHeight > 5) {
-         var count = 0;
+         let count = 0;
          if (row[field.columnName] && row[field.columnName].length)
             count = row[field.columnName].length;
          else count = 0;
 
          if (count > 1) {
-            var badge = domNode.querySelector(".webix_badge.selectivityBadge");
+            const badge = domNode.querySelector(
+               ".webix_badge.selectivityBadge"
+            );
             if (badge != null) {
                badge.innerHTML = count;
             } else {
-               var anchor = document.createElement("A");
+               const anchor = document.createElement("A");
                anchor.href = "javascript:void(0);";
                anchor.addEventListener("click", function (event) {
                   // v2: this was just saving the new height to the
@@ -597,8 +390,8 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
                   // App.actions.onRowResizeAuto(row.id, innerHeight);
                   event.stopPropagation();
                });
-               var node = document.createElement("SPAN");
-               var textnode = document.createTextNode(count);
+               const node = document.createElement("SPAN");
+               const textnode = document.createTextNode(count);
                node.classList.add("webix_badge", "selectivityBadge");
                node.appendChild(textnode);
                anchor.appendChild(node);
@@ -622,7 +415,7 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
    }
 
    detailComponent() {
-      var detailComponentSetting = super.detailComponent();
+      const detailComponentSetting = super.detailComponent();
 
       detailComponentSetting.common = () => {
          return {
@@ -634,7 +427,7 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
    }
 
    getValue(item, rowData) {
-      var values = {};
+      let values = {};
       values = item.getValues();
       return values;
    }
@@ -642,11 +435,11 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
    setValue(item, rowData) {
       if (!item) return false;
 
-      var val = rowData[this.columnName] || [];
+      const val = rowData[this.columnName] || [];
 
       item.setValues(val);
       // get dom
-      var dom = item.$view.querySelector(".list-data-values");
+      const dom = item.$view.querySelector(".list-data-values");
 
       if (!dom) return false;
 
@@ -657,7 +450,7 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
       });
 
       setTimeout(function () {
-         var height = 33;
+         let height = 33;
          if (dom.scrollHeight > 33) {
             height = dom.scrollHeight;
          }

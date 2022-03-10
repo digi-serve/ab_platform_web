@@ -1,564 +1,10 @@
-var ABFieldConnectCore = require("../../core/dataFields/ABFieldConnectCore");
-var ABFieldComponent = require("./ABFieldComponent");
+const ABFieldConnectCore = require("../../core/dataFields/ABFieldConnectCore");
 
-let L = (...params) => AB.Multilingual.label(...params);
-
-var ids = {
-   linkObject: "ab-new-connectObject-list-item",
-   objectCreateNew: "ab-new-connectObject-create-new",
-
-   fieldLink: "ab-add-field-link-from",
-   fieldLink2: "ab-add-field-link-from-2",
-   linkType: "ab-add-field-link-type-to",
-   linkViaType: "ab-add-field-link-type-from",
-   fieldLinkVia: "ab-add-field-link-to",
-   fieldLinkVia2: "ab-add-field-link-to-2",
-
-   link1: "ab-link1-field-options",
-   link2: "ab-link2-field-options",
-
-   isCustomFK: "ab-is-custom-fk",
-   indexField: "ab-index-field",
-   indexField2: "ab-index-field2",
-
-   connectDataPopup: "ab-connect-object-data-popup",
-};
-
-var defaultValues = ABFieldConnectCore.defaultValues();
-
-function populateSelect(populate) {
-   let options = [];
-   ABFieldConnectComponent.CurrentApplication.objectsIncluded().forEach((o) => {
-      options.push({ id: o.id, value: o.label });
-   });
-
-   // sort by object's label  A -> Z
-   options.sort((a, b) => {
-      if (a.value < b.value) return -1;
-      if (a.value > b.value) return 1;
-      return 0;
-   });
-
-   $$(ids.linkObject).define("options", options);
-   $$(ids.linkObject).refresh();
-   if (populate != null && populate == true) {
-      $$(ids.linkObject).setValue(options[options.length - 1].id);
-      $$(ids.linkObject).refresh();
-      var selectedObj = $$(ids.linkObject)
-         .getList()
-         .getItem(options[options.length - 1].id);
-      if (selectedObj) {
-         var selectedObjLabel = selectedObj.value;
-         $$(ids.fieldLinkVia).setValue(
-            L("<b>${0}</b> entry.", [selectedObjLabel])
-         );
-         $$(ids.fieldLinkVia2).setValue(
-            L("Each <b>${0}</b> entry connects with", [selectedObjLabel])
-         );
-         $$(ids.link1).show();
-         $$(ids.link2).show();
-      }
-   }
-}
-
-/**
- * ABFieldConnectComponent
- *
- * Defines the UI Component for this Data Field.  The ui component is responsible
- * for displaying the properties editor, populating existing data, retrieving
- * property values, etc.
- */
-var ABFieldConnectComponent = new ABFieldComponent({
-   fieldDefaults: ABFieldConnectCore.defaults(),
-
-   elements: (App, field) => {
-      ids = field.idsUnique(ids, App);
-
-      this.App = App;
-
-      return [
-         {
-            view: "richselect",
-            label: L("Connected to:"),
-            id: ids.linkObject,
-            disallowEdit: true,
-            name: "linkObject",
-            labelWidth: this.AB.UISettings.config().labelWidthLarge,
-            placeholder: L("Select object"),
-            options: [],
-            // select: true,
-            // height: 140,
-            // template: "<div class='ab-new-connectObject-list-item'>#label#</div>",
-            on: {
-               onChange: (newV, oldV) => {
-                  ABFieldConnectComponent.logic.selectObjectTo(newV, oldV);
-               },
-            },
-         },
-         {
-            view: "button",
-            css: "webix_primary",
-            id: ids.objectCreateNew,
-            disallowEdit: true,
-            value: L("Connect to new Object"),
-            click: async () => {
-               await ABFieldConnectComponent.logic.clickNewObject();
-            },
-         },
-         {
-            view: "layout",
-            id: ids.link1,
-            hidden: true,
-            cols: [
-               {
-                  id: ids.fieldLink,
-                  view: "label",
-                  width: 300,
-               },
-               {
-                  id: ids.linkType,
-                  disallowEdit: true,
-                  name: "linkType",
-                  view: "richselect",
-                  value: defaultValues.linkType,
-                  width: 95,
-                  options: [
-                     {
-                        id: "many",
-                        value: L("many"),
-                     },
-                     {
-                        id: "one",
-                        value: L("one"),
-                     },
-                  ],
-                  on: {
-                     onChange: (newValue, oldValue) => {
-                        ABFieldConnectComponent.logic.selectLinkType(
-                           newValue,
-                           oldValue
-                        );
-                     },
-                  },
-               },
-               {
-                  id: ids.fieldLinkVia,
-                  view: "label",
-                  label: L("<b>{0}</b> entry.", [L("[Select object]")]),
-                  width: 200,
-               },
-            ],
-         },
-         {
-            view: "layout",
-            id: ids.link2,
-            hidden: true,
-            cols: [
-               {
-                  id: ids.fieldLinkVia2,
-                  view: "label",
-                  label: L("Each <b>{0}</b> entry connects with", [
-                     L("[Select object]"),
-                  ]),
-                  width: 300,
-               },
-               {
-                  id: ids.linkViaType,
-                  name: "linkViaType",
-                  disallowEdit: true,
-                  view: "richselect",
-                  value: defaultValues.linkViaType,
-                  width: 95,
-                  options: [
-                     {
-                        id: "many",
-                        value: L("many"),
-                     },
-                     {
-                        id: "one",
-                        value: L("one"),
-                     },
-                  ],
-                  on: {
-                     onChange: (newV, oldV) => {
-                        ABFieldConnectComponent.logic.selectLinkViaType(
-                           newV,
-                           oldV
-                        );
-                     },
-                  },
-               },
-               {
-                  id: ids.fieldLink2,
-                  view: "label",
-                  width: 200,
-               },
-            ],
-         },
-         {
-            name: "linkColumn",
-            view: "text",
-            hidden: true,
-         },
-         {
-            name: "isSource",
-            view: "text",
-            hidden: true,
-         },
-         {
-            id: ids.isCustomFK,
-            name: "isCustomFK",
-            view: "checkbox",
-            disallowEdit: true,
-            labelWidth: 0,
-            labelRight: L("Custom Foreign Key"),
-            hidden: true,
-            on: {
-               onChange: () => {
-                  ABFieldConnectComponent.logic.checkCustomFK();
-               },
-            },
-         },
-         {
-            id: ids.indexField,
-            name: "indexField",
-            view: "richselect",
-            disallowEdit: true,
-            hidden: true,
-            labelWidth: this.AB.UISettings.config().labelWidthLarge,
-            label: L("Index Field:"),
-            placeholder: L("Select index field"),
-            options: [],
-            // on: {
-            //    onChange: () => {
-            //       ABFieldConnectComponent.logic.updateColumnName();
-            //    }
-            // }
-         },
-         {
-            id: ids.indexField2,
-            name: "indexField2",
-            view: "richselect",
-            disallowEdit: true,
-            hidden: true,
-            labelWidth: this.AB.UISettings.config().labelWidthLarge,
-            label: L("Index Field:"),
-            placeholder: L("Select index field"),
-            options: [],
-         },
-      ];
-   },
-
-   // defaultValues: the keys must match a .name of your elements to set it's default value.
-   defaultValues: defaultValues,
-
-   // rules: basic form validation rules for webix form entry.
-   // the keys must match a .name of your .elements for it to apply
-   rules: {},
-
-   // include additional behavior on default component operations here:
-   // The base routines will be processed first, then these.  Any results
-   // from the base routine, will be passed on to these:
-   logic: {
-      applicationLoad: (application) => {
-         ABFieldConnectComponent.CurrentApplication = application;
-      },
-
-      objectLoad: (object) => {
-         ABFieldConnectComponent.CurrentObject = object;
-      },
-
-      clear: (ids) => {
-         // $$(ids.linkObject).unselectAll();
-         $$(ids.linkObject).setValue(defaultValues.linkObject);
-      },
-
-      isValid: (ids, isValid) => {
-         // validate require select linked object
-         var selectedObjId = $$(ids.linkObject).getValue();
-         if (!selectedObjId) {
-            webix.html.addCss($$(ids.linkObject).$view, "webix_invalid");
-            isValid = false;
-         } else {
-            webix.html.removeCss($$(ids.linkObject).$view, "webix_invalid");
-         }
-
-         return isValid;
-      },
-
-      show: (pass_ids) => {
-         // add objects to list
-         // $$(pass_ids.linkObject).clearAll();
-         // $$(pass_ids.linkObject).parse(ABFieldConnectComponent.CurrentApplication.objects());
-         populateSelect(false);
-
-         // show current object name
-         $$(ids.fieldLink).setValue(
-            L("Each <b>{0}</b> entry connects with", [
-               ABFieldConnectComponent.CurrentObject.label,
-            ])
-         );
-         $$(ids.fieldLink2).setValue(
-            L("<b>{0}</b> entry.", [
-               ABFieldConnectComponent.CurrentObject.label,
-            ])
-         );
-
-         // keep the column name element to use when custom index is checked
-         ABFieldConnectComponent._$columnName = $$(pass_ids.columnName);
-         ABFieldConnectComponent.logic.updateCustomIndex();
-      },
-
-      populate: (/* ids, values */) => {},
-
-      values: (ids, values) => {
-         return values;
-      },
-
-      selectObjectTo: (newValue, oldValue) => {
-         if (!newValue) {
-            $$(ids.link1).hide();
-            $$(ids.link2).hide();
-         }
-         if (newValue == oldValue || newValue == "") return;
-
-         let selectedObj = $$(ids.linkObject).getList().getItem(newValue);
-         if (!selectedObj) return;
-
-         let selectedObjLabel = selectedObj.value;
-         $$(ids.fieldLinkVia).setValue(
-            L("<b>{0}</b> entry.", [selectedObjLabel])
-         );
-         $$(ids.fieldLinkVia2).setValue(
-            L("Each <b>{0}</b> entry connects with", [selectedObjLabel])
-         );
-         $$(ids.link1).show();
-         $$(ids.link2).show();
-
-         ABFieldConnectComponent.logic.updateCustomIndex();
-      },
-
-      clickNewObject: async (callback) => {
-         let App = this.App;
-         if (!App.actions.addNewObject) return;
-
-         try {
-            // pass false because after it is created we do not want it to select it in the object list
-            await App.actions.addNewObject(false, callback);
-
-            // pass true because we want it to select the last item in the list that was just created
-            populateSelect(true, callback);
-         } catch (err) {
-            App.AB.notify.developer(err, {
-               message: "Error when add new object.",
-            });
-         }
-      },
-
-      selectLinkType: (newValue /*, oldValue */) => {
-         let labelEntry = L("entry");
-         let labelEntries = L("entries");
-
-         let message = $$(ids.fieldLinkVia).getValue() || "";
-
-         if (newValue == "many") {
-            message = message.replace(labelEntry, labelEntries);
-         } else {
-            message = message.replace(labelEntries, labelEntry);
-         }
-         $$(ids.fieldLinkVia).define("label", message);
-         $$(ids.fieldLinkVia).refresh();
-
-         ABFieldConnectComponent.logic.updateCustomIndex();
-      },
-
-      selectLinkViaType: (newValue /*, oldValue */) => {
-         let labelEntry = L("entry");
-         let labelEntries = L("entries");
-
-         let message = $$(ids.fieldLink2).getValue() || "";
-
-         if (newValue == "many") {
-            message = message.replace(labelEntry, labelEntries);
-         } else {
-            message = message.replace(labelEntries, labelEntry);
-         }
-         $$(ids.fieldLink2).define("label", message);
-         $$(ids.fieldLink2).refresh();
-
-         ABFieldConnectComponent.logic.updateCustomIndex();
-      },
-
-      checkCustomFK: () => {
-         $$(ids.indexField).hide();
-         $$(ids.indexField2).hide();
-
-         let isChecked = $$(ids.isCustomFK).getValue();
-         if (isChecked) {
-            let menuItems = $$(ids.indexField).getList().config.data;
-            if (menuItems && menuItems.length) {
-               $$(ids.indexField).show();
-            }
-
-            let menuItems2 = $$(ids.indexField2).getList().config.data;
-            if (menuItems2 && menuItems2.length) {
-               $$(ids.indexField2).show();
-            }
-         }
-
-         // ABFieldConnectComponent.logic.updateColumnName();
-      },
-
-      updateCustomIndex: () => {
-         let linkObjectId = $$(ids.linkObject).getValue();
-         let linkType = $$(ids.linkType).getValue();
-         let linkViaType = $$(ids.linkViaType).getValue();
-
-         let sourceObject = null; // object stores index column
-         let linkIndexes = null; // the index fields of link object M:N
-
-         $$(ids.indexField2).define("options", []);
-         $$(ids.indexField2).refresh();
-
-         // 1:1
-         // 1:M
-         if (
-            (linkType == "one" && linkViaType == "one") ||
-            (linkType == "one" && linkViaType == "many")
-         ) {
-            sourceObject = this.AB.objectByID(linkObjectId);
-         }
-         // M:1
-         else if (linkType == "many" && linkViaType == "one") {
-            sourceObject = ABFieldConnectComponent.CurrentObject;
-         }
-         // M:N
-         else if (linkType == "many" && linkViaType == "many") {
-            sourceObject = ABFieldConnectComponent.CurrentObject;
-            let linkObject = this.AB.objectByID(linkObjectId);
-
-            // Populate the second index fields
-            let linkIndexFields = [];
-            linkIndexes = linkObject.indexes((idx) => idx.unique);
-            (linkIndexes || []).forEach((idx) => {
-               (idx.fields || []).forEach((f) => {
-                  if (
-                     (!f ||
-                        !f.settings ||
-                        !f.settings.required ||
-                        linkIndexFields.filter((opt) => opt.id == f.id)
-                           .length) &&
-                     f.key != "AutoIndex" &&
-                     f.key != "combined"
-                  )
-                     return;
-
-                  linkIndexFields.push({
-                     id: f.id,
-                     value: f.label,
-                  });
-               });
-            });
-            $$(ids.indexField2).define("options", linkIndexFields);
-            $$(ids.indexField2).refresh();
-         }
-
-         $$(ids.indexField).hide();
-         $$(ids.indexField2).hide();
-
-         if (!sourceObject) {
-            $$(ids.isCustomFK).hide();
-            return;
-         }
-
-         let indexes = sourceObject.indexes((idx) => idx.unique);
-         if (
-            (!indexes || indexes.length < 1) &&
-            (!linkIndexes || linkIndexes.length < 1)
-         ) {
-            $$(ids.isCustomFK).hide();
-            $$(ids.indexField).define("options", []);
-            $$(ids.indexField).refresh();
-            return;
-         }
-
-         let indexFields = [];
-         (indexes || []).forEach((idx) => {
-            (idx.fields || []).forEach((f) => {
-               if (
-                  (!f ||
-                     !f.settings ||
-                     !f.settings.required ||
-                     indexFields.filter((opt) => opt.id == f.id).length) &&
-                  f.key != "AutoIndex" &&
-                  f.key != "combined"
-               )
-                  return;
-
-               indexFields.push({
-                  id: f.id,
-                  value: f.label,
-                  field: f,
-               });
-            });
-         });
-         $$(ids.indexField).define("options", indexFields);
-         $$(ids.indexField).refresh();
-
-         if (indexFields && indexFields.length) {
-            $$(ids.isCustomFK).show();
-         }
-
-         ABFieldConnectComponent.logic.checkCustomFK();
-      },
-
-      // updateColumnName: () => {
-      //    let isChecked = $$(ids.isCustomFK).getValue();
-      //    let indexFieldId = $$(ids.indexField).getValue();
-      //    let indexFieldOpt = (
-      //       $$(ids.indexField).getList().config.data || []
-      //    ).filter((opt) => opt.id == indexFieldId)[0];
-
-      //    if (isChecked && indexFieldOpt && indexFieldOpt.field) {
-      //       // Disable & Update the column name
-      //       if (ABFieldConnectComponent._$columnName) {
-      //          let linkObjectId = $$(ids.linkObject).getValue();
-      //          let linkObject = ABFieldConnectComponent.CurrentApplication.objects(
-      //             (o) => o.id == linkObjectId
-      //          )[0];
-      //          if (linkObject) {
-      //             ABFieldConnectComponent._$columnName.setValue(
-      //                `${linkObject.name}.${indexFieldOpt.field.columnName}`
-      //             );
-      //          }
-      //          ABFieldConnectComponent._$columnName.disable();
-      //       }
-      //    } else {
-      //       // Enable the column name element
-      //       if (ABFieldConnectComponent._$columnName) {
-      //          ABFieldConnectComponent._$columnName.enable();
-      //       }
-      //    }
-      // }
-   },
-});
+const L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABFieldConnect extends ABFieldConnectCore {
    constructor(values, object, fieldDefaults) {
       super(values, object, fieldDefaults);
-   }
-
-   /*
-    * @function propertiesComponent
-    *
-    * return a UI Component that contains the property definitions for this Field.
-    *
-    * @param {App} App the UI App instance passed around the Components.
-    * @param {stirng} idBase
-    * @return {Component}
-    */
-   static propertiesComponent(App, idBase) {
-      return ABFieldConnectComponent.component(App, idBase);
    }
 
    /**
@@ -593,10 +39,10 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
       // Now we need to remove our linked Object->field
 
-      var linkObject = this.datasourceLink;
+      const linkObject = this.datasourceLink;
       if (!linkObject) return Promise.resolve(); // already notified
 
-      var linkField = this.fieldLink;
+      const linkField = this.fieldLink;
       if (!linkField) return Promise.resolve(); // already notified
 
       // destroy linked field
@@ -617,10 +63,10 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
     * @return {array}
     */
    pullRelationValues(row) {
-      var selectedData = [];
+      let selectedData = [];
 
-      var data = super.pullRelationValues(row);
-      var linkedObject = this.datasourceLink;
+      const data = super.pullRelationValues(row);
+      const linkedObject = this.datasourceLink;
 
       if (data && linkedObject) {
          // if this select value is array
@@ -644,41 +90,40 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
    // return the grid column header definition for this instance of ABFieldConnect
    columnHeader(options) {
       options = options || {};
+      const config = super.columnHeader(options);
+      const field = this;
+      const App = field.AB._App;
 
-      var config = super.columnHeader(options);
-      var field = this;
-      var App = App;
-
-      var width = options.width,
+      const width = options.width,
          editable = options.editable;
 
       config.template = (row) => {
          if (row.$group) return row[field.columnName];
 
-         var node = document.createElement("div");
+         const node = document.createElement("div");
          node.classList.add("connect-data-values");
          if (typeof width != "undefined") {
             node.style.marginLeft = width + "px";
          }
 
-         var domNode = node;
+         const domNode = node;
 
-         var multiselect = field.settings.linkType == "many";
+         const multiselect = field.settings.linkType == "many";
 
-         var placeholder = L("Select item");
+         let placeholder = L("Select item");
          if (multiselect) {
             placeholder = L("Select items");
          }
-         var readOnly = false;
+         let readOnly = false;
          if (editable != null && !editable) {
             readOnly = true;
             placeholder = "";
          }
 
-         // var domNode = node.querySelector('.list-data-values');
+         // const domNode = node.querySelector('.list-data-values');
 
          // get selected values
-         var selectedData = field.pullRelationValues(row);
+         const selectedData = field.pullRelationValues(row);
 
          // Render selectivity
          if (!options.skipRenderSelectivity) {
@@ -726,25 +171,25 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
    customDisplay(row, App, node, options) {
       options = options || {};
 
-      var isFormView = options.formView != null ? options.formView : false;
+      const isFormView = options.formView != null ? options.formView : false;
       // sanity check.
       if (!node) {
          return;
       }
 
-      var domNode = node.querySelector(".connect-data-values");
+      const domNode = node.querySelector(".connect-data-values");
       if (!domNode) return;
 
-      var multiselect = this.settings.linkType == "many";
+      const multiselect = this.settings.linkType == "many";
 
       // get selected values
-      var selectedData = this.pullRelationValues(row);
+      const selectedData = this.pullRelationValues(row);
 
-      var placeholder = L("Select item");
+      let placeholder = L("Select item");
       if (multiselect) {
          placeholder = L("Select items");
       }
-      var readOnly = false;
+      let readOnly = false;
       if (options.editable != null && options.editable == false) {
          readOnly = true;
          placeholder = "";
@@ -765,11 +210,11 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                L("PARENT ELEMENT"),
             ]);
          } else {
-            let val = this.getValue($$(options.filterValue.ui.id));
+            const val = this.getValue($$(options.filterValue.ui.id));
             if (!val) {
                // if there isn't a value on the parent select element set this one to readonly and change placeholder text
                readOnly = true;
-               let label = $$(options.filterValue.ui.id);
+               const label = $$(options.filterValue.ui.id);
                placeholderReadOnly = L("Must select item from '{0}' first.", [
                   label.config.label,
                ]);
@@ -777,9 +222,9 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          }
       }
 
-      var formId = "";
+      let formId = "";
       if ($$(domNode).getFormView) {
-         var formNode = $$(domNode).getFormView();
+         const formNode = $$(domNode).getFormView();
          if (formNode && formNode.config && formNode.config.abid) {
             formId = formNode.config.abid;
          }
@@ -803,11 +248,11 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                url: "It will call url in .getOptions function", // require
                minimumInputLength: 0,
                quietMillis: 250,
-               fetch: (url, init, queryOptions) => {
+               fetch: async (url, init, queryOptions) => {
                   // if we are filtering based off another selectivity's value we
                   // need to do it on fetch each time because the value can change
                   // copy the filters so we don't add to them every time there is a change
-                  let combineFilters = JSON.parse(
+                  const combineFilters = JSON.parse(
                      JSON.stringify(options.filters)
                   );
 
@@ -818,12 +263,12 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                      $$(options.filterValue.ui.id)
                   ) {
                      // get the current value of the parent select box
-                     let parentVal = this.getValue(
+                     const parentVal = this.getValue(
                         $$(options.filterValue.ui.id)
                      );
                      if (parentVal) {
                         // if there is a value create a new filter rule
-                        let filter = {
+                        const filter = {
                            key: options.filterKey,
                            rule: "equals",
                            value: parentVal[options.filterColumn],
@@ -866,7 +311,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                "change",
                async (/* e */) => {
                   // update just this value on our current object.model
-                  var values = {};
+                  const values = {};
                   values[this.columnName] = this.selectivityGet(domNode);
 
                   // check data does not be changed
@@ -911,7 +356,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                "change",
                (/* e */) => {
                   if (domNode.clientHeight > 32) {
-                     var item = $$(node);
+                     const item = $$(node);
                      item.define("height", domNode.clientHeight + 6);
                      item.resizeChildren();
                      item.resize();
@@ -922,13 +367,13 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
             // add a change listener to the selectivity instance we are filtering our options list by.
             if (options.filterValue && $$(options.filterValue.ui.id)) {
-               let parentDomNode = $$(
+               const parentDomNode = $$(
                   options.filterValue.ui.id
                ).$view.querySelector(".connect-data-values");
                parentDomNode.addEventListener(
                   "change",
                   (e) => {
-                     let parentVal = this.selectivityGet(parentDomNode);
+                     const parentVal = this.selectivityGet(parentDomNode);
                      if (parentVal) {
                         // if there is a value set allow the user to edit and
                         // put back the placeholder text to the orignal value
@@ -1026,7 +471,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
    ////       object constructor and have it internally track these things?
    customEdit(row, App, node) {
       if (this.settings.linkType == "many") {
-         var domNode = node.querySelector(".connect-data-values");
+         const domNode = node.querySelector(".connect-data-values");
 
          if (domNode.selectivity != null) {
             // Open selectivity
@@ -1052,7 +497,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
    }
 
    detailComponent() {
-      var detailComponentSetting = super.detailComponent();
+      const detailComponentSetting = super.detailComponent();
 
       detailComponentSetting.common = () => {
          return {
@@ -1071,11 +516,11 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
     */
    getOptions(where, term, sort) {
       return new Promise((resolve, reject) => {
-         var haveResolved = false;
+         let haveResolved = false;
          // {bool}
          // have we already passed back a result?
 
-         var respond = (options) => {
+         const respond = (options) => {
             // filter the raw lookup with the provided search term
             options = options.filter(function (item) {
                if (item.text.toLowerCase().includes(term.toLowerCase())) {
@@ -1110,18 +555,18 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          // if options was cached
          // if (this._options != null) return resolve(this._options);
 
-         var linkedObj = this.datasourceLink;
+         const linkedObj = this.datasourceLink;
 
          // System could not found the linked object - It may be deleted ?
          if (linkedObj == null) throw new Error("No linked object");
 
-         var linkedCol = this.fieldLink;
+         const linkedCol = this.fieldLink;
 
          // System could not found the linked field - It may be deleted ?
          if (linkedCol == null) throw new Error("No linked column");
 
          // Get linked object model
-         var linkedModel = linkedObj.model();
+         const linkedModel = linkedObj.model();
 
          // M:1 - get data that's only empty relation value
          if (
@@ -1160,7 +605,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             }
          }
 
-         var storageID = `${this.id}-${JSON.stringify(where)}`;
+         const storageID = `${this.id}-${JSON.stringify(where)}`;
 
          Promise.resolve()
             .then(async () => {
@@ -1168,7 +613,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
                // We store the .findAll() results locally and return that for a
                // quick response:
-               var storedOptions = await this.AB.Storage.get(storageID);
+               const storedOptions = await this.AB.Storage.get(storageID);
                if (storedOptions) {
                   // immediately respond with our stored options.
                   this._options = storedOptions;
@@ -1178,7 +623,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             .then(async () => {
                try {
                   // Pull linked object data
-                  var result = await linkedModel.findAll({
+                  const result = await linkedModel.findAll({
                      where: where,
                      sort: sort,
                      populate: false,
@@ -1210,8 +655,8 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
    }
 
    getValue(item) {
-      var domNode = item.$view.querySelector(".connect-data-values");
-      var values = this.selectivityGet(domNode);
+      const domNode = item.$view.querySelector(".connect-data-values");
+      const values = this.selectivityGet(domNode);
       return values;
    }
 
@@ -1221,10 +666,10 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       // if (AB.isEmpty(rowData)) return; removed because sometimes we will
       // want to set this to empty
 
-      let val = this.pullRelationValues(rowData);
+      const val = this.pullRelationValues(rowData);
 
       // get selectivity dom
-      var domSelectivity = item.$view.querySelector(".connect-data-values");
+      const domSelectivity = item.$view.querySelector(".connect-data-values");
 
       if (domSelectivity) {
          // set value to selectivity
