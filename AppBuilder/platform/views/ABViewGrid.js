@@ -209,21 +209,22 @@ class ABViewGridComponent extends ABViewComponent {
             // show footer when there are summary columns
             settings.summaryColumns.length > 0 ||
             settings.countColumns.length > 0,
-         tooltip: {
-            // id: ids.tooltip,
-            template: (obj, common) => {
-               return this.toolTip(obj, common);
-            },
-            on: {
-               // When showing a larger image preview the tooltip sometime displays part of the image off the screen...this attempts to fix that problem
-               onBeforeRender: function () {
-                  self.toolTipOnBeforeRender(this.getNode());
-               },
-               onAfterRender: function (data) {
-                  self.toolTipOnAfterRender(this.getNode());
-               },
-            },
-         },
+         tooltip: true,
+         // tooltip: {
+         //    // id: ids.tooltip,
+         //    template: (obj, common) => {
+         //       return this.toolTip(obj, common);
+         //    },
+         //    on: {
+         //       // When showing a larger image preview the tooltip sometime displays part of the image off the screen...this attempts to fix that problem
+         //       onBeforeRender: function () {
+         //          self.toolTipOnBeforeRender(this.getNode());
+         //       },
+         //       onAfterRender: function (data) {
+         //          self.toolTipOnAfterRender(this.getNode());
+         //       },
+         //    },
+         // },
          dragColumn: true,
          on: {
             onBeforeSelect: function (data, preserve) {

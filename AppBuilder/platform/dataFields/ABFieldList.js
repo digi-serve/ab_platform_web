@@ -617,6 +617,7 @@ module.exports = class ABFieldList extends ABFieldListCore {
             selectedData = _getSelectedOptions(this, rowData);
          }
          var values = [];
+         values.push('<div class="badgeContainer">');
          let hasCustomColor = "";
          let optionHex = "";
          if (
@@ -633,6 +634,11 @@ module.exports = class ABFieldList extends ABFieldListCore {
                   `<div style="${optionHex}" class='webix_multicombo_value ${hasCustomColor}'><span>${val.text}</span><!-- span data-uuid="${val.id}" class="webix_multicombo_delete" role="button" aria-label="Remove item"></span --></div>`
                );
             });
+            if (selectedData.length > 1) {
+               values.push(
+                  `<span class="webix_badge selectivityBadge">${selectedData.length}</span>`
+               );
+            }
          } else if (selectedData) {
             let selectedObj = selectedData;
             if (typeof selectedData == "string") {
@@ -646,7 +652,10 @@ module.exports = class ABFieldList extends ABFieldListCore {
             values.push(
                `<div style="${optionHex}" class='webix_multicombo_value ${hasCustomColor}'><span>${selectedObj.text}</span><!-- span data-uuid="${selectedObj.id}" class="webix_multicombo_delete" role="button" aria-label="Remove item"></span --></div>`
             );
+         } else {
+            return "";
          }
+         values.push("</div>");
          return values.join("");
       };
       config.editor = this.settings.isMultiple ? "multiselect" : "combo";

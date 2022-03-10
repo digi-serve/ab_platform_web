@@ -686,6 +686,8 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
    columnHeader(options) {
       options = options || {};
 
+      var field = this;
+
       if (options.filters == null) {
          options.filters = {};
       }
@@ -705,24 +707,37 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       config.template = (row) => {
          var selectedData = this.pullRelationValues(row);
          var values = [];
-         if (selectedData.length) {
+         values.push('<div class="badgeContainer">');
+         if (
+            selectedData &&
+            Array.isArray(selectedData) &&
+            selectedData.length
+         ) {
             selectedData.forEach((val) => {
                values.push(
                   `<div class='webix_multicombo_value'><span>${val.value}</span><!-- span data-uuid="${val.id}" class="webix_multicombo_delete" role="button" aria-label="Remove item"></span --></div>`
                );
             });
+            if (selectedData.length > 1) {
+               values.push(
+                  `<span class="webix_badge selectivityBadge">${selectedData.length}</span>`
+               );
+            }
          } else if (selectedData.value) {
             values.push(
                `<div class='webix_multicombo_value'><span>${selectedData.value}</span><!-- span data-uuid="${selectedData.id}" class="webix_multicombo_delete" role="button" aria-label="Remove item"></span --></div>`
             );
+         } else {
+            return "";
          }
+         values.push("</div>");
          return values.join("");
       };
       config.suggest = {
          button: true,
          on: {
             onBeforeShow: function () {
-               this.getAndPopulateOptions(this);
+               field.getAndPopulateOptions(this);
             },
          },
       };

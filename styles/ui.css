@@ -84,6 +84,14 @@ label {
    max-height: 27px;
    overflow: hidden;
    line-height: 26px;
+   font-weight: normal;
+   color: #475466 !important;
+}
+.badgeContainer {
+   position: relative;
+}
+.webix_tooltip .webix_badge.selectivityBadge {
+   display: none;
 }
 .editConnectedPage {
    margin-left: -5px;
