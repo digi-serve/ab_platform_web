@@ -59,7 +59,7 @@ module.exports = class ABFieldList extends ABFieldListCore {
                                  value[this.columnName] = remainingFields;
                                  model.update(item.id, value).then(() => {
                                     // if ($$(node) && $$(node).updateItem)
-                                    // 	$$(node).updateItem(value.id, value);
+                                    //    $$(node).updateItem(value.id, value);
                                     numDone++;
                                     if (numDone >= numToDo) {
                                        resolve();
@@ -243,7 +243,7 @@ module.exports = class ABFieldList extends ABFieldListCore {
     * perform any custom display modifications for this field.
     * @param {object} row is the {name=>value} hash of the current row of data.
     * @param {App} App the shared ui App object useful more making globally
-    *					unique id references.
+    *             unique id references.
     * @param {HtmlDOM} node  the HTML Dom object for this field's display.
     */
    customDisplay(row, App, node, options) {
@@ -360,7 +360,7 @@ module.exports = class ABFieldList extends ABFieldListCore {
     *
     * @param {object} row is the {name=>value} hash of the current row of data.
     * @param {App} App the shared ui App object useful more making globally
-    *					unique id references.
+    *             unique id references.
     * @param {HtmlDOM} node  the HTML Dom object for this field's display.
     */
    customEdit(row, App, node) {

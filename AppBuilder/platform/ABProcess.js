@@ -34,9 +34,6 @@ module.exports = class ABProcess extends ABProcessCore {
          return new Promise((resolve, reject) => {
             this.toDefinition()
                .destroy()
-               .catch((err) => {
-                  reject(err);
-               })
                .then(() => {
                   // allow normal processing to contine now:
                   resolve();
@@ -56,6 +53,9 @@ module.exports = class ABProcess extends ABProcessCore {
                         a.processRemove(this);
                      });
                   }
+               })
+               .catch((err) => {
+                  reject(err);
                });
          });
       });

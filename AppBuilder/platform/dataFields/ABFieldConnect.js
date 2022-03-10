@@ -522,7 +522,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
          const respond = (options) => {
             // filter the raw lookup with the provided search term
-            options = options.filter(function (item) {
+            options = options.filter((item) => {
                if (item.text.toLowerCase().includes(term.toLowerCase())) {
                   return true;
                }
@@ -608,6 +608,8 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          const storageID = `${this.id}-${JSON.stringify(where)}`;
 
          Promise.resolve()
+            // TODO: debug the cached data + response so the droplist can display
+            // updated data.
             .then(async () => {
                // Get Local Storage
 
