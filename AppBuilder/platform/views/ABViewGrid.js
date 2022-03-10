@@ -1685,10 +1685,7 @@ class ABViewGridComponent extends ABViewComponent {
          var origCol = objColumnHeaders.find((h) => h.fieldID == c.fieldID);
          // to do this we use _.merge() on duplicate keys the second passed
          // object wins the tie
-         var mergedCol = _.merge(c, origCol);
-         // if (origCol?.template) {
-         //    c.template = origCol.template;
-         // }
+         var mergedCol = _.merge(origCol, c);
          c = mergedCol;
 
          var f = CurrentObject.fieldByID(c.fieldID);

@@ -109,12 +109,6 @@ module.exports = class ABViewDetailConnect extends ABViewDetailConnectCore {
          },
       };
 
-      // Add plus button in front of template
-      // baseComp.ui.template = baseComp.ui.template.replace(
-      //    "#display#",
-      //    `${addPageComponent.ui} #display#`
-      // );
-
       // Click to open new data form
       // addPageComponent.ui.onClick = addPageComponent.ui.onClick || {};
       let ui = {};

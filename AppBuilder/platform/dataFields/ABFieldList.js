@@ -1,7 +1,7 @@
 var ABFieldListCore = require("../../core/dataFields/ABFieldListCore");
 var ABFieldComponent = require("./ABFieldComponent");
 
-// var ABFieldSelectivity = require("./ABFieldSelectivity");
+var ABFieldSelectivity = require("./ABFieldSelectivity");
 
 var defaultValues = ABFieldListCore.defaultValues();
 
@@ -593,52 +593,6 @@ module.exports = class ABFieldList extends ABFieldListCore {
       var field = this;
       var App = App;
 
-      // Multiple select list
-      // if (this.settings.isMultiple == true) {
-      //    var width = options.width,
-      //       editable = options.editable;
-      //
-      //    config.template = (row) => {
-      //       var node = document.createElement("div");
-      //       node.classList.add("list-data-values");
-      //       if (typeof width != "undefined") {
-      //          node.style.marginLeft = width + "px";
-      //       }
-      //
-      //       var domNode = node;
-      //
-      //       var placeholder = L("Select items");
-      //       var readOnly = false;
-      //       if (editable != null && editable == false) {
-      //          readOnly = true;
-      //          placeholder = "";
-      //       }
-      //
-      //       // var domNode = node.querySelector('.list-data-values');
-      //
-      //       // get selected values
-      //       let selectedData = _getSelectedOptions(field, row);
-      //
-      //       // Render selectivity
-      //       field._Selectivity.selectivityRender(
-      //          domNode,
-      //          {
-      //             multiple: true,
-      //             readOnly: readOnly,
-      //             placeholder: placeholder,
-      //             hasColors: field.settings.hasColors,
-      //             items: field.settings.options,
-      //             data: selectedData,
-      //          },
-      //          App,
-      //          row
-      //       );
-      //
-      //       return node.outerHTML;
-      //    };
-      // }
-      // // Single select list
-      // else {
       var formClass = "";
       var placeHolder = "";
       if (options.editable) {
@@ -650,17 +604,17 @@ module.exports = class ABFieldList extends ABFieldListCore {
       var isRemovable = options.editable && !this.settings.required;
 
       config.editFormat = (value) => {
-         return field.editFormat(value);
+         return this.editFormat(value);
       };
-      config.editParse = function (value) {
-         return field.editParse(value);
+      config.editParse = (value) => {
+         return this.editParse(value);
       };
 
       config.template = (rowData) => {
-         let selectedData = rowData[field.columnName];
+         let selectedData = rowData[this.columnName];
          if (selectedData == null) return "";
          if (this.settings.isMultiple) {
-            selectedData = _getSelectedOptions(field, rowData);
+            selectedData = _getSelectedOptions(this, rowData);
          }
          var values = [];
          let hasCustomColor = "";
@@ -671,7 +625,7 @@ module.exports = class ABFieldList extends ABFieldListCore {
             selectedData.length
          ) {
             selectedData.forEach((val) => {
-               if (field.settings.hasColors && val.hex) {
+               if (this.settings.hasColors && val.hex) {
                   hasCustomColor = "hascustomcolor";
                   optionHex = `background: ${val.hex};`;
                }
@@ -682,10 +636,10 @@ module.exports = class ABFieldList extends ABFieldListCore {
          } else if (selectedData) {
             let selectedObj = selectedData;
             if (typeof selectedData == "string") {
-               selectedObj = field.getItemFromVal(selectedData);
+               selectedObj = this.getItemFromVal(selectedData);
             }
             if (!selectedObj) return "";
-            if (field.settings.hasColors && selectedObj.hex) {
+            if (this.settings.hasColors && selectedObj.hex) {
                hasCustomColor = "hascustomcolor";
                optionHex = `background: ${selectedObj.hex};`;
             }
@@ -698,7 +652,7 @@ module.exports = class ABFieldList extends ABFieldListCore {
       config.editor = this.settings.isMultiple ? "multiselect" : "combo";
       config.suggest = {
          button: true,
-         data: field.settings.options.map(function (opt) {
+         data: this.settings.options.map(function (opt) {
             return {
                id: opt.id,
                value: opt.text,
@@ -709,7 +663,6 @@ module.exports = class ABFieldList extends ABFieldListCore {
       if (this.settings.isMultiple) {
          config.suggest.view = "checksuggest";
       }
-      // }
 
       return config;
    }
@@ -730,74 +683,6 @@ module.exports = class ABFieldList extends ABFieldListCore {
 
       options = options || {};
 
-      // if (this.settings.isMultiple == true) {
-      //    var placeholder = L("Select items");
-      //    var readOnly = false;
-      //    if (options.editable != null && options.editable == false) {
-      //       readOnly = true;
-      //       placeholder = "";
-      //    }
-      //
-      //    var domNode = node.querySelector(".list-data-values");
-      //
-      //    // get selected values
-      //    var selectedData = _getSelectedOptions(this, row);
-      //
-      //    // Render selectivity
-      //    this._Selectivity.selectivityRender(
-      //       domNode,
-      //       {
-      //          multiple: true,
-      //          readOnly: readOnly,
-      //          placeholder: placeholder,
-      //          hasColors: this.settings.hasColors,
-      //          items: this.settings.options,
-      //          data: selectedData,
-      //       },
-      //       App,
-      //       row
-      //    );
-      //
-      //    // Listen event when selectivity value updates
-      //    if (domNode && !readOnly && row.id && node) {
-      //       domNode.addEventListener(
-      //          "change",
-      //          (/* e */) => {
-      //             // update just this value on our current object.model
-      //             var values = {};
-      //             values[this.columnName] = this._Selectivity.selectivityGet(
-      //                domNode
-      //             );
-      //
-      //             // pass null because it could not put empty array in REST api
-      //             if (values[this.columnName].length == 0)
-      //                values[this.columnName] = "";
-      //
-      //             this.object
-      //                .model()
-      //                .update(row.id, values)
-      //                .then(() => {
-      //                   // update the client side data object as well so other data changes won't cause this save to be reverted
-      //                   if (values[this.columnName] == "")
-      //                      values[this.columnName] = [];
-      //                   if ($$(node) && $$(node).updateItem)
-      //                      $$(node).updateItem(row.id, values);
-      //                })
-      //                .catch((err) => {
-      //                   node.classList.add("webix_invalid");
-      //                   node.classList.add("webix_invalid_cell");
-      //
-      //                   this.AB.notify.developer(err, {
-      //                      message: "Error updating our entry.",
-      //                      row: row,
-      //                      values: values,
-      //                   });
-      //                });
-      //          },
-      //          false
-      //       );
-      //    }
-      // } else {
       if (!node.querySelector) return;
 
       var clearButton = node.querySelector(
@@ -813,8 +698,7 @@ module.exports = class ABFieldList extends ABFieldListCore {
                .update(row.id, values)
                .then(() => {
                   // update the client side data object as well so other data changes won't cause this save to be reverted
-                  if ($$(node) && $$(node).updateItem)
-                     $$(node).updateItem(row.id, values);
+                  $$(node)?.updateItem?.(row.id, values);
                })
                .catch((err) => {
                   node.classList.add("webix_invalid");
@@ -824,11 +708,11 @@ module.exports = class ABFieldList extends ABFieldListCore {
                      message: "Error updating our entry.",
                      row: row,
                      values: "",
+                     field: this.toObj(),
                   });
                });
          });
       }
-      // }
    }
 
    /*
@@ -840,18 +724,7 @@ module.exports = class ABFieldList extends ABFieldListCore {
     * @param {HtmlDOM} node  the HTML Dom object for this field's display.
     */
    customEdit(row, App, node) {
-      // if (this.settings.isMultiple == true) {
-      //    var domNode = node.querySelector(".list-data-values");
-      //
-      //    if (domNode.selectivity != null) {
-      //       // Open selectivity
-      //       domNode.selectivity.open();
-      //       return false;
-      //    }
-      //    return false;
-      // } else {
       return super.customEdit(row, App, node);
-      // }
    }
 
    /*
@@ -959,8 +832,8 @@ module.exports = class ABFieldList extends ABFieldListCore {
 
    getSelectedOptions(field, rowData = {}) {
       let result = [];
-      if (rowData[field.columnName] != null) {
-         result = rowData[field.columnName];
+      if (rowData[this.columnName] != null) {
+         result = rowData[this.columnName];
       } else if (rowData) {
          if (Array.isArray(rowData)) {
             result = rowData;
@@ -972,8 +845,8 @@ module.exports = class ABFieldList extends ABFieldListCore {
          if (typeof result == "string") result = JSON.parse(result);
 
          // Pull text with current language
-         if (field.settings) {
-            result = (field.settings.options || []).filter((opt) => {
+         if (this.settings) {
+            result = (this.settings.options || []).filter((opt) => {
                return (
                   (result || []).filter((v) => (opt.id || opt) == (v.id || v))
                      .length > 0
@@ -989,15 +862,7 @@ module.exports = class ABFieldList extends ABFieldListCore {
       if (!item) return;
 
       if (this.settings.isMultiple) {
-         // let selectedOpts = _getSelectedOptions(this, rowData);
-         // get selectivity dom
-         // var domSelectivity = item.$view.querySelector(".list-data-values");
-         // set value to selectivity
-         // this._Selectivity.selectivitySet(
-         //    domSelectivity,
-         //    selectedOpts,
-         //    this.App
-         // );
+         // do we need anything here?
       } else {
          super.setValue(item, rowData);
       }

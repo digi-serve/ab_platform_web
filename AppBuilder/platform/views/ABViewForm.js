@@ -1054,15 +1054,15 @@ module.exports = class ABViewForm extends ABViewFormCore {
             if (relationFieldCom == null) return;
 
             var relationFieldView = this.viewComponents[relationFieldCom.id].ui
-               .id;
-            if (
-               this.viewComponents[relationFieldCom.id].ui.rows &&
-               this.viewComponents[relationFieldCom.id].ui.rows[0] &&
-               this.viewComponents[relationFieldCom.id].ui.rows[0].id
-            ) {
-               var relationFieldView = this.viewComponents[relationFieldCom.id]
-                  .ui.rows[0].id;
-            }
+               .inputId;
+            // if (
+            //    this.viewComponents[relationFieldCom.id].ui.rows &&
+            //    this.viewComponents[relationFieldCom.id].ui.rows[0] &&
+            //    this.viewComponents[relationFieldCom.id].ui.rows[0].id
+            // ) {
+            //    relationFieldView = this.viewComponents[relationFieldCom.id].ui
+            //       .rows[0].id;
+            // }
             if (relationFieldView == null) return;
 
             var relationElem = $$(relationFieldView),

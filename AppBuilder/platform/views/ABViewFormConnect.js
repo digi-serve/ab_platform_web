@@ -46,33 +46,13 @@ function _onShow(App, compId, instance, component) {
       Object.keys(instance.parent.viewComponents).forEach((key, index) => {
          // find component name, I (James) adjusted the ui to display better,
          // but the result is two different ui types.
-         let uiName = "";
+         let uiName = $$(instance.parent.viewComponents[key].ui.inputId)?.config
+            ?.name;
          if (
-            instance.parent.viewComponents[key].ui &&
-            instance.parent.viewComponents[key].ui.rows &&
-            instance.parent.viewComponents[key].ui.rows.length
+            uiName &&
+            uiName == instance.settings.filterConnectedValue.split(":")[0]
          ) {
-            if (instance.parent.viewComponents[key].ui.rows[0].name) {
-               uiName = instance.parent.viewComponents[key].ui.rows[0].name;
-               if (
-                  uiName == instance.settings.filterConnectedValue.split(":")[0]
-               ) {
-                  filterValue = instance.parent.viewComponents[key].ui.rows[0];
-               }
-            } else if (
-               instance.parent.viewComponents[key].ui.rows[0].cols &&
-               instance.parent.viewComponents[key].ui.rows[0].cols[2] &&
-               instance.parent.viewComponents[key].ui.rows[0].cols[2].name
-            ) {
-               uiName =
-                  instance.parent.viewComponents[key].ui.rows[0].cols[2].name;
-               if (
-                  uiName == instance.settings.filterConnectedValue.split(":")[0]
-               ) {
-                  filterValue =
-                     instance.parent.viewComponents[key].ui.rows[0].cols[2];
-               }
-            }
+            filterValue = $$(instance.parent.viewComponents[key].ui.inputId);
          }
       });
 
@@ -116,18 +96,18 @@ function _onShow(App, compId, instance, component) {
    // to make sure the UX helps the user know what to do.
    let placeholderReadOnly = null;
    if (instance.options.filterValue && instance.options.filterKey) {
-      if (!$$(instance.options.filterValue.id)) {
+      if (!$$(instance.options.filterValue.config.id)) {
          // this happens in the Interface Builder when only the single form UI is displayed
          readOnly = true;
          placeholderReadOnly = L("Must select item from '{0}' first.", [
             L("PARENT ELEMENT"),
          ]);
       } else {
-         let val = field.getValue($$(instance.options.filterValue.id));
+         let val = field.getValue($$(instance.options.filterValue.config.id));
          if (!val) {
             // if there isn't a value on the parent select element set this one to readonly and change placeholder text
             readOnly = true;
-            let label = $$(instance.options.filterValue.id);
+            let label = $$(instance.options.filterValue.config.id);
             placeholderReadOnly = L("Must select item from '{0}' first.", [
                label.config.label,
             ]);
@@ -152,15 +132,19 @@ function _onShow(App, compId, instance, component) {
          instance.parentFormComponent()
       );
    }
-
-   if (instance.options.filterValue && $$(instance.options.filterValue.id)) {
+   if (
+      instance.options.filterValue &&
+      $$(instance.options.filterValue.config.id)
+   ) {
       // let parentDomNode = $$(options.filterValue.ui.id).$view.querySelector(
       //    ".connect-data-values"
       // );
-      $$(instance.options.filterValue.id).attachEvent(
+      $$(instance.options.filterValue.config.id).attachEvent(
          "onChange",
          (e) => {
-            let parentVal = $$(instance.options.filterValue.id).getValue();
+            let parentVal = $$(
+               instance.options.filterValue.config.id
+            ).getValue();
             if (parentVal) {
                $$(node).define("disabled", false);
                $$(node).define("placeholder", placeholder);
@@ -748,15 +732,6 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
             var elem = $$(ids.component);
             if (!elem) return;
 
-            // get the linked Object for current field
-            // var linkedObj = field.datasourceLink;
-            // isolate the connected field data that was saved
-            // var savedItem = linkedObj.displayData(saveData);
-            // repopulate the selectivity options now that there is a new one added
-            // var filters = {};
-            // if (this.settings.objectWorkspace && this.settings.objectWorkspace.filterConditions) {
-            // 	filters = this.settings.objectWorkspace.filterConditions;
-            // }
             field.once("option.data", (data) => {
                data.forEach((item) => {
                   item.value = item.text;
@@ -776,8 +751,8 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
                   $$(ids.component).setValue(saveData.id);
                }
                // close the popup when we are finished
-               if ($$(ids.popup)) $$(ids.popup).close();
-               if ($$(ids.editpopup)) $$(ids.editpopup).close();
+               $$(ids.popup)?.close();
+               $$(ids.editpopup)?.close();
             });
 
             field
@@ -952,9 +927,10 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
 
                let dc = form.datacollection;
 
-               addPageComponent.onClick(dc).then(() => {
-                  // component.logic.formReady($form);
-               });
+               // Unsure if we need this
+               // addPageComponent.onClick(dc).then(() => {
+               // component.logic.formReady($form);
+               // });
 
                return false;
             },
