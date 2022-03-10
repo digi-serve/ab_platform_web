@@ -1031,28 +1031,28 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
    getItemFromVal(val) {
       let item;
-      let options = [];
-      if (this._options) {
-         options = options.concat(this._options);
-      }
+      let options = this._options || [];
       if (options.length > 0) {
-         options.forEach((option) => {
-            if (this.indexField && option[this.indexField.columnName] == val) {
-               item = option;
-               return false;
+         for (let i = 0; i < options.length; i++) {
+            if (
+               this.indexField &&
+               options[i][this.indexField.columnName] == val
+            ) {
+               item = options[i];
+               break;
             } else if (
                this.indexField2 &&
-               option[this.indexField2.columnName] == val
+               options[i][this.indexField2.columnName] == val
             ) {
-               item = option;
-               return false;
+               item = options[i];
+               break;
             } else {
-               if (option.id == val) {
-                  item = option;
-                  return false;
+               if (options[i].id == val) {
+                  item = options[i];
+                  break;
                }
             }
-         });
+         }
          return item;
       } else {
          return "";
@@ -1089,6 +1089,8 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       if (item.getList && item.getList().count() == 0) {
          item.getList().define("data", val);
       }
+      // this allows the form to clear itself it
+      // its settings are asking to clear on load
       setTimeout(function () {
          item.setValue(val.id);
       }, 50);
