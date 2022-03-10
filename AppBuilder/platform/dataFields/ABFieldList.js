@@ -15,7 +15,7 @@ module.exports = class ABFieldList extends ABFieldListCore {
    /// Instance Methods
    ///
 
-   async save() {
+   save() {
       return super.save().then(() => {
          // Now we want to clear out any entries that had values == to item removed from our list:
          if (this.pendingDeletions.length) {
