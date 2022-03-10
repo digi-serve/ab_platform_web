@@ -662,7 +662,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
       if (data && linkedObject) {
          // if this select value is array
-         if (data.map) {
+         if (Array.isArray(data)) {
             selectedData = data.map(function (d) {
                // display label in format
                if (d) {
@@ -691,20 +691,19 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       }
 
       var config = super.columnHeader(options);
-      var field = this;
       var App = App;
 
-      var multiselect = field.settings.linkType == "many";
+      var multiselect = this.settings.linkType == "many";
 
       config.editor = multiselect ? "multiselect" : "combo";
       config.editFormat = (value) => {
-         return field.editFormat(value);
+         return this.editFormat(value);
       };
-      config.editParse = function (value) {
-         return field.editParse(value);
+      config.editParse = (value) => {
+         return this.editParse(value);
       };
       config.template = (row) => {
-         var selectedData = field.pullRelationValues(row);
+         var selectedData = this.pullRelationValues(row);
          var values = [];
          if (selectedData.length) {
             selectedData.forEach((val) => {
@@ -723,7 +722,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          button: true,
          on: {
             onBeforeShow: function () {
-               field.getAndPopulateOptions(this);
+               this.getAndPopulateOptions(this);
             },
          },
       };
