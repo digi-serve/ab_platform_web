@@ -1,6 +1,7 @@
 const ABViewFormCore = require("../../core/views/ABViewFormCore");
 const ABViewFormButton = require("./ABViewFormButton");
 const ABViewFormCustom = require("./ABViewFormCustom");
+const ABViewFormConnect = require("./ABViewFormConnect");
 const ABViewFormComponent = require("./ABViewFormComponent");
 const ABViewFormSelectMultiple = require("./ABViewFormSelectMultiple");
 const ABViewFormTextbox = require("./ABViewFormTextbox");
@@ -716,6 +717,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
             hidden: true,
             rows: validationUI,
          },
+         // {},
       ];
 
       // an ABViewForm_ is a collection of rows:
@@ -943,6 +945,14 @@ module.exports = class ABViewForm extends ABViewFormCore {
          },
 
          displayData: (rowData) => {
+            var customFields = this.fieldComponents((comp) => {
+               return (
+                  // comp instanceof ABViewFormCustom ||
+                  // rich text
+                  comp instanceof ABViewFormTextbox &&
+                  comp.settings.type == "rich"
+               );
+            });
             // If setTimeout is already scheduled, no need to do anything
             if (this.timerId) {
                return;
@@ -1043,10 +1053,19 @@ module.exports = class ABViewForm extends ABViewFormCore {
 
             if (relationFieldCom == null) return;
 
-            var relationFieldView = this.viewComponents[relationFieldCom.id];
+            var relationFieldView = this.viewComponents[relationFieldCom.id].ui
+               .inputId;
+            // if (
+            //    this.viewComponents[relationFieldCom.id].ui.rows &&
+            //    this.viewComponents[relationFieldCom.id].ui.rows[0] &&
+            //    this.viewComponents[relationFieldCom.id].ui.rows[0].id
+            // ) {
+            //    relationFieldView = this.viewComponents[relationFieldCom.id].ui
+            //       .rows[0].id;
+            // }
             if (relationFieldView == null) return;
 
-            var relationElem = $$(relationFieldView.ui.id),
+            var relationElem = $$(relationFieldView),
                relationName = relationField.relationName();
 
             // pull data of parent's dc
@@ -1189,7 +1208,10 @@ module.exports = class ABViewForm extends ABViewFormCore {
 
       // get custom values
       var customFields = this.fieldComponents(
-         (comp) => comp instanceof ABViewFormCustom
+         (comp) =>
+            comp instanceof ABViewFormCustom ||
+            comp instanceof ABViewFormConnect ||
+            comp instanceof ABViewFormSelectMultiple
       );
       customFields.forEach((f) => {
          var vComponent = this.viewComponents[f.id];

@@ -121,7 +121,8 @@ export default class ABViewPropertyAddPage extends ABViewProperty {
    component(App, idBase) {
       let ids = {
          popup: App.unique(`${idBase}_popup_add_new`),
-         field: idBase.split('_')[1],
+         field: idBase.split("_")[1],
+         button: App.unique(`${idBase}_popup_add_new_button`),
       };
 
       let ui = "";
@@ -130,13 +131,28 @@ export default class ABViewPropertyAddPage extends ABViewProperty {
          this.settings.formView &&
          this.settings.formView != this.constructor.default.formView
       ) {
-         let iDiv = document.createElement("div");
-         iDiv.className = "ab-connect-add-new";
-         const dataCy = `add new CR button ${this.settings.formView} ${ids.field}`
-         iDiv.innerHTML =
-            `<a href="javascript:void(0);" class="fa fa-plus ab-connect-add-new-link" data-cy="${dataCy}"></a>`;
+         // let iDiv = document.createElement("div");
+         // iDiv.className = "ab-connect-add-new";
+         const dataCy = `add new CR button ${this.settings.formView} ${ids.field}`;
+         // iDiv.innerHTML = `<a href="javascript:void(0);" class="fa fa-plus ab-connect-add-new-link" data-cy="${dataCy}"></a>`;
          // iDiv.appendChild(node);
-         ui = iDiv.outerHTML;
+         // ui = iDiv.outerHTML;
+         ui = {
+            id: ids.button,
+            view: "button",
+            type: "icon",
+            icon: "fa fa-plus",
+            width: 32,
+            height: 32,
+            css: "webix_primary ab-connect-add-new-link",
+            on: {
+               onAfterRender: () => {
+                  $$(ids.button)
+                     ?.$view.querySelector("button")
+                     .setAttribute("data-cy", dataCy);
+               },
+            },
+         };
       }
 
       let _logic = {
@@ -297,7 +313,7 @@ export default class ABViewPropertyAddPage extends ABViewProperty {
                   let comp = v.viewComponents[fView.id];
                   if (!comp) return;
 
-                  field.setValue($$(comp.ui.id), data);
+                  field.setValue($$(comp.ui.inputId), data);
                });
             });
          },

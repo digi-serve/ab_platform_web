@@ -44,11 +44,15 @@ function _onShow(App, compId, instance, component) {
       instance.settings.filterConnectedValue.indexOf(":") > -1
    ) {
       Object.keys(instance.parent.viewComponents).forEach((key, index) => {
+         // find component name, I (James) adjusted the ui to display better,
+         // but the result is two different ui types.
+         let uiName = $$(instance.parent.viewComponents[key].ui.inputId)?.config
+            ?.name;
          if (
-            instance.parent.viewComponents[key].ui.name ==
-            instance.settings.filterConnectedValue.split(":")[0]
+            uiName &&
+            uiName == instance.settings.filterConnectedValue.split(":")[0]
          ) {
-            filterValue = instance.parent.viewComponents[key];
+            filterValue = $$(instance.parent.viewComponents[key].ui.inputId);
          }
       });
 
@@ -58,7 +62,7 @@ function _onShow(App, compId, instance, component) {
       filterColumn = instance.settings.filterConnectedValue.split(":")[2];
    }
 
-   field.customDisplay(rowData, App, node, {
+   instance.options = {
       formView: instance.settings.formView,
       filters: instance.settings.objectWorkspace.filterConditions,
       sort: instance.settings.objectWorkspace.sortFields,
@@ -70,13 +74,98 @@ function _onShow(App, compId, instance, component) {
          !instance.settings.editForm || instance.settings.editForm == "none"
             ? false
             : true,
-   });
+   };
+
+   var multiselect = field.settings.linkType == "many";
+
+   var placeholder = L("Select item");
+   if (multiselect) {
+      placeholder = L("Select items");
+   }
+
+   var readOnly = false;
+   if (
+      instance.options.editable != null &&
+      instance.options.editable == false
+   ) {
+      readOnly = true;
+      placeholder = "";
+   }
+
+   // if this field's options are filtered off another field's value we need
+   // to make sure the UX helps the user know what to do.
+   let placeholderReadOnly = null;
+   if (instance.options.filterValue && instance.options.filterKey) {
+      if (!$$(instance.options.filterValue.config.id)) {
+         // this happens in the Interface Builder when only the single form UI is displayed
+         readOnly = true;
+         placeholderReadOnly = L("Must select item from '{0}' first.", [
+            L("PARENT ELEMENT"),
+         ]);
+      } else {
+         let val = field.getValue($$(instance.options.filterValue.config.id));
+         if (!val) {
+            // if there isn't a value on the parent select element set this one to readonly and change placeholder text
+            readOnly = true;
+            let label = $$(instance.options.filterValue.config.id);
+            placeholderReadOnly = L("Must select item from '{0}' first.", [
+               label.config.label,
+            ]);
+         }
+      }
+   }
+
+   // fetch the options and set placeholder text for this view
+   if (node) {
+      if (readOnly) {
+         $$(node).define("placeholder", placeholderReadOnly);
+         $$(node).define("disabled", true);
+      } else {
+         $$(node).define("placeholder", placeholder);
+      }
+      $$(node).refresh();
+
+      field.getAndPopulateOptions(
+         $$(node),
+         this.options,
+         field,
+         instance.parentFormComponent()
+      );
+   }
+   if (
+      instance.options.filterValue &&
+      $$(instance.options.filterValue.config.id)
+   ) {
+      // let parentDomNode = $$(options.filterValue.ui.id).$view.querySelector(
+      //    ".connect-data-values"
+      // );
+      $$(instance.options.filterValue.config.id).attachEvent(
+         "onChange",
+         (e) => {
+            let parentVal = $$(
+               instance.options.filterValue.config.id
+            ).getValue();
+            if (parentVal) {
+               $$(node).define("disabled", false);
+               $$(node).define("placeholder", placeholder);
+               $$(node).setValue("");
+               $$(node).refresh();
+            } else {
+               $$(node).define("disabled", true);
+               $$(node).define("placeholder", placeholderReadOnly);
+               $$(node).setValue("");
+               $$(node).refresh();
+            }
+         },
+         false
+      );
+   }
 
    // listen 'editPage' event
-   if (!instance._editPageEvent) {
-      instance._editPageEvent = true;
-      field.on("editPage", component.logic.goToEditPage);
-   }
+   // if (!instance._editPageEvent) {
+   //    instance._editPageEvent = true;
+   //    field.on("editPage", component.logic.goToEditPage);
+   // }
 }
 
 module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
@@ -182,7 +271,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
 
       _logic.showSortPopup = ($button) => {
          SortComponent.show($button, null, {
-            pos: "top"
+            pos: "top",
          });
       };
 
@@ -319,7 +408,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
                      ],
                   },
                   {
-                     height: 30
+                     height: 30,
                   },
                   {
                      rows: [
@@ -328,7 +417,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
                               {
                                  view: "label",
                                  label: L("Sort Options:"),
-                                 width: App.config.labelWidthLarge
+                                 width: App.config.labelWidthLarge,
                               },
                               {
                                  view: "button",
@@ -338,13 +427,13 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
                                  icon: "fa fa-gear",
                                  type: "icon",
                                  badge: 0,
-                                 click: function() {
+                                 click: function () {
                                     _logic.showSortPopup(this.$view);
-                                 }
-                              }
-                           ]
-                        }
-                     ]
+                                 },
+                              },
+                           ],
+                        },
+                     ],
                   },
                ],
             },
@@ -437,8 +526,8 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
       });
 
       // Set the options of the possible edit forms
-      this.addPageProperty.setSettings(view, view.settings);
-      this.editPageProperty.setSettings(view, view.settings);
+      this.addPageProperty.setSettings(view, view.settingsAddPage);
+      this.editPageProperty.setSettings(view, view.settingsEditPage);
       $$(ids.filterConnectedValue).define("options", filterConnectedOptions);
       $$(ids.filterConnectedValue).setValue(view.settings.filterConnectedValue);
 
@@ -479,15 +568,15 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
       ).getValue();
       view.settings.objectWorkspace = {
          filterConditions: FilterComponent.getValue(),
-         sortFields: SortComponent.getValue()
+         sortFields: SortComponent.getValue(),
       };
 
-      view.settings = this.addPageProperty.getSettings(view);
-      view.settings = this.editPageProperty.getSettings(view);
+      view.settingsAddPage = this.addPageProperty.getSettings(view);
+      view.settingsEditPage = this.editPageProperty.getSettings(view);
 
       // refresh settings of app page tool
-      view.addPageTool.fromSettings(view.settings);
-      view.editPageTool.fromSettings(view.settings);
+      view.addPageTool.fromSettings(view.settingsAddPage);
+      view.editPageTool.fromSettings(view.settingsEditPage);
    }
 
    static populateBadgeNumber(ids, view) {
@@ -586,72 +675,37 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
     * @param {obj} App
     * @return {obj} UI component
     */
-   component(App) {
+   component(App, idPrefix) {
       var field = this.field();
       // this field may be deleted
       if (!field) return super.component(App);
 
-      var component = {};
+      idPrefix = idPrefix ? idPrefix + "_" : "";
+
+      var component = super.component(App);
       var form = this.parentFormComponent();
       var idBase = this.parentFormUniqueID(
          "ABViewFormConnect_" + this.id + "_f_"
       );
       var ids = {
-         component: App.unique(`${idBase}_component`),
-         popup: App.unique(`${idBase}_popup_add_new`),
-         editpopup: App.unique(`${idBase}_popup_edit_form_popup_add_new`),
+         component: App.unique(`${idPrefix}${idBase}_component`),
+         popup: App.unique(`${idPrefix}${idBase}_popup_add_new`),
+         editpopup: App.unique(
+            `${idPrefix}${idBase}_popup_edit_form_popup_add_new`
+         ),
       };
 
       var settings = {};
       if (form) settings = form.settings;
 
-      var requiredClass = "";
-      if (field.settings.required == true || this.settings.required == true) {
-         requiredClass = "webix_required";
-      }
-      var templateLabel = "";
-      if (settings.showLabel) {
-         if (settings.labelPosition == "top")
-            templateLabel =
-               '<label style="display:block; text-align: left; margin: 0; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;" class="webix_inp_top_label ' +
-               requiredClass +
-               '">#label#</label>';
-         else
-            templateLabel =
-               '<label style="width: #width#px; display: inline-block; line-height: 32px; float: left; margin: 0; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;" class="webix_inp_label ' +
-               requiredClass +
-               '">#label#</label>';
-      }
-
-      var newWidth = settings.labelWidth;
-      if (this.settings.formView && this.settings.formView != "none") {
-         newWidth += 40;
-      } else if (
-         settings.showLabel == true &&
-         settings.labelPosition == "top"
-      ) {
-         newWidth = 0;
-      }
-
       let addPageComponent = this.addPageTool.component(App, idBase);
       let editPageComponent;
 
-      let template = `<div class="customField">${templateLabel}#plusButton##template#</div>`
-         .replace(/#width#/g, settings.labelWidth)
-         .replace(/#label#/g, field.label)
-         .replace(/#plusButton#/g, addPageComponent.ui)
-         .replace(
-            /#template#/g,
-            field
-               .columnHeader({
-                  width: newWidth,
-                  editable: true,
-                  skipRenderSelectivity: true,
-               })
-               .template({})
-         );
+      component.init = (optionsParam) => {
+         var settings = {};
+         var options = optionsParam || {};
+         if (form) settings = form.settings;
 
-      component.init = (options) => {
          addPageComponent.applicationLoad(this.application);
          addPageComponent.init({
             onSaveData: component.logic.callbackSaveData,
@@ -678,46 +732,34 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
             var elem = $$(ids.component);
             if (!elem) return;
 
-            // get the linked Object for current field
-            // var linkedObj = field.datasourceLink;
-            // isolate the connected field data that was saved
-            // var savedItem = linkedObj.displayData(saveData);
-            // repopulate the selectivity options now that there is a new one added
-            // var filters = {};
-            // if (this.settings.objectWorkspace && this.settings.objectWorkspace.filterConditions) {
-            // 	filters = this.settings.objectWorkspace.filterConditions;
-            // }
+            field.once("option.data", (data) => {
+               data.forEach((item) => {
+                  item.value = item.text;
+               });
+               $$(ids.component).getList().clearAll();
+               $$(ids.component).getList().define("data", data);
+               if (field.settings.linkType == "many") {
+                  let currentVals = $$(ids.component).getValue();
+                  if (currentVals.indexOf(saveData.id) == -1) {
+                     $$(ids.component).setValue(
+                        currentVals
+                           ? currentVals + "," + saveData.id
+                           : saveData.id
+                     );
+                  }
+               } else {
+                  $$(ids.component).setValue(saveData.id);
+               }
+               // close the popup when we are finished
+               $$(ids.popup)?.close();
+               $$(ids.editpopup)?.close();
+            });
 
             field
                .getOptions(this.settings.objectWorkspace.filterConditions, "")
                .then(function (data) {
-                  // find option with the matching id to the savedData
-                  var myOption = data.filter((d) => d.id == saveData.id)[0];
-                  if (myOption == null) {
-                     if ($$(ids.popup)) $$(ids.popup).close();
-                     if ($$(ids.editpopup)) $$(ids.editpopup).close();
-                     return;
-                  }
-
-                  let fieldVal = field.getValue(elem);
-                  if (Array.isArray(fieldVal)) {
-                     // Keep selected items
-                     fieldVal.push(myOption);
-                  } else {
-                     fieldVal = myOption;
-                  }
-
-                  var values = {};
-                  // retrieve the related field name
-                  var relatedField = field.relationName();
-                  // format payload to the setValue requirements
-                  values[relatedField] = fieldVal;
-                  // set the value of selectivity to the matching item that was just created
-                  field.setValue(elem, values);
-
-                  // close the popup when we are finished
-                  if ($$(ids.popup)) $$(ids.popup).close();
-                  if ($$(ids.editpopup)) $$(ids.editpopup).close();
+                  // we need new option that will be returned from server (above)
+                  // so we will not set this and then just reset it.
                });
          },
 
@@ -764,86 +806,167 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
                $form = $elem.getFormView();
             }
 
-            component.logic.formBusy($form);
+            // Open the form popup
+            editPageComponent.onClick().then(() => {
+               let dc = editForm.datacollection;
+               if (dc) {
+                  dc.setCursor(rowId);
 
-            setTimeout(() => {
-               // Open the form popup
-               editPageComponent.onClick().then(() => {
-                  let dc = editForm.datacollection;
-                  if (dc) {
-                     dc.setCursor(rowId);
-
-                     if (!this.__editFormDcEvent) {
-                        this.__editFormDcEvent = dc.on(
-                           "initializedData",
-                           () => {
-                              dc.setCursor(rowId);
-                           }
-                        );
-                     }
+                  if (!this.__editFormDcEvent) {
+                     this.__editFormDcEvent = dc.on("initializedData", () => {
+                        dc.setCursor(rowId);
+                     });
                   }
-
-                  component.logic.formReady($form);
-               });
-            }, 50);
+               }
+            });
          },
       };
 
-      component.ui = {
-         id: ids.component,
-         view: "forminput",
-         labelWidth: 0,
-         paddingY: 0,
-         paddingX: 0,
-         label: field.label,
-         css: "ab-custom-field",
-         name: field.columnName,
-         body: {
-            view: App.custom.focusabletemplate.view,
-            css: "webix_el_box",
-            borderless: true,
-            template: template,
-            onClick: {
-               customField: (id, e, trg) => {
-                  if (this.settings.disable == 1) return;
+      var multiselect = field.settings.linkType == "many";
 
-                  var rowData = {};
-
-                  if ($$(ids.component)) {
-                     var node = $$(ids.component).$view;
-                     field.customEdit(rowData, App, node);
+      component.ui.label = field.label;
+      component.ui.labelWidth = settings.labelWidth;
+      component.ui.id = ids.component;
+      component.ui.view = multiselect ? "multicombo" : "combo";
+      component.ui.on = {
+         onItemClick: (id, e) => {
+            if (
+               e.target.classList.contains("editConnectedPage") &&
+               e.target.dataset.itemId
+            ) {
+               let rowId = e.target.dataset.itemId;
+               if (!rowId) return;
+               component.logic.goToEditPage(rowId);
+            }
+         },
+         onChange: (data) => {
+            let selectedValues;
+            if (Array.isArray(data)) {
+               selectedValues = [];
+               data.forEach((record) => {
+                  let recordObj = record;
+                  if (typeof record != "object") {
+                     // we need to convert either index or uuid to full data object
+                     recordObj = field.getItemFromVal(record);
                   }
-               },
-               "ab-connect-add-new-link": function (e, id, trg) {
-                  e.stopPropagation();
-                  // var topParentView = this.getTopParentView();
-                  // component.logic.openFormPopup(topParentView.config.left, topParentView.config.top);
+                  if (recordObj && recordObj.id)
+                     selectedValues.push(recordObj.id);
+               });
+            } else {
+               selectedValues = data;
+               if (typeof data != "object") {
+                  // we need to convert either index or uuid to full data object
+                  selectedValues = field.getItemFromVal(data);
+               }
+               // selectedValues = field.pullRecordRelationValues(selectedValues);
+               if (selectedValues && selectedValues.id) {
+                  selectedValues = selectedValues.id;
+               } else {
+                  selectedValues = data;
+               }
+            }
+            // We can now set the new value but we need to block event listening
+            // so it doesn't trigger onChange again
+            $$(ids.component).blockEvent();
+            let prepedVals = selectedValues.join
+               ? selectedValues.join()
+               : selectedValues;
+            $$(ids.component).setValue(prepedVals);
+            $$(ids.component).unblockEvent();
+         },
+      };
 
-                  let $form = this.getFormView();
-                  component.logic.formBusy($form);
+      component.ui.dataFieldId = field.id;
 
-                  let dc = form.datacollection;
-
-                  setTimeout(() => {
-                     addPageComponent.onClick(dc).then(() => {
-                        component.logic.formReady($form);
-                     });
-                  }, 50);
-
-                  return false;
-               },
+      let editForm = "";
+      if (settings.editForm && settings.editForm != "") {
+         editForm =
+            '<i data-item-id="#id#" class="fa fa-cog editConnectedPage"></i>';
+      }
+      component.ui.suggest = {
+         button: true,
+         selectAll: multiselect ? true : false,
+         body: {
+            data: [],
+            template: editForm + "#value#",
+         },
+         on: {
+            onShow: () => {
+               field.getAndPopulateOptions(
+                  $$(ids.component),
+                  this.options,
+                  field,
+                  form
+               );
             },
          },
       };
 
-      if (settings.showLabel == true && settings.labelPosition == "top") {
-         component.ui.body.height = 80;
+      component.ui.onClick = {
+         customField: (id, e, trg) => {
+            if (this.settings.disable == 1) return;
+
+            var rowData = {};
+
+            if ($$(ids.component)) {
+               var node = $$(ids.component).$view;
+               field.customEdit(rowData, App, node);
+            }
+         },
+      };
+
+      if (addPageComponent.ui) {
+         // reset some component vals to make room for button
+         component.ui.label = "";
+         component.ui.labelWidth = 0;
+
+         // add click event to add new button
+         addPageComponent.ui.on = {
+            onItemClick: (id, evt) => {
+               let $form = $$(id).getFormView();
+
+               let dc = form.datacollection;
+
+               addPageComponent.onClick(dc);
+
+               return false;
+            },
+         };
+
+         component.ui = {
+            inputId: component.ui.id,
+            rows: [
+               {
+                  cols: [
+                     {
+                        view: "label",
+                        label: field.label,
+                        width: settings.labelWidth,
+                        align: "left",
+                     },
+                     addPageComponent.ui,
+                     component.ui,
+                  ],
+               },
+            ],
+         };
       } else {
-         component.ui.body.height = 38;
+         component.ui = {
+            inputId: component.ui.id,
+            rows: [component.ui],
+         };
       }
 
       component.onShow = () => {
          _onShow(App, ids.component, this, component);
+         let elem = $$(ids.component);
+         if (!elem) return;
+
+         let node = elem.$view;
+
+         // Add data-cy attributes
+         const dataCy = `${field.key} ${field.columnName} ${field.id} ${this.parent.id}`;
+         node.setAttribute("data-cy", dataCy);
       };
 
       return component;

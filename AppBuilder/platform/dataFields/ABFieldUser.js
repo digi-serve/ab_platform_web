@@ -2,9 +2,9 @@ const ABFieldConnectCore = require("../../core/dataFields/ABFieldConnectCore");
 const ABFieldUserCore = require("../../core/dataFields/ABFieldUserCore");
 
 module.exports = class ABFieldUser extends ABFieldUserCore {
-   // constructor(values, object) {
-   //    super(values, object);
-   // }
+   constructor(values, object, fieldDefaults) {
+      super(values, object, fieldDefaults);
+   }
 
    ///
    /// Working with Actual Object Values:
@@ -91,6 +91,7 @@ module.exports = class ABFieldUser extends ABFieldUserCore {
    // return the grid column header definition for this instance of ABFieldUser
 
    columnHeader(options) {
+      // debugger;
       options = this.setDisplayOptions(options);
       return super.columnHeader(options);
    }
@@ -103,11 +104,12 @@ module.exports = class ABFieldUser extends ABFieldUserCore {
     *             unique id references.
     * @param {HtmlDOM} node  the HTML Dom object for this field's display.
     */
-   customDisplay(row, App, node, options = {}) {
-      options = this.setDisplayOptions(options);
-
-      return super.customDisplay(row, App, node, options);
-   }
+   // customDisplay(row, App, node, options = {}) {
+   //    debugger;
+   //    options = this.setDisplayOptions(options);
+   //
+   //    return super.customDisplay(row, App, node, options);
+   // }
 
    setDisplayOptions(options) {
       options = options || {};
@@ -150,6 +152,12 @@ module.exports = class ABFieldUser extends ABFieldUserCore {
          }
       }
    }
+
+   // getValue() {
+   //    var elem = $$(ids.component);
+   //
+   //    return field.getValue(elem, rowData);
+   // }
 
    setValue(item, rowData) {
       let val = rowData[this.columnName];

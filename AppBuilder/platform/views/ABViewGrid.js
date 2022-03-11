@@ -209,21 +209,22 @@ class ABViewGridComponent extends ABViewComponent {
             // show footer when there are summary columns
             settings.summaryColumns.length > 0 ||
             settings.countColumns.length > 0,
-         tooltip: {
-            // id: ids.tooltip,
-            template: (obj, common) => {
-               return this.toolTip(obj, common);
-            },
-            on: {
-               // When showing a larger image preview the tooltip sometime displays part of the image off the screen...this attempts to fix that problem
-               onBeforeRender: function () {
-                  self.toolTipOnBeforeRender(this.getNode());
-               },
-               onAfterRender: function (data) {
-                  self.toolTipOnAfterRender(this.getNode());
-               },
-            },
-         },
+         tooltip: true,
+         // tooltip: {
+         //    // id: ids.tooltip,
+         //    template: (obj, common) => {
+         //       return this.toolTip(obj, common);
+         //    },
+         //    on: {
+         //       // When showing a larger image preview the tooltip sometime displays part of the image off the screen...this attempts to fix that problem
+         //       onBeforeRender: function () {
+         //          self.toolTipOnBeforeRender(this.getNode());
+         //       },
+         //       onAfterRender: function (data) {
+         //          self.toolTipOnAfterRender(this.getNode());
+         //       },
+         //    },
+         // },
          dragColumn: true,
          on: {
             onBeforeSelect: function (data, preserve) {
@@ -1680,11 +1681,13 @@ class ABViewGridComponent extends ABViewComponent {
 
       // default our columnConfig values to our columnHeaders:
       columnHeaders.forEach((c) => {
-         // localStorage won't save any .template() functions.
+         // we want to overwrite our default settings with anything stored
+         // in local storage
          var origCol = objColumnHeaders.find((h) => h.fieldID == c.fieldID);
-         if (origCol?.template) {
-            c.template = origCol.template;
-         }
+         // to do this we use _.merge() on duplicate keys the second passed
+         // object wins the tie
+         var mergedCol = _.merge(origCol, c);
+         c = mergedCol;
 
          var f = CurrentObject.fieldByID(c.fieldID);
          if (!f) return;

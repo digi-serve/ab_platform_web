@@ -44,6 +44,10 @@ module.exports = class ABViewDetailComponent extends ABViewDetailComponentCore {
     * @return {obj} UI component
     */
    component(App, idPrefix) {
+      var idBase = "ABViewDetailComponent_" + (idPrefix || "") + this.id;
+      var ids = {
+         component: App.unique(`${idBase}_component`),
+      };
       // setup 'label' of the element
       var detailView = this.detailComponent(),
          field = this.field() || {},
@@ -86,6 +90,7 @@ module.exports = class ABViewDetailComponent extends ABViewDetailComponentCore {
       }
 
       var _ui = {
+         id: ids.component,
          view: "template",
          borderless: true,
          height: height,

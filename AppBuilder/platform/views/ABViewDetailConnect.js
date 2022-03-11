@@ -83,6 +83,9 @@ module.exports = class ABViewDetailConnect extends ABViewDetailConnectCore {
    component(App, idPrefix) {
       let idBase = "ABViewDetailConnect_" + (idPrefix || "") + this.id;
       let baseComp = super.component(App, idBase);
+      var ids = {
+         detail: this.parentDetailComponent()?.id || this.parent.id,
+      };
 
       let addPageComponent = this.addPageTool.component(App, idBase);
 
@@ -95,37 +98,69 @@ module.exports = class ABViewDetailConnect extends ABViewDetailConnectCore {
          });
       };
 
-      // Add plus button in front of template
-      baseComp.ui.template = baseComp.ui.template.replace(
-         "#display#",
-         `${addPageComponent.ui} #display#`
-      );
-
-      // Click to open new data form
-      baseComp.ui.onClick = baseComp.ui.onClick || {};
-      baseComp.ui.onClick["ab-connect-add-new-link"] = (e, id, trg) => {
-         e.stopPropagation();
-
-         // TODO: busy cursor
-
-         let dc;
-         let detail = this.detailComponent();
-         if (detail) dc = detail.datacollection;
-
-         setTimeout(() => {
-            addPageComponent.onClick(dc).then(() => {
-               // TODO: ready cursor
-            });
-         }, 50);
-
-         return false;
+      baseComp.ui.on = {
+         //Add data-cy attribute for Cypress Testing
+         onAfterRender: () => {
+            let columnName = this.field((fld) => {
+               return fld.id == this.settings.fieldId;
+            }).columnName;
+            const dataCy = `detail connected ${columnName} ${this.settings.fieldId} ${ids.detail}`;
+            $$(baseComp.ui.id)?.$view.setAttribute("data-cy", dataCy);
+         },
       };
 
+      // Click to open new data form
+      // addPageComponent.ui.onClick = addPageComponent.ui.onClick || {};
+      let ui = {};
+      if (addPageComponent.ui) {
+         addPageComponent.ui.click = (e, id, trg) => {
+            // e.stopPropagation();
+
+            // TODO: busy cursor
+
+            let dc;
+            let detail = this.detailComponent();
+            if (detail) dc = detail.datacollection;
+
+            setTimeout(() => {
+               addPageComponent.onClick(dc);
+            }, 50);
+
+            return false;
+         };
+
+         ui = {
+            rows: [
+               {
+                  cols: [baseComp.ui, addPageComponent.ui],
+               },
+            ],
+         };
+      } else {
+         ui = baseComp.ui;
+      }
+
       return {
-         ui: baseComp.ui,
+         ui: ui,
 
          init: _init,
-         logic: baseComp.logic,
+         logic: {
+            setValue: (val) => {
+               let vals = [];
+               if (Array.isArray(val)) {
+                  val.forEach((record) => {
+                     vals.push(
+                        `<span class="webix_multicombo_value">${record.text}</span>`
+                     );
+                  });
+               } else {
+                  vals.push(
+                     `<span class="webix_multicombo_value">${val.text}</span>`
+                  );
+               }
+               baseComp.logic.setValue(baseComp.ui.id, vals.join(""));
+            },
+         },
       };
    }
 

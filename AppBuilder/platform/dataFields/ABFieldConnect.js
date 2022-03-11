@@ -57,7 +57,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
     * @method pullRelationValues
     *
     * On the Web client, we want our returned relation values to be
-    * ready for Webix objects that require a .text field.
+    * ready for Webix objects that require a .text and .value field.
     *
     * @param {*} row
     * @return {array}
@@ -70,10 +70,13 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
       if (data && linkedObject) {
          // if this select value is array
-         if (data.map) {
+         if (Array.isArray(data)) {
             selectedData = data.map(function (d) {
                // display label in format
-               if (d) d.text = d.text || linkedObject.displayData(d);
+               if (d) {
+                  d.text = d.text || linkedObject.displayData(d);
+                  d.value = d.text;
+               }
 
                return d;
             });
@@ -81,380 +84,74 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             selectedData = data;
             selectedData.text =
                selectedData.text || linkedObject.displayData(selectedData);
+            selectedData.value = selectedData.text;
          }
       }
 
       return selectedData;
    }
 
-   // return the grid column header definition for this instance of ABFieldConnect
    columnHeader(options) {
       options = options || {};
       const config = super.columnHeader(options);
       const field = this;
       const App = field.AB._App;
 
-      const width = options.width,
-         editable = options.editable;
-
-      config.template = (row) => {
-         if (row.$group) return row[field.columnName];
-
-         const node = document.createElement("div");
-         node.classList.add("connect-data-values");
-         if (typeof width != "undefined") {
-            node.style.marginLeft = width + "px";
-         }
-
-         const domNode = node;
-
-         const multiselect = field.settings.linkType == "many";
-
-         let placeholder = L("Select item");
-         if (multiselect) {
-            placeholder = L("Select items");
-         }
-         let readOnly = false;
-         if (editable != null && !editable) {
-            readOnly = true;
-            placeholder = "";
-         }
-
-         // const domNode = node.querySelector('.list-data-values');
-
-         // get selected values
-         const selectedData = field.pullRelationValues(row);
-
-         // Render selectivity
-         if (!options.skipRenderSelectivity) {
-            field.selectivityRender(
-               domNode,
-               {
-                  multiple: multiselect,
-                  readOnly: readOnly,
-                  editPage: options.editPage,
-                  isLabelHidden: options.isLabelHidden,
-                  additionalText: options.additionalText,
-                  placeholder: placeholder,
-                  data: selectedData,
-               },
-               App,
-               row
-            );
-         }
-
-         return domNode.outerHTML;
-      };
-
-      return config;
-   }
-
-   /*
-    * @function customDisplay
-    * perform any custom display modifications for this field.
-    * @param {object} row
-    *        is the {name=>value} hash of the current row of data.
-    * @param {App} App
-    *        the shared ui App object useful more making globally
-    *			 unique id references.
-    * @param {HtmlDOM} node
-    *        the HTML Dom object for this field's display.
-    * @param {object} options
-    *        a {key=>value} hash of display options
-    *          .editable {bool}  are we able to edit the value?
-    *          .filters {hash}  the where cond to lookup values
-    *          .editPage
-    *          .isLabelHidden
-    *          .additionalText
-    *
-    */
-   customDisplay(row, App, node, options) {
-      options = options || {};
-
-      const isFormView = options.formView != null ? options.formView : false;
-      // sanity check.
-      if (!node) {
-         return;
-      }
-
-      const domNode = node.querySelector(".connect-data-values");
-      if (!domNode) return;
-
-      const multiselect = this.settings.linkType == "many";
-
-      // get selected values
-      const selectedData = this.pullRelationValues(row);
-
-      let placeholder = L("Select item");
-      if (multiselect) {
-         placeholder = L("Select items");
-      }
-      let readOnly = false;
-      if (options.editable != null && options.editable == false) {
-         readOnly = true;
-         placeholder = "";
-      }
-
       if (options.filters == null) {
          options.filters = {};
       }
 
-      // if this field's options are filtered off another field's value we need
-      // to make sure the UX helps the user know what to do.
-      let placeholderReadOnly = null;
-      if (options.filterValue && options.filterKey) {
-         if (!$$(options.filterValue.ui.id)) {
-            // this happens in the Interface Builder when only the single form UI is displayed
-            readOnly = true;
-            placeholderReadOnly = L("Must select item from '{0}' first.", [
-               L("PARENT ELEMENT"),
-            ]);
-         } else {
-            const val = this.getValue($$(options.filterValue.ui.id));
-            if (!val) {
-               // if there isn't a value on the parent select element set this one to readonly and change placeholder text
-               readOnly = true;
-               const label = $$(options.filterValue.ui.id);
-               placeholderReadOnly = L("Must select item from '{0}' first.", [
-                  label.config.label,
-               ]);
-            }
-         }
-      }
+      var multiselect = this.settings.linkType == "many";
 
-      let formId = "";
-      if ($$(domNode).getFormView) {
-         const formNode = $$(domNode).getFormView();
-         if (formNode && formNode.config && formNode.config.abid) {
-            formId = formNode.config.abid;
-         }
-      }
-
-      // Render selectivity
-      this.selectivityRender(
-         domNode,
-         {
-            multiple: multiselect,
-            data: selectedData,
-            placeholder: placeholderReadOnly
-               ? placeholderReadOnly
-               : placeholder,
-            readOnly: readOnly,
-            editPage: options.editPage,
-            isLabelHidden: options.isLabelHidden,
-            additionalText: options.additionalText,
-            dataCy: `${this.key} ${this.columnName} ${this.id} ${formId}`,
-            ajax: {
-               url: "It will call url in .getOptions function", // require
-               minimumInputLength: 0,
-               quietMillis: 250,
-               fetch: async (url, init, queryOptions) => {
-                  // if we are filtering based off another selectivity's value we
-                  // need to do it on fetch each time because the value can change
-                  // copy the filters so we don't add to them every time there is a change
-                  const combineFilters = JSON.parse(
-                     JSON.stringify(options.filters)
-                  );
-
-                  // only add filters if we pass valid value and key
-                  if (
-                     options.filterValue &&
-                     options.filterKey &&
-                     $$(options.filterValue.ui.id)
-                  ) {
-                     // get the current value of the parent select box
-                     const parentVal = this.getValue(
-                        $$(options.filterValue.ui.id)
-                     );
-                     if (parentVal) {
-                        // if there is a value create a new filter rule
-                        const filter = {
-                           key: options.filterKey,
-                           rule: "equals",
-                           value: parentVal[options.filterColumn],
-                        };
-                        combineFilters.rules.push(filter);
-                     }
-                  }
-
-                  this.once("option.data", (options) => {
-                     domNode.selectivity.setOptions({
-                        items: options,
-                     });
-                     domNode.selectivity.close();
-                     domNode.selectivity.open();
-                  });
-
-                  return this.getOptions(
-                     combineFilters,
-                     queryOptions.term,
-                     options.sort
-                  ).then((data) => {
-                     return {
-                        results: data,
-                     };
-                  });
-               },
-            },
-         },
-         App,
-         row
-      );
-
-      if (!domNode.dataset.isListened) {
-         // prevent listen duplicate
-         domNode.dataset.isListened = true;
-
-         // Listen event when selectivity value updates
-         if (domNode && row.id && !isFormView) {
-            domNode.addEventListener(
-               "change",
-               async (/* e */) => {
-                  // update just this value on our current object.model
-                  const values = {};
-                  values[this.columnName] = this.selectivityGet(domNode);
-
-                  // check data does not be changed
-                  if (Object.is(values[this.columnName], row[this.columnName]))
-                     return;
-
-                  // pass empty string because it could not put empty array in REST api
-                  // added check for null because default value of field is null
-                  if (
-                     values[this.columnName] == null ||
-                     values[this.columnName].length == 0
-                  )
-                     values[this.columnName] = "";
-
-                  try {
-                     await this.object.model().update(row.id, values);
-
-                     // update values of relation to display in grid
-                     values[this.relationName()] = values[this.columnName];
-
-                     // update new value to item of DataTable .updateItem
-                     if (values[this.columnName] == "")
-                        values[this.columnName] = [];
-                     if ($$(node) && $$(node).updateItem)
-                        $$(node).updateItem(row.id, values);
-                  } catch (err) {
-                     node.classList.add("webix_invalid");
-                     node.classList.add("webix_invalid_cell");
-
-                     this.AB.notify.developer(err, {
-                        context:
-                           "ABFieldConnect:customDisplay():onChange: Error updating our entry.",
-                        row: row,
-                        values: values,
-                     });
-                  }
-               },
-               false
-            );
-         } else {
-            domNode.addEventListener(
-               "change",
-               (/* e */) => {
-                  if (domNode.clientHeight > 32) {
-                     const item = $$(node);
-                     item.define("height", domNode.clientHeight + 6);
-                     item.resizeChildren();
-                     item.resize();
-                  }
-               },
-               false
-            );
-
-            // add a change listener to the selectivity instance we are filtering our options list by.
-            if (options.filterValue && $$(options.filterValue.ui.id)) {
-               const parentDomNode = $$(
-                  options.filterValue.ui.id
-               ).$view.querySelector(".connect-data-values");
-               parentDomNode.addEventListener(
-                  "change",
-                  (e) => {
-                     const parentVal = this.selectivityGet(parentDomNode);
-                     if (parentVal) {
-                        // if there is a value set allow the user to edit and
-                        // put back the placeholder text to the orignal value
-                        domNode.selectivity.setOptions({
-                           readOnly: false,
-                           placeholder: placeholder,
-                        });
-
-                        // clear any previous value because it could be invalid
-                        // domNode.selectivity.setValue(null);
-
-                        if (domNode.selectivity.getValue()) {
-                           // if we are filtering based off another selectivity's value we
-                           // need to do it on fetch each time because the value can change
-                           // copy the filters so we don't add to them every time there is a change
-                           var combineFilters = JSON.parse(
-                              JSON.stringify(options.filters)
-                           );
-                           // only add filters if we pass valid value and key
-                           if (
-                              options.filterValue &&
-                              options.filterKey &&
-                              $$(options.filterValue.ui.id)
-                           ) {
-                              // get the current value of the parent select box
-                              let parentVal = this.getValue(
-                                 $$(options.filterValue.ui.id)
-                              );
-                              if (parentVal) {
-                                 // if there is a value create a new filter rule
-                                 var filter = {
-                                    key: options.filterKey,
-                                    rule: "equals",
-                                    value: parentVal[options.filterColumn]
-                                 };
-                                 combineFilters.rules.push(filter);
-
-                                 this.getOptions(
-                                    combineFilters,
-                                    "",
-                                    options.sort
-                                 ).then(function(data) {
-                                    var valid = false;
-                                    var values = domNode.selectivity.getValue();
-                                    if (typeof values != "array") {
-                                       values = [values];
-                                    }
-                                    var valueLength = values.length;
-                                    var validVals = 0;
-                                    data.forEach((option) => {
-                                       if (values.indexOf(option.id) > -1) {
-                                          validVals++;
-                                          if (validVals == valueLength) {
-                                             valid = true;
-                                          }
-                                       }
-                                    });
-                                    if (!valid) {
-                                       domNode.selectivity.setValue(null);
-                                    }
-                                 });
-                              }
-                           }
-                        }
-                     } else {
-                        // if there is not a value set make field read only and
-                        // set the placeholder text to a read only version
-                        domNode.selectivity.setOptions({
-                           readOnly: true,
-                           placeholder: placeholderReadOnly,
-                        });
-
-                        // clear any previous value because it could be invalid
-                        domNode.selectivity.setValue(null);
-                     }
-                  },
-                  false
+      config.editor = multiselect ? "multiselect" : "combo";
+      config.editFormat = (value) => {
+         return this.editFormat(value);
+      };
+      config.editParse = (value) => {
+         return this.editParse(value);
+      };
+      config.template = (row) => {
+         var selectedData = this.pullRelationValues(row);
+         var values = [];
+         values.push('<div class="badgeContainer">');
+         if (
+            selectedData &&
+            Array.isArray(selectedData) &&
+            selectedData.length
+         ) {
+            selectedData.forEach((val) => {
+               values.push(
+                  `<div class='webix_multicombo_value'><span>${val.value}</span><!-- span data-uuid="${val.id}" class="webix_multicombo_delete" role="button" aria-label="Remove item"></span --></div>`
+               );
+            });
+            if (selectedData.length > 1) {
+               values.push(
+                  `<span class="webix_badge selectivityBadge">${selectedData.length}</span>`
                );
             }
+         } else if (selectedData.value) {
+            values.push(
+               `<div class='webix_multicombo_value'><span>${selectedData.value}</span><!-- span data-uuid="${selectedData.id}" class="webix_multicombo_delete" role="button" aria-label="Remove item"></span --></div>`
+            );
+         } else {
+            return "";
          }
+         values.push("</div>");
+         return values.join("");
+      };
+      config.suggest = {
+         button: true,
+         on: {
+            onBeforeShow: function () {
+               field.getAndPopulateOptions(this);
+            },
+         },
+      };
+      if (multiselect) {
+         config.suggest.view = "checksuggest";
       }
+
+      return config;
    }
 
    /*
@@ -470,17 +167,8 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
    ////       are these values present when this Object is instanciated? Can't we just pass these into the
    ////       object constructor and have it internally track these things?
    customEdit(row, App, node) {
-      if (this.settings.linkType == "many") {
-         const domNode = node.querySelector(".connect-data-values");
-
-         if (domNode.selectivity != null) {
-            // Open selectivity
-            domNode.selectivity.open();
-            return false;
-         }
-         return false;
-      }
-      return false;
+      // var selectedData = this.pullRelationValues(row);
+      // this._selectedData = selectedData;
    }
 
    /*
@@ -573,10 +261,12 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             this.settings.linkType == "many" &&
             this.settings.linkViaType == "one"
          ) {
-            where.rules.push({
-               key: linkedCol.id,
-               rule: "is_null",
-            });
+            // Mar 8, 2022 I (James) removed this because we need these options
+            // to appear so we can put a checkbox next to them with the new UI
+            // where.rules.push({
+            //    key: linkedCol.id,
+            //    rule: "is_null",
+            // });
             // where[linkedCol.columnName] = null;
          }
          // 1:1
@@ -591,7 +281,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                // newRule[linkedCol.id] = { 'haveNoRelation': 0 };
                where.rules.push({
                   key: linkedCol.id,
-                  rule: "haveNoRelation",
+                  rule: "have_no_relation",
                });
             }
             // 1:1 - get data that's only empty relation value by query null value from link table
@@ -619,7 +309,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                if (storedOptions) {
                   // immediately respond with our stored options.
                   this._options = storedOptions;
-                  return respond(storedOptions);
+                  return respond(this._options);
                }
             })
             .then(async () => {
@@ -637,6 +327,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                   // populate display text
                   (this._options || []).forEach((opt) => {
                      opt.text = linkedObj.displayData(opt);
+                     opt.value = opt.text;
                   });
 
                   this.AB.Storage.set(storageID, this._options);
@@ -656,32 +347,213 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       });
    }
 
+   editFormat(value) {
+      if (!value) return "";
+      let vals = [];
+      if (Array.isArray(value)) {
+         value.forEach((val) => {
+            if (typeof val == "object") {
+               vals.push(val.id);
+            } else {
+               let itemObj = this.getItemFromVal(val);
+               vals.push(itemObj.id);
+            }
+         });
+      } else {
+         if (typeof value == "object") {
+            vals.push(value.id);
+         } else {
+            let itemObj = this.getItemFromVal(value);
+            if (itemObj && itemObj.id) {
+               vals.push(itemObj.id);
+            }
+         }
+      }
+      return vals.join();
+   }
+
+   editParse(value) {
+      var multiselect = this.settings.linkType == "many";
+      if (multiselect) {
+         let returnVals = [];
+         let vals = value.split(",");
+         vals.forEach((val) => {
+            returnVals.push(val);
+         });
+         return returnVals;
+      } else {
+         let item = this.getItemFromVal(value);
+         return item;
+      }
+   }
+
+   getAndPopulateOptions(editor, options, field, form) {
+      let theEditor = editor;
+
+      let combineFilters = {};
+      if (options && options.filterValue && options.filterValue.config.id) {
+         let parentVal = $$(options.filterValue.config.id).getValue();
+         if (parentVal) {
+            // if we are filtering based off another selectivity's value we
+            // need to do it on fetch each time because the value can change
+            // copy the filters so we don't add to them every time there is a change
+            combineFilters = JSON.parse(JSON.stringify(options.filters));
+
+            // if there is a value create a new filter rule
+            let filter = {
+               key: options.filterKey,
+               rule: "equals",
+               value: parentVal,
+            };
+            combineFilters.rules.push(filter);
+         }
+      }
+
+      this.once("option.data", (data) => {
+         this.populateOptions(theEditor, data, field, form, true);
+      });
+      this.getOptions(combineFilters, "").then((data) => {
+         this.populateOptions(theEditor, data, field, form, false);
+      });
+   }
+
+   populateOptions(theEditor, data, field, form, addCy) {
+      theEditor.blockEvent();
+      theEditor.getList().clearAll();
+      theEditor.getList().define("data", data);
+      if (addCy) {
+         this.populateOptionsDataCy(theEditor, field, form);
+      }
+      if (theEditor.getValue && theEditor.getValue()) {
+         theEditor.setValue(theEditor.getValue());
+         // } else if (this._selectedData && this._selectedData.length) {
+         //    theEditor.setValue(this.editFormat(this._selectedData));
+      }
+      theEditor.unblockEvent();
+   }
+
+   populateOptionsDataCy(theEditor, field, form) {
+      // Add data-cy attributes
+      if (theEditor.getList) {
+         if (!theEditor.getPopup) return;
+         var popup = theEditor.getPopup();
+         if (!popup) return;
+         theEditor.getList().data.each((option) => {
+            if (!option) return;
+            var node = popup.$view.querySelector(
+               "[webix_l_id='" + option.id + "']"
+            );
+            if (!node) return;
+            node.setAttribute(
+               "data-cy",
+               `${field.key} options ${option.id} ${field.id} ${form.id}`
+            );
+         });
+      }
+   }
+
+   getItemFromVal(val) {
+      let item;
+      let options = this._options || [];
+      if (options.length > 0) {
+         for (let i = 0; i < options.length; i++) {
+            if (
+               this.indexField &&
+               options[i][this.indexField.columnName] == val
+            ) {
+               item = options[i];
+               break;
+            } else if (
+               this.indexField2 &&
+               options[i][this.indexField2.columnName] == val
+            ) {
+               item = options[i];
+               break;
+            } else {
+               if (options[i].id == val) {
+                  item = options[i];
+                  break;
+               }
+            }
+         }
+         return item;
+      } else {
+         return "";
+      }
+   }
+
    getValue(item) {
-      const domNode = item.$view.querySelector(".connect-data-values");
-      const values = this.selectivityGet(domNode);
-      return values;
+      var multiselect = this.settings.linkType == "many";
+      if (multiselect) {
+         let vals = [];
+         if (item.getValue()) {
+            let val = item.getValue().split(",");
+            val.forEach((record) => {
+               vals.push(item.getList().getItem(record));
+            });
+         }
+         return vals;
+      } else {
+         if (item.getValue()) {
+            return item.getList().getItem(item.getValue());
+         } else {
+            return "";
+         }
+      }
    }
 
    setValue(item, rowData) {
       if (!item) return;
-
       // if (AB.isEmpty(rowData)) return; removed because sometimes we will
       // want to set this to empty
+      let val = this.pullRelationValues(rowData);
+      // put in current values as options so we can display them before
+      // the rest of the options are fetched when field is clicked
+      if (item.getList && item.getList().count() == 0) {
+         item.getList().define("data", val);
+      }
+      // this allows the form to clear itself it
+      // its settings are asking to clear on load
+      setTimeout(function () {
+         item.setValue(val.id);
+      }, 50);
+   }
 
-      const val = this.pullRelationValues(rowData);
+   /**
+    * @method pullRecordRelationValues
+    *
+    * On the Web client, we want our returned relation values to be
+    * ready for Webix objects that require a .text and .value field.
+    *
+    * @param {*} row
+    * @return {array}
+    */
+   pullRecordRelationValues(record) {
+      var selectedData = [];
 
-      // get selectivity dom
-      const domSelectivity = item.$view.querySelector(".connect-data-values");
+      var data = record;
+      var linkedObject = this.datasourceLink;
 
-      if (domSelectivity) {
-         // set value to selectivity
-         this.selectivitySet(domSelectivity, val);
+      if (data && linkedObject) {
+         // if this select value is array
+         if (Array.isArray(data)) {
+            selectedData = data.map(function (d) {
+               // display label in format
+               if (d) {
+                  d.text = d.text || linkedObject.displayData(d);
+                  d.value = d.text;
+               }
 
-         if (domSelectivity.clientHeight > 32) {
-            item.define("height", domSelectivity.clientHeight + 6);
-            item.resizeChildren();
-            item.resize();
+               return d;
+            });
+         } else if (data.id || data.uuid) {
+            selectedData = data;
+            selectedData.text =
+               selectedData.text || linkedObject.displayData(selectedData);
+            selectedData.value = selectedData.text;
          }
       }
+
+      return selectedData;
    }
 };
