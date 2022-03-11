@@ -1,144 +1,9 @@
-var ABFieldConnectCore = require("../../core/dataFields/ABFieldConnectCore");
-var ABFieldUserCore = require("../../core/dataFields/ABFieldUserCore");
-var ABFieldComponent = require("./ABFieldComponent");
-
-let L = (...params) => AB.Multilingual.label(...params);
-
-var ids = {
-   editable: "ab-user-editable",
-   isMultiple: "ab-user-multiple-option",
-   isCurrentUser: "ab-user-current-user-option",
-   isShowProfileImage: "ab-user-show-profile-image-option",
-   isShowUsername: "ab-user-show-username-option",
-};
-
-/**
- * ABFieldUserComponent
- *
- * Defines the UI Component for this Data Field.  The ui component is responsible
- * for displaying the properties editor, populating existing data, retrieving
- * property values, etc.
- */
-var ABFieldUserComponent = new ABFieldComponent({
-   fieldDefaults: ABFieldUserCore.defaults(),
-
-   elements: function (App, field) {
-      ids = field.idsUnique(ids, App);
-
-      return [
-         {
-            view: "checkbox",
-            name: "isMultiple",
-            id: ids.isMultiple,
-            disallowEdit: true,
-            labelRight: L("Allow multiple users"),
-            labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
-         },
-         {
-            view: "checkbox",
-            name: "isCurrentUser",
-            id: ids.isCurrentUser,
-            labelRight: L("Default value as current user"),
-            labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
-            on: {
-               onChange: function (newValue, oldValue) {
-                  if (newValue == 0) {
-                     $$(ids.editable).setValue(1);
-                     $$(ids.editable).hide();
-                  } else {
-                     $$(ids.editable).setValue(1);
-                     $$(ids.editable).show();
-                  }
-               },
-            },
-         },
-         {
-            view: "checkbox",
-            name: "editable",
-            hidden: true,
-            id: ids.editable,
-            labelRight: L("Editable"),
-            labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
-         },
-         {
-            view: "checkbox",
-            name: "isShowProfileImage",
-            id: ids.isShowProfileImage,
-            labelRight: L("Show Profile Image"),
-            labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
-         },
-         {
-            view: "checkbox",
-            name: "isShowUsername",
-            id: ids.isShowUsername,
-            labelRight: L("Show Username"),
-            labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
-         },
-      ];
-   },
-
-   // defaultValues: the keys must match a .name of your elements to set it's default value.
-   defaultValues: ABFieldUserCore.defaultValues(),
-
-   // rules: basic form validation rules for webix form entry.
-   // the keys must match a .name of your .elements for it to apply
-   rules: {
-      // 'textDefault':webix.rules.isNotEmpty,
-      // 'supportMultilingual':webix.rules.isNotEmpty
-   },
-
-   // include additional behavior on default component operations here:
-   // The base routines will be processed first, then these.  Any results
-   // from the base routine, will be passed on to these:
-   //    @param {obj} ids  the list of ids used to generate the UI.  your
-   //               provided .elements will have matching .name keys
-   //               to access them here.
-   //  @param {obj} values the current set of values provided for this instance
-   //                  of ABField:
-   //               {
-   //                id:'',         // if already .saved()
-   //                   label:'',
-   //                   columnName:'',
-   //                settings:{
-   //                   showIcon:'',
-   //
-   //                   your element key=>values here
-   //                }
-   //               }
-   //
-   //       .clear(ids)  : reset the display to an empty state
-   //       .isValid(ids, isValid): perform validation on the current editor values
-   //       .populate(ids, values) : populate the form with your current settings
-   //       .show(ids)   : display the form in the editor
-   //       .values(ids, values) : return the current values from the form
-   logic: {},
-
-   // perform any additional setup actions here.
-   // @param {obj} ids  the hash of id values for all the current form elements.
-   //              it should have your elements + the default Header elements:
-   //                .label, .columnName, .fieldDescription, .showIcon
-   init: function (ids) {
-      // want to hide the description? :
-      // $$(ids.fieldDescription).hide();
-   },
-});
+const ABFieldConnectCore = require("../../core/dataFields/ABFieldConnectCore");
+const ABFieldUserCore = require("../../core/dataFields/ABFieldUserCore");
 
 module.exports = class ABFieldUser extends ABFieldUserCore {
    constructor(values, object, fieldDefaults) {
       super(values, object, fieldDefaults);
-   }
-
-   /**
-    * @function propertiesComponent
-    *
-    * return a UI Component that contains the property definitions for this Field.
-    *
-    * @param {App} App the UI App instance passed around the Components.
-    * @param {stirng} idBase
-    * @return {Component}
-    */
-   static propertiesComponent(App, idBase) {
-      return ABFieldUserComponent.component(App, idBase);
    }
 
    ///
@@ -148,7 +13,7 @@ module.exports = class ABFieldUser extends ABFieldUserCore {
    async save() {
       // Add new
       if (this.id == null) {
-         var SiteUser = this.AB.objectUser();
+         const SiteUser = this.AB.objectUser();
          const Defaults = ABFieldUserCore.defaults();
 
          this.settings.linkObject = SiteUser.id;
@@ -171,7 +36,7 @@ module.exports = class ABFieldUser extends ABFieldUserCore {
          //       connection.
          //       However, the SiteUser will see the data as a ABFieldConnect
          //       connection
-         let linkCol = SiteUser.fieldNew({
+         const linkCol = SiteUser.fieldNew({
             key: ABFieldConnectCore.defaults().key,
             columnName: this.object.tableName,
             label: this.object.label,
@@ -295,7 +160,7 @@ module.exports = class ABFieldUser extends ABFieldUserCore {
    // }
 
    setValue(item, rowData) {
-      var val = rowData[this.columnName];
+      let val = rowData[this.columnName];
       // Select "[Current user]" to update
       if (val == "ab-current-user") val = this.AB.Account.username();
 
@@ -306,7 +171,7 @@ module.exports = class ABFieldUser extends ABFieldUserCore {
 
    getUsers() {
       return this.AB.Account.userList().map((u) => {
-         var result = {
+         const result = {
             id: u.username,
             image: u.image_id,
          };

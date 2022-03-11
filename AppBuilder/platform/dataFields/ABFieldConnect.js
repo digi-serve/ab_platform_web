@@ -1,6 +1,6 @@
-var ABFieldConnectCore = require("../../core/dataFields/ABFieldConnectCore");
+const ABFieldConnectCore = require("../../core/dataFields/ABFieldConnectCore");
 
-let L = (...params) => AB.Multilingual.label(...params);
+const L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABFieldConnect extends ABFieldConnectCore {
    constructor(values, object, fieldDefaults) {
@@ -39,10 +39,10 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
       // Now we need to remove our linked Object->field
 
-      var linkObject = this.datasourceLink;
+      const linkObject = this.datasourceLink;
       if (!linkObject) return Promise.resolve(); // already notified
 
-      var linkField = this.fieldLink;
+      const linkField = this.fieldLink;
       if (!linkField) return Promise.resolve(); // already notified
 
       // destroy linked field
@@ -63,10 +63,10 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
     * @return {array}
     */
    pullRelationValues(row) {
-      var selectedData = [];
+      let selectedData = [];
 
-      var data = super.pullRelationValues(row);
-      var linkedObject = this.datasourceLink;
+      const data = super.pullRelationValues(row);
+      const linkedObject = this.datasourceLink;
 
       if (data && linkedObject) {
          // if this select value is array
@@ -93,15 +93,13 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
    columnHeader(options) {
       options = options || {};
-
-      var field = this;
+      const config = super.columnHeader(options);
+      const field = this;
+      const App = field.AB._App;
 
       if (options.filters == null) {
          options.filters = {};
       }
-
-      var config = super.columnHeader(options);
-      var App = App;
 
       var multiselect = this.settings.linkType == "many";
 
@@ -187,7 +185,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
    }
 
    detailComponent() {
-      var detailComponentSetting = super.detailComponent();
+      const detailComponentSetting = super.detailComponent();
 
       detailComponentSetting.common = () => {
          return {
@@ -206,13 +204,13 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
     */
    getOptions(where, term, sort) {
       return new Promise((resolve, reject) => {
-         var haveResolved = false;
+         let haveResolved = false;
          // {bool}
          // have we already passed back a result?
 
-         var respond = (options) => {
+         const respond = (options) => {
             // filter the raw lookup with the provided search term
-            options = options.filter(function (item) {
+            options = options.filter((item) => {
                if (item.text.toLowerCase().includes(term.toLowerCase())) {
                   return true;
                }
@@ -245,18 +243,18 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          // if options was cached
          // if (this._options != null) return resolve(this._options);
 
-         var linkedObj = this.datasourceLink;
+         const linkedObj = this.datasourceLink;
 
          // System could not found the linked object - It may be deleted ?
          if (linkedObj == null) throw new Error("No linked object");
 
-         var linkedCol = this.fieldLink;
+         const linkedCol = this.fieldLink;
 
          // System could not found the linked field - It may be deleted ?
          if (linkedCol == null) throw new Error("No linked column");
 
          // Get linked object model
-         var linkedModel = linkedObj.model();
+         const linkedModel = linkedObj.model();
 
          // M:1 - get data that's only empty relation value
          if (
@@ -297,15 +295,17 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             }
          }
 
-         var storageID = `${this.id}-${JSON.stringify(where)}`;
+         const storageID = `${this.id}-${JSON.stringify(where)}`;
 
          Promise.resolve()
+            // TODO: debug the cached data + response so the droplist can display
+            // updated data.
             .then(async () => {
                // Get Local Storage
 
                // We store the .findAll() results locally and return that for a
                // quick response:
-               var storedOptions = await this.AB.Storage.get(storageID);
+               const storedOptions = await this.AB.Storage.get(storageID);
                if (storedOptions) {
                   // immediately respond with our stored options.
                   this._options = storedOptions;
@@ -315,7 +315,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             .then(async () => {
                try {
                   // Pull linked object data
-                  var result = await linkedModel.findAll({
+                  const result = await linkedModel.findAll({
                      where: where,
                      sort: sort,
                      populate: false,

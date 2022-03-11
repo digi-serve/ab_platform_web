@@ -1,6 +1,6 @@
 const ABFieldNumberCore = require("../../core/dataFields/ABFieldNumberCore");
 
-var INIT_EDITOR = false;
+let INIT_EDITOR = false;
 // {bool} INIT_EDITOR
 // Transition code between previous Framework and current.
 // we now need to wait until webix is declared or accessible globally.
@@ -19,18 +19,6 @@ module.exports = class ABFieldNumber extends ABFieldNumberCore {
       }
       super(values, object);
    }
-   /*
-    * @function propertiesComponent
-    *
-    * return a UI Component that contains the property definitions for this Field.
-    *
-    * @param {App} App the UI App instance passed around the Components.
-    * @param {stirng} idBase
-    * @return {Component}
-    */
-   // static propertiesComponent(App, idBase) {
-   //    return ABFieldNumberComponent.component(App, idBase);
-   // }
 
    ///
    /// Working with Actual Object Values:
@@ -47,12 +35,12 @@ module.exports = class ABFieldNumber extends ABFieldNumberCore {
     */
    // return the grid column header definition for this instance of ABFieldNumber
    columnHeader(options) {
-      var config = super.columnHeader(options);
+      const config = super.columnHeader(options);
 
       config.editor = "number"; // [edit_type] simple inline editing.
 
       config.format = (d) => {
-         var rowData = {};
+         const rowData = {};
          rowData[this.columnName] = d;
 
          return this.format(rowData);
@@ -75,7 +63,7 @@ module.exports = class ABFieldNumber extends ABFieldNumberCore {
    }
 
    detailComponent() {
-      var detailComponentSetting = super.detailComponent();
+      const detailComponentSetting = super.detailComponent();
 
       detailComponentSetting.common = () => {
          return {

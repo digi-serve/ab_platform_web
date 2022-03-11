@@ -155,7 +155,7 @@ class ABViewGridComponent extends ABViewComponent {
 
       if (!L) {
          L = (...params) => {
-            return AB.Multilingual.label(...params);
+            return this.AB.Multilingual.label(...params);
          };
       }
    }

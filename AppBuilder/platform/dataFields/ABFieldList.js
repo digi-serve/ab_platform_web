@@ -1,6 +1,6 @@
-var ABFieldListCore = require("../../core/dataFields/ABFieldListCore");
+const ABFieldListCore = require("../../core/dataFields/ABFieldListCore");
 
-let L = (...params) => AB.Multilingual.label(...params);
+const L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABFieldList extends ABFieldListCore {
    constructor(values, object) {
@@ -17,14 +17,14 @@ module.exports = class ABFieldList extends ABFieldListCore {
       return super.save().then(() => {
          // Now we want to clear out any entries that had values == to item removed from our list:
          if (this.pendingDeletions.length) {
-            var model = this.object.model();
+            const model = this.object.model();
 
             if (this.settings.isMultiple == true) {
                // find all the entries that have one of the deleted values:
                // use Promise to prevent issues with data being loaded before it is deleted on client side
                return new Promise((resolve, reject) => {
-                  var numDone = 0;
-                  var numToDo = 0;
+                  let numDone = 0;
+                  let numToDo = 0;
 
                   model
                      .findAll({})
@@ -35,7 +35,7 @@ module.exports = class ABFieldList extends ABFieldListCore {
                         list.forEach((item) => {
                            if (Array.isArray(item[this.columnName])) {
                               // get fields not in pendingDeletions
-                              var remainingFields = item[
+                              let remainingFields = item[
                                  this.columnName
                               ].filter((i) => {
                                  return (
@@ -53,11 +53,11 @@ module.exports = class ABFieldList extends ABFieldListCore {
                                  if (remainingFields.length == 0) {
                                     remainingFields = "";
                                  }
-                                 var value = {};
+                                 const value = {};
                                  value[this.columnName] = remainingFields;
                                  model.update(item.id, value).then(() => {
                                     // if ($$(node) && $$(node).updateItem)
-                                    // 	$$(node).updateItem(value.id, value);
+                                    //    $$(node).updateItem(value.id, value);
                                     numDone++;
                                     if (numDone >= numToDo) {
                                        resolve();
@@ -74,10 +74,10 @@ module.exports = class ABFieldList extends ABFieldListCore {
                });
             } else {
                // find all the entries that have one of the deleted values:
-               var where = {};
+               const where = {};
                where[this.columnName] = this.pendingDeletions;
                return new Promise((resolve, reject) => {
-                  var numDone = 0;
+                  let numDone = 0;
 
                   model
                      .findAll(where)
@@ -88,8 +88,8 @@ module.exports = class ABFieldList extends ABFieldListCore {
                         // for each one, set the value to ''
                         // NOTE: jQuery ajax routines filter out null values, so we can't
                         // set them to null. :(
-                        // var numDone = 0;
-                        var value = {};
+                        // const numDone = 0;
+                        const value = {};
                         value[this.columnName] = "";
 
                         list.forEach((item) => {
@@ -112,7 +112,7 @@ module.exports = class ABFieldList extends ABFieldListCore {
    }
 
    isValid() {
-      var validator = super.isValid();
+      const validator = super.isValid();
 
       // validator.addError('columnName', L('ab.validation.object.name.unique', 'Field columnName must be unique (#name# already used in this Application)').replace('#name#', this.name) );
 
@@ -127,9 +127,9 @@ module.exports = class ABFieldList extends ABFieldListCore {
    columnHeader(options) {
       options = options || {};
 
-      var config = super.columnHeader(options);
-      var field = this;
-      var App = App;
+      const config = super.columnHeader(options);
+      const field = this;
+      const App = field.AB._App;
 
       var formClass = "";
       var placeHolder = "";
@@ -219,7 +219,7 @@ module.exports = class ABFieldList extends ABFieldListCore {
     * perform any custom display modifications for this field.
     * @param {object} row is the {name=>value} hash of the current row of data.
     * @param {App} App the shared ui App object useful more making globally
-    *					unique id references.
+    *             unique id references.
     * @param {HtmlDOM} node  the HTML Dom object for this field's display.
     */
    customDisplay(row, App, node, options) {
@@ -267,12 +267,12 @@ module.exports = class ABFieldList extends ABFieldListCore {
     *
     * @param {object} row is the {name=>value} hash of the current row of data.
     * @param {App} App the shared ui App object useful more making globally
-    *					unique id references.
+    *             unique id references.
     * @param {HtmlDOM} node  the HTML Dom object for this field's display.
     */
-   customEdit(row, App, node) {
-      return super.customEdit(row, App, node);
-   }
+   // customEdit(row, App, node) {
+   //    return super.customEdit(row, App, node);
+   // }
 
    /*
     * @funciton formComponent
@@ -286,7 +286,7 @@ module.exports = class ABFieldList extends ABFieldListCore {
    formComponent() {
       // NOTE: what is being returned here needs to mimic an ABView CLASS.
       // primarily the .common() and .newInstance() methods.
-      var formComponentSetting = super.formComponent();
+      const formComponentSetting = super.formComponent();
 
       // .common() is used to create the display in the list
       formComponentSetting.common = () => {
@@ -308,7 +308,7 @@ module.exports = class ABFieldList extends ABFieldListCore {
    }
 
    detailComponent() {
-      var detailComponentSetting = super.detailComponent();
+      const detailComponentSetting = super.detailComponent();
 
       detailComponentSetting.common = () => {
          return {

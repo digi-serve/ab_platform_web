@@ -16,11 +16,50 @@ export default class ABViewComponent extends ClassUI {
       //   eventName: {string} the event key we are listening for
       //   listener:  {fn} the function to call on
       // }
+
+      this.CurrentObjectID = null;
+      // {string}
+      // the ABObject.id of the object we are working with.
+
+      this.CurrentDatacollectionID = null;
+      // {string}
+      // the ABDataCollection.id of the DC we are working with
+   }
+
+   /**
+    * @method CurrentObject()
+    * A helper to return the current ABObject we are working with.
+    * @return {ABObject}
+    */
+   get CurrentObject() {
+      return this.AB.objectByID(this.CurrentObjectID);
+   }
+   /**
+    * @method CurrentDatacollection()
+    * A helper to return the current ABDataCollection we are working with.
+    * @return {ABDataCollection}
+    */
+   get CurrentDatacollection() {
+      return this.AB.datacollectionByID(this.CurrentDatacollectionID);
+   }
+
+   /**
+    * @method datacollectionLoad
+    *
+    * @param datacollection {ABDatacollection}
+    */
+   datacollectionLoad(datacollection) {
+      this.CurrentDatacollectionID = datacollection.id;
+   }
+
+   objectLoad(object) {
+      this.CurrentObjectID = object.id;
    }
 
    /**
     * @method eventAdd()
-    * Create a new listener on an object.
+    * Create a new listener on an object. Note, this will prevent multiple
+    * listeners being applied to the same Object.
     * @param {object} evt
     *        The definition of the event we are adding:
     *        {

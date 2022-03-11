@@ -25,17 +25,21 @@ import cssFontAwesome from "./styles/font-awesome.min.css";
 import Bootstrap from "./init/Bootstrap.js";
 // Bootstrap is responsible for initializing the platform.
 
+// Import webix components
+const gantt = require("./js/webix/components/gantt/gantt.min.js");
+import ganttCSS from "./js/webix/components/gantt/gantt.css";
+
+import kanban from "./js/webix/components/kanban/kanban.js";
+import pivot from "./js/webix/components/pivot/pivot.js";
+import querybuilder from "./js/webix/components/querybuilder/querybuilder.js";
+import report from "./js/webix/components/reports/reports.js";
+
 // Make sure webix is global object
 if (!window.webix) {
    window.webix = webix;
 }
 
-// Import webix components
-import gantt from "./js/webix/components/gantt/gantt.js";
-import kanban from "./js/webix/components/kanban/kanban.js";
-import pivot from "./js/webix/components/pivot/pivot.js";
-import querybuilder from "./js/webix/components/querybuilder/querybuilder.js";
-import report from "./js/webix/components/reports/reports.js";
+window.gantt = gantt;
 
 Bootstrap.init().catch((err) => {
    var errorMSG = err.toString();
@@ -48,3 +52,5 @@ Bootstrap.init().catch((err) => {
 
    Bootstrap.error(err);
 });
+
+export default Bootstrap;

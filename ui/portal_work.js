@@ -286,7 +286,7 @@ class PortalWork extends ClassUI {
                         (
                            menu.abApplication
                               .pages()
-                              .filter((p) => p.getUserAccess() > 0) || []
+                              .filter((p) => p.getUserAccess?.() > 0) || []
                         ).length > 0
                      ) {
                         this.AppState.lastSelectedApp = menu.abApplication.id;
@@ -352,7 +352,7 @@ class PortalWork extends ClassUI {
             var allPlaceholders = [];
             allApplications.forEach((app) => {
                (app.pages() || []).forEach((page) => {
-                  if (page.getUserAccess() == 0) return;
+                  if (page.getUserAccess?.() == 0) return;
                   allPlaceholders.push({
                      id: this.pageID(page),
                      template: `Page: ${page.label || page.name}`,
@@ -410,7 +410,7 @@ class PortalWork extends ClassUI {
 
             allApplications.forEach((app) => {
                (app.pages() || []).forEach((page) => {
-                  if (page.getUserAccess() == 0) return;
+                  if (page.getUserAccess?.() == 0) return;
                   if (!DefaultPage || page.id != DefaultPage.id) {
                      var cont = new ClassUIPage(
                         this.pageID(page),
@@ -525,7 +525,7 @@ class PortalWork extends ClassUI {
 
       // Build a Menu Button for each of the ABApplication Root Pages
       (row.abApplication.pages() || []).forEach((p) => {
-         if (p.getUserAccess() == 0) return;
+         if (p.getUserAccess?.() == 0) return;
          // Decide if current Page button should look selected.
          var active = "";
          if (firstPage || p.id == activePageID) {

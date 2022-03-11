@@ -126,12 +126,6 @@ class PortalAuthLoginResetPassword extends ClassUI {
                               {},
                            ],
                         },
-                        {
-                           id: "portal_auth_login_form_errormsg",
-                           view: "template",
-                           css: "webix_control",
-                           height: 32,
-                        },
                      ],
                   },
                   {},
