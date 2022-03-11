@@ -123,9 +123,7 @@ module.exports = class ABViewDetailConnect extends ABViewDetailConnectCore {
             if (detail) dc = detail.datacollection;
 
             setTimeout(() => {
-               addPageComponent.onClick(dc).then(() => {
-                  // TODO: ready cursor
-               });
+               addPageComponent.onClick(dc);
             }, 50);
 
             return false;

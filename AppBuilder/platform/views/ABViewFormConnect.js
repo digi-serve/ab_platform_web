@@ -927,9 +927,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
 
                let dc = form.datacollection;
 
-               addPageComponent.onClick(dc).then(() => {
-                  // component.logic.formReady($form);
-               });
+               addPageComponent.onClick(dc);
 
                return false;
             },
