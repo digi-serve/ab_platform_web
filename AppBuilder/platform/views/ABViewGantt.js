@@ -52,6 +52,12 @@ class ABViewGanttComponent extends ABViewComponent {
       this.originalStartDate = null;
       this.originalEndDate = null;
 
+      this.pendingAdds = {};
+      // {Promise}  /* id : {Promise} */
+      // In order to prevent a race condition where multiple adds can be
+      // generated on the same item, we catch the repeats and just return
+      // the same data for each.
+
       this.ganttElement = {
          isExistsTask: (taskId) => {
             let localService = $$(this.ids.gantt).getService("local");
@@ -146,7 +152,11 @@ class ABViewGanttComponent extends ABViewComponent {
                            return Promise.resolve([]);
                         }
                         async addTask(obj, index, parent) {
-                           let newTask = await _this.taskAdd(obj);
+                           if (!_this.pendingAdds[obj.id]) {
+                              _this.pendingAdds[obj.id] = _this.taskAdd(obj);
+                           }
+                           let newTask = await _this.pendingAdds[obj.id];
+                           delete _this.pendingAdds[obj.id];
                            return {
                               id: (newTask || {}).id,
                            };
@@ -373,36 +383,38 @@ class ABViewGanttComponent extends ABViewComponent {
       if (!dcTasks) return;
 
       // gantt v 8.1.1
-      // Note: there is a async bug that can happen here.
+      // Note: there is a race condition that can happen here.
       // dataService.tasks() calls the MyBackend.tasks() above which
       // returns a Promise.
       // when you call dcTasks.clearAll() before the promise
       // is resolved, the gantt internally throws an error.
       //
-      // So we remove the .clearAll() here and let the parse()
-      // below populate our list.
-      // dcTasks.clearAll();
+      // So give webix some time to internally complete it's process
+      // before we do .clearAll();
+      setTimeout(() => {
+         dcTasks.clearAll();
 
-      let DC = this.CurrentDatacollection;
-      let gantt_data = {
-         data: DC
-            ? (DC.getData() || []).map((d, index) =>
-                 this.convertFormat(d, index)
-              )
-            : [],
-      };
+         let DC = this.CurrentDatacollection;
+         let gantt_data = {
+            data: DC
+               ? (DC.getData() || []).map((d, index) =>
+                    this.convertFormat(d, index)
+                 )
+               : [],
+         };
 
-      // check required fields before parse
-      if (this.StartDateField && (this.EndDateField || this.DurationField)) {
-         dcTasks.parse(gantt_data);
-      }
+         // check required fields before parse
+         if (this.StartDateField && (this.EndDateField || this.DurationField)) {
+            dcTasks.parse(gantt_data);
+         }
 
-      // Keep original start and end dates for calculate scale to display
-      const currScale = dataService.getScales();
-      this.originalStartDate = currScale.start;
-      this.originalEndDate = currScale.end;
+         // Keep original start and end dates for calculate scale to display
+         const currScale = dataService.getScales();
+         this.originalStartDate = currScale.start;
+         this.originalEndDate = currScale.end;
 
-      this.sort();
+         this.sort();
+      }, 10);
    }
 
    setScale(scale) {
