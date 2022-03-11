@@ -70,7 +70,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
       if (data && linkedObject) {
          // if this select value is array
-         if (data.map) {
+         if (Array.isArray(data)) {
             selectedData = data.map(function (d) {
                // display label in format
                if (d) {
