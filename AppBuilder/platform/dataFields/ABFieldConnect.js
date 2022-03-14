@@ -510,13 +510,13 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       // put in current values as options so we can display them before
       // the rest of the options are fetched when field is clicked
       if (item.getList && item.getList().count() == 0) {
+         if (!Array.isArray(val)) {
+            val = [val];
+         }
          item.getList().define("data", val);
       }
-      // this allows the form to clear itself it
-      // its settings are asking to clear on load
-      setTimeout(function () {
-         item.setValue(val.id);
-      }, 50);
+      item.define("value", val);
+      item.refresh();
    }
 
    /**
