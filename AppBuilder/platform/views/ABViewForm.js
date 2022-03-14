@@ -947,10 +947,11 @@ module.exports = class ABViewForm extends ABViewFormCore {
          displayData: (rowData) => {
             var customFields = this.fieldComponents((comp) => {
                return (
-                  // comp instanceof ABViewFormCustom ||
+                  comp instanceof ABViewFormCustom ||
+                  comp instanceof ABViewFormConnect ||
                   // rich text
-                  comp instanceof ABViewFormTextbox &&
-                  comp.settings.type == "rich"
+                  (comp instanceof ABViewFormTextbox &&
+                     comp.settings.type == "rich")
                );
             });
             // If setTimeout is already scheduled, no need to do anything
@@ -962,6 +963,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
                var customFields = this.fieldComponents((comp) => {
                   return (
                      comp instanceof ABViewFormCustom ||
+                     comp instanceof ABViewFormConnect ||
                      // rich text
                      (comp instanceof ABViewFormTextbox &&
                         comp.settings.type == "rich")
@@ -1023,7 +1025,13 @@ module.exports = class ABViewForm extends ABViewFormCore {
                      if (this._showed) comp.onShow?.();
 
                      // set value to each components
-                     if (f.field()) f.field().setValue($$(comp.ui.id), rowData);
+                     if (f.field()) {
+                        if (comp.ui.inputId) {
+                           f.field().setValue($$(comp.ui.inputId), rowData);
+                        } else {
+                           f.field().setValue($$(comp.ui.id), rowData);
+                        }
+                     }
 
                      comp.logic?.refresh?.(rowData);
                   });
