@@ -203,6 +203,7 @@ class ABViewGridComponent extends ABViewComponent {
          prerender: false,
          editable: settings.isEditable,
          fixedRowHeight: false,
+         height: settings.height || 0,
          editaction: "custom",
          select: selectType,
          footer:
