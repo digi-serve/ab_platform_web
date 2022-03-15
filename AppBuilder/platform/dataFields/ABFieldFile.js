@@ -1,142 +1,10 @@
-var ABFieldFileCore = require("../../core/dataFields/ABFieldFileCore");
-var ABFieldComponent = require("./ABFieldComponent");
+const ABFieldFileCore = require("../../core/dataFields/ABFieldFileCore");
 
-let L = (...params) => AB.Multilingual.label(...params);
-
-/**
- * ABFieldFileComponent
- *
- * Defines the UI Component for this Data Field.  The ui component is responsible
- * for displaying the properties editor, populating existing data, retrieving
- * property values, etc.
- *
- * @param {obj} App  the current Component Application instance for the current UI.
- * @return {obj} the Component object.
- */
-var ABFieldFileComponent = new ABFieldComponent({
-   fieldDefaults: ABFieldFileCore.defaults(),
-
-   elements: (App, field) => {
-      var ids = {
-         fileSize: "",
-         fileType: "",
-      };
-      ids = field.idsUnique(ids, App);
-
-      return [
-         {
-            cols: [
-               {
-                  view: "checkbox",
-                  name: "limitFileSize",
-                  labelRight: L("Size (MB)"),
-                  width: 120,
-                  labelWidth: 0,
-                  value: 1,
-                  click: function () {
-                     if (this.getValue()) $$(ids.fileSize).enable();
-                     else $$(ids.fileSize).disable();
-                  },
-               },
-               {
-                  view: "counter",
-                  name: "fileSize",
-                  id: ids.fileSize,
-               },
-            ],
-         },
-         {
-            cols: [
-               {
-                  view: "checkbox",
-                  name: "limitFileType",
-                  labelRight: L("Type"),
-                  width: 120,
-                  labelWidth: 0,
-                  value: 1,
-                  click: function () {
-                     if (this.getValue()) $$(ids.fileType).enable();
-                     else $$(ids.fileType).disable();
-                  },
-               },
-               {
-                  view: "text",
-                  name: "fileType",
-                  placeholder: L("txt,rtf,doc,docx,..."),
-                  id: ids.fileType,
-               },
-            ],
-         },
-      ];
-   },
-
-   // defaultValues: the keys must match a .name of your elements to set it's default value.
-   defaultValues: ABFieldFileCore.defaultValues(),
-
-   // rules: basic form validation rules for webix form entry.
-   // the keys must match a .name of your .elements for it to apply
-   rules: {
-      // 'textDefault':webix.rules.isNotEmpty,
-      // 'supportMultilingual':webix.rules.isNotEmpty
-   },
-
-   // include additional behavior on default component operations here:
-   // The base routines will be processed first, then these.  Any results
-   // from the base routine, will be passed on to these:
-   // 	@param {obj} ids  the list of ids used to generate the UI.  your
-   //					  provided .elements will have matching .name keys
-   //					  to access them here.
-   //  @param {obj} values the current set of values provided for this instance
-   // 					  of ABField:
-   //					  {
-   //						id:'',			// if already .saved()
-   // 						label:'',
-   // 						columnName:'',
-   //						settings:{
-   //							showIcon:'',
-   //
-   //							your element key=>values here
-   //						}
-   //					  }
-   //
-   // 		.clear(ids)  : reset the display to an empty state
-   // 		.isValid(ids, isValid): perform validation on the current editor values
-   // 		.populate(ids, ABField) : populate the form with your current settings
-   // 		.show(ids)   : display the form in the editor
-   // 		.values(ids, values) : return the current values from the form
-   logic: {
-      clear: (ids) => {
-         $$(ids.fileSize).setValue(0);
-         $$(ids.fileType).setValue("");
-      },
-   },
-
-   // perform any additional setup actions here.
-   // @param {obj} ids  the hash of id values for all the current form elements.
-   //					 it should have your elements + the default Header elements:
-   //						.label, .columnName, .fieldDescription, .showIcon
-   init: function (ids) {
-      // want to hide the description? :
-      // $$(ids.fieldDescription).hide();
-   },
-});
+const L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABFieldFile extends ABFieldFileCore {
    constructor(values, object) {
       super(values, object);
-   }
-
-   /*
-    * @function propertiesComponent
-    *
-    * return a UI Component that contains the property definitions for this Field.
-    *
-    * @param {App} App the UI App instance passed around the Components.
-    * @param {stirng} idBase
-    * @return {Component}
-    */
-   static propertiesComponent(App, idBase) {
-      return ABFieldFileComponent.component(App, idBase);
    }
 
    ///
@@ -144,7 +12,7 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
    ///
 
    isValid() {
-      var validator = super.isValid();
+      const validator = super.isValid();
 
       // validator.addError('columnName', L('ab.validation.object.name.unique', 'Field columnName must be unique (#name# already used in this Application)').replace('#name#', this.name) );
 
@@ -204,17 +72,17 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
    columnHeader(options) {
       options = options || {};
 
-      var config = super.columnHeader(options);
+      const config = super.columnHeader(options);
 
       config.editor = false;
 
-      var editable = options.editable;
+      const editable = options.editable;
 
       // populate our default template:
       config.template = (obj) => {
          if (obj.$group) return this.dataValue(obj);
 
-         var fileDiv = [
+         const fileDiv = [
             '<div class="ab-file-data-field" style="float: left;">',
             '<div class="webix_view ab-file-holder">',
             '<div class="webix_template">',
@@ -245,8 +113,8 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
       }
       options = options || {};
 
-      var typesList = [];
-      var maximumSize = 0;
+      let typesList = [];
+      let maximumSize = 0;
 
       if (this.settings.limitFileType && this.settings.fileType) {
          typesList = this.settings.fileType.split(",");
@@ -259,7 +127,7 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
       // 		// safety check:
       // 		// webix seems to crash if you specify a .container that doesn't exists:
       // 		// Note: when the template is first created, we don't have App.unique()
-      var parentContainer = node.querySelector(".ab-file-holder");
+      const parentContainer = node.querySelector(".ab-file-holder");
       if (parentContainer) {
          parentContainer.innerHTML = "";
          // parentContainer.id = idBase;	// change it to the unique one.
@@ -267,7 +135,7 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
          // 			// use a webix component for displaying the content.
          // 			// do this so I can use the progress spinner
 
-         var webixContainer = webix.ui({
+         const webixContainer = webix.ui({
             view: "template",
             container: parentContainer,
 
@@ -284,15 +152,15 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
          // 			////
 
          if (!options.editable) {
-            var domNode = parentContainer.querySelector(".delete-image");
+            const domNode = parentContainer.querySelector(".delete-image");
             if (domNode) domNode.style.display = "none";
 
             return;
          }
 
-         var url = this.urlUpload(true);
+         const url = this.urlUpload(true);
 
-         var uploader = webix.ui({
+         const uploader = webix.ui({
             view: "uploader",
             apiOnly: true,
             upload: url,
@@ -305,9 +173,9 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
                   node.classList.remove("webix_invalid_cell");
 
                   // verify file type
-                  var acceptableTypes = typesList;
+                  const acceptableTypes = typesList;
                   if (acceptableTypes && acceptableTypes != "") {
-                     var type = item.type.toLowerCase();
+                     const type = item.type.toLowerCase();
                      if (acceptableTypes.indexOf(type) == -1) {
                         webix.message(
                            L("Only [{0}] files are supported", [
@@ -321,7 +189,7 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
                   //verify file size
                   //Convert to MegaBytes
                   if (maximumSize > 0) {
-                     var acceptableSizes = maximumSize * 1000000;
+                     const acceptableSizes = maximumSize * 1000000;
                      if (item.size > acceptableSizes) {
                         webix.message(
                            L("Maximum file size is {0}MB", [maximumSize])
@@ -342,7 +210,7 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
                   webixContainer.hideProgress();
                   // this.showFile(idBase, response.data.uuid);
 
-                  var values = {};
+                  const values = {};
                   values[this.columnName] = {};
                   values[this.columnName].uuid = response.data.uuid;
                   values[this.columnName].filename = item.name;
@@ -414,10 +282,10 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
             title: "",
             message: L("Are you sure you want to remove this file?"),
             callback: async (result) => {
-               var confirmDelete = result ? 1 : 0;
+               const confirmDelete = result ? 1 : 0;
                if (confirmDelete) {
                   // update just this value on our current object.model
-                  var values = {};
+                  const values = {};
                   values[this.columnName] = "";
 
                   if (row.id) {
@@ -446,9 +314,9 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
             },
          });
       } else {
-         let rowData = this.dataValue(row);
+         const rowData = this.dataValue(row);
          if (!rowData || !rowData.uuid) {
-            var uploaderId = node.dataset["uploaderId"],
+            const uploaderId = node.dataset["uploaderId"],
                uploader = $$(uploaderId);
 
             if (uploader && uploader.fileDialog)
@@ -473,7 +341,7 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
    }
 
    detailComponent() {
-      var detailComponentSetting = super.detailComponent();
+      const detailComponentSetting = super.detailComponent();
 
       detailComponentSetting.common = () => {
          return {
@@ -487,14 +355,14 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
    //File Template
 
    fileTemplate(obj, editable) {
-      var iconDisplay = "";
-      var fileDisplay = "display:none;";
-      var fileURL = "";
+      let iconDisplay = "";
+      let fileDisplay = "display:none;";
+      let fileURL = "";
 
-      var value = "";
-      var name = "";
+      let value = "";
+      let name = "";
 
-      let rowData = this.dataValue(obj);
+      const rowData = this.dataValue(obj);
       if (rowData) {
          value = rowData.uuid;
          name = rowData.filename;
@@ -506,7 +374,7 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
          fileURL = "/file/" + value;
       }
 
-      var html = [
+      const html = [
          `<div class="file-data-field-icon" style="text-align: center; height: inherit; display: table-cell; vertical-align: middle; border: 2px dotted #CCC; background: #FFF; border-radius: 10px; font-size: 11px; line-height: 13px; padding: 0 10px; ${iconDisplay}"><i class="fa fa-file fa-2x" style="opacity: 0.6; font-size: 32px; margin-top: 3px; margin-bottom: 5px;"></i>${
             editable ? `<br/>${L("Drag and drop or click here")}` : ""
          }</div>`,
@@ -523,8 +391,8 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
    }
 
    getValue(item, rowData) {
-      var file = item.$view.querySelector(".file-data-field-name");
-      var fileLink = file.querySelector("a");
+      const file = item.$view.querySelector(".file-data-field-name");
+      const fileLink = file.querySelector("a");
 
       return {
          uuid: file.getAttribute("file-uuid"),
@@ -535,10 +403,10 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
    setValue(item, rowData) {
       if (!item) return;
 
-      var domNode = item.$view;
+      const domNode = item.$view;
       if (!domNode) return;
 
-      var val = null;
+      let val = null;
       if (rowData) {
          val = this.dataValue(rowData);
 
@@ -548,12 +416,12 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
          // }
       }
 
-      var fileicon = domNode.querySelector(".file-data-field-icon");
+      const fileicon = domNode.querySelector(".file-data-field-icon");
       if (fileicon) fileicon.style.display = val && val.uuid ? "none" : "block";
 
-      var file = domNode.querySelector(".file-data-field-name");
+      const file = domNode.querySelector(".file-data-field-name");
       if (file) {
-         var fileDeleteIcon = file.querySelector(".ab-delete-photo");
+         const fileDeleteIcon = file.querySelector(".ab-delete-photo");
          if (fileDeleteIcon)
             fileDeleteIcon.style.display = val && val.uuid ? "block" : "none";
 
@@ -561,8 +429,8 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
          if (val && val.uuid) file.setAttribute("file-uuid", val.uuid);
          else file.removeAttribute("file-uuid");
 
-         var fileLink = file.querySelector("a");
-         var fileURL = "/file/" + (val ? val.uuid : "");
+         const fileLink = file.querySelector("a");
+         const fileURL = "/file/" + (val ? val.uuid : "");
          fileLink.href = fileURL;
          fileLink.innerHTML = val ? val.filename : "";
       }

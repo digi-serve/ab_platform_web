@@ -1,6 +1,7 @@
 const ABViewFormCore = require("../../core/views/ABViewFormCore");
 const ABViewFormButton = require("./ABViewFormButton");
 const ABViewFormCustom = require("./ABViewFormCustom");
+const ABViewFormConnect = require("./ABViewFormConnect");
 const ABViewFormComponent = require("./ABViewFormComponent");
 const ABViewFormSelectMultiple = require("./ABViewFormSelectMultiple");
 const ABViewFormTextbox = require("./ABViewFormTextbox");
@@ -671,44 +672,44 @@ module.exports = class ABViewForm extends ABViewFormCore {
       // Pull fields that have validation rules
       var fieldValidations = [];
       var validationUI = [];
-      if (this.datacollection && this.datacollection.datasource) {
-         var object = this.datacollection.datasource;
+      // NOTE: this._currentObject can be set in the KanBan Side Panel
+      var object = this.datacollection?.datasource ?? this._currentObject;
+      if (object) {
          var existsFields = this.fieldComponents();
-         if (object != null) {
-            object.fields().forEach((f) => {
-               var view = existsFields.filter((com) => {
-                  return f.id == com.settings.fieldId;
-               })[0];
 
-               // check to see if field has validation rules
-               if (view && f.settings.validationRules) {
-                  // parse the rules because they were stored as a string
-                  // check if rules are still a string...if so lets parse them
-                  if (typeof f.settings.validationRules === "string") {
-                     f.settings.validationRules = JSON.parse(
-                        f.settings.validationRules
-                     );
-                  }
-                  // there could be more than one so lets loop through and build the UI
-                  f.settings.validationRules.forEach((rule) => {
-                     var Filter = new FilterComplex(
-                        App,
-                        f.columnName + "_" + webix.uid()
-                     );
-                     // add the new ui to an array so we can add them all at the same time
-                     validationUI.push(Filter.ui);
-                     // store the filter's info so we can assign values and settings after the ui is rendered
-                     fieldValidations.push({
-                        filter: Filter,
-                        view: Filter.ids.querybuilder,
-                        columnName: f.columnName,
-                        validationRules: rule.rules,
-                        invalidMessage: rule.invalidMessage,
-                     });
-                  });
+         object.fields().forEach((f) => {
+            var view = existsFields.filter((com) => {
+               return f.id == com.settings.fieldId;
+            })[0];
+
+            // check to see if field has validation rules
+            if (view && f.settings.validationRules) {
+               // parse the rules because they were stored as a string
+               // check if rules are still a string...if so lets parse them
+               if (typeof f.settings.validationRules === "string") {
+                  f.settings.validationRules = JSON.parse(
+                     f.settings.validationRules
+                  );
                }
-            });
-         }
+               // there could be more than one so lets loop through and build the UI
+               f.settings.validationRules.forEach((rule) => {
+                  var Filter = new FilterComplex(
+                     App,
+                     f.columnName + "_" + webix.uid()
+                  );
+                  // add the new ui to an array so we can add them all at the same time
+                  validationUI.push(Filter.ui);
+                  // store the filter's info so we can assign values and settings after the ui is rendered
+                  fieldValidations.push({
+                     filter: Filter,
+                     view: Filter.ids.querybuilder,
+                     columnName: f.columnName,
+                     validationRules: rule.rules,
+                     invalidMessage: rule.invalidMessage,
+                  });
+               });
+            }
+         });
       }
 
       var fieldValidationsHolder = [
@@ -716,6 +717,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
             hidden: true,
             rows: validationUI,
          },
+         // {},
       ];
 
       // an ABViewForm_ is a collection of rows:
@@ -943,6 +945,15 @@ module.exports = class ABViewForm extends ABViewFormCore {
          },
 
          displayData: (rowData) => {
+            var customFields = this.fieldComponents((comp) => {
+               return (
+                  comp instanceof ABViewFormCustom ||
+                  comp instanceof ABViewFormConnect ||
+                  // rich text
+                  (comp instanceof ABViewFormTextbox &&
+                     comp.settings.type == "rich")
+               );
+            });
             // If setTimeout is already scheduled, no need to do anything
             if (this.timerId) {
                return;
@@ -952,6 +963,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
                var customFields = this.fieldComponents((comp) => {
                   return (
                      comp instanceof ABViewFormCustom ||
+                     comp instanceof ABViewFormConnect ||
                      // rich text
                      (comp instanceof ABViewFormTextbox &&
                         comp.settings.type == "rich")
@@ -1013,7 +1025,13 @@ module.exports = class ABViewForm extends ABViewFormCore {
                      if (this._showed) comp.onShow?.();
 
                      // set value to each components
-                     if (f.field()) f.field().setValue($$(comp.ui.id), rowData);
+                     if (f.field()) {
+                        if (comp.ui.inputId) {
+                           f.field().setValue($$(comp.ui.inputId), rowData);
+                        } else {
+                           f.field().setValue($$(comp.ui.id), rowData);
+                        }
+                     }
 
                      comp.logic?.refresh?.(rowData);
                   });
@@ -1043,10 +1061,19 @@ module.exports = class ABViewForm extends ABViewFormCore {
 
             if (relationFieldCom == null) return;
 
-            var relationFieldView = this.viewComponents[relationFieldCom.id];
+            var relationFieldView = this.viewComponents[relationFieldCom.id].ui
+               .inputId;
+            // if (
+            //    this.viewComponents[relationFieldCom.id].ui.rows &&
+            //    this.viewComponents[relationFieldCom.id].ui.rows[0] &&
+            //    this.viewComponents[relationFieldCom.id].ui.rows[0].id
+            // ) {
+            //    relationFieldView = this.viewComponents[relationFieldCom.id].ui
+            //       .rows[0].id;
+            // }
             if (relationFieldView == null) return;
 
-            var relationElem = $$(relationFieldView.ui.id),
+            var relationElem = $$(relationFieldView),
                relationName = relationField.relationName();
 
             // pull data of parent's dc
@@ -1193,7 +1220,10 @@ module.exports = class ABViewForm extends ABViewFormCore {
 
       // get custom values
       var customFields = this.fieldComponents(
-         (comp) => comp instanceof ABViewFormCustom
+         (comp) =>
+            comp instanceof ABViewFormCustom ||
+            comp instanceof ABViewFormConnect ||
+            comp instanceof ABViewFormSelectMultiple
       );
       customFields.forEach((f) => {
          var vComponent = this.viewComponents[f.id];

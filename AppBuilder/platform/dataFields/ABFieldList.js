@@ -1,474 +1,12 @@
-var ABFieldListCore = require("../../core/dataFields/ABFieldListCore");
-var ABFieldComponent = require("./ABFieldComponent");
+const ABFieldListCore = require("../../core/dataFields/ABFieldListCore");
 
-var ABFieldSelectivity = require("./ABFieldSelectivity");
-
-var defaultValues = ABFieldListCore.defaultValues();
-
-let L = (...params) => AB.Multilingual.label(...params);
-
-var ids = {
-   isMultiple: "ab-list-multiple-option",
-   hasColors: "ab-list-colors-option",
-   default: "ab-list-single-default",
-   multipleDefault: "ab-list-multiple-default",
-   options: "ab-list-option",
-   colorboard: "ab-colorboard",
-};
-
-var colors = [
-   ["#F44336", "#E91E63", "#9C27B0", "#673AB7"],
-   ["#3F51B5", "#2196F3", "#03A9F4", "#00BCD4"],
-   ["#009688", "#4CAF50", "#8BC34A", "#CDDC39"],
-   ["#FFEB3B", "#FFC107", "#FF9800", "#FF5722"],
-   ["#795548", "#9E9E9E", "#607D8B", "#000000"],
-];
-
-function getNextHex() {
-   var options = $$(ids.options);
-   var usedColors = [];
-   options.data.each(function (item) {
-      usedColors.push(item.hex);
-   });
-   var allColors = [];
-   colors.forEach(function (c) {
-      if (typeof c == "object") {
-         c.forEach(function (j) {
-            allColors.push(j);
-         });
-      }
-   });
-   var newHex = "#3498db";
-   for (var i = 0; i < allColors.length; i++) {
-      if (usedColors.indexOf(allColors[i]) == -1) {
-         newHex = allColors[i];
-         break;
-      }
-   }
-   return newHex;
-}
-
-function toggleColorControl(value) {
-   var colorPickers = $$(ids.options).$view.querySelectorAll(
-      ".ab-color-picker"
-   );
-   colorPickers.forEach(function (itm) {
-      if (value == 1) itm.classList.remove("hide");
-      else itm.classList.add("hide");
-   });
-}
-
-function updateDefaultList(ids, settings = {}, L) {
-   var optList = $$(ids.options)
-      .find({})
-      .map(function (opt) {
-         return {
-            id: opt.id,
-            value: opt.value,
-            hex: opt.hex,
-         };
-      });
-
-   if ($$(ids.isMultiple).getValue()) {
-      // Multiple default selector
-      var domNode = $$(ids.multipleDefault).$view.querySelector(
-         ".list-data-values"
-      );
-      if (!domNode) return false;
-
-      // TODO : use to render selectivity to set default values
-      let selectivityRender = new ABFieldSelectivity(
-         {
-            settings: {},
-         },
-         {},
-         {}
-      );
-
-      selectivityRender.selectivityRender(domNode, {
-         multiple: true,
-         data: settings.multipleDefault,
-         placeholder: L("Select items"),
-         items: optList.map(function (opt) {
-            return {
-               id: opt.id,
-               text: opt.value,
-               hex: opt.hex,
-            };
-         }),
-      });
-      domNode.addEventListener("change", function (e) {
-         if (e.value.length) {
-            $$(ids.multipleDefault).define("required", false);
-         } else if (
-            $$(ids.multipleDefault)
-               .$view.querySelector(".webix_inp_label")
-               .classList.contains("webix_required")
-         ) {
-            $$(ids.multipleDefault).define("required", true);
-         }
-      });
-   } else {
-      // Single default selector
-      $$(ids.default).define("options", optList);
-      if (settings.default) $$(ids.default).setValue(settings.default);
-
-      $$(ids.default).refresh();
-   }
-}
-
-/**
- * ABFieldListComponent
- *
- * Defines the UI Component for this Data Field.  The ui component is responsible
- * for displaying the properties editor, populating existing data, retrieving
- * property values, etc.
- */
-var ABFieldListComponent = new ABFieldComponent({
-   fieldDefaults: ABFieldListCore.defaults(),
-
-   elements: (App, field) => {
-      ids = field.idsUnique(ids, App);
-
-      return [
-         {
-            view: "checkbox",
-            name: "isMultiple",
-            disallowEdit: true,
-            id: ids.isMultiple,
-            labelRight: L("Multiselect"),
-            labelWidth: 0,
-            value: false,
-            on: {
-               onChange: (newV /* , oldV */) => {
-                  if (newV == true) {
-                     $$(ids.default).hide();
-                     $$(ids.multipleDefault).show();
-                  } else {
-                     $$(ids.default).show();
-                     $$(ids.multipleDefault).hide();
-                  }
-
-                  updateDefaultList(ids, field.settings, L);
-               },
-            },
-         },
-         {
-            view: "checkbox",
-            name: "hasColors",
-            id: ids.hasColors,
-            labelRight: L("Customize Colors"),
-            labelWidth: 0,
-            value: false,
-            on: {
-               onChange: (newV, oldV) => {
-                  if (newV == oldV) return false;
-
-                  toggleColorControl(newV);
-               },
-            },
-         },
-         {
-            view: "label",
-            label: `<b>${L("Options")}</b>`,
-         },
-         {
-            id: ids.options,
-            name: "options",
-            css: "padList",
-            view: App.custom.editlist.view,
-            template:
-               "<div style='position: relative;'><i class='ab-color-picker fa fa-lg fa-chevron-circle-down' style='color:#hex#'></i> #value#<i class='ab-new-field-remove fa fa-remove' style='position: absolute; top: 7px; right: 7px;'></i></div>",
-            autoheight: true,
-            drag: true,
-            editable: true,
-            hex: "",
-            editor: "text",
-            editValue: "value",
-            onClick: {
-               "ab-new-field-remove": (e, itemId /*, trg */) => {
-                  // Remove option item
-                  // check that item is in saved data already
-                  var matches = (
-                     ABFieldListComponent._originalOptions || []
-                  ).filter(function (x) {
-                     return x.id == itemId;
-                  })[0];
-                  if (matches) {
-                     // Ask the user if they want to remove option
-                     webix
-                        .confirm({
-                           title: L("Delete Option"),
-                           text: L(
-                              "All exisiting entries with this value will be cleared. Are you sure you want to delete this option?"
-                           ),
-                           type: "confirm-warning",
-                        })
-                        .then(() => {
-                           // This is the "Yes"/"OK" click
-
-                           // store the item that will be deleted for the save action
-                           ABFieldListComponent._currentField.pendingDeletions =
-                              ABFieldListComponent._currentField
-                                 .pendingDeletions || [];
-                           ABFieldListComponent._currentField.pendingDeletions.push(
-                              itemId
-                           );
-                           $$(ids.options).remove(itemId);
-                        });
-                  }
-                  // If this item did not be saved, then remove from list
-                  else {
-                     $$(ids.options).remove(itemId);
-                  }
-               },
-               "ab-color-picker": function (e, itemId, trg) {
-                  // alert("open color picker");
-                  var item = itemId;
-                  webix
-                     .ui({
-                        id: ids.colorboard,
-                        view: "popup",
-                        body: {
-                           view: "colorboard",
-                           type: "classic",
-                           id: "color",
-                           width: 125,
-                           height: 150,
-                           palette: colors,
-                           left: 125,
-                           top: 150,
-                           on: {
-                              onSelect: (hex) => {
-                                 var vals = $$(ids.options).getItem(item);
-                                 vals.hex = hex;
-                                 $$(ids.options).updateItem(item, vals);
-                                 $$(ids.colorboard).hide();
-                              },
-                           },
-                        },
-                     })
-                     .show(trg, { x: -7 });
-                  return false;
-               },
-            },
-            on: {
-               onAfterAdd: () => {
-                  updateDefaultList(ids, field.settings, L);
-               },
-               onAfterEditStop: () => {
-                  updateDefaultList(ids, field.settings, L);
-               },
-               onAfterDelete: () => {
-                  updateDefaultList(ids, field.settings, L);
-               },
-               onAfterRender: () => {
-                  toggleColorControl($$(ids.hasColors).getValue());
-               },
-            },
-         },
-         {
-            view: "button",
-            css: "webix_primary",
-            value: L("Add new option"),
-            click: function () {
-               let itemId = webix.uid();
-               let nextHex = getNextHex();
-               let optionElem = $$(ids.options);
-               if (!optionElem) return;
-
-               optionElem.add(
-                  {
-                     id: itemId,
-                     value: "",
-                     hex: nextHex,
-                     isNew: true,
-                  },
-                  optionElem.count()
-               );
-
-               if (optionElem.exists(itemId)) optionElem.edit(itemId);
-            },
-         },
-         {
-            id: ids.default,
-            placeholder: L("Select Default"),
-            name: "default",
-            view: "richselect",
-            label: L("Default"),
-         },
-         {
-            id: ids.multipleDefault,
-            name: "multipleDefault",
-            view: "forminput",
-            labelWidth: 0,
-            height: 36,
-            borderless: true,
-            hidden: true,
-            body: {
-               view: App.custom.focusabletemplate.view,
-               css: "customFieldCls",
-               borderless: true,
-               template:
-                  `<label style="width: 80px;text-align: left;line-height:32px;" class="webix_inp_label">${L(
-                     "Default"
-                  )}</label>` +
-                  '<div style="margin-left: 80px; height: 36px;" class="list-data-values form-entry"></div>',
-            },
-         },
-      ];
-   },
-
-   // defaultValues: the keys must match a .name of your elements to set it's default value.
-   defaultValues: defaultValues,
-
-   // rules: basic form validation rules for webix form entry.
-   // the keys must match a .name of your .elements for it to apply
-   rules: {},
-
-   // include additional behavior on default component operations here:
-   // The base routines will be processed first, then these.  Any results
-   // from the base routine, will be passed on to these:
-   logic: {
-      // isValid: function (ids, isValid) {
-
-      // }
-
-      clear: (ids) => {
-         $$(ids.isMultiple).setValue(0);
-         $$(ids.hasColors).setValue(0);
-         $$(ids.options).clearAll();
-
-         $$(ids.default).define("options", []);
-         $$(ids.default).setValue(defaultValues.default);
-
-         var domNode = $$(ids.multipleDefault).$view.querySelector(
-            ".list-data-values"
-         );
-         if (domNode && domNode.selectivity) {
-            domNode.selectivity.setData([]);
-         }
-      },
-
-      populate: (ids, field) => {
-         // store the options that currently exisit to compare later for deletes
-         ABFieldListComponent._originalOptions = field.settings.options;
-         // set options to webix list
-         let opts = [];
-         // we need to access the fields -> object -> model to run updates on save (may be refactored later)
-         ABFieldListComponent._currentField = field;
-         if (ABFieldListComponent._currentField) {
-            // empty this out so we don't try to delete already deleted options (or delete options that we canceled before running)
-            ABFieldListComponent._currentField.pendingDeletions = [];
-            opts = (field.settings.options || []).map((opt) => {
-               return {
-                  id: opt.id,
-                  value: opt.text,
-                  hex: opt.hex,
-                  translations: opt.translations,
-               };
-            });
-         }
-         $$(ids.options).parse(opts);
-         $$(ids.options).refresh();
-
-         setTimeout(() => {
-            updateDefaultList(ids, field.settings, L);
-         }, 10);
-      },
-
-      /*
-       * @function requiredOnChange
-       *
-       * The ABField.definitionEditor implements a default operation
-       * to look for a default field and set it to a required field
-       * if the field is set to required
-       *
-       * if you want to override that functionality, implement this fn()
-       *
-       * @param {string} newVal	The new value of label
-       * @param {string} oldVal	The previous value
-       */
-      // requiredOnChange: (newVal, oldVal, ids) => {
-
-      // 	// when require number, then default value needs to be reqired
-      // 	$$(ids.default).define("required", newVal);
-      // 	$$(ids.default).refresh();
-
-      // 	if ($$(ids.multipleDefault).$view.querySelector(".webix_inp_label")) {
-      // 		if (newVal) {
-      // 			$$(ids.multipleDefault).define("required", true);
-      // 			$$(ids.multipleDefault).$view.querySelector(".webix_inp_label").classList.add("webix_required");
-      // 		} else {
-      // 			$$(ids.multipleDefault).define("required", false);
-      // 			$$(ids.multipleDefault).$view.querySelector(".webix_inp_label").classList.remove("webix_required");
-      // 		}
-      // 	}
-
-      // },
-
-      values: (ids, values) => {
-         // Get options list from UI, then set them to settings
-         values.settings.options = [];
-         $$(ids.options).data.each((opt) => {
-            let optionId = opt.id;
-
-            // If it is a new option item, then .id uses string instead of UID
-            // for support custom index
-            if (
-               opt.isNew &&
-               opt.value &&
-               !values.settings.options.filter((o) => o.id == opt.value).length
-            ) {
-               optionId = opt.value;
-            }
-
-            values.settings.options.push({
-               id: optionId,
-               text: opt.value,
-               hex: opt.hex,
-               translations: opt.translations,
-            });
-         });
-
-         // Un-translate options list
-         values.settings.options.forEach((opt) => {
-            this.AB.Multilingual.unTranslate(opt, opt, ["text"]);
-         });
-
-         // Set multiple default value
-         values.settings.multipleDefault = [];
-         var domNode = $$(ids.multipleDefault).$view.querySelector(
-            ".list-data-values"
-         );
-         if (domNode && domNode.selectivity) {
-            values.settings.multipleDefault =
-               domNode.selectivity.getData() || [];
-         }
-
-         return values;
-      },
-   },
-});
+const L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABFieldList extends ABFieldListCore {
    constructor(values, object) {
       super(values, object);
 
-      this._Selectivity = new ABFieldSelectivity(values, object);
-   }
-
-   /*
-    * @function propertiesComponent
-    *
-    * return a UI Component that contains the property definitions for this Field.
-    *
-    * @param {App} App the UI App instance passed around the Components.
-    * @param {stirng} idBase
-    * @return {Component}
-    */
-   static propertiesComponent(App, idBase) {
-      return ABFieldListComponent.component(App, idBase);
+      // this._Selectivity = new ABFieldSelectivity(values, object);
    }
 
    ///
@@ -479,14 +17,14 @@ module.exports = class ABFieldList extends ABFieldListCore {
       return super.save().then(() => {
          // Now we want to clear out any entries that had values == to item removed from our list:
          if (this.pendingDeletions.length) {
-            var model = this.object.model();
+            const model = this.object.model();
 
             if (this.settings.isMultiple == true) {
                // find all the entries that have one of the deleted values:
                // use Promise to prevent issues with data being loaded before it is deleted on client side
                return new Promise((resolve, reject) => {
-                  var numDone = 0;
-                  var numToDo = 0;
+                  let numDone = 0;
+                  let numToDo = 0;
 
                   model
                      .findAll({})
@@ -497,7 +35,7 @@ module.exports = class ABFieldList extends ABFieldListCore {
                         list.forEach((item) => {
                            if (Array.isArray(item[this.columnName])) {
                               // get fields not in pendingDeletions
-                              var remainingFields = item[
+                              let remainingFields = item[
                                  this.columnName
                               ].filter((i) => {
                                  return (
@@ -515,11 +53,11 @@ module.exports = class ABFieldList extends ABFieldListCore {
                                  if (remainingFields.length == 0) {
                                     remainingFields = "";
                                  }
-                                 var value = {};
+                                 const value = {};
                                  value[this.columnName] = remainingFields;
                                  model.update(item.id, value).then(() => {
                                     // if ($$(node) && $$(node).updateItem)
-                                    // 	$$(node).updateItem(value.id, value);
+                                    //    $$(node).updateItem(value.id, value);
                                     numDone++;
                                     if (numDone >= numToDo) {
                                        resolve();
@@ -536,10 +74,10 @@ module.exports = class ABFieldList extends ABFieldListCore {
                });
             } else {
                // find all the entries that have one of the deleted values:
-               var where = {};
+               const where = {};
                where[this.columnName] = this.pendingDeletions;
                return new Promise((resolve, reject) => {
-                  var numDone = 0;
+                  let numDone = 0;
 
                   model
                      .findAll(where)
@@ -550,8 +88,8 @@ module.exports = class ABFieldList extends ABFieldListCore {
                         // for each one, set the value to ''
                         // NOTE: jQuery ajax routines filter out null values, so we can't
                         // set them to null. :(
-                        // var numDone = 0;
-                        var value = {};
+                        // const numDone = 0;
+                        const value = {};
                         value[this.columnName] = "";
 
                         list.forEach((item) => {
@@ -574,7 +112,7 @@ module.exports = class ABFieldList extends ABFieldListCore {
    }
 
    isValid() {
-      var validator = super.isValid();
+      const validator = super.isValid();
 
       // validator.addError('columnName', L('ab.validation.object.name.unique', 'Field columnName must be unique (#name# already used in this Application)').replace('#name#', this.name) );
 
@@ -589,110 +127,88 @@ module.exports = class ABFieldList extends ABFieldListCore {
    columnHeader(options) {
       options = options || {};
 
-      var config = super.columnHeader(options);
-      var field = this;
-      var App = App;
+      const config = super.columnHeader(options);
+      const field = this;
+      const App = field.AB._App;
 
-      // Multiple select list
-      if (this.settings.isMultiple == true) {
-         var width = options.width,
-            editable = options.editable;
-
-         config.template = (row) => {
-            var node = document.createElement("div");
-            node.classList.add("list-data-values");
-            if (typeof width != "undefined") {
-               node.style.marginLeft = width + "px";
-            }
-
-            var domNode = node;
-
-            var placeholder = L("Select items");
-            var readOnly = false;
-            if (editable != null && editable == false) {
-               readOnly = true;
-               placeholder = "";
-            }
-
-            // var domNode = node.querySelector('.list-data-values');
-
-            // get selected values
-            let selectedData = _getSelectedOptions(field, row);
-
-            // Render selectivity
-            field._Selectivity.selectivityRender(
-               domNode,
-               {
-                  multiple: true,
-                  readOnly: readOnly,
-                  placeholder: placeholder,
-                  hasColors: field.settings.hasColors,
-                  items: field.settings.options,
-                  data: selectedData,
-               },
-               App,
-               row
-            );
-
-            return node.outerHTML;
-         };
+      var formClass = "";
+      var placeHolder = "";
+      if (options.editable) {
+         formClass = " form-entry";
+         placeHolder = `<span style='color: #CCC; padding: 0 5px;'>${L(
+            "Select item"
+         )}</span>`;
       }
-      // Single select list
-      else {
-         var formClass = "";
-         var placeHolder = "";
-         if (options.editable) {
-            formClass = " form-entry";
-            placeHolder = `<span style='color: #CCC; padding: 0 5px;'>${L(
-               "Select item"
-            )}"</span>`;
+      var isRemovable = options.editable && !this.settings.required;
+
+      config.editFormat = (value) => {
+         return this.editFormat(value);
+      };
+      config.editParse = (value) => {
+         return this.editParse(value);
+      };
+
+      config.template = (rowData) => {
+         let selectedData = rowData[this.columnName];
+         if (selectedData == null) return "";
+         if (this.settings.isMultiple) {
+            selectedData = _getSelectedOptions(this, rowData);
          }
-         var isRemovable = options.editable && !this.settings.required;
-
-         config.template = (obj) => {
-            var myHex = "#666666";
-            var myText = placeHolder;
-            field.settings.options.forEach((h) => {
-               if (h.id == obj[field.columnName]) {
-                  myHex = h.hex;
-                  myText = h.text;
+         var values = [];
+         values.push('<div class="badgeContainer">');
+         let hasCustomColor = "";
+         let optionHex = "";
+         if (
+            selectedData &&
+            Array.isArray(selectedData) &&
+            selectedData.length
+         ) {
+            selectedData.forEach((val) => {
+               if (this.settings.hasColors && val.hex) {
+                  hasCustomColor = "hascustomcolor";
+                  optionHex = `background: ${val.hex};`;
                }
-            });
-            if (field.settings.hasColors && obj[field.columnName]) {
-               return (
-                  '<span class="selectivity-single-selected-item rendered' +
-                  formClass +
-                  '" style="background-color:' +
-                  myHex +
-                  ' !important;">' +
-                  myText +
-                  (isRemovable
-                     ? ' <a class="selectivity-single-selected-item-remove"><i class="fa fa-remove"></i></a>'
-                     : "") +
-                  "</span>"
+               values.push(
+                  `<div style="${optionHex}" class='webix_multicombo_value ${hasCustomColor}'><span>${val.text}</span><!-- span data-uuid="${val.id}" class="webix_multicombo_delete" role="button" aria-label="Remove item"></span --></div>`
                );
-            } else {
-               if (myText != placeHolder) {
-                  return (
-                     myText +
-                     (isRemovable
-                        ? ' <a class="selectivity-single-selected-item-remove" style="color: #333;"><i class="fa fa-remove"></i></a>'
-                        : "")
-                  );
-               } else {
-                  return myText;
-               }
+            });
+            if (selectedData.length > 1) {
+               values.push(
+                  `<span class="webix_badge selectivityBadge">${selectedData.length}</span>`
+               );
             }
-         };
-
-         config.editor = "richselect";
-         config.options = field.settings.options.map(function (opt) {
+         } else if (selectedData) {
+            let selectedObj = selectedData;
+            if (typeof selectedData == "string") {
+               selectedObj = this.getItemFromVal(selectedData);
+            }
+            if (!selectedObj) return "";
+            if (this.settings.hasColors && selectedObj.hex) {
+               hasCustomColor = "hascustomcolor";
+               optionHex = `background: ${selectedObj.hex};`;
+            }
+            values.push(
+               `<div style="${optionHex}" class='webix_multicombo_value ${hasCustomColor}'><span>${selectedObj.text}</span><!-- span data-uuid="${selectedObj.id}" class="webix_multicombo_delete" role="button" aria-label="Remove item"></span --></div>`
+            );
+         } else {
+            return "";
+         }
+         values.push("</div>");
+         return values.join("");
+      };
+      config.editor = this.settings.isMultiple ? "multiselect" : "combo";
+      config.suggest = {
+         button: true,
+         data: this.settings.options.map(function (opt) {
             return {
                id: opt.id,
                value: opt.text,
                hex: opt.hex,
             };
-         });
+         }),
+      };
+      if (this.settings.isMultiple) {
+         config.suggest.view = "checksuggest";
       }
 
       return config;
@@ -703,7 +219,7 @@ module.exports = class ABFieldList extends ABFieldListCore {
     * perform any custom display modifications for this field.
     * @param {object} row is the {name=>value} hash of the current row of data.
     * @param {App} App the shared ui App object useful more making globally
-    *					unique id references.
+    *             unique id references.
     * @param {HtmlDOM} node  the HTML Dom object for this field's display.
     */
    customDisplay(row, App, node, options) {
@@ -714,104 +230,35 @@ module.exports = class ABFieldList extends ABFieldListCore {
 
       options = options || {};
 
-      if (this.settings.isMultiple == true) {
-         var placeholder = L("Select items");
-         var readOnly = false;
-         if (options.editable != null && options.editable == false) {
-            readOnly = true;
-            placeholder = "";
-         }
+      if (!node.querySelector) return;
 
-         var domNode = node.querySelector(".list-data-values");
+      var clearButton = node.querySelector(
+         ".selectivity-single-selected-item-remove"
+      );
+      if (clearButton) {
+         clearButton.addEventListener("click", (e) => {
+            e.stopPropagation();
+            var values = {};
+            values[this.columnName] = "";
+            this.object
+               .model()
+               .update(row.id, values)
+               .then(() => {
+                  // update the client side data object as well so other data changes won't cause this save to be reverted
+                  $$(node)?.updateItem?.(row.id, values);
+               })
+               .catch((err) => {
+                  node.classList.add("webix_invalid");
+                  node.classList.add("webix_invalid_cell");
 
-         // get selected values
-         var selectedData = _getSelectedOptions(this, row);
-
-         // Render selectivity
-         this._Selectivity.selectivityRender(
-            domNode,
-            {
-               multiple: true,
-               readOnly: readOnly,
-               placeholder: placeholder,
-               hasColors: this.settings.hasColors,
-               items: this.settings.options,
-               data: selectedData,
-            },
-            App,
-            row
-         );
-
-         // Listen event when selectivity value updates
-         if (domNode && !readOnly && row.id && node) {
-            domNode.addEventListener(
-               "change",
-               (/* e */) => {
-                  // update just this value on our current object.model
-                  var values = {};
-                  values[this.columnName] = this._Selectivity.selectivityGet(
-                     domNode
-                  );
-
-                  // pass null because it could not put empty array in REST api
-                  if (values[this.columnName].length == 0)
-                     values[this.columnName] = "";
-
-                  this.object
-                     .model()
-                     .update(row.id, values)
-                     .then(() => {
-                        // update the client side data object as well so other data changes won't cause this save to be reverted
-                        if (values[this.columnName] == "")
-                           values[this.columnName] = [];
-                        if ($$(node) && $$(node).updateItem)
-                           $$(node).updateItem(row.id, values);
-                     })
-                     .catch((err) => {
-                        node.classList.add("webix_invalid");
-                        node.classList.add("webix_invalid_cell");
-
-                        this.AB.notify.developer(err, {
-                           message: "Error updating our entry.",
-                           row: row,
-                           values: values,
-                        });
-                     });
-               },
-               false
-            );
-         }
-      } else {
-         if (!node.querySelector) return;
-
-         var clearButton = node.querySelector(
-            ".selectivity-single-selected-item-remove"
-         );
-         if (clearButton) {
-            clearButton.addEventListener("click", (e) => {
-               e.stopPropagation();
-               var values = {};
-               values[this.columnName] = "";
-               this.object
-                  .model()
-                  .update(row.id, values)
-                  .then(() => {
-                     // update the client side data object as well so other data changes won't cause this save to be reverted
-                     if ($$(node) && $$(node).updateItem)
-                        $$(node).updateItem(row.id, values);
-                  })
-                  .catch((err) => {
-                     node.classList.add("webix_invalid");
-                     node.classList.add("webix_invalid_cell");
-
-                     this.AB.notify.developer(err, {
-                        message: "Error updating our entry.",
-                        row: row,
-                        values: "",
-                     });
+                  this.AB.notify.developer(err, {
+                     message: "Error updating our entry.",
+                     row: row,
+                     values: "",
+                     field: this.toObj(),
                   });
-            });
-         }
+               });
+         });
       }
    }
 
@@ -820,23 +267,12 @@ module.exports = class ABFieldList extends ABFieldListCore {
     *
     * @param {object} row is the {name=>value} hash of the current row of data.
     * @param {App} App the shared ui App object useful more making globally
-    *					unique id references.
+    *             unique id references.
     * @param {HtmlDOM} node  the HTML Dom object for this field's display.
     */
-   customEdit(row, App, node) {
-      if (this.settings.isMultiple == true) {
-         var domNode = node.querySelector(".list-data-values");
-
-         if (domNode.selectivity != null) {
-            // Open selectivity
-            domNode.selectivity.open();
-            return false;
-         }
-         return false;
-      } else {
-         return super.customEdit(row, App, node);
-      }
-   }
+   // customEdit(row, App, node) {
+   //    return super.customEdit(row, App, node);
+   // }
 
    /*
     * @funciton formComponent
@@ -850,12 +286,12 @@ module.exports = class ABFieldList extends ABFieldListCore {
    formComponent() {
       // NOTE: what is being returned here needs to mimic an ABView CLASS.
       // primarily the .common() and .newInstance() methods.
-      var formComponentSetting = super.formComponent();
+      const formComponentSetting = super.formComponent();
 
       // .common() is used to create the display in the list
       formComponentSetting.common = () => {
          return {
-            key: this.settings.isMultiple ? "fieldcustom" : "selectsingle",
+            key: this.settings.isMultiple ? "selectmultiple" : "selectsingle",
             settings: {
                options: this.settings.options.map(function (opt) {
                   return {
@@ -872,46 +308,108 @@ module.exports = class ABFieldList extends ABFieldListCore {
    }
 
    detailComponent() {
-      var detailComponentSetting = super.detailComponent();
+      const detailComponentSetting = super.detailComponent();
 
       detailComponentSetting.common = () => {
          return {
-            key: this.settings.isMultiple ? "detailcustom" : "detailtext",
+            key: this.settings.isMultiple ? "detailtext" : "detailtext",
          };
       };
 
       return detailComponentSetting;
    }
 
-   getValue(item /*, rowData */) {
-      var values = {};
-
-      if (!item) return values;
-
-      if (this.settings.isMultiple) {
-         var domNode = item.$view.querySelector(".list-data-values");
-         values = this._Selectivity.selectivityGet(domNode);
+   editFormat(value) {
+      if (!value) return "";
+      let vals = [];
+      if (Array.isArray(value)) {
+         value.forEach((val) => {
+            if (typeof val == "object") {
+               vals.push(val.id);
+            } else {
+               let itemObj = this.getItemFromVal(val);
+               vals.push(itemObj.id);
+            }
+         });
       } else {
-         values = $$(item).getValue();
+         if (typeof value == "object") {
+            vals.push(value.id);
+         } else {
+            let itemObj = this.getItemFromVal(value);
+            if (itemObj && itemObj.id) {
+               vals.push(itemObj.id);
+            }
+         }
       }
-      return values;
+      return vals.join();
+   }
+
+   editParse(value) {
+      if (this.settings.isMultiple) {
+         let returnVals = [];
+         let vals = value.split(",");
+         vals.forEach((val) => {
+            returnVals.push(this.getItemFromVal(val));
+         });
+         return returnVals;
+      } else {
+         return value;
+      }
+   }
+
+   getItemFromVal(val) {
+      let item;
+      let options = this.options();
+      if (options.length > 1) {
+         options.forEach((option) => {
+            if (option.id == val) {
+               item = option;
+               return false;
+            }
+         });
+         return item;
+      } else {
+         return "";
+      }
+   }
+
+   getValue(item, rowData) {
+      return this.editParse(item.getValue());
+   }
+
+   getSelectedOptions(field, rowData = {}) {
+      let result = [];
+      if (rowData[this.columnName] != null) {
+         result = rowData[this.columnName];
+      } else if (rowData) {
+         if (Array.isArray(rowData)) {
+            result = rowData;
+         } else {
+            result.push(rowData);
+         }
+      }
+      if (result.length) {
+         if (typeof result == "string") result = JSON.parse(result);
+
+         // Pull text with current language
+         if (this.settings) {
+            result = (this.settings.options || []).filter((opt) => {
+               return (
+                  (result || []).filter((v) => (opt.id || opt) == (v.id || v))
+                     .length > 0
+               );
+            });
+         }
+      }
+
+      return result;
    }
 
    setValue(item, rowData) {
       if (!item) return;
 
       if (this.settings.isMultiple) {
-         let selectedOpts = _getSelectedOptions(this, rowData);
-
-         // get selectivity dom
-         var domSelectivity = item.$view.querySelector(".list-data-values");
-
-         // set value to selectivity
-         this._Selectivity.selectivitySet(
-            domSelectivity,
-            selectedOpts,
-            this.App
-         );
+         // do we need anything here?
       } else {
          super.setValue(item, rowData);
       }

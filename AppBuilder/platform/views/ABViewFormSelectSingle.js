@@ -125,12 +125,43 @@ module.exports = class ABViewFormSelectSingle extends (
       else options = this.settings.options || [];
 
       component.ui.id = ids.component;
-      component.ui.options = options.map((opt) => {
-         return {
-            id: opt.id,
-            value: opt.text || opt.value,
+
+      if (field.settings.hasColors) {
+         component.ui.css = "combowithcolors";
+         component.ui.options = {
+            view: "suggest",
+            body: {
+               view: "list",
+               data: options.map((opt) => {
+                  return {
+                     id: opt.id,
+                     value: opt.text || opt.value,
+                     hex: field.settings.hasColors ? opt.hex : "",
+                  };
+               }),
+               template: function (value) {
+                  var items = [];
+                  var hasCustomColor = "";
+                  var optionHex = "";
+                  if (value.hex) {
+                     hasCustomColor = "hascustomcolor";
+                     optionHex = `background: ${value.hex};`;
+                  }
+                  items.push(
+                     `<span class="webix_multicombo_value ${hasCustomColor}" style="${optionHex}" optvalue="${value.id}"><span>${value.value}</span></span>`
+                  );
+                  return items.join("");
+               },
+            },
          };
-      });
+      } else {
+         component.ui.options = options.map((opt) => {
+            return {
+               id: opt.id,
+               value: opt.text || opt.value,
+            };
+         });
+      }
 
       // radio element could not be empty options
       if (component.ui.view == "radio" && component.ui.options.length < 1) {
@@ -139,6 +170,10 @@ module.exports = class ABViewFormSelectSingle extends (
             value: L("Option"),
          });
       }
+
+      // component.ui = {
+      //    rows: [component.ui],
+      // };
 
       // make sure each of our child views get .init() called
       component.init = (options) => {};

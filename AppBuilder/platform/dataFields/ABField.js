@@ -5,10 +5,10 @@
  *
  */
 
-var ABFieldCore = require("../../core/dataFields/ABFieldCore");
-var FilterComplex = require("../FilterComplex");
+const ABFieldCore = require("../../core/dataFields/ABFieldCore");
+const FilterComplex = require("../FilterComplex");
 
-let L = (...params) => AB.Multilingual.label(...params);
+const L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABField extends ABFieldCore {
    constructor(values, object, fieldDefaults) {
@@ -55,7 +55,7 @@ module.exports = class ABField extends ABFieldCore {
    static clearEditor(ids) {
       this._CurrentField = null;
 
-      var defaultValues = {
+      const defaultValues = {
          label: "",
          columnName: "",
          showIcon: 1,
@@ -64,13 +64,13 @@ module.exports = class ABField extends ABFieldCore {
          validationRules: "",
       };
 
-      for (var f in defaultValues) {
-         var component = $$(ids[f]);
+      for (const f in defaultValues) {
+         const component = $$(ids[f]);
          if (component) component.setValue(defaultValues[f]);
       }
 
       // reset the validation rules UI
-      var filterViews = $$(ids.filterComplex).queryView(
+      const filterViews = $$(ids.filterComplex).queryView(
          {
             view: "form",
             css: "abValidationForm",
@@ -111,7 +111,7 @@ module.exports = class ABField extends ABFieldCore {
       }
 
       if (field.settings && field.settings.validationRules) {
-         var rules = field.settings.validationRules;
+         let rules = field.settings.validationRules;
          if (typeof rules == "string") {
             try {
                rules = JSON.parse(rules);
@@ -150,7 +150,7 @@ module.exports = class ABField extends ABFieldCore {
       /// if not onChange, then use our default:
 
       // setup our default labelOnChange functionality:
-      var labelOnChange = function (newVal, oldVal) {
+      let labelOnChange = function (newVal, oldVal) {
          oldVal = oldVal || "";
 
          if (
@@ -167,13 +167,13 @@ module.exports = class ABField extends ABFieldCore {
          labelOnChange = _logic.labelOnChange;
       }
 
-      var requiredOnChange = function (newVal, oldVal, ids) {
+      let requiredOnChange = function (newVal, oldVal, ids) {
          console.warn(
             "Field has not implemented .requiredOnChange() is that okay?"
          );
       };
 
-      var addValidation = (ids) => {
+      const addValidation = (ids) => {
          return this._CurrentField.addValidation(ids);
       };
 
@@ -182,7 +182,7 @@ module.exports = class ABField extends ABFieldCore {
          requiredOnChange = _logic.requiredOnChange;
       }
 
-      var getNumberOfNullValue = async (isRequired) => {
+      const getNumberOfNullValue = async (isRequired) => {
          if (
             isRequired &&
             this._CurrentField &&
@@ -192,7 +192,7 @@ module.exports = class ABField extends ABFieldCore {
             // TODO: disable save button
 
             // get count number
-            let data = await this._CurrentField.object.model().count({
+            const data = await this._CurrentField.object.model().count({
                where: {
                   glue: "and",
                   rules: [
@@ -205,7 +205,7 @@ module.exports = class ABField extends ABFieldCore {
             });
 
             if (data.count > 0) {
-               let messageTemplate = L(
+               const messageTemplate = L(
                   "** There are {0} rows that will be updated to default value",
                   [data.count]
                );
@@ -222,7 +222,7 @@ module.exports = class ABField extends ABFieldCore {
          }
       };
 
-      var _ui = {
+      const _ui = {
          // id: ids.component,
          rows: [
             // {
@@ -329,7 +329,7 @@ module.exports = class ABField extends ABFieldCore {
    }
 
    static editorValues(settings) {
-      var obj = {
+      const obj = {
          label: settings.label,
          columnName: settings.columnName,
          settings: settings,
@@ -342,8 +342,8 @@ module.exports = class ABField extends ABFieldCore {
    }
 
    addValidation(ids, settings) {
-      var App = this.object.application.App;
-      var Filter = new FilterComplex(App, "field_validation_rules");
+      const App = this.object.application.App;
+      const Filter = new FilterComplex(App, "field_validation_rules");
       $$(ids.filterComplex).addView({
          view: "form",
          css: "abValidationForm",
@@ -370,7 +370,7 @@ module.exports = class ABField extends ABFieldCore {
                type: "icon",
                autowidth: true,
                click: function () {
-                  var $viewCond = this.getParentView();
+                  const $viewCond = this.getParentView();
                   $$(ids.filterComplex).removeView($viewCond);
                },
             },
@@ -390,12 +390,11 @@ module.exports = class ABField extends ABFieldCore {
     * @return null or [{OP.Validation.validator()}] objects.
     */
    isValid() {
-      var validator = this.AB.Validation.validator();
+      const validator = this.AB.Validation.validator();
 
       // .columnName must be unique among fileds on the same object
-      var isNameUnique =
+      const isNameUnique =
          this.object.fields((f) => {
-            var isDifferent = f.id != this.id;
             return (
                f.id != this.id &&
                f.columnName.toLowerCase() == this.columnName.toLowerCase()
@@ -466,10 +465,10 @@ module.exports = class ABField extends ABFieldCore {
       // existing rows that have NULL values for this field
       // are updated to have our current .default value.
       if (!isAdd && this.settings.required && this.settings.default) {
-         let model = this.object.model();
+         const model = this.object.model();
 
          // pull rows that has null value
-         let result = await model.findAll({
+         const result = await model.findAll({
             where: {
                glue: "and",
                rules: [
@@ -481,7 +480,7 @@ module.exports = class ABField extends ABFieldCore {
             },
          });
 
-         let tasks = [];
+         const tasks = [];
 
          // updating ...
          result.data.forEach((d) => {
@@ -508,7 +507,7 @@ module.exports = class ABField extends ABFieldCore {
       // ABFieldConnect.migrateXXX() gets called from the UI popupNewDataField
       // in order to handle the timings of the 2 fields that need to be created
       if (!this.isConnection) {
-         let fnMigrate = isAdd ? this.migrateCreate() : this.migrateUpdate();
+         const fnMigrate = isAdd ? this.migrateCreate() : this.migrateUpdate();
          await fnMigrate;
       }
 
@@ -557,7 +556,7 @@ module.exports = class ABField extends ABFieldCore {
    columnHeader(options) {
       options = options || {};
 
-      var config = {
+      const config = {
          id: this.columnName, // this.id,
          header: this.label,
       };
@@ -628,7 +627,7 @@ module.exports = class ABField extends ABFieldCore {
    setValue(item, rowData, defaultValue) {
       if (!item) return;
 
-      var val;
+      let val;
 
       if (
          (rowData == null || rowData[this.columnName] == null) &&
@@ -679,12 +678,12 @@ module.exports = class ABField extends ABFieldCore {
             // 		 this and return an actual Form Component.
 
             // store object id and field id to field component
-            var values = this.formComponent().common();
+            const values = this.formComponent().common();
             values.settings = values.settings || {};
             values.settings.objectId = this.object.id;
             values.settings.fieldId = this.id;
 
-            var ABFieldPlaceholder = application.viewNew(
+            const ABFieldPlaceholder = application.viewNew(
                values,
                application,
                parent
@@ -712,12 +711,12 @@ module.exports = class ABField extends ABFieldCore {
          // 		is dropped onto the ABView list.
          newInstance: (application, parent) => {
             // store object id and field id to field component
-            var values = this.detailComponent().common();
+            const values = this.detailComponent().common();
             values.settings = values.settings || {};
             values.settings.objectId = this.object.id;
             values.settings.fieldId = this.id;
 
-            var ABFieldPlaceholder = application.viewNew(
+            const ABFieldPlaceholder = application.viewNew(
                values,
                application,
                parent

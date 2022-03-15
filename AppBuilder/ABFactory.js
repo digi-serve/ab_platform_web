@@ -30,6 +30,8 @@ import Network from "../resources/Network.js";
 import Storage from "../resources/Storage.js";
 // Storage: manages our interface for local storage
 
+const ABViewManager = require("./core/ABViewManagerCore");
+
 import Tenant from "../resources/Tenant.js";
 // Tenant: manages the Tenant information of the current instance
 
@@ -111,6 +113,9 @@ class ABFactory extends ABFactoryCore {
 
       // Plugin Classes
       this.ClassUI = ClassUI;
+
+      // additional Class definitions
+      this.Class.ABViewManager = ABViewManager;
 
       // Temp placeholders until Resources are implemented:
       this.Analytics = {

@@ -1,89 +1,8 @@
-var ABFieldBooleanCore = require("../../core/dataFields/ABFieldBooleanCore");
-var ABFieldComponent = require("./ABFieldComponent");
-
-let L = (...params) => AB.Multilingual.label(...params);
-
-/**
- * ABFieldBooleanComponent
- *
- * Defines the UI Component for this Data Field.  The ui component is responsible
- * for displaying the properties editor, populating existing data, retrieving
- * property values, etc.
- */
-var ABFieldBooleanComponent = new ABFieldComponent({
-   fieldDefaults: ABFieldBooleanCore.defaults(),
-
-   elements: (App, field) => {
-      // ids = field.idsUnique(ids, App);
-      return [
-         {
-            name: "default",
-            view: "checkbox",
-            label: L("Default"),
-            labelPosition: "left",
-            labelWidth: 70,
-            labelRight: L("Uncheck"),
-            css: "webix_table_checkbox",
-            on: {
-               onChange: function (newVal, oldVal) {
-                  let checkLabel = L("Check");
-                  let uncheckLabel = L("Uncheck");
-
-                  this.define("labelRight", newVal ? checkLabel : uncheckLabel);
-                  this.refresh();
-               },
-            },
-         },
-      ];
-   },
-
-   // defaultValues: the keys must match a .name of your elements to set it's default value.
-   defaultValues: ABFieldBooleanCore.defaultValues(),
-
-   // rules: basic form validation rules for webix form entry.
-   // the keys must match a .name of your .elements for it to apply
-   rules: {},
-
-   // include additional behavior on default component operations here:
-   // The base routines will be processed first, then these.  Any results
-   // from the base routine, will be passed on to these:
-   logic: {
-      // isValid: function (ids, isValid) {
-      // }
-      // populate: function (ids, values) {
-      // 	if (values.settings.validation) {
-      // 		$$(ids.validateMinimum).enable();
-      // 		$$(ids.validateMaximum).enable();
-      // 	} else {
-      // 		$$(ids.validateMinimum).disable();
-      // 		$$(ids.validateMaximum).disable();
-      // 	}
-      // }
-   },
-
-   // perform any additional setup actions here.
-   // @param {obj} ids  the hash of id values for all the current form elements.
-   //					 it should have your elements + the default Header elements:
-   //						.label, .columnName, .fieldDescription, .showIcon
-   init: function (ids) {},
-});
+const ABFieldBooleanCore = require("../../core/dataFields/ABFieldBooleanCore");
 
 module.exports = class ABFieldBoolean extends ABFieldBooleanCore {
    constructor(values, object) {
       super(values, object);
-   }
-
-   /*
-    * @function propertiesComponent
-    *
-    * return a UI Component that contains the property definitions for this Field.
-    *
-    * @param {App} App the UI App instance passed around the Components.
-    * @param {stirng} idBase
-    * @return {Component}
-    */
-   static propertiesComponent(App, idBase) {
-      return ABFieldBooleanComponent.component(App, idBase);
    }
 
    ///
@@ -91,7 +10,7 @@ module.exports = class ABFieldBoolean extends ABFieldBooleanCore {
    ///
 
    isValid() {
-      var validator = super.isValid();
+      const validator = super.isValid();
 
       // validator.addError('columnName', L('ab.validation.object.name.unique', 'Field columnName must be unique (#name# already used in this Application)').replace('#name#', this.name) );
 
@@ -106,7 +25,7 @@ module.exports = class ABFieldBoolean extends ABFieldBooleanCore {
    columnHeader(options) {
       options = options || {};
 
-      var config = super.columnHeader(options);
+      const config = super.columnHeader(options);
 
       config.editor = "template";
       config.css = "center";
@@ -148,7 +67,7 @@ module.exports = class ABFieldBoolean extends ABFieldBooleanCore {
    }
 
    detailComponent() {
-      var detailComponentSetting = super.detailComponent();
+      const detailComponentSetting = super.detailComponent();
 
       detailComponentSetting.common = () => {
          return {

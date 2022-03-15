@@ -148,7 +148,7 @@ class ClassUI extends EventEmitter {
 
    show() {
       if (this.ids?.component) {
-         $$(this.ids.component).show();
+         $$(this.ids.component)?.show();
       }
    }
 }

@@ -1,329 +1,16 @@
-var ABFieldImageCore = require("../../core/dataFields/ABFieldImageCore");
-var ABFieldComponent = require("./ABFieldComponent");
+const ABFieldImageCore = require("../../core/dataFields/ABFieldImageCore");
 
-let L = (...params) => AB.Multilingual.label(...params);
-
-/**
- * ABFieldImageComponent
- *
- * Defines the UI Component for this Data Field.  The ui component is responsible
- * for displaying the properties editor, populating existing data, retrieving
- * property values, etc.
- *
- * @param {obj} App  the current Component Application instance for the current UI.
- * @return {obj} the Component object.
- */
-var ABFieldImageComponent = new ABFieldComponent({
-   fieldDefaults: ABFieldImageCore.defaults(),
-
-   elements: (App, field) => {
-      var ids = {
-         imageWidth: "",
-         imageHeight: "",
-         defaultImageUrl: "",
-      };
-      ids = field.idsUnique(ids, App);
-
-      return [
-         {
-            cols: [
-               {
-                  view: "checkbox",
-                  name: "useWidth",
-                  labelRight: L("Width"),
-                  width: 80,
-                  labelWidth: 0,
-                  value: 1,
-                  click: function () {
-                     if (this.getValue()) $$(ids.imageWidth).enable();
-                     else $$(ids.imageWidth).disable();
-                  },
-               },
-               {
-                  view: "text",
-                  name: "imageWidth",
-                  id: ids.imageWidth,
-               },
-            ],
-         },
-         {
-            cols: [
-               {
-                  view: "checkbox",
-                  name: "useHeight",
-                  // id:componentIds.useHeight,
-                  labelRight: L("Height"),
-                  width: 80,
-                  labelWidth: 0,
-                  value: 1,
-                  click: function () {
-                     if (this.getValue()) $$(ids.imageHeight).enable();
-                     else $$(ids.imageHeight).disable();
-                  },
-               },
-               {
-                  view: "text",
-                  name: "imageHeight",
-                  id: ids.imageHeight,
-               },
-            ],
-         },
-         {
-            cols: [
-               {
-                  view: "checkbox",
-                  name: "useDefaultImage",
-                  labelRight: L("Default image"),
-                  width: 200,
-                  labelWidth: 0,
-                  value: 0,
-                  click: function () {
-                     if (this.getValue()) $$(ids.defaultImageUrl).enable();
-                     else $$(ids.defaultImageUrl).disable();
-                  },
-               },
-
-               {
-                  view: "uploader",
-                  id: ids.defaultImageUrl,
-                  template:
-                     '<div class="default-image-holder">' +
-                     '<div class="image-data-field-icon">' +
-                     '<i class="fa fa-picture-o fa-2x"></i>' +
-                     `<div>${L("Drag and drop or click here")}</div>` +
-                     "</div>" +
-                     '<div class="image-data-field-image" style="display:none;">' +
-                     '<a style="" class="ab-delete-photo" href="javascript:void(0);"><i class="fa fa-times delete-image" style="display:none;"></i></a>' +
-                     "</div>" +
-                     "</div>",
-                  apiOnly: true,
-                  inputName: "file",
-                  multiple: false,
-                  disabled: true,
-                  name: "defaultImageUrl",
-                  height: 150,
-                  width: 100,
-                  on: {
-                     // when a file is added to the uploader
-                     onBeforeFileAdd: function (item) {
-                        // verify file type
-                        var acceptableTypes = [
-                           "jpg",
-                           "jpeg",
-                           "bmp",
-                           "png",
-                           "gif",
-                        ];
-                        var type = item.type.toLowerCase();
-                        if (acceptableTypes.indexOf(type) == -1) {
-                           //// TODO: multilingual
-                           webix.message(
-                              "Only [" +
-                                 acceptableTypes.join(", ") +
-                                 "] images are supported"
-                           );
-                           return false;
-                        }
-                     },
-
-                     // if an error was returned
-                     onFileUploadError: function (item, response) {
-                        App.AB.notify.developer(
-                           new Error("Error loading image"),
-                           {
-                              message: "Error loading image",
-                              response,
-                           }
-                        );
-                     },
-                  },
-               },
-            ],
-         },
-      ];
-   },
-
-   // defaultValues: the keys must match a .name of your elements to set it's default value.
-   defaultValues: ABFieldImageCore.defaultValues(),
-
-   // rules: basic form validation rules for webix form entry.
-   // the keys must match a .name of your .elements for it to apply
-   rules: {
-      // 'textDefault':webix.rules.isNotEmpty,
-      // 'supportMultilingual':webix.rules.isNotEmpty
-   },
-
-   // include additional behavior on default component operations here:
-   // The base routines will be processed first, then these.  Any results
-   // from the base routine, will be passed on to these:
-   // 	@param {obj} ids  the list of ids used to generate the UI.  your
-   //					  provided .elements will have matching .name keys
-   //					  to access them here.
-   //  @param {obj} values the current set of values provided for this instance
-   // 					  of ABField:
-   //					  {
-   //						id:'',			// if already .saved()
-   // 						label:'',
-   // 						columnName:'',
-   //						settings:{
-   //							showIcon:'',
-   //
-   //							your element key=>values here
-   //						}
-   //					  }
-   //
-   // 		.clear(ids)  : reset the display to an empty state
-   // 		.isValid(ids, isValid): perform validation on the current editor values
-   // 		.populate(ids, ABField) : populate the form with your current settings
-   // 		.show(ids)   : display the form in the editor
-   // 		.values(ids, values) : return the current values from the form
-   logic: {
-      clear: (ids) => {
-         $$(ids.useWidth).setValue(0);
-         $$(ids.useHeight).setValue(0);
-         $$(ids.useDefaultImage).setValue(0);
-
-         $$(ids.imageWidth).setValue("");
-         $$(ids.imageHeight).setValue("");
-         $$(ids.defaultImageUrl).setValue("");
-      },
-      objectLoad: (object) => {
-         ABFieldImageComponent.currentObject = object;
-      },
-      populate: (ids, field) => {
-         var uploader = $$(ids.defaultImageUrl);
-         var value = field.settings.defaultImageUrl;
-         var isUseDefaultImage = field.settings.useDefaultImage;
-
-         if (field.settings.useDefaultImage) {
-            uploader.enable();
-         }
-
-         if (value && isUseDefaultImage) {
-            //Show default image
-            uploader.attachEvent("onAfterRender", function (file, response) {
-               var parentContainer = uploader.$view.querySelector(
-                  ".default-image-holder"
-               );
-               parentContainer.querySelector(
-                  ".image-data-field-icon"
-               ).style.display = "none";
-
-               var image = parentContainer.querySelector(
-                  ".image-data-field-image"
-               );
-               image.style.display = "";
-               image.style.backgroundImage = `url('/file/${value}')`;
-               image.setAttribute("image-uuid", value);
-
-               parentContainer.querySelector(".delete-image").style.display =
-                  "table-cell";
-            });
-
-            uploader.$view.addEventListener("click", (e) => {
-               if (e.target.className.indexOf("delete-image") > -1) {
-                  var parentContainer = uploader.$view.querySelector(
-                     ".default-image-holder"
-                  );
-                  parentContainer.querySelector(
-                     ".image-data-field-icon"
-                  ).style.display = "";
-
-                  var image = parentContainer.querySelector(
-                     ".image-data-field-image"
-                  );
-                  image.style.display = "none";
-                  image.style.backgroundImage = "";
-                  image.setAttribute("image-uuid", "");
-
-                  parentContainer.querySelector(".delete-image").style.display =
-                     "none";
-               }
-            });
-         }
-      },
-      show: (ids) => {
-         var url = this.urlUpload(true);
-
-         var uploader = $$(ids.defaultImageUrl);
-         uploader.config.upload = url;
-         uploader.attachEvent("onFileUpload", function (file, response) {
-            $$(ids.defaultImageUrl).setValue(response.data.uuid);
-
-            var parentContainer = uploader.$view.querySelector(
-               ".default-image-holder"
-            );
-            parentContainer.querySelector(
-               ".image-data-field-icon"
-            ).style.display = "none";
-
-            var image = parentContainer.querySelector(
-               ".image-data-field-image"
-            );
-            image.style.display = "";
-            image.style.backgroundImage = `url('${this.urlImage(
-               response.data.uuid
-            )}')`;
-
-            image.setAttribute("image-uuid", response.data.uuid);
-
-            parentContainer.querySelector(".delete-image").style.display =
-               "table-cell";
-         });
-         uploader.attachEvent("onAfterRender", function (file, response) {
-            var parentContainer = uploader.$view.querySelector(
-               ".default-image-holder"
-            );
-            parentContainer.querySelector(
-               ".image-data-field-icon"
-            ).style.display = "";
-
-            var image = parentContainer.querySelector(
-               ".image-data-field-image"
-            );
-            image.style.display = "none";
-            image.style.backgroundImage = "";
-            image.setAttribute("image-uuid", "");
-
-            parentContainer.querySelector(".delete-image").style.display =
-               "none";
-         });
-         uploader.addDropZone(uploader.$view);
-         uploader.render();
-      },
-   },
-
-   // perform any additional setup actions here.
-   // @param {obj} ids  the hash of id values for all the current form elements.
-   //					 it should have your elements + the default Header elements:
-   //						.label, .columnName, .fieldDescription, .showIcon
-   init: function (ids) {
-      // want to hide the description? :
-      // $$(ids.fieldDescription).hide();
-   },
-});
+const L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABFieldImage extends ABFieldImageCore {
    constructor(values, object) {
       super(values, object);
    }
 
-   /*
-    * @function propertiesComponent
-    *
-    * return a UI Component that contains the property definitions for this Field.
-    *
-    * @param {App} App the UI App instance passed around the Components.
-    * @param {stirng} idBase
-    * @return {Component}
-    */
-   static propertiesComponent(App, idBase) {
-      return ABFieldImageComponent.component(App, idBase);
-   }
-
    ///
    /// Instance Methods
    ///
+
    /**
     * @function destroy
     * On a destroy operation, ask if the user wants to keep the related images.
@@ -386,8 +73,8 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
    columnHeader(options) {
       options = options || {};
 
-      let config = super.columnHeader(options);
-      let field = this;
+      const config = super.columnHeader(options);
+      const field = this;
 
       config.editor = false; // 'text';  // '[edit_type]'   for your unique situation
       // config.sort   = 'string' // '[sort_type]'   for your unique situation
@@ -398,44 +85,49 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
       let imageSrcHeight = "100%";
       if (field.settings.useWidth) {
          config.width = field.settings.imageWidth || 100;
-         let heightVal =
+         const heightVal =
             field.settings.useHeight && field.settings.imageHeight
                ? field.settings.imageHeight + 20
                : 80;
-         containerHeight = `${heightVal} px`;
-         width = `${field.settings.imageWidth || 100} px`;
+         containerHeight = `${heightVal}px`;
+         width = `${field.settings.imageWidth || 100}px`;
          imageHeight =
             field.settings.useHeight && field.settings.imageHeight
                ? field.settings.imageHeight
                : 80;
-         imageHeight = `${imageHeight} px`;
+         imageHeight = `${imageHeight}px`;
          imageSrcHeight =
             field.settings.useHeight && field.settings.imageHeight
                ? field.settings.imageHeight
                : 60;
-         imageSrcHeight = `${imageSrcHeight} px`;
+         imageSrcHeight = `${imageSrcHeight}px`;
       }
-      if (field.settings.useHeight) {
-         containerHeight = parseInt(field.settings.imageHeight) + 20;
-         containerHeight = `${containerHeight} px`;
-         imageHeight = parseInt(field.settings.imageHeight);
-         imageHeight = `${imageHeight} px`;
-         imageSrcHeight = parseInt(field.settings.imageHeight);
-         imageSrcHeight = `${imageSrcHeight} px`;
+      if (
+         field.settings.useHeight &&
+         field.settings.imageHeight &&
+         field.settings.imageHeight != "NaN"
+      ) {
+         config.height = field.settings.imageHeight || 0;
+         containerHeight = parseInt(config.height) + 20;
+         containerHeight = `${containerHeight}px`;
+         imageHeight = parseInt(config.height);
+         imageHeight = `${imageHeight}px`;
+         imageSrcHeight = parseInt(config.height);
+         imageSrcHeight = `${imageSrcHeight}px`;
       }
 
-      let editable = options.editable;
+      const editable = options.editable;
 
       // populate our default template:
       // debugger;
       config.template = (obj) => {
          if (obj.$group) return obj[this.columnName];
 
-         let widthStyle = `width: ${width}; height: ${containerHeight}`;
+         const widthStyle = `width: ${width}; height: ${containerHeight}`;
 
-         let imageStyle = `width: ${width}; height: ${imageHeight}`;
+         const imageStyle = `width: ${width}; height: ${imageHeight}`;
 
-         let imgDiv = [
+         const imgDiv = [
             `<div class="ab-image-data-field" style="${widthStyle}">`,
             `<div class="webix_view ab-image-holder" style="${imageStyle}">`,
             '<div class="webix_template">',
@@ -472,26 +164,26 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
       if (!node) {
          return;
       }
-      var L = App.Label;
+      const L = App.Label;
 
       options = options || {};
 
-      var idBase = App.unique(this.idCustomContainer(row, options.formId));
+      const idBase = App.unique(this.idCustomContainer(row, options.formId));
 
       // safety check:
       // webix seems to crash if you specify a .container that doesn't exists:
       // Note: when the template is first created, we don't have App.unique()
-      var parentContainer = node.querySelector(".ab-image-holder");
+      const parentContainer = node.querySelector(".ab-image-holder");
       if (parentContainer) {
          parentContainer.innerHTML = "";
          // parentContainer.id = idBase;	// change it to the unique one.
 
-         var imgHeight = 0;
+         let imgHeight = 0;
          if (this.settings.useHeight) {
             imgHeight = parseInt(this.settings.imageHeight) || imgHeight;
          }
 
-         var imgWidth = 0;
+         let imgWidth = 0;
          if (this.settings.useWidth) {
             imgWidth = parseInt(this.settings.imageWidth) || imgWidth;
          }
@@ -504,7 +196,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
 
          // use a webix component for displaying the content.
          // do this so I can use the progress spinner
-         var webixContainer = webix.ui({
+         const webixContainer = webix.ui({
             view: "template",
             css: "ab-image-holder",
             // id: ids.container,
@@ -527,15 +219,15 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
          ////
 
          if (!options.editable) {
-            var domNode = parentContainer.querySelector(".delete-image");
+            const domNode = parentContainer.querySelector(".delete-image");
             if (domNode) domNode.style.display = "none";
 
             return;
          }
 
-         var url = this.urlUpload();
+         const url = this.urlUpload();
 
-         var uploader = webix.ui({
+         const uploader = webix.ui({
             view: "uploader",
             // id:ids.uploader,
             apiOnly: true,
@@ -555,8 +247,8 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
                   node.classList.remove("webix_invalid_cell");
 
                   // verify file type
-                  var acceptableTypes = ["jpg", "jpeg", "bmp", "png", "gif"];
-                  var type = item.type.toLowerCase();
+                  const acceptableTypes = ["jpg", "jpeg", "bmp", "png", "gif"];
+                  const type = item.type.toLowerCase();
                   if (acceptableTypes.indexOf(type) == -1) {
                      webix.message(
                         L("Only [{0}] images are supported", [
@@ -580,7 +272,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
 
                   // TODO: delete previous image from our OPsPortal service?
 
-                  var values = {};
+                  const values = {};
                   values[this.columnName] = response.data.uuid;
 
                   // update just this value on our current object.model
@@ -597,7 +289,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
                            $$(node).updateItem(row.id, values);
                         } else {
                            // if you scroll the table the connection to the datatable is lost so we need to find it again
-                           var dataTable = document.querySelector(
+                           const dataTable = document.querySelector(
                               ".webix_dtable"
                            );
                            if ($$(dataTable) && $$(dataTable).getItem(row.id))
@@ -673,10 +365,10 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
             title: "",
             message: L("Are you sure you want to remove this image?"),
             callback: async (result) => {
-               var confirmDelete = result ? 1 : 0;
+               const confirmDelete = result ? 1 : 0;
                if (confirmDelete) {
                   // update just this value on our current object.model
-                  var values = {};
+                  const values = {};
                   values[this.columnName] = ""; // removing the reference to the image here
 
                   try {
@@ -704,7 +396,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
             },
          });
       } else {
-         let uploaderId = node.dataset["uploaderId"],
+         const uploaderId = node.dataset["uploaderId"],
             uploader = $$(uploaderId);
 
          if (uploader && uploader.fileDialog)
@@ -728,7 +420,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
    }
 
    detailComponent() {
-      var detailComponentSetting = super.detailComponent();
+      const detailComponentSetting = super.detailComponent();
 
       detailComponentSetting.common = () => {
          return {
@@ -745,12 +437,12 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
       options.width = options.width || "100%";
 
       // deault view is icon:
-      var iconDisplay = "";
-      var imageDisplay = "display:none";
-      var imageURL = "";
+      let iconDisplay = "";
+      let imageDisplay = "display:none";
+      let imageURL = "";
 
-      var value = "";
-      var isRemoveDefaultImage = false;
+      let value = "";
+      let isRemoveDefaultImage = false;
       if (obj[this.columnName]) {
          value = obj[this.columnName];
       }
@@ -774,7 +466,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
          }
       }
 
-      var html = [
+      let html = [
          `<div class="image-data-field-icon" style="${iconDisplay}"><i class="fa fa-picture-o fa-2x"></i>#drag#</div>` +
             `<div class="image-data-field-image" style="${imageDisplay} width:${options.width}; height:${options.height}; ${imageURL}">#remove#</div>`,
       ].join("");
@@ -796,11 +488,11 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
    }
 
    showImage(uuid, node) {
-      var parentContainer = node.querySelector(".ab-image-holder");
+      const parentContainer = node.querySelector(".ab-image-holder");
       if (parentContainer) {
          parentContainer.querySelector(".image-data-field-icon").style.display =
             "none";
-         var image = parentContainer.querySelector(".image-data-field-image");
+         const image = parentContainer.querySelector(".image-data-field-image");
          image.style.display = "";
          image.style.backgroundImage = `url('${this.urlImage(uuid)}')`;
          image.setAttribute("image-uuid", uuid);
@@ -808,17 +500,17 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
    }
 
    getValue(item, rowData) {
-      var image = item.$view.querySelector(".image-data-field-image");
+      const image = item.$view.querySelector(".image-data-field-image");
       return image.getAttribute("image-uuid");
    }
 
    setValue(item, rowData) {
       if (!item) return;
 
-      var domNode = item.$view;
+      const domNode = item.$view;
       if (!domNode) return;
 
-      var val = null;
+      let val = null;
       if (rowData) {
          val = this.dataValue(rowData);
 
@@ -828,12 +520,12 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
          // }
       }
 
-      let imageIcon = domNode.querySelector(".image-data-field-icon");
+      const imageIcon = domNode.querySelector(".image-data-field-icon");
       if (imageIcon) imageIcon.style.display = val ? "none" : "";
 
-      let image = domNode.querySelector(".image-data-field-image");
+      const image = domNode.querySelector(".image-data-field-image");
       if (image) {
-         let imageDeleteIcon = image.querySelector(".ab-delete-photo");
+         const imageDeleteIcon = image.querySelector(".ab-delete-photo");
          if (imageDeleteIcon)
             imageDeleteIcon.style.display = val ? "block" : "none";
 
@@ -860,22 +552,22 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
     * }
     */
    toBase64(rowData) {
-      var promise = new Promise((resolve, reject) => {
+      const promise = new Promise((resolve, reject) => {
          if (!rowData[this.columnName]) return resolve(null);
 
-         var img = new Image();
+         const img = new Image();
          img.crossOrigin = "Anonymous";
          img.onerror = function (err) {
             reject(err);
          };
          img.onload = function () {
-            var canvas = document.createElement("canvas");
+            const canvas = document.createElement("canvas");
             canvas.width = img.width;
             canvas.height = img.height;
-            var ctx = canvas.getContext("2d");
+            const ctx = canvas.getContext("2d");
             ctx.drawImage(img, 0, 0);
-            var dataURL = canvas.toDataURL();
-            var imageData = {
+            const dataURL = canvas.toDataURL();
+            const imageData = {
                data: dataURL,
                width: img.width,
                height: img.height,
