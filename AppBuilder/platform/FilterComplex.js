@@ -6,25 +6,47 @@ let L = (...params) => AB.Multilingual.label(...params);
  * @function _toInternal()
  * translate our external QB conditions into our internal format that
  * makes the cond.rule unique by adding the field.id to the rule.
- * @param {obj} cond
+ * @param {obj} cond - {
+ *                         rules: [
+ *                            {
+ *                               alias: string || undefined,
+ *                               key: uuid,
+ *                               rule: string,
+ *                               value: object,
+ *                            }
+ *                         ]
+ *                      }
  *        the QB condition format we use exernally in our AB system.
  */
-function _toInternal(cond) {
+function _toInternal(cond, fields = []) {
+   if (!cond) return;
    if (cond.key) {
-      if (cond.key != "this_object") {
-         if (cond.rule && cond.rule.indexOf(cond.key) == -1) {
-            cond.rule = `${cond.key}_${cond.rule}`;
-         }
-      } else {
-         if (cond.rule && cond.rule.indexOf("uuid") == -1) {
-            cond.rule = `uuid_${cond.rule}`;
-         }
-      }
+      // Convert to format
+      // {
+      //    glue: "and",
+      //    rules: [
+      //       {
+      //          field: "test_col",
+      //          condition: { type: "greater", filter: 100 },
+      //       },
+      //    ],
+      // }
+      let field = fields.filter((f) => f.id == cond.key)[0];
+      cond.field = field?.columnName;
+      cond.includes = (cond.value || []).split(",");
+      cond.condition = {
+         type: cond.rule,
+         filter: cond.value,
+      };
+
+      delete cond.key;
+      delete cond.rule;
+      delete cond.value;
    }
 
    if (cond.rules && cond.rules.length) {
       (cond.rules || []).forEach((r) => {
-         _toInternal(r);
+         _toInternal(r, fields);
       });
    }
 }
@@ -33,25 +55,41 @@ function _toInternal(cond) {
  * @function _toExternal()
  * translate our internal QB conditions into our external format that
  * where the cond.rule no longer has the field.id.
- * @param {obj} cond
+ * @param {obj} cond - {
+ *                         glue: "and",
+ *                         rules: [
+ *                            {
+ *                               field: "test_col",
+ *                               condition: { type: "greater", filter: 100 },
+ *                            },
+ *                         ],
+ *                      }
  *        the QB condition format we use internally
  */
-function _toExternal(cond) {
-   if (cond.key) {
-      if (cond.key != "this_object") {
-         if (cond.rule && cond.rule.indexOf(cond.key) > -1) {
-            cond.rule = cond.rule.replace(`${cond.key}_`, "");
-         }
-      } else {
-         if (cond.rule && cond.rule.indexOf("uuid") > -1) {
-            cond.rule = cond.rule.replace(`uuid_`, "");
-         }
-      }
+function _toExternal(cond, fields = []) {
+   if (!cond) return;
+   if (cond.field) {
+      let field = fields.filter((f) => f.columnName == cond.field)[0];
+      cond.key = field?.id;
+      cond.condition = cond.condition || {};
+      cond.rule = cond.condition.type;
+
+      // Convert multi-values to a string
+      let values = cond.includes || [];
+      if (cond.condition.filter && values.indexOf(cond.condition.filter) < 0)
+         values.push(cond.condition.filter);
+
+      cond.value = values.join(",");
+
+      delete cond.field;
+      delete cond.type;
+      delete cond.includes;
+      delete cond.condition;
    }
 
    if (cond.rules && cond.rules.length) {
       (cond.rules || []).forEach((r) => {
-         _toExternal(r);
+         _toExternal(r, fields);
       });
    }
 }
@@ -124,7 +162,6 @@ module.exports = class FilterComplex extends FilterComplexCore {
 
       // internal list of Webix IDs to reference our UI components.
       let ids = (this.ids = {
-         filterForm: this.unique(`${idBase}_rowFilter_form`),
          popup: this.unique(`${idBase}_popup`),
          querybuilder: this.unique(`${idBase}_querybuilder`),
          save: this.unique(`${idBase}_save`),
@@ -148,36 +185,36 @@ module.exports = class FilterComplex extends FilterComplexCore {
       this.recordRuleOptions = [];
       this.recordRuleFieldOptions = [];
 
-      let _logic = this._logic || {};
-
-      _logic.onChange = () => {
-         if (!this.__blockOnChange) {
-            _logic.callbacks.onChange();
-         }
-
-         return false;
-      };
+      this.uiQueryCustomValue();
 
       // webix UI definition:
       this.ui = {
          rows: [
             {
-               view: "form",
-               id: ids.filterForm,
+               view: "layout",
                type: "clean",
                borderless: true,
-               // hidden: true,
-               elements: [
+               rows: [
                   {
-                     view: "querybuilder",
+                     view: "query",
                      id: ids.querybuilder,
-                     fields: [],
-                     filters: [],
-                     on: {
-                        onKeySelect: (form) => {
-                           this.uiCustomValue(form);
+                     data: () => [],
+                     // data: async (field) => await this.pullOptions(field),
+                     fields: [
+                        {
+                           id: "first_name",
+                           value: "First Name",
+                           type: "text",
+                           conditions: [
+                              {
+                                 id: "equals",
+                                 value: "Equals",
+                                 batch: "string",
+                                 handler: () => true,
+                              },
+                           ],
                         },
-                     },
+                     ],
                   },
                ],
             },
@@ -189,7 +226,6 @@ module.exports = class FilterComplex extends FilterComplexCore {
                click: () => {
                   if (this.myPopup) this.myPopup.hide();
                   this.emit("save", this.getValue());
-                  _logic.onChange();
                },
             },
          ],
@@ -200,9 +236,11 @@ module.exports = class FilterComplex extends FilterComplexCore {
    init(options) {
       super.init(options);
 
-      // register our callbacks:
-      for (var c in this._logic.callbacks) {
-         this._logic.callbacks[c] = options[c] || this._logic.callbacks[c];
+      const el = $$(this.ids.querybuilder);
+      if (el) {
+         el.getState().$observe("value", (v) => {
+            this.emit("changed", this.getValue());
+         });
       }
 
       // if (options.isRecordRule) {
@@ -229,8 +267,8 @@ module.exports = class FilterComplex extends FilterComplexCore {
    isValid(rowData) {
       let helper = () => true;
 
-      if ($$(this.ids.querybuilder))
-         helper = $$(this.ids.querybuilder).getFilterHelper();
+      let $query = $$(this.ids.querybuilder);
+      if ($query) helper = $query.getFilterFunction();
 
       return helper(rowData);
    }
@@ -239,7 +277,8 @@ module.exports = class FilterComplex extends FilterComplexCore {
       super.setValue(settings);
       if (!settings) return;
 
-      if ($$(this.ids.querybuilder)) {
+      const el = $$(this.ids.querybuilder);
+      if (el) {
          let qbSettings = this.AB.cloneDeep(settings);
 
          // Settings should match a condition built upon our QB format:
@@ -259,36 +298,23 @@ module.exports = class FilterComplex extends FilterComplexCore {
          // unique for each field (see uiInit()).  So when we bring in settings
          // we need to translate them into our internal format:
 
-         _toInternal(qbSettings);
+         _toInternal(qbSettings, this._Fields);
 
-         $$(this.ids.querybuilder).setValue(qbSettings);
-
-         // Update custom value
-         let $selectors = $$(this.ids.querybuilder).queryView(
-            {
-               view: "querybuilderline",
-            },
-            "all"
-         );
-         if ($selectors) {
-            ($selectors || []).forEach(($sElem) => {
-               this.uiCustomValue($sElem);
-            });
-         }
+         el.define("value", qbSettings);
       }
    }
 
    getValue() {
       if ($$(this.ids.querybuilder)) {
          let settings = this.AB.cloneDeep(
-            $$(this.ids.querybuilder).getValue() || {}
+            $$(this.ids.querybuilder).getState().value || {}
          );
 
          // what we pull out of the QB will have .rules in our internal format:
          // {field.id}_{rule}  (see uiInit() )
          // But we need to store them in our generic QB format for use outside
          // our FilterComplex widget.
-         _toExternal(settings);
+         _toExternal(settings, this._Fields);
          this.condition = settings;
       }
 
@@ -307,149 +333,336 @@ module.exports = class FilterComplex extends FilterComplexCore {
    uiInit() {
       let el = $$(this.ids.querybuilder);
       if (el) {
+         // Clear fields
+         while (el.config.fields.length > 0) {
+            el.config.fields.pop();
+         }
          // Set fields
-         el.define("fields", this.fieldsToQB());
-
-         // Set filters
-         // the filters here are an array of Condition Options for each field.
-         el.config.filters.clearAll();
-         (this.filtersToQB() || []).forEach((filter) => {
-            // .filtersToQB() generates an array of filters for each field,
-            // but the filter.id here is the type of condition rule: contains, not_contains, etc...
-            // we need the ID's to be unique, so we will make them unique to each field by adding
-            // {field.id}_{condition.rule} so make the unique id.
-
-            let type = Object.keys(filter.type)[0];
-            // make sure to only update the filter.id 1x
-            if (filter.id.indexOf(type) == -1) {
-               filter.id = type + "_" + filter.id;
-            }
-
-            // now filter.id is unique.
-
-            el.config.filters.add(filter);
+         (this.fieldsToQB() || []).forEach((f) => {
+            el.config.fields.push(f);
          });
       }
    }
 
-   uiCustomValue($selector) {
-      if (
-         !$selector ||
-         !$selector.config ||
-         !$selector.config.value ||
-         !$selector.config.value.key
-      )
-         return;
+   // HACK: have to overwrite Webix Query's function to support our custom input requirement.
+   // HooWoo
+   uiQueryCustomValue() {
+      // Could not require on the top of the page. (Webix cound not found error). Yahoo
+      const Query = require("../../js/webix/components/query/query.js");
 
-      let columnName = $selector.config.value.key;
-      let rule = $selector.config.value.rule;
-      // let value = $selector.config.value.value;
+      Query.views.filter.prototype.CreateFilter = (
+         field,
+         type,
+         format,
+         conditions,
+         place
+      ) => {
+         let inputs = this.uiValue(field);
 
-      let $valueElem = $selector.queryView({ customEdit: true });
-      if (!$valueElem) return;
+         let ui = {
+            view: "filter",
+            localId: "filter",
+            conditions: conditions,
+            field: field,
+            mode: type,
+            template: function (o) {
+               let str = o[field];
+               let parser =
+                  format || (type == "date" ? webix.i18n.dateFormatStr : null);
+               if (parser) str = parser(str);
+               return str;
+            },
+            inputs: inputs,
+            margin: 6,
+         };
 
-      let field = this._Fields.filter((f) => f.columnName == columnName)[0];
-      if (!field) return;
+         let filter = webix.ui(ui, place);
 
-      if (rule == "in_query" || rule == "not_in_query") {
-         this.uiInQueryValue($valueElem, field);
-      } else if (
-         rule == "in_data_collection" ||
-         rule == "not_in_data_collection"
-      ) {
-         this.uiInDataCollectionValue($valueElem, field);
-      } else if (field.key == "list") {
-         this.uiListValue($valueElem, field);
-      }
+         // let data = [];
+         // const $query = $$(this.ids.querybuilder);
+         // if ($query) {
+         //    data = $query.app.getService("backend").data(field);
+         // }
+         // filter.parse(data);
+
+         return filter;
+      };
    }
 
-   uiInQueryValue($value, field) {
+   uiValue(fieldColumnName) {
+      let result;
+
+      let field = (this._Fields || []).filter(
+         (f) => f.columnName == fieldColumnName
+      )[0];
+
+      switch (field?.key) {
+         case "boolean":
+            result = []
+               .concat(this.uiBooleanValue(field))
+               .concat(this.uiQueryFieldValue(field));
+            break;
+         case "connectObject":
+            result = []
+               .concat(this.uiQueryValue(field))
+               .concat(this.uiUserValue(field))
+               .concat(this.uiDataCollectionValue(field));
+            break;
+         case "list":
+            result = []
+               .concat(this.uiListValue(field))
+               .concat(this.uiQueryFieldValue(field));
+            break;
+         case "user":
+            result = []
+               .concat(this.uiUserValue(field))
+               .concat(this.uiQueryFieldValue(field));
+            break;
+      }
+
+      return result;
+   }
+
+   uiBooleanValue(field) {
+      return [
+         {
+            batch: "boolean",
+            view: "checkbox",
+         },
+      ];
+   }
+
+   uiQueryValue(field) {
       let options = [];
-      let Queries = [];
+
+      let isQueryField =
+         this._QueryFields?.filter((f) => f.id == field.id).length > 0;
 
       // populate the list of Queries for this_object:
       if (field.id == "this_object" && this._Object) {
-         Queries = this.queries((q) => q.canFilterObject(this._Object));
+         options = this._Queries?.filter((q) =>
+            q.canFilterObject(this._Object)
+         );
       }
       // populate the list of Queries for a query field
-      else {
-         Queries = this.queries((q) => {
-            return (
+      else if (isQueryField) {
+         options = this._Queries?.filter(
+            (q) =>
                (this._Object ? this._Object.id : "") != q.id && // Prevent filter looping
                q.canFilterObject(field.datasourceLink)
-            );
-         });
+         );
       }
 
-      Queries.forEach((q) => {
+      options?.forEach((q) => {
          options.push({
             id: q.id,
             value: q.label,
          });
       });
 
-      $value.define("options", options);
-      $value.refresh();
+      return [
+         {
+            batch: "query",
+            view: "combo",
+            options: options ?? [],
+         },
+      ];
    }
 
-   uiInDataCollectionValue($value, field) {
-      let options = [];
+   uiListValue(field) {
+      return [
+         {
+            batch: "list",
+            view: "combo",
+            options: field?.settings?.options?.map(function (x) {
+               return {
+                  id: x.id,
+                  value: x.text,
+               };
+            }),
+         },
+      ];
+   }
 
-      // get id of the link object
+   uiUserValue(field) {
+      return [
+         {
+            batch: "user",
+            view: "combo",
+            options: this.AB.Account.userList().map((u) => {
+               return {
+                  id: u.username,
+                  value: u.username,
+               };
+            }),
+         },
+      ];
+   }
+
+   uiDataCollectionValue(field) {
       let linkObjectId;
       if (field.id == "this_object" && this._Object) {
          linkObjectId = this._Object.id;
       } else {
-         linkObjectId = field.settings.linkObject;
+         linkObjectId = field?.settings?.linkObject;
       }
 
-      // pull data collection list
-      if (this._Application && linkObjectId) {
-         options = this._Application
-            .datacollections(
-               (dc) => dc.datasource && dc.datasource.id == linkObjectId
-            )
-            .map((dc) => {
-               return { id: dc.id, value: dc.label };
-            });
-      }
-
-      $value.define("options", options);
-      $value.refresh();
+      return [
+         {
+            batch: "datacollection",
+            view: "combo",
+            options:
+               this._Application && linkObjectId
+                  ? this._Application
+                       .datacollections(
+                          (dc) => dc?.datasource?.id == linkObjectId
+                       )
+                       .map((dc) => {
+                          return {
+                             id: dc.id,
+                             value: dc.label,
+                          };
+                       })
+                  : [],
+         },
+      ];
    }
 
-   uiListValue($value, field) {
-      let options = field.settings.options.map(function (opt) {
-         return {
-            id: opt.id,
-            value: opt.text,
-            hex: opt.hex,
-         };
-      });
-
-      $value.define("options", options);
-      $value.refresh();
+   uiQueryFieldValue(field) {
+      return [
+         {
+            batch: "queryField",
+            view: "combo",
+            options: this.queries(
+               (q) => this._Object == null || q.id != this._Object.id
+            ).map((q) => {
+               return {
+                  id: q.id,
+                  value: q.label,
+               };
+            }),
+         },
+      ];
    }
 
-   popUp() {
+   // uiCustomValue($selector) {
+   //    if (
+   //       !$selector ||
+   //       !$selector.config ||
+   //       !$selector.config.value ||
+   //       !$selector.config.value.key
+   //    )
+   //       return;
+
+   //    let columnName = $selector.config.value.key;
+   //    let rule = $selector.config.value.rule;
+   //    // let value = $selector.config.value.value;
+
+   //    let $valueElem = $selector.queryView({ customEdit: true });
+   //    if (!$valueElem) return;
+
+   //    let field = this._Fields.filter((f) => f.columnName == columnName)[0];
+   //    if (!field) return;
+
+   //    if (rule == "in_query" || rule == "not_in_query") {
+   //       this.uiInQueryValue($valueElem, field);
+   //    } else if (
+   //       rule == "in_data_collection" ||
+   //       rule == "not_in_data_collection"
+   //    ) {
+   //       this.uiInDataCollectionValue($valueElem, field);
+   //    } else if (field.key == "list") {
+   //       this.uiListValue($valueElem, field);
+   //    }
+   // }
+
+   // uiInQueryValue($value, field) {
+   //    let options = [];
+   //    let Queries = [];
+
+   //    // populate the list of Queries for this_object:
+   //    if (field.id == "this_object" && this._Object) {
+   //       Queries = this.queries((q) => q.canFilterObject(this._Object));
+   //    }
+   //    // populate the list of Queries for a query field
+   //    else {
+   //       Queries = this.queries((q) => {
+   //          return (
+   //             (this._Object ? this._Object.id : "") != q.id && // Prevent filter looping
+   //             q.canFilterObject(field.datasourceLink)
+   //          );
+   //       });
+   //    }
+
+   //    Queries.forEach((q) => {
+   //       options.push({
+   //          id: q.id,
+   //          value: q.label,
+   //       });
+   //    });
+
+   //    $value.define("options", options);
+   //    $value.refresh();
+   // }
+
+   // uiInDataCollectionValue($value, field) {
+   //    let options = [];
+
+   //    // get id of the link object
+   //    let linkObjectId;
+   //    if (field.id == "this_object" && this._Object) {
+   //       linkObjectId = this._Object.id;
+   //    } else {
+   //       linkObjectId = field.settings.linkObject;
+   //    }
+
+   //    // pull data collection list
+   //    if (this._Application && linkObjectId) {
+   //       options = this._Application
+   //          .datacollections(
+   //             (dc) => dc.datasource && dc.datasource.id == linkObjectId
+   //          )
+   //          .map((dc) => {
+   //             return { id: dc.id, value: dc.label };
+   //          });
+   //    }
+
+   //    $value.define("options", options);
+   //    $value.refresh();
+   // }
+
+   // uiListValue($value, field) {
+   //    let options = field.settings.options.map(function (opt) {
+   //       return {
+   //          id: opt.id,
+   //          value: opt.text,
+   //          hex: opt.hex,
+   //       };
+   //    });
+
+   //    $value.define("options", options);
+   //    $value.refresh();
+   // }
+
+   popUp(...options) {
       if (!this.myPopup) {
          let ui = {
             id: this.ids.popup,
             view: "popup",
-            position: "center",
-            height: 500,
-            width: 1000,
+            height: 400,
+            width: 800,
             body: this.ui,
          };
 
          this.myPopup = webix.ui(ui);
+         this.init();
       }
 
-      if (this.application) {
-         this.applicationLoad(this.application);
+      if (this._Application) {
+         this.applicationLoad(this._Application);
       }
-      if (this.fields) {
-         this.fieldsLoad(this.fields);
+      if (this._Fields) {
+         this.fieldsLoad(this._Fields);
       }
 
       // NOTE: do this, before the .setValue() operation, as we need to have
@@ -460,6 +673,6 @@ module.exports = class FilterComplex extends FilterComplexCore {
          this.setValue(this.condition);
       }
 
-      this.myPopup.show();
+      this.myPopup.show(...options);
    }
 };

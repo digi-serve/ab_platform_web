@@ -18,7 +18,8 @@
 import ABViewProperty from "./ABViewProperty";
 // const ABViewGridFilterRule = require("../../../rules/ABViewGridFilterRule");
 
-const RowFilter = require("../../RowFilter");
+// const RowFilter = require("../../RowFilter");
+const ComplexFilter = require("../../FilterComplex");
 
 let L = (...params) => AB.Multilingual.label(...params);
 
@@ -57,7 +58,7 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
       // External sources of text filters are stored here. This is most likely
       // from the global search toolbar entry.
 
-      this.rowFilter = new RowFilter(
+      this.rowFilter = new ComplexFilter(
          null,
          `${this.ids.component}_filter`,
          this.AB
@@ -66,7 +67,7 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
       // When .userFilterPosition == "toolbar" we use this RowFilter to
       // display a form in a popup where the toolbar button is.
 
-      this.rowFilterForm = new RowFilter(
+      this.rowFilterForm = new ComplexFilter(
          null,
          `${this.ids.component}_filter_form`,
          this.AB
@@ -635,17 +636,28 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
       }
 
       var ids = this.ids;
-      this.filter_popup = webix.ui({
-         view: "popup",
-         id: ids.component,
-         width: 800,
-         hidden: true,
-         body: this.rowFilter.ui,
-      });
+      // this.filter_popup = webix.ui({
+      //    view: "popup",
+      //    id: ids.component,
+      //    width: 600,
+      //    height: 400,
+      //    hidden: true,
+      //    body: this.rowFilter.ui,
+      // });
 
       this.rowFilter.init();
-      this.rowFilter.on("changed", () => {
-         this.triggerCallback();
+      this.rowFilter.on("changed", (value) => {
+         let filterRules = value.rules || [];
+
+         // if ($$(ids.buttonFilter)) {
+         // 	$$(ids.buttonFilter).define('badge', filterRules.length || null);
+         // 	$$(ids.buttonFilter).refresh();
+         // }
+
+         // be notified when there is a change in the filter
+         this.triggerCallback((rowData) => {
+            return this.rowFilter.isValid(rowData);
+         }, filterRules);
       });
 
       this.rowFilterForm.init();
@@ -904,7 +916,8 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
    }
 
    showPopup($view) {
-      this.filter_popup.show($view, null, { pos: "top" });
+      // this.filter_popup.show($view, null, { pos: "top" });
+      this.rowFilter.popUp($view);
    }
 
    /**
@@ -919,8 +932,12 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
       this.App = App;
       this.idBase = idBase;
 
-      this.rowFilter = new RowFilter(App, `${idBase}_filter`, App.AB);
-      this.rowFilterForm = new RowFilter(App, `${idBase}_filter_form`, App.AB);
+      this.rowFilter = new ComplexFilter(App, `${idBase}_filter`, App.AB);
+      this.rowFilterForm = new ComplexFilter(
+         App,
+         `${idBase}_filter_form`,
+         App.AB
+      );
 
       if (this.object) {
          // this.rowFilter.applicationLoad(this.object.application);
@@ -1009,13 +1026,13 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
       };
 
       let init = (options) => {
-         this.filter_popup = webix.ui({
-            view: "popup",
-            id: ids.component,
-            width: 800,
-            hidden: true,
-            body: this.rowFilter.ui,
-         });
+         // this.filter_popup = webix.ui({
+         //    view: "popup",
+         //    id: ids.component,
+         //    width: 800,
+         //    hidden: true,
+         //    body: this.rowFilter.ui,
+         // });
 
          // register callbacks:
          for (var c in logic.callbacks) {
@@ -1023,30 +1040,27 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
          }
 
          this.rowFilter.init({
-            onChange: () => {
-               let filterRules = this.rowFilter.getValue().rules || [];
-
-               // if ($$(ids.buttonFilter)) {
-               // 	$$(ids.buttonFilter).define('badge', filterRules.length || null);
-               // 	$$(ids.buttonFilter).refresh();
-               // }
-
-               // be notified when there is a change in the filter
-               logic.triggerCallback((rowData) => {
-                  return this.rowFilter.isValid(rowData);
-               }, filterRules);
-            },
+            //    onChange: () => {
+            //       let filterRules = this.rowFilter.getValue().rules || [];
+            //       // if ($$(ids.buttonFilter)) {
+            //       // 	$$(ids.buttonFilter).define('badge', filterRules.length || null);
+            //       // 	$$(ids.buttonFilter).refresh();
+            //       // }
+            //       // be notified when there is a change in the filter
+            //       logic.triggerCallback((rowData) => {
+            //          return this.rowFilter.isValid(rowData);
+            //       }, filterRules);
+            //    },
          });
 
          this.rowFilterForm.init({
-            onChange: () => {
-               let filterRules = this.rowFilterForm.getValue().rules || [];
-
-               // be notified when there is a change in the filter
-               logic.triggerCallback((rowData) => {
-                  return this.rowFilterForm.isValid(rowData);
-               }, filterRules);
-            },
+            //    onChange: () => {
+            //       let filterRules = this.rowFilterForm.getValue().rules || [];
+            //       // be notified when there is a change in the filter
+            //       logic.triggerCallback((rowData) => {
+            //          return this.rowFilterForm.isValid(rowData);
+            //       }, filterRules);
+            //    },
          });
 
          $$(ids.filterPanel).hide();
