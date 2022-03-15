@@ -1206,13 +1206,17 @@ module.exports = class ABViewForm extends ABViewFormCore {
     */
    getFormValues(formView, obj, dcLink) {
       // get the fields that are on this form
-      var visibleFields = [];
+      var visibleFields = ["id"]; // we always want the id so we can udpate records
       var loopForm = formView.getValues(function (obj) {
          visibleFields.push(obj.config.name);
       });
 
-      // get update data
-      var formVals = formView.getValues();
+      // only get data passed from form
+      let allVals = formView.getValues();
+      let formVals = {};
+      visibleFields.forEach((val) => {
+         formVals[val] = allVals[val];
+      });
 
       // get custom values
       var customFields = this.fieldComponents(
@@ -1247,13 +1251,6 @@ module.exports = class ABViewForm extends ABViewFormCore {
          if (formVals[prop] == null || formVals[prop].length == 0)
             formVals[prop] = "";
       }
-
-      // add default values to hidden fields
-      obj.fields().forEach((f) => {
-         if (formVals[f.columnName] === undefined) {
-            f.defaultValue(formVals);
-         }
-      });
 
       // Add parent's data collection cursor when a connect field does not show
       if (dcLink && dcLink.getCursor()) {

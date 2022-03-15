@@ -174,7 +174,8 @@ module.exports = class ABObject extends ABObjectCore {
    isValidData(data) {
       var validator = this.AB.Validation.validator();
       this.fields().forEach((f) => {
-         f.isValidData(data, validator);
+         // check if value was passed, if so validate it
+         if (data.hasOwnProperty(f.columnName)) f.isValidData(data, validator);
       });
 
       return validator;
