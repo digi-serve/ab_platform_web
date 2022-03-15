@@ -1650,6 +1650,20 @@ class ABViewGridComponent extends ABViewComponent {
       var accessLevel = DataTable.config.accessLevel;
       DataTable.define("leftSplit", 0);
       DataTable.define("rightSplit", 0);
+
+      let rowHeight = 0;
+      CurrentObject.imageFields().forEach((image) => {
+         if (
+            image.settings.useHeight &&
+            image.settings.imageHeight > rowHeight
+         ) {
+            rowHeight = image.settings.imageHeight;
+         }
+      });
+      if (rowHeight) {
+         DataTable.define("rowHeight", rowHeight);
+      }
+
       // DataTable.clearAll();
 
       var settings = this.settings;
