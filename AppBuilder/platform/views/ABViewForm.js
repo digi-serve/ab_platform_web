@@ -985,7 +985,10 @@ module.exports = class ABViewForm extends ABViewFormCore {
                      // set value to each components
                      var defaultRowData = {};
                      field.defaultValue(defaultRowData);
-                     field.setValue($$(comp.ui.id), defaultRowData);
+                     field.setValue(
+                        $$(comp.ui.inputId ? comp.ui.inputId : comp.ui.id),
+                        defaultRowData
+                     );
 
                      comp.logic?.refresh?.(defaultRowData);
                   });
