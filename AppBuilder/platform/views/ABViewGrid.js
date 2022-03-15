@@ -1684,10 +1684,15 @@ class ABViewGridComponent extends ABViewComponent {
          // we want to overwrite our default settings with anything stored
          // in local storage
          var origCol = objColumnHeaders.find((h) => h.fieldID == c.fieldID);
-         // to do this we use _.merge() on duplicate keys the second passed
-         // object wins the tie
-         var mergedCol = _.merge(origCol, c);
-         c = mergedCol;
+
+         // none of our functions can be stored in localStorage, so scan
+         // the original column and attach any template functions to our
+         // stashed copy.
+         Object.keys(origCol).forEach((k) => {
+            if (typeof origCol[k] == "function") {
+               c[k] = origCol[k];
+            }
+         });
 
          var f = CurrentObject.fieldByID(c.fieldID);
          if (!f) return;
