@@ -203,6 +203,7 @@ class ABViewGridComponent extends ABViewComponent {
          prerender: false,
          editable: settings.isEditable,
          fixedRowHeight: false,
+         height: settings.height || 0,
          editaction: "custom",
          select: selectType,
          footer:
@@ -1650,6 +1651,20 @@ class ABViewGridComponent extends ABViewComponent {
       var accessLevel = DataTable.config.accessLevel;
       DataTable.define("leftSplit", 0);
       DataTable.define("rightSplit", 0);
+
+      let rowHeight = 0;
+      CurrentObject.imageFields().forEach((image) => {
+         if (
+            image.settings.useHeight &&
+            image.settings.imageHeight > rowHeight
+         ) {
+            rowHeight = image.settings.imageHeight;
+         }
+      });
+      if (rowHeight) {
+         DataTable.define("rowHeight", rowHeight);
+      }
+
       // DataTable.clearAll();
 
       var settings = this.settings;

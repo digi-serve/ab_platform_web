@@ -35,7 +35,7 @@ module.exports = class RowFilter extends RowFilterCore {
       });
 
       // Set current username
-      this.Account.username = this.AB.Account.username();
+      // this.Account.username = this.AB.Account.username();
 
       var batchName; // we need to revert to this default when switching away from a in/by query field
 

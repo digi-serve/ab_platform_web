@@ -532,8 +532,11 @@ input[type="text"].selectivity-multiple-input {
    padding-top: 0;
 }
 .webix_cell .ab-image-data-field {
-   pointer-events: none;
-   padding: 10px 0;
+   /* pointer-events: none; */
+   padding: 0;
+}
+.ab-image-holder .webix_template {
+   padding: 0;
 }
 .ab-image-data-field {
    width: 100%;
@@ -906,6 +909,9 @@ input[type="text"].selectivity-multiple-input {
 
 .image-data-field-image {
    position: relative;
+   border: 5px solid white;
+   background-size: cover;
+   background-position: center;
 }
 .ab-delete-photo {
    position: absolute;
@@ -1588,4 +1594,40 @@ div.webix_dataview_item.webix_transparent {
 }
 .ab-connect-add-new-link .webix_icon_btn {
    margin-right: 0;
+}
+.image-data-field-icon {
+   border: 2px dashed rgba(0, 0, 0, 0.3);
+   border-radius: 10px;
+   padding: 5px;
+   display: flex;
+   flex-direction: row;
+   text-align: center;
+   justify-content: center;
+   align-items: center;
+   line-height: 12px;
+   font-size: 10px;
+   color: rgba(0, 0, 0, 0.5);
+   margin: 5px;
+   height: calc(100% - 10px);
+   overflow: hidden;
+}
+.webix_cell > .ab-image-data-field {
+   margin-left: -12px;
+}
+.ab-delete-photo {
+   background: red;
+   color: white;
+   font-size: 10px;
+   text-align: center;
+   line-height: 20px;
+   width: 20px;
+   height: 20px;
+   border-radius: 10px;
+   top: -3px;
+   right: -3px;
+   transition: all 0.25s;
+}
+.ab-delete-photo:hover {
+   color: white;
+   font-size: 14px;
 }

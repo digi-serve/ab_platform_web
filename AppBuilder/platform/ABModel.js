@@ -209,6 +209,13 @@ module.exports = class ABModel extends ABModelCore {
    create(values) {
       this.prepareMultilingualData(values);
 
+      // add default values record if no value is passed for column
+      this.object.fields().forEach((f) => {
+         if (values[f.columnName] === undefined) {
+            f.defaultValue(values);
+         }
+      });
+
       return new Promise((resolve, reject) => {
          var jobID = this.AB.jobID();
          this.AB.Network.once(jobID, this.handler_create);

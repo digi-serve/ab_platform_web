@@ -38,7 +38,7 @@ module.exports = class ABFieldUser extends ABFieldUserCore {
          //       connection
          const linkCol = SiteUser.fieldNew({
             key: ABFieldConnectCore.defaults().key,
-            columnName: this.object.tableName,
+            columnName: `${this.object.name}_${this.label}`,
             label: this.object.label,
             settings: {
                showIcon: this.settings.showIcon,
@@ -64,13 +64,15 @@ module.exports = class ABFieldUser extends ABFieldUserCore {
          // this.settings.linkColumn = linkCol.id;
          // await ABFieldUserCore.prototype.save.call(this);
 
-         await this.save();
+         let newDef = await this.toDefinition().save();
+         this.id = newDef.id;
 
          linkCol.settings.linkColumn = this.id;
-         await linkCol.save();
+         let newLinkDef = await linkCol.toDefinition().save();
+         linkCol.id = newLinkDef.id;
 
          this.settings.linkColumn = linkCol.id;
-         await this.save();
+         await this.toDefinition().save();
 
          // Add fields to Objects
          await this.object.fieldAdd(this);
@@ -80,7 +82,7 @@ module.exports = class ABFieldUser extends ABFieldUserCore {
          // Create column to DB
          await this.migrateCreate();
 
-         // await linkCol.migrateCreate();
+         await linkCol.migrateCreate();
 
          return this;
       } else {
