@@ -516,7 +516,6 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          item.getList().define("data", val);
       }
       item.define("value", val);
-      item.refresh();
    }
 
    /**
