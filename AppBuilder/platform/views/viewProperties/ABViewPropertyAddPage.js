@@ -304,10 +304,12 @@ export default class ABViewPropertyAddPage extends ABViewProperty {
                   // Set label of selected item
                   if (linkedData.text) {
                      data[relationName].text = linkedData.text;
+                     data[relationName].value = data[relationName].text;
                   } else {
                      let rawData = {};
                      rawData[relationName] = linkedData;
                      data[relationName].text = field.format(rawData);
+                     data[relationName].value = data[relationName].text;
                   }
 
                   let comp = v.viewComponents[fView.id];
