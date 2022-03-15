@@ -147,32 +147,6 @@ module.exports = class ABObjectQuery extends ABObjectQueryCore {
    }
 
    ///
-   /// DB Migrations
-   ///
-
-   /**
-    * @method migrateCreate
-    * A Query Object doesn't do anything on a migrateCreate() request.
-    * override these in case they are called for some reason.
-    */
-   migrateCreate() {
-      return new Promise((resolve, reject) => {
-         resolve();
-      });
-   }
-
-   /**
-    * @method migrateDrop
-    * A Query Object doesn't do anything on a migrateDrop() request.
-    * override these in case they are called for some reason.
-    */
-   migrateDrop() {
-      return new Promise((resolve, reject) => {
-         resolve();
-      });
-   }
-
-   ///
    /// Working with Client Components:
    ///
 
