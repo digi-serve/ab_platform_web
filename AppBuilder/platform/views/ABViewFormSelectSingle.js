@@ -126,7 +126,7 @@ module.exports = class ABViewFormSelectSingle extends (
 
       component.ui.id = ids.component;
 
-      if (field.settings.hasColors) {
+    if (field?.settings.hasColors) {
          component.ui.css = "combowithcolors";
          component.ui.options = {
             view: "suggest",
