@@ -170,18 +170,6 @@ module.exports = class FilterComplex extends FilterComplexCore {
       // Set current username
       this.Account.username = this.AB.Account.username();
 
-      // Default options list to push to all fields
-      // this.queryFieldOptions = [
-      //    {
-      //       value: this.labels.component.inQueryField,
-      //       id: "in_query_field"
-      //    },
-      //    {
-      //       value: this.labels.component.notInQueryField,
-      //       id: "not_in_query_field"
-      //    }
-      // ];
-
       this.recordRuleOptions = [];
       this.recordRuleFieldOptions = [];
 
@@ -243,19 +231,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
          });
       }
 
-      // if (options.isRecordRule) {
-      //    this.recordRuleOptions = [
-      //       {
-      //          value: this.labels.component.sameAsField,
-      //          id: "same_as_field"
-      //       },
-      //       {
-      //          value: this.labels.component.notSameAsField,
-      //          id: "not_same_as_field"
-      //       }
-      //    ];
-      //    this.recordRuleFieldOptions = options.fieldOptions;
-      // }
+      this._isRecordRule = options?.isRecordRule ?? false;
    }
 
    /**
@@ -398,9 +374,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
 
       switch (field?.key) {
          case "boolean":
-            result = []
-               .concat(this.uiBooleanValue(field))
-               .concat(this.uiQueryFieldValue(field));
+            result = [].concat(this.uiBooleanValue(field));
             break;
          case "connectObject":
             result = []
@@ -408,17 +382,28 @@ module.exports = class FilterComplex extends FilterComplexCore {
                .concat(this.uiUserValue(field))
                .concat(this.uiDataCollectionValue(field));
             break;
+         case "date":
+         case "datetime":
+            result = ["datepicker", "daterangepicker"];
+            break;
          case "list":
-            result = []
-               .concat(this.uiListValue(field))
-               .concat(this.uiQueryFieldValue(field));
+            result = [].concat(this.uiListValue(field));
+            break;
+         case "number":
+            result = ["text"];
             break;
          case "user":
-            result = []
-               .concat(this.uiUserValue(field))
-               .concat(this.uiQueryFieldValue(field));
+            result = [].concat(this.uiUserValue(field));
+            break;
+         case "string":
+         case "LongText":
+         case "email":
+            result = ["text"];
             break;
       }
+
+      if (field?.key != "connectObject")
+         result = (result || []).concat(this.uiQueryFieldValue(field));
 
       return result;
    }
@@ -533,6 +518,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
          {
             batch: "queryField",
             view: "combo",
+            placeholder: this.labels.component.inQueryFieldQueryPlaceholder,
             options: this.queries(
                (q) => this._Object == null || q.id != this._Object.id
             ).map((q) => {
@@ -543,6 +529,62 @@ module.exports = class FilterComplex extends FilterComplexCore {
             }),
          },
       ];
+
+      // !! NOTE: Webix Query widget need a Input only
+      // const _onChangeQueryFieldCombo = (value, $querySelector) => {
+      //    // populate the list of Queries for this_object:
+      //    let options = [];
+      //    // Get all queries fields
+      //    let Query = this.queries((q) => q.id == value)[0];
+      //    if (Query) {
+      //       Query.fields((f) => !f.isConnection).forEach((q) => {
+      //          options.push({
+      //             id: q.id,
+      //             value: `${q?.object?.label}.${q?.label}`,
+      //          });
+      //       });
+      //       // Populate field options to the query field selector
+      //       const $queryFieldSelector = $querySelector?.getParent()?.queryView(
+      //          {
+      //             placeholder: this.labels.inQueryFieldFieldPlaceholder,
+      //          },
+      //          "all"
+      //       )[0];
+      //       if ($queryFieldSelector) {
+      //          $queryFieldSelector.define("options", options);
+      //          $queryFieldSelector.refresh();
+      //       }
+      //    }
+      // };
+      // return [
+      //    {
+      //       batch: "queryField",
+      //       rows: [
+      //          {
+      //             view: "combo",
+      //             placeholder: this.labels.inQueryFieldQueryPlaceholder,
+      //             options: this.queries(
+      //                (q) => this._Object == null || q.id != this._Object.id
+      //             ).map((q) => {
+      //                return {
+      //                   id: q.id,
+      //                   value: q.label,
+      //                };
+      //             }),
+      //             on: {
+      //                onChange: function (val) {
+      //                   _onChangeQueryFieldCombo(val, this);
+      //                },
+      //             },
+      //          },
+      //          {
+      //             view: "combo",
+      //             placeholder: this.labels.inQueryFieldFieldPlaceholder,
+      //             options: [],
+      //          },
+      //       ],
+      //    },
+      // ];
    }
 
    // uiCustomValue($selector) {
