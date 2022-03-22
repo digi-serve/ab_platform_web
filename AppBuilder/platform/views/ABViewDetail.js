@@ -334,6 +334,10 @@ module.exports = class ABViewDetail extends ABViewDetailCore {
                         break;
                      case "list":
                         val = rowData[field.columnName];
+                        if (!val) {
+                           val = "";
+                           break;
+                        }
 
                         if (field.settings.isMultiple == 0) {
                            let myVal = "";
@@ -344,18 +348,38 @@ module.exports = class ABViewDetail extends ABViewDetailCore {
 
                            if (field.settings.hasColors) {
                               let myHex = "#66666";
+                              let hasCustomColor = "";
                               field.settings.options.forEach(function (h) {
-                                 if (h.text == myVal) myHex = h.hex;
+                                 if (h.text == myVal) {
+                                    myHex = h.hex;
+                                    hasCustomColor = "hascustomcolor";
+                                 }
                               });
-                              myVal =
-                                 '<span class="selectivity-multiple-selected-item rendered" style="background-color:' +
-                                 myHex +
-                                 ' !important;">' +
-                                 myVal +
-                                 "</span>";
+                              myVal = `<span class="webix_multicombo_value ${hasCustomColor}" style="background-color: ${myHex} !important;"><span>${myVal}</span></span>`;
                            }
 
                            val = myVal;
+                        } else {
+                           let items = [];
+                           let myVal = "";
+                           val.forEach((value) => {
+                              var hasCustomColor = "";
+                              var optionHex = "";
+                              if (field.settings.hasColors && value.hex) {
+                                 hasCustomColor = "hascustomcolor";
+                                 optionHex = `background: ${value.hex};`;
+                              }
+                              field.settings.options.forEach(function (
+                                 options
+                              ) {
+                                 if (options.id == value.id)
+                                    myVal = options.text;
+                              });
+                              items.push(
+                                 `<span class="webix_multicombo_value ${hasCustomColor}" style="${optionHex}" optvalue="${value.id}"><span>${myVal}</span></span>`
+                              );
+                           });
+                           val = items.join("");
                         }
                         break;
                      case "user":

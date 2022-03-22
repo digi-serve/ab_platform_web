@@ -71,7 +71,7 @@ class Account extends EventEmitter {
    }
 
    roles(fn = () => true) {
-      return (this._config.roles || []).filter(fn);
+      return (this._config?.roles || []).filter(fn);
    }
    rolesAll() {
       return this._listRoles;
@@ -82,7 +82,7 @@ class Account extends EventEmitter {
    }
 
    username() {
-      return this._config.username;
+      return this._config?.username;
    }
 
    userList() {
@@ -90,7 +90,7 @@ class Account extends EventEmitter {
    }
 
    uuid() {
-      return this._config.uuid;
+      return this._config?.uuid;
    }
 }
 

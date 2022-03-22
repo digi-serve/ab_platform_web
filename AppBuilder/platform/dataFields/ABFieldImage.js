@@ -89,26 +89,38 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
             field.settings.useHeight && field.settings.imageHeight
                ? field.settings.imageHeight + 20
                : 80;
-         containerHeight = `${heightVal} px`;
-         width = `${field.settings.imageWidth || 100} px`;
+         containerHeight = `${heightVal}px`;
+         width = `${field.settings.imageWidth || 100}px`;
          imageHeight =
             field.settings.useHeight && field.settings.imageHeight
                ? field.settings.imageHeight
                : 80;
-         imageHeight = `${imageHeight} px`;
+         imageHeight = `${imageHeight}px`;
          imageSrcHeight =
             field.settings.useHeight && field.settings.imageHeight
                ? field.settings.imageHeight
                : 60;
-         imageSrcHeight = `${imageSrcHeight} px`;
+         imageSrcHeight = `${imageSrcHeight}px`;
+      } else if (options.width) {
+         config.width = options.width || 100;
+         width = `${options.width || 100}px`;
+         imageHeight = options.width;
+         imageHeight = `${imageHeight}px`;
+         imageSrcHeight = options.width;
+         imageSrcHeight = `${imageSrcHeight}px`;
       }
-      if (field.settings.useHeight) {
-         containerHeight = parseInt(field.settings.imageHeight) + 20;
-         containerHeight = `${containerHeight} px`;
-         imageHeight = parseInt(field.settings.imageHeight);
-         imageHeight = `${imageHeight} px`;
-         imageSrcHeight = parseInt(field.settings.imageHeight);
-         imageSrcHeight = `${imageSrcHeight} px`;
+      if (
+         field.settings.useHeight &&
+         field.settings.imageHeight &&
+         field.settings.imageHeight != "NaN"
+      ) {
+         config.height = field.settings.imageHeight || 0;
+         containerHeight = parseInt(config.height) + 20;
+         containerHeight = `${containerHeight}px`;
+         imageHeight = parseInt(config.height);
+         imageHeight = `${imageHeight}px`;
+         imageSrcHeight = parseInt(config.height);
+         imageSrcHeight = `${imageSrcHeight}px`;
       }
 
       const editable = options.editable;
@@ -123,7 +135,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
          const imageStyle = `width: ${width}; height: ${imageHeight}`;
 
          const imgDiv = [
-            `<div class="ab-image-data-field" style="${widthStyle}">`,
+            `<div class="ab-image-data-field" style="float: left; ${widthStyle}">`,
             `<div class="webix_view ab-image-holder" style="${imageStyle}">`,
             '<div class="webix_template">',
             this.imageTemplate(obj, {
@@ -357,8 +369,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
 
          // Ask the user if they really want to delete the photo
          webix.confirm({
-            title: "",
-            message: L("Are you sure you want to remove this image?"),
+            title: L("Are you sure you want to remove this image?"),
             callback: async (result) => {
                const confirmDelete = result ? 1 : 0;
                if (confirmDelete) {
@@ -433,7 +444,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
 
       // deault view is icon:
       let iconDisplay = "";
-      let imageDisplay = "display:none";
+      let imageDisplay = "display:none;";
       let imageURL = "";
 
       let value = "";
@@ -448,12 +459,12 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
       }
 
       if (value) {
-         iconDisplay = "display:none";
+         iconDisplay = "display:none;";
          imageDisplay = "";
          imageURL = `background-image:url('${this.urlImage(value)}');`;
       } else {
          if (this.settings.useDefaultImage && !isRemoveDefaultImage) {
-            iconDisplay = "display:none";
+            iconDisplay = "display:none;";
             imageDisplay = "";
             imageURL = `background-image:url('${this.urlImage(
                this.settings.defaultImageUrl
@@ -462,7 +473,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
       }
 
       let html = [
-         `<div class="image-data-field-icon" style="${iconDisplay}"><i class="fa fa-picture-o fa-2x"></i>#drag#</div>` +
+         `<div class="image-data-field-icon" style="${iconDisplay}">#drag#</div>` +
             `<div class="image-data-field-image" style="${imageDisplay} width:${options.width}; height:${options.height}; ${imageURL}">#remove#</div>`,
       ].join("");
 

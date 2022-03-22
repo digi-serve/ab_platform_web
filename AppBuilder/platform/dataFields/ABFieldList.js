@@ -1,14 +1,12 @@
 const ABFieldListCore = require("../../core/dataFields/ABFieldListCore");
 
-const ABFieldSelectivity = require("./ABFieldSelectivity");
-
 const L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABFieldList extends ABFieldListCore {
    constructor(values, object) {
       super(values, object);
 
-      this._Selectivity = new ABFieldSelectivity(values, object);
+      // this._Selectivity = new ABFieldSelectivity(values, object);
    }
 
    ///
@@ -133,106 +131,84 @@ module.exports = class ABFieldList extends ABFieldListCore {
       const field = this;
       const App = field.AB._App;
 
-      // Multiple select list
-      if (this.settings.isMultiple == true) {
-         const width = options.width,
-            editable = options.editable;
-
-         config.template = (row) => {
-            const node = document.createElement("div");
-            node.classList.add("list-data-values");
-            if (typeof width != "undefined") {
-               node.style.marginLeft = width + "px";
-            }
-
-            const domNode = node;
-
-            let placeholder = L("Select items");
-            let readOnly = false;
-            if (editable != null && editable == false) {
-               readOnly = true;
-               placeholder = "";
-            }
-
-            // const domNode = node.querySelector('.list-data-values');
-
-            // get selected values
-            const selectedData = _getSelectedOptions(field, row);
-
-            // Render selectivity
-            field._Selectivity.selectivityRender(
-               domNode,
-               {
-                  multiple: true,
-                  readOnly: readOnly,
-                  placeholder: placeholder,
-                  hasColors: field.settings.hasColors,
-                  items: field.settings.options,
-                  data: selectedData,
-               },
-               App,
-               row
-            );
-
-            return node.outerHTML;
-         };
+      var formClass = "";
+      var placeHolder = "";
+      if (options.editable) {
+         formClass = " form-entry";
+         placeHolder = `<span style='color: #CCC; padding: 0 5px;'>${L(
+            "Select item"
+         )}</span>`;
       }
-      // Single select list
-      else {
-         let formClass = "";
-         let placeHolder = "";
-         if (options.editable) {
-            formClass = " form-entry";
-            placeHolder = `<span style='color: #CCC; padding: 0 5px;'>${L(
-               "Select item"
-            )}"</span>`;
+      var isRemovable = options.editable && !this.settings.required;
+
+      config.editFormat = (value) => {
+         return this.editFormat(value);
+      };
+      config.editParse = (value) => {
+         return this.editParse(value);
+      };
+
+      config.template = (rowData) => {
+         let selectedData = rowData[this.columnName];
+         if (selectedData == null) return "";
+         if (this.settings.isMultiple) {
+            selectedData = _getSelectedOptions(this, rowData);
          }
-         const isRemovable = options.editable && !this.settings.required;
-
-         config.template = (obj) => {
-            let myHex = "#666666";
-            let myText = placeHolder;
-            field.settings.options.forEach((h) => {
-               if (h.id == obj[field.columnName]) {
-                  myHex = h.hex;
-                  myText = h.text;
+         var values = [];
+         values.push('<div class="badgeContainer">');
+         let hasCustomColor = "";
+         let optionHex = "";
+         if (
+            selectedData &&
+            Array.isArray(selectedData) &&
+            selectedData.length
+         ) {
+            selectedData.forEach((val) => {
+               if (this.settings.hasColors && val.hex) {
+                  hasCustomColor = "hascustomcolor";
+                  optionHex = `background: ${val.hex};`;
                }
-            });
-            if (field.settings.hasColors && obj[field.columnName]) {
-               return (
-                  '<span class="selectivity-single-selected-item rendered' +
-                  formClass +
-                  '" style="background-color:' +
-                  myHex +
-                  ' !important;">' +
-                  myText +
-                  (isRemovable
-                     ? ' <a class="selectivity-single-selected-item-remove"><i class="fa fa-remove"></i></a>'
-                     : "") +
-                  "</span>"
+               values.push(
+                  `<div style="${optionHex}" class='webix_multicombo_value ${hasCustomColor}'><span>${val.text}</span><!-- span data-uuid="${val.id}" class="webix_multicombo_delete" role="button" aria-label="Remove item"></span --></div>`
                );
-            } else {
-               if (myText != placeHolder) {
-                  return (
-                     myText +
-                     (isRemovable
-                        ? ' <a class="selectivity-single-selected-item-remove" style="color: #333;"><i class="fa fa-remove"></i></a>'
-                        : "")
-                  );
-               } else {
-                  return myText;
-               }
+            });
+            if (selectedData.length > 1) {
+               values.push(
+                  `<span class="webix_badge selectivityBadge">${selectedData.length}</span>`
+               );
             }
-         };
-
-         config.editor = "richselect";
-         config.options = field.settings.options.map(function (opt) {
+         } else if (selectedData) {
+            let selectedObj = selectedData;
+            if (typeof selectedData == "string") {
+               selectedObj = this.getItemFromVal(selectedData);
+            }
+            if (!selectedObj) return "";
+            if (this.settings.hasColors && selectedObj.hex) {
+               hasCustomColor = "hascustomcolor";
+               optionHex = `background: ${selectedObj.hex};`;
+            }
+            values.push(
+               `<div style="${optionHex}" class='webix_multicombo_value ${hasCustomColor}'><span>${selectedObj.text}</span><!-- span data-uuid="${selectedObj.id}" class="webix_multicombo_delete" role="button" aria-label="Remove item"></span --></div>`
+            );
+         } else {
+            return "";
+         }
+         values.push("</div>");
+         return values.join("");
+      };
+      config.editor = this.settings.isMultiple ? "multiselect" : "combo";
+      config.suggest = {
+         button: true,
+         data: this.settings.options.map(function (opt) {
             return {
                id: opt.id,
                value: opt.text,
                hex: opt.hex,
             };
-         });
+         }),
+      };
+      if (this.settings.isMultiple) {
+         config.suggest.view = "checksuggest";
       }
 
       return config;
@@ -254,104 +230,35 @@ module.exports = class ABFieldList extends ABFieldListCore {
 
       options = options || {};
 
-      if (this.settings.isMultiple == true) {
-         let placeholder = L("Select items");
-         let readOnly = false;
-         if (options.editable != null && options.editable == false) {
-            readOnly = true;
-            placeholder = "";
-         }
+      if (!node.querySelector) return;
 
-         const domNode = node.querySelector(".list-data-values");
+      var clearButton = node.querySelector(
+         ".selectivity-single-selected-item-remove"
+      );
+      if (clearButton) {
+         clearButton.addEventListener("click", (e) => {
+            e.stopPropagation();
+            var values = {};
+            values[this.columnName] = "";
+            this.object
+               .model()
+               .update(row.id, values)
+               .then(() => {
+                  // update the client side data object as well so other data changes won't cause this save to be reverted
+                  $$(node)?.updateItem?.(row.id, values);
+               })
+               .catch((err) => {
+                  node.classList.add("webix_invalid");
+                  node.classList.add("webix_invalid_cell");
 
-         // get selected values
-         const selectedData = _getSelectedOptions(this, row);
-
-         // Render selectivity
-         this._Selectivity.selectivityRender(
-            domNode,
-            {
-               multiple: true,
-               readOnly: readOnly,
-               placeholder: placeholder,
-               hasColors: this.settings.hasColors,
-               items: this.settings.options,
-               data: selectedData,
-            },
-            App,
-            row
-         );
-
-         // Listen event when selectivity value updates
-         if (domNode && !readOnly && row.id && node) {
-            domNode.addEventListener(
-               "change",
-               (/* e */) => {
-                  // update just this value on our current object.model
-                  const values = {};
-                  values[this.columnName] = this._Selectivity.selectivityGet(
-                     domNode
-                  );
-
-                  // pass null because it could not put empty array in REST api
-                  if (values[this.columnName].length == 0)
-                     values[this.columnName] = "";
-
-                  this.object
-                     .model()
-                     .update(row.id, values)
-                     .then(() => {
-                        // update the client side data object as well so other data changes won't cause this save to be reverted
-                        if (values[this.columnName] == "")
-                           values[this.columnName] = [];
-                        if ($$(node) && $$(node).updateItem)
-                           $$(node).updateItem(row.id, values);
-                     })
-                     .catch((err) => {
-                        node.classList.add("webix_invalid");
-                        node.classList.add("webix_invalid_cell");
-
-                        this.AB.notify.developer(err, {
-                           message: "Error updating our entry.",
-                           row: row,
-                           values: values,
-                        });
-                     });
-               },
-               false
-            );
-         }
-      } else {
-         if (!node.querySelector) return;
-
-         const clearButton = node.querySelector(
-            ".selectivity-single-selected-item-remove"
-         );
-         if (clearButton) {
-            clearButton.addEventListener("click", (e) => {
-               e.stopPropagation();
-               const values = {};
-               values[this.columnName] = "";
-               this.object
-                  .model()
-                  .update(row.id, values)
-                  .then(() => {
-                     // update the client side data object as well so other data changes won't cause this save to be reverted
-                     if ($$(node) && $$(node).updateItem)
-                        $$(node).updateItem(row.id, values);
-                  })
-                  .catch((err) => {
-                     node.classList.add("webix_invalid");
-                     node.classList.add("webix_invalid_cell");
-
-                     this.AB.notify.developer(err, {
-                        message: "Error updating our entry.",
-                        row: row,
-                        values: "",
-                     });
+                  this.AB.notify.developer(err, {
+                     message: "Error updating our entry.",
+                     row: row,
+                     values: "",
+                     field: this.toObj(),
                   });
-            });
-         }
+               });
+         });
       }
    }
 
@@ -363,20 +270,9 @@ module.exports = class ABFieldList extends ABFieldListCore {
     *             unique id references.
     * @param {HtmlDOM} node  the HTML Dom object for this field's display.
     */
-   customEdit(row, App, node) {
-      if (this.settings.isMultiple == true) {
-         const domNode = node.querySelector(".list-data-values");
-
-         if (domNode.selectivity != null) {
-            // Open selectivity
-            domNode.selectivity.open();
-            return false;
-         }
-         return false;
-      } else {
-         return super.customEdit(row, App, node);
-      }
-   }
+   // customEdit(row, App, node) {
+   //    return super.customEdit(row, App, node);
+   // }
 
    /*
     * @funciton formComponent
@@ -395,7 +291,7 @@ module.exports = class ABFieldList extends ABFieldListCore {
       // .common() is used to create the display in the list
       formComponentSetting.common = () => {
          return {
-            key: this.settings.isMultiple ? "fieldcustom" : "selectsingle",
+            key: this.settings.isMultiple ? "selectmultiple" : "selectsingle",
             settings: {
                options: this.settings.options.map(function (opt) {
                   return {
@@ -416,42 +312,104 @@ module.exports = class ABFieldList extends ABFieldListCore {
 
       detailComponentSetting.common = () => {
          return {
-            key: this.settings.isMultiple ? "detailcustom" : "detailtext",
+            key: this.settings.isMultiple ? "detailtext" : "detailtext",
          };
       };
 
       return detailComponentSetting;
    }
 
-   getValue(item /*, rowData */) {
-      let values = {};
-
-      if (!item) return values;
-
-      if (this.settings.isMultiple) {
-         const domNode = item.$view.querySelector(".list-data-values");
-         values = this._Selectivity.selectivityGet(domNode);
+   editFormat(value) {
+      if (!value) return "";
+      let vals = [];
+      if (Array.isArray(value)) {
+         value.forEach((val) => {
+            if (typeof val == "object") {
+               vals.push(val.id);
+            } else {
+               let itemObj = this.getItemFromVal(val);
+               vals.push(itemObj.id);
+            }
+         });
       } else {
-         values = $$(item).getValue();
+         if (typeof value == "object") {
+            vals.push(value.id);
+         } else {
+            let itemObj = this.getItemFromVal(value);
+            if (itemObj && itemObj.id) {
+               vals.push(itemObj.id);
+            }
+         }
       }
-      return values;
+      return vals.join();
+   }
+
+   editParse(value) {
+      if (this.settings.isMultiple) {
+         let returnVals = [];
+         let vals = value.split(",");
+         vals.forEach((val) => {
+            returnVals.push(this.getItemFromVal(val));
+         });
+         return returnVals;
+      } else {
+         return value;
+      }
+   }
+
+   getItemFromVal(val) {
+      let item;
+      let options = this.options();
+      if (options.length > 1) {
+         options.forEach((option) => {
+            if (option.id == val) {
+               item = option;
+               return false;
+            }
+         });
+         return item;
+      } else {
+         return "";
+      }
+   }
+
+   getValue(item, rowData) {
+      return this.editParse(item.getValue());
+   }
+
+   getSelectedOptions(field, rowData = {}) {
+      let result = [];
+      if (rowData[this.columnName] != null) {
+         result = rowData[this.columnName];
+      } else if (rowData) {
+         if (Array.isArray(rowData)) {
+            result = rowData;
+         } else {
+            result.push(rowData);
+         }
+      }
+      if (result.length) {
+         if (typeof result == "string") result = JSON.parse(result);
+
+         // Pull text with current language
+         if (this.settings) {
+            result = (this.settings.options || []).filter((opt) => {
+               return (
+                  (result || []).filter((v) => (opt.id || opt) == (v.id || v))
+                     .length > 0
+               );
+            });
+         }
+      }
+
+      return result;
    }
 
    setValue(item, rowData) {
       if (!item) return;
 
       if (this.settings.isMultiple) {
-         const selectedOpts = _getSelectedOptions(this, rowData);
-
-         // get selectivity dom
-         const domSelectivity = item.$view.querySelector(".list-data-values");
-
-         // set value to selectivity
-         this._Selectivity.selectivitySet(
-            domSelectivity,
-            selectedOpts,
-            this.App
-         );
+         // do we need anything here?
       } else {
          super.setValue(item, rowData);
       }

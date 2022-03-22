@@ -511,6 +511,7 @@ module.exports = class ABView extends ABViewCore {
          "textbox",
          "numberbox",
          "selectsingle",
+         "selectmultiple",
          "formtree",
          "fieldreadonly",
          // not allowed Chart's Widgets

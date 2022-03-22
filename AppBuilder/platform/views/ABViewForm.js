@@ -1,6 +1,7 @@
 const ABViewFormCore = require("../../core/views/ABViewFormCore");
 const ABViewFormButton = require("./ABViewFormButton");
 const ABViewFormCustom = require("./ABViewFormCustom");
+const ABViewFormConnect = require("./ABViewFormConnect");
 const ABViewFormComponent = require("./ABViewFormComponent");
 const ABViewFormSelectMultiple = require("./ABViewFormSelectMultiple");
 const ABViewFormTextbox = require("./ABViewFormTextbox");
@@ -716,6 +717,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
             hidden: true,
             rows: validationUI,
          },
+         // {},
       ];
 
       // an ABViewForm_ is a collection of rows:
@@ -943,6 +945,15 @@ module.exports = class ABViewForm extends ABViewFormCore {
          },
 
          displayData: (rowData) => {
+            var customFields = this.fieldComponents((comp) => {
+               return (
+                  comp instanceof ABViewFormCustom ||
+                  comp instanceof ABViewFormConnect ||
+                  // rich text
+                  (comp instanceof ABViewFormTextbox &&
+                     comp.settings.type == "rich")
+               );
+            });
             // If setTimeout is already scheduled, no need to do anything
             if (this.timerId) {
                return;
@@ -952,6 +963,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
                var customFields = this.fieldComponents((comp) => {
                   return (
                      comp instanceof ABViewFormCustom ||
+                     comp instanceof ABViewFormConnect ||
                      // rich text
                      (comp instanceof ABViewFormTextbox &&
                         comp.settings.type == "rich")
@@ -973,7 +985,10 @@ module.exports = class ABViewForm extends ABViewFormCore {
                      // set value to each components
                      var defaultRowData = {};
                      field.defaultValue(defaultRowData);
-                     field.setValue($$(comp.ui.id), defaultRowData);
+                     field.setValue(
+                        $$(comp.ui.inputId ? comp.ui.inputId : comp.ui.id),
+                        defaultRowData
+                     );
 
                      comp.logic?.refresh?.(defaultRowData);
                   });
@@ -1013,7 +1028,13 @@ module.exports = class ABViewForm extends ABViewFormCore {
                      if (this._showed) comp.onShow?.();
 
                      // set value to each components
-                     if (f.field()) f.field().setValue($$(comp.ui.id), rowData);
+                     if (f.field()) {
+                        if (comp.ui.inputId) {
+                           f.field().setValue($$(comp.ui.inputId), rowData);
+                        } else {
+                           f.field().setValue($$(comp.ui.id), rowData);
+                        }
+                     }
 
                      comp.logic?.refresh?.(rowData);
                   });
@@ -1043,10 +1064,19 @@ module.exports = class ABViewForm extends ABViewFormCore {
 
             if (relationFieldCom == null) return;
 
-            var relationFieldView = this.viewComponents[relationFieldCom.id];
+            var relationFieldView = this.viewComponents[relationFieldCom.id].ui
+               .inputId;
+            // if (
+            //    this.viewComponents[relationFieldCom.id].ui.rows &&
+            //    this.viewComponents[relationFieldCom.id].ui.rows[0] &&
+            //    this.viewComponents[relationFieldCom.id].ui.rows[0].id
+            // ) {
+            //    relationFieldView = this.viewComponents[relationFieldCom.id].ui
+            //       .rows[0].id;
+            // }
             if (relationFieldView == null) return;
 
-            var relationElem = $$(relationFieldView.ui.id),
+            var relationElem = $$(relationFieldView),
                relationName = relationField.relationName();
 
             // pull data of parent's dc
@@ -1179,17 +1209,24 @@ module.exports = class ABViewForm extends ABViewFormCore {
     */
    getFormValues(formView, obj, dcLink) {
       // get the fields that are on this form
-      var visibleFields = [];
+      var visibleFields = ["id"]; // we always want the id so we can udpate records
       var loopForm = formView.getValues(function (obj) {
          visibleFields.push(obj.config.name);
       });
 
-      // get update data
-      var formVals = formView.getValues();
+      // only get data passed from form
+      let allVals = formView.getValues();
+      let formVals = {};
+      visibleFields.forEach((val) => {
+         formVals[val] = allVals[val];
+      });
 
       // get custom values
       var customFields = this.fieldComponents(
-         (comp) => comp instanceof ABViewFormCustom
+         (comp) =>
+            comp instanceof ABViewFormCustom ||
+            comp instanceof ABViewFormConnect ||
+            comp instanceof ABViewFormSelectMultiple
       );
       customFields.forEach((f) => {
          var vComponent = this.viewComponents[f.id];
@@ -1217,13 +1254,6 @@ module.exports = class ABViewForm extends ABViewFormCore {
          if (formVals[prop] == null || formVals[prop].length == 0)
             formVals[prop] = "";
       }
-
-      // add default values to hidden fields
-      obj.fields().forEach((f) => {
-         if (formVals[f.columnName] === undefined) {
-            f.defaultValue(formVals);
-         }
-      });
 
       // Add parent's data collection cursor when a connect field does not show
       if (dcLink && dcLink.getCursor()) {
