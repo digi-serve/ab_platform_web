@@ -324,7 +324,7 @@ class ABViewKanBanComponent extends ABViewComponent {
          $menuUser.clearAll();
 
          if (CurrentOwnerField instanceof ABFieldUser) {
-            let users = this.AB.Account.userlist().map((u) => {
+            let users = this.AB.Account.userList().map((u) => {
                return {
                   id: u.username,
                   value: u.username,
