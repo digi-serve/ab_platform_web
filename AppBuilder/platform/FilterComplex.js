@@ -525,19 +525,16 @@ module.exports = class FilterComplex extends FilterComplexCore {
          {
             batch: "datacollection",
             view: "combo",
-            options:
-               this._Application && linkObjectId
-                  ? this._Application
-                       .datacollections(
-                          (dc) => dc?.datasource?.id == linkObjectId
-                       )
-                       .map((dc) => {
-                          return {
-                             id: dc.id,
-                             value: dc.label,
-                          };
-                       })
-                  : [],
+            options: linkObjectId
+               ? this.AB.datacollections(
+                    (dc) => dc?.datasource?.id == linkObjectId
+                 ).map((dc) => {
+                    return {
+                       id: dc.id,
+                       value: dc.label,
+                    };
+                 })
+               : [],
          },
       ];
    }
@@ -600,9 +597,6 @@ module.exports = class FilterComplex extends FilterComplexCore {
          this.init();
       }
 
-      if (this._Application) {
-         this.applicationLoad(this._Application);
-      }
       if (this._Fields) {
          this.fieldsLoad(this._Fields);
       }
