@@ -33,11 +33,13 @@ function _toInternal(cond, fields = []) {
       // }
       let field = fields.filter((f) => f.id == cond.key)[0];
       cond.field = field?.columnName;
-      cond.includes = (cond.value || []).split(",");
       cond.condition = {
          type: cond.rule,
          filter: cond.value,
       };
+
+      if (Array.isArray(cond.value)) cond.includes = cond.value;
+      else cond.includes = (cond.value || "").split(",");
 
       delete cond.key;
       delete cond.rule;
@@ -157,6 +159,12 @@ module.exports = class FilterComplex extends FilterComplexCore {
             isNotCurrentUserCondition: L("is not current user"),
             containsCurrentUserCondition: L("contains current user"),
             notContainsCurrentUserCondition: L("does not contain current user"),
+
+            ContextDefaultOption: L("choose option"),
+            EqualsProcessValue: L("equals process value"),
+            NotEqualsProcessValueCondition: L("not equals process value"),
+            InProcessValueCondition: L("in process value"),
+            notInProcessValueCondition: L("not in process value"),
          },
       });
 
@@ -374,7 +382,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
 
       switch (field?.key) {
          case "boolean":
-            result = [].concat(this.uiBooleanValue(field));
+            result = this.uiBooleanValue(field);
             break;
          case "connectObject":
             result = []
@@ -387,25 +395,46 @@ module.exports = class FilterComplex extends FilterComplexCore {
             result = ["datepicker", "daterangepicker"];
             break;
          case "list":
-            result = [].concat(this.uiListValue(field));
-            break;
-         case "number":
-            result = ["text"];
+            result = this.uiListValue(field);
             break;
          case "user":
-            result = [].concat(this.uiUserValue(field));
+            result = []
+               .concat(this.uiNoneValue())
+               .concat(this.uiUserValue(field));
             break;
-         case "string":
-         case "LongText":
-         case "email":
-            result = ["text"];
-            break;
+         // case "number":
+         //    result = ["text"];
+         //    break;
+         // case "string":
+         // case "LongText":
+         // case "email":
+         //    result = ["text"];
+         //    break;
       }
 
-      if (field?.key != "connectObject")
-         result = (result || []).concat(this.uiQueryFieldValue(field));
+      if (field?.key != "connectObject") {
+         result = (result || ["text"])
+            .concat(this.uiQueryFieldValue(field))
+            .concat(this.uiContextValue(field));
+      }
+      // Special case: from Process builder
+      // .processFieldsLoad()
+      else if (fieldColumnName.indexOf("uuid") > -1) {
+         result = this.uiContextValue(null, fieldColumnName);
+      }
 
       return result;
+   }
+
+   uiNoneValue() {
+      return [
+         {
+            batch: "none",
+            borderless: true,
+            view: "template",
+            template: "",
+         },
+      ];
    }
 
    uiBooleanValue(field) {
@@ -529,162 +558,33 @@ module.exports = class FilterComplex extends FilterComplexCore {
             }),
          },
       ];
-
-      // !! NOTE: Webix Query widget need a Input only
-      // const _onChangeQueryFieldCombo = (value, $querySelector) => {
-      //    // populate the list of Queries for this_object:
-      //    let options = [];
-      //    // Get all queries fields
-      //    let Query = this.queries((q) => q.id == value)[0];
-      //    if (Query) {
-      //       Query.fields((f) => !f.isConnection).forEach((q) => {
-      //          options.push({
-      //             id: q.id,
-      //             value: `${q?.object?.label}.${q?.label}`,
-      //          });
-      //       });
-      //       // Populate field options to the query field selector
-      //       const $queryFieldSelector = $querySelector?.getParent()?.queryView(
-      //          {
-      //             placeholder: this.labels.inQueryFieldFieldPlaceholder,
-      //          },
-      //          "all"
-      //       )[0];
-      //       if ($queryFieldSelector) {
-      //          $queryFieldSelector.define("options", options);
-      //          $queryFieldSelector.refresh();
-      //       }
-      //    }
-      // };
-      // return [
-      //    {
-      //       batch: "queryField",
-      //       rows: [
-      //          {
-      //             view: "combo",
-      //             placeholder: this.labels.inQueryFieldQueryPlaceholder,
-      //             options: this.queries(
-      //                (q) => this._Object == null || q.id != this._Object.id
-      //             ).map((q) => {
-      //                return {
-      //                   id: q.id,
-      //                   value: q.label,
-      //                };
-      //             }),
-      //             on: {
-      //                onChange: function (val) {
-      //                   _onChangeQueryFieldCombo(val, this);
-      //                },
-      //             },
-      //          },
-      //          {
-      //             view: "combo",
-      //             placeholder: this.labels.inQueryFieldFieldPlaceholder,
-      //             options: [],
-      //          },
-      //       ],
-      //    },
-      // ];
    }
 
-   // uiCustomValue($selector) {
-   //    if (
-   //       !$selector ||
-   //       !$selector.config ||
-   //       !$selector.config.value ||
-   //       !$selector.config.value.key
-   //    )
-   //       return;
+   uiContextValue(field, processFieldKey = null) {
+      let processField = (this._ProcessFields ?? []).filter(
+         (pField) =>
+            pField?.field?.id == field?.id || pField.key == processFieldKey
+      )[0];
 
-   //    let columnName = $selector.config.value.key;
-   //    let rule = $selector.config.value.rule;
-   //    // let value = $selector.config.value.value;
+      if (!processField) return [];
 
-   //    let $valueElem = $selector.queryView({ customEdit: true });
-   //    if (!$valueElem) return;
-
-   //    let field = this._Fields.filter((f) => f.columnName == columnName)[0];
-   //    if (!field) return;
-
-   //    if (rule == "in_query" || rule == "not_in_query") {
-   //       this.uiInQueryValue($valueElem, field);
-   //    } else if (
-   //       rule == "in_data_collection" ||
-   //       rule == "not_in_data_collection"
-   //    ) {
-   //       this.uiInDataCollectionValue($valueElem, field);
-   //    } else if (field.key == "list") {
-   //       this.uiListValue($valueElem, field);
-   //    }
-   // }
-
-   // uiInQueryValue($value, field) {
-   //    let options = [];
-   //    let Queries = [];
-
-   //    // populate the list of Queries for this_object:
-   //    if (field.id == "this_object" && this._Object) {
-   //       Queries = this.queries((q) => q.canFilterObject(this._Object));
-   //    }
-   //    // populate the list of Queries for a query field
-   //    else {
-   //       Queries = this.queries((q) => {
-   //          return (
-   //             (this._Object ? this._Object.id : "") != q.id && // Prevent filter looping
-   //             q.canFilterObject(field.datasourceLink)
-   //          );
-   //       });
-   //    }
-
-   //    Queries.forEach((q) => {
-   //       options.push({
-   //          id: q.id,
-   //          value: q.label,
-   //       });
-   //    });
-
-   //    $value.define("options", options);
-   //    $value.refresh();
-   // }
-
-   // uiInDataCollectionValue($value, field) {
-   //    let options = [];
-
-   //    // get id of the link object
-   //    let linkObjectId;
-   //    if (field.id == "this_object" && this._Object) {
-   //       linkObjectId = this._Object.id;
-   //    } else {
-   //       linkObjectId = field.settings.linkObject;
-   //    }
-
-   //    // pull data collection list
-   //    if (this._Application && linkObjectId) {
-   //       options = this._Application
-   //          .datacollections(
-   //             (dc) => dc.datasource && dc.datasource.id == linkObjectId
-   //          )
-   //          .map((dc) => {
-   //             return { id: dc.id, value: dc.label };
-   //          });
-   //    }
-
-   //    $value.define("options", options);
-   //    $value.refresh();
-   // }
-
-   // uiListValue($value, field) {
-   //    let options = field.settings.options.map(function (opt) {
-   //       return {
-   //          id: opt.id,
-   //          value: opt.text,
-   //          hex: opt.hex,
-   //       };
-   //    });
-
-   //    $value.define("options", options);
-   //    $value.refresh();
-   // }
+      return [
+         {
+            batch: "context",
+            view: "select",
+            options: [
+               {
+                  id: "empty",
+                  value: this.labels.component.ContextDefaultOption,
+               },
+               {
+                  id: processField.key,
+                  value: L("context({0})", [processField.label]),
+               },
+            ],
+         },
+      ];
+   }
 
    popUp(...options) {
       if (!this.myPopup) {
