@@ -331,10 +331,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
    // HACK: have to overwrite Webix Query's function to support our custom input requirement.
    // HooWoo
    uiQueryCustomValue() {
-      // Could not require on the top of the page. (Webix cound not found error). Yahoo
-      const Query = require("../../js/webix/components/query/query.js");
-
-      Query.views.filter.prototype.CreateFilter = (
+      window.query.views.filter.prototype.CreateFilter = (
          field,
          type,
          format,

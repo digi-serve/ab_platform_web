@@ -34,7 +34,7 @@ import pivot from "./js/webix/components/pivot/pivot.js";
 import report from "./js/webix/components/reports/reports.js";
 // import querybuilder from "./js/webix/components/querybuilder/querybuilder.js";
 import queryCSS from "./js/webix/components/query/query.css";
-import query from "./js/webix/components/query/query.js";
+const query = require("./js/webix/components/query/query.js");
 
 // Make sure webix is global object
 if (!window.webix) {
@@ -42,6 +42,7 @@ if (!window.webix) {
 }
 
 window.gantt = gantt;
+window.query = query;
 
 Bootstrap.init().catch((err) => {
    var errorMSG = err.toString();
