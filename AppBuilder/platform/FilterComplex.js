@@ -178,8 +178,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
       // Set current username
       this.Account.username = this.AB.Account.username();
 
-      this.recordRuleOptions = [];
-      this.recordRuleFieldOptions = [];
+      this._recordRuleFieldOptions = [];
 
       this.uiQueryCustomValue();
 
@@ -196,21 +195,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
                      id: ids.querybuilder,
                      data: () => [],
                      // data: async (field) => await this.pullOptions(field),
-                     fields: [
-                        {
-                           id: "first_name",
-                           value: "First Name",
-                           type: "text",
-                           conditions: [
-                              {
-                                 id: "equals",
-                                 value: "Equals",
-                                 batch: "string",
-                                 handler: () => true,
-                              },
-                           ],
-                        },
-                     ],
+                     fields: [],
                   },
                ],
             },
@@ -240,6 +225,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
       }
 
       this._isRecordRule = options?.isRecordRule ?? false;
+      this._recordRuleFieldOptions = options?.fieldOptions ?? [];
    }
 
    /**
@@ -420,6 +406,10 @@ module.exports = class FilterComplex extends FilterComplexCore {
          result = this.uiContextValue(null, fieldColumnName);
       }
 
+      if (this._isRecordRule) {
+         result = (result || []).concat(this.uiRecordRuleValue(field));
+      }
+
       return result;
    }
 
@@ -550,6 +540,16 @@ module.exports = class FilterComplex extends FilterComplexCore {
                   value: q.label,
                };
             }),
+         },
+      ];
+   }
+
+   uiRecordRuleValue(field) {
+      return [
+         {
+            batch: "recordRule",
+            view: "select",
+            options: this._recordRuleFieldOptions || [],
          },
       ];
    }
