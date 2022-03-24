@@ -18,7 +18,6 @@
 import ABViewProperty from "./ABViewProperty";
 // const ABViewGridFilterRule = require("../../../rules/ABViewGridFilterRule");
 
-// const RowFilter = require("../../RowFilter");
 const ComplexFilter = require("../../FilterComplex");
 
 let L = (...params) => AB.Multilingual.label(...params);

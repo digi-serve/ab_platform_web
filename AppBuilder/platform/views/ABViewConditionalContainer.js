@@ -1,5 +1,5 @@
 const ABViewConditionalContainerCore = require("../../core/views/ABViewConditionalContainerCore");
-const RowFilter = require("../RowFilter");
+const FilterComplex = require("../FilterComplex");
 
 const ABViewPropertyDefaults = ABViewConditionalContainerCore.defaultValues();
 
@@ -14,7 +14,7 @@ module.exports = class ABViewConditionalContainer extends (
       super(values, application, parent, defaultValues);
 
       // Set filter value
-      this.__filterComponent = new RowFilter(
+      this.__filterComponent = new FilterComplex(
          null,
          "ABViewConditionalContainer",
          this.AB
@@ -77,10 +77,10 @@ module.exports = class ABViewConditionalContainer extends (
          this.populateBadgeNumber(ids, view);
       };
 
-      FilterComponent = new RowFilter(App, `${idBase}_filter`, this.AB);
-      FilterComponent.init({
-         // when we make a change in the popups we want to make sure we save the new workspace to the properties to do so just fire an onChange event
-         onChange: _logic.onFilterChange,
+      FilterComponent = new FilterComplex(App, `${idBase}_filter`, this.AB);
+      FilterComponent.init();
+      FilterComponent.on("change", (val) => {
+         _logic.onFilterChange(val);
       });
 
       this.filter_popup = webix.ui({
