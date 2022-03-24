@@ -48,6 +48,16 @@ module.exports = class ABObjectQuery extends ABObjectQueryCore {
       this.AB.on("ab.query.update", (data) => {
          if (this.id == data.queryId) this.fromValues(data.data);
       });
+
+      // .fromValues() should already have been called in super()
+      // so now add in our conditionScan()
+      // NOTE: this can be folded into the Core once filterComplex
+      // is fully implemented and not on Platform only.
+
+      // now scan our conditions to make sure they are
+      // 1) reference fields that exist in our Query
+      // 2) completely filled out conditions.
+      this.conditionScan(this.where);
    }
 
    ///
@@ -223,4 +233,68 @@ module.exports = class ABObjectQuery extends ABObjectQueryCore {
 
       return headers;
    }
+
+   /**
+    * @method conditionScan()
+    * Scan the provided condition object and determine if there are any
+    * configuration issues.
+    * @param {obj} rule
+    *        the QueryBuilder rule that we are scanning.
+    * @param {array} listWarnings
+    *        An array of warnings that we should add our notices to.
+    */
+   conditionScan(rule) {
+      if (!rule) {
+         return;
+      }
+
+      if (rule.glue) {
+         (rule.rules || []).forEach((r) => {
+            this.conditionScan(r);
+         });
+         return;
+      }
+
+      // 1) we need to have any key as one of our fields.
+      let field = this.fieldByID(rule.key);
+      if (!field && rule.key != "this_object") {
+         this.emit(
+            "warning",
+            "condition does not reference one of our fields",
+            {
+               rule,
+            }
+         );
+      }
+
+      // 2) completely filled out conditions.
+      if (!this._conditionCheck) {
+         this._conditionCheck = this.AB.filtercomplexNew(
+            `${this.id}_conditionCheck`
+         );
+         // {FilterComplex} ._conditionCheck
+         // has our .isConditionComplete() method.
+      }
+      if (!this._conditionCheck.isConditionComplete(rule)) {
+         this.emit("warning", "incomplete condition definition", {
+            rule,
+         });
+      }
+   }
+
+   /**
+    * @method warningsAll()
+    * Compile any warnings from this Query, or any of it's fields.
+    * @return {array}
+    *         An array of warning objects.
+    *         .message {string} message to display
+    *         .data {obj} associated debug info for this warning.
+    */
+   // warningsAll() {
+   //    // report both OUR warnings, and any warnings from any of our fields
+   //    // NOTE: this will get
+   //    var allWarnings = super.warningsAll();
+
+   //    return allWarnings;
+   // }
 };

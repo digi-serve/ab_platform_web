@@ -140,6 +140,29 @@ module.exports = class ABClassApplication extends ABApplicationCore {
    }
 
    /**
+    * @method processInsert()
+    * persist the current ABProcess in our list of .processIDs.
+    * @param {ABProcess} process
+    * @return {Promise}
+    */
+   processInsert(process) {
+      this._processes.push(process);
+      return this._listInsert(process, "processIDs");
+   }
+
+   /**
+    * @method processRemove()
+    * remove the current ABProcess from our list of .processIDs.
+    * NOTE: this method persists the changes to the server.
+    * @param {ABProcess} process
+    * @return {Promise}
+    */
+   processRemove(process) {
+      this._processes = this._processes.filter((p) => p.id != process.id);
+      return this._listRemove(process, "processIDs");
+   }
+
+   /**
     * @method queryInsert()
     * persist the current ABObjectQuery in our list of .queryIDs.
     * @param {ABObjectQuery} query

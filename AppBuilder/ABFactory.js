@@ -728,6 +728,16 @@ class ABFactory extends ABFactoryCore {
    // }
 
    /**
+    * @method filtercomplexNew()
+    * return an instance of a new RowFilter that is tied to this
+    * ABFactory.
+    * @return {RowFilter}
+    */
+   filtercomplexNew(idBase) {
+      return new FilterComplex(this._App, idBase, this);
+   }
+
+   /**
     * notify()
     * will send alerts to a group of people. These alerts are usually about
     * configuration errors, or software problems.
