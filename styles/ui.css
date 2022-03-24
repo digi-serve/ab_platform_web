@@ -1631,3 +1631,17 @@ div.webix_dataview_item.webix_transparent {
    color: white;
    font-size: 14px;
 }
+.webix_transparent .webix_button .webix_icon,
+.webix_transparent .webix_button .webix_icon_btn {
+   color: #1ca1c1;
+}
+.webix_icon_btn {
+   margin-right: 0 !important;
+   vertical-align: baseline;
+}
+.webix_list_icon.webix_icon {
+   vertical-align: baseline;
+}
+.webix_list_item.menu {
+   color: inherit;
+}
