@@ -42,7 +42,6 @@ if (!window.webix) {
 }
 
 window.gantt = gantt;
-window.query = query;
 
 Bootstrap.init().catch((err) => {
    var errorMSG = err.toString();

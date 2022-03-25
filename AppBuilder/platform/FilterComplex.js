@@ -180,8 +180,6 @@ module.exports = class FilterComplex extends FilterComplexCore {
 
       this._recordRuleFieldOptions = [];
 
-      this.uiQueryCustomValue();
-
       // webix UI definition:
       this.ui = {
          rows: [
@@ -301,6 +299,8 @@ module.exports = class FilterComplex extends FilterComplexCore {
    }
 
    uiInit() {
+      this.uiQueryCustomValue();
+
       let el = $$(this.ids.querybuilder);
       if (el) {
          // Clear fields
@@ -317,7 +317,11 @@ module.exports = class FilterComplex extends FilterComplexCore {
    // HACK: have to overwrite Webix Query's function to support our custom input requirement.
    // HooWoo
    uiQueryCustomValue() {
-      window.query.views.filter.prototype.CreateFilter = (
+      const $el = $$(this.ids.querybuilder);
+      if (!$el) return;
+
+      // window.query.views.filter.prototype.CreateFilter = (
+      $el.$app.require("jet-views", "filter").prototype.CreateFilter = (
          field,
          type,
          format,
@@ -600,7 +604,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
 
       // NOTE: do this, before the .setValue() operation, as we need to have
       // our fields and filters defined BEFORE a setValue() is performed.
-      this.uiInit();
+      // this.uiInit();
 
       if (this.condition) {
          this.setValue(this.condition);
