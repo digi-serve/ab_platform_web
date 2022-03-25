@@ -379,7 +379,7 @@ module.exports = class ABClassApplication extends ABApplicationCore {
          "views",
       ].forEach((k) => {
          this[k]().forEach((o) => {
-            warnings = warnings.concat(o.warnings());
+            warnings = warnings.concat(o.warningsAll());
          });
       });
 

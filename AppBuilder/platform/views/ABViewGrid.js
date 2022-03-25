@@ -1685,6 +1685,14 @@ class ABViewGridComponent extends ABViewComponent {
          columnHeaders = objColumnHeaders;
       }
 
+      // sanity check:
+      // columnHeaders can't contain a column that doesn't exist in objColumHeaders:
+      // (eg: a field might have been removed but localStorage doesn't know that )
+      var objColumnHeaderIDs = objColumnHeaders.map((h) => h.fieldID);
+      columnHeaders = columnHeaders.filter(
+         (c) => objColumnHeaderIDs.indexOf(c.fieldID) > -1
+      );
+
       // default our columnConfig values to our columnHeaders:
       columnHeaders.forEach((c) => {
          // we want to overwrite our default settings with anything stored
