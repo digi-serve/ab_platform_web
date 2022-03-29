@@ -104,6 +104,13 @@ class PortalAuthLoginForm extends ClassUI {
                                  click() {
                                     var form = $$("portal_auth_login_form");
                                     if (form.validate()) {
+                                       $$(
+                                          "portal_auth_login_form_submit"
+                                       ).hide();
+                                       $$(
+                                          "portal_auth_login_form_submit_wait"
+                                       ).show();
+
                                        var values = form.getValues();
                                        self.error(); // hids the error message
 
@@ -119,6 +126,12 @@ class PortalAuthLoginForm extends ClassUI {
                                                 "portal_auth_login" /*, context:{} */,
                                           }
                                        ).catch((err) => {
+                                          $$(
+                                             "portal_auth_login_form_submit"
+                                          ).show();
+                                          $$(
+                                             "portal_auth_login_form_submit_wait"
+                                          ).hide();
                                           console.log(err);
                                        });
                                     }
@@ -128,6 +141,16 @@ class PortalAuthLoginForm extends ClassUI {
                                        ClassUI.CYPRESS_REF(this);
                                     },
                                  },
+                              },
+                              {
+                                 view: "button",
+                                 label:
+                                    "<i class='fa fa-circle-o-notch fa-fw fa-spin'></i>",
+                                 type: "form",
+                                 id: "portal_auth_login_form_submit_wait",
+                                 css: "webix_primary",
+                                 width: 150,
+                                 hidden: true,
                               },
                               {},
                            ],
