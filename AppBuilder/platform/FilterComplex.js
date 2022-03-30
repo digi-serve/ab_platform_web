@@ -400,7 +400,8 @@ module.exports = class FilterComplex extends FilterComplexCore {
       }
 
       if (field?.key != "connectObject") {
-         result = (result || ["text"])
+         result = (result || [])
+            .concat(this.uiTextValue(field))
             .concat(this.uiQueryFieldValue(field))
             .concat(this.uiContextValue(field));
       }
@@ -433,6 +434,26 @@ module.exports = class FilterComplex extends FilterComplexCore {
          {
             batch: "boolean",
             view: "checkbox",
+         },
+      ];
+   }
+
+   uiTextValue(field) {
+      return [
+         {
+            batch: "text",
+            view: "text",
+            on: {
+               onAfterRender: function () {
+                  // HACK: focus on webix.text and webix.textarea
+                  // Why!! If the parent layout has zIndex lower than 101, then is not able to focus to webix.text and webix.textarea
+                  let $layout =
+                     this.queryView(function (a) {
+                        return !a.getParentView();
+                     }, "parent") || this;
+                  $layout.$view.style.zIndex = 102;
+               },
+            },
          },
       ];
    }
