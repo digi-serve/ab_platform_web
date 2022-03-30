@@ -31,8 +31,10 @@ import ganttCSS from "./js/webix/components/gantt/gantt.css";
 
 import kanban from "./js/webix/components/kanban/kanban.js";
 import pivot from "./js/webix/components/pivot/pivot.js";
-import querybuilder from "./js/webix/components/querybuilder/querybuilder.js";
 import report from "./js/webix/components/reports/reports.js";
+// import querybuilder from "./js/webix/components/querybuilder/querybuilder.js";
+import queryCSS from "./js/webix/components/query/query.css";
+const query = require("./js/webix/components/query/query.js");
 
 // Make sure webix is global object
 if (!window.webix) {
