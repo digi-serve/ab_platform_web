@@ -1557,20 +1557,30 @@ div.amp .fa-unlock-alt {
 }
 /* Login Page */
 .portalLogin {
-   opacity: 0;
+   /* opacity: 0; */
    background: #ebedf0;
    background: linear-gradient(
       0deg,
       rgba(171, 171, 171, 1) 0%,
       rgba(235, 237, 240, 1) 100%
    );
-   -webkit-animation: 1s ease 0s normal forwards 1 fadein;
-   animation: 1s ease 0s normal forwards 1 fadein;
+   /* -webkit-animation: 1s ease 0s normal forwards 1 fadein;
+   animation: 1s ease 0s normal forwards 1 fadein; */
 }
 .portalLoginForm {
    opacity: 0;
-   -webkit-animation: 1s ease 0.5s normal forwards 1 fadein;
-   animation: 1s ease 0.5s normal forwards 1 fadein;
+   -webkit-animation: 1s ease 0s normal forwards 1 fadein;
+   animation: 1s ease 0s normal forwards 1 fadein;
+   background: white;
+   border-radius: 30px;
+   box-shadow: 0px 20px 20px rgba(0, 0, 0, 0.4);
+   position: relative;
+   top: -20px;
+   transform: scale(1.2);
+}
+.portalLogin .webix_view {
+   overflow: visible;
+   display: inline-block;
 }
 div.webix_dataview_item.webix_transparent {
    padding: 0px;
@@ -1578,9 +1588,15 @@ div.webix_dataview_item.webix_transparent {
 @keyframes fadein {
    0% {
       opacity: 0;
+      top: -20px;
+      transform: scale(1.1);
+      box-shadow: 0px 20px 20px rgba(0, 0, 0, 0.4);
    }
    100% {
       opacity: 1;
+      top: 0;
+      transform: scale(1);
+      box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.4);
    }
 }
 
