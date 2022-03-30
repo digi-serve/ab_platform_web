@@ -180,8 +180,6 @@ module.exports = class FilterComplex extends FilterComplexCore {
 
       this._recordRuleFieldOptions = [];
 
-      this.uiQueryCustomValue();
-
       // webix UI definition:
       this.ui = {
          rows: [
@@ -301,6 +299,8 @@ module.exports = class FilterComplex extends FilterComplexCore {
    }
 
    uiInit() {
+      this.uiQueryCustomValue();
+
       let el = $$(this.ids.querybuilder);
       if (el) {
          // Clear fields
@@ -317,7 +317,11 @@ module.exports = class FilterComplex extends FilterComplexCore {
    // HACK: have to overwrite Webix Query's function to support our custom input requirement.
    // HooWoo
    uiQueryCustomValue() {
-      window.query.views.filter.prototype.CreateFilter = (
+      const $el = $$(this.ids.querybuilder);
+      if (!$el) return;
+
+      // window.query.views.filter.prototype.CreateFilter = (
+      $el.$app.require("jet-views", "filter").prototype.CreateFilter = (
          field,
          type,
          format,
@@ -396,7 +400,8 @@ module.exports = class FilterComplex extends FilterComplexCore {
       }
 
       if (field?.key != "connectObject") {
-         result = (result || ["text"])
+         result = (result || [])
+            .concat(this.uiTextValue(field))
             .concat(this.uiQueryFieldValue(field))
             .concat(this.uiContextValue(field));
       }
@@ -429,6 +434,26 @@ module.exports = class FilterComplex extends FilterComplexCore {
          {
             batch: "boolean",
             view: "checkbox",
+         },
+      ];
+   }
+
+   uiTextValue(field) {
+      return [
+         {
+            batch: "text",
+            view: "text",
+            on: {
+               onAfterRender: function () {
+                  // HACK: focus on webix.text and webix.textarea
+                  // Why!! If the parent layout has zIndex lower than 101, then is not able to focus to webix.text and webix.textarea
+                  let $layout =
+                     this.queryView(function (a) {
+                        return !a.getParentView();
+                     }, "parent") || this;
+                  $layout.$view.style.zIndex = 102;
+               },
+            },
          },
       ];
    }
@@ -600,7 +625,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
 
       // NOTE: do this, before the .setValue() operation, as we need to have
       // our fields and filters defined BEFORE a setValue() is performed.
-      this.uiInit();
+      // this.uiInit();
 
       if (this.condition) {
          this.setValue(this.condition);
