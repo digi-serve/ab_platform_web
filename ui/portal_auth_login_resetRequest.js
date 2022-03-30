@@ -28,7 +28,6 @@ class PortalAuthLoginResetRequest extends ClassUI {
                   {
                      width: 360,
                      rows: [
-                        {},
                         {
                            id: "password_reset_email",
                            css: "portalLoginForm",
@@ -156,8 +155,6 @@ class PortalAuthLoginResetRequest extends ClassUI {
                               },
                            ],
                         },
-
-                        {},
                      ],
                   },
                   {},

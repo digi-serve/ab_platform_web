@@ -30,7 +30,6 @@ class PortalAuthLoginForm extends ClassUI {
                   {
                      width: 360,
                      rows: [
-                        {},
                         {
                            css: "portalLoginForm",
                            padding: 30,
@@ -210,7 +209,6 @@ class PortalAuthLoginForm extends ClassUI {
                               },
                            ],
                         },
-                        {},
                      ],
                   },
                   {},
