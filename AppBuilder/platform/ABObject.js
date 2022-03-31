@@ -731,10 +731,10 @@ module.exports = class ABObject extends ABObjectCore {
       return allWarnings;
    }
 
-   warningsEval() {
-      // our .fromValues() has already registered any missing fields.
-      // those should get reported from warnings()
-   }
+   // warningsEval() {
+   //    // our .fromValues() has already registered any missing fields.
+   //    // those should get reported from warnings()
+   // }
 
    isUuid(text) {
       console.error(

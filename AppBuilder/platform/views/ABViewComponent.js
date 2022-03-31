@@ -91,6 +91,17 @@ export default class ABViewComponent extends ClassUI {
    }
 
    /**
+    * @method eventsClear()
+    * Remove all the attached event listeners and reset our tracking.
+    */
+   eventsClear() {
+      (this.__events || []).forEach((e) => {
+         e.emitter.removeListener(e.eventName, e.listener);
+      });
+      this.__events = [];
+   }
+
+   /**
     * @method onShow()
     * perform any preparations necessary when showing this component.
     */
