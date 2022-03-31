@@ -1,7 +1,5 @@
 const ABViewCSVExporterCore = require("../../core/views/ABViewCSVExporterCore");
 
-const FilterComplex = require("../FilterComplex");
-
 const ABViewCSVExporterPropertyComponentDefaults = ABViewCSVExporterCore.defaultValues();
 
 let L = (...params) => AB.Multilingual.label(...params);
@@ -233,7 +231,7 @@ module.exports = class ABViewCSVExporter extends ABViewCSVExporterCore {
    static initPopupEditors(App, ids, _logic) {
       var idBase = "ABViewCSVExporterPropertyEditor";
 
-      PropertyFilter = new FilterComplex(App, `${idBase}_filter`, AB);
+      PropertyFilter = this.AB.filterComplexNew(`${idBase}_filter`);
       PropertyFilter.init();
       // when we make a change in the popups we want to make sure we save the new workspace to the properties to do so just fire an onChange event
       PropertyFilter.on("change", (val) => {
@@ -291,7 +289,7 @@ module.exports = class ABViewCSVExporter extends ABViewCSVExporterCore {
          popupFilter: App.unique(`${idBase}_popup_filter`),
       };
 
-      let ClientFilter = new FilterComplex(App, `${idBase}_filter`, AB);
+      let ClientFilter = this.AB.filterComplexNew(`${idBase}_filter`);
 
       let _ui = {
          view: "layout",

@@ -1739,7 +1739,7 @@ class ABViewGridComponent extends ABViewComponent {
       var fieldValidations = [];
       var rulePops = [];
 
-      columnHeaders.forEach(function (col) {
+      columnHeaders.forEach((col) => {
          col.fillspace = false;
 
          // parse the rules because they were stored as a string
@@ -1753,8 +1753,7 @@ class ABViewGridComponent extends ABViewComponent {
                var validationUI = [];
                // there could be more than one so lets loop through and build the UI
                col.validationRules.forEach((rule) => {
-                  var Filter = new FilterComplex(
-                     App,
+                  var Filter = this.AB.filterComplexNew(
                      col.id /*+ "_" + webix.uid()*/
                   );
                   // add the new ui to an array so we can add them all at the same time

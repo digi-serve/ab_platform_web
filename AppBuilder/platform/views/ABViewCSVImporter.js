@@ -10,8 +10,6 @@ const ABViewCSVImporterPropertyComponentDefaults = ABViewCSVImporterCore.default
 let L = (...params) => AB.Multilingual.label(...params);
 // multilingual Label fn()
 
-var FilterComplex = require("../FilterComplex");
-
 let PopupRecordRule = null;
 
 class ABViewCSVImporterComponent extends ClassUI {
@@ -874,9 +872,8 @@ class ABViewCSVImporterComponent extends ClassUI {
             var validationUI = [];
             // there could be more than one so lets loop through and build the UI
             validationRules.forEach((rule) => {
-               var Filter = new FilterComplex(
-                  this.AB._App,
-                  f.field.id + "_" + webix.uid()
+               var Filter = this.AB.filterComplexNew(
+                  `${f.field.id}_${webix.uid()}`
                );
                // add the new ui to an array so we can add them all at the same time
                validationUI.push(Filter.ui);

@@ -5,8 +5,6 @@
 //
 const ABViewRuleAction = require("../ABViewRuleAction");
 
-const FilterComplex = require("../../platform/FilterComplex");
-
 let L = (...params) => AB.Multilingual.label(...params);
 
 var ABViewRuleActionObjectUpdaterDefaults = {
@@ -517,8 +515,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                                     };
                                  });
 
-                              FilterComponent = new FilterComplex(
-                                 this.App,
+                              FilterComponent = this.AB.filterComplexNew(
                                  `${idBase}_filter`
                               );
                               // FilterComponent.applicationLoad(
