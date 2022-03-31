@@ -935,6 +935,7 @@ input[type="text"].selectivity-multiple-input {
    line-height: 20px;
    color: #fff !important;
    font-weight: bold;
+   vertical-align: unset !important;
 }
 .webix_dark .sidebarCustomIcon {
    color: #4a4e58 !important;
