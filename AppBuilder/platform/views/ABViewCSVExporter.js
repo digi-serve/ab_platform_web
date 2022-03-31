@@ -1,7 +1,5 @@
 const ABViewCSVExporterCore = require("../../core/views/ABViewCSVExporterCore");
 
-const RowFilter = require("../RowFilter");
-
 const ABViewCSVExporterPropertyComponentDefaults = ABViewCSVExporterCore.defaultValues();
 
 let L = (...params) => AB.Multilingual.label(...params);
@@ -233,10 +231,11 @@ module.exports = class ABViewCSVExporter extends ABViewCSVExporterCore {
    static initPopupEditors(App, ids, _logic) {
       var idBase = "ABViewCSVExporterPropertyEditor";
 
-      PropertyFilter = new RowFilter(App, `${idBase}_filter`, AB);
-      PropertyFilter.init({
-         // when we make a change in the popups we want to make sure we save the new workspace to the properties to do so just fire an onChange event
-         onChange: _logic.onFilterChange,
+      PropertyFilter = this.AB.filterComplexNew(`${idBase}_filter`);
+      PropertyFilter.init();
+      // when we make a change in the popups we want to make sure we save the new workspace to the properties to do so just fire an onChange event
+      PropertyFilter.on("change", (val) => {
+         _logic.onFilterChange(val);
       });
 
       this.filter_popup = webix.ui({
@@ -290,7 +289,7 @@ module.exports = class ABViewCSVExporter extends ABViewCSVExporterCore {
          popupFilter: App.unique(`${idBase}_popup_filter`),
       };
 
-      let ClientFilter = new RowFilter(App, `${idBase}_filter`, AB);
+      let ClientFilter = this.AB.filterComplexNew(`${idBase}_filter`);
 
       let _ui = {
          view: "layout",
@@ -341,9 +340,11 @@ module.exports = class ABViewCSVExporter extends ABViewCSVExporterCore {
             ClientFilter.fieldsLoad(obj ? obj.fields() : [], obj);
          }
 
-         ClientFilter.init({
-            onChange: _logic.onFilterChange,
+         ClientFilter.init();
+         ClientFilter.on("change", (val) => {
+            _logic.onFilterChange(val);
          });
+
          webix.ui({
             view: "popup",
             id: ids.popupFilter,

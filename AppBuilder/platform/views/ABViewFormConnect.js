@@ -6,7 +6,6 @@ const ABViewPropertyEditPage = require("./viewProperties/ABViewPropertyEditPage"
 
 const ABViewFormConnectPropertyComponentDefaults = ABViewFormConnectCore.defaultValues();
 
-const RowFilter = require("../RowFilter");
 const ABPopupSort = require("../../../ABDesigner/ab_work_object_workspace_popupSortFields");
 
 let FilterComponent = null;
@@ -178,10 +177,8 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
       super(values, application, parent, defaultValues);
 
       // Set filter value
-      this.__filterComponent = new RowFilter(
-         null,
-         `${this.id}__filterComponent`,
-         this.AB
+      this.__filterComponent = this.AB.filterComplexNew(
+         `${this.id}__filterComponent`
       );
       // this.__filterComponent.applicationLoad(application);
       this.__filterComponent.fieldsLoad(
@@ -614,10 +611,11 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
    static initPopupEditors(App, ids, _logic) {
       var idBase = "ABViewFormConnectPropertyEditor";
 
-      FilterComponent = new RowFilter(App, `${idBase}_filter`);
-      FilterComponent.init({
-         // when we make a change in the popups we want to make sure we save the new workspace to the properties to do so just fire an onChange event
-         onChange: _logic.onFilterChange,
+      FilterComponent = this.AB.filterComplexNew(`${idBase}_filter`);
+      FilterComponent.init();
+      // when we make a change in the popups we want to make sure we save the new workspace to the properties to do so just fire an onChange event
+      FilterComponent.on("change", (val) => {
+         _logic.onFilterChange(val);
       });
 
       SortComponent = new ABPopupSort(this.App, `${idBase}_sort`);
@@ -654,7 +652,6 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
             FilterComponent.fieldsLoad(linkedObj.fields(), linkedObj);
       }
 
-      FilterComponent.applicationLoad(view.application);
       FilterComponent.setValue(filterConditions);
 
       if (linkedObj) SortComponent.objectLoad(linkedObj);

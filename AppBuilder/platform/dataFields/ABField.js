@@ -6,7 +6,6 @@
  */
 
 const ABFieldCore = require("../../core/dataFields/ABFieldCore");
-const FilterComplex = require("../FilterComplex");
 
 const L = (...params) => AB.Multilingual.label(...params);
 
@@ -343,7 +342,9 @@ module.exports = class ABField extends ABFieldCore {
 
    addValidation(ids, settings) {
       const App = this.object.application.App;
-      const Filter = new FilterComplex(App, "field_validation_rules");
+      const Filter = this.AB.filterComplexNew(
+         `${this.id}_field_validation_rules`
+      );
       $$(ids.filterComplex).addView({
          view: "form",
          css: "abValidationForm",
