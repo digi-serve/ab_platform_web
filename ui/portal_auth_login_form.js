@@ -25,143 +25,189 @@ class PortalAuthLoginForm extends ClassUI {
          cols: [
             {},
             {
-               width: "300",
-               css: "portalLoginForm",
                rows: [
                   {},
                   {
-                     template:
-                        "<div style='text-align: center; font-size:160px; line-height: 160px;'><i style='background-color: #666; color: transparent; text-shadow: 0px 1px 1px rgba(255,255,255,0.5); -webkit-background-clip: text; -moz-background-clip: text; background-clip: text;' class='fa fa-user-circle-o'></i></div>",
-                     borderless: true,
-                     height: 190,
-                     type: "clean",
-                  },
-                  {
-                     id: "portal_auth_login_form",
-                     view: "form",
-                     type: "clean",
-                     css: { background: "transparent !important" },
-                     borderless: true,
-                     elementsConfig: {
-                        bottomPadding: 20,
-                        height: 52,
-                     },
-                     elements: [
+                     width: 360,
+                     rows: [
                         {
-                           id: "portal_auth_login_form_tenantList",
-                           view: "select",
-                           // label: "Tenant",
-                           name: "tenant",
-                           attributes: {
-                              "data-cy": "portal_auth_login_form_tenantList",
-                           },
-                           value: 1,
-                           options: [
-                              { id: 1, value: "Master" },
-                              { id: 2, value: "Release" },
-                           ],
-                        },
-                        {
-                           view: "text",
-                           placeholder: L("Email"),
-                           name: "email",
-                           id: "email",
-                           attributes: {
-                              "data-cy": "portal_auth_login_form_email",
-                           },
-                           // required: true,
-                           validate: webix.rules.isEmail,
-                           invalidMessage: L("Please enter a valid email."),
-                           validateEvent: "blur",
-                        },
-                        {
-                           view: "text",
-                           type: "password",
-                           placeholder: L("Password"),
-                           name: "password",
-                           attributes: {
-                              "data-cy": "portal_auth_login_form_password",
-                           },
-                           // required: true,
-                           validate: webix.rules.isNotEmpty,
-                           invalidMessage: L("Please enter your password."),
-                           validateEvent: "blur",
-                        },
-                        {
-                           margin: 10,
-                           paddingX: 2,
-                           borderless: true,
-                           cols: [
-                              {},
+                           css: "portalLoginForm",
+                           padding: 30,
+                           rows: [
                               {
-                                 view: "button",
-                                 label: L("Login"),
-                                 type: "form",
-                                 id: "portal_auth_login_form_submit",
-                                 css: "webix_primary",
-                                 width: 150,
-                                 hotkey: "enter",
-                                 click() {
-                                    var form = $$("portal_auth_login_form");
-                                    if (form.validate()) {
-                                       var values = form.getValues();
-                                       self.error(); // hids the error message
-
-                                       // this.AB.Network.post()
-                                       // can either be a Relay or Rest operation.
-                                       // we should get the response from the
-                                       // published JobRequest initialized in
-                                       // the .init() routine.
-                                       self.AB.Network.post(
-                                          { url: "/auth/login", data: values },
-                                          {
-                                             key:
-                                                "portal_auth_login" /*, context:{} */,
-                                          }
-                                       ).catch((err) => {
-                                          console.log(err);
-                                       });
-                                    }
+                                 template:
+                                    "<div style='text-align: center; font-size:160px; line-height: 160px;'><i style='background-color: #666; color: transparent; text-shadow: 0px 1px 1px rgba(255,255,255,0.5); -webkit-background-clip: text; -moz-background-clip: text; background-clip: text;' class='fa fa-user-circle-o'></i></div>",
+                                 borderless: true,
+                                 height: 190,
+                                 type: "clean",
+                              },
+                              {
+                                 id: "portal_auth_login_form",
+                                 view: "form",
+                                 type: "clean",
+                                 css: { background: "transparent !important" },
+                                 borderless: true,
+                                 elementsConfig: {
+                                    bottomPadding: 20,
+                                    height: 52,
                                  },
-                                 on: {
-                                    onAfterRender() {
-                                       ClassUI.CYPRESS_REF(this);
+                                 elements: [
+                                    {
+                                       id: "portal_auth_login_form_tenantList",
+                                       view: "select",
+                                       // label: "Tenant",
+                                       name: "tenant",
+                                       attributes: {
+                                          "data-cy":
+                                             "portal_auth_login_form_tenantList",
+                                       },
+                                       value: 1,
+                                       options: [
+                                          { id: 1, value: "Master" },
+                                          { id: 2, value: "Release" },
+                                       ],
                                     },
-                                 },
+                                    {
+                                       view: "text",
+                                       placeholder: L("Email"),
+                                       name: "email",
+                                       id: "email",
+                                       attributes: {
+                                          "data-cy":
+                                             "portal_auth_login_form_email",
+                                       },
+                                       // required: true,
+                                       validate: webix.rules.isEmail,
+                                       invalidMessage: L(
+                                          "Please enter a valid email."
+                                       ),
+                                       validateEvent: "blur",
+                                    },
+                                    {
+                                       view: "text",
+                                       type: "password",
+                                       placeholder: L("Password"),
+                                       name: "password",
+                                       attributes: {
+                                          "data-cy":
+                                             "portal_auth_login_form_password",
+                                       },
+                                       // required: true,
+                                       validate: webix.rules.isNotEmpty,
+                                       invalidMessage: L(
+                                          "Please enter your password."
+                                       ),
+                                       validateEvent: "blur",
+                                    },
+                                    {
+                                       margin: 10,
+                                       paddingX: 2,
+                                       borderless: true,
+                                       cols: [
+                                          {},
+                                          {
+                                             view: "button",
+                                             label: L("Login"),
+                                             type: "form",
+                                             id:
+                                                "portal_auth_login_form_submit",
+                                             css: "webix_primary",
+                                             width: 150,
+                                             hotkey: "enter",
+                                             click() {
+                                                var form = $$(
+                                                   "portal_auth_login_form"
+                                                );
+                                                if (form.validate()) {
+                                                   $$(
+                                                      "portal_auth_login_form_submit"
+                                                   ).hide();
+                                                   $$(
+                                                      "portal_auth_login_form_submit_wait"
+                                                   ).show();
+
+                                                   var values = form.getValues();
+                                                   self.error(); // hids the error message
+
+                                                   // this.AB.Network.post()
+                                                   // can either be a Relay or Rest operation.
+                                                   // we should get the response from the
+                                                   // published JobRequest initialized in
+                                                   // the .init() routine.
+                                                   self.AB.Network.post(
+                                                      {
+                                                         url: "/auth/login",
+                                                         data: values,
+                                                      },
+                                                      {
+                                                         key:
+                                                            "portal_auth_login" /*, context:{} */,
+                                                      }
+                                                   ).catch((err) => {
+                                                      $$(
+                                                         "portal_auth_login_form_submit"
+                                                      ).show();
+                                                      $$(
+                                                         "portal_auth_login_form_submit_wait"
+                                                      ).hide();
+                                                      console.log(err);
+                                                   });
+                                                }
+                                             },
+                                             on: {
+                                                onAfterRender() {
+                                                   ClassUI.CYPRESS_REF(this);
+                                                },
+                                             },
+                                          },
+                                          {
+                                             view: "button",
+                                             label:
+                                                "<i class='fa fa-circle-o-notch fa-fw fa-spin'></i>",
+                                             type: "form",
+                                             id:
+                                                "portal_auth_login_form_submit_wait",
+                                             css: "webix_primary",
+                                             width: 150,
+                                             hidden: true,
+                                          },
+                                          {},
+                                       ],
+                                    },
+                                    {
+                                       margin: 10,
+                                       paddingX: 2,
+                                       borderless: true,
+                                       cols: [
+                                          {},
+                                          {
+                                             view: "button",
+                                             label: L("Forgot password?"),
+                                             css: "webix_transparent",
+                                             click: () => {
+                                                this.emit("request.reset");
+                                                // $$("portal_auth_login").hide();
+                                                // $$("password_reset_email").show();
+                                             },
+                                             width: 150,
+                                          },
+                                          {},
+                                       ],
+                                    },
+                                    {
+                                       id: "portal_auth_login_form_errormsg",
+                                       view: "template",
+                                       css: "webix_control",
+                                       height: 32,
+                                       on: {
+                                          onAfterRender() {
+                                             ClassUI.CYPRESS_REF(this);
+                                          },
+                                       },
+                                    },
+                                 ],
                               },
-                              {},
                            ],
-                        },
-                        {
-                           margin: 10,
-                           paddingX: 2,
-                           borderless: true,
-                           cols: [
-                              {},
-                              {
-                                 view: "button",
-                                 label: L("Forgot Password?"),
-                                 css: "webix_transparent",
-                                 click: () => {
-                                    this.emit("request.reset");
-                                    // $$("portal_auth_login").hide();
-                                    // $$("password_reset_email").show();
-                                 },
-                                 width: 150,
-                              },
-                              {},
-                           ],
-                        },
-                        {
-                           id: "portal_auth_login_form_errormsg",
-                           view: "template",
-                           css: "webix_control",
-                           height: 32,
-                           on: {
-                              onAfterRender() {
-                                 ClassUI.CYPRESS_REF(this);
-                              },
-                           },
                         },
                      ],
                   },

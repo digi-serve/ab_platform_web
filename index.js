@@ -31,27 +31,28 @@ import ganttCSS from "./js/webix/components/gantt/gantt.css";
 
 import kanban from "./js/webix/components/kanban/kanban.js";
 import pivot from "./js/webix/components/pivot/pivot.js";
-import querybuilder from "./js/webix/components/querybuilder/querybuilder.js";
-const report = require("./js/webix/components/reports/reports.js");
+import report from "./js/webix/components/reports/reports.js";
+import queryCSS from "./js/webix/components/query/query.css";
+const query = require("./js/webix/components/query/query.js");
 
 // Make sure webix is global object
 if (!window.webix) {
-  window.webix = webix;
+   window.webix = webix;
 }
 
 window.gantt = gantt;
 window.reports = report;
 
 Bootstrap.init().catch((err) => {
-  var errorMSG = err.toString();
+   var errorMSG = err.toString();
 
-  Bootstrap.alert({
-    type: "alert-error",
-    title: "Error initializing Portal:",
-    text: errorMSG,
-  });
+   Bootstrap.alert({
+      type: "alert-error",
+      title: "Error initializing Portal:",
+      text: errorMSG,
+   });
 
-  Bootstrap.error(err);
+   Bootstrap.error(err);
 });
 
 export default Bootstrap;

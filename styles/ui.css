@@ -935,6 +935,7 @@ input[type="text"].selectivity-multiple-input {
    line-height: 20px;
    color: #fff !important;
    font-weight: bold;
+   vertical-align: unset !important;
 }
 .webix_dark .sidebarCustomIcon {
    color: #4a4e58 !important;
@@ -1557,20 +1558,30 @@ div.amp .fa-unlock-alt {
 }
 /* Login Page */
 .portalLogin {
-   opacity: 0;
+   /* opacity: 0; */
    background: #ebedf0;
    background: linear-gradient(
       0deg,
       rgba(171, 171, 171, 1) 0%,
       rgba(235, 237, 240, 1) 100%
    );
-   -webkit-animation: 1s ease 0s normal forwards 1 fadein;
-   animation: 1s ease 0s normal forwards 1 fadein;
+   /* -webkit-animation: 1s ease 0s normal forwards 1 fadein;
+   animation: 1s ease 0s normal forwards 1 fadein; */
 }
 .portalLoginForm {
    opacity: 0;
-   -webkit-animation: 1s ease 0.5s normal forwards 1 fadein;
-   animation: 1s ease 0.5s normal forwards 1 fadein;
+   -webkit-animation: 1s ease 0s normal forwards 1 fadein;
+   animation: 1s ease 0s normal forwards 1 fadein;
+   background: white;
+   border-radius: 30px;
+   box-shadow: 0px 20px 20px rgba(0, 0, 0, 0.4);
+   position: relative;
+   top: -20px;
+   transform: scale(1.2);
+}
+.portalLogin .webix_view {
+   overflow: visible;
+   display: inline-block;
 }
 div.webix_dataview_item.webix_transparent {
    padding: 0px;
@@ -1578,9 +1589,15 @@ div.webix_dataview_item.webix_transparent {
 @keyframes fadein {
    0% {
       opacity: 0;
+      top: -20px;
+      transform: scale(1.1);
+      box-shadow: 0px 20px 20px rgba(0, 0, 0, 0.4);
    }
    100% {
       opacity: 1;
+      top: 0;
+      transform: scale(1);
+      box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.4);
    }
 }
 
@@ -1653,58 +1670,4 @@ div.webix_dataview_item.webix_transparent {
    position: absolute;
    right: 0;
    top: 0;
-}
-@keyframes pulseDark {
-   0% {
-      /* color: darkorange; */
-      transform: scale(1);
-      text-shadow: 0 0 1px rgba(0, 0, 0, 0.4);
-   }
-   50% {
-      /* color: orange; */
-   }
-   100% {
-      /* color: darkorange; */
-      transform: scale(1.25);
-      text-shadow: 0 3px 3px rgba(0, 0, 0, 0.4);
-   }
-}
-@keyframes pulseLight {
-   0% {
-      /* color: darkorange; */
-      transform: scale(1);
-      text-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
-   }
-   50% {
-      /* color: orange; */
-   }
-   100% {
-      /* color: darkorange; */
-      transform: scale(1.25);
-      text-shadow: 0 3px 3px rgba(0, 0, 0, 0.1);
-   }
-}
-.pulseDark {
-   animation-name: pulseDark;
-   animation-duration: 1s;
-   animation-timing-function: ease-out;
-   animation-direction: alternate;
-   animation-iteration-count: infinite;
-   animation-play-state: running;
-   color: orange !important;
-}
-.pulseLight {
-   animation-name: pulseLight;
-   animation-duration: 1s;
-   animation-timing-function: ease-out;
-   animation-direction: alternate;
-   animation-iteration-count: infinite;
-   animation-play-state: running;
-   color: orange !important;
-}
-.smalltext {
-   font-size: small !important;
-}
-.ab-object-list-item .webix_sidebar_dir_icon {
-   margin-right: 20px;
 }
