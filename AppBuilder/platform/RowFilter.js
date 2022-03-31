@@ -6,6 +6,8 @@ module.exports = class RowFilter extends RowFilterCore {
    constructor(App, idBase, AB) {
       super(App, idBase, AB);
 
+      console.error("TODO: Switch RowFilter => FilterComplex");
+
       // internal list of Webix IDs to reference our UI components.
       let ids = (this.ids = {
          component: this.unique(`${idBase}_rowFilter`),
@@ -1271,7 +1273,7 @@ module.exports = class RowFilter extends RowFilterCore {
     */
    isComplete() {
       if (!this._completeConditions) {
-         this._completeConditions = this.AB.filtercomplexNew(
+         this._completeConditions = this.AB.filterComplexNew(
             `${this.ids.component}_iscomplete`
          );
       }

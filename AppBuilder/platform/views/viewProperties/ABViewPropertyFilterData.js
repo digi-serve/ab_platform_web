@@ -59,7 +59,6 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
       // from the global search toolbar entry.
 
       this.rowFilter = new ComplexFilter(
-         null,
          `${this.ids.component}_filter`,
          this.AB
       );
@@ -68,7 +67,6 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
       // display a form in a popup where the toolbar button is.
 
       this.rowFilterForm = new ComplexFilter(
-         null,
          `${this.ids.component}_filter_form`,
          this.AB
       );
@@ -932,12 +930,8 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
       this.App = App;
       this.idBase = idBase;
 
-      this.rowFilter = new ComplexFilter(App, `${idBase}_filter`, App.AB);
-      this.rowFilterForm = new ComplexFilter(
-         App,
-         `${idBase}_filter_form`,
-         App.AB
-      );
+      this.rowFilter = new ComplexFilter(`${idBase}_filter`, App.AB);
+      this.rowFilterForm = new ComplexFilter(`${idBase}_filter_form`, App.AB);
 
       if (this.object) {
          // this.rowFilter.applicationLoad(this.object.application);

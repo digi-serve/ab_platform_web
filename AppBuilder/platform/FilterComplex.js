@@ -97,13 +97,13 @@ function _toExternal(cond, fields = []) {
 }
 
 module.exports = class FilterComplex extends FilterComplexCore {
-   constructor(App, idBase, AB) {
+   constructor(idBase, AB) {
       idBase = idBase || "ab_row_filter";
 
-      super(App, idBase, AB);
+      super(idBase, AB);
 
       let labels = (this.labels = {
-         common: (App || {}).labels,
+         common: (AB._App || {}).labels,
          component: {
             and: L("And"),
             or: L("Or"),

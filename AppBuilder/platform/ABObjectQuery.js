@@ -269,7 +269,7 @@ module.exports = class ABObjectQuery extends ABObjectQueryCore {
 
       // 2) completely filled out conditions.
       if (!this._conditionCheck) {
-         this._conditionCheck = this.AB.filtercomplexNew(
+         this._conditionCheck = this.AB.filterComplexNew(
             `${this.id}_conditionCheck`
          );
          // {FilterComplex} ._conditionCheck
