@@ -23,122 +23,137 @@ class PortalAuthLoginResetRequest extends ClassUI {
          cols: [
             {},
             {
-               width: "300",
-               id: "password_reset_email",
-               css: "portalLoginForm",
                rows: [
                   {},
                   {
-                     template:
-                        "<div style='text-align: center; font-size:160px; line-height: 160px;'><i style='background-color: #666; color: transparent; text-shadow: 0px 1px 1px rgba(255,255,255,0.5); -webkit-background-clip: text; -moz-background-clip: text; background-clip: text;' class='fa fa-envelope-o'></i></div>",
-                     borderless: true,
-                     height: 190,
-                     type: "clean",
-                  },
-                  {
-                     id: "portal_reset_password_form",
-                     view: "form",
-                     type: "clean",
-                     css: { background: "transparent !important" },
-                     borderless: true,
-                     elementsConfig: {
-                        bottomPadding: 20,
-                     },
-                     elements: [
+                     width: 360,
+                     rows: [
                         {
-                           template: `<p>${L(
-                              "Enter your email. We'll send a link to reset your password."
-                           )}</p>`,
-                           css: {
-                              background: "transparent",
-                              border: "none",
-                              "font-size": "16px",
-                              color: "black",
-                              "text-align": "center",
-                           },
-                           height: 80,
-                        },
-                        {
-                           height: 72,
-                           borderless: true,
-                           cols: [
+                           id: "password_reset_email",
+                           css: "portalLoginForm",
+                           padding: 30,
+                           rows: [
                               {
-                                 id: "reset_tenantList",
-                                 view: "select",
-                                 // label: "Tenant",
-                                 name: "tenant",
-                                 attributes: {
-                                    "data-cy": "reset_tenantList",
+                                 template:
+                                    "<div style='text-align: center; font-size:160px; line-height: 160px;'><i style='background-color: #666; color: transparent; text-shadow: 0px 1px 1px rgba(255,255,255,0.5); -webkit-background-clip: text; -moz-background-clip: text; background-clip: text;' class='fa fa-envelope-o'></i></div>",
+                                 borderless: true,
+                                 height: 190,
+                                 type: "clean",
+                              },
+                              {
+                                 id: "portal_reset_password_form",
+                                 view: "form",
+                                 type: "clean",
+                                 css: { background: "transparent !important" },
+                                 borderless: true,
+                                 elementsConfig: {
+                                    bottomPadding: 20,
                                  },
-                                 value: 1,
-                                 options: [
-                                    { id: 1, value: "Master" },
-                                    { id: 2, value: "Release" },
-                                 ],
-                              },
-                              {
-                                 id: "reset-email",
-                                 view: "text",
-                                 placeholder: L("Email"),
-                                 name: "email",
-                                 validate: webix.rules.isEmail,
-                                 invalidMessage: L(
-                                    "Please enter a valid email."
-                                 ),
-                                 validateEvent: "blur",
-                              },
-                              {
-                                 rows: [
+                                 elements: [
                                     {
-                                       view: "button",
-                                       height: 52,
-                                       icon: "fa fa-paper-plane",
-                                       type: "icon",
-                                       css: "webix_primary",
-                                       autowidth: true,
-                                       hotkey: "enter",
-                                       click() {
-                                          var email = $$("reset-email");
-                                          if (email.validate()) {
-                                             email = email.getValue();
-                                             var tenant = $$(
-                                                "reset_tenantList"
-                                             ).getValue();
-                                             self.AB.Network.post(
-                                                {
-                                                   url: "/auth/login/reset",
-                                                   data: {
-                                                      email,
-                                                      tenant,
-                                                      url:
-                                                         window.location
-                                                            .origin ||
-                                                         window.location.href,
-                                                   },
-                                                },
-                                                {
-                                                   key:
-                                                      "portal_auth_login_reset",
-                                                   context: { email },
-                                                }
-                                             ).catch((err) => {
-                                                console.log(err);
-                                             });
-                                          }
+                                       template: `<p>${L(
+                                          "Enter your email. We'll send a link to reset your password."
+                                       )}</p>`,
+                                       autoheight: true,
+                                       css: {
+                                          background: "transparent",
+                                          border: "none",
+                                          "font-size": "16px",
+                                          color: "black",
+                                          "text-align": "center",
                                        },
                                     },
-                                    {},
+                                    {
+                                       borderless: true,
+                                       cols: [
+                                          {
+                                             id: "reset_tenantList",
+                                             view: "select",
+                                             // label: "Tenant",
+                                             name: "tenant",
+                                             attributes: {
+                                                "data-cy": "reset_tenantList",
+                                             },
+                                             value: 1,
+                                             options: [
+                                                { id: 1, value: "Master" },
+                                                { id: 2, value: "Release" },
+                                             ],
+                                          },
+                                          {
+                                             id: "reset-email",
+                                             view: "text",
+                                             placeholder: L("Email"),
+                                             name: "email",
+                                             validate: webix.rules.isEmail,
+                                             invalidMessage: L(
+                                                "Please enter a valid email."
+                                             ),
+                                             validateEvent: "blur",
+                                          },
+                                          {
+                                             rows: [
+                                                {
+                                                   view: "button",
+                                                   icon: "fa fa-paper-plane",
+                                                   type: "icon",
+                                                   css: "webix_primary",
+                                                   autowidth: true,
+                                                   hotkey: "enter",
+                                                   click() {
+                                                      var email = $$(
+                                                         "reset-email"
+                                                      );
+                                                      if (email.validate()) {
+                                                         email = email.getValue();
+                                                         var tenant = $$(
+                                                            "reset_tenantList"
+                                                         ).getValue();
+                                                         self.AB.Network.post(
+                                                            {
+                                                               url:
+                                                                  "/auth/login/reset",
+                                                               data: {
+                                                                  email,
+                                                                  tenant,
+                                                                  url:
+                                                                     window
+                                                                        .location
+                                                                        .origin ||
+                                                                     window
+                                                                        .location
+                                                                        .href,
+                                                               },
+                                                            },
+                                                            {
+                                                               key:
+                                                                  "portal_auth_login_reset",
+                                                               context: {
+                                                                  email,
+                                                               },
+                                                            }
+                                                         ).catch((err) => {
+                                                            console.log(err);
+                                                         });
+                                                      }
+                                                   },
+                                                },
+                                                {},
+                                             ],
+                                          },
+                                       ],
+                                    },
+                                    {
+                                       view: "button",
+                                       label: L("Back to log in"),
+                                       css: "webix_transparent",
+                                       click() {
+                                          self.emit("login");
+                                       },
+                                    },
                                  ],
                               },
                            ],
-                        },
-                        {
-                           view: "button",
-                           label: L("Back to Sign In Page"),
-                           css: "webix_transparent",
-                           click() {
-                              self.emit("login");
-                           },
                         },
                      ],
                   },
