@@ -1,5 +1,4 @@
 const ABProcessGatewayExclusiveCore = require("../../../core/process/tasks/ABProcessGatewayExclusiveCore.js");
-const RowFilter = require("../../RowFilter");
 
 let L = (...params) => AB.Multilingual.label(...params);
 
@@ -58,7 +57,7 @@ module.exports = class ABProcessGatewayExclusive extends (
 
          var connectedElement = this.process.elementForDiagramID(conn.to);
 
-         var DF = new RowFilter(App, `${id}_${conn.id}_filter`, this.AB);
+         var DF = this.AB.filterComplexNew(`${id}_${conn.id}_filter`);
          // DF.applicationLoad(this.application);
          DF.fieldsLoad(abFields);
          this.__dfLookup[conn.id] = DF;

@@ -8,7 +8,6 @@
  *
  */
 const ABQLCore = require("../../core/ql/ABQLCore.js");
-const FilterComplex = require("../FilterComplex.js");
 const RowUpdater = require("../RowUpdater.js");
 
 const L = (...params) => AB.Multilingual.label(...params);
@@ -358,7 +357,7 @@ class ABQL extends ABQLCore {
             //     "uniqueID of the field (field.id)" : {webixUI definition}
             // }
 
-            var Filter = new FilterComplex(null, id);
+            var Filter = this.AB.filterComplexNew(id);
             var hashFieldIDs = this.availableProcessDataFieldsHash();
             if (this.object) {
                Filter.fieldsLoad(this.object.fields(), this.object);
