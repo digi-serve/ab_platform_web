@@ -276,7 +276,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
 
          if (isComplete) {
             switch (cond.rule) {
-               // case "same_as_user":
+               case "same_as_user":
                case "is_current_user":
                case "is_not_current_user":
                case "contain_current_user":
