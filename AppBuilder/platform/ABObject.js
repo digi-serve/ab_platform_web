@@ -724,6 +724,10 @@ module.exports = class ABObject extends ABObjectCore {
          allWarnings.push({ message: "I got no fields.", data: {} });
       }
 
+      this.indexes().forEach((i) => {
+         allWarnings = allWarnings.concat(i.warnings());
+      });
+
       return allWarnings;
    }
 
