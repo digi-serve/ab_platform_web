@@ -585,6 +585,28 @@ module.exports = class ABDataCollection extends ABDataCollectionCore {
       });
    }
 
+   fromValues(values) {
+      super.fromValues(values);
+      if (this.workspaceViews) this.workspaceViews.fromObj(values);
+      this.emit("warnings");
+   }
+
+   warningsAll() {
+      // report both OUR warnings, and any warnings from any of our fields
+      var allWarnings = [].concat(this._warnings);
+
+      if (!this.datasource) {
+         allWarnings.push({ message: "I got no a datasourse.", data: {} });
+      }
+
+      return allWarnings;
+   }
+
+   warningsEval() {
+      // our .fromValues() has already registered any missing fields.
+      // those should get reported from warnings()
+   }
+
    get userScopes() {
       return this.AB.Account.scopes();
    }
