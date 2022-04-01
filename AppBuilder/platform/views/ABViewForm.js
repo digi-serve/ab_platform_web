@@ -9,8 +9,6 @@ const ABViewFormTextbox = require("./ABViewFormTextbox");
 const ABRecordRule = require("../../rules/ABViewRuleListFormRecordRules");
 const ABSubmitRule = require("../../rules/ABViewRuleListFormSubmitRules");
 
-var FilterComplex = require("../FilterComplex");
-
 let PopupRecordRule = null;
 let PopupSubmitRule = null;
 
@@ -693,9 +691,8 @@ module.exports = class ABViewForm extends ABViewFormCore {
                }
                // there could be more than one so lets loop through and build the UI
                f.settings.validationRules.forEach((rule) => {
-                  var Filter = new FilterComplex(
-                     App,
-                     f.columnName + "_" + webix.uid()
+                  var Filter = this.AB.filterComplexNew(
+                     `${f.columnName}_${webix.uid()}`
                   );
                   // add the new ui to an array so we can add them all at the same time
                   validationUI.push(Filter.ui);

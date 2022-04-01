@@ -18,9 +18,6 @@
 import ABViewProperty from "./ABViewProperty";
 // const ABViewGridFilterRule = require("../../../rules/ABViewGridFilterRule");
 
-// const RowFilter = require("../../RowFilter");
-const ComplexFilter = require("../../FilterComplex");
-
 let L = (...params) => AB.Multilingual.label(...params);
 
 // var getRule = (object, App, idBase) => {
@@ -58,19 +55,13 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
       // External sources of text filters are stored here. This is most likely
       // from the global search toolbar entry.
 
-      this.rowFilter = new ComplexFilter(
-         null,
-         `${this.ids.component}_filter`,
-         this.AB
-      );
+      this.rowFilter = this.AB.filterComplexNew(`${this.ids.component}_filter`);
       // {RowFilter}
       // When .userFilterPosition == "toolbar" we use this RowFilter to
       // display a form in a popup where the toolbar button is.
 
-      this.rowFilterForm = new ComplexFilter(
-         null,
-         `${this.ids.component}_filter_form`,
-         this.AB
+      this.rowFilterForm = this.AB.filterComplexNew(
+         `${this.ids.component}_filter_form`
       );
       // {RowFilter}
       // When .userFilterPosition == "form" we use this RowFilter to
@@ -932,12 +923,8 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
       this.App = App;
       this.idBase = idBase;
 
-      this.rowFilter = new ComplexFilter(App, `${idBase}_filter`, App.AB);
-      this.rowFilterForm = new ComplexFilter(
-         App,
-         `${idBase}_filter_form`,
-         App.AB
-      );
+      this.rowFilter = this.AB.filterComplexNew(`${idBase}_filter`);
+      this.rowFilterForm = this.AB.filterComplexNew(`${idBase}_filter_form`);
 
       if (this.object) {
          // this.rowFilter.applicationLoad(this.object.application);

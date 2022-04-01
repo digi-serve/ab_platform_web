@@ -8,8 +8,6 @@
 const ABComponent = require("../AppBuilder/platform/ABComponent");
 const AB_Work_HeaderEditMenu = require("./ab_work_object_workspace_popupHeaderEditMenu");
 
-var FilterComplex = require("../AppBuilder/platform/FilterComplex");
-
 module.exports = class ABWorkObjectDatatable extends ABComponent {
    /**
      *
@@ -1042,9 +1040,8 @@ module.exports = class ABWorkObjectDatatable extends ABComponent {
                   var validationUI = [];
                   // there could be more than one so lets loop through and build the UI
                   col.validationRules.forEach((rule) => {
-                     var Filter = new FilterComplex(
-                        App,
-                        col.id + "_" + webix.uid()
+                     var Filter = this.AB.filterComplexNew(
+                        `${col.id}_${webix.uid()}`
                      );
                      // add the new ui to an array so we can add them all at the same time
                      validationUI.push(Filter.ui);

@@ -5,8 +5,6 @@
 //
 const ABViewRuleAction = require("../ABViewRuleAction");
 
-const RowFilter = require("../../platform/RowFilter");
-
 let L = (...params) => AB.Multilingual.label(...params);
 
 var ABViewRuleActionObjectUpdaterDefaults = {
@@ -517,8 +515,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                                     };
                                  });
 
-                              FilterComponent = new RowFilter(
-                                 this.App,
+                              FilterComponent = this.AB.filterComplexNew(
                                  `${idBase}_filter`
                               );
                               // FilterComponent.applicationLoad(
@@ -526,8 +523,10 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                               // );
                               FilterComponent.init({
                                  isRecordRule: true,
-                                 onChange: _logic.onFilterChange,
                                  fieldOptions: options,
+                              });
+                              FilterComponent.on("change", (val) => {
+                                 _logic.onFilterChange(val);
                               });
 
                               $row.addView(FilterComponent.ui, 1);

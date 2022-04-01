@@ -1,15 +1,6 @@
 const ABViewGridCore = require("../../core/views/ABViewGridCore");
 import ABViewComponent from "./ABViewComponent";
 
-// const ABWorkspaceDatatable = require("../../../ABDesigner/ab_work_object_workspace_datatable");
-// const ABPopupHideFields = require("../../../ABDesigner/ab_work_object_workspace_popupHideFields");
-// const ABPopupFrozenColumns = require("../../../ABDesigner/ab_work_object_workspace_popupFrozenColumns");
-
-// const ABPopupSummaryColumns = require("../../../ABDesigner/ab_work_object_workspace_popupSummaryColumns");
-// const ABPopupCountColumns = require("../../../ABDesigner/ab_work_object_workspace_popupCountColumns");
-
-// const ABFieldImage = require("../dataFields/ABFieldImage");
-
 import ABPopupExport from "./ABViewGridPopupExport";
 import ABPopupMassUpdateClass from "./ABViewGridPopupMassUpdate";
 import ABPopupSortField from "./ABViewGridPopupSortFields";
@@ -26,11 +17,11 @@ var GridSettings = null;
 // Keep a global copy of our local Grid settings, so we can optimize the header
 // sizes.
 
-let PopupHideFieldComponent = null;
-let PopupFrozenColumnsComponent = null;
-let PopupFilterProperty = null;
-let PopupSummaryColumnsComponent = null;
-let PopupCountColumnsComponent = null;
+// let PopupHideFieldComponent = null;
+// let PopupFrozenColumnsComponent = null;
+// let PopupFilterProperty = null;
+// let PopupSummaryColumnsComponent = null;
+// let PopupCountColumnsComponent = null;
 
 var L = null;
 // multilingual Label fn()
@@ -1694,6 +1685,14 @@ class ABViewGridComponent extends ABViewComponent {
          columnHeaders = objColumnHeaders;
       }
 
+      // sanity check:
+      // columnHeaders can't contain a column that doesn't exist in objColumHeaders:
+      // (eg: a field might have been removed but localStorage doesn't know that )
+      var objColumnHeaderIDs = objColumnHeaders.map((h) => h.fieldID);
+      columnHeaders = columnHeaders.filter(
+         (c) => objColumnHeaderIDs.indexOf(c.fieldID) > -1
+      );
+
       // default our columnConfig values to our columnHeaders:
       columnHeaders.forEach((c) => {
          // we want to overwrite our default settings with anything stored
@@ -1739,7 +1738,7 @@ class ABViewGridComponent extends ABViewComponent {
       var fieldValidations = [];
       var rulePops = [];
 
-      columnHeaders.forEach(function (col) {
+      columnHeaders.forEach((col) => {
          col.fillspace = false;
 
          // parse the rules because they were stored as a string
@@ -1753,8 +1752,7 @@ class ABViewGridComponent extends ABViewComponent {
                var validationUI = [];
                // there could be more than one so lets loop through and build the UI
                col.validationRules.forEach((rule) => {
-                  var Filter = new FilterComplex(
-                     App,
+                  var Filter = this.AB.filterComplexNew(
                      col.id /*+ "_" + webix.uid()*/
                   );
                   // add the new ui to an array so we can add them all at the same time
@@ -3678,122 +3676,122 @@ export default class ABViewGrid extends ABViewGridCore {
       return component;
    }
 
-   populateEditor(ids, view) {
-      // Pull data collections to options
-      var objectOptions = view.propertyDatacollections();
-      $$(ids.datacollection).define("options", objectOptions);
-      $$(ids.datacollection).refresh();
-      if (view.settings.datacollection != "") {
-         $$(ids.datacollection).setValue(view.settings.dataviewID);
-         // $$(ids.linkedObject).show();
-      } else {
-         $$(ids.datacollection).setValue("");
-         // $$(ids.linkedObject).hide();
-      }
+   // populateEditor(ids, view) {
+   //    // Pull data collections to options
+   //    var objectOptions = view.propertyDatacollections();
+   //    $$(ids.datacollection).define("options", objectOptions);
+   //    $$(ids.datacollection).refresh();
+   //    if (view.settings.datacollection != "") {
+   //       $$(ids.datacollection).setValue(view.settings.dataviewID);
+   //       // $$(ids.linkedObject).show();
+   //    } else {
+   //       $$(ids.datacollection).setValue("");
+   //       // $$(ids.linkedObject).hide();
+   //    }
 
-      // Grouping options
-      let groupFields = [];
-      let dv = this.datacollection;
-      if (dv && dv.datasource) {
-         dv.datasource
-            .fields((f) => {
-               return (
-                  !f.isConnection &&
-                  view.settings.hiddenFields.indexOf(f.columnName) < 0
-               );
-            })
-            .forEach((f) => {
-               groupFields.push({
-                  id: f.columnName,
-                  value: f.label,
-               });
-            });
-      }
-      $$(ids.groupBy).define("options", groupFields);
-      $$(ids.groupBy).refresh();
+   //    // Grouping options
+   //    let groupFields = [];
+   //    let dv = this.datacollection;
+   //    if (dv && dv.datasource) {
+   //       dv.datasource
+   //          .fields((f) => {
+   //             return (
+   //                !f.isConnection &&
+   //                view.settings.hiddenFields.indexOf(f.columnName) < 0
+   //             );
+   //          })
+   //          .forEach((f) => {
+   //             groupFields.push({
+   //                id: f.columnName,
+   //                value: f.label,
+   //             });
+   //          });
+   //    }
+   //    $$(ids.groupBy).define("options", groupFields);
+   //    $$(ids.groupBy).refresh();
 
-      this.propertyGroupByList(ids, view.settings.groupBy);
-   }
+   //    this.propertyGroupByList(ids, view.settings.groupBy);
+   // }
 
-   populatePopupEditors(view, dataSource) {
-      var dv = this.datacollection;
-      if (!dv) return;
+   // populatePopupEditors(view, dataSource) {
+   //    var dv = this.datacollection;
+   //    if (!dv) return;
 
-      let object = dv.datasource;
-      if (!object) return;
+   //    let object = dv.datasource;
+   //    if (!object) return;
 
-      PopupHideFieldComponent.objectLoad(object);
-      PopupHideFieldComponent.setValue(view.settings.hiddenFields || []);
-      PopupHideFieldComponent.setFrozenColumnID(
-         view.settings.frozenColumnID || ""
-      );
-      PopupFrozenColumnsComponent.objectLoad(object);
-      PopupFrozenColumnsComponent.setValue(view.settings.frozenColumnID || "");
-      PopupFrozenColumnsComponent.setHiddenFields(
-         view.settings.hiddenFields || []
-      );
+   //    PopupHideFieldComponent.objectLoad(object);
+   //    PopupHideFieldComponent.setValue(view.settings.hiddenFields || []);
+   //    PopupHideFieldComponent.setFrozenColumnID(
+   //       view.settings.frozenColumnID || ""
+   //    );
+   //    PopupFrozenColumnsComponent.objectLoad(object);
+   //    PopupFrozenColumnsComponent.setValue(view.settings.frozenColumnID || "");
+   //    PopupFrozenColumnsComponent.setHiddenFields(
+   //       view.settings.hiddenFields || []
+   //    );
 
-      PopupFilterProperty.objectLoad(object);
-      PopupFilterProperty.setSettings(view.settings.gridFilter);
+   //    PopupFilterProperty.objectLoad(object);
+   //    PopupFilterProperty.setSettings(view.settings.gridFilter);
 
-      PopupSummaryColumnsComponent.objectLoad(object, view);
-      PopupSummaryColumnsComponent.setValue(view.settings.summaryColumns || []);
+   //    PopupSummaryColumnsComponent.objectLoad(object, view);
+   //    PopupSummaryColumnsComponent.setValue(view.settings.summaryColumns || []);
 
-      PopupCountColumnsComponent.objectLoad(object, view);
-      PopupCountColumnsComponent.setValue(view.settings.countColumns || []);
-   }
+   //    PopupCountColumnsComponent.objectLoad(object, view);
+   //    PopupCountColumnsComponent.setValue(view.settings.countColumns || []);
+   // }
 
-   populateBadgeNumber(ids, view) {
-      // set badge numbers to setting buttons
-      if (view.settings.hiddenFields) {
-         $$(ids.buttonFieldsVisible).define(
-            "badge",
-            view.settings.hiddenFields.length || null
-         );
-         $$(ids.buttonFieldsVisible).refresh();
-      } else {
-         $$(ids.buttonFieldsVisible).define("badge", null);
-         $$(ids.buttonFieldsVisible).refresh();
-      }
+   // populateBadgeNumber(ids, view) {
+   //    // set badge numbers to setting buttons
+   //    if (view.settings.hiddenFields) {
+   //       $$(ids.buttonFieldsVisible).define(
+   //          "badge",
+   //          view.settings.hiddenFields.length || null
+   //       );
+   //       $$(ids.buttonFieldsVisible).refresh();
+   //    } else {
+   //       $$(ids.buttonFieldsVisible).define("badge", null);
+   //       $$(ids.buttonFieldsVisible).refresh();
+   //    }
 
-      if (view.settings.gridFilter && view.settings.gridFilter.filterOption) {
-         $$(ids.buttonFilterData).define("badge", "Y");
-         $$(ids.buttonFilterData).refresh();
-      } else {
-         $$(ids.buttonFilterData).define("badge", null);
-         $$(ids.buttonFilterData).refresh();
-      }
+   //    if (view.settings.gridFilter && view.settings.gridFilter.filterOption) {
+   //       $$(ids.buttonFilterData).define("badge", "Y");
+   //       $$(ids.buttonFilterData).refresh();
+   //    } else {
+   //       $$(ids.buttonFilterData).define("badge", null);
+   //       $$(ids.buttonFilterData).refresh();
+   //    }
 
-      if (view.settings && view.settings.frozenColumnID) {
-         $$(ids.buttonFieldsFreeze).define("badge", "Y");
-         $$(ids.buttonFieldsFreeze).refresh();
-      } else {
-         $$(ids.buttonFieldsFreeze).define("badge", null);
-         $$(ids.buttonFieldsFreeze).refresh();
-      }
+   //    if (view.settings && view.settings.frozenColumnID) {
+   //       $$(ids.buttonFieldsFreeze).define("badge", "Y");
+   //       $$(ids.buttonFieldsFreeze).refresh();
+   //    } else {
+   //       $$(ids.buttonFieldsFreeze).define("badge", null);
+   //       $$(ids.buttonFieldsFreeze).refresh();
+   //    }
 
-      if (view.settings && view.settings.summaryColumns) {
-         $$(ids.buttonSummaryFields).define(
-            "badge",
-            view.settings.summaryColumns.length || null
-         );
-         $$(ids.buttonSummaryFields).refresh();
-      } else {
-         $$(ids.buttonSummaryFields).define("badge", null);
-         $$(ids.buttonSummaryFields).refresh();
-      }
+   //    if (view.settings && view.settings.summaryColumns) {
+   //       $$(ids.buttonSummaryFields).define(
+   //          "badge",
+   //          view.settings.summaryColumns.length || null
+   //       );
+   //       $$(ids.buttonSummaryFields).refresh();
+   //    } else {
+   //       $$(ids.buttonSummaryFields).define("badge", null);
+   //       $$(ids.buttonSummaryFields).refresh();
+   //    }
 
-      if (view.settings && view.settings.countColumns) {
-         $$(ids.buttonCountFields).define(
-            "badge",
-            view.settings.countColumns.length || null
-         );
-         $$(ids.buttonCountFields).refresh();
-      } else {
-         $$(ids.buttonCountFields).define("badge", null);
-         $$(ids.buttonCountFields).refresh();
-      }
-   }
+   //    if (view.settings && view.settings.countColumns) {
+   //       $$(ids.buttonCountFields).define(
+   //          "badge",
+   //          view.settings.countColumns.length || null
+   //       );
+   //       $$(ids.buttonCountFields).refresh();
+   //    } else {
+   //       $$(ids.buttonCountFields).define("badge", null);
+   //       $$(ids.buttonCountFields).refresh();
+   //    }
+   // }
 
    get filterHelper() {
       if (this.__filterHelper == null) {

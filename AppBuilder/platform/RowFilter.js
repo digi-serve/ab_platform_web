@@ -6,6 +6,8 @@ module.exports = class RowFilter extends RowFilterCore {
    constructor(App, idBase, AB) {
       super(App, idBase, AB);
 
+      console.error("TODO: Switch RowFilter => FilterComplex");
+
       // internal list of Webix IDs to reference our UI components.
       let ids = (this.ids = {
          component: this.unique(`${idBase}_rowFilter`),
@@ -1002,7 +1004,7 @@ module.exports = class RowFilter extends RowFilterCore {
 
             console.warn("convert RowFilter.callback.onChange() to .emit()");
             _logic.callbacks.onChange();
-            this.emit("changed");
+            this.emit("change");
          }
 
          return false;
@@ -1260,5 +1262,22 @@ module.exports = class RowFilter extends RowFilterCore {
 
       // unblock .onChange event
       logic.unblockOnChange();
+   }
+
+   /**
+    * @method isComplete()
+    * returns a truthy value representing whether or not our current condition
+    * expression is fully completed.  Then externally checks can be made to
+    * verify if the data is complete.
+    * @return {bool}
+    */
+   isComplete() {
+      if (!this._completeConditions) {
+         this._completeConditions = this.AB.filterComplexNew(
+            `${this.ids.component}_iscomplete`
+         );
+      }
+
+      return this._completeConditions.isConditionComplete(this.getValue());
    }
 };
