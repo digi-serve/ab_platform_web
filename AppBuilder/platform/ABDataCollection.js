@@ -593,10 +593,18 @@ module.exports = class ABDataCollection extends ABDataCollectionCore {
 
    warningsAll() {
       // report both OUR warnings, and any warnings from any of our fields
-      var allWarnings = [].concat(this._warnings);
+      const allWarnings = [].concat(this._warnings);
 
       if (!this.datasource) {
-         allWarnings.push({ message: "I got no a datasourse.", data: {} });
+         allWarnings.push({ message: "I got no the datasourse.", data: {} });
+      } else if (this.linkDatacollectionID) {
+         const linkDC = this.AB.datacollectionById(this.linkDatacollectionID);
+
+         if (linkDC)
+            allWarnings.push({
+               message: "I got no the linked datacollection.",
+               data: {},
+            });
       }
 
       return allWarnings;
