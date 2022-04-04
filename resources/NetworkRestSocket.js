@@ -45,7 +45,7 @@ class NetworkRestSocket extends NetworkRest {
                   let obj = this.AB.objectByID(data.objectId);
                   if (obj) {
                      let model = obj.model();
-                     data.data = model.normalizeData(data.data);
+                     model.normalizeData(data.data);
                   }
                }
             }
