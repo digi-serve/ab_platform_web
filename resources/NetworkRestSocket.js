@@ -36,6 +36,19 @@ class NetworkRestSocket extends NetworkRest {
       // Pass the io.socket.on(*) events to our AB factory.
       listSocketEvents.forEach((ev) => {
          io.socket.on(ev, (data) => {
+            // check if the ev contains 'datacollection'
+            // and do a single normalizeData() on the incoming data here
+            // before sending it off to be processed.
+            if (ev.indexOf("ab.datacollection") > -1) {
+               let values = data.data;
+               if (values) {
+                  let obj = this.AB.objectByID(data.objectId);
+                  if (obj) {
+                     let model = obj.model();
+                     model.normalizeData(data.data);
+                  }
+               }
+            }
             this.AB.emit(ev, data);
          });
       });
