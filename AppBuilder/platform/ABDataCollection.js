@@ -585,12 +585,6 @@ module.exports = class ABDataCollection extends ABDataCollectionCore {
       });
    }
 
-   fromValues(values) {
-      super.fromValues(values);
-      if (this.workspaceViews) this.workspaceViews.fromObj(values);
-      this.emit("warnings");
-   }
-
    warningsAll() {
       // report both OUR warnings, and any warnings from any of our fields
       const allWarnings = [].concat(this._warnings);
@@ -602,7 +596,7 @@ module.exports = class ABDataCollection extends ABDataCollectionCore {
 
          if (linkDC)
             allWarnings.push({
-               message: "I got no the linked datacollection.",
+               message: `Datacollection[${this.label}][${this.id}] can't resolve linkDatacollectionID[${this.linkDatacollectionID}]`,
                data: {},
             });
       }
