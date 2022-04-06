@@ -236,9 +236,12 @@ module.exports = class FilterComplex extends FilterComplexCore {
       let helper = () => true;
 
       let $query = $$(this.ids.querybuilder);
-      if ($query) helper = $query.getFilterFunction();
-
-      return helper(rowData);
+      if ($query) {
+         helper = $query.getFilterFunction();
+         return helper(rowData);
+      } else {
+         return super.isValid(rowData);
+      }
    }
 
    /**
