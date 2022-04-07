@@ -1662,7 +1662,9 @@ div.webix_dataview_item.webix_transparent {
 .webix_list_item.menu {
    color: inherit;
 }
-.ab-datacollection-list-item,
+.ab-datacollection-list-item {
+   position: relative;
+}
 .ab-object-list-item {
    position: relative;
 }
