@@ -590,7 +590,10 @@ module.exports = class ABDataCollection extends ABDataCollectionCore {
       const allWarnings = [].concat(this._warnings);
 
       if (!this.datasource) {
-         allWarnings.push({ message: "I got no the datasourse.", data: {} });
+         allWarnings.push({
+            message: `Datacollection[${this.label}][${this.id}] doesn't have a datasource.`,
+            data: {},
+         });
       } else if (this.linkDatacollectionID) {
          const linkDC = this.AB.datacollectionById(this.linkDatacollectionID);
 
