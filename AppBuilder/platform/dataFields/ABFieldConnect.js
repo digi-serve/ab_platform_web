@@ -375,12 +375,16 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
    editParse(value) {
       var multiselect = this.settings.linkType == "many";
       if (multiselect) {
-         let returnVals = [];
-         let vals = value.split(",");
-         vals.forEach((val) => {
-            returnVals.push(this.getItemFromVal(val));
-         });
-         return returnVals;
+         if (!value) {
+            return [];
+         } else {
+            let returnVals = [];
+            let vals = value.split(",");
+            vals.forEach((val) => {
+               returnVals.push(this.getItemFromVal(val));
+            });
+            return returnVals;
+         }
       } else {
          let item = this.getItemFromVal(value);
          return item;
