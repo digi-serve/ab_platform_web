@@ -279,11 +279,18 @@ module.exports = class FilterComplex extends FilterComplexCore {
 
          if (isComplete) {
             switch (cond.rule) {
-               case "same_as_user":
                case "is_current_user":
                case "is_not_current_user":
                case "contain_current_user":
                case "not_contain_current_user":
+               case "same_as_user":
+               case "not_same_as_user":
+               case "less_current":
+               case "greater_current":
+               case "less_or_equal_current":
+               case "greater_or_equal_current":
+               case "is_empty":
+               case "is_not_empty":
                   // There are only a few rules that don't need a
                   // value
                   break;
