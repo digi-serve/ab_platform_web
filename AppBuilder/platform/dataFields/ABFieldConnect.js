@@ -378,7 +378,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          let returnVals = [];
          let vals = value.split(",");
          vals.forEach((val) => {
-            returnVals.push(val);
+            returnVals.push(this.getItemFromVal(val));
          });
          return returnVals;
       } else {
@@ -459,13 +459,13 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          for (let i = 0; i < options.length; i++) {
             if (
                this.indexField &&
-               options[i][this.indexField.columnName] == val
+               options[i][this.indexField.object.PK()] == val
             ) {
                item = options[i];
                break;
             } else if (
                this.indexField2 &&
-               options[i][this.indexField2.columnName] == val
+               options[i][this.indexField2.object.PK()] == val
             ) {
                item = options[i];
                break;
