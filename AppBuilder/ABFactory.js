@@ -18,6 +18,8 @@ import Account from "../resources/Account.js";
 
 import ClassUI from "../ui/ClassUI.js";
 
+import CommCenter from "../resources/CommCenter.js";
+
 import Dialog from "./_factory_utils/Dialog.js";
 // Dialog : common UI dialogs.
 
@@ -104,6 +106,7 @@ class ABFactory extends ABFactoryCore {
       // Resources
       //
       this.Account = Account;
+      this.CommCenter = CommCenter;
       this.Dialog = Dialog;
       this.Multilingual = Multilingual;
       this.Network = Network;
@@ -440,6 +443,7 @@ class ABFactory extends ABFactoryCore {
       var allInits = [];
 
       allInits.push(this.Account.init(this));
+      allInits.push(this.CommCenter.init(this));
       allInits.push(this.Multilingual.init(this));
       allInits.push(this.Network.init(this));
       allInits.push(this.Tenant.init(this));
@@ -793,8 +797,8 @@ class ABFactory extends ABFactoryCore {
       this.emit("error", emitData);
    }
 
-   jobID() {
-      return nanoid();
+   jobID(size = 21) {
+      return nanoid(size);
    }
 
    Label() {
