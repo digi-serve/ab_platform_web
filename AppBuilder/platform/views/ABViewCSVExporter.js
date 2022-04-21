@@ -356,9 +356,7 @@ module.exports = class ABViewCSVExporter extends ABViewCSVExporterCore {
 
       let _logic = (this._logic = {
          downloadCsvFile: () => {
-            let url = `/app_builder/application/${this.application.id}/page/${
-               this.pageRoot().id
-            }/view/${this.id}/csv`;
+            let url = `/appbuilder/csv-export/${this.id}`;
 
             let where = ClientFilter.getValue();
             if (where && (where.rules || []).length) {
