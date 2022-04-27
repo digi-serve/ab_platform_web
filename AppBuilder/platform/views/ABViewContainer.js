@@ -1,8 +1,173 @@
 const ABViewContainerCore = require("../../core/views/ABViewContainerCore");
+const ABViewComponent = require("./ABViewComponent").default;
 
 const ABPropertyComponentDefaults = ABViewContainerCore.defaultValues();
 
 let L = (...params) => AB.Multilingual.label(...params);
+
+class ABViewContainerComponent extends ABViewComponent {
+   constructor(viewContainer, idBase) {
+      var base = idBase || `ABViewContainer_${viewContainer.id}`;
+      super(base, {});
+
+      this.viewContainer = viewContainer;
+      this.settings = viewContainer.settings;
+
+      this.viewComponents = {
+         /* view.id : {viewComponent} */
+      };
+      // {hash}
+      // a reference of all our child views that we manage
+
+      this.viewComponentIDs = {
+         /* view.id : {viewComponent} */
+      };
+      // {hash}
+      // a reference of all our child.ui().ids of the views we manage
+
+      this._handlerChangePage = (pageId) => {
+         this.viewContainer.changePage(pageId);
+      };
+   }
+
+   ui() {
+      // Generate rows & cols of views to .layout
+      let views = this.viewContainer.viewsSortByPosition();
+      let rowViews = this.getElements(views);
+
+      return {
+         id: this.ids.component,
+         view: "layout",
+         rows: rowViews,
+      };
+   }
+
+   // make sure each of our child views get .init() called
+   init(AB, parentAccessLevel = 0) {
+      this.AB = AB;
+
+      let allInits = [];
+
+      // // register our callbacks:
+      // if (options) {
+      //    for (var c in _logic.callbacks) {
+      //       _logic.callbacks[c] = options[c] || _logic.callbacks[c];
+      //    }
+      // }
+
+      // see access by CSS class
+      if ($$(this.ids.component))
+         $$(this.ids.component).define(
+            "css",
+            "accessLevel-" + parentAccessLevel
+         );
+
+      // attach all the .UI views:
+      for (var key in this.viewComponents) {
+         // skip when the view is removed.
+         if (this.viewContainer.views((v) => v.id == key)[0] == null) return;
+
+         var component = this.viewComponents[key];
+
+         // Initial component along with options in case there are callbacks we need to listen for
+         if (parentAccessLevel > 0) {
+            allInits.push(component.init(AB, parentAccessLevel));
+         } else {
+            $$(this.viewComponentIDs[key]).hide();
+         }
+      }
+
+      return Promise.all(allInits);
+   }
+
+   getElements(views) {
+      var rows = [];
+      var curRowIndex;
+      var curColIndex;
+
+      views.forEach((v) => {
+         let component = v.component(/* App, idPrefix */);
+         this.viewComponents[v.id] = component;
+
+         ////
+         //// TODO: figure out the embedded Callbacks => emit()
+         ////
+         // if key == "form" or "button" register the callbacks to the parent
+         // NOTE this will only work on the last form of a page!
+         // if (v.key == "form" && v._logic.callbacks) {
+         //    _logic.callbacks = v._logic.callbacks;
+         // }
+
+         // Create a new row
+         if (v.position.y == null || v.position.y != curRowIndex) {
+            curRowIndex = v.position.y || rows.length;
+            curColIndex = 0;
+
+            var rowNew = {
+               cols: [],
+            };
+
+            // Create columns following setting value
+            var colNumber =
+               this.settings.columns || ABPropertyComponentDefaults.columns;
+            for (var i = 0; i < colNumber; i++) {
+               var grav =
+                  this.settings.gravity && this.settings.gravity[i]
+                     ? parseInt(this.settings.gravity[i])
+                     : ABPropertyComponentDefaults.gravity;
+               rowNew.cols.push({
+                  gravity: grav,
+               });
+            }
+
+            rows.push(rowNew);
+         }
+
+         // Get the last row
+         var curRow = rows[rows.length - 1];
+
+         var newPos = v.position.x || 0;
+         var getGrav = 1;
+
+         if (curRow.cols[newPos] && curRow.cols[newPos].gravity) {
+            getGrav = curRow.cols[newPos].gravity;
+         }
+
+         let _ui = component.ui();
+         this.viewComponentIDs[v.id] = _ui.id;
+
+         _ui.gravity = getGrav;
+
+         // Add ui of sub-view to column
+         curRow.cols[newPos] = _ui;
+
+         curColIndex += 1;
+
+         // Trigger 'changePage' event to parent
+         this.eventAdd({
+            emitter: v,
+            eventName: "changePage",
+            listener: this._handlerChangePage,
+         });
+      });
+
+      return rows;
+   }
+
+   onShow() {
+      let dv = this.viewContainer.datacollection;
+      if (dv && dv.dataStatus == dv.dataStatusFlag.notInitial) {
+         // load data when a widget is showing
+         dv.loadData();
+      }
+
+      // calll .onShow in child components
+      this.viewContainer.views().forEach((v) => {
+         var component = this.viewComponents[v.id];
+         component?.onShow?.();
+      });
+   }
+}
 
 module.exports = class ABViewContainer extends ABViewContainerCore {
    // constructor(values, application, parent, defaultValues) {
@@ -21,6 +186,7 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
     * @param {string} mode what mode are we in ['block', 'preview']
     * @return {Component}
     */
+   /*
    editorComponent(App, mode) {
       var idBase = "ABViewContainerEditorComponent";
       var ids = {
@@ -138,7 +304,7 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
           * render the list template for the View
           * @param {obj} obj the current View instance
           * @param {obj} common  Webix provided object with common UI tools
-          */
+          * /
          template: (child) => {
             return `<div>
                <i class="fa fa-${child.icon} webix_icon_btn"></i> ${child.label}
@@ -158,7 +324,7 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
           * @param {obj} e the onClick event object
           * @param {integer} id the id of the element to delete
           * @param {obj} trg  Webix provided object
-          */
+          * /
          viewDelete: (e, id, trg) => {
             var deletedView = this.views((v) => v.id == id)[0];
             if (!deletedView) return false;
@@ -225,7 +391,7 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
           * @param {obj} e the onClick event object
           * @param {integer} id the id of the element to edit
           * @param {obj} trg  Webix provided object
-          */
+          * /
          viewEdit: (e, id, trg) => {
             var view = this.views((v) => v.id == id)[0];
 
@@ -237,6 +403,7 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
             // that causes errors.)
             setTimeout(() => {
                App.actions.populateInterfaceWorkspace(view);
+               this.emit("view.edit", view);
             }, 50);
 
             e.preventDefault();
@@ -351,6 +518,7 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
          onShow: _onShow,
       };
    }
+   */
 
    //
    // Property Editor
@@ -359,7 +527,7 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
    // static propertyEditorComponent(App) {
    // 	return ABViewPropertyComponent.component(App);
    // }
-
+   /*
    static propertyEditorDefaultElements(App, ids, _logic, ObjectDefaults) {
       var commonUI = super.propertyEditorDefaultElements(
          App,
@@ -510,7 +678,7 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
       let editorComponent = view.editorComponent(this._App);
       await editorComponent.logic.onReorder();
    }
-
+  */
    /**
     * @method component()
     * return a UI component based upon this view.
@@ -519,7 +687,29 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
     *
     * @return {obj} UI component
     */
-   component(App, idPrefix) {
+
+   component(v1App = false) {
+      let component = new ABViewContainerComponent(this);
+
+      // if this is our v1Interface
+      if (v1App) {
+         var newComponent = component;
+         component = {
+            ui: component.ui(),
+            init: (options, accessLevel) => {
+               return newComponent.init(this.AB, accessLevel);
+            },
+            onShow: (...params) => {
+               return newComponent.onShow?.(...params);
+            },
+         };
+      }
+
+      return component;
+   }
+
+   /*
+   componentV1(App, idPrefix) {
       var idBase = "ABViewContainer_" + (idPrefix || "") + this.id;
       var ids = {
          component: App.unique(`${idBase}_component`),
@@ -671,4 +861,5 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
          onShow: _onShow,
       };
    }
+   */
 };

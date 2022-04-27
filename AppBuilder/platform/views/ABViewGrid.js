@@ -2197,6 +2197,11 @@ class ABViewGridComponent extends ABViewComponent {
          obj[columnName].forEach(function (o) {
             if (o.text) tip += o.text + "<br/>";
          });
+      } else if (
+         typeof obj[columnName + "__relation"] != "undefined" &&
+         typeof obj[columnName] == "number"
+      ) {
+         tip = obj[columnName + "__relation"].text;
       } else if (typeof obj[columnName + "__relation"] != "undefined") {
          var relationData = obj[columnName + "__relation"];
          if (!Array.isArray(relationData)) relationData = [relationData];
@@ -2204,11 +2209,6 @@ class ABViewGridComponent extends ABViewComponent {
          (relationData || []).forEach(function (o) {
             if (o) tip += o.text + "<br/>";
          });
-      } else if (
-         typeof obj[columnName + "__relation"] != "undefined" &&
-         typeof obj[columnName] == "number"
-      ) {
-         tip = obj[columnName + "__relation"].text;
       } else if (imageFieldColNames.indexOf(columnName) != -1) {
          if (obj[columnName] == null) {
             return "";

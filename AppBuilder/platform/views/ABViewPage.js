@@ -21,22 +21,23 @@ module.exports = class ABViewPage extends ABViewPageCore {
     * @param {string} mode what mode are we in ['block', 'preview']
     * @return {Component}
     */
-   editorComponent(App, mode) {
-      var comp = super.editorComponent(App, mode);
+   // editorComponent(App, mode) {
+   //    var comp = super.editorComponent(App, mode);
 
-      var _init = (options) => {
-         comp.init(options);
-      };
+   //    var _init = (options) => {
+   //       comp.init(options);
+   //    };
 
-      return {
-         ui: comp.ui,
-         init: _init,
-         logic: comp.logic,
+   //    return {
+   //       ui: comp.ui,
+   //       init: _init,
+   //       logic: comp.logic,
 
-         onShow: comp.onShow,
-      };
-   }
+   //       onShow: comp.onShow,
+   //    };
+   // }
 
+   /*
    static propertyEditorDefaultElements(App, ids, _logic, ObjectDefaults) {
       var commonUI = super.propertyEditorDefaultElements(
          App,
@@ -335,7 +336,7 @@ module.exports = class ABViewPage extends ABViewPageCore {
     * @method propertyUpdatePermissionsOptions
     * Populate permissions of Ops Portal to select list in property
     *
-    */
+    * /
    static propertyUpdatePermissionsOptions(ids, view) {
       var action_key = this.getPageActionKey(view);
       var roles = [];
@@ -391,6 +392,7 @@ module.exports = class ABViewPage extends ABViewPageCore {
             console.error(err);
          });
    }
+   */
 
    /*
     * @component()
@@ -398,7 +400,42 @@ module.exports = class ABViewPage extends ABViewPageCore {
     * @param {obj} App
     * @return {obj} UI component
     */
-   component(App) {
+   component(v1App = false) {
+      var component = super.component();
+
+      component._ui = component.ui();
+
+      // wrap our ABViewContainer in our Page scrollview
+      component.ui = () => {
+         return {
+            view: "scrollview",
+            borderless: true,
+            css:
+               this.settings.pageBackground ||
+               ABPropertyComponentDefaults.pageBackground,
+            body: component._ui,
+         };
+      };
+
+      // if this is our v1Interface
+      if (v1App) {
+         var newComponent = component;
+         component = {
+            ui: component.ui(),
+            init: (options, accessLevel) => {
+               accessLevel = accessLevel ?? this.getUserAccess();
+               return newComponent.init(this.AB, accessLevel);
+            },
+            onShow: (...params) => {
+               return newComponent.onShow?.(...params);
+            },
+         };
+      }
+
+      return component;
+   }
+   /*
+   componentV1(App) {
       var comp = super.component(App);
       var _ui = {
          view: "scrollview",
@@ -422,4 +459,5 @@ module.exports = class ABViewPage extends ABViewPageCore {
          onShow: comp.onShow,
       };
    }
+   */
 };
