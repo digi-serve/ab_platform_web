@@ -787,42 +787,89 @@ module.exports = class ABViewDocxBuilder extends ABViewDocxBuilderCore {
                            let defaultVal = [300, 160];
 
                            let dc = this.datacollection;
-                           if (!dc) return defaultVal;
+                           if (!dc) {
+                              let dcs = this.datacollections;
+                              if (dcs) {
+                                 dcs.forEach((dc) => {
+                                    let obj = dc.datasource;
+                                    if (!obj) return false;
 
-                           let obj = dc.datasource;
-                           if (!obj) return defaultVal;
+                                    // This is a query object
+                                    if (tagName.indexOf(".") > -1) {
+                                       let tagNames = tagName.split(".");
 
-                           // This is a query object
-                           if (tagName.indexOf(".") > -1) {
-                              let tagNames = tagName.split(".");
+                                       if (!obj.objects) return false; // not a query
+                                       obj = obj.objects(
+                                          (o) => o.label == tagNames[0]
+                                       )[0]; // Label of object
+                                       if (!obj) return false;
 
-                              obj = obj.objects(
-                                 (o) => o.label == tagNames[0]
-                              )[0]; // Label of object
+                                       tagName = tagNames[1]; // Field name
+                                    }
+
+                                    let imageField = obj.fields(
+                                       (f) => f.columnName == tagName
+                                    )[0];
+                                    if (!imageField || !imageField.settings)
+                                       return false;
+
+                                    if (
+                                       imageField.settings.useWidth &&
+                                       imageField.settings.imageWidth
+                                    )
+                                       defaultVal[0] =
+                                          imageField.settings.imageWidth;
+
+                                    if (
+                                       imageField.settings.useHeight &&
+                                       imageField.settings.imageHeight
+                                    )
+                                       defaultVal[1] =
+                                          imageField.settings.imageHeight;
+
+                                    return false;
+                                 });
+                                 return defaultVal;
+                              } else {
+                                 return defaultVal;
+                              }
+                           } else {
+                              let obj = dc.datasource;
                               if (!obj) return defaultVal;
 
-                              tagName = tagNames[1]; // Field name
-                           }
+                              // This is a query object
+                              if (tagName.indexOf(".") > -1) {
+                                 let tagNames = tagName.split(".");
 
-                           let imageField = obj.fields(
-                              (f) => f.columnName == tagName
-                           )[0];
-                           if (!imageField || !imageField.settings)
+                                 obj = obj.objects(
+                                    (o) => o.label == tagNames[0]
+                                 )[0]; // Label of object
+                                 if (!obj) return defaultVal;
+
+                                 tagName = tagNames[1]; // Field name
+                              }
+
+                              let imageField = obj.fields(
+                                 (f) => f.columnName == tagName
+                              )[0];
+                              if (!imageField || !imageField.settings)
+                                 return defaultVal;
+
+                              if (
+                                 imageField.settings.useWidth &&
+                                 imageField.settings.imageWidth
+                              )
+                                 defaultVal[0] = imageField.settings.imageWidth;
+
+                              if (
+                                 imageField.settings.useHeight &&
+                                 imageField.settings.imageHeight
+                              )
+                                 defaultVal[1] =
+                                    imageField.settings.imageHeight;
+
                               return defaultVal;
-
-                           if (
-                              imageField.settings.useWidth &&
-                              imageField.settings.imageWidth
-                           )
-                              defaultVal[0] = imageField.settings.imageWidth;
-
-                           if (
-                              imageField.settings.useHeight &&
-                              imageField.settings.imageHeight
-                           )
-                              defaultVal[1] = imageField.settings.imageHeight;
-
-                           return defaultVal;
+                           }
                         },
                         // getSize: function (imgBuffer, tagValue, tagName) {
                         // 	if (imgBuffer) {

@@ -133,7 +133,7 @@ class Network extends EventEmitter {
    /**
     * Network.put()
     * perform a PUT request to the AppBuilder server.
-    * This if ro UPDATE/REPLACE operations to data on the server.
+    * This is for UPDATE/REPLACE operations to data on the server.
     * @param {obj} params the request parameters that need to be executed on
     *              the AppBuilder Server
     * @param {obj} jobResponse the callback info for handling the response.
@@ -325,7 +325,7 @@ class Network extends EventEmitter {
             })
             .catch((err) => {
                this.AB.notify.developer(err, {
-                  message: "Error while queueing data"
+                  message: "Error while queueing data",
                });
                this.AB.Analytics.logError(err);
                reject(err);
@@ -426,7 +426,7 @@ class Network extends EventEmitter {
             // respond to errors:
             .catch((err) => {
                this.AB.notify.developer(err, {
-                  message: "commAPI queueFlush error"
+                  message: "commAPI queueFlush error",
                });
                this.AB.Analytics.logError(err);
 

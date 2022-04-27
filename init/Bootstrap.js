@@ -98,15 +98,17 @@ class Bootstrap extends EventEmitter {
 
                // Make sure the BootStrap Object is available globally
                window.__ABBS = this;
-
-               var plugins = Config.plugins() || [];
-               console.log("plugins:", plugins);
-
                var allPluginsLoaded = [];
-               plugins.forEach((p) => {
-                  allPluginsLoaded.push(loadScript(p));
-               });
 
+               var tenantInfo = Config.tenantConfig();
+               if (tenantInfo) {
+                  var plugins = Config.plugins() || [];
+                  console.log("plugins:", plugins);
+
+                  plugins.forEach((p) => {
+                     allPluginsLoaded.push(loadScript(tenantInfo.id, p));
+                  });
+               }
                return Promise.all(allPluginsLoaded);
             })
 
@@ -201,7 +203,7 @@ class Bootstrap extends EventEmitter {
 
 export default new Bootstrap();
 
-function loadScript(p) {
+function loadScript(tenant, p) {
    return new Promise((resolve, reject) => {
       var cb = () => resolve();
 
@@ -209,7 +211,7 @@ function loadScript(p) {
       var head = document.head;
       var script = document.createElement("script");
       script.type = "text/javascript";
-      script.src = `/plugin/${p}`;
+      script.src = `/plugin/${tenant || "??"}/${p}`;
 
       // Then bind the event to the callback function.
       // There are several events for cross browser compatibility.
