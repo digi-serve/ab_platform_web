@@ -4,8 +4,9 @@
  * other sources.
  */
 
-var EventEmitter = require("events").EventEmitter;
+const EventEmitter = require("events").EventEmitter;
 import CommCenterRoom from "./CommCenterRoom";
+import CommCenterRoomSocket from "./CommCenterRoomSocket";
 
 class CommCenter extends EventEmitter {
    constructor() {
@@ -16,6 +17,9 @@ class CommCenter extends EventEmitter {
 
       this.rooms = {};
       // {hash}  { key: {CommCenterRoom}}
+
+      this.sockets = {};
+      // {hash}  { key: {CommCenterRoomSocket}}
    }
 
    init(AB) {
@@ -23,6 +27,106 @@ class CommCenter extends EventEmitter {
       return Promise.resolve();
    }
 
+   async _newRoom(key, hash, RoomClass) {
+      // NOTE: current implementation implies that a browser can only
+      // make a single connection into a room.  However if we want to
+      // make >1 connection, we should instead track it
+      // this.rooms[key] = [Room, Room];
+      // or
+      // this.rooms[key] = { clientID : {Room} }
+      // Then each call to this Room(key) will add a new connection.
+
+      // A Room might want to condition the "key" according to it's type:
+      let RoomKey = RoomClass.RoomKey(key, this.AB);
+
+      // build a new Room Connection if one doesn't exist.
+      if (!hash[RoomKey]) {
+         // create a new Room connection:
+         let room = new RoomClass(this, key);
+         hash[room.key] = room;
+         // let socketKey = `${this.AB.Tenant.id()}-${key}`;
+         // {string}
+         // on the server, we partition these rooms off by the Tenant.  So
+         // socketKey represents the ACTUAL socket room name and is used
+         // to listen on io.socket.on();
+
+         io.socket.on(room.key, (packet) => {
+            let Room = hash[packet.key];
+            if (!Room) return;
+            if (packet.to && packet.to != Room.clientID) return;
+            switch (packet.type) {
+               case "client":
+                  // a default broadcast packet sent to this Room to
+                  // announce another client that has joined.
+                  // packet: {
+                  //    type: "client",
+                  //    id: clientID
+                  //        // uid of this client in the room
+                  // }
+                  Room.clientIn(packet);
+                  break;
+
+               case "data":
+                  // a DATA packet sent to the ROOM. This might be a BROADCAST
+                  // data packet sent via Room.send({data});  Or this might be
+                  // sent directly to this client's Room using a
+                  // Client.send({data});
+                  // In either case, there is not an expected response to this
+                  // incoming DATA packet.
+                  // packet: {
+                  //    type:"data",
+                  //    {to:clientID}
+                  //    from:"clientID",
+                  //    data:{data}
+                  // }
+                  if (!packet.to || packet.to == this.clientID) {
+                     Room.dataIn(packet);
+                  }
+                  break;
+
+               case "disconnect":
+                  // A notification that a particular client has disconnected from
+                  // our communications.
+
+                  if (!packet.to || packet.to == this.clientID) {
+                     Room.disconnectIn(packet);
+                  }
+                  break;
+
+               case "query":
+                  // A QUERY request was made to this Room Connection. There is
+                  // an expected response that is being waited for.
+                  // packet: {
+                  //    type:"query",
+                  //    from:"clientID",
+                  //    qID:"queryID",
+                  //    data:"data"
+                  // }
+                  Room.queryIn(packet);
+                  break;
+
+               case "response":
+                  // A RESPONSE to a QUERY request was received.  The Room will
+                  // need to resolve the pending Room.query().then() to deliver
+                  // the response.
+                  // packet: {
+                  //    type:"response",
+                  //    qID:"queryID",
+                  //    from:"clientID",
+                  //    data:data
+                  // }
+                  Room.responseIn(packet);
+                  break;
+            }
+         });
+         await room.join();
+         // room.join();
+      }
+
+      // return our room connection
+      return hash[RoomKey];
+   }
+   /*
    async Room(key) {
       // NOTE: current implementation implies that a browser can only
       // make a single connection into a room.  However if we want to
@@ -108,6 +212,16 @@ class CommCenter extends EventEmitter {
 
       // return our room connection
       return this.rooms[key];
+   }
+
+   */
+
+   async Room(key) {
+      return this._newRoom(key, this.rooms, CommCenterRoom);
+   }
+
+   async Socket(key) {
+      return this._newRoom(key, this.sockets, CommCenterRoomSocket);
    }
 }
 

@@ -1,12 +1,13 @@
 /*
- * CommCenterRoom.js
- * A connection to shared "Room" where participants of that room can
- * share messages among each other.
+ * CommCenterSocket.js
+ * A connection to a listener that is connected to our server by a Socket.
  */
 
-var EventEmitter = require("events").EventEmitter;
+const EventEmitter = require("events").EventEmitter;
+import CommCenterRoom from "./CommCenterRoom";
 
-class CommReq extends EventEmitter {
+class CommReqSocket extends CommCenterRoom.CommReq {
+   /*
    constructor(Room, packet) {
       super();
 
@@ -55,9 +56,11 @@ class CommReq extends EventEmitter {
       };
       return this._Room.respond(packet);
    }
+   */
 }
 
-class CommCenterClient extends EventEmitter {
+class CommCenterSocketClient extends CommCenterRoom.CommCenterClient {
+   /*
    constructor(Room, clientID) {
       super();
       this.id = clientID;
@@ -65,7 +68,7 @@ class CommCenterClient extends EventEmitter {
       this.AB = Room.AB;
 
       this.pendingQueries = {
-         /* qid : { resolve, reject } */
+         /* qid : { resolve, reject } * /
       };
       // {hash}
       // track the pending queries we have made.  On a "response" packet
@@ -110,58 +113,38 @@ class CommCenterClient extends EventEmitter {
       }
    }
 
-   send(data) {
-      let packet = {
-         type: "data",
-         to: this.id,
-         data,
-      };
-      this.room.respond(packet);
-   }
+   */
 }
 
-export default class CommCenterRoom extends EventEmitter {
-   static get CommReq() {
-      return CommReq;
-   }
-
-   static get CommCenterClient() {
-      return CommCenterClient;
-   }
-
+export default class CommCenterSocket extends CommCenterRoom {
    static RoomKey(key, AB) {
-      return key;
+      let uuid = AB.Account.uuid();
+      return `${key}-${uuid}`;
    }
-
    constructor(CC, key) {
-      super();
+      super(CC, key);
 
-      this.CC = CC;
-      // {CommCenter}
-      // a pointer back to our common CommCenter.
+      // the 'key' is what the UI app is requesting.  But we are making
+      // it unique per User since Socket connections are not shared among
+      // different users
+      this.key = CommCenterSocket.RoomKey(key, this.AB);
 
-      this.AB = CC.AB;
-
-      this.key = key;
-      // {string}
-      // the unique socket room key we are joining.
-
-      this.setMaxListeners(0);
-      // allow > 10 listeners
-
-      this.clientID = null;
-      // {uid}
-      // each connection to a room gets it's own clientID
-      // even if it comes from the same browser.
-
-      this.clients = {};
+      this.clientID = AB.Account.uuid();
    }
 
-   async join() {
-      this.clientID = await this.AB.Network.post({
-         url: `/commcenter/room/${this.key}`,
+   join() {
+      return this.AB.Network.post({
+         url: `/commcenter/socket/${this.key}`,
       });
-      console.log("join(): clientID:" + this.clientID);
+      // console.log("join(): clientID:" + this.clientID);
+   }
+
+   newCommClient(packet) {
+      return new CommCenterSocketClient(this, packet.id);
+   }
+
+   newCommReq(packet) {
+      return new CommReqSocket(this, packet);
    }
 
    /**
@@ -174,30 +157,13 @@ export default class CommCenterRoom extends EventEmitter {
     *          // uid of this client in the room
     *        }
     */
-   clientIn(packet) {
-      // creates a this.clients[clientID] = new Client(clientID, this)
-      let client = this.newCommClient(packet);
-      this.clients[client.id] = client;
-      this.emit("client", client);
-   }
 
-   disconnectIn(packet) {
-      let client = this.clients[packet.from];
-      if (client) {
-         delete this.clients[packet.from];
-         client.emit("disconnected");
-
-         this.emit("disconnected", client);
-      }
-   }
-
-   newCommClient(packet) {
-      return new CommCenterClient(this, packet.id);
-   }
-
-   newCommReq(packet) {
-      return new CommReq(this, packet);
-   }
+   // clientIn(packet) {
+   //    // creates a this.clients[clientID] = new Client(clientID, this)
+   //    let client = this.newCommClient(packet);
+   //    this.clients[client.id] = client;
+   //    this.emit("client", client);
+   // }
 
    /**
     * @method data()
@@ -215,20 +181,20 @@ export default class CommCenterRoom extends EventEmitter {
     *          data: {data}
     *        }
     */
-   dataIn(packet) {
-      var req = this.newCommReq(packet);
-      this.emit("data", req);
+   // dataIn(packet) {
+   //    var req = this.newCommReq(packet);
+   //    this.emit("data", req);
 
-      if (req.from) {
-         let client = this.clients[req.from];
-         if (!client) {
-            // let's create a new client here:
-            this.clientIn({ id: req.from });
-            client = this.clients[req.from];
-         }
-         client.dataIn(req);
-      }
-   }
+   //    if (req.from) {
+   //       let client = this.clients[req.from];
+   //       if (!client) {
+   //          // let's create a new client here:
+   //          this.clientIn({ id: req.from });
+   //          client = this.clients[req.from];
+   //       }
+   //       client.dataIn(req);
+   //    }
+   // }
 
    /**
     * @method queryIn()
@@ -247,20 +213,20 @@ export default class CommCenterRoom extends EventEmitter {
     *          data: {data}
     *        }
     */
-   queryIn(packet) {
-      var req = this.newCommReq(packet);
-      this.emit("query", req);
+   // queryIn(packet) {
+   //    var req = new CommReq(this, packet);
+   //    this.emit("query", req);
 
-      if (req.from) {
-         let client = this.clients[req.from];
-         if (!client) {
-            // let's create a new client here:
-            this.clientIn({ id: req.from });
-            client = this.clients[req.from];
-         }
-         client.queryIn(req);
-      }
-   }
+   //    if (req.from) {
+   //       let client = this.clients[req.from];
+   //       if (!client) {
+   //          // let's create a new client here:
+   //          this.clientIn({ id: req.from });
+   //          client = this.clients[req.from];
+   //       }
+   //       client.queryIn(req);
+   //    }
+   // }
 
    /**
     * @method query()
@@ -270,30 +236,30 @@ export default class CommCenterRoom extends EventEmitter {
     *        the data packet to send to each of the clients.
     * @return {Promise}
     */
-   query(data) {
-      var results = {};
+   // query(data) {
+   //    var results = {};
 
-      var allClients = [];
+   //    var allClients = [];
 
-      function queryClient(client) {
-         allClients.push(
-            client.query(data).then((res) => {
-               results[client.id] = res;
-            })
-         );
-      }
+   //    function queryClient(client) {
+   //       allClients.push(
+   //          client.query(data).then((res) => {
+   //             results[client.id] = res;
+   //          })
+   //       );
+   //    }
 
-      Object.keys(this.clients).forEach((cid) => {
-         // query the OTHER clients, not myself:
-         if (cid != this.clientID) {
-            queryClient(this.clients[cid]);
-         }
-      });
+   //    Object.keys(this.clients).forEach((cid) => {
+   //       // query the OTHER clients, not myself:
+   //       if (cid != this.clientID) {
+   //          queryClient(this.clients[cid]);
+   //       }
+   //    });
 
-      return Promise.all(allClients).then(() => {
-         return { data: results };
-      });
-   }
+   //    return Promise.all(allClients).then(() => {
+   //       return { data: results };
+   //    });
+   // }
 
    /**
     * @method respond()
@@ -303,42 +269,43 @@ export default class CommCenterRoom extends EventEmitter {
     *        The data packet to return.
     * @return {Promise}
     */
-   respond(packet) {
-      packet.from = this.clientID;
-      return this._send(packet);
-   }
+   // respond(packet) {
+   //    packet.from = this.clientID;
+   //    return this._send(packet);
+   // }
 
-   responseIn(packet) {
-      var req = this.newCommReq(packet);
+   // responseIn(packet) {
+   //    var req = new CommReq(this, packet);
 
-      if (req.from) {
-         // find the client this is from
-         let client = this.clients[req.from];
-         if (!client) {
-            // let's create a new client here:
-            this.clientIn({ id: req.from });
-            client = this.clients[req.from];
-         }
-         client.responseIn(req);
-      }
-   }
+   //    if (req.from) {
+   //       // find the client this is from
+   //       let client = this.clients[req.from];
+   //       if (!client) {
+   //          // let's create a new client here:
+   //          this.clientIn({ id: req.from });
+   //          client = this.clients[req.from];
+   //       }
+   //       client.responseIn(req);
+   //    }
+   // }
 
    /**
     * @method send()
-    * Send a Broadcast message to the whole room.
+    * Send a Broadcast message to all our connected sockets:
     */
    send(data) {
-      var packet = {
-         type: "data",
-         from: this.clientID,
-         data,
-      };
-      return this._send(packet);
+      var allSends = [];
+      Object.keys(this.clients).forEach((k) => {
+         if (k != this.clientID) {
+            allSends.push(this.clients[k].send(data));
+         }
+      });
+      return Promise.all(allSends);
    }
 
    _send(packet) {
       return this.AB.Network.put({
-         url: `/commcenter/room/${this.key}`,
+         url: `/commcenter/socket/${this.key}`,
          data: packet,
       });
    }
