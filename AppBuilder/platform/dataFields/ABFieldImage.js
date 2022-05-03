@@ -254,7 +254,14 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
                   node.classList.remove("webix_invalid_cell");
 
                   // verify file type
-                  const acceptableTypes = ["jpg", "jpeg", "bmp", "png", "gif"];
+                  const acceptableTypes = [
+                     "jpg",
+                     "jpeg",
+                     "bmp",
+                     "png",
+                     "gif",
+                     "webp",
+                  ];
                   const type = item.type.toLowerCase();
                   if (acceptableTypes.indexOf(type) == -1) {
                      webix.message(
