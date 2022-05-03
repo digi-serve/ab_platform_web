@@ -16,23 +16,18 @@
  */
 
 import ABViewProperty from "./ABViewProperty";
+import ABViewComponent from "../ABViewComponent";
+
 // const ABViewGridFilterRule = require("../../../rules/ABViewGridFilterRule");
 
 let L = (...params) => AB.Multilingual.label(...params);
 
-// var getRule = (object, App, idBase) => {
-//    var FilterRule = new ABViewGridFilterRule();
-//    FilterRule.objectLoad(object);
-
-//    // run .component because it need to have .getValue and .setValue functions to Rule
-//    // NOTE: ABViewQueryBuilderObjectFieldCondition - why does not return new object from .compnent ?
-//    if ((App, idBase)) FilterRule.component(App, idBase);
-
-//    return FilterRule;
-// };
-
-// var rowFilter = null;
-// var rowFilterForm = null;
+class ABViewPropertyFilterDataComponent extends ABViewComponent {
+   constructor(viewPropertyFilterData, idBase) {
+      var base = idBase || viewPropertyFilterData.idBase;
+      super(base, {});
+   }
+}
 
 export default class ABViewPropertyFilterData extends ABViewProperty {
    constructor(AB, idBase) {
@@ -66,6 +61,28 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
       // {RowFilter}
       // When .userFilterPosition == "form" we use this RowFilter to
       // display a form under the toolbar.
+
+      this._handler_rowFilterChanged = (value) => {
+         let filterRules = value.rules || [];
+
+         // if ($$(ids.buttonFilter)) {
+         //    $$(ids.buttonFilter).define('badge', filterRules.length || null);
+         //    $$(ids.buttonFilter).refresh();
+         // }
+
+         // be notified when there is a change in the filter
+         this.triggerCallback((rowData) => {
+            return this.rowFilter.isValid(rowData);
+         }, filterRules);
+      };
+
+      this._handler_rowFilterFormChanged = () => {
+         this.triggerCallback();
+      };
+
+      this.initialized = false;
+      // {bool}
+      // make sure this is not .init() more than once
    }
 
    /**
@@ -562,6 +579,7 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
          type: "space",
          borderless: true,
          padding: 0,
+         hidden: true,
          rows: [
             {
                id: ids.globalFilterFormContainer,
@@ -637,24 +655,15 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
       // });
 
       this.rowFilter.init();
-      this.rowFilter.on("changed", (value) => {
-         let filterRules = value.rules || [];
-
-         // if ($$(ids.buttonFilter)) {
-         // 	$$(ids.buttonFilter).define('badge', filterRules.length || null);
-         // 	$$(ids.buttonFilter).refresh();
-         // }
-
-         // be notified when there is a change in the filter
-         this.triggerCallback((rowData) => {
-            return this.rowFilter.isValid(rowData);
-         }, filterRules);
-      });
+      this.rowFilter.removeListener("changed", this._handler_rowFilterChanged);
+      this.rowFilter.on("changed", this._handler_rowFilterChanged);
 
       this.rowFilterForm.init();
-      this.rowFilterForm.on("changed", () => {
-         this.triggerCallback();
-      });
+      this.rowFilterForm.removeListener(
+         "changed",
+         this._handler_rowFilterFormChanged
+      );
+      this.rowFilterForm.on("changed", this._handler_rowFilterFormChanged);
 
       $$(ids.filterPanel)?.hide();
       if ($$(this.rowFilterForm.ui.id)) $$(this.rowFilterForm.ui.id).hide();
@@ -721,6 +730,32 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
       }
 
       return rowFilterRules;
+   }
+
+   /**
+    * @method getFilter()
+    * Return a fn() that returns {truthy} with a given row of
+    * data.
+    */
+   getFilter() {
+      // default filter
+      if (this.__currentFilter == null) {
+         // if empty search text in global single mode, then no display rows
+         if (
+            this.settings.filterOption == 3 &&
+            this.settings.globalFilterPosition == "single"
+         )
+            this.__currentFilter = (/* row */) => {
+               return false;
+            };
+         // always true, show every rows
+         else
+            this.__currentFilter = (/* row */) => {
+               return true;
+            };
+      }
+
+      return this.__currentFilter;
    }
 
    /**
@@ -917,6 +952,7 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
     * @param {string} idBase
     *      Identifier for this component
     */
+   /*
    component(App, idBase) {
       super.component(App, idBase);
 
@@ -935,7 +971,7 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
       }
 
       let ids = {
-         /** UI */
+         /** UI * /
          filterPanel: App.unique(`${idBase}_filterPanel`),
          globalFilterFormContainer: App.unique(
             `${idBase}_globalFilterFormContainer`
@@ -1107,8 +1143,8 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
          callbacks: {
             /**
              * @param {function} fnFilter
-             */
-            onFilterData: function (/*fnFilter, filterRules*/) {
+             * /
+            onFilterData: function () {
                console.warn("NO onFilterData()");
             },
          },
@@ -1120,7 +1156,7 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
          },
 
          resetFilter: () => {
-            let showAllFn = function (/* rowData */) {
+            let showAllFn = function (/* rowData * /) {
                   return true;
                },
                filterRules = [];
@@ -1133,7 +1169,7 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
 
             debugger;
             console.error("::: TODO: refactor getRule()");
-            let queryRule; /* = getRule(this.object, this.App, this.idBase); */
+            let queryRule; /* = getRule(this.object, this.App, this.idBase); * /
 
             let ui = {
                id: id,
@@ -1160,12 +1196,12 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
                   instance.settings.filterOption == 3 &&
                   instance.settings.globalFilterPosition == "single"
                )
-                  instance.__currentFilter = (/* row */) => {
+                  instance.__currentFilter = (/* row * /) => {
                      return false;
                   };
                // always true, show every rows
                else
-                  instance.__currentFilter = (/* row */) => {
+                  instance.__currentFilter = (/* row * /) => {
                      return true;
                   };
             }
@@ -1264,4 +1300,5 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
          searchText: logic.searchText,
       };
    }
+   */
 }
