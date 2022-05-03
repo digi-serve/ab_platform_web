@@ -102,6 +102,11 @@ module.exports = class FilterComplex extends FilterComplexCore {
 
       super(idBase, AB);
 
+      this.observing = false;
+      // {bool}
+      // try to prevent multiple observers generating >1 "changed"
+      // event.
+
       let labels = (this.labels = {
          common: (AB._App || {}).labels,
          component: {
@@ -217,9 +222,12 @@ module.exports = class FilterComplex extends FilterComplexCore {
 
       const el = $$(this.ids.querybuilder);
       if (el) {
-         el.getState().$observe("value", (v) => {
-            this.emit("changed", this.getValue());
-         });
+         if (!this.observing) {
+            el.getState().$observe("value", (v) => {
+               this.emit("changed", this.getValue());
+            });
+            this.observing = true;
+         }
       }
 
       this._isRecordRule = options?.isRecordRule ?? false;
