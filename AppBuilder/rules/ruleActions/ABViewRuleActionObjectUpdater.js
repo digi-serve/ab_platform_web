@@ -942,6 +942,8 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
             var filterConditions = this.currentForm.AB.cloneDeep(
                op.filterConditions
             );
+            // The cloned dataCollection is not copying the current cursor, so save it here
+            const cursor = dataCollection.getCursor();
             if (filterConditions && filterConditions.rules) {
                filterConditions.rules
                   .filter((r) => {
@@ -978,7 +980,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                // TODO: rename to 'select-cursor'
                case "select-one":
                default:
-                  value = clonedDataCollection.getCursor(); // dataView.getItem(dataView.getCursor());
+                  value = cursor; // dataView.getItem(dataView.getCursor());
 
                   if (value) {
                      // NOTE: webix documentation issue: .getCursor() is supposed to return

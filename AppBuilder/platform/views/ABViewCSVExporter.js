@@ -345,45 +345,31 @@ module.exports = class ABViewCSVExporter extends ABViewCSVExporterCore {
             _logic.onFilterChange(val);
          });
 
-         webix.ui({
-            view: "popup",
-            id: ids.popupFilter,
-            width: 800,
-            hidden: true,
-            body: ClientFilter.ui,
-         });
+         // webix.ui({
+         //    view: "popup",
+         //    id: ids.popupFilter,
+         //    width: 800,
+         //    hidden: true,
+         //    body: ClientFilter.ui,
+         // });
       };
 
       let _logic = (this._logic = {
          downloadCsvFile: () => {
-            let url = `/app_builder/application/${this.application.id}/page/${
-               this.pageRoot().id
-            }/view/${this.id}/csv`;
-
+            let url = `/appbuilder/csv-export/${this.id}`;
             let where = ClientFilter.getValue();
+
             if (where && (where.rules || []).length) {
-               var t = [];
-
-               // Convert a object to Web Query String
-               for (var a in where) {
-                  var value = where[a];
-                  if (value === null || value === undefined) value = "";
-                  if (typeof value === "object") value = JSON.stringify(value);
-                  t.push(a + "=" + encodeURIComponent(value));
-               }
-               where = t.join("&");
-
-               url = `${url}?${where}`;
+               let qsWhere = JSON.stringify(where);
+               qsWhere = encodeURIComponent(qsWhere);
+               url = `${url}?where=${qsWhere}`;
             }
 
             window.open(url);
          },
          showFilterPopup: () => {
             let $buttonFilter = $$(ids.buttonFilter);
-            let $popupFilter = $$(ids.popupFilter);
-            if (!$popupFilter) return;
-
-            $popupFilter.show($buttonFilter ? $buttonFilter.$view : null);
+            ClientFilter.popUp($buttonFilter ? $buttonFilter.$view : null);
          },
          onFilterChange: () => {
             let $buttonFilter = $$(ids.buttonFilter);
