@@ -2,68 +2,14 @@ const ABProcessTaskServiceQueryCore = require("../../../core/process/tasks/ABPro
 
 const ABQLManager = require("../../ql/ABQLManager.js");
 
-let L = (...params) => AB.Multilingual.label(...params);
-
 module.exports = class ABProcessTaskServiceQuery extends (
    ABProcessTaskServiceQueryCore
 ) {
-   ////
-   //// Process Instance Methods
-   ////
-
-   propertyIDs(id) {
-      return {
-         name: `${id}_name`,
-         query: `${id}_query`,
-         suggestions: `${id}_suggestions`,
-      };
+   constructor(attributes, process, AB) {
+      super(attributes, process, AB);
    }
 
-   /**
-    * propertiesShow()
-    * display the properties panel for this Process Element.
-    * @param {string} id
-    *        the webix $$(id) of the properties panel area.
-    */
-   propertiesShow(id) {
-      var ids = this.propertyIDs(id);
-
-      var ui = {
-         id: id,
-         view: "form",
-         elements: [
-            {
-               id: ids.name,
-               view: "text",
-               label: L("Name"),
-               name: "name",
-               value: this.name,
-            },
-         ],
-      };
-
-      // add in the QueryBuilder UI
-      var Builder = ABQLManager.builder(this.qlObj, this, this.AB);
-      ui.elements.push(Builder.ui(ids.query));
-
-      // create the ui on the DOM
-      webix.ui(ui, $$(id));
-
-      // initialize any operations
-      Builder.init(ids.query);
-
-      $$(id).show();
-   }
-
-   /**
-    * propertiesStash()
-    * pull our values from our property panel.
-    * @param {string} id
-    *        the webix $$(id) of the properties panel area.
-    */
-   propertiesStash(id) {
-      var ids = this.propertyIDs(id);
-      this.name = this.property(ids.name);
-      this.qlObj = ABQLManager.parse(ids.query, this, this.AB);
+   ABQLManager() {
+      return ABQLManager;
    }
 };
