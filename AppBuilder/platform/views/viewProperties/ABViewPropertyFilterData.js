@@ -31,13 +31,13 @@ class ABViewPropertyFilterDataComponent extends ABViewComponent {
 
 export default class ABViewPropertyFilterData extends ABViewProperty {
    constructor(AB, idBase) {
-      super({
-         filterPanel: `${idBase}_filterPanel`,
-         globalFilterFormContainer: `${idBase}__globalFilterFormContainer`,
-         globalFilterForm: `${idBase}_globalFilterForm`,
-         filterMenutoolbar: `${idBase}_filterMenuToolbar`,
-         resetFilterButton: `${idBase}_resetFilterButton`,
-         component: `${idBase}_filterData_popup`,
+      super(idBase, {
+         buttonAddfilter: "",
+         filterPanel: "",
+         globalFilterFormContainer: "",
+         globalFilterForm: "",
+         filterMenutoolbar: "",
+         resetFilterButton: "",
       });
 
       this.AB = AB;
@@ -592,9 +592,6 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
                      on: {
                         onTimedKeyPress: () => {
                            this.triggerCallback();
-                           // var searchText = this.getValue();
-
-                           // self.searchText(searchText);
                         },
                      },
                   },
@@ -613,7 +610,15 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
                   },
                ],
             },
-            this.rowFilterForm.ui,
+            {
+               id: ids.buttonAddfilter,
+               view: "button",
+               css: "webix_primary",
+               value: L("Add Filter"),
+               click: () => {
+                  this.rowFilterForm.popUp();
+               },
+            },
             {
                view: "toolbar",
                id: ids.filterMenutoolbar,
@@ -664,9 +669,10 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
          this._handler_rowFilterFormChanged
       );
       this.rowFilterForm.on("changed", this._handler_rowFilterFormChanged);
+      this.rowFilterForm.on("save", this._handler_rowFilterFormChanged);
 
       $$(ids.filterPanel)?.hide();
-      if ($$(this.rowFilterForm.ui.id)) $$(this.rowFilterForm.ui.id).hide();
+      $$(ids.buttonAddfilter).hide();
       $$(ids.filterMenutoolbar).hide();
       $$(ids.globalFilterFormContainer).hide();
 
@@ -676,7 +682,7 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
          case 1:
             switch (this.settings.userFilterPosition) {
                case "form":
-                  $$(this.rowFilterForm.ui.id).show();
+                  $$(ids.buttonAddfilter).show();
                   $$(ids.filterPanel).show();
                   break;
                case "toolbar":
@@ -767,8 +773,11 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
       let searchRules = this.searchText(this.__externalSearchText);
       let rowFilterRules = this.filterRules();
 
+      let badgeCount = 0;
       if (rowFilterRules?.rules?.length) {
+         badgeCount = rowFilterRules?.rules?.length;
          if (searchRules) {
+            badgeCount++;
             rowFilterRules = {
                glue: "and",
                rules: [rowFilterRules, searchRules],
@@ -779,6 +788,11 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
       }
 
       this.emit("filter.data", null, rowFilterRules);
+
+      if (badgeCount == 0) badgeCount = false;
+      let $button = $$(this.ids.buttonAddfilter);
+      $button.config.badge = badgeCount;
+      $button.refresh();
    }
 
    resetFilter() {

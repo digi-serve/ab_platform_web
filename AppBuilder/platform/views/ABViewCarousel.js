@@ -25,6 +25,15 @@ class ABViewCarouselComponent extends ABViewComponent {
          this.onShow();
       };
 
+      this._handler_doFilter = (fnFilter, filterRules) => {
+         // NOTE: fnFilter is depreciated and will be removed.
+
+         // this.onShow(filterRules);
+         let dv = this.view.datacollection;
+         dv.filterCondition(filterRules);
+         dv.reloadData();
+      };
+
       this._handler_busy = () => {
          this.busy();
       };
@@ -124,7 +133,7 @@ class ABViewCarouselComponent extends ABViewComponent {
 
       this.filterUI.init(this.AB);
       this.filterUI.removeListener("filter.data", this._handler_doOnShow);
-      this.filterUI.on("filter.data", this._handler_doOnShow);
+      this.filterUI.on("filter.data", this._handler_doFilter);
 
       // link page helper
       this.linkPage.init({
