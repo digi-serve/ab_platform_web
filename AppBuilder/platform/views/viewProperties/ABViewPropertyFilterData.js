@@ -616,7 +616,9 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
                css: "webix_primary",
                value: L("Add Filter"),
                click: () => {
-                  this.rowFilterForm.popUp();
+                  this.rowFilterForm.popUp($$(ids.buttonAddfilter).getNode(), {
+                     pos: "bottom",
+                  });
                },
             },
             {
@@ -632,7 +634,7 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
                      label: L("Reset Filter"),
                      icon: "fa fa-ban",
                      type: "icon",
-                     badge: 0,
+                     // badge: 0,
                      autowidth: true,
                      click: function () {
                         self.resetFilter();
@@ -702,13 +704,14 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
                      var filterRuleButton = {
                         view: "button",
                         css: "webix_primary",
-                        label: qr.ruleName,
+                        label: qr.label,
                         icon: "fa fa-filter",
                         type: "icon",
-                        badge: 0,
+                        // badge: 0,
                         autowidth: true,
                         click: () => {
-                           this.selectFilter(qr.queryRules);
+                           this.emit("filter.data", null, qr.filters);
+                           // this.selectFilter(qr.filter);
                         },
                      };
                      $filterMenutoolbar.addView(filterRuleButton);
@@ -957,7 +960,7 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
 
    showPopup($view) {
       // this.filter_popup.show($view, null, { pos: "top" });
-      this.rowFilter.popUp($view);
+      this.rowFilter.popUp($view, null, { pos: "center" });
    }
 
    /**

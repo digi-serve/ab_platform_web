@@ -194,8 +194,8 @@ module.exports = class FilterComplex extends FilterComplexCore {
                borderless: true,
                rows: [
                   {
-                     view: "query",
                      id: ids.querybuilder,
+                     view: "query",
                      data: () => [],
                      // data: async (field) => await this.pullOptions(field),
                      fields: [],
@@ -223,9 +223,16 @@ module.exports = class FilterComplex extends FilterComplexCore {
       const el = $$(this.ids.querybuilder);
       if (el) {
          if (!this.observing) {
+            // HACK!! The process of setting the $observe() is actually
+            // calling the cb() when set.  This is clearing our .condition
+            // if we call init() after we have setValues(). which can happen
+            // when using the popUp() method.
+
+            let _cond = this.condition;
             el.getState().$observe("value", (v) => {
                this.emit("changed", this.getValue());
             });
+            this.condition = _cond;
             this.observing = true;
          }
       }
@@ -521,12 +528,13 @@ module.exports = class FilterComplex extends FilterComplexCore {
             on: {
                onAfterRender: function () {
                   // HACK: focus on webix.text and webix.textarea
-                  // Why!! If the parent layout has zIndex lower than 101, then is not able to focus to webix.text and webix.textarea
+                  // Why!! If the parent layout has zIndex lower than 101,
+                  // then is not able to focus to webix.text and webix.textarea
                   let $layout =
                      this.queryView(function (a) {
                         return !a.getParentView();
                      }, "parent") || this;
-                  $layout.$view.style.zIndex = 102;
+                  $layout.$view.style.zIndex = 500;
                },
             },
          },
