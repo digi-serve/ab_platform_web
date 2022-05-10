@@ -796,7 +796,7 @@ export default class ABViewCarousel extends ABViewCarouselCore {
       if (v1App) {
          var newComponent = component;
          component = {
-            ui: component.ui(),
+            ui: newComponent.ui(),
             init: (options, accessLevel) => {
                return newComponent.init(this.AB, accessLevel);
             },

@@ -1,223 +1,48 @@
 import ABViewProperty from "./ABViewProperty";
+import ABViewComponent from "../ABViewComponent";
 
 let L = (...params) => AB.Multilingual.label(...params);
 
+class ABViewPropertyLinkPageComponent extends ABViewComponent {
+   constructor(linkPageHelper, idBase) {
+      let base = idBase || `ABViewPropertyLinkPage_xxx`;
+      super(base, {});
+
+      this.linkPageHelper = linkPageHelper;
+      this.AB = linkPageHelper.AB;
+
+      this.view = null;
+      // {ABViewXXXX}
+      // the ABView object this link references.
+
+      this.datacollection = null;
+      // {ABDataCollection}
+      // The related Datacollection to this view that drives it's data.
+      // we usually have to set the cursor before the view displays the
+      // appropriate data.
+   }
+
+   ui() {
+      return {};
+   }
+
+   init(options) {
+      if (options.view) this.view = options.view;
+
+      if (options.datacollection) this.datacollection = options.datacollection;
+   }
+
+   changePage(pageId, rowId) {
+      if (this.datacollection) this.datacollection.setCursor(rowId);
+
+      if (this.view) this.view.changePage(pageId);
+   }
+}
+
 export default class ABViewPropertyLinkPage extends ABViewProperty {
-   constructor() {
-      super();
-   }
-
-   /**
-    * @property default
-    * return default settings
-    *
-    * @return {Object}
-    */
-   static get default() {
-      return {
-         detailsPage: null, // uuid
-         detailsTab: null, // uuid
-         editPage: null, // uuid
-         editTab: null, // uuid
-      };
-   }
-
-   static propertyComponent(App, idBase) {
-      let base = super.propertyComponent();
-      const uiConfig = this.AB.Config.uiSettings();
-
-      let ids = {
-         detailsPage: idBase + "_linkPage_detailsPage",
-         editPage: idBase + "_linkPage_editPage",
-      };
-
-      let labels = {
-         common: App.labels,
-         component: {
-            // header: L("ab.component.grid.filterMenu", "*Filter Menu")
-         },
-      };
-
-      let ui = {
-         view: "fieldset",
-         label: L("Linked Pages:"),
-         labelWidth: uiConfig.labelWidthLarge,
-         body: {
-            type: "clean",
-            padding: 10,
-            rows: [
-               {
-                  id: ids.detailsPage,
-                  view: "select",
-                  name: "detailsPage",
-                  label: L("Details Page:"),
-                  labelWidth: uiConfig.labelWidthLarge,
-               },
-               {
-                  id: ids.editPage,
-                  view: "select",
-                  name: "editPage",
-                  label: L("Edit Form:"),
-                  labelWidth: uiConfig.labelWidthLarge,
-               },
-            ],
-         },
-      };
-
-      let init = (options) => {
-         // register callbacks:
-         for (var c in logic.callbacks) {
-            logic.callbacks[c] = options[c] || logic.callbacks[c];
-         }
-      };
-
-      let logic = {
-         callbacks: {
-            // onCancel: function () { console.warn('NO onCancel()!') },
-         },
-
-         viewLoad: (view) => {
-            this.view = view;
-
-            let filter = (v, widgetKey) => {
-               return (
-                  v.key == widgetKey &&
-                  v.settings.dataviewID == view.settings.dataviewID
-               );
-            };
-
-            // Set the options of the possible detail views
-            let pagesHasDetail = [];
-
-            pagesHasDetail = pagesHasDetail.concat(
-               view
-                  .pageRoot()
-                  .views((v) => {
-                     return filter(v, "detail");
-                  }, true)
-                  .map((p) => {
-                     return {
-                        id: p.id,
-                        value: p.label,
-                     };
-                  })
-            );
-
-            pagesHasDetail = pagesHasDetail.concat(
-               view
-                  .pageRoot()
-                  .pages((p) => {
-                     return p.views((v) => {
-                        return filter(v, "detail");
-                     }, true).length;
-                  }, true)
-                  .map((p) => {
-                     return {
-                        id: p.id,
-                        value: p.label,
-                     };
-                  })
-            );
-
-            pagesHasDetail.unshift({
-               id: "",
-               value: L("No linked view"),
-            });
-            $$(ids.detailsPage).define("options", pagesHasDetail);
-            $$(ids.detailsPage).refresh();
-
-            // Set the options of the possible edit forms
-            let pagesHasForm = [];
-
-            pagesHasForm = pagesHasForm.concat(
-               view
-                  .pageRoot()
-                  .views((v) => {
-                     return filter(v, "form");
-                  }, true)
-                  .map((p) => {
-                     return {
-                        id: p.id,
-                        value: p.label,
-                     };
-                  })
-            );
-
-            pagesHasForm = pagesHasForm.concat(
-               view
-                  .pageRoot()
-                  .pages((p) => {
-                     return p.views((v) => {
-                        return filter(v, "form");
-                     }, true).length;
-                  }, true)
-                  .map((p) => {
-                     return {
-                        id: p.id,
-                        value: p.label,
-                     };
-                  })
-            );
-
-            pagesHasForm.unshift({
-               id: "",
-               value: L("No linked form"),
-            });
-            $$(ids.editPage).define("options", pagesHasForm);
-            $$(ids.editPage).refresh();
-         },
-
-         setSettings: (settings) => {
-            var details = settings.detailsPage;
-            if (settings.detailsTab != "") {
-               details += ":" + settings.detailsTab;
-            }
-            $$(ids.detailsPage).setValue(details);
-
-            var edit = settings.editPage;
-            if (settings.editTab != "") {
-               edit += ":" + settings.editTab;
-            }
-            $$(ids.editPage).setValue(edit);
-         },
-
-         getSettings: () => {
-            let settings = {};
-
-            var detailsPage = $$(ids.detailsPage).getValue();
-            var detailsTab = "";
-            if (detailsPage.split(":").length > 1) {
-               var detailsVals = detailsPage.split(":");
-               detailsPage = detailsVals[0];
-               detailsTab = detailsVals[1];
-            }
-            settings.detailsPage = detailsPage;
-            settings.detailsTab = detailsTab;
-
-            var editPage = $$(ids.editPage).getValue();
-            var editTab = "";
-            if (editPage.split(":").length > 1) {
-               var editVals = editPage.split(":");
-               editPage = editVals[0];
-               editTab = editVals[1];
-            }
-            settings.editPage = editPage;
-            settings.editTab = editTab;
-
-            return settings;
-         },
-      };
-
-      return {
-         ui: ui,
-         init: init,
-         logic: logic,
-
-         viewLoad: logic.viewLoad,
-         setSettings: logic.setSettings,
-         getSettings: logic.getSettings,
-      };
-   }
+   // constructor() {
+   //    super();
+   // }
 
    /** == UI == */
    /**
@@ -226,39 +51,26 @@ export default class ABViewPropertyLinkPage extends ABViewProperty {
     * @param {string} idBase
     *      Identifier for this component
     */
-   component(App, idBase) {
-      let base = super.component(App, idBase);
+   component(v1App = false) {
+      let component = new ABViewPropertyLinkPageComponent(this);
 
-      /**
-       * @method init
-       * @param {Object} options - {
-       * 								view: {ABView},
-       * 								datacollection: {ABDatacollection}
-       * 							}
-       */
-      let init = (options) => {
-         base.init(options);
+      // if this is our v1Interface
+      if (v1App) {
+         var newComponent = component;
+         component = {
+            ui: newComponent.ui(),
+            init: (...params) => {
+               return newComponent.init(...params);
+            },
+            onShow: (...params) => {
+               return newComponent.onShow?.(...params);
+            },
+            changePage: (...params) => {
+               return newComponent.changePage(...params);
+            },
+         };
+      }
 
-         if (options.view) this.view = options.view;
-
-         if (options.datacollection)
-            this.datacollection = options.datacollection;
-      };
-
-      let logic = {
-         changePage: (pageId, rowId) => {
-            if (this.datacollection) this.datacollection.setCursor(rowId);
-
-            if (this.view) this.view.changePage(pageId);
-         },
-      };
-
-      return {
-         ui: base.ui,
-         init: init,
-         logic: logic,
-
-         changePage: logic.changePage,
-      };
+      return component;
    }
 }
