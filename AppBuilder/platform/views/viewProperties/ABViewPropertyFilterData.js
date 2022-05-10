@@ -14,13 +14,30 @@
  *                (this is used for the parent component to indicate how
  *                many rules are currently applied to the data being displayed)
  */
-
+const ABMLClass = require("../../ABMLClass");
 import ABViewProperty from "./ABViewProperty";
 import ABViewComponent from "../ABViewComponent";
 
 // const ABViewGridFilterRule = require("../../../rules/ABViewGridFilterRule");
 
 let L = (...params) => AB.Multilingual.label(...params);
+
+class FilterRuleSettings extends ABMLClass {
+   constructor() {
+      super(["label"], AB);
+   }
+
+   fromSettings(settings) {
+      super.fromValues(settings);
+      this.filters = settings.filters;
+   }
+
+   toSettings() {
+      let obj = super.toObj();
+      obj.filters = this.filters;
+      return obj;
+   }
+}
 
 class ABViewPropertyFilterDataComponent extends ABViewComponent {
    constructor(viewPropertyFilterData, idBase) {
@@ -701,16 +718,18 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
                // populate filter items
                if (this.settings?.queryRules) {
                   (this.settings.queryRules || []).forEach((qr) => {
+                     let Rule = new FilterRuleSettings();
+                     Rule.fromSettings(qr);
                      var filterRuleButton = {
                         view: "button",
                         css: "webix_primary",
-                        label: qr.label,
+                        label: Rule.label,
                         icon: "fa fa-filter",
                         type: "icon",
                         // badge: 0,
                         autowidth: true,
                         click: () => {
-                           this.emit("filter.data", null, qr.filters);
+                           this.emit("filter.data", null, Rule.filters);
                            // this.selectFilter(qr.filter);
                         },
                      };
