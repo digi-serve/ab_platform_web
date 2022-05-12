@@ -46,9 +46,14 @@ class ABViewGridComponent extends ABViewComponent {
       });
 
       this.viewGrid = viewGrid;
-      this.viewGrid.filterHelper.on("filter.data", (fnFilter, filterRules) => {
+      this._handler_filterData = (fnFilter, filterRules) => {
          this.callbackFilterData(fnFilter, filterRules); // be notified when there is a change in the filter
-      });
+      };
+      this.viewGrid.filterHelper.removeListener(
+         "filter.data",
+         this._handler_filterData
+      );
+      this.viewGrid.filterHelper.on("filter.data", this._handler_filterData);
 
       // derive these from viewGrid
       this.AB = viewGrid.AB;
@@ -90,10 +95,7 @@ class ABViewGridComponent extends ABViewComponent {
       // {bool}
       // Has a Validation Error occured?
 
-      this.linkPage = this.viewGrid.linkPageHelper.component(
-         this.AB._App,
-         `${base}_gridlinkpage`
-      );
+      this.linkPage = this.viewGrid.linkPageHelper.component();
       // {ABViewPropertyLinkPage}
       //
 
@@ -144,11 +146,24 @@ class ABViewGridComponent extends ABViewComponent {
       // We want this called when the .datacollection we are linked to
       // emits an "onChange" event.
 
+      this.ignoreLocalSettings = false;
+      // {bool}
+      // should we ignore our local settings in our current context?
+      // (used in ABDesigner when our settings will change as we need to
+      // use those instead of the saved settings.)
+
       if (!L) {
          L = (...params) => {
             return this.AB.Multilingual.label(...params);
          };
       }
+   }
+
+   detatch() {
+      this.viewGrid.filterHelper.removeListener(
+         "filter.data",
+         this._handler_filterData
+      );
    }
 
    /**
@@ -559,6 +574,8 @@ class ABViewGridComponent extends ABViewComponent {
       var throttleCustomDisplay = null;
       var scrollStarted = null;
 
+      if (!DataTable) return Promise.resolve();
+
       webix.extend(DataTable, webix.ProgressBar);
 
       DataTable.config.accessLevel = accessLevel;
@@ -920,7 +937,7 @@ class ABViewGridComponent extends ABViewComponent {
       $$(this.ids.buttonSort).refresh();
 
       let gridElem = this.getDataTable();
-      if (gridElem.data.find({}).lesngth < gridElem.data.count()) {
+      if (gridElem.data.find({}).length < gridElem.data.count()) {
          try {
             // NOTE: Webix's client sorting does not support dynamic loading.
             // If the data does not be loaded, then load all data.
@@ -934,7 +951,9 @@ class ABViewGridComponent extends ABViewComponent {
       }
       // wait until the grid component will done to repaint UI
       setTimeout(() => {
-         gridElem.sort(this.PopupSortDataTableComponent.sort);
+         gridElem.sort((...params) =>
+            this.PopupSortDataTableComponent.sort(...params)
+         );
       }, 777);
    }
 
@@ -1000,7 +1019,7 @@ class ABViewGridComponent extends ABViewComponent {
                   !CurrentObject.isGroup
                ) {
                   $DataTable.clearAll();
-                  $DataTable.parse(dc.getData());
+                  $DataTable.parse(dc.getData() || []);
 
                   this.grouping();
                   this.ready();
@@ -1630,6 +1649,8 @@ class ABViewGridComponent extends ABViewComponent {
     *        our config settings?
     */
    refreshHeader(ignoreLocal = false) {
+      ignoreLocal = ignoreLocal || this.ignoreLocal;
+
       // columnSplitRight = 0;
       // wait until we have an Object defined:
       var CurrentObject = this.datacollection.datasource;

@@ -481,7 +481,7 @@ export default class AB_Work_Object_Workspace_PopupSortFields extends ClassUI {
       var childViews = $$(this.ids.form).getChildViews();
       if (childViews.length > 1) {
          // Ignore 'Add new sort' button
-         childViews.forEach(function (cView, index) {
+         childViews.forEach((cView, index) => {
             if (childViews.length - 1 <= index || result != 0) return;
 
             var fieldId = cView.getChildViews()[0].getValue();

@@ -294,6 +294,10 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
          this._handler_rowFilterFormChanged
       );
       this.rowFilterForm.on("changed", this._handler_rowFilterFormChanged);
+      this.rowFilterForm.removeListener(
+         "save",
+         this._handler_rowFilterFormChanged
+      );
       this.rowFilterForm.on("save", this._handler_rowFilterFormChanged);
 
       $$(ids.filterPanel)?.hide();
