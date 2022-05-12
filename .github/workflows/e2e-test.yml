@@ -54,3 +54,9 @@ jobs:
               env: stack=ab
               install: false
               
+         - uses: actions/upload-artifact@v2
+           if: failure()
+           with:
+              name: cypress-screenshots
+              path: ./ab/test/e2e/cypress/screenshots
+              
