@@ -14,8 +14,10 @@ jobs:
       name: Run Tests
       runs-on: ubuntu-latest
       steps:
-         - name: Install AppBuilder
-           run: docker swarm init && npx digi-serve/ab-cli install ab --stack=ab --port=8080 --db.expose=false --db.password=root --db.encryption=false --tag=develop --nginx.enable=true --ssl.none --bot.enable=false --smtp.enable=false --tenant.username=admin --tenant.password=admin --tenant.email=neo@thematrix.com
+         - uses: digi-serve/ab-install-action@v1
+           with:
+              port: 8080
+              folder: ab
 
          - name: Check out ab_platform_web
            uses: actions/checkout@v2
@@ -50,3 +52,5 @@ jobs:
               wait-on: "http://localhost:8080"
               wait-on-timeout: 300
               env: stack=ab
+              install: false
+              
