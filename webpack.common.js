@@ -1,9 +1,9 @@
-const webpack = require("webpack"); //to access built-in plugins
-var path = require("path");
+// const webpack = require("webpack"); //to access built-in plugins
+const path = require("path");
 var APP = path.resolve(__dirname);
 
 module.exports = {
-   mode: "development", // "production", "none"
+   // mode: "development", // "production", "none"
    context: APP,
    entry: {
       app: path.join(APP, "index.js"),
@@ -14,27 +14,17 @@ module.exports = {
    },
    module: {
       rules: [
-         // {
-         //    test: /\.m?js$/,
-         //    exclude: /node_modules/,
-         //    use: {
-         //       loader: "babel-loader",
-         //       options: {
-         //          presets: [["@babel/preset-env", { targets: "defaults" }]],
-         //       },
-         //    },
-         // },
          {
             test: /\.css$/,
             use: ["style-loader", "css-loader?url=false"],
          },
          {
-            test: /\.(eot|woff|woff2|svg|ttf)([\?]?.*)$/,
+            test: /\.(eot|woff|woff2|svg|ttf)([?]?.*)$/,
             use: ["url-loader?limit=10000000"],
          },
       ],
    },
-   devtool: "source-map",
+   // devtool: "source-map",
    plugins: [],
    resolve: {
       alias: {
