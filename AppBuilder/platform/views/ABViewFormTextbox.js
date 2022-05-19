@@ -106,7 +106,85 @@ module.exports = class ABViewFormTextbox extends ABViewFormTextboxCore {
     * @param {obj} App
     * @return {obj} UI component
     */
-   component(App) {
+   component(v1App) {
+      var component = super.component();
+
+      component._ui = component.ui();
+      component._ui.id = `ABViewFormTextbox_${this.id}_f_`;
+
+      component.ui = () => {
+         switch (
+            this.settings.type ||
+            ABViewFormTextboxPropertyComponentDefaults.type
+         ) {
+            case "single":
+               component._ui.view = "text";
+               break;
+            case "multiple":
+               component._ui.view = "textarea";
+               component._ui.height = 200;
+               break;
+            case "rich":
+               component._ui.view = "forminput";
+               component._ui.height = 200;
+               component._ui.css = "ab-rich-text";
+               component._ui.body = {
+                  view: "tinymce-editor",
+                  value: "",
+                  cdn: "/js/webix/extras/tinymce",
+                  config: {
+                     plugins: "link",
+                     menubar: "format edit",
+                     toolbar:
+                        "undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | fontsizeselect | link",
+                  },
+               };
+               break;
+         }
+
+         return component._ui;
+      };
+
+      component.onShow = () => {
+         // WORKAROUND : to fix breaks TinyMCE when switch pages/tabs
+         // https://forum.webix.com/discussion/6772/switching-tabs-breaks-tinymce
+         if (
+            this.settings.type &&
+            this.settings.type == "rich" &&
+            $$(component._ui.id)
+         ) {
+            // recreate rich editor
+            webix.ui(component._ui, $$(component._ui.id));
+            // Add dataCy to TinyMCE text editor
+            $$(component._ui.id)
+               .getChildViews()[0]
+               .getEditor(true)
+               .then((editor) => {
+                  const dataCy = `${this.key} rich ${component._ui.name} ${this.id} ${this.parent.id}`;
+                  editor.contentAreaContainer.setAttribute("data-cy", dataCy);
+               });
+         }
+      };
+
+      // if this is our v1Interface
+      if (v1App) {
+         var newComponent = component;
+         component = {
+            ui: newComponent.ui(),
+            init: (options, accessLevel) => {
+               return newComponent.init(this.AB, accessLevel);
+            },
+            onShow: (...params) => {
+               return newComponent.onShow?.(...params);
+            },
+         };
+         component._ui = newComponent._ui;
+      }
+
+      return component;
+   }
+
+   componentOld(App) {
       var component = super.component(App);
 
       var idBase = this.parentFormUniqueID(`ABViewFormTextbox_${this.id}_f_`);
@@ -156,10 +234,13 @@ module.exports = class ABViewFormTextbox extends ABViewFormTextboxCore {
             // recreate rich editor
             webix.ui(component.ui, $$(component.ui.id));
             // Add dataCy to TinyMCE text editor
-            $$(component.ui.id).getChildViews()[0].getEditor(true).then((editor) => {
-               const dataCy = `${this.key} rich ${component.ui.name} ${this.id} ${this.parent.id}`;
-               editor.contentAreaContainer.setAttribute('data-cy', dataCy);
-            });
+            $$(component.ui.id)
+               .getChildViews()[0]
+               .getEditor(true)
+               .then((editor) => {
+                  const dataCy = `${this.key} rich ${component.ui.name} ${this.id} ${this.parent.id}`;
+                  editor.contentAreaContainer.setAttribute("data-cy", dataCy);
+               });
          }
       };
 

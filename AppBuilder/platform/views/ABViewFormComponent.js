@@ -4,10 +4,110 @@ const ABViewFormFieldPropertyComponentDefaults = ABViewFormComponentCore.default
 
 let L = (...params) => AB.Multilingual.label(...params);
 
+const ABViewComponent = require("./ABViewComponent").default;
+
+class ABViewFormUIComponent extends ABViewComponent {
+   constructor(baseView, idBase, ids) {
+      var base = idBase || `ABViewFormComponent_${baseView.id}`;
+      super(base, ids);
+
+      this.view = baseView;
+      this.settings = baseView.settings;
+      this.AB = baseView.AB;
+   }
+
+   ui() {
+      // setup 'label' of the element
+
+      var form = this.view.parentFormComponent(),
+         field = this.view.field(),
+         label = "";
+
+      var settings = {};
+      if (form) settings = form.settings;
+
+      var _ui = {
+         labelPosition: settings.labelPosition,
+         labelWidth: settings.labelWidth,
+         label: label,
+      };
+
+      if (field != null) {
+         _ui.name = field.columnName;
+
+         // default value
+         var data = {};
+         field.defaultValue(data);
+         if (data[field.columnName]) _ui.value = data[field.columnName];
+
+         if (settings.showLabel == true) {
+            _ui.label = field.label;
+         }
+
+         if (
+            field.settings.required == true ||
+            this.settings.required == true
+         ) {
+            _ui.required = 1;
+         }
+
+         if (this.settings.disable == 1) {
+            _ui.disabled = true;
+         }
+
+         // add data-cy to form element for better testing code
+         _ui.on = {
+            onAfterRender() {
+               if (this.getList) {
+                  var popup = this.getPopup();
+                  if (!popup) return;
+                  this.getList().data.each((option) => {
+                     if (!option) return;
+                     var node = popup.$view.querySelector(
+                        "[webix_l_id='" + option.id + "']"
+                     );
+                     if (!node) return;
+                     node.setAttribute(
+                        "data-cy",
+                        `${field.key} options ${option.id} ${field.id} ${form.id}`
+                     );
+                  });
+               }
+               this.getInputNode().setAttribute(
+                  "data-cy",
+                  `${field.key} ${field.columnName} ${field.id} ${form.id}`
+               );
+            },
+         };
+
+         // this may be needed if we want to format data at this point
+         // if (field.format) data = field.format(data);
+
+         _ui.validate = (val, data, colName) => {
+            let validator = this.AB.Validation.validator();
+
+            field.isValidData(data, validator);
+
+            return validator.pass();
+         };
+      }
+      return _ui;
+   }
+
+   init(AB) {
+      this.AB = AB;
+      return Promise.resolve();
+   }
+}
+
 module.exports = class ABViewFormComponent extends ABViewFormComponentCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
    // }
+
+   static get componentUI() {
+      return ABViewFormUIComponent;
+   }
 
    static propertyEditorDefaultElements(App, ids, _logic, ObjectDefaults) {
       var commonUI = super.propertyEditorDefaultElements(
@@ -81,7 +181,27 @@ module.exports = class ABViewFormComponent extends ABViewFormComponentCore {
     * @param {obj} App
     * @return {obj} UI component
     */
-   component(App) {
+   component(v1App = false) {
+      let component = new ABViewFormUIComponent(this);
+
+      // if this is our v1Interface
+      if (v1App) {
+         var newComponent = component;
+         component = {
+            ui: newComponent.ui(),
+            init: (options, accessLevel) => {
+               return newComponent.init(this.AB, accessLevel);
+            },
+            onShow: (...params) => {
+               return newComponent.onShow?.(...params);
+            },
+         };
+      }
+
+      return component;
+   }
+
+   componentV1(App) {
       // setup 'label' of the element
       var form = this.parentFormComponent(),
          field = this.field(),

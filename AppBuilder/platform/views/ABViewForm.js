@@ -2,7 +2,7 @@ const ABViewFormCore = require("../../core/views/ABViewFormCore");
 const ABViewFormButton = require("./ABViewFormButton");
 const ABViewFormCustom = require("./ABViewFormCustom");
 const ABViewFormConnect = require("./ABViewFormConnect");
-const ABViewFormComponent = require("./ABViewFormComponent");
+// const ABViewFormComponent = require("./ABViewFormComponent");
 const ABViewFormSelectMultiple = require("./ABViewFormSelectMultiple");
 const ABViewFormTextbox = require("./ABViewFormTextbox");
 
@@ -17,7 +17,110 @@ let PopupSubmitRule = null;
 ////
 const ABViewFormPropertyComponentDefaults = ABViewFormCore.defaultValues();
 
-let L = (...params) => AB.Multilingual.label(...params);
+const ABViewComponent = require("./ABViewComponent").default;
+
+class ABViewFormUIComponent extends ABViewComponent {
+   constructor(baseView, idBase) {
+      var base = idBase || `ABViewForm_${baseView.id}`;
+      super(base, {
+         layout: "",
+         filterComplex: "",
+      });
+
+      this.view = baseView;
+      this.settings = baseView.settings;
+      this.AB = baseView.AB;
+   }
+
+   ui() {
+      let superComponent = this.view.superComponent();
+      let rows = superComponent.ui().rows || [];
+
+      // Pull fields that have validation rules
+      var fieldValidations = [];
+      var validationUI = [];
+      // NOTE: this._currentObject can be set in the KanBan Side Panel
+      var object =
+         this.view.datacollection?.datasource ?? this.view._currentObject;
+      if (object) {
+         var existsFields = this.view.fieldComponents();
+
+         object.fields().forEach((f) => {
+            var view = existsFields.filter((com) => {
+               return f.id == com.settings.fieldId;
+            })[0];
+
+            // check to see if field has validation rules
+            if (view && f.settings.validationRules) {
+               // parse the rules because they were stored as a string
+               // check if rules are still a string...if so lets parse them
+               if (typeof f.settings.validationRules === "string") {
+                  f.settings.validationRules = JSON.parse(
+                     f.settings.validationRules
+                  );
+               }
+               // there could be more than one so lets loop through and build the UI
+               f.settings.validationRules.forEach((rule, indx) => {
+                  var Filter = this.AB.filterComplexNew(
+                     `${f.columnName}_${indx}`
+                  );
+                  // add the new ui to an array so we can add them all at the same time
+                  if (typeof Filter.ui == "function") {
+                     validationUI.push(Filter.ui());
+                  } else {
+                     // Legacy v1 method:
+                     validationUI.push(Filter.ui);
+                  }
+
+                  // store the filter's info so we can assign values and settings after the ui is rendered
+                  fieldValidations.push({
+                     filter: Filter,
+                     view: Filter.ids.querybuilder,
+                     columnName: f.columnName,
+                     validationRules: rule.rules,
+                     invalidMessage: rule.invalidMessage,
+                  });
+               });
+            }
+         });
+      }
+
+      var fieldValidationsHolder = [
+         {
+            hidden: true,
+            rows: validationUI,
+         },
+         // {},
+      ];
+
+      return {
+         // view: "scrollview",
+         // height: this.settings.height || ABViewFormPropertyComponentDefaults.height,
+         // body: {
+         id: this.ids.component,
+         view: "form",
+         abid: this.view.id,
+         rows: rows.concat(fieldValidationsHolder),
+         // elementsConfig: {
+         //    on: {
+         //       onChange: function(newv, oldv) {
+         //          this.validate();
+         //       }
+         //    }
+         // }
+         // }
+      };
+   }
+
+   init(AB) {
+      this.AB = AB;
+      return Promise.resolve();
+   }
+
+   detatch() {
+      // TODO: remove any handlers we have attached.
+   }
+}
 
 module.exports = class ABViewForm extends ABViewFormCore {
    // constructor(values, application, parent, defaultValues) {
@@ -652,7 +755,32 @@ module.exports = class ABViewForm extends ABViewFormCore {
     * @param {obj} App
     * @return {obj} UI component
     */
-   component(App) {
+
+   superComponent() {
+      return super.component();
+   }
+
+   component(v1App = false) {
+      let component = new ABViewFormUIComponent(this);
+
+      // if this is our v1Interface
+      if (v1App) {
+         var newComponent = component;
+         component = {
+            ui: newComponent.ui(),
+            init: (options, accessLevel) => {
+               return newComponent.init(this.AB, accessLevel);
+            },
+            onShow: (...params) => {
+               return newComponent.onShow?.(...params);
+            },
+         };
+      }
+
+      return component;
+   }
+
+   componentOld(App) {
       this.App = App;
       var idBase = "ABViewForm_" + this.id;
       this.uniqueInstanceID = webix.uid();
