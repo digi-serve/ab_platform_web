@@ -103,6 +103,23 @@ class Bootstrap extends EventEmitter {
                var tenantInfo = Config.tenantConfig();
                if (tenantInfo) {
                   var plugins = Config.plugins() || [];
+
+                  // Short Term Fix: Don't load ABDesigner for non builders (need a way to assign plugins to users/roles);
+                  const designerIndex = plugins.indexOf("ABDesigner.js");
+                  if (designerIndex > -1) {
+                     const builderRoles = [
+                        "6cc04894-a61b-4fb5-b3e5-b8c3f78bd331",
+                        "e1be4d22-1d00-4c34-b205-ef84b8334b19",
+                     ];
+                     const userBuilderRoles = Config._config.user.roles.filter(
+                        (role) => builderRoles.indexOf(role.uuid) > -1
+                     ).length;
+                     // Remove if no builder roles
+                     if (userBuilderRoles < 1) {
+                        plugins.splice(designerIndex, 1);
+                     }
+                  }
+
                   console.log("plugins:", plugins);
 
                   plugins.forEach((p) => {
