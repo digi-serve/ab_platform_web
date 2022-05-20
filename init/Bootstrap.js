@@ -111,11 +111,12 @@ class Bootstrap extends EventEmitter {
                         "6cc04894-a61b-4fb5-b3e5-b8c3f78bd331",
                         "e1be4d22-1d00-4c34-b205-ef84b8334b19",
                      ];
-                     const userBuilderRoles = Config._config.user.roles.filter(
+                     const userInfo = Config.userConfig();
+                     const userBuilderRoles = userInfo?.roles.filter(
                         (role) => builderRoles.indexOf(role.uuid) > -1
                      ).length;
                      // Remove if no builder roles
-                     if (userBuilderRoles < 1) {
+                     if (userBuilderRoles < 1 || userInfo == null) {
                         plugins.splice(designerIndex, 1);
                      }
                   }
