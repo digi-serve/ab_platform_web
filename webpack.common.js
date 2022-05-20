@@ -1,9 +1,7 @@
-// const webpack = require("webpack"); //to access built-in plugins
 const path = require("path");
-var APP = path.resolve(__dirname);
+const APP = path.resolve(__dirname);
 
 module.exports = {
-   // mode: "development", // "production", "none"
    context: APP,
    entry: {
       app: path.join(APP, "index.js"),
@@ -24,7 +22,6 @@ module.exports = {
          },
       ],
    },
-   // devtool: "source-map",
    plugins: [],
    resolve: {
       alias: {
