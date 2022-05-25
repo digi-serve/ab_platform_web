@@ -30,7 +30,7 @@ jobs:
            working-directory: ./ab/developer/ab_platform_web
 
          - name: Webpack
-           run: node node_modules/webpack-cli/bin/cli.js
+           run: node node_modules/webpack-cli/bin/cli.js webpack.prod.js
            working-directory: ./ab/developer/ab_platform_web
 
          - name: Check out kitchen-sink tests
