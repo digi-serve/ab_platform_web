@@ -35,7 +35,7 @@
       "bootstrap": "^4.6.0",
       "formiojs": "^4.12.7",
       "jszip-utils": "^0.1.0",
-      "nanoid": "^3.1.22",
+      "nanoid": "^3.1.31",
       "tinymce": "^5.8.1"
    }
 }
