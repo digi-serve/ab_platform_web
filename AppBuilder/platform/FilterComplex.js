@@ -32,7 +32,7 @@ function _toInternal(cond, fields = []) {
       //    ],
       // }
       let field = fields.filter((f) => f.id == cond.key)[0];
-      cond.field = field?.columnName;
+      cond.field = field?.columnName ?? field?.id;
       cond.condition = {
          type: cond.rule,
          filter: cond.value,
@@ -72,7 +72,8 @@ function _toExternal(cond, fields = []) {
    if (!cond) return;
    if (cond.field) {
       let field = fields.filter((f) => f.columnName == cond.field)[0];
-      cond.key = field?.id;
+      cond.alias = alias || undefined;
+      cond.key = field?.id || cond.field;
       cond.condition = cond.condition || {};
       cond.rule = cond.condition.type;
 
@@ -81,7 +82,18 @@ function _toExternal(cond, fields = []) {
       if (cond.condition.filter && values.indexOf(cond.condition.filter) < 0)
          values.push(cond.condition.filter);
 
-      cond.value = values.join(",");
+      cond.value = values
+         .map((v) => {
+            // Convert date format
+            if (field && (field.key == "date" || field.key == "datetime")) {
+               return field.exportValue(v);
+            } else if (v instanceof Date) {
+               return v.toISOString();
+            } else {
+               return v;
+            }
+         })
+         .join(",");
 
       delete cond.field;
       delete cond.type;
@@ -430,6 +442,13 @@ module.exports = class FilterComplex extends FilterComplexCore {
    uiValue(fieldColumnName) {
       let result;
 
+      // Special case: this_object
+      if (fieldColumnName == "this_object") {
+         return []
+            .concat(this.uiQueryValue("this_object"))
+            .concat(this.uiDataCollectionValue("this_object"));
+      }
+
       let field = (this._Fields || []).filter(
          (f) => f.columnName == fieldColumnName
       )[0];
@@ -532,7 +551,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
          this._QueryFields?.filter((f) => f.id == field.id).length > 0;
 
       // populate the list of Queries for this_object:
-      if (field.id == "this_object" && this._Object) {
+      if (field == "this_object" && this._Object) {
          options = this._Queries?.filter((q) =>
             q.canFilterObject(this._Object)
          );
@@ -594,7 +613,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
 
    uiDataCollectionValue(field) {
       let linkObjectId;
-      if (field.id == "this_object" && this._Object) {
+      if (field == "this_object" && this._Object) {
          linkObjectId = this._Object.id;
       } else {
          linkObjectId = field?.settings?.linkObject;
@@ -687,7 +706,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
       }
 
       if (this._Fields) {
-         this.fieldsLoad(this._Fields);
+         this.fieldsLoad(this._Fields, this._Object);
       }
 
       // NOTE: do this, before the .setValue() operation, as we need to have
