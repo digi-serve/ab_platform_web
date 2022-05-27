@@ -56,6 +56,7 @@ class ABViewCarouselComponent extends ABViewComponent {
       }
 
       return {
+         id: `${ids.component}_top`,
          borderless: true,
          cols: [
             spacer, // spacer
@@ -142,20 +143,22 @@ class ABViewCarouselComponent extends ABViewComponent {
       });
 
       // set data-cy
-      const carousel = $$(this.ids.component).$view;
-      carousel.setAttribute("data-cy", `${this.view.key} ${this.view.id}`);
-      carousel
-         .querySelector(".webix_nav_button_prev")
-         ?.firstElementChild?.setAttribute(
-            "data-cy",
-            `${this.view.key} button previous ${this.view.id}`
-         );
-      carousel
-         .querySelector(".webix_nav_button_next")
-         ?.firstElementChild?.setAttribute(
-            "data-cy",
-            `${this.view.key} button next ${this.view.id}`
-         );
+      const carousel = $$(this.ids.component)?.$view;
+      if (carousel) {
+         carousel.setAttribute("data-cy", `${this.view.key} ${this.view.id}`);
+         carousel
+            .querySelector(".webix_nav_button_prev")
+            ?.firstElementChild?.setAttribute(
+               "data-cy",
+               `${this.view.key} button previous ${this.view.id}`
+            );
+         carousel
+            .querySelector(".webix_nav_button_next")
+            ?.firstElementChild?.setAttribute(
+               "data-cy",
+               `${this.view.key} button next ${this.view.id}`
+            );
+      }
 
       return Promise.resolve();
    }
@@ -357,58 +360,66 @@ class ABViewCarouselComponent extends ABViewComponent {
       this._imageCount = images.length;
 
       var Carousel = $$(ids.component);
+      if (Carousel) {
+         // re-render
+         webix.ui(images, Carousel);
 
-      // re-render
-      webix.ui(images, Carousel);
+         // add loading cursor
+         webix.extend(Carousel, webix.ProgressBar);
 
-      // add loading cursor
-      if (Carousel) webix.extend(Carousel, webix.ProgressBar);
+         // link pages events
+         let editPage = this.settings.editPage;
+         let detailsPage = this.settings.detailsPage;
 
-      // link pages events
-      let editPage = this.settings.editPage;
-      let detailsPage = this.settings.detailsPage;
-
-      // if (detailsPage || editPage) {
-      $$(ids.component).$view.onclick = (e) => {
-         if (e.target.className) {
-            if (e.target.className.indexOf("ab-carousel-edit") > -1) {
-               webix.html.removeCss($$(ids.component).getNode(), "fullscreen");
-               webix.fullscreen.exit();
-               let rowId = e.target.getAttribute("ab-row-id");
-               this.linkPage.changePage(editPage, rowId);
-            } else if (e.target.className.indexOf("ab-carousel-detail") > -1) {
-               webix.html.removeCss($$(ids.component).getNode(), "fullscreen");
-               webix.fullscreen.exit();
-               let rowId = e.target.getAttribute("ab-row-id");
-               this.linkPage.changePage(detailsPage, rowId);
-            } else if (
-               e.target.className.indexOf("ab-carousel-fullscreen") > -1
-            ) {
-               $$(ids.component).define("css", "fullscreen");
-               webix.fullscreen.set(ids.component, {
-                  head: {
-                     view: "toolbar",
-                     css: "webix_dark",
-                     elements: [
-                        {},
-                        {
-                           view: "icon",
-                           icon: "fa fa-times",
-                           click: function () {
-                              webix.html.removeCss(
-                                 $$(ids.component).getNode(),
-                                 "fullscreen"
-                              );
-                              webix.fullscreen.exit();
+         // if (detailsPage || editPage) {
+         Carousel.$view.onclick = (e) => {
+            if (e.target.className) {
+               if (e.target.className.indexOf("ab-carousel-edit") > -1) {
+                  webix.html.removeCss(
+                     $$(ids.component).getNode(),
+                     "fullscreen"
+                  );
+                  webix.fullscreen.exit();
+                  let rowId = e.target.getAttribute("ab-row-id");
+                  this.linkPage.changePage(editPage, rowId);
+               } else if (
+                  e.target.className.indexOf("ab-carousel-detail") > -1
+               ) {
+                  webix.html.removeCss(
+                     $$(ids.component).getNode(),
+                     "fullscreen"
+                  );
+                  webix.fullscreen.exit();
+                  let rowId = e.target.getAttribute("ab-row-id");
+                  this.linkPage.changePage(detailsPage, rowId);
+               } else if (
+                  e.target.className.indexOf("ab-carousel-fullscreen") > -1
+               ) {
+                  $$(ids.component).define("css", "fullscreen");
+                  webix.fullscreen.set(ids.component, {
+                     head: {
+                        view: "toolbar",
+                        css: "webix_dark",
+                        elements: [
+                           {},
+                           {
+                              view: "icon",
+                              icon: "fa fa-times",
+                              click: function () {
+                                 webix.html.removeCss(
+                                    $$(ids.component).getNode(),
+                                    "fullscreen"
+                                 );
+                                 webix.fullscreen.exit();
+                              },
                            },
-                        },
-                     ],
-                  },
-               });
+                        ],
+                     },
+                  });
+               }
             }
-         }
-      };
-      // }
+         };
+      }
    }
 
    showFilterPopup($view) {
@@ -809,8 +820,7 @@ export default class ABViewCarousel extends ABViewCarouselCore {
       return component;
    }
 
-   /*
-   componentV1(App) {
+   componentOld(App) {
       var idBase = this.idBase;
       var ids = {
          component: App.unique(`${idBase}_component`),
@@ -915,16 +925,19 @@ export default class ABViewCarousel extends ABViewCarouselCore {
 
          // set data-cy
          const carousel = $$(ids.component).$view;
-         carousel.setAttribute('data-cy', `${this.key} ${this.id}`);
+         carousel.setAttribute("data-cy", `${this.key} ${this.id}`);
          carousel
-             .querySelector('.webix_nav_button_prev')
-             ?.firstElementChild
-             ?.setAttribute('data-cy', `${this.key} button previous ${this.id}`);
+            .querySelector(".webix_nav_button_prev")
+            ?.firstElementChild?.setAttribute(
+               "data-cy",
+               `${this.key} button previous ${this.id}`
+            );
          carousel
-             .querySelector('.webix_nav_button_next')
-             ?.firstElementChild
-             ?.setAttribute('data-cy', `${this.key} button next ${this.id}`);
-
+            .querySelector(".webix_nav_button_next")
+            ?.firstElementChild?.setAttribute(
+               "data-cy",
+               `${this.key} button next ${this.id}`
+            );
       };
 
       let _logic = {
@@ -1168,7 +1181,6 @@ export default class ABViewCarousel extends ABViewCarouselCore {
          onShow: _logic.onShow,
       };
    }
-   */
 
    get idBase() {
       return `ABViewCarousel_${this.id}`;

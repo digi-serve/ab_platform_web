@@ -17,12 +17,6 @@ var GridSettings = null;
 // Keep a global copy of our local Grid settings, so we can optimize the header
 // sizes.
 
-// let PopupHideFieldComponent = null;
-// let PopupFrozenColumnsComponent = null;
-// let PopupFilterProperty = null;
-// let PopupSummaryColumnsComponent = null;
-// let PopupCountColumnsComponent = null;
-
 var L = null;
 // multilingual Label fn()
 
@@ -49,10 +43,7 @@ class ABViewGridComponent extends ABViewComponent {
       this._handler_filterData = (fnFilter, filterRules) => {
          this.callbackFilterData(fnFilter, filterRules); // be notified when there is a change in the filter
       };
-      this.viewGrid.filterHelper.removeListener(
-         "filter.data",
-         this._handler_filterData
-      );
+      this.detatch();
       this.viewGrid.filterHelper.on("filter.data", this._handler_filterData);
 
       // derive these from viewGrid
@@ -2922,679 +2913,602 @@ export default class ABViewGrid extends ABViewGridCore {
     * @param {obj} App
     * @return {obj} UI component
     */
-   // component(App, objId) {
-   //    let baseCom = super.component(App);
-   //    var L = App.Label;
-
-   //    var idBase = objId || "ABViewGrid_" + this.id;
-   //    var ids = {
-   //       component: App.unique(idBase + "_component"),
-   //       toolbar: App.unique(idBase + "_toolbar"),
-   //       buttonDeleteSelected: App.unique(idBase + "_deleteSelected"),
-   //       // buttonExport: App.unique('buttonExport'),
-   //       buttonFilter: App.unique(idBase + "_buttonFilter"),
-   //       buttonMassUpdate: App.unique(idBase + "_buttonMassUpdate"),
-   //       buttonSort: App.unique(idBase + "_buttonSort"),
-   //       buttonExport: App.unique(idBase + "_buttonExport"),
-
-   //       globalSearchToolbar: App.unique(idBase + "_globalSearchToolbar"),
-   //    };
-
-   //    var labels = {
-   //       common: App.labels,
-   //    };
-
-   //    var CurrentObject = null;
-
-   //    var settings = {
-   //       allowDelete: this.settings.allowDelete,
-   //       detailsView: this.settings.detailsPage,
-   //       editView: this.settings.editPage,
-   //       isEditable: this.settings.isEditable,
-   //       massUpdate: this.settings.massUpdate,
-   //       configureHeaders: false,
-   //       summaryColumns: this.settings.summaryColumns,
-   //       countColumns: this.settings.countColumns,
-   //       hideHeader: this.settings.hideHeader,
-   //       labelAsField: this.settings.labelAsField,
-   //       hideButtons: this.settings.hideButtons,
-   //       groupBy: this.settings.groupBy,
-   //       hiddenFields: this.settings.hiddenFields,
-   //       frozenColumnID: this.settings.frozenColumnID || "",
-   //       isTreeDatable: this.datacollection && this.datacollection.isGroup,
-   //    };
-
-   //    let DataTable = new ABWorkspaceDatatable(App, idBase, settings);
-   //    let PopupMassUpdateComponent = new ABPopupMassUpdate(
-   //       App,
-   //       idBase + "_mass"
-   //    );
-   //    let PopupSortDataTableComponent = new ABPopupSortField(
-   //       App,
-   //       idBase + "_sort"
-   //    );
-   //    let exportPopup = new ABPopupExport(App, idBase + "_export");
-
-   //    let filterUI = this.filterHelper.component(App, idBase + "_gridfilter");
-   //    this.filterHelper.fromSettings(this.settings.gridFilter);
-
-   //    let linkPage = this.linkPageHelper.component(
-   //       App,
-   //       idBase + "_gridlinkpage"
-   //    );
-
-   //    let _init = (options, accessLevel) => {
-   //       if (this.settings.dataviewID != "") {
-   //          DataTable.init(
-   //             {
-   //                onCheckboxChecked: _logic.callbackCheckboxChecked,
-   //             },
-   //             accessLevel
-   //          );
-
-   //          PopupMassUpdateComponent.init({
-   //             // onSave:_logic.callbackAddFields        // be notified of something...who knows...
-   //          });
-
-   //          PopupSortDataTableComponent.init({
-   //             onChange: _logic.callbackSortData,
-   //          });
-
-   //          filterUI.init({
-   //             onFilterData: (fnFilter, filterRules) => {
-   //                _logic.callbackFilterData(fnFilter, filterRules); // be notified when there is a change in the filter
-   //             },
-   //          });
-
-   //          exportPopup.init({});
-
-   //          if (
-   //             this.settings.massUpdate ||
-   //             this.settings.isSortable ||
-   //             this.settings.isExportable ||
-   //             (this.settings.gridFilter &&
-   //                this.settings.gridFilter.filterOption &&
-   //                this.settings.gridFilter.userFilterPosition == "toolbar")
-   //          ) {
-   //             $$(ids.toolbar).show();
-   //          }
-
-   //          if (this.settings.massUpdate == false) {
-   //             $$(ids.buttonMassUpdate).hide();
-   //             $$(ids.buttonDeleteSelected).hide();
-   //          }
-
-   //          if (this.settings.allowDelete == false) {
-   //             $$(ids.buttonDeleteSelected).hide();
-   //          }
-
-   //          if (this.settings.gridFilter) {
-   //             if (
-   //                this.settings.gridFilter.filterOption != 1 ||
-   //                this.settings.gridFilter.userFilterPosition != "toolbar"
-   //             ) {
-   //                $$(ids.buttonFilter).hide();
-   //             }
-
-   //             if (
-   //                this.settings.gridFilter.filterOption == 3 &&
-   //                this.settings.gridFilter.globalFilterPosition == "single"
-   //             ) {
-   //                $$(DataTable.ui.id).hide();
-   //             }
-
-   //             if (this.settings.gridFilter.isGlobalToolbar)
-   //                $$(ids.globalSearchToolbar).show();
-   //             else $$(ids.globalSearchToolbar).hide();
-   //          }
-
-   //          if (this.settings.isSortable == false) {
-   //             $$(ids.buttonSort).hide();
-   //          }
-
-   //          if (this.settings.isExportable == false) {
-   //             $$(ids.buttonExport).hide();
-   //          }
-
-   //          if (this.settings.hideHeader == true) {
-   //             DataTable.hideHeader();
-   //          }
-
-   //          var dv = this.datacollection;
-   //          if (dv && dv.datasource) {
-   //             CurrentObject = dv.datasource;
-
-   //             DataTable.objectLoad(CurrentObject);
-   //             PopupMassUpdateComponent.objectLoad(CurrentObject, DataTable);
-   //             PopupSortDataTableComponent.objectLoad(CurrentObject);
-   //             PopupSortDataTableComponent.setValue(this.settings.sortFields);
-   //             this.filterHelper.objectLoad(CurrentObject);
-   //             this.filterHelper.viewLoad(this);
-   //             exportPopup.objectLoad(CurrentObject);
-   //             exportPopup.dataCollectionLoad(dv);
-   //             exportPopup.setGridComponent($$(DataTable.ui.id));
-   //             exportPopup.setHiddenFields(this.settings.hiddenFields);
-   //             exportPopup.setFilename(this.label);
-   //             DataTable.refreshHeader();
-
-   //             // link page helper
-   //             linkPage.init({
-   //                view: this,
-   //                datacollection: dv,
-   //             });
-
-   //             // dv.bind($$(DataTable.ui.id));
-   //             DataTable.datacollectionLoad(dv);
-
-   //             var editPage = this.settings.editPage;
-   //             var detailsPage = this.settings.detailsPage;
-   //             var editTab = this.settings.editTab;
-   //             var detailsTab = this.settings.detailsTab;
-   //             var isEditable = this.settings.isEditable;
-
-   //             // we need to recursivly look backwards to toggle tabs into view when a user choosed to select a tab for edit or details views
-   //             function toggleTab(parentTab, wb) {
-   //                // find the tab
-   //                var tab = wb.getTopParentView().queryView({ id: parentTab });
-   //                // if we didn't pass and id we may have passed a domNode
-   //                if (tab == null) {
-   //                   tab = $$(parentTab);
-   //                }
-
-   //                if (tab == null) return;
-
-   //                // set the tabbar to to the tab
-   //                var tabbar = tab.getParentView().getParentView();
-
-   //                if (tabbar == null) return;
-
-   //                if (tabbar.setValue) {
-   //                   // if we have reached the top we won't have a tab
-   //                   tabbar.setValue(parentTab);
-   //                }
-
-   //                // find if it is in a multiview of a tab
-   //                var nextTab = tabbar.queryView(
-   //                   { view: "scrollview" },
-   //                   "parent"
-   //                );
-   //                // if so then do this again
-   //                if (nextTab) {
-   //                   toggleTab(nextTab, wb);
-   //                }
-   //             }
-
-   //             $$(DataTable.ui.id).attachEvent(
-   //                "onItemClick",
-   //                function (id, e, node) {
-   //                   var item = id;
-
-   //                   if (e == "auto") {
-   //                      // automatically choose the details page if a record matches
-   //                      // later on we can decide if we want to have the choice to select the edit page intead.
-   //                      _logic.changePage(dv, item, detailsPage);
-   //                      toggleTab(detailsTab, this);
-   //                   } else if (e.target.className.indexOf("eye") > -1) {
-   //                      _logic.changePage(dv, item, detailsPage);
-   //                      toggleTab(detailsTab, this);
-   //                   } else if (e.target.className.indexOf("pencil") > -1) {
-   //                      _logic.changePage(dv, item, editPage);
-   //                      toggleTab(editTab, this);
-   //                   } else if (e.target.className.indexOf("trash") > -1) {
-   //                      // don't do anything for delete it is handled elsewhere
-   //                   } else if (!isEditable && detailsPage.length) {
-   //                      _logic.changePage(dv, item, detailsPage);
-   //                      toggleTab(detailsTab, this);
-   //                   } else if (
-   //                      !isEditable &&
-   //                      !detailsPage.length &&
-   //                      editPage.length &&
-   //                      this.config.accessLevel == 2
-   //                   ) {
-   //                      _logic.changePage(dv, item, editPage);
-   //                      toggleTab(editTab, this);
-   //                   }
-   //                }
-   //             );
-
-   //             $$(DataTable.ui.id).attachEvent(
-   //                "onAfterRender",
-   //                function (data) {
-   //                   if ($$(DataTable.ui.id)) {
-   //                      //set cy data
-   //                      $$(DataTable.ui.id).$view.setAttribute(
-   //                         "data-cy",
-   //                         DataTable.idBase
-   //                      );
-   //                      for (const key in ids) {
-   //                         if (Object.hasOwnProperty.call(ids, key)) {
-   //                            let element = ids[key].toString();
-   //                            if ($$(element)) {
-   //                               $$(element).$view.setAttribute(
-   //                                  "data-cy",
-   //                                  element
-   //                               );
-   //                            }
-   //                         }
-   //                      }
-   //                   }
-   //                }
-   //             );
-
-   //             // $$(DataTable.ui.id).attachEvent('onBeforeRender', function (data) {
-   //             //    _logic.clientSideDataFilter();
-   //             // });
-
-   //             $$(DataTable.ui.id).adjust();
-   //          }
-
-   //          // Adjust grid based off Access Level of parent view
-   //          if (accessLevel < 2) {
-   //             $$(ids.buttonMassUpdate).hide();
-   //             $$(ids.buttonDeleteSelected).hide();
-   //          }
-   //       }
-   //    };
-
-   //    // specify height of the grid
-   //    if (this.settings.height) DataTable.ui.height = this.settings.height;
-
-   //    var tableUI = {
-   //       type: "space",
-   //       rows: [
-   //          {
-   //             view: "label",
-   //             label: "Select an object to load.",
-   //             inputWidth: 200,
-   //             align: "center",
-   //          },
-   //          {},
-   //       ],
-   //    };
-   //    if (this.settings.dataviewID != "") {
-   //       tableUI = {
-   //          type: "space",
-   //          padding: 17,
-   //          rows: [
-   //             {
-   //                view: "toolbar",
-   //                id: ids.toolbar,
-   //                hidden: true,
-   //                css: "ab-data-toolbar",
-   //                cols: [
-   //                   {
-   //                      view: "button",
-   //                      id: ids.buttonMassUpdate,
-   //                      css: "webix_transparent",
-   //                      label: L("ab.object.toolbar.massUpdate", "*Edit"),
-   //                      icon: "fa fa-pencil-square-o",
-   //                      type: "icon",
-   //                      disabled: true,
-   //                      autowidth: true,
-   //                      click: function () {
-   //                         _logic.toolbarMassUpdate(this.$view);
-   //                      },
-   //                   },
-   //                   {
-   //                      view: "button",
-   //                      id: ids.buttonDeleteSelected,
-   //                      css: "webix_transparent",
-   //                      label: L("ab.object.toolbar.deleteRecords", "*Delete"),
-   //                      icon: "fa fa-trash",
-   //                      type: "icon",
-   //                      disabled: true,
-   //                      autowidth: true,
-   //                      click: function () {
-   //                         _logic.toolbarDeleteSelected(this.$view);
-   //                      },
-   //                   },
-   //                   {
-   //                      view: "button",
-   //                      id: ids.buttonFilter,
-   //                      css: "webix_transparent",
-   //                      label: L("ab.object.toolbar.filterFields", "*Filters"),
-   //                      icon: "fa fa-filter",
-   //                      type: "icon",
-   //                      autowidth: true,
-   //                      click: function () {
-   //                         _logic.toolbarFilter(this.$view);
-   //                      },
-   //                   },
-   //                   {
-   //                      view: "button",
-   //                      id: ids.buttonSort,
-   //                      css: "webix_transparent",
-   //                      label: L("ab.object.toolbar.sortFields", "*Sort"),
-   //                      icon: "fa fa-sort",
-   //                      type: "icon",
-   //                      autowidth: true,
-   //                      click: function () {
-   //                         _logic.toolbarSort(this.$view);
-   //                      },
-   //                   },
-   //                   {
-   //                      view: "button",
-   //                      id: ids.buttonExport,
-   //                      css: "webix_transparent",
-   //                      label: L("ab.object.toolbar.export", "*Export"),
-   //                      icon: "fa fa-print",
-   //                      type: "icon",
-   //                      autowidth: true,
-   //                      click: function () {
-   //                         _logic.toolbarExport(this.$view);
-   //                      },
-   //                   },
-   //                   /*
-   //             {
-   //                view: view,
-   //                id: ids.buttonExport,
-   //                label: labels.component.export,
-   //                icon: "fa fa-download",
-   //                type: "icon",
-   //                click: function() {
-   //                   _logic.toolbarButtonExport(this.$view);
-   //                }
-   //             }
-   //                          */
-   //                   {},
-   //                   {
-   //                      id: ids.globalSearchToolbar,
-   //                      view: "search",
-   //                      placeholder: "Search...",
-   //                      on: {
-   //                         onTimedKeyPress: () => {
-   //                            let searchText = $$(
-   //                               ids.globalSearchToolbar
-   //                            ).getValue();
-
-   //                            filterUI.searchText(searchText);
-   //                         },
-   //                      },
-   //                   },
-   //                ],
-   //             },
-   //             filterUI.ui,
-   //             DataTable.ui,
-   //          ],
-   //       };
-   //    }
-
-   //    // our internal business logic
-   //    var _logic = {
-   //       callbackCheckboxChecked: (state) => {
-   //          if (state == "enable") {
-   //             _logic.enableUpdateDelete();
-   //          } else {
-   //             _logic.disableUpdateDelete();
-   //          }
-   //       },
-
-   //       callbackSortData: (sort_settings) => {
-   //          let sortRules = sort_settings || [];
-
-   //          $$(ids.buttonSort).define("badge", sortRules.length || null);
-   //          $$(ids.buttonSort).refresh();
-
-   //          let gridElem = $$(DataTable.ui.id);
-   //          Promise.resolve()
-   //             // NOTE: Webix's client sorting does not support dynamic loading.
-   //             // If the data does not be loaded, then load all data.
-   //             .then(() => {
-   //                if (gridElem.data.find({}).length < gridElem.data.count()) {
-   //                   return new Promise((next, bad) => {
-   //                      this.datacollection
-   //                         .reloadData(0, 0)
-   //                         .catch(bad)
-   //                         .then(() => {
-   //                            // wait until the grid component will done to repaint UI
-   //                            setTimeout(() => {
-   //                               next();
-   //                            }, 777);
-   //                         });
-   //                   });
-   //                } else {
-   //                   return Promise.resolve();
-   //                }
-   //             })
-   //             // client sort data
-   //             .then(() => {
-   //                gridElem.sort(PopupSortDataTableComponent.sort);
-   //             });
-   //       },
-
-   //       callbackFilterData: (fnFilter, filterRules) => {
-   //          filterRules = filterRules || [];
-
-   //          if ($$(ids.buttonFilter)) {
-   //             $$(ids.buttonFilter).define("badge", filterRules.length || null);
-   //             $$(ids.buttonFilter).refresh();
-   //          }
-
-   //          Promise.resolve()
-   //             .then(
-   //                () =>
-   //                   new Promise((next, err) => {
-   //                      // if (
-   //                      //    !this.settings ||
-   //                      //    !this.settings.gridFilter ||
-   //                      //    this.settings.gridFilter.filterOption != 3
-   //                      // )
-   //                      //    // Global search
-   //                      //    return next();
-
-   //                      let dc = this.datacollection;
-   //                      if (
-   //                         !dc ||
-   //                         (dc.settings.loadAll &&
-   //                            dc.dataStatus != dc.dataStatusFlag.notInitial)
-   //                      )
-   //                         // Load all already
-   //                         return next();
-
-   //                      let limit = null;
-
-   //                      // limit pull data to reduce time and performance loading
-   //                      // if (dc.__dataCollection.count() > 300) limit = 300;
-
-   //                      // Load all data
-   //                      let gridElem = $$(DataTable.ui.id);
-   //                      if (
-   //                         gridElem.data.find({}).length < gridElem.data.count()
-   //                      ) {
-   //                         dc.reloadData(0, limit)
-   //                            .then(() => {
-   //                               // Should set .loadAll to this data collection ?
-   //                               if (limit == null) dc.settings.loadAll = true;
-
-   //                               next();
-   //                            })
-   //                            .catch(err);
-   //                      } else {
-   //                         next();
-   //                      }
-   //                   })
-   //             )
-   //             // client filter data
-   //             .then(
-   //                () =>
-   //                   new Promise((next, err) => {
-   //                      if (!fnFilter) return next();
-
-   //                      // wait the data are parsed into webix.datatable
-   //                      setTimeout(() => {
-   //                         let table = $$(DataTable.ui.id);
-   //                         table.filter((rowData) => {
-   //                            // rowData is null when is not load from paging
-   //                            if (rowData == null) return false;
-
-   //                            return fnFilter(rowData);
-   //                         });
-
-   //                         if (
-   //                            this.settings.gridFilter.globalFilterPosition ==
-   //                            "single"
-   //                         ) {
-   //                            if (table.count() > 0) {
-   //                               table.show();
-   //                               table.select(table.getFirstId(), false);
-   //                               table.callEvent("onItemClick", [
-   //                                  table.getFirstId(),
-   //                                  "auto",
-   //                                  null,
-   //                               ]);
-   //                            } else {
-   //                               table.hide();
-   //                            }
-   //                         }
-
-   //                         next();
-   //                      }, 500);
-   //                   })
-   //             );
-   //       },
-
-   //       changePage: (dv, rowItem, page) => {
-   //          let rowId = rowItem && rowItem.row ? rowItem.row : null;
-
-   //          // Set cursor to data view
-   //          if (dv) {
-   //             dv.setCursor(rowId);
-   //          }
-
-   //          // Pass settings to link page module
-   //          if (linkPage) {
-   //             linkPage.changePage(page, rowId);
-   //          }
-
-   //          super.changePage(page);
-   //       },
-
-   //       selectRow: (rowData) => {
-   //          if (!$$(DataTable.ui.id)) return;
-
-   //          if (rowData == null) $$(DataTable.ui.id).unselect();
-   //          else if (
-   //             rowData &&
-   //             rowData.id &&
-   //             $$(DataTable.ui.id).exists(rowData.id)
-   //          )
-   //             $$(DataTable.ui.id).select(rowData.id, false);
-   //          else $$(DataTable.ui.id).select(null, false);
-   //       },
-
-   //       /**
-   //        * @function enableUpdateDelete
-   //        *
-   //        * enable the update or delete buttons in the toolbar if there are any items selected
-   //        * we will make this externally accessible so we can call it from within the datatable component
-   //        */
-   //       enableUpdateDelete: function () {
-   //          $$(ids.buttonMassUpdate).enable();
-   //          $$(ids.buttonDeleteSelected).enable();
-   //       },
-
-   //       /**
-   //        * @function enableUpdateDelete
-   //        *
-   //        * disable the update or delete buttons in the toolbar if there no items selected
-   //        * we will make this externally accessible so we can call it from within the datatable component
-   //        */
-   //       disableUpdateDelete: function () {
-   //          $$(ids.buttonMassUpdate).disable();
-   //          $$(ids.buttonDeleteSelected).disable();
-   //       },
-
-   //       toolbarDeleteSelected: function ($view) {
-   //          var deleteTasks = [];
-   //          $$(DataTable.ui.id).data.each(function (obj) {
-   //             if (
-   //                typeof obj != "undefined" &&
-   //                obj.hasOwnProperty("appbuilder_select_item") &&
-   //                obj.appbuilder_select_item == 1
-   //             ) {
-   //                deleteTasks.push(function (next) {
-   //                   CurrentObject.model()
-   //                      .delete(obj.id)
-   //                      .then((response) => {
-   //                         next();
-   //                      }, next);
-   //                });
-   //             }
-   //          });
-
-   //          if (deleteTasks.length > 0) {
-   //             App.AB.Dialog.Confirm({
-   //                title: L("ab.massDelete.title", "*Delete Multiple Records"),
-   //                text: L(
-   //                   "ab.massDelete.description",
-   //                   "*Are you sure you want to delete the selected records?"
-   //                ),
-   //                callback: function (result) {
-   //                   if (result) {
-   //                      async.parallel(deleteTasks, function (err) {
-   //                         if (err) {
-   //                            // TODO : Error message
-   //                         } else {
-   //                            // Anything we need to do after we are done.
-   //                            _logic.disableUpdateDelete();
-   //                         }
-   //                      });
-   //                   }
-   //                },
-   //             });
-   //          } else {
-   //             App.AB.Dialog.Alert({
-   //                title: L("key.no.records.selected", "No Records Selected"),
-   //                text: L(
-   //                   "key.select.one",
-   //                   "You need to select at least one record...did you drink your coffee today?"
-   //                ),
-   //             });
-   //          }
-   //       },
-
-   //       toolbarFilter: ($view) => {
-   //          filterUI.showPopup($view);
-   //       },
-
-   //       toolbarSort: ($view) => {
-   //          PopupSortDataTableComponent.show($view);
-   //       },
-
-   //       toolbarExport: ($view) => {
-   //          exportPopup.show($view);
-   //       },
-
-   //       toolbarMassUpdate: function ($view) {
-   //          PopupMassUpdateComponent.show($view);
-   //       },
-   //    };
-
-   //    var _onShow = () => {
-   //       baseCom.onShow();
-
-   //       if ($$(DataTable.ui.id)) {
-   //          $$(DataTable.ui.id).adjust();
-   //       }
-
-   //       var dv = this.datacollection;
-   //       if (dv) {
-   //          this.eventAdd({
-   //             emitter: dv,
-   //             eventName: "changeCursor",
-   //             listener: _logic.selectRow,
-   //          });
-   //       }
-   //    };
-
-   //    return {
-   //       ui: tableUI,
-   //       init: _init,
-   //       logic: _logic,
-
-   //       onShow: _onShow,
-   //    };
-   // }
+   componentOld(App, objId) {
+      //    let baseCom = super.component(App);
+      //    var L = App.Label;
+      //    var idBase = objId || "ABViewGrid_" + this.id;
+      //    var ids = {
+      //       component: App.unique(idBase + "_component"),
+      //       toolbar: App.unique(idBase + "_toolbar"),
+      //       buttonDeleteSelected: App.unique(idBase + "_deleteSelected"),
+      //       // buttonExport: App.unique('buttonExport'),
+      //       buttonFilter: App.unique(idBase + "_buttonFilter"),
+      //       buttonMassUpdate: App.unique(idBase + "_buttonMassUpdate"),
+      //       buttonSort: App.unique(idBase + "_buttonSort"),
+      //       buttonExport: App.unique(idBase + "_buttonExport"),
+      //       globalSearchToolbar: App.unique(idBase + "_globalSearchToolbar"),
+      //    };
+      //    var labels = {
+      //       common: App.labels,
+      //    };
+      //    var CurrentObject = null;
+      //    var settings = {
+      //       allowDelete: this.settings.allowDelete,
+      //       detailsView: this.settings.detailsPage,
+      //       editView: this.settings.editPage,
+      //       isEditable: this.settings.isEditable,
+      //       massUpdate: this.settings.massUpdate,
+      //       configureHeaders: false,
+      //       summaryColumns: this.settings.summaryColumns,
+      //       countColumns: this.settings.countColumns,
+      //       hideHeader: this.settings.hideHeader,
+      //       labelAsField: this.settings.labelAsField,
+      //       hideButtons: this.settings.hideButtons,
+      //       groupBy: this.settings.groupBy,
+      //       hiddenFields: this.settings.hiddenFields,
+      //       frozenColumnID: this.settings.frozenColumnID || "",
+      //       isTreeDatable: this.datacollection && this.datacollection.isGroup,
+      //    };
+      //    let DataTable = new ABWorkspaceDatatable(App, idBase, settings);
+      //    let PopupMassUpdateComponent = new ABPopupMassUpdate(
+      //       App,
+      //       idBase + "_mass"
+      //    );
+      //    let PopupSortDataTableComponent = new ABPopupSortField(
+      //       App,
+      //       idBase + "_sort"
+      //    );
+      //    let exportPopup = new ABPopupExport(App, idBase + "_export");
+      //    let filterUI = this.filterHelper.component(App, idBase + "_gridfilter");
+      //    this.filterHelper.fromSettings(this.settings.gridFilter);
+      //    let linkPage = this.linkPageHelper.component(
+      //       App,
+      //       idBase + "_gridlinkpage"
+      //    );
+      //    let _init = (options, accessLevel) => {
+      //       if (this.settings.dataviewID != "") {
+      //          DataTable.init(
+      //             {
+      //                onCheckboxChecked: _logic.callbackCheckboxChecked,
+      //             },
+      //             accessLevel
+      //          );
+      //          PopupMassUpdateComponent.init({
+      //             // onSave:_logic.callbackAddFields        // be notified of something...who knows...
+      //          });
+      //          PopupSortDataTableComponent.init({
+      //             onChange: _logic.callbackSortData,
+      //          });
+      //          filterUI.init({
+      //             onFilterData: (fnFilter, filterRules) => {
+      //                _logic.callbackFilterData(fnFilter, filterRules); // be notified when there is a change in the filter
+      //             },
+      //          });
+      //          exportPopup.init({});
+      //          if (
+      //             this.settings.massUpdate ||
+      //             this.settings.isSortable ||
+      //             this.settings.isExportable ||
+      //             (this.settings.gridFilter &&
+      //                this.settings.gridFilter.filterOption &&
+      //                this.settings.gridFilter.userFilterPosition == "toolbar")
+      //          ) {
+      //             $$(ids.toolbar).show();
+      //          }
+      //          if (this.settings.massUpdate == false) {
+      //             $$(ids.buttonMassUpdate).hide();
+      //             $$(ids.buttonDeleteSelected).hide();
+      //          }
+      //          if (this.settings.allowDelete == false) {
+      //             $$(ids.buttonDeleteSelected).hide();
+      //          }
+      //          if (this.settings.gridFilter) {
+      //             if (
+      //                this.settings.gridFilter.filterOption != 1 ||
+      //                this.settings.gridFilter.userFilterPosition != "toolbar"
+      //             ) {
+      //                $$(ids.buttonFilter).hide();
+      //             }
+      //             if (
+      //                this.settings.gridFilter.filterOption == 3 &&
+      //                this.settings.gridFilter.globalFilterPosition == "single"
+      //             ) {
+      //                $$(DataTable.ui.id).hide();
+      //             }
+      //             if (this.settings.gridFilter.isGlobalToolbar)
+      //                $$(ids.globalSearchToolbar).show();
+      //             else $$(ids.globalSearchToolbar).hide();
+      //          }
+      //          if (this.settings.isSortable == false) {
+      //             $$(ids.buttonSort).hide();
+      //          }
+      //          if (this.settings.isExportable == false) {
+      //             $$(ids.buttonExport).hide();
+      //          }
+      //          if (this.settings.hideHeader == true) {
+      //             DataTable.hideHeader();
+      //          }
+      //          var dv = this.datacollection;
+      //          if (dv && dv.datasource) {
+      //             CurrentObject = dv.datasource;
+      //             DataTable.objectLoad(CurrentObject);
+      //             PopupMassUpdateComponent.objectLoad(CurrentObject, DataTable);
+      //             PopupSortDataTableComponent.objectLoad(CurrentObject);
+      //             PopupSortDataTableComponent.setValue(this.settings.sortFields);
+      //             this.filterHelper.objectLoad(CurrentObject);
+      //             this.filterHelper.viewLoad(this);
+      //             exportPopup.objectLoad(CurrentObject);
+      //             exportPopup.dataCollectionLoad(dv);
+      //             exportPopup.setGridComponent($$(DataTable.ui.id));
+      //             exportPopup.setHiddenFields(this.settings.hiddenFields);
+      //             exportPopup.setFilename(this.label);
+      //             DataTable.refreshHeader();
+      //             // link page helper
+      //             linkPage.init({
+      //                view: this,
+      //                datacollection: dv,
+      //             });
+      //             // dv.bind($$(DataTable.ui.id));
+      //             DataTable.datacollectionLoad(dv);
+      //             var editPage = this.settings.editPage;
+      //             var detailsPage = this.settings.detailsPage;
+      //             var editTab = this.settings.editTab;
+      //             var detailsTab = this.settings.detailsTab;
+      //             var isEditable = this.settings.isEditable;
+      //             // we need to recursivly look backwards to toggle tabs into view when a user choosed to select a tab for edit or details views
+      //             function toggleTab(parentTab, wb) {
+      //                // find the tab
+      //                var tab = wb.getTopParentView().queryView({ id: parentTab });
+      //                // if we didn't pass and id we may have passed a domNode
+      //                if (tab == null) {
+      //                   tab = $$(parentTab);
+      //                }
+      //                if (tab == null) return;
+      //                // set the tabbar to to the tab
+      //                var tabbar = tab.getParentView().getParentView();
+      //                if (tabbar == null) return;
+      //                if (tabbar.setValue) {
+      //                   // if we have reached the top we won't have a tab
+      //                   tabbar.setValue(parentTab);
+      //                }
+      //                // find if it is in a multiview of a tab
+      //                var nextTab = tabbar.queryView(
+      //                   { view: "scrollview" },
+      //                   "parent"
+      //                );
+      //                // if so then do this again
+      //                if (nextTab) {
+      //                   toggleTab(nextTab, wb);
+      //                }
+      //             }
+      //             $$(DataTable.ui.id).attachEvent(
+      //                "onItemClick",
+      //                function (id, e, node) {
+      //                   var item = id;
+      //                   if (e == "auto") {
+      //                      // automatically choose the details page if a record matches
+      //                      // later on we can decide if we want to have the choice to select the edit page intead.
+      //                      _logic.changePage(dv, item, detailsPage);
+      //                      toggleTab(detailsTab, this);
+      //                   } else if (e.target.className.indexOf("eye") > -1) {
+      //                      _logic.changePage(dv, item, detailsPage);
+      //                      toggleTab(detailsTab, this);
+      //                   } else if (e.target.className.indexOf("pencil") > -1) {
+      //                      _logic.changePage(dv, item, editPage);
+      //                      toggleTab(editTab, this);
+      //                   } else if (e.target.className.indexOf("trash") > -1) {
+      //                      // don't do anything for delete it is handled elsewhere
+      //                   } else if (!isEditable && detailsPage.length) {
+      //                      _logic.changePage(dv, item, detailsPage);
+      //                      toggleTab(detailsTab, this);
+      //                   } else if (
+      //                      !isEditable &&
+      //                      !detailsPage.length &&
+      //                      editPage.length &&
+      //                      this.config.accessLevel == 2
+      //                   ) {
+      //                      _logic.changePage(dv, item, editPage);
+      //                      toggleTab(editTab, this);
+      //                   }
+      //                }
+      //             );
+      //             $$(DataTable.ui.id).attachEvent(
+      //                "onAfterRender",
+      //                function (data) {
+      //                   if ($$(DataTable.ui.id)) {
+      //                      //set cy data
+      //                      $$(DataTable.ui.id).$view.setAttribute(
+      //                         "data-cy",
+      //                         DataTable.idBase
+      //                      );
+      //                      for (const key in ids) {
+      //                         if (Object.hasOwnProperty.call(ids, key)) {
+      //                            let element = ids[key].toString();
+      //                            if ($$(element)) {
+      //                               $$(element).$view.setAttribute(
+      //                                  "data-cy",
+      //                                  element
+      //                               );
+      //                            }
+      //                         }
+      //                      }
+      //                   }
+      //                }
+      //             );
+      //             // $$(DataTable.ui.id).attachEvent('onBeforeRender', function (data) {
+      //             //    _logic.clientSideDataFilter();
+      //             // });
+      //             $$(DataTable.ui.id).adjust();
+      //          }
+      //          // Adjust grid based off Access Level of parent view
+      //          if (accessLevel < 2) {
+      //             $$(ids.buttonMassUpdate).hide();
+      //             $$(ids.buttonDeleteSelected).hide();
+      //          }
+      //       }
+      //    };
+      //    // specify height of the grid
+      //    if (this.settings.height) DataTable.ui.height = this.settings.height;
+      //    var tableUI = {
+      //       type: "space",
+      //       rows: [
+      //          {
+      //             view: "label",
+      //             label: "Select an object to load.",
+      //             inputWidth: 200,
+      //             align: "center",
+      //          },
+      //          {},
+      //       ],
+      //    };
+      //    if (this.settings.dataviewID != "") {
+      //       tableUI = {
+      //          type: "space",
+      //          padding: 17,
+      //          rows: [
+      //             {
+      //                view: "toolbar",
+      //                id: ids.toolbar,
+      //                hidden: true,
+      //                css: "ab-data-toolbar",
+      //                cols: [
+      //                   {
+      //                      view: "button",
+      //                      id: ids.buttonMassUpdate,
+      //                      css: "webix_transparent",
+      //                      label: L("ab.object.toolbar.massUpdate", "*Edit"),
+      //                      icon: "fa fa-pencil-square-o",
+      //                      type: "icon",
+      //                      disabled: true,
+      //                      autowidth: true,
+      //                      click: function () {
+      //                         _logic.toolbarMassUpdate(this.$view);
+      //                      },
+      //                   },
+      //                   {
+      //                      view: "button",
+      //                      id: ids.buttonDeleteSelected,
+      //                      css: "webix_transparent",
+      //                      label: L("ab.object.toolbar.deleteRecords", "*Delete"),
+      //                      icon: "fa fa-trash",
+      //                      type: "icon",
+      //                      disabled: true,
+      //                      autowidth: true,
+      //                      click: function () {
+      //                         _logic.toolbarDeleteSelected(this.$view);
+      //                      },
+      //                   },
+      //                   {
+      //                      view: "button",
+      //                      id: ids.buttonFilter,
+      //                      css: "webix_transparent",
+      //                      label: L("ab.object.toolbar.filterFields", "*Filters"),
+      //                      icon: "fa fa-filter",
+      //                      type: "icon",
+      //                      autowidth: true,
+      //                      click: function () {
+      //                         _logic.toolbarFilter(this.$view);
+      //                      },
+      //                   },
+      //                   {
+      //                      view: "button",
+      //                      id: ids.buttonSort,
+      //                      css: "webix_transparent",
+      //                      label: L("ab.object.toolbar.sortFields", "*Sort"),
+      //                      icon: "fa fa-sort",
+      //                      type: "icon",
+      //                      autowidth: true,
+      //                      click: function () {
+      //                         _logic.toolbarSort(this.$view);
+      //                      },
+      //                   },
+      //                   {
+      //                      view: "button",
+      //                      id: ids.buttonExport,
+      //                      css: "webix_transparent",
+      //                      label: L("ab.object.toolbar.export", "*Export"),
+      //                      icon: "fa fa-print",
+      //                      type: "icon",
+      //                      autowidth: true,
+      //                      click: function () {
+      //                         _logic.toolbarExport(this.$view);
+      //                      },
+      //                   },
+      //                   /*
+      //             {
+      //                view: view,
+      //                id: ids.buttonExport,
+      //                label: labels.component.export,
+      //                icon: "fa fa-download",
+      //                type: "icon",
+      //                click: function() {
+      //                   _logic.toolbarButtonExport(this.$view);
+      //                }
+      //             }
+      //                          */
+      //                   {},
+      //                   {
+      //                      id: ids.globalSearchToolbar,
+      //                      view: "search",
+      //                      placeholder: "Search...",
+      //                      on: {
+      //                         onTimedKeyPress: () => {
+      //                            let searchText = $$(
+      //                               ids.globalSearchToolbar
+      //                            ).getValue();
+      //                            filterUI.searchText(searchText);
+      //                         },
+      //                      },
+      //                   },
+      //                ],
+      //             },
+      //             filterUI.ui,
+      //             DataTable.ui,
+      //          ],
+      //       };
+      //    }
+      //    // our internal business logic
+      //    var _logic = {
+      //       callbackCheckboxChecked: (state) => {
+      //          if (state == "enable") {
+      //             _logic.enableUpdateDelete();
+      //          } else {
+      //             _logic.disableUpdateDelete();
+      //          }
+      //       },
+      //       callbackSortData: (sort_settings) => {
+      //          let sortRules = sort_settings || [];
+      //          $$(ids.buttonSort).define("badge", sortRules.length || null);
+      //          $$(ids.buttonSort).refresh();
+      //          let gridElem = $$(DataTable.ui.id);
+      //          Promise.resolve()
+      //             // NOTE: Webix's client sorting does not support dynamic loading.
+      //             // If the data does not be loaded, then load all data.
+      //             .then(() => {
+      //                if (gridElem.data.find({}).length < gridElem.data.count()) {
+      //                   return new Promise((next, bad) => {
+      //                      this.datacollection
+      //                         .reloadData(0, 0)
+      //                         .catch(bad)
+      //                         .then(() => {
+      //                            // wait until the grid component will done to repaint UI
+      //                            setTimeout(() => {
+      //                               next();
+      //                            }, 777);
+      //                         });
+      //                   });
+      //                } else {
+      //                   return Promise.resolve();
+      //                }
+      //             })
+      //             // client sort data
+      //             .then(() => {
+      //                gridElem.sort(PopupSortDataTableComponent.sort);
+      //             });
+      //       },
+      //       callbackFilterData: (fnFilter, filterRules) => {
+      //          filterRules = filterRules || [];
+      //          if ($$(ids.buttonFilter)) {
+      //             $$(ids.buttonFilter).define("badge", filterRules.length || null);
+      //             $$(ids.buttonFilter).refresh();
+      //          }
+      //          Promise.resolve()
+      //             .then(
+      //                () =>
+      //                   new Promise((next, err) => {
+      //                      // if (
+      //                      //    !this.settings ||
+      //                      //    !this.settings.gridFilter ||
+      //                      //    this.settings.gridFilter.filterOption != 3
+      //                      // )
+      //                      //    // Global search
+      //                      //    return next();
+      //                      let dc = this.datacollection;
+      //                      if (
+      //                         !dc ||
+      //                         (dc.settings.loadAll &&
+      //                            dc.dataStatus != dc.dataStatusFlag.notInitial)
+      //                      )
+      //                         // Load all already
+      //                         return next();
+      //                      let limit = null;
+      //                      // limit pull data to reduce time and performance loading
+      //                      // if (dc.__dataCollection.count() > 300) limit = 300;
+      //                      // Load all data
+      //                      let gridElem = $$(DataTable.ui.id);
+      //                      if (
+      //                         gridElem.data.find({}).length < gridElem.data.count()
+      //                      ) {
+      //                         dc.reloadData(0, limit)
+      //                            .then(() => {
+      //                               // Should set .loadAll to this data collection ?
+      //                               if (limit == null) dc.settings.loadAll = true;
+      //                               next();
+      //                            })
+      //                            .catch(err);
+      //                      } else {
+      //                         next();
+      //                      }
+      //                   })
+      //             )
+      //             // client filter data
+      //             .then(
+      //                () =>
+      //                   new Promise((next, err) => {
+      //                      if (!fnFilter) return next();
+      //                      // wait the data are parsed into webix.datatable
+      //                      setTimeout(() => {
+      //                         let table = $$(DataTable.ui.id);
+      //                         table.filter((rowData) => {
+      //                            // rowData is null when is not load from paging
+      //                            if (rowData == null) return false;
+      //                            return fnFilter(rowData);
+      //                         });
+      //                         if (
+      //                            this.settings.gridFilter.globalFilterPosition ==
+      //                            "single"
+      //                         ) {
+      //                            if (table.count() > 0) {
+      //                               table.show();
+      //                               table.select(table.getFirstId(), false);
+      //                               table.callEvent("onItemClick", [
+      //                                  table.getFirstId(),
+      //                                  "auto",
+      //                                  null,
+      //                               ]);
+      //                            } else {
+      //                               table.hide();
+      //                            }
+      //                         }
+      //                         next();
+      //                      }, 500);
+      //                   })
+      //             );
+      //       },
+      //       changePage: (dv, rowItem, page) => {
+      //          let rowId = rowItem && rowItem.row ? rowItem.row : null;
+      //          // Set cursor to data view
+      //          if (dv) {
+      //             dv.setCursor(rowId);
+      //          }
+      //          // Pass settings to link page module
+      //          if (linkPage) {
+      //             linkPage.changePage(page, rowId);
+      //          }
+      //          super.changePage(page);
+      //       },
+      //       selectRow: (rowData) => {
+      //          if (!$$(DataTable.ui.id)) return;
+      //          if (rowData == null) $$(DataTable.ui.id).unselect();
+      //          else if (
+      //             rowData &&
+      //             rowData.id &&
+      //             $$(DataTable.ui.id).exists(rowData.id)
+      //          )
+      //             $$(DataTable.ui.id).select(rowData.id, false);
+      //          else $$(DataTable.ui.id).select(null, false);
+      //       },
+      //       /**
+      //        * @function enableUpdateDelete
+      //        *
+      //        * enable the update or delete buttons in the toolbar if there are any items selected
+      //        * we will make this externally accessible so we can call it from within the datatable component
+      //        */
+      //       enableUpdateDelete: function () {
+      //          $$(ids.buttonMassUpdate).enable();
+      //          $$(ids.buttonDeleteSelected).enable();
+      //       },
+      //       /**
+      //        * @function enableUpdateDelete
+      //        *
+      //        * disable the update or delete buttons in the toolbar if there no items selected
+      //        * we will make this externally accessible so we can call it from within the datatable component
+      //        */
+      //       disableUpdateDelete: function () {
+      //          $$(ids.buttonMassUpdate).disable();
+      //          $$(ids.buttonDeleteSelected).disable();
+      //       },
+      //       toolbarDeleteSelected: function ($view) {
+      //          var deleteTasks = [];
+      //          $$(DataTable.ui.id).data.each(function (obj) {
+      //             if (
+      //                typeof obj != "undefined" &&
+      //                obj.hasOwnProperty("appbuilder_select_item") &&
+      //                obj.appbuilder_select_item == 1
+      //             ) {
+      //                deleteTasks.push(function (next) {
+      //                   CurrentObject.model()
+      //                      .delete(obj.id)
+      //                      .then((response) => {
+      //                         next();
+      //                      }, next);
+      //                });
+      //             }
+      //          });
+      //          if (deleteTasks.length > 0) {
+      //             App.AB.Dialog.Confirm({
+      //                title: L("ab.massDelete.title", "*Delete Multiple Records"),
+      //                text: L(
+      //                   "ab.massDelete.description",
+      //                   "*Are you sure you want to delete the selected records?"
+      //                ),
+      //                callback: function (result) {
+      //                   if (result) {
+      //                      async.parallel(deleteTasks, function (err) {
+      //                         if (err) {
+      //                            // TODO : Error message
+      //                         } else {
+      //                            // Anything we need to do after we are done.
+      //                            _logic.disableUpdateDelete();
+      //                         }
+      //                      });
+      //                   }
+      //                },
+      //             });
+      //          } else {
+      //             App.AB.Dialog.Alert({
+      //                title: L("key.no.records.selected", "No Records Selected"),
+      //                text: L(
+      //                   "key.select.one",
+      //                   "You need to select at least one record...did you drink your coffee today?"
+      //                ),
+      //             });
+      //          }
+      //       },
+      //       toolbarFilter: ($view) => {
+      //          filterUI.showPopup($view);
+      //       },
+      //       toolbarSort: ($view) => {
+      //          PopupSortDataTableComponent.show($view);
+      //       },
+      //       toolbarExport: ($view) => {
+      //          exportPopup.show($view);
+      //       },
+      //       toolbarMassUpdate: function ($view) {
+      //          PopupMassUpdateComponent.show($view);
+      //       },
+      //    };
+      //    var _onShow = () => {
+      //       baseCom.onShow();
+      //       if ($$(DataTable.ui.id)) {
+      //          $$(DataTable.ui.id).adjust();
+      //       }
+      //       var dv = this.datacollection;
+      //       if (dv) {
+      //          this.eventAdd({
+      //             emitter: dv,
+      //             eventName: "changeCursor",
+      //             listener: _logic.selectRow,
+      //          });
+      //       }
+      //    };
+      //    return {
+      //       ui: tableUI,
+      //       init: _init,
+      //       logic: _logic,
+      //       onShow: _onShow,
+      //    };
+   }
 
    component(v1App = false) {
       var component = new ABViewGridComponent(this);

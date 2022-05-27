@@ -69,13 +69,17 @@ class ABViewFormUIComponent extends ABViewComponent {
                      if (!node) return;
                      node.setAttribute(
                         "data-cy",
-                        `${field.key} options ${option.id} ${field.id} ${form.id}`
+                        `${field.key} options ${option.id} ${field.id} ${
+                           form ? form.id : "nf"
+                        }`
                      );
                   });
                }
                this.getInputNode().setAttribute(
                   "data-cy",
-                  `${field.key} ${field.columnName} ${field.id} ${form.id}`
+                  `${field.key} ${field.columnName} ${field.id} ${
+                     form ? form.id : "nf"
+                  }`
                );
             },
          };
