@@ -84,6 +84,7 @@ class ABViewContainerComponent extends ABViewComponent {
       var rows = [];
       var curRowIndex;
       var curColIndex;
+      var componentMap = {};
 
       views.forEach((v) => {
          let component = v.component(/* App, idPrefix */);
@@ -124,10 +125,19 @@ class ABViewContainerComponent extends ABViewComponent {
          }
 
          // Get the last row
-         var curRow = rows[rows.length - 1];
+         let rowIndx = rows.length - 1;
+         var curRow = rows[rowIndx];
 
          var newPos = v.position.x || 0;
          var getGrav = 1;
+
+         let mapKey = `${rowIndx}-${newPos}`;
+         if (componentMap[mapKey]) {
+            console.error(
+               `Component[${component.ids.component}] is overwriting component[${componentMap[mapKey].ids.component}]. <-- Reorder them to fix.`
+            );
+         }
+         componentMap[mapKey] = component;
 
          if (curRow.cols[newPos] && curRow.cols[newPos].gravity) {
             getGrav = curRow.cols[newPos].gravity;
