@@ -301,9 +301,9 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
       this.rowFilterForm.on("save", this._handler_rowFilterFormChanged);
 
       $$(ids.filterPanel)?.hide();
-      $$(ids.buttonAddfilter).hide();
-      $$(ids.filterMenutoolbar).hide();
-      $$(ids.globalFilterFormContainer).hide();
+      $$(ids.buttonAddfilter)?.hide();
+      $$(ids.filterMenutoolbar)?.hide();
+      $$(ids.globalFilterFormContainer)?.hide();
 
       switch (this.settings.filterOption) {
          case 0:
@@ -311,16 +311,16 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
          case 1:
             switch (this.settings.userFilterPosition) {
                case "form":
-                  $$(ids.buttonAddfilter).show();
-                  $$(ids.filterPanel).show();
+                  $$(ids.buttonAddfilter)?.show();
+                  $$(ids.filterPanel)?.show();
                   break;
                case "toolbar":
-                  $$(ids.filterPanel).hide();
+                  $$(ids.filterPanel)?.hide();
                   break;
             }
             break;
          case 2:
-            $$(ids.filterPanel).show();
+            $$(ids.filterPanel)?.show();
             var $filterMenutoolbar = $$(ids.filterMenutoolbar);
             if ($filterMenutoolbar) {
                $filterMenutoolbar.show();
@@ -349,8 +349,8 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
             }
             break;
          case 3:
-            $$(ids.globalFilterFormContainer).show();
-            $$(ids.filterPanel).show();
+            $$(ids.globalFilterFormContainer)?.show();
+            $$(ids.filterPanel)?.show();
             break;
       }
    }
