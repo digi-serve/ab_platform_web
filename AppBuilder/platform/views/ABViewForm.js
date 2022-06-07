@@ -1406,6 +1406,13 @@ module.exports = class ABViewForm extends ABViewFormCore {
       // get update data
       var formVals = this.getFormValues(formView, obj, dv.datacollectionLink);
 
+      // Set value of calculate fields
+      obj.fields((f) => f.key == "calculate").forEach((f) => {
+         if (formVals[f.columnName] == null) {
+            formVals[f.columnName] = f.format(formVals);
+         }
+      });
+
       // wait for our Record Rules to be ready before we continue.
       await this.recordRulesReady();
 
