@@ -35,9 +35,9 @@ class PortalWorkUserQRWindow extends ClassUI {
                },
                {
                   view: "button",
-                  autowidth: true,
                   type: "icon",
                   css: "webix_transparent",
+                  width: 40,
                   icon: "fa fa-repeat",
                   click: () => {
                      console.log("refresh");
@@ -51,9 +51,9 @@ class PortalWorkUserQRWindow extends ClassUI {
                },
                {
                   view: "button",
-                  autowidth: true,
                   type: "icon",
                   css: "webix_transparent",
+                  width: 40,
                   icon: "nomargin fa fa-times",
                   click: () => {
                      $$(this.id).hide();
@@ -67,12 +67,14 @@ class PortalWorkUserQRWindow extends ClassUI {
             ],
          },
          body: {
+            css: { "text-align": "center" },
             rows: [
+               { height: 10 },
                {
                   borderless: true,
-                  template: L(
+                  template: `<span style="font-size:14px;font-weight:500;">${L(
                      "Use your phone's camera app to scan this QR code, and it will open a webpage to the conneXted mobile app. You only need to scan the code for the first time."
-                  ),
+                  )}</span>`,
                },
                {
                   id: "qr-code-image",
@@ -85,9 +87,9 @@ class PortalWorkUserQRWindow extends ClassUI {
 
                {
                   borderless: true,
-                  template: L(
+                  template: `<div style="font-size:14px;font-weight:500;font-weight:500;">${L(
                      "This code can only be used once. It will expire after 7 days."
-                  ),
+                  )}</div>`,
                },
             ],
          },

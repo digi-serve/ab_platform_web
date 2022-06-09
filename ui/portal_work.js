@@ -217,7 +217,6 @@ class PortalWork extends ClassUI {
          { id: "user_logout", label: L("Logout"), icon: "ban" },
       ];
 
-      debugger;
       // Only add the QR Code option if the relay service is enabled
       const { relay } = AB.Config.siteConfig();
       if (relay) {
