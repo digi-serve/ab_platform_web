@@ -214,15 +214,20 @@ class PortalWork extends ClassUI {
             label: L("Switcheroo"),
             icon: "user-secret",
          },
-         {
-            id: "user_qr",
-            label: L("Connect Mobile App"),
-            icon: "qrcode",
-         },
          { id: "user_logout", label: L("Logout"), icon: "ban" },
       ];
 
       debugger;
+      // Only add the QR Code option if the relay service is enabled
+      const { relay } = AB.Config.siteConfig();
+      if (relay) {
+         // Insert at userMenuOptions[2] so logout is still last
+         userMenuOptions.splice(2, 0, {
+            id: "user_qr",
+            label: L("Connect Mobile App"),
+            icon: "qrcode",
+         });
+      }
 
       // This is the User popup menu that opens when you click the user icon in the main nav
       webix.ui({
