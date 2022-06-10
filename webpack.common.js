@@ -7,7 +7,7 @@ module.exports = {
       app: path.join(APP, "index.js"),
    },
    output: {
-      path: path.join(APP, "..", "..", "assets"),
+      path: path.join(APP, "..", "web", "assets"),
       filename: "[name].js",
    },
    module: {
@@ -25,7 +25,7 @@ module.exports = {
    plugins: [],
    resolve: {
       alias: {
-         assets: path.resolve(__dirname, "..", "..", "assets"),
+         assets: path.resolve(__dirname, "..", "web", "assets"),
       },
    },
 };

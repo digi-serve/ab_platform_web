@@ -7,7 +7,7 @@
       "lint": "eslint AppBuilder/. init/. resources/. ui/. webix_custom_components/. --fix --max-warnings=0 --report-unused-disable-directives && echo '✔  Your .js files look good.'",
       "test": "mocha -r esm test/**/*.test.js",
       "build": "webpack-cli --config webpack.prod.js --progress",
-      "build:update": "node_modules/.bin/webpack-cli",
+      "build:update": "webpack-cli --config webpack.prod.js",
       "watch": "webpack-cli --config webpack.dev.js --watch --progress",
       "break": "node --inspect-brk=9229 ./node_modules/.bin/webpack-cli --watch --progress"
    },
