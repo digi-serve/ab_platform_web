@@ -3,6 +3,7 @@ import ClassUIPage from "./ClassUIPage.js";
 
 import PortalWorkInbox from "./portal_work_inbox.js";
 import PortalWorkInboxTaskWindow from "./portal_work_inbox_taskWindow.js";
+import PortalWorkUserQRWindow from "./portal_work_user_qr_window.js";
 
 class PortalWork extends ClassUI {
    constructor() {
@@ -206,6 +207,27 @@ class PortalWork extends ClassUI {
       $$("abSidebarMenu").define("data", menu_data);
       this.sidebarResize();
 
+      const userMenuOptions = [
+         { id: "user_profile", label: L("User Profile"), icon: "user" },
+         {
+            id: "user_switcheroo",
+            label: L("Switcheroo"),
+            icon: "user-secret",
+         },
+         { id: "user_logout", label: L("Logout"), icon: "ban" },
+      ];
+
+      // Only add the QR Code option if the relay service is enabled
+      const { relay } = AB.Config.siteConfig();
+      if (relay) {
+         // Insert at userMenuOptions[2] so logout is still last
+         userMenuOptions.splice(2, 0, {
+            id: "user_qr",
+            label: L("Connect Mobile App"),
+            icon: "qrcode",
+         });
+      }
+
       // This is the User popup menu that opens when you click the user icon in the main nav
       webix.ui({
          view: "popup",
@@ -213,34 +235,30 @@ class PortalWork extends ClassUI {
          width: 150,
          body: {
             view: "list",
-            data: [
-               { id: "user_profile", label: L("User Profile"), icon: "user" },
-               {
-                  id: "user_switcheroo",
-                  label: L("Switcheroo"),
-                  icon: "user-secret",
-               },
-               { id: "user_logout", label: L("Logout"), icon: "ban" },
-            ],
+            data: userMenuOptions,
             template: "<i class='fa-fw fa fa-#icon#'></i> #label#",
             autoheight: true,
             select: true,
             on: {
                onItemClick: function (id /*, event */) {
-                  if (id == "user_logout") {
-                     // NOTE: "this" here is the popup window:
-                     AB.Account.logout();
-                  } else {
-                     var item = this.getItem(id);
-                     webix.message(
-                        "Menu item: <i>" +
-                           item.label +
-                           "</i> <br/>Menu ID: <i>" +
-                           item.id +
-                           "</i>"
-                     );
+                  switch (id) {
+                     case "user_logout":
+                        AB.Account.logout();
+                        break;
+                     case "user_qr":
+                        PortalWorkUserQRWindow.init(AB);
+                        PortalWorkUserQRWindow.show();
+                        break;
+                     default:
+                        var item = this.getItem(id);
+                        webix.message(
+                           "Menu item: <i>" +
+                              item.label +
+                              "</i> <br/>Menu ID: <i>" +
+                              item.id +
+                              "</i>"
+                        );
                   }
-
                   $$("userMenu").hide();
                },
 
