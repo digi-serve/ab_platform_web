@@ -32,7 +32,7 @@ function _toInternal(cond, fields = []) {
       //    ],
       // }
       let field = fields.filter((f) => f.id == cond.key)[0];
-      cond.field = field?.columnName;
+      cond.field = field?.columnName ?? field?.id;
       cond.condition = {
          type: cond.rule,
          filter: cond.value,
@@ -72,7 +72,8 @@ function _toExternal(cond, fields = []) {
    if (!cond) return;
    if (cond.field) {
       let field = fields.filter((f) => f.columnName == cond.field)[0];
-      cond.key = field?.id;
+      cond.alias = alias || undefined;
+      cond.key = field?.id || cond.field;
       cond.condition = cond.condition || {};
       cond.rule = cond.condition.type;
 
@@ -81,7 +82,18 @@ function _toExternal(cond, fields = []) {
       if (cond.condition.filter && values.indexOf(cond.condition.filter) < 0)
          values.push(cond.condition.filter);
 
-      cond.value = values.join(",");
+      cond.value = values
+         .map((v) => {
+            // Convert date format
+            if (field && (field.key == "date" || field.key == "datetime")) {
+               return field.exportValue(v);
+            } else if (v instanceof Date) {
+               return v.toISOString();
+            } else {
+               return v;
+            }
+         })
+         .join(",");
 
       delete cond.field;
       delete cond.type;
@@ -218,6 +230,8 @@ module.exports = class FilterComplex extends FilterComplexCore {
       const el = $$(this.ids.querybuilder);
       if (el) {
          el.getState().$observe("value", (v) => {
+            if (this.__blockOnChange) return false;
+
             this.emit("changed", this.getValue());
          });
       }
@@ -335,7 +349,9 @@ module.exports = class FilterComplex extends FilterComplexCore {
 
          _toInternal(qbSettings, this._Fields);
 
+         this.__blockOnChange = true;
          el.define("value", qbSettings);
+         this.__blockOnChange = false;
       }
    }
 
@@ -430,6 +446,15 @@ module.exports = class FilterComplex extends FilterComplexCore {
    uiValue(fieldColumnName) {
       let result;
 
+      // Special case: this_object
+      if (fieldColumnName == "this_object") {
+         return []
+            .concat(this.uiQueryValue("this_object"))
+            .concat(this.uiDataCollectionValue("this_object"))
+            .concat(this.uiCustomValue("this_object"))
+            .concat(this.uiContextValue("this_object", "uuid"));
+      }
+
       let field = (this._Fields || []).filter(
          (f) => f.columnName == fieldColumnName
       )[0];
@@ -442,7 +467,8 @@ module.exports = class FilterComplex extends FilterComplexCore {
             result = []
                .concat(this.uiQueryValue(field))
                .concat(this.uiUserValue(field))
-               .concat(this.uiDataCollectionValue(field));
+               .concat(this.uiDataCollectionValue(field))
+               .concat(this.uiContextValue(field));
             break;
          case "date":
          case "datetime":
@@ -481,6 +507,8 @@ module.exports = class FilterComplex extends FilterComplexCore {
       if (this._isRecordRule) {
          result = (result || []).concat(this.uiRecordRuleValue(field));
       }
+
+      result = (result || []).concat(this.uiCustomValue(field));
 
       return result;
    }
@@ -532,7 +560,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
          this._QueryFields?.filter((f) => f.id == field.id).length > 0;
 
       // populate the list of Queries for this_object:
-      if (field.id == "this_object" && this._Object) {
+      if (field == "this_object" && this._Object) {
          options = this._Queries?.filter((q) =>
             q.canFilterObject(this._Object)
          );
@@ -594,7 +622,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
 
    uiDataCollectionValue(field) {
       let linkObjectId;
-      if (field.id == "this_object" && this._Object) {
+      if (field == "this_object" && this._Object) {
          linkObjectId = this._Object.id;
       } else {
          linkObjectId = field?.settings?.linkObject;
@@ -647,10 +675,22 @@ module.exports = class FilterComplex extends FilterComplexCore {
    }
 
    uiContextValue(field, processFieldKey = null) {
-      let processField = (this._ProcessFields ?? []).filter(
-         (pField) =>
-            pField?.field?.id == field?.id || pField.key == processFieldKey
-      )[0];
+      let processField = (this._ProcessFields || []).filter((pField) => {
+         if (!pField) return false;
+
+         if (pField.field) {
+            return pField.field.id == field.id;
+         } else if (pField.key) {
+            // uuid
+            let processFieldId = pField.key.split(".").pop();
+            return (
+               processFieldId == field.id ||
+               processFieldId == field.key ||
+               processFieldId == processFieldKey ||
+               pField.key == processFieldKey
+            );
+         }
+      })[0];
 
       if (!processField) return [];
 
@@ -672,6 +712,12 @@ module.exports = class FilterComplex extends FilterComplexCore {
       ];
    }
 
+   uiCustomValue(field) {
+      let customOptions = this._customOptions || {};
+      let options = customOptions[field.id || field] || {};
+      return options.values || [];
+   }
+
    popUp(...options) {
       if (!this.myPopup) {
          let ui = {
@@ -687,7 +733,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
       }
 
       if (this._Fields) {
-         this.fieldsLoad(this._Fields);
+         this.fieldsLoad(this._Fields, this._Object);
       }
 
       // NOTE: do this, before the .setValue() operation, as we need to have
@@ -699,5 +745,19 @@ module.exports = class FilterComplex extends FilterComplexCore {
       }
 
       this.myPopup.show(...options);
+   }
+
+   /**
+    * @method addCustomOption
+    *
+    * @param {string|uuid} fieldId
+    * @param {Object} options - {
+    *                               conditions: [],
+    *                               values: []
+    *                           }
+    */
+   addCustomOption(fieldId, options = {}) {
+      this._customOptions = this._customOptions || {};
+      this._customOptions[fieldId] = options;
    }
 };
