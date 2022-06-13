@@ -115,44 +115,16 @@ class PortalWorkInbox extends ClassUI {
 
       webix.ui(this.ui());
 
-      var allAppAccordions = {};
+      this.allAppAccordions = {};
       // {hash}  { ABApplication.id : ClassAccordionEntry }
       // A lookup of all our ClassAccordionEntry(s) by their app.id
 
       //
       // Prepare our Hashes:
       //
-      var lang = this.AB.Account.language();
+      this.lang = this.AB.Account.language();
       (this.AB.Config.inboxMetaConfig() || []).forEach((app) => {
-         // convert config info with current language labels
-         this.translate(app, lang);
-
-         var appAccordion = new ClassAccordionEntry(app);
-         $$("inbox_accordion").addView(appAccordion.ui());
-         allAppAccordions[app.id] = appAccordion;
-         appAccordion.on("showTasks", (...params) => {
-            // showTasks
-            // indicates when the user has selected a group of Accordian Tasks
-            // to process.
-            PortalWorkInboxTaskWindow.showTasks(...params);
-         });
-
-         appAccordion.on("item.processed", (uuid) => {
-            // item.processed
-            // indicates when the specified form has been updated on the server.
-            PortalWorkInboxTaskWindow.clearTask(uuid);
-            this.entries = this.entries.filter((e) => e.uuid != uuid);
-            if (this.entries.length == 0) {
-               $$("emptyInbox").show();
-            }
-            this.emit("updated");
-         });
-
-         (app.processes || []).forEach((p) => {
-            this.translate(p, lang);
-            this.processLookupHash[p.id] = p.label;
-            this.appLookupHash[p.id] = app.id;
-         });
+         this.createAccordian(app);
       });
 
       this.entries = this.AB.Config.inboxConfig() || [];
@@ -162,17 +134,14 @@ class PortalWorkInbox extends ClassUI {
       var allInits = [];
 
       for (var index in this.appAccordionLists) {
-         var processes = [];
-         for (var process in this.appAccordionLists[index]) {
-            processes.push(this.appAccordionLists[index][process]);
-         }
+         const processes = this.getProcessList(index);
 
-         var accordion = allAppAccordions[index]
-            ? allAppAccordions[index].unitList()
+         const accordion = this.allAppAccordions[index]
+            ? this.allAppAccordions[index].unitList()
             : null;
          if (accordion) {
             allInits.push(
-               allAppAccordions[index].init(this.AB).then(() => {
+               this.allAppAccordions[index].init(this.AB).then(() => {
                   accordion.parse(processes);
                   accordion.show();
                })
@@ -194,24 +163,31 @@ class PortalWorkInbox extends ClassUI {
       return Promise.all(allInits).then(() => {
          this.emit("updated");
 
-         this.AB.on("ab.inbox.create", (item) => {
-            var alreadyThere = this.entries.find((e) => e.uuid == item.uuid);
+         this.AB.on("ab.inbox.create", async (item) => {
+            const alreadyThere = this.entries.find((e) => e.uuid == item.uuid);
             if (!alreadyThere) {
                this.entries.push(item);
+               // If we can't find the app's accordion in the list then add it
+               const createNew = !this.appLookupHash[item.definition];
+               if (createNew) {
+                  const [app] = await this.AB.Network.post({
+                     url: "/process/inbox/meta",
+                     data: { ids: [item.definition] },
+                  });
+                  this.createAccordian(app);
+               }
+               const appId = this.appLookupHash[item.definition];
+               const accordion = this.allAppAccordions[appId];
                this.addItem(item);
 
-               var appId = this.appLookupHash[item.definition];
-               var accordion = allAppAccordions[appId];
-               if (accordion) {
-                  // ensure a new accordion has been .init()
-                  accordion.init(this.AB);
-                  var ul = accordion.unitList();
-                  if (ul) {
-                     ul.parse(this.appAccordionLists[appId][item.definition]);
-                     ul.refresh();
-                  }
-                  accordion.show();
-               }
+               if (createNew) await accordion.init(this.AB);
+
+               const unitList = accordion.unitList();
+               unitList.parse(this.appAccordionLists[appId][item.definition]);
+               unitList.show();
+               unitList.refresh();
+
+               accordion.show();
             }
             this.emit("updated");
          });
@@ -227,6 +203,48 @@ class PortalWorkInbox extends ClassUI {
             }
          );
       });
+   }
+
+   createAccordian(app) {
+      // convert config info with current language labels
+      this.translate(app, this.lang);
+
+      const appAccordion = new ClassAccordionEntry(app);
+      $$("inbox_accordion").addView(appAccordion.ui());
+      this.allAppAccordions[app.id] = appAccordion;
+      appAccordion.on("showTasks", (...params) => {
+         // showTasks
+         // indicates when the user has selected a group of Accordian Tasks
+         // to process.
+         PortalWorkInboxTaskWindow.showTasks(...params);
+      });
+
+      appAccordion.on("item.processed", (uuid) => {
+         // item.processed
+         // indicates when the specified form has been updated on the server.
+         PortalWorkInboxTaskWindow.clearTask(uuid);
+         this.entries = this.entries.filter((e) => e.uuid != uuid);
+         if (this.entries.length == 0) {
+            $$("emptyInbox").show();
+         }
+         this.emit("updated");
+      });
+
+      (app.processes || []).forEach((p) => {
+         this.translate(p, this.lang);
+         this.processLookupHash[p.id] = p.label;
+         this.appLookupHash[p.id] = app.id;
+      });
+
+      return appAccordion;
+   }
+
+   getProcessList(index) {
+      const processes = [];
+      for (const process in this.appAccordionLists[index]) {
+         processes.push(this.appAccordionLists[index][process]);
+      }
+      return processes;
    }
 
    addItem(item) {
