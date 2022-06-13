@@ -140,12 +140,12 @@ class PortalWorkInbox extends ClassUI {
             ? this.allAppAccordions[index].unitList()
             : null;
          if (accordion) {
-            allInits.push(
-               this.allAppAccordions[index].init(this.AB).then(() => {
-                  accordion.parse(processes);
-                  accordion.show();
-               })
-            );
+            const init = async () => {
+               await this.allAppAccordions[index].init(this.AB);
+               accordion.parse(processes);
+               accordion.show();
+            };
+            allInits.push(init());
          } else {
             this.AB.notify.developer(
                new Error(
