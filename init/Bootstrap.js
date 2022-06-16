@@ -28,6 +28,7 @@ import FormIOBuilderCSS from "../node_modules/formiojs/dist/formio.builder.min.c
 
 import initConfig from "../init/initConfig.js";
 import initDiv from "../init/initDiv.js";
+import initDefinitions from "../init/initDefinitions.js";
 // import initResources from "../init/initResources.js";
 
 // import JSZipUtils from "jszip-utils/dist/jszip-utils.min.js";
@@ -91,6 +92,13 @@ class Bootstrap extends EventEmitter {
                // 2) Request the User's Configuration Information from the
                //    server.
                return initConfig.init(this);
+               //load the definitions for current user
+            })
+            // load definitions for current user
+            .then(async () => {
+               if (Config.userConfig()) {
+                  await initDefinitions.init(this);
+               }
             })
 
             .then(() => {

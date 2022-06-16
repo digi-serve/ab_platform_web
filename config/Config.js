@@ -97,7 +97,7 @@ class Config {
     *          { ABDefinition.id : {ABDefinition} }  hash of definitions.
     */
    definitions() {
-      return this._config.definitions;
+      return window.definitions;
    }
 
    error(/* ...args */) {
