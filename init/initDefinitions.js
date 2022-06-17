@@ -15,7 +15,7 @@ export default {
       const res = await response.json();
       const updated = res.data;
 
-      const loadDefinitions = await new Promise((resolve, reject) => {
+      await new Promise((resolve, reject) => {
          var cb = () => resolve();
          // Adding the script tag to the head as suggested before
          const head = document.head;
