@@ -269,7 +269,6 @@ class PortalAccessLevelManager extends ClassUI {
                }
             });
          });
-         existingRoles.push("b966e3ef-c71a-44a2-9a75-3ba8c0dbc811");
          existingRoles.forEach((role) => {
             this.buildAccessAccordion(role);
          });
