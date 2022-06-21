@@ -4,6 +4,7 @@ import ClassUIPage from "./ClassUIPage.js";
 import PortalWorkInbox from "./portal_work_inbox.js";
 import PortalWorkInboxTaskWindow from "./portal_work_inbox_taskWindow.js";
 import PortalWorkUserQRWindow from "./portal_work_user_qr_window.js";
+import PortalAccessLevelManager from "./portal_access_level_manager.js";
 
 class PortalWork extends ClassUI {
    constructor() {
@@ -95,6 +96,21 @@ class PortalWork extends ClassUI {
                      click: () => {
                         PortalWorkInbox.show();
                      },
+                     on: {
+                        onAfterRender() {
+                           ClassUI.CYPRESS_REF(this);
+                        },
+                     },
+                  },
+                  {
+                     id: "settings_icon",
+                     view: "button",
+                     type: "icon",
+                     icon: "fa fa-cog fa-lg no-margin",
+                     width: 40,
+                     hidden: true,
+                     popup: "settingsMenu",
+                     /* Look at this.refreshSettingsMenu() for menu options and actions */
                      on: {
                         onAfterRender() {
                            ClassUI.CYPRESS_REF(this);
@@ -240,7 +256,7 @@ class PortalWork extends ClassUI {
             autoheight: true,
             select: true,
             on: {
-               onItemClick: function (id /*, event */) {
+               onItemClick: (id) => {
                   switch (id) {
                      case "user_logout":
                         AB.Account.logout();
@@ -250,13 +266,14 @@ class PortalWork extends ClassUI {
                         PortalWorkUserQRWindow.show();
                         break;
                      default:
-                        var item = this.getItem(id);
+                        //eslint-disable-next-line
+                        const item = userMenuOptions.filter(
+                           (o) => o.id == id
+                        )[0];
                         webix.message(
-                           "Menu item: <i>" +
-                              item.label +
-                              "</i> <br/>Menu ID: <i>" +
-                              item.id +
-                              "</i>"
+                           `<b>Not yet implemented</b><br/>
+                           Menu item:<i>${item.label}</i><br/>
+                           Menu ID:<i>${item.id}</i>`
                         );
                   }
                   $$("userMenu").hide();
@@ -449,6 +466,7 @@ class PortalWork extends ClassUI {
             });
          })
          .then(() => {
+            this.refreshSettingsMenu();
             //
             // Step 6: Initialize the Inbox Items
             //
@@ -529,10 +547,13 @@ class PortalWork extends ClassUI {
       var activePageID = null;
       // {string}
       // The ABViewPage.id of the active Page for the current Application.
-
-      // remember the current Application has been selected
-      this.AppState.lastSelectedApp = row.abApplication.id;
-      this.saveState();
+      if (this.AppState.lastSelectedApp != row.abApplication.id) {
+         // remember the current Application has been selected
+         this.AppState.lastSelectedApp = row.abApplication.id;
+         this.saveState();
+         // Need to Settings Menu if different for each app
+         this.refreshSettingsMenu();
+      }
 
       // if the current Application already has an Active State Page marked
       // we don't want the first page:
@@ -707,6 +728,108 @@ class PortalWork extends ClassUI {
          //    },
          // },
       };
+   }
+
+   refreshSettingsMenu() {
+      const settingsMenuOptions = [];
+      const { uuid, roles } = this.AB.Config.userConfig();
+
+      const application = this.AB.applicationByID(
+         this.AppState.lastSelectedApp
+      );
+      if (!application) return $$("settings_icon").hide();
+      if (application.isAccessManaged) {
+         let isManager = false;
+         if (
+            application.accessManagers.useAccount == "1" &&
+            application.accessManagers.account.indexOf(uuid) > -1
+         ) {
+            isManager = true;
+         }
+         if (!isManager && application.accessManagers.useRole == "1") {
+            roles.forEach((role) => {
+               if (application.accessManagers.role.indexOf(role.uuid) > -1) {
+                  isManager = true;
+               }
+            });
+         }
+         if (isManager) {
+            settingsMenuOptions.push({
+               id: "accessLevel",
+               label: this.label("Access Manager"),
+               icon: "lock",
+            });
+         }
+      }
+      if (application.isTranslationManaged) {
+         let isManager = false;
+         if (
+            application.translationManagers.useAccount == "1" &&
+            application.translationManagers.account.indexOf(uuid) > -1
+         ) {
+            isManager = true;
+         }
+         if (!isManager && application.translationManagers.useRole == "1") {
+            roles.forEach((role) => {
+               if (
+                  application.translationManagers.role.indexOf(role.uuid) > -1
+               ) {
+                  isManager = true;
+               }
+            });
+         }
+         if (isManager) {
+            settingsMenuOptions.push({
+               id: "translation",
+               label: this.label("Translation Tool"),
+               icon: "language",
+            });
+         }
+      }
+
+      if (settingsMenuOptions.length < 1) return $$("settings_icon").hide();
+
+      $$("settings_icon").show();
+
+      webix.ui({
+         view: "popup",
+         id: "settingsMenu",
+         width: 150,
+         body: {
+            view: "list",
+            data: settingsMenuOptions,
+            template: "<i class='fa-fw fa fa-#icon#'></i> #label#",
+            autoheight: true,
+            select: true,
+            on: {
+               onItemClick: (id /*, event */) => {
+                  switch (id) {
+                     case "accessLevel":
+                        PortalAccessLevelManager.init(this);
+                        PortalAccessLevelManager.show();
+                        break;
+                     default:
+                        //eslint-disable-next-line
+                        const item = settingsMenuOptions.filter(
+                           (o) => o.id == id
+                        )[0];
+                        webix.message(
+                           `<b>Not yet implemented</b><br/>
+                           Menu item:<i>${item.label}</i><br/>
+                           Menu ID:<i>${item.id}</i>`
+                        );
+                  }
+                  $$("userMenu").hide();
+               },
+
+               onAfterRender() {
+                  this.data.each((a) => {
+                     ClassUI.CYPRESS_REF(this.getItemNode(a.id), a.id);
+                  });
+               },
+            },
+         },
+      });
    }
 }
 
