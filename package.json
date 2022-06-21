@@ -8,6 +8,7 @@
       "test": "mocha -r esm test/**/*.test.js",
       "build": "webpack-cli --config webpack.prod.js --progress",
       "build:update": "webpack-cli --config webpack.prod.js",
+      "build:dev": "webpack-cli --config webpack.dev.js",
       "watch": "webpack-cli --config webpack.dev.js --watch --progress",
       "break": "node --inspect-brk=9229 ./node_modules/.bin/webpack-cli --watch --progress"
    },
