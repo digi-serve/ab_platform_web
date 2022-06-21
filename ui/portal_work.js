@@ -4,6 +4,7 @@ import ClassUIPage from "./ClassUIPage.js";
 import PortalWorkInbox from "./portal_work_inbox.js";
 import PortalWorkInboxTaskWindow from "./portal_work_inbox_taskWindow.js";
 import PortalWorkUserQRWindow from "./portal_work_user_qr_window.js";
+import PortalAccessLevelManager from "./portal_access_level_manager.js";
 
 class PortalWork extends ClassUI {
    constructor() {
@@ -214,6 +215,7 @@ class PortalWork extends ClassUI {
             label: L("Switcheroo"),
             icon: "user-secret",
          },
+         { id: "amp", label: L("AMP"), icon: "ban" },
          { id: "user_logout", label: L("Logout"), icon: "ban" },
       ];
 
@@ -240,10 +242,14 @@ class PortalWork extends ClassUI {
             autoheight: true,
             select: true,
             on: {
-               onItemClick: function (id /*, event */) {
+               onItemClick: (id /*, event */) => {
                   switch (id) {
                      case "user_logout":
                         AB.Account.logout();
+                        break;
+                     case "amp":
+                        PortalAccessLevelManager.init(this);
+                        PortalAccessLevelManager.show();
                         break;
                      case "user_qr":
                         PortalWorkUserQRWindow.init(AB);
@@ -652,6 +658,7 @@ class PortalWork extends ClassUI {
          this.AppState.lastPages[page.application.id] = page.id;
          this.saveState();
       }
+      return pageUI;
    }
 
    /**
