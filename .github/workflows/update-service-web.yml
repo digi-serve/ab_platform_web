@@ -1,4 +1,4 @@
-name: Update Ab Service Web
+name: Update AB Service Web
 on:
    # Run on any commit to the #master branch
    push:
@@ -24,6 +24,7 @@ jobs:
               path: web
               repository: digi-serve/ab_service_web
               ref: ${{ matrix.branch }}
+              token: ${{ secrets.DS_REPO_PAT }}
          - run: npm i
            working-directory: ./ab_platform_web
          - run: npm run build:${{ matrix.webpack }}
