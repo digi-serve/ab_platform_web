@@ -1293,7 +1293,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
       obj.fields((f) => f.key == "calculate" || f.key == "formula").forEach(
          (f) => {
             if (formVals[f.columnName] == null) {
-               formVals[f.columnName] = f.format(cursorFormVals);
+               formVals[f.columnName] = f.format(cursorFormVals, true);
             }
          }
       );
@@ -1560,4 +1560,3 @@ module.exports = class ABViewForm extends ABViewFormCore {
       }
    }
 };
-
