@@ -245,8 +245,6 @@ class PortalAccessLevelManager extends ClassUI {
       this.AB = portal.AB;
       this.portal = portal;
       this.appId = portal.AppState.lastSelectedApp;
-      this.currentPage = portal.AppState.lastPages[this.appId];
-      this.pageContainers = portal.pageContainers;
 
       const languageCode = this.AB.Config.userConfig().languageCode;
       this.roles = this.AB.Config.metaConfig().roles.map((role) => {
@@ -271,6 +269,7 @@ class PortalAccessLevelManager extends ClassUI {
                }
             });
          });
+         existingRoles.push("b966e3ef-c71a-44a2-9a75-3ba8c0dbc811");
          existingRoles.forEach((role) => {
             this.buildAccessAccordion(role);
          });
@@ -289,7 +288,7 @@ class PortalAccessLevelManager extends ClassUI {
       parent.application = {};
       parent.application.id = this.appId;
       this.portal.showPage(parent);
-      const pageUI = this.pageContainers[parent.id];
+      const pageUI = this.portal.pageContainers[parent.id];
       pageUI.showPage(pageId, viewId);
    }
 
@@ -301,13 +300,6 @@ class PortalAccessLevelManager extends ClassUI {
    }
 
    buildAccessAccordion(role) {
-      const findRole = this.roles.find((r) => {
-         return r.id === role;
-      });
-      // if (!findRole) {
-      //    return false;
-      // }
-
       const manageUsers = {
          rows: [
             {

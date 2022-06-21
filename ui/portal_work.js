@@ -737,6 +737,7 @@ class PortalWork extends ClassUI {
       const application = this.AB.applicationByID(
          this.AppState.lastSelectedApp
       );
+      if (!application) return $$("settings_icon").hide();
       if (application.isAccessManaged) {
          let isManager = false;
          if (
