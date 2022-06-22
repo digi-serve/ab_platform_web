@@ -204,6 +204,11 @@ class ClassUIPage extends ClassUI {
     * @param {ABViewPage} page
     */
    renderPage(page) {
+      if (window.webixLocale) {
+         setTimeout(() => {
+            webix.i18n.setLocale(window.webixLocale);
+         }, 500);
+      }
       var component = page.component(this.App);
       var ui = component.ui;
 

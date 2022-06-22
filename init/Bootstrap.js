@@ -13,6 +13,8 @@ if (!window.webix) {
    window.webix = Webix;
 }
 
+require("../js/webix/locales/th-TH.js");
+
 import ABFactory from "../AppBuilder/ABFactory";
 
 var EventEmitter = require("events").EventEmitter;
@@ -176,6 +178,20 @@ class Bootstrap extends EventEmitter {
                   // webix recommends wrapping any webix code in the .ready()
                   // function that executes after page loading.
                   webix.ready(() => {
+                     const locales = {
+                        en: "en-US",
+                        "zh-hans": "zh-CN",
+                        th: "th-TH",
+                     };
+                     // locales - map ab languageCode to webix locale
+                     const { languageCode } = AB.Config.userConfig();
+                     // save the webix locale used to set locale in ClassUIPage.renderPage()
+                     window.webixLocale =
+                        locales.hasOwnProperty(languageCode) &&
+                        webix.i18n.locales.hasOwnProperty(locales[languageCode])
+                           ? locales[languageCode]
+                           : false;
+
                      // webix pro offers a feature that hides scroll bars by
                      // default for browsers that include them due to the user's
                      // UI. The experience becomes more like a touch interface
