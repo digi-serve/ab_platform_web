@@ -184,7 +184,7 @@ class Bootstrap extends EventEmitter {
                         th: "th-TH",
                      };
                      // locales - map ab languageCode to webix locale
-                     const { languageCode } = AB.Config.userConfig();
+                     const { languageCode } = AB.Config.userConfig() ?? {};
                      // save the webix locale used to set locale in ClassUIPage.renderPage()
                      window.webixLocale =
                         locales.hasOwnProperty(languageCode) &&
