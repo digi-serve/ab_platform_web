@@ -85,7 +85,8 @@ module.exports = class ABViewFormDatepicker extends ABViewFormDatepickerCore {
          component.ui.value = new Date(component.ui.value);
       }
 
-      if (field != null) {
+      // if we have webix locale set, will use the date format form there.
+      if (field != null && !window.webixLocale) {
          component.ui.format = field.getFormat();
       }
 
