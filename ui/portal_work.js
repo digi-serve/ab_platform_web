@@ -304,7 +304,7 @@ class PortalWork extends ClassUI {
       // Step 1: prepare the AppState so we can determine which options
       // should be pre selected.
       //
-      const AppState = (await this.AB.Storage.get(this.storageKey)) || {
+      const AppState = (await this.AB.Storage.get(this.storageKey)) ?? {
          lastSelectedApp: null,
          // {string}  the ABApplication.id of the last App selected
 
@@ -346,8 +346,9 @@ class PortalWork extends ClassUI {
       if ($sideBar) {
          // search the Menu entries to see which one matches our
          // stored AppState
-         let foundMenuEntry =
-            this.sidebarMenuEntryByID(this.AppState.lastSelectedApp) || null;
+         let foundMenuEntry = this.sidebarMenuEntryByID(
+            this.AppState.lastSelectedApp
+         );
 
          if (!foundMenuEntry) {
             // if we couldn't find the entry then our .lastSelectedApp
@@ -373,10 +374,9 @@ class PortalWork extends ClassUI {
                foundMenuEntry.abApplication.id
             ];
 
-            DefaultPage =
-               foundMenuEntry.abApplication.pages(
-                  (p) => p.id === defaultPageID
-               )[0] || null;
+            DefaultPage = foundMenuEntry.abApplication.pages(
+               (p) => p.id === defaultPageID
+            )[0];
 
             if (!DefaultPage) {
                // then just pick the first one:
@@ -490,7 +490,7 @@ class PortalWork extends ClassUI {
          $$("inbox_icon").refresh();
       });
 
-      allInits.push(PortalWorkInbox.init(this.AB));
+      await PortalWorkInbox.init(this.AB);
 
       //
       // Step 7: As well as the Inbox Task Window
