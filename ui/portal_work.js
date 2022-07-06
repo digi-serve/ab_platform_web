@@ -3,6 +3,7 @@ import ClassUIPage from "./ClassUIPage.js";
 
 import PortalWorkInbox from "./portal_work_inbox.js";
 import PortalWorkInboxTaskWindow from "./portal_work_inbox_taskWindow.js";
+import PortalWorkUserProfileWindow from "./portal_work_user_profile_window.js";
 import PortalWorkUserQRWindow from "./portal_work_user_qr_window.js";
 import PortalAccessLevelManager from "./portal_access_level_manager.js";
 
@@ -37,7 +38,7 @@ class PortalWork extends ClassUI {
                            let sidebarMenu = $$("abSidebarMenu");
                            if (sidebarMenu.getSelectedId() == "") {
                               sidebarMenu.blockEvent();
-                              var firstID = sidebarMenu.getFirstId();
+                              const firstID = sidebarMenu.getFirstId();
                               sidebarMenu.select(firstID);
                               sidebarMenu.unblockEvent();
                            }
@@ -192,16 +193,20 @@ class PortalWork extends ClassUI {
       };
    }
 
-   init(AB) {
+   async init(AB) {
       this.AB = AB;
 
       this.storageKey = "portal_work_state";
 
       this.pageContainers = {};
 
-      var L = (...params) => {
+      const L = (...params) => {
          return this.label(...params);
       };
+
+      const allInits = [];
+
+      allInits.push(PortalWorkUserProfileWindow.init(this.AB));
 
       // {hash}  { ABViewPage.id : ClassUIPage() }
       // track each of the page containers (instances of ClassUIPage) that
@@ -209,16 +214,18 @@ class PortalWork extends ClassUI {
       // Root Pages.
 
       // Get all our ABApplications and loaded Plugins in allApplications
-      var allApplications = this.AB.applications() || [];
-      allApplications = allApplications.concat(this.AB.plugins() || []);
+      const allApplications = (this.AB.applications() || []).concat(
+         this.AB.plugins() || []
+      );
 
       // Build out our Navigation Side Bar Menu with our available
       // ABApplications
-      let menu_data = [];
-      allApplications.forEach((app) => {
+      const menu_data = [];
+
+      for (let i = 0; i < allApplications.length; i++) {
          // TODO: implement Sorting on these before building UI
-         menu_data.push(this.uiSideBarMenuEntry(app));
-      });
+         menu_data.push(this.uiSideBarMenuEntry(allApplications[i]));
+      }
 
       $$("abSidebarMenu").define("data", menu_data);
       this.sidebarResize();
@@ -234,7 +241,8 @@ class PortalWork extends ClassUI {
       ];
 
       // Only add the QR Code option if the relay service is enabled
-      const { relay } = AB.Config.siteConfig();
+      const { relay } = this.AB.Config.siteConfig();
+
       if (relay) {
          // Insert at userMenuOptions[2] so logout is still last
          userMenuOptions.splice(2, 0, {
@@ -258,6 +266,9 @@ class PortalWork extends ClassUI {
             on: {
                onItemClick: (id) => {
                   switch (id) {
+                     case "user_profile":
+                        PortalWorkUserProfileWindow.show();
+                        break;
                      case "user_logout":
                         AB.Account.logout();
                         break;
@@ -289,237 +300,240 @@ class PortalWork extends ClassUI {
       });
 
       // Now Fill out Toolbar and Root Pages:
-      return Promise.resolve()
-         .then(() => {
-            return this.AB.Storage.get(this.storageKey);
-         })
-         .then((AppState) => {
-            //
-            // Step 1: prepare the AppState so we can determine which options
-            // should be pre selected.
-            //
+      //
+      // Step 1: prepare the AppState so we can determine which options
+      // should be pre selected.
+      //
+      const AppState = (await this.AB.Storage.get(this.storageKey)) || {
+         lastSelectedApp: null,
+         // {string}  the ABApplication.id of the last App selected
 
-            if (!AppState) {
-               AppState = {
-                  lastSelectedApp: null,
-                  // {string}  the ABApplication.id of the last App selected
+         lastPages: {},
+         // {hash}  { ABApplication.id : ABPage.id }
+         // a lookup of all the last selected Pages for each Application
+      };
 
-                  lastPages: {},
-                  // {hash}  { ABApplication.id : ABPage.id }
-                  // a lookup of all the last selected Pages for each Application
-               };
-            }
-            this.AppState = AppState;
+      this.AppState = AppState;
 
-            // set default selected App if not already set
-            // just choose the 1st App in the list (must have pages that we have
-            // access to)
-            if (!this.AppState.lastSelectedApp && menu_data.length) {
-               menu_data.forEach((menu) => {
-                  if (!this.AppState.lastSelectedApp) {
-                     if (
-                        (
-                           menu.abApplication
-                              .pages()
-                              .filter((p) => p.getUserAccess?.() > 0) || []
-                        ).length > 0
-                     ) {
-                        this.AppState.lastSelectedApp = menu.abApplication.id;
-                     }
-                  }
-               });
+      // set default selected App if not already set
+      // just choose the 1st App in the list (must have pages that we have
+      // access to)
+      if (!this.AppState.lastSelectedApp && menu_data.length)
+         for (let i = 0; i < menu_data.length; i++)
+            if (
+               (
+                  menu_data[i].abApplication
+                     .pages()
+                     .filter((p) => p.getUserAccess?.() > 0) || []
+               ).length > 0
+            ) {
+               this.AppState.lastSelectedApp = menu_data[i].abApplication.id;
+
+               break;
             }
 
-            //
-            // Step 2: figure out the Default Page to be displayed.
-            //
-            var DefaultPage = null;
-            // {ABViewPage}
-            // The ABViewPage of the 1st page to display.
+      //
+      // Step 2: figure out the Default Page to be displayed.
+      //
+      let DefaultPage = null;
+      // {ABViewPage}
+      // The ABViewPage of the 1st page to display.
 
-            // sidebar and NavBar are already built at this point. So we can
-            // query them.
-            var sideBar = $$("abSidebarMenu");
-            if (sideBar) {
-               // search the Menu entries to see which one matches our
-               // stored AppState
-               var foundMenuEntry = this.sidebarMenuEntryByID(
-                  this.AppState.lastSelectedApp
-               );
-               if (!foundMenuEntry) {
-                  // if we couldn't find the entry then our .lastSelectedApp
-                  // must be referencing an Application we no longer have
-                  // access to.
-                  // So just pick the 1st app with pages
-                  menu_data.forEach((menu) => {
-                     if (!foundMenuEntry) {
-                        if ((menu.abApplication.pages() || []).length > 0) {
-                           foundMenuEntry = this.sidebarMenuEntryByID(
-                              menu.abApplication.id
-                           );
-                        }
-                     }
-                  });
-               }
+      // sidebar and NavBar are already built at this point. So we can
+      // query them.
+      const $sideBar = $$("abSidebarMenu");
 
-               if (foundMenuEntry) {
-                  sideBar.select(foundMenuEntry.id);
-                  this.selectApplication(foundMenuEntry.id);
+      if ($sideBar) {
+         // search the Menu entries to see which one matches our
+         // stored AppState
+         let foundMenuEntry =
+            this.sidebarMenuEntryByID(this.AppState.lastSelectedApp) || null;
 
-                  var defaultPageID = this.AppState.lastPages[
-                     foundMenuEntry.abApplication.id
-                  ];
-                  DefaultPage = foundMenuEntry.abApplication.pages(
-                     (p) => p.id === defaultPageID
-                  )[0];
-                  if (!DefaultPage) {
-                     // then just pick the first one:
-                     DefaultPage = foundMenuEntry.abApplication.pages()[0];
-                  }
+         if (!foundMenuEntry) {
+            // if we couldn't find the entry then our .lastSelectedApp
+            // must be referencing an Application we no longer have
+            // access to.
+            // So just pick the 1st app with pages
+            for (let i = 0; i < menu_data.length; i++) {
+               if ((menu_data[i].abApplication.pages() || []).length > 0) {
+                  foundMenuEntry =
+                     this.sidebarMenuEntryByID(menu_data[i].abApplication.id) ||
+                     null;
+
+                  if (foundMenuEntry) break;
                }
             }
+         }
 
-            //
-            // Step 3: Prime the content area with placeholders for ALL
-            // Root Pages
-            //
+         if (foundMenuEntry) {
+            $sideBar.select(foundMenuEntry.id);
+            this.selectApplication(foundMenuEntry.id);
 
-            var allPlaceholders = [];
-            allApplications.forEach((app) => {
-               (app.pages() || []).forEach((page) => {
-                  if (page.getUserAccess?.() == 0) return;
-                  allPlaceholders.push({
-                     id: this.pageID(page),
-                     template: `Page: ${page.label || page.name}`,
-                  });
-               });
+            const defaultPageID = this.AppState.lastPages[
+               foundMenuEntry.abApplication.id
+            ];
+
+            DefaultPage =
+               foundMenuEntry.abApplication.pages(
+                  (p) => p.id === defaultPageID
+               )[0] || null;
+
+            if (!DefaultPage) {
+               // then just pick the first one:
+               DefaultPage = foundMenuEntry.abApplication.pages()[0];
+            }
+         }
+      }
+
+      //
+      // Step 3: Prime the content area with placeholders for ALL
+      // Root Pages
+      //
+      const allPlaceholders = [];
+
+      for (let i = 0; i < allApplications.length; i++) {
+         const pages = allApplications[i].pages() || [];
+
+         for (let j = 0; j < pages.length; j++) {
+            if (pages[j].getUserAccess?.() === 0) break;
+
+            allPlaceholders.push({
+               id: this.pageID(pages[j]),
+               template: `Page: ${pages[j].label || pages[j].name}`,
             });
-            if (allPlaceholders.length > 0) {
-               webix.ui(
-                  {
-                     view: "multiview",
-                     keepViews: true,
-                     animate: false,
-                     cells: allPlaceholders,
-                  },
-                  $$("abWorkPages")
-               );
-            }
+         }
+      }
 
-            //
-            // Step 4: initialize the DefaultPage
-            // when it is finished we can show that page and emit "ready" to
-            // signal we can transition to the Work Portal
-            //
-            if (!this.App) {
-               // page.component() require a common {ABComponent.App}
-               this.App = new this.AB.Class.ABComponent(
-                  null,
-                  "portal_work",
-                  this.AB
-               ).App;
-            }
-            if (DefaultPage) {
-               var container = new ClassUIPage(
-                  this.pageID(DefaultPage),
-                  DefaultPage,
+      if (allPlaceholders.length > 0)
+         webix.ui(
+            {
+               view: "multiview",
+               keepViews: true,
+               animate: false,
+               cells: allPlaceholders,
+            },
+            $$("abWorkPages")
+         );
+
+      //
+      // Step 4: initialize the DefaultPage
+      // when it is finished we can show that page and emit "ready" to
+      // signal we can transition to the Work Portal
+      //
+      if (!this.App) {
+         // page.component() require a common {ABComponent.App}
+         this.App = new this.AB.Class.ABComponent(
+            null,
+            "portal_work",
+            this.AB
+         ).App;
+      }
+
+      if (DefaultPage) {
+         const container = new ClassUIPage(
+            this.pageID(DefaultPage),
+            DefaultPage,
+            this.App,
+            this.AB
+         );
+         const containerInit = async () => {
+            await container.init(this.AB, true);
+            this.showPage(DefaultPage);
+         };
+
+         this.pageContainers[DefaultPage.id] = container;
+         allInits.push(containerInit());
+      }
+      // let pUI = DefaultPage.component(this.App);
+
+      // webix.ui(pUI.ui, $$(this.pageID(DefaultPage)));
+      // pUI.init();
+      // pUI.onShow();
+      // this.showPage(DefaultPage);
+
+      //
+      // Step 5: initialize the remaining Pages
+      //
+      for (let i = 0; i < allApplications.length; i++) {
+         const pages = allApplications[i].pages() || [];
+
+         for (let j = 0; j < pages.length; j++) {
+            if (pages[j].getUserAccess?.() === 0) continue;
+
+            if (!DefaultPage || pages[j].id !== DefaultPage.id) {
+               const cont = new ClassUIPage(
+                  this.pageID(pages[j]),
+                  pages[j],
                   this.App,
                   this.AB
                );
-               this.pageContainers[DefaultPage.id] = container;
 
-               container.init(this.AB, true).then(() => {
-                  this.showPage(DefaultPage);
-               });
+               this.pageContainers[pages[j].id] = cont;
+
+               allInits.push(cont.init(this.AB));
+
+               // let comp = page.component(commonComp.App);
+               // webix.ui(comp.ui, $$(this.pageID(page)));
+               // comp.init();
+               // comp.onShow();
             }
-            // let pUI = DefaultPage.component(this.App);
+         }
+      }
 
-            // webix.ui(pUI.ui, $$(this.pageID(DefaultPage)));
-            // pUI.init();
-            // pUI.onShow();
-            // this.showPage(DefaultPage);
+      this.refreshSettingsMenu();
+      //
+      // Step 6: Initialize the Inbox Items
+      //
+      PortalWorkInbox.on("updated", () => {
+         const count = PortalWorkInbox.count();
+         $$("inbox_icon").define({ badge: count ? count : false });
+         $$("inbox_icon").refresh();
+      });
 
-            //
-            // Step 5: initialize the remaining Pages
-            //
+      allInits.push(PortalWorkInbox.init(this.AB));
 
-            allApplications.forEach((app) => {
-               (app.pages() || []).forEach((page) => {
-                  if (page.getUserAccess?.() == 0) return;
-                  if (!DefaultPage || page.id != DefaultPage.id) {
-                     var cont = new ClassUIPage(
-                        this.pageID(page),
-                        page,
-                        this.App,
-                        this.AB
-                     );
-                     this.pageContainers[page.id] = cont;
+      //
+      // Step 7: As well as the Inbox Task Window
+      //
+      allInits.push(PortalWorkInboxTaskWindow.init(this.AB));
 
-                     cont.init(this.AB);
-
-                     // let comp = page.component(commonComp.App);
-                     // webix.ui(comp.ui, $$(this.pageID(page)));
-                     // comp.init();
-                     // comp.onShow();
-                  }
-               });
-            });
-         })
-         .then(() => {
-            this.refreshSettingsMenu();
-            //
-            // Step 6: Initialize the Inbox Items
-            //
-            PortalWorkInbox.on("updated", () => {
-               var count = PortalWorkInbox.count();
-               $$("inbox_icon").define({ badge: count ? count : false });
-               $$("inbox_icon").refresh();
-            });
-            return PortalWorkInbox.init(this.AB);
-         })
-         .then(() => {
-            //
-            // Step 7: As well as the Inbox Task Window
-            //
-            return PortalWorkInboxTaskWindow.init(this.AB);
-         })
-         .then(() => {
-            // Network and Queued operations Alert
+      // Network and Queued operations Alert
+      $$("network_icon").hide();
+      this.AB.Network.on("queued", () => {
+         const count = this.AB.Network.queueCount();
+         $$("network_icon").define({ badge: count ? count : false });
+         $$("network_icon").refresh();
+         if (count > 0) {
+            $$("network_icon").show();
+         } else {
             $$("network_icon").hide();
-            this.AB.Network.on("queued", () => {
-               var count = this.AB.Network.queueCount();
-               $$("network_icon").define({ badge: count ? count : false });
-               $$("network_icon").refresh();
-               if (count > 0) {
-                  $$("network_icon").show();
-               } else {
-                  $$("network_icon").hide();
-               }
-            });
+         }
+      });
 
-            this.AB.Network.on("queue.synced", () => {
-               $$("network_icon").define({ badge: false });
-               $$("network_icon").refresh();
-               $$("network_icon").hide();
-            });
+      this.AB.Network.on("queue.synced", () => {
+         $$("network_icon").define({ badge: false });
+         $$("network_icon").refresh();
+         $$("network_icon").hide();
+      });
 
-            this.emit("ready");
+      this.emit("ready");
 
-            // !!! HACK: Leave this for James to figure out why Menu Title isn't proper
-            // size on initial loading.
-            setTimeout(() => {
-               $$("portal_work_menu_title").resize();
-            }, 200);
+      // !!! HACK: Leave this for James to figure out why Menu Title isn't proper
+      // size on initial loading.
+      setTimeout(() => {
+         $$("portal_work_menu_title").resize();
+      }, 200);
 
-            // Now attempt to flush any pending network operations:
-            this.AB.Network._connectionCheck();
+      // Now attempt to flush any pending network operations:
+      this.AB.Network._connectionCheck();
 
-            // Be sure our UI elements that don't respond to onAfterRender()
-            // have their cypress references set:
-            ["portal_work_menu_pages"].forEach((eid) => {
-               ClassUI.CYPRESS_REF($$(eid));
-            });
-         });
+      // Be sure our UI elements that don't respond to onAfterRender()
+      // have their cypress references set:
+      ["portal_work_menu_pages"].forEach((eid) => {
+         ClassUI.CYPRESS_REF($$(eid));
+      });
+
+      await Promise.all(allInits);
    }
 
    /**
@@ -534,17 +548,17 @@ class PortalWork extends ClassUI {
    }
 
    selectApplication(id) {
-      var row = $$("abSidebarMenu").getItem(id);
+      const row = $$("abSidebarMenu").getItem(id);
 
-      var pageButtons = [];
+      const pageButtons = [];
       // {array}
       // the webix menu buttons for each Page
 
-      var firstPage = true;
+      let firstPage = true;
       // {bool} firstPage
       // should we choose the 1st page as being the active page?
 
-      var activePageID = null;
+      let activePageID = null;
       // {string}
       // The ABViewPage.id of the active Page for the current Application.
       if (this.AppState.lastSelectedApp != row.abApplication.id) {
@@ -566,7 +580,7 @@ class PortalWork extends ClassUI {
       (row.abApplication.pages() || []).forEach((p) => {
          if (p.getUserAccess?.() == 0) return;
          // Decide if current Page button should look selected.
-         var active = "";
+         let active = "";
          if (firstPage || p.id == activePageID) {
             active = "activePage";
             firstPage = false;
@@ -575,7 +589,7 @@ class PortalWork extends ClassUI {
             this.AppState.lastPages[row.abApplication.id] = p.id;
          }
 
-         var pbLabel = p.label;
+         let pbLabel = p.label;
          if ("function" === typeof p.label) {
             pbLabel = p.label();
          }
@@ -589,7 +603,7 @@ class PortalWork extends ClassUI {
             abPage: p,
             click: (item) => {
                // when button is clicked, update the selected look
-               var pageButton = $$(item);
+               const pageButton = $$(item);
 
                // Remove any other "activePage" entries
                $$("portal_work_menu_pages")
@@ -627,7 +641,7 @@ class PortalWork extends ClassUI {
 
       // now everything is displayed
       // default initial display to current activePage:
-      var selectedPage = null;
+      let selectedPage = null;
       $$("portal_work_menu_pages")
          .queryView(
             {
@@ -641,7 +655,7 @@ class PortalWork extends ClassUI {
       this.showPage(selectedPage?.data?.abPage);
 
       // hide the sidebar menu
-      var sideBar = $$("navSidebar");
+      const sideBar = $$("navSidebar");
       if (sideBar.isVisible()) {
          sideBar.hide();
       }
@@ -667,7 +681,8 @@ class PortalWork extends ClassUI {
    }
 
    showPage(page) {
-      var pageUI = this.pageContainers[page?.id];
+      const pageUI = this.pageContainers[page?.id];
+
       if (pageUI) {
          pageUI.show();
          this.AppState.lastPages[page.application.id] = page.id;
@@ -682,27 +697,31 @@ class PortalWork extends ClassUI {
     * @return {obj}
     */
    sidebarMenuEntryByID(menuID) {
-      var foundMenuEntry = null;
-      var sideBar = $$("abSidebarMenu");
-      if (sideBar) {
+      const $sideBar = $$("abSidebarMenu");
+
+      let foundMenuEntry = null;
+
+      if ($sideBar) {
          // search the Menu entries to see which one matches our
          // stored AppState
 
-         var id = sideBar.getFirstId();
+         let id = $sideBar.getFirstId();
          while (!foundMenuEntry && id) {
-            let entry = sideBar.getItem(id);
+            let entry = $sideBar.getItem(id);
             if (entry.abApplication.id == menuID) {
                foundMenuEntry = entry;
             }
-            id = sideBar.getNextId(id);
+            id = $sideBar.getNextId(id);
          }
       }
+
       return foundMenuEntry;
    }
 
    sidebarResize() {
-      let sidebarMenu = $$("abSidebarMenu");
-      var sideBarHeight = sidebarMenu.count() * 45 + 1;
+      const sidebarMenu = $$("abSidebarMenu");
+      const sideBarHeight = sidebarMenu.count() * 45 + 1;
+
       sidebarMenu.define("height", sideBarHeight);
       sidebarMenu.resize();
       // $$("abNavSidebarScrollView").resize(true);
@@ -731,12 +750,12 @@ class PortalWork extends ClassUI {
    }
 
    refreshSettingsMenu() {
-      const settingsMenuOptions = [];
       const { uuid, roles } = this.AB.Config.userConfig();
-
       const application = this.AB.applicationByID(
          this.AppState.lastSelectedApp
       );
+      const settingsMenuOptions = [];
+
       if (!application) return $$("settings_icon").hide();
       if (application.isAccessManaged) {
          let isManager = false;

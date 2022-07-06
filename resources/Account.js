@@ -92,6 +92,14 @@ class Account extends EventEmitter {
    uuid() {
       return this._config?.uuid;
    }
+
+   imageID() {
+      return this._config?.image_id;
+   }
+
+   sendEmailNotifications() {
+      return this._config?.sendEmailNotifications;
+   }
 }
 
 export default new Account();
