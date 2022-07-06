@@ -17,6 +17,7 @@ class PortalWorkInboxAccordion extends ClassUI {
          header: this.app.label,
          id: this.id,
          view: "accordionitem",
+         collapsed: true,
          css: "stayCollapsed",
          hidden: true,
          body: {
@@ -32,7 +33,7 @@ class PortalWorkInboxAccordion extends ClassUI {
                      value.replace(/{(.*?)}/, "")
                   );
                },
-               headerHeight: 24,
+               headerHeight: 35,
             },
             template: function (obj) {
                return (
@@ -93,6 +94,7 @@ class PortalWorkInboxAccordion extends ClassUI {
             },
             on: {
                onAfterRender() {
+                  $$(self.id).expand();
                   ClassUI.CYPRESS_REF(this);
                   this.data.each((a) => {
                      ClassUI.CYPRESS_REF(
