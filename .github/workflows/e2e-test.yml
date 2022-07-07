@@ -11,6 +11,7 @@ on:
    
 jobs:
    e2etests:
+      name: Test
       runs-on: ubuntu-latest
       strategy:
          matrix:
@@ -45,7 +46,7 @@ jobs:
            with:
               port: 8080
               folder: ab
-              repository: ab_service_web
+              repository: digi-serve/ab_service_web
               
          - name: Check out kitchen-sink tests
            uses: actions/checkout@v2
