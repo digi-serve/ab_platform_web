@@ -1,4 +1,4 @@
-name: E2E Tests
+name: E2E Tests & Update Web Service
 on:
    # Run on any commit to the #master branch
    push:
