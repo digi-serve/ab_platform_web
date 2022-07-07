@@ -69,4 +69,36 @@ jobs:
            if: failure()
            with:
               name: cypress-screenshots
-              path: ./ab/test/e2e/cypress/screenshots             
+              path: ./ab/test/e2e/cypress/screenshots
+              
+   # if its a push event and tests passed update ab_service_web           
+   update_ab_service_web:
+      name: Update ab_service_web
+      needs: e2etests
+      if: ${{ github.event_name == 'push' }} 
+      runs-on: ubuntu-latest
+      strategy:
+         matrix:
+            include:
+               - branch: develop
+                 webpack: dev
+               - branch: master
+                 webpack: update
+      steps:
+         - uses: actions/checkout@v3
+           with:
+              path: ab_platform_web
+              submodules: true
+         - uses: actions/checkout@v3
+           with:
+              path: web
+              repository: digi-serve/ab_service_web
+              ref: ${{ matrix.branch }}
+              token: ${{ secrets.DS_REPO_PAT }}
+         - run: npm i
+           working-directory: ./ab_platform_web
+         - run: npm run build:${{ matrix.webpack }}
+           working-directory: ./ab_platform_web
+         - uses: EndBug/add-and-commit@v9
+           with:
+              cwd: ./web
