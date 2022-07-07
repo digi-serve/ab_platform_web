@@ -8,40 +8,50 @@ on:
       branches: [master]
    # Allows user to trigger the workflow from GitHub's web UI
    workflow_dispatch:
-
+   
 jobs:
-   cypress-test:
-      name: Run Tests
+   e2etests:
       runs-on: ubuntu-latest
+      strategy:
+         matrix:
+            include:
+               - branch: develop
+                 webpack: dev
+               - branch: master
+                 webpack: update
       steps:
+         - uses: actions/checkout@v3
+           with:
+              path: ab_platform_web
+              submodules: true
+              
+         - uses: actions/checkout@v3
+           with:
+              path: web
+              repository: digi-serve/ab_service_web
+              token: ${{ secrets.DS_REPO_PAT }}
+              
+         - run: npm i
+           working-directory: ./ab_platform_web
+         
+         - name: Webpack
+           run: npm run build:${{ matrix.webpack }}
+           working-directory: ./ab_platform_web
+           
+        # webpack expects the folder to be called "web" ab-install action expects "ab_service_web"
+         - run: mv web ab_service_web
+
          - uses: digi-serve/ab-install-action@v1
            with:
               port: 8080
               folder: ab
-
-         - name: Check out ab_platform_web
-           uses: actions/checkout@v2
-           with:
-              path: ./ab/developer/ab_platform_web
-              submodules: recursive
-
-         - name: Npm Install
-           run: npm i
-           working-directory: ./ab/developer/ab_platform_web
-
-         - name: Webpack
-           run: npm run build
-           working-directory: ./ab/developer/ab_platform_web
-
+              repo: ab_service_web
+              
          - name: Check out kitchen-sink tests
            uses: actions/checkout@v2
            with:
               repository: digi-serve/kitchensink_app
               path: ab/test/e2e/cypress/integration/kitchensink_app
-
-         - name: Deploy Stack
-           run: ./UP.sh -t -q
-           working-directory: ./ab
 
          - name: Run Cypress Tests
            uses: cypress-io/github-action@v2
@@ -58,5 +68,4 @@ jobs:
            if: failure()
            with:
               name: cypress-screenshots
-              path: ./ab/test/e2e/cypress/screenshots
-              
+              path: ./ab/test/e2e/cypress/screenshots             
