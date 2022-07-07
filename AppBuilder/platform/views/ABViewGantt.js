@@ -1,5 +1,5 @@
 const ABViewGanttCore = require("../../core/views/ABViewGanttCore");
-import ABViewComponent from "./ABViewComponent";
+import ABViewComponent from "./viewComponent/ABViewComponent";
 
 let L = null;
 

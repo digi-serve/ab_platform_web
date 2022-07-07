@@ -1,15 +1,7 @@
 const ABViewDetailCustomCore = require("../../core/views/ABViewDetailCustomCore");
+const ABViewDetailCustomComponent = require("./viewComponent/ABViewDetailCustomComponent");
 
 module.exports = class ABViewDetailCustom extends ABViewDetailCustomCore {
-   /**
-    * @param {obj} values  key=>value hash of ABView values
-    * @param {ABApplication} application the application object this view is under
-    * @param {ABView} parent the ABView this view is a child of. (can be null)
-    */
-   // constructor(values, application, parent, defaultValues) {
-   //    super(values, application, parent, defaultValues);
-   // }
-
    //
    //	Editor Related
    //
@@ -51,40 +43,35 @@ module.exports = class ABViewDetailCustom extends ABViewDetailCustomCore {
       };
    }
 
-   //
-   // Property Editor
-   //
-
-   static propertyEditorDefaultElements(App, ids, _logic, ObjectDefaults) {
-      var commonUI = super.propertyEditorDefaultElements(
-         App,
-         ids,
-         _logic,
-         ObjectDefaults
-      );
-
-      // in addition to the common .label  values, we
-      // ask for:
-      return commonUI.concat([]);
-   }
-
-   static propertyEditorPopulate(App, ids, view) {
-      super.propertyEditorPopulate(App, ids, view);
-   }
-
-   static propertyEditorValues(ids, view) {
-      super.propertyEditorValues(ids, view);
-   }
-
    /**
-    * @component()
+    * @method component()
     * return a UI component based upon this view.
-    * @param {obj} App
+    * @param {obj} v1App
     * @param {string} idPrefix
     *
     * @return {obj} UI component
     */
-   component(App, idPrefix) {
+   component(v1App) {
+      let component = new ABViewDetailCustomComponent(this);
+
+      // if this is our v1Interface
+      if (v1App) {
+         let newComponent = component;
+         component = {
+            ui: component.ui(),
+            init: (options, accessLevel) => {
+               return newComponent.init(this.AB, accessLevel);
+            },
+            onShow: (...params) => {
+               return newComponent.onShow?.(...params);
+            },
+         };
+      }
+
+      return component;
+   }
+
+   componentOld(App, idPrefix) {
       var component = super.component(App);
       var field = this.field();
       var detailView = this.detailComponent();

@@ -1,5 +1,5 @@
 const ABViewCarouselCore = require("../../core/views/ABViewCarouselCore");
-const ABViewComponent = require("./ABViewComponent").default;
+const ABViewComponent = require("./viewComponent/ABViewComponent").default;
 
 // const ABViewPropertyFilterData = require("./viewProperties/ABViewPropertyFilterData");
 // const ABViewPropertyLinkPage = require("./viewProperties/ABViewPropertyLinkPage");

@@ -1,4 +1,5 @@
 const ABViewCore = require("../../core/views/ABViewCore.js");
+const ABViewComponent = require("./viewComponent/ABViewComponent").default;
 
 let L = (...params) => AB.Multilingual.label(...params);
 
@@ -440,20 +441,22 @@ module.exports = class ABView extends ABViewCore {
    //    return list;
    // }
 
-   /*
-    * @component()
+   /**
+    * @method component()
     * return a UI component based upon this view.
-    * @param {obj} App
+    *
     * @return {obj} UI component
     */
-   component(App) {
-      var idBase = "ABView_" + this.id;
-      var ids = {
-         component: App.unique(`${idBase}_component`),
+   component() {
+      const component = new ABViewComponent(this);
+
+      let idBase = `ABView_${this.id}`;
+      let ids = {
+         component: `${idBase}_component`,
       };
 
       // an ABView is a collection of rows:
-      var _ui = {
+      let _ui = {
          id: ids.component,
          view: "layout",
          type: "space",
