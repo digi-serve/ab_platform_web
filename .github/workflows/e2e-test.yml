@@ -45,7 +45,7 @@ jobs:
            with:
               port: 8080
               folder: ab
-              repo: ab_service_web
+              repository: ab_service_web
               
          - name: Check out kitchen-sink tests
            uses: actions/checkout@v2
