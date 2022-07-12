@@ -25,29 +25,29 @@ module.exports = class ABViewDetailTree extends ABViewDetailTreeCore {
     * @param {string} mode what mode are we in ['block', 'preview']
     * @return {Component}
     */
-   editorComponent(App, mode) {
-      var idBase = "ABViewDetailTreeEditorComponent";
-      var ids = {
-         component: App.unique(`${idBase}_component`),
-      };
+   // editorComponent(App, mode) {
+   //    var idBase = "ABViewDetailTreeEditorComponent";
+   //    var ids = {
+   //       component: App.unique(`${idBase}_component`),
+   //    };
 
-      var elem = this.component(App).ui;
-      elem.id = ids.component;
+   //    var elem = this.component(App).ui;
+   //    elem.id = ids.component;
 
-      var _ui = {
-         rows: [elem, {}],
-      };
+   //    var _ui = {
+   //       rows: [elem, {}],
+   //    };
 
-      var _init = (options) => {};
+   //    var _init = (options) => {};
 
-      var _logic = {};
+   //    var _logic = {};
 
-      return {
-         ui: _ui,
-         init: _init,
-         logic: _logic,
-      };
-   }
+   //    return {
+   //       ui: _ui,
+   //       init: _init,
+   //       logic: _logic,
+   //    };
+   // }
 
    /**
     * @method component()
@@ -59,102 +59,22 @@ module.exports = class ABViewDetailTree extends ABViewDetailTreeCore {
     */
    component(v1App, idPrefix) {
       var component = new ABViewDetailTreeComponent(this);
-      var field = this.field();
-      var detailView = this.detailComponent();
 
-      var idBase = `ABViewDetailTree_${idPrefix || ""}${this.id}`;
-      var ids = {
-         component: v1App.unique(`${idBase}_component`),
-      };
-      var className = "ab-detail-tree";
+      // if this is our v1Interface
+      if (v1App) {
+         var newComponent = component;
+         component = {
+            ui: newComponent.ui(),
+            init: (options, accessLevel) => {
+               return newComponent.init(this.AB, accessLevel);
+            },
+            onShow: (...params) => {
+               return newComponent.onShow?.(...params);
+            },
+         };
+      }
 
-      component.ui.id = ids.component;
-
-      var _init = (options) => {
-         component.init(options);
-
-         // add div of tree to detail
-         var divTree = `<div class="${className}"></div>`;
-         component.logic.setValue(ids.component, divTree);
-      };
-
-      var _logic = {
-         getDomTree: () => {
-            var elem = $$(ids.component);
-            if (!elem) return;
-
-            return elem.$view.getElementsByClassName(className)[0];
-         },
-
-         setValue: (val) => {
-            // convert value to array
-            if (val != null && !(val instanceof Array)) {
-               val = [val];
-            }
-
-            setTimeout(function () {
-               // get tree dom
-               var domTree = _logic.getDomTree();
-
-               if (!domTree) return false;
-
-               var branches = [];
-               if (typeof field.settings.options.data == "undefined") {
-                  field.settings.options = new webix.TreeCollection({
-                     data: field.settings.options,
-                  });
-               }
-
-               field.settings.options.data.each(function (obj) {
-                  if (val != null && val.indexOf(obj.id) != -1) {
-                     var html = "";
-
-                     var rootid = obj.id;
-                     while (this.getParentId(rootid)) {
-                        field.settings.options.data.each(function (par) {
-                           if (
-                              field.settings.options.data.getParentId(rootid) ==
-                              par.id
-                           ) {
-                              html = par.text + ": " + html;
-                           }
-                        });
-                        rootid = this.getParentId(rootid);
-                     }
-
-                     html += obj.text;
-                     branches.push(html);
-                  }
-               });
-
-               var myHex = "#4CAF50";
-               var nodeHTML = "<div class='list-data-values'>";
-               branches.forEach(function (item) {
-                  nodeHTML +=
-                     '<span class="selectivity-multiple-selected-item rendered" style="background-color:' +
-                     myHex +
-                     ' !important;">' +
-                     item +
-                     "</span>";
-               });
-               nodeHTML += "</div>";
-               domTree.innerHTML = nodeHTML;
-
-               var height = 33;
-               if (domTree.scrollHeight > 33) height = domTree.scrollHeight;
-
-               $$(ids.component).config.height = height;
-               $$(ids.component).resize();
-            }, 50);
-         },
-      };
-
-      return {
-         ui: component.ui,
-
-         init: _init,
-         logic: _logic,
-      };
+      return component;
    }
 
    componentOld(App, idPrefix) {

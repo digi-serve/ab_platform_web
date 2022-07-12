@@ -14,34 +14,34 @@ module.exports = class ABViewDetailCustom extends ABViewDetailCustomCore {
     * @param {string} mode what mode are we in ['block', 'preview']
     * @return {Component}
     */
-   editorComponent(App, mode) {
-      var idBase = "ABViewDetailCustomEditorComponent";
-      var ids = {
-         component: App.unique(`${idBase}_component`),
-      };
+   // editorComponent(App, mode) {
+   //    var idBase = "ABViewDetailCustomEditorComponent";
+   //    var ids = {
+   //       component: App.unique(`${idBase}_component`),
+   //    };
 
-      var component = this.component(App);
+   //    var component = this.component(App);
 
-      var textElem = component.ui;
-      textElem.id = ids.component;
+   //    var textElem = component.ui;
+   //    textElem.id = ids.component;
 
-      var _ui = {
-         rows: [textElem, {}],
-      };
+   //    var _ui = {
+   //       rows: [textElem, {}],
+   //    };
 
-      var _init = component.init;
-      var _logic = component.logic;
+   //    var _init = component.init;
+   //    var _logic = component.logic;
 
-      var _onShow = component.onShow;
+   //    var _onShow = component.onShow;
 
-      return {
-         ui: _ui,
-         init: _init,
-         logic: _logic,
+   //    return {
+   //       ui: _ui,
+   //       init: _init,
+   //       logic: _logic,
 
-         onShow: _onShow,
-      };
-   }
+   //       onShow: _onShow,
+   //    };
+   // }
 
    /**
     * @method component()

@@ -21,59 +21,6 @@ module.exports = class ABViewDetailConnect extends ABViewDetailConnectCore {
       this.addPageTool.fromSettings(this.settings);
    }
 
-   //
-   // Property Editor
-   //
-
-   static propertyEditorDefaultElements(App, ids, _logic, ObjectDefaults) {
-      let commonUI = super.propertyEditorDefaultElements(
-         App,
-         ids,
-         _logic,
-         ObjectDefaults
-      );
-
-      let idBase = "ABViewDetailConnectPropertyEditor";
-
-      if (this.addPageProperty == null) {
-         this.addPageProperty = ABViewPropertyAddPage.propertyComponent(
-            App,
-            idBase
-         );
-         this.addPageProperty.init({
-            onSave: () => {
-               let currView = _logic.currentEditObject();
-               if (!currView) return;
-
-               // refresh settings
-               this.propertyEditorValues(ids, currView);
-
-               // trigger a save()
-               this.propertyEditorSave(ids, currView);
-            },
-         });
-      }
-
-      // in addition to the common .label  values, we
-      // ask for:
-      return commonUI.concat([this.addPageProperty.ui]);
-   }
-
-   static propertyEditorPopulate(App, ids, view) {
-      super.propertyEditorPopulate(App, ids, view);
-
-      this.addPageProperty.setSettings(view, view.settings);
-   }
-
-   static propertyEditorValues(ids, view) {
-      super.propertyEditorValues(ids, view);
-
-      view.settings = this.addPageProperty.getSettings(view);
-
-      // refresh settings of app page tool
-      view.addPageTool.fromSettings(view.settings);
-   }
-
    /**
     * @method component()
     * return a UI component based upon this view.

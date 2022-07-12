@@ -1,40 +1,12 @@
-const ABViewDetailComponentCore = require("../../core/views/ABViewDetailComponentCore");
+const ABViewDetailItemCore = require("../../core/views/ABViewDetailItemCore");
 const ABViewDetailItemComponent = require("./viewComponent/ABViewDetailItemComponent");
 
 let L = (...params) => AB.Multilingual.label(...params);
 
-module.exports = class ABViewDetailItem extends ABViewDetailComponentCore {
+module.exports = class ABViewDetailItem extends ABViewDetailItemCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
    // }
-
-   static propertyEditorDefaultElements(App, ids, _logic, ObjectDefaults) {
-      let commonUI = super.propertyEditorDefaultElements(
-         App,
-         ids,
-         _logic,
-         ObjectDefaults
-      );
-
-      return commonUI.concat([
-         {
-            name: "fieldLabel",
-            view: "text",
-            disabled: true,
-            label: L("Field"),
-         },
-      ]);
-   }
-
-   static propertyEditorPopulate(App, ids, view) {
-      super.propertyEditorPopulate(App, ids, view);
-
-      let field = view.field();
-
-      if (field) {
-         $$(ids.fieldLabel).setValue(field.label);
-      }
-   }
 
    /**
     * @method component()

@@ -72,6 +72,7 @@ module.exports = class ABViewDetailItemComponent extends ABViewComponent {
       if (field?.key == "string" || field?.key == "LongText") {
          val = val.replace(/[<]/g, "&lt;");
       }
+
       $$(componentId).setValues({ display: val });
    }
 };

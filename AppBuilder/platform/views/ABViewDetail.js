@@ -1,6 +1,6 @@
 const ABViewDetailCore = require("../../core/views/ABViewDetailCore");
 const ABViewDetailComponent = require("./viewComponent/ABViewDetailComponent");
-const ABViewDetailItemComponent = require("./ABViewDetailComponent");
+// const ABViewDetailItemComponent = require("./ABViewDetailComponent");
 const ABObjectQuery = require("../ABObjectQuery");
 
 const ABViewDetailPropertyComponentDefaults = ABViewDetailCore.defaultValues();
@@ -20,14 +20,14 @@ module.exports = class ABViewDetail extends ABViewDetailCore {
     * @param {string} mode what mode are we in ['block', 'preview']
     * @return {Component}
     */
-   editorComponent(App, mode) {
-      var comp = super.editorComponent(App, mode);
+   // editorComponent(App, mode) {
+   //    var comp = super.editorComponent(App, mode);
 
-      // Define height of cell
-      comp.ui.rows[0].cellHeight = 75;
+   //    // Define height of cell
+   //    comp.ui.rows[0].cellHeight = 75;
 
-      return comp;
-   }
+   //    return comp;
+   // }
 
    /**
     * @method component()
@@ -255,49 +255,5 @@ module.exports = class ABViewDetail extends ABViewDetailCore {
 
          onShow: _onShow,
       };
-   }
-
-   clearFieldComponents() {
-      let tasks = [];
-
-      this.views().forEach((comp) => {
-         tasks.push(() => comp.destroy());
-      });
-
-      return tasks.reduce((promiseChain, currTask) => {
-         return promiseChain.then(currTask);
-      }, Promise.resolve([]));
-   }
-
-   addFieldToView(field, yPosition, ids, App) {
-      if (field == null) return;
-
-      let newView = field.detailComponent().newInstance(this.application, this);
-      if (newView == null) return;
-
-      // set settings to component
-      newView.settings = newView.settings || {};
-      newView.settings.fieldId = field.id;
-      newView.settings.labelWidth =
-         this.settings.labelWidth ||
-         ABViewDetailPropertyComponentDefaults.labelWidth;
-
-      // keep alias to support Query that contains alias name
-      // [alias].[columnName]
-      newView.settings.alias = field.alias;
-
-      // TODO : Default settings
-
-      newView.position.y = yPosition;
-
-      // add a new component
-      this._views.push(newView);
-
-      // update properties when a sub-view is destroyed
-      newView.once("destroyed", () => {
-         ABViewDetail.propertyEditorPopulate(App, ids, this);
-      });
-
-      return newView;
    }
 };
