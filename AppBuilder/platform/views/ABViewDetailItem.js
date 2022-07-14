@@ -1,65 +1,56 @@
-const ABViewDetailComponentCore = require("../../core/views/ABViewDetailComponentCore");
+const ABViewDetailItemCore = require("../../core/views/ABViewDetailItemCore");
+const ABViewDetailItemComponent = require("./viewComponent/ABViewDetailItemComponent");
 
 let L = (...params) => AB.Multilingual.label(...params);
 
-module.exports = class ABViewDetailComponent extends ABViewDetailComponentCore {
+module.exports = class ABViewDetailItem extends ABViewDetailItemCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
    // }
 
-   static propertyEditorDefaultElements(App, ids, _logic, ObjectDefaults) {
-      var commonUI = super.propertyEditorDefaultElements(
-         App,
-         ids,
-         _logic,
-         ObjectDefaults
-      );
-
-      return commonUI.concat([
-         {
-            name: "fieldLabel",
-            view: "text",
-            disabled: true,
-            label: L("Field"),
-         },
-      ]);
-   }
-
-   static propertyEditorPopulate(App, ids, view) {
-      super.propertyEditorPopulate(App, ids, view);
-
-      var field = view.field();
-
-      if (field) {
-         $$(ids.fieldLabel).setValue(field.label);
-      }
-   }
-
    /**
-    * @component()
+    * @method component()
     * return a UI component based upon this view.
     * @param {obj} App
-    * @param {string} idPrefix
-    *
     * @return {obj} UI component
     */
-   component(App, idPrefix) {
-      var idBase = "ABViewDetailComponent_" + (idPrefix || "") + this.id;
-      var ids = {
+   component(v1App = false) {
+      let component = new ABViewDetailItemComponent(this);
+
+      // if this is our v1Interface
+      if (v1App) {
+         let newComponent = component;
+         component = {
+            ui: newComponent.ui(),
+            init: (options, accessLevel) => {
+               return newComponent.init(this.AB, accessLevel);
+            },
+            onShow: (...params) => {
+               return newComponent.onShow?.(...params);
+            },
+         };
+      }
+
+      return component;
+   }
+
+   componentOld(App, idPrefix) {
+      let idBase = "ABViewDetailComponent_" + (idPrefix || "") + this.id;
+      let ids = {
          component: App.unique(`${idBase}_component`),
       };
       // setup 'label' of the element
-      var detailView = this.detailComponent(),
+      let detailView = this.detailComponent(),
          field = this.field() || {},
          label = "";
 
-      var settings = {};
+      let settings = {};
       if (detailView) settings = detailView.settings;
 
-      var isUsers = false;
+      let isUsers = false;
       if (field && field.key == "user") isUsers = true;
 
-      var templateLabel = "";
+      let templateLabel = "";
       if (settings.showLabel == true) {
          if (settings.labelPosition == "top")
             templateLabel =
@@ -73,11 +64,11 @@ module.exports = class ABViewDetailComponent extends ABViewDetailComponentCore {
          templateLabel = "#display#";
       }
 
-      var template = templateLabel
+      let template = templateLabel
          .replace(/#width#/g, settings.labelWidth)
          .replace(/#label#/g, field ? field.label : "");
 
-      var height = 38;
+      let height = 38;
       if (settings.labelPosition == "top") height = height * 2;
 
       if (
@@ -89,7 +80,7 @@ module.exports = class ABViewDetailComponent extends ABViewDetailComponentCore {
          height = parseInt(field.settings.imageHeight) || height;
       }
 
-      var _ui = {
+      let _ui = {
          id: ids.component,
          view: "template",
          borderless: true,
@@ -100,9 +91,9 @@ module.exports = class ABViewDetailComponent extends ABViewDetailComponentCore {
       };
 
       // make sure each of our child views get .init() called
-      var _init = (options) => {};
+      let _init = (options) => {};
 
-      var _logic = {
+      let _logic = {
          setValue: (componentId, val) => {
             if ($$(componentId)) {
                if (field.key == "string" || field.key == "LongText") {

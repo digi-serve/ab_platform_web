@@ -1,5 +1,5 @@
 const ABViewGridCore = require("../../core/views/ABViewGridCore");
-import ABViewComponent from "./ABViewComponent";
+import ABViewComponent from "./viewComponent/ABViewComponent";
 
 import ABPopupExport from "./ABViewGridPopupExport";
 import ABPopupMassUpdateClass from "./ABViewGridPopupMassUpdate";

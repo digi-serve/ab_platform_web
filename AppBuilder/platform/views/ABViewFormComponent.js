@@ -4,7 +4,7 @@ const ABViewFormFieldPropertyComponentDefaults = ABViewFormComponentCore.default
 
 let L = (...params) => AB.Multilingual.label(...params);
 
-const ABViewComponent = require("./ABViewComponent").default;
+const ABViewComponent = require("./viewComponent/ABViewComponent").default;
 
 class ABViewFormUIComponent extends ABViewComponent {
    constructor(baseView, idBase, ids) {

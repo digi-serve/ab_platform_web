@@ -2,11 +2,16 @@
  * ABViewComponent
  * A common UI component class for our UI widgets.
  */
-import ClassUI from "../../../ui/ClassUI";
+import ClassUI from "../../../../ui/ClassUI";
 
 export default class ABViewComponent extends ClassUI {
-   constructor(...params) {
-      super(...params);
+   constructor(baseView, idBase, ids) {
+      idBase = idBase || `ABViewContainer_${baseView.id}`;
+      super(idBase, ids);
+
+      this.view = baseView;
+      this.settings = baseView.settings;
+      this.AB = baseView.AB;
 
       this.__events = [];
       // {array}
@@ -41,6 +46,10 @@ export default class ABViewComponent extends ClassUI {
     */
    get CurrentDatacollection() {
       return this.AB.datacollectionByID(this.CurrentDatacollectionID);
+   }
+
+   init(AB) {
+      this.AB = AB;
    }
 
    /**

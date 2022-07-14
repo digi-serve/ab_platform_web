@@ -17,19 +17,15 @@ let PopupSubmitRule = null;
 ////
 const ABViewFormPropertyComponentDefaults = ABViewFormCore.defaultValues();
 
-const ABViewComponent = require("./ABViewComponent").default;
+const ABViewComponent = require("./viewComponent/ABViewComponent").default;
 
 class ABViewFormUIComponent extends ABViewComponent {
    constructor(baseView, idBase) {
-      var base = idBase || `ABViewForm_${baseView.id}`;
-      super(base, {
+      idBase = idBase || `ABViewForm_${baseView.id}`;
+      super(baseView, idBase, {
          layout: "",
          filterComplex: "",
       });
-
-      this.view = baseView;
-      this.settings = baseView.settings;
-      this.AB = baseView.AB;
    }
 
    ui() {

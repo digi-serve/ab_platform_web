@@ -1,5 +1,5 @@
 import ABViewProperty from "./ABViewProperty";
-import ABViewComponent from "../ABViewComponent";
+import ABViewComponent from "../viewComponent/ABViewComponent";
 
 let L = (...params) => AB.Multilingual.label(...params);
 
