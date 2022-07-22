@@ -107,6 +107,8 @@ module.exports = class ABViewDetailComponent extends ABViewDetailComponentCore {
             if ($$(componentId)) {
                if (field.key == "string" || field.key == "LongText") {
                   val = val.replace(/[<]/g, "&lt;");
+               } else if (field.key == "user") {
+                  val = val.text ?? val.value ?? val.username ?? val;
                }
                $$(componentId).setValues({ display: val });
             }
