@@ -7,15 +7,24 @@ window.webix.i18n.locales["th-TH"] = {
    decimalDelimiter: ".",
    decimalSize: 2,
    dateFormat: (date) => {
+      if (date == null) return "";
+      else if (typeof date == "string") return date;
+
       const format = webix.Date.dateToStr(`%j/%m/${date.getFullYear() + 543}`);
       return format(date);
    },
    timeFormat: "%G:%i",
    longDateFormat: (date) => {
+      if (date == null) return "";
+      else if (typeof date == "string") return date;
+
       const format = webix.Date.dateToStr(`%j %F ${date.getFullYear() + 543}`);
       return format(date);
    },
    fullDateFormat: (date) => {
+      if (date == null) return "";
+      else if (typeof date == "string") return date;
+
       const format = webix.Date.dateToStr(
          `%j %F ${date.getFullYear() + 543} %G:%i`
       );
