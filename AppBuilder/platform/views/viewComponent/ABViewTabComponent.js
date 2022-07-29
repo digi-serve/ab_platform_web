@@ -417,15 +417,20 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
       // this will collapse or expand the sidebar
       $sidebar.setState(state);
 
+      const checkCollapseMenu = $sidebar.getItem(ids.collapseMenu) ?? null;
+      const checkExpandMenu = $sidebar.getItem(ids.expandMenu) ?? null;
+
       // if the state is collapsed we need to make sure the expand option is available
       if (state.collapsed) {
-         setTimeout(() => {
-            $sidebar.remove(ids.collapseMenu);
+         if (checkCollapseMenu && checkExpandMenu) {
+            // $sidebar.remove(ids.collapseMenu);
             $sidebar.add(expandMenu);
-         }, 0);
+         }
       } else {
-         $sidebar.remove(ids.expandMenu);
-         $sidebar.add(collapseMenu);
+         if (checkCollapseMenu && checkExpandMenu) {
+            // $sidebar.remove(ids.collapseMenu);
+            $sidebar.add(collapseMenu);
+         }
       }
    }
 
