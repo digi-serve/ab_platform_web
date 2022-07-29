@@ -413,9 +413,16 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          }
       }
 
-      this.once("option.data", (data) => {
+      const handlerOptionData = (data) => {
          this.populateOptions(theEditor, data, field, form, true);
-      });
+      };
+
+      // try to make sure we don't continually add up listeners.
+      this.removeListener("option.data", handlerOptionData).once(
+         "option.data",
+         handlerOptionData
+      );
+
       this.getOptions(combineFilters, "").then((data) => {
          this.populateOptions(theEditor, data, field, form, false);
       });
