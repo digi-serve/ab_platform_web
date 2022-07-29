@@ -1,5 +1,5 @@
 const ABViewKanbanCore = require("../../core/views/ABViewKanbanCore");
-import ABViewComponent from "./ABViewComponent";
+import ABViewComponent from "./viewComponent/ABViewComponent";
 
 const ABViewPropertyLinkPage = require("./viewProperties/ABViewPropertyLinkPage")
    .default;

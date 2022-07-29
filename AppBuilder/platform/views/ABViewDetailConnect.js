@@ -2,6 +2,8 @@ const ABViewDetailConnectCore = require("../../core/views/ABViewDetailConnectCor
 const ABViewPropertyAddPage = require("./viewProperties/ABViewPropertyAddPage")
    .default;
 
+const ABViewDetailConnectComponent = require("./viewComponent/ABViewDetailConnectComponent");
+
 module.exports = class ABViewDetailConnect extends ABViewDetailConnectCore {
    ///
    /// Instance Methods
@@ -19,68 +21,35 @@ module.exports = class ABViewDetailConnect extends ABViewDetailConnectCore {
       this.addPageTool.fromSettings(this.settings);
    }
 
-   //
-   // Property Editor
-   //
-
-   static propertyEditorDefaultElements(App, ids, _logic, ObjectDefaults) {
-      let commonUI = super.propertyEditorDefaultElements(
-         App,
-         ids,
-         _logic,
-         ObjectDefaults
-      );
-
-      let idBase = "ABViewDetailConnectPropertyEditor";
-
-      if (this.addPageProperty == null) {
-         this.addPageProperty = ABViewPropertyAddPage.propertyComponent(
-            App,
-            idBase
-         );
-         this.addPageProperty.init({
-            onSave: () => {
-               let currView = _logic.currentEditObject();
-               if (!currView) return;
-
-               // refresh settings
-               this.propertyEditorValues(ids, currView);
-
-               // trigger a save()
-               this.propertyEditorSave(ids, currView);
-            },
-         });
-      }
-
-      // in addition to the common .label  values, we
-      // ask for:
-      return commonUI.concat([this.addPageProperty.ui]);
-   }
-
-   static propertyEditorPopulate(App, ids, view) {
-      super.propertyEditorPopulate(App, ids, view);
-
-      this.addPageProperty.setSettings(view, view.settings);
-   }
-
-   static propertyEditorValues(ids, view) {
-      super.propertyEditorValues(ids, view);
-
-      view.settings = this.addPageProperty.getSettings(view);
-
-      // refresh settings of app page tool
-      view.addPageTool.fromSettings(view.settings);
-   }
-
    /**
     * @method component()
     * return a UI component based upon this view.
-    * @param {obj} App
+    * @param {obj} v1App
     * @param {string} idPrefix
     *
     * @return {obj} UI component
     */
-   component(App, idPrefix) {
+   component(v1App, idPrefix) {
+      let component = new ABViewDetailConnectComponent(this);
+
+      // if this is our v1Interface
+      if (v1App) {
+         var newComponent = component;
+         component = {
+            ui: component.ui(),
+            init: (options, accessLevel) => {
+               return newComponent.init(this.AB, accessLevel);
+            },
+            onShow: (...params) => {
+               return newComponent.onShow?.(...params);
+            },
+         };
+      }
+
+      return component;
+   }
+
+   componentOld(App, idPrefix) {
       let idBase = "ABViewDetailConnect_" + (idPrefix || "") + this.id;
       let baseComp = super.component(App, idBase);
       var ids = {
@@ -144,22 +113,20 @@ module.exports = class ABViewDetailConnect extends ABViewDetailConnectCore {
          ui: ui,
 
          init: _init,
-         logic: {
-            setValue: (val) => {
-               let vals = [];
-               if (Array.isArray(val)) {
-                  val.forEach((record) => {
-                     vals.push(
-                        `<span class="webix_multicombo_value">${record.text}</span>`
-                     );
-                  });
-               } else {
+         setValue: (val) => {
+            let vals = [];
+            if (Array.isArray(val)) {
+               val.forEach((record) => {
                   vals.push(
-                     `<span class="webix_multicombo_value">${val.text}</span>`
+                     `<span class="webix_multicombo_value">${record.text}</span>`
                   );
-               }
-               baseComp.logic.setValue(baseComp.ui.id, vals.join(""));
-            },
+               });
+            } else {
+               vals.push(
+                  `<span class="webix_multicombo_value">${val.text}</span>`
+               );
+            }
+            baseComp.setValue(baseComp.ui().id, vals.join(""));
          },
       };
    }

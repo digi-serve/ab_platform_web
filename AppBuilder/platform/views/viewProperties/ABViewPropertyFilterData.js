@@ -16,7 +16,7 @@
  */
 const ABMLClass = require("../../ABMLClass");
 import ABViewProperty from "./ABViewProperty";
-import ABViewComponent from "../ABViewComponent";
+import ABViewComponent from "../viewComponent/ABViewComponent";
 
 // const ABViewGridFilterRule = require("../../../rules/ABViewGridFilterRule");
 

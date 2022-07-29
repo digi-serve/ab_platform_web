@@ -167,7 +167,7 @@ function _onShow(compId, instance) {
    // }
 }
 
-const ABViewComponent = require("./ABViewComponent").default;
+const ABViewComponent = require("./viewComponent/ABViewComponent").default;
 
 class ABViewFormConnectComponent extends ABViewComponent {
    constructor(baseView, idBase) {

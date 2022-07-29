@@ -1,5 +1,7 @@
 const ABViewFormCheckboxCore = require("../../core/views/ABViewFormCheckboxCore");
 
+const ABViewComponent = require("./viewComponent/ABViewComponent").default;
+
 module.exports = class ABViewFormCheckbox extends ABViewFormCheckboxCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -47,7 +49,37 @@ module.exports = class ABViewFormCheckbox extends ABViewFormCheckboxCore {
     * @param {obj} App
     * @return {obj} UI component
     */
-   component(App) {
+   component(v1App) {
+      let component = super.component();
+
+      component._ui = component.ui();
+      component._ui.id = `ABViewFormCheckbox_${this.id}_f_`;
+
+      component.ui = () => {
+         component._ui.view = "checkbox";
+
+         return component._ui;
+      };
+
+      // if this is our v1Interface
+      if (v1App) {
+         let newComponent = component;
+         component = {
+            ui: component.ui(),
+            init: (options, accessLevel) => {
+               return newComponent.init(this.AB, accessLevel);
+            },
+            onShow: (...params) => {
+               return newComponent.onShow?.(...params);
+            },
+         };
+         component._ui = newComponent._ui;
+      }
+
+      return component;
+   }
+
+   componentOld(App) {
       var component = super.component(App);
 
       var idBase = this.parentFormUniqueID(`ABViewFormCheckbox_${this.id}_f_`);
