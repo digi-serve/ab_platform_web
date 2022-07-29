@@ -1,4 +1,5 @@
 const ABViewComponent = require("./ABViewComponent").default;
+const ABViewDetailComponent = require("./ABViewDetailComponent");
 const ABViewPropertyLinkPage = require("../viewProperties/ABViewPropertyLinkPage")
    .default;
 
@@ -97,7 +98,7 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
    }
 
    async onShow() {
-      const dc = this.datacollection;
+      const dc = this.view.datacollection;
       if (!dc) return;
 
       switch (dc.dataStatus) {
@@ -157,7 +158,7 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
       const detailsPage = this.settings.detailsPage;
       let records = [];
 
-      const dc = this.datacollection;
+      const dc = this.view.datacollection;
       if (!dc) {
          this.ready();
          return;
@@ -169,7 +170,7 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
          return;
       }
 
-      const xCount = parseInt(this.settings.xCount);
+      const xCount = parseInt(this.view.settings.xCount);
       const recordWidth = Math.floor(
          (Layout.$width - 20 - xCount * 20) / xCount
       );
@@ -197,32 +198,34 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
 
       for (let i = this._startPos; i < stopPos; i++) {
          // get the components configuation
-         let detailCom = this.AB.cloneDeep(super.component(rows[i].id));
+         let detailCom = new ABViewDetailComponent(this.view, rows[i].id);
+
+         let _ui = detailCom.ui();
 
          // adjust the UI to make sure it will look like a "card"
-         detailCom.ui.type = "space";
-         detailCom.ui.css = "ab-detail-view";
+         _ui.type = "space";
+         _ui.css = "ab-detail-view";
          if (detailsPage || editPage) {
-            detailCom.ui.css += ` ab-detail-hover ab-record-${rows[i].id}`;
+            _ui.css += ` ab-detail-hover ab-record-${rows[i].id}`;
 
             if (detailsPage) {
-               detailCom.ui.css += " ab-detail-page";
+               _ui.css += " ab-detail-page";
             }
             if (editPage) {
-               detailCom.ui.css += " ab-edit-page";
+               _ui.css += " ab-edit-page";
             }
          }
-         detailCom.ui.paddingX = 10;
-         detailCom.ui.paddingY = 6;
-         detailCom.ui.minWidth = recordWidth - 10;
-         detailCom.ui.maxWidth = recordWidth;
+         _ui.paddingX = 10;
+         _ui.paddingY = 6;
+         _ui.minWidth = recordWidth - 10;
+         _ui.maxWidth = recordWidth;
 
          if (Layout.addView) {
-            Layout.addView(detailCom.ui, -1);
+            Layout.addView(_ui, -1);
             detailCom.init(null, 2); // 2 - Always allow access to components inside data view
-            setTimeout(detailCom.logic.displayData(rows[i]), 0);
+            setTimeout(detailCom.displayData(rows[i]), 0);
          } else {
-            records.push(detailCom.ui);
+            records.push(_ui);
          }
       }
 
@@ -238,9 +241,9 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
          this.AB.Webix.ui(flexlayout, $$(ids.scrollview), $$(ids.dataFlexView));
 
          for (let j = this._startPos; j < stopPos; j++) {
-            let detailCom = this.AB.cloneDeep(super.component(rows[j].id));
+            let detailCom = new ABViewDetailComponent(this.view, rows[j].id);
             detailCom.init(null, 2); // 2 - Always allow access to components inside data view
-            setTimeout(detailCom.logic.displayData(rows[j]), 0);
+            setTimeout(detailCom.displayData(rows[j]), 0);
          }
       }
 
@@ -292,10 +295,10 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
       }
 
       //Add data-cy attributes for cypress tests
-      const name = this.name.replace(".dataview", "");
+      const name = this.view.name.replace(".dataview", "");
       Layout.$view.setAttribute(
          "data-cy",
-         `dataview container ${name} ${this.id}`
+         `dataview container ${name} ${this.view.id}`
       );
 
       Layout.getChildViews().forEach((child, i) => {
@@ -305,13 +308,13 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
             .querySelector(".webix_accordionitem_body")
             .setAttribute(
                "data-cy",
-               `dataview item ${name} ${uuid} ${this.id}`
+               `dataview item ${name} ${uuid} ${this.view.id}`
             );
          view
             .querySelector(".webix_accordionitem_button")
             .setAttribute(
                "data-cy",
-               `dataview item button ${name} ${uuid} ${this.id}`
+               `dataview item button ${name} ${uuid} ${this.view.id}`
             );
       });
 
@@ -352,7 +355,7 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
 
          this.yPosition = y;
 
-         const dc = this.datacollection;
+         const dc = this.view.datacollection;
          if (!dc) return;
 
          if (Layout.getChildViews().length >= dc.totalCount) return;

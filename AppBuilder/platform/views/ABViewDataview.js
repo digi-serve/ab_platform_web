@@ -1,7 +1,7 @@
 const ABViewDataviewCore = require("../../core/views/ABViewDataviewCore");
-const ABViewDataviewComponent = require("./viewComponent/ABViewDetailComponent");
-const ABViewPropertyLinkPage = require("./viewProperties/ABViewPropertyLinkPage")
-   .default;
+const ABViewDataviewComponent = require("./viewComponent/ABViewDataviewComponent");
+// const ABViewPropertyLinkPage = require("./viewProperties/ABViewPropertyLinkPage")
+//    .default;
 
 const ABViewDataviewDefaults = ABViewDataviewCore.defaultValues();
 
@@ -16,55 +16,55 @@ module.exports = class ABViewDataview extends ABViewDataviewCore {
    // Property Editor
    //
 
-   static propertyEditorDefaultElements(App, ids, _logic, ObjectDefaults) {
-      var idBase = "ABViewDataviewPropertyEditor";
+   // static propertyEditorDefaultElements(App, ids, _logic, ObjectDefaults) {
+   //    var idBase = "ABViewDataviewPropertyEditor";
 
-      var commonUI = super.propertyEditorDefaultElements(
-         App,
-         ids,
-         _logic,
-         ObjectDefaults
-      );
+   //    var commonUI = super.propertyEditorDefaultElements(
+   //       App,
+   //       ids,
+   //       _logic,
+   //       ObjectDefaults
+   //    );
 
-      this.linkPageComponent = ABViewPropertyLinkPage.propertyComponent(
-         App,
-         idBase
-      );
+   //    this.linkPageComponent = ABViewPropertyLinkPage.propertyComponent(
+   //       App,
+   //       idBase
+   //    );
 
-      return commonUI.concat([
-         {
-            view: "counter",
-            name: "xCount",
-            min: 1, // we cannot have 0 columns per row so lets not accept it
-            label: L("Items in a row"),
-            labelWidth: this.AB.UISettings.config().labelWidthLarge,
-            step: 1,
-         },
-         this.linkPageComponent.ui,
-      ]);
-   }
+   //    return commonUI.concat([
+   //       {
+   //          view: "counter",
+   //          name: "xCount",
+   //          min: 1, // we cannot have 0 columns per row so lets not accept it
+   //          label: L("Items in a row"),
+   //          labelWidth: this.AB.UISettings.config().labelWidthLarge,
+   //          step: 1,
+   //       },
+   //       this.linkPageComponent.ui,
+   //    ]);
+   // }
 
-   static propertyEditorPopulate(App, ids, view) {
-      super.propertyEditorPopulate(App, ids, view);
+   // static propertyEditorPopulate(App, ids, view) {
+   //    super.propertyEditorPopulate(App, ids, view);
 
-      $$(ids.xCount).setValue(
-         view.settings.xCount || ABViewDataviewDefaults.xCount
-      );
+   //    $$(ids.xCount).setValue(
+   //       view.settings.xCount || ABViewDataviewDefaults.xCount
+   //    );
 
-      this.linkPageComponent.viewLoad(view);
-      this.linkPageComponent.setSettings(view.settings);
-   }
+   //    this.linkPageComponent.viewLoad(view);
+   //    this.linkPageComponent.setSettings(view.settings);
+   // }
 
-   static propertyEditorValues(ids, view) {
-      super.propertyEditorValues(ids, view);
+   // static propertyEditorValues(ids, view) {
+   //    super.propertyEditorValues(ids, view);
 
-      view.settings.xCount = $$(ids.xCount).getValue();
+   //    view.settings.xCount = $$(ids.xCount).getValue();
 
-      let linkSettings = this.linkPageComponent.getSettings();
-      for (let key in linkSettings) {
-         view.settings[key] = linkSettings[key];
-      }
-   }
+   //    let linkSettings = this.linkPageComponent.getSettings();
+   //    for (let key in linkSettings) {
+   //       view.settings[key] = linkSettings[key];
+   //    }
+   // }
 
    /**
     * @method fromValues()

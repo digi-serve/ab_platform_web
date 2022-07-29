@@ -14,7 +14,7 @@ module.exports = class ABViewDetailItemComponent extends ABViewComponent {
       let ids = this.ids;
 
       // setup 'label' of the element
-      let detailView = this.view.parentDetailComponent(),
+      let detailView = this.view.detailComponent(),
          field = this.view.field();
 
       let settings = detailView?.settings ?? {};
