@@ -51,16 +51,16 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
          name: "customIcons",
          icon: (obj, common) => {
             if (obj.icon.length)
-               return (
-                  "<span class='webix_icon webix_sidebar_icon fa fa-fw fa-" +
-                  obj.icon +
-                  "'></span>"
-               );
-            return (
-               "<span class='webix_icon webix_sidebar_icon sidebarCustomIcon'>" +
-               obj.value.charAt(0).toUpperCase() +
-               "</span>"
-            );
+               return [
+                  "<span class='webix_icon webix_sidebar_icon fa fa-fw fa-",
+                  obj.icon,
+                  "'></span>",
+               ].join("");
+            return [
+               "<span class='webix_icon webix_sidebar_icon sidebarCustomIcon'>",
+               obj.value.charAt(0).toUpperCase(),
+               "</span>",
+            ].join("");
          },
       });
 
@@ -77,7 +77,7 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
                })
                .map((view) => {
                   return {
-                     id: view.id + "_menu",
+                     id: `${view.id}_menu`,
                      value: view.label,
                      icon: view.tabicon ? view.tabicon : "",
                   };
@@ -100,7 +100,7 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
                };
 
                // find out what the first option is so we can set it later
-               let selectedItem = baseView._viewComponents[0].view.id + "_menu";
+               let selectedItem = `${baseView._viewComponents[0].view.id}_menu`;
 
                const sidebar = {
                   view: "sidebar",
@@ -271,18 +271,20 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
                   // tab icon
                   if (view.tabicon) {
                      if (baseView.settings.iconOnTop) {
-                        tabTemplate =
-                           "<div class='ab-tabIconContainer'><span class='fa fa-lg fa-fw fa-" +
-                           view.tabicon +
-                           "'></span><br/>" +
-                           view.label +
-                           "</div>";
+                        tabTemplate = [
+                           "<div class='ab-tabIconContainer'><span class='fa fa-lg fa-fw fa-",
+                           view.tabicon,
+                           "'></span><br/>",
+                           view.label,
+                           "</div>",
+                        ].join("");
                      } else {
-                        tabTemplate =
-                           "<span class='fa fa-lg fa-fw fa-" +
-                           view.tabicon +
-                           "'></span> " +
-                           view.label;
+                        tabTemplate = [
+                           "<span class='fa fa-lg fa-fw fa-",
+                           view.tabicon,
+                           "'></span> ",
+                           view.label,
+                        ].join("");
                      }
                   }
 
@@ -315,19 +317,14 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
                                     const node = $$(
                                        ids.component
                                     ).$view.querySelector(
-                                       '[button_id="' + view.id + '"]'
+                                       `[button_id="${view.id}"]`
                                     );
 
                                     if (!node) return;
 
                                     node.setAttribute(
                                        "data-cy",
-                                       "tab " +
-                                          view.name +
-                                          " " +
-                                          view.id +
-                                          " " +
-                                          baseView.id
+                                       `tab ${view.name} ${view.id} ${baseView.id}`
                                     );
                                  });
                               },
