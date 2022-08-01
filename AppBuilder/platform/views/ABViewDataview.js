@@ -1,10 +1,11 @@
 const ABViewDataviewCore = require("../../core/views/ABViewDataviewCore");
-const ABViewPropertyLinkPage = require("./viewProperties/ABViewPropertyLinkPage")
-   .default;
+const ABViewDataviewComponent = require("./viewComponent/ABViewDataviewComponent");
+// const ABViewPropertyLinkPage = require("./viewProperties/ABViewPropertyLinkPage")
+//    .default;
 
 const ABViewDataviewDefaults = ABViewDataviewCore.defaultValues();
 
-let L = (...params) => AB.Multilingual.label(...params);
+const L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABViewDataview extends ABViewDataviewCore {
    // constructor(values, application, parent, defaultValues) {
@@ -15,55 +16,55 @@ module.exports = class ABViewDataview extends ABViewDataviewCore {
    // Property Editor
    //
 
-   static propertyEditorDefaultElements(App, ids, _logic, ObjectDefaults) {
-      var idBase = "ABViewDataviewPropertyEditor";
+   // static propertyEditorDefaultElements(App, ids, _logic, ObjectDefaults) {
+   //    var idBase = "ABViewDataviewPropertyEditor";
 
-      var commonUI = super.propertyEditorDefaultElements(
-         App,
-         ids,
-         _logic,
-         ObjectDefaults
-      );
+   //    var commonUI = super.propertyEditorDefaultElements(
+   //       App,
+   //       ids,
+   //       _logic,
+   //       ObjectDefaults
+   //    );
 
-      this.linkPageComponent = ABViewPropertyLinkPage.propertyComponent(
-         App,
-         idBase
-      );
+   //    this.linkPageComponent = ABViewPropertyLinkPage.propertyComponent(
+   //       App,
+   //       idBase
+   //    );
 
-      return commonUI.concat([
-         {
-            view: "counter",
-            name: "xCount",
-            min: 1, // we cannot have 0 columns per row so lets not accept it
-            label: L("Items in a row"),
-            labelWidth: this.AB.UISettings.config().labelWidthLarge,
-            step: 1,
-         },
-         this.linkPageComponent.ui,
-      ]);
-   }
+   //    return commonUI.concat([
+   //       {
+   //          view: "counter",
+   //          name: "xCount",
+   //          min: 1, // we cannot have 0 columns per row so lets not accept it
+   //          label: L("Items in a row"),
+   //          labelWidth: this.AB.UISettings.config().labelWidthLarge,
+   //          step: 1,
+   //       },
+   //       this.linkPageComponent.ui,
+   //    ]);
+   // }
 
-   static propertyEditorPopulate(App, ids, view) {
-      super.propertyEditorPopulate(App, ids, view);
+   // static propertyEditorPopulate(App, ids, view) {
+   //    super.propertyEditorPopulate(App, ids, view);
 
-      $$(ids.xCount).setValue(
-         view.settings.xCount || ABViewDataviewDefaults.xCount
-      );
+   //    $$(ids.xCount).setValue(
+   //       view.settings.xCount || ABViewDataviewDefaults.xCount
+   //    );
 
-      this.linkPageComponent.viewLoad(view);
-      this.linkPageComponent.setSettings(view.settings);
-   }
+   //    this.linkPageComponent.viewLoad(view);
+   //    this.linkPageComponent.setSettings(view.settings);
+   // }
 
-   static propertyEditorValues(ids, view) {
-      super.propertyEditorValues(ids, view);
+   // static propertyEditorValues(ids, view) {
+   //    super.propertyEditorValues(ids, view);
 
-      view.settings.xCount = $$(ids.xCount).getValue();
+   //    view.settings.xCount = $$(ids.xCount).getValue();
 
-      let linkSettings = this.linkPageComponent.getSettings();
-      for (let key in linkSettings) {
-         view.settings[key] = linkSettings[key];
-      }
-   }
+   //    let linkSettings = this.linkPageComponent.getSettings();
+   //    for (let key in linkSettings) {
+   //       view.settings[key] = linkSettings[key];
+   //    }
+   // }
 
    /**
     * @method fromValues()
@@ -75,13 +76,41 @@ module.exports = class ABViewDataview extends ABViewDataviewCore {
       super.fromValues(values);
 
       this.settings.detailsPage =
-         this.settings.detailsPage || ABViewDataviewDefaults.detailsPage;
+         this.settings.detailsPage ?? ABViewDataviewDefaults.detailsPage;
       this.settings.editPage =
-         this.settings.editPage || ABViewDataviewDefaults.editPage;
+         this.settings.editPage ?? ABViewDataviewDefaults.editPage;
       this.settings.detailsTab =
-         this.settings.detailsTab || ABViewDataviewDefaults.detailsTab;
+         this.settings.detailsTab ?? ABViewDataviewDefaults.detailsTab;
       this.settings.editTab =
-         this.settings.editTab || ABViewDataviewDefaults.editTab;
+         this.settings.editTab ?? ABViewDataviewDefaults.editTab;
+   }
+
+   /**
+    * @method component()
+    * return a UI component based upon this view.
+    * @param {obj } v1App
+    * @param {string} idPrefix - define to support in 'Datacollection' widget
+    *
+    * @return {obj } UI component
+    */
+   component(v1App, idPrefix) {
+      let component = new ABViewDataviewComponent(this);
+
+      // if this is our v1Interface
+      if (v1App) {
+         var newComponent = component;
+         component = {
+            ui: component.ui(),
+            init: (options, accessLevel) => {
+               return newComponent.init(this.AB, accessLevel);
+            },
+            onShow: (...params) => {
+               return newComponent.onShow?.(...params);
+            },
+         };
+      }
+
+      return component;
    }
 
    /**
@@ -90,7 +119,7 @@ module.exports = class ABViewDataview extends ABViewDataviewCore {
     * @param {obj } App
     * @return {obj } UI component
     */
-   component(App) {
+   componentOld(App, idPrefix) {
       var com = {};
 
       var idBase = "ABViewDataview_" + this.id;
@@ -492,12 +521,5 @@ module.exports = class ABViewDataview extends ABViewDataviewCore {
       };
 
       return com;
-   }
-
-   get linkPageHelper() {
-      if (this.__linkPageHelper == null)
-         this.__linkPageHelper = new ABViewPropertyLinkPage();
-
-      return this.__linkPageHelper;
    }
 };
