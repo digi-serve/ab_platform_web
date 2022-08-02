@@ -1,7 +1,7 @@
 const path = require("path");
 const APP = path.resolve(__dirname);
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 
 module.exports = {
    context: APP,
@@ -24,30 +24,31 @@ module.exports = {
          },
       ],
    },
-   plugins: [new HtmlWebpackPlugin({
-      template: "./webpack/index.ejs",
-      filename: "../../../api_sails/views/site/index.ejs",
-      inject: "body",
-      publicPath: "assets/app"
-   }),
-   new CleanWebpackPlugin() 
-],
+   plugins: [
+      new HtmlWebpackPlugin({
+         template: "./webpack/index.ejs",
+         filename: "../../../api_sails/views/site/index.ejs",
+         inject: "body",
+         publicPath: "assets/app",
+      }),
+      new CleanWebpackPlugin(),
+   ],
    resolve: {
       alias: {
          assets: path.resolve(__dirname, "..", "web", "assets"),
       },
    },
    optimization: {
-    moduleIds: 'deterministic',
-     runtimeChunk: 'single',
-     splitChunks: {
-      cacheGroups: {
-         vendor: {
-           test: /[\\/]node_modules[\\/]/,
-           name: 'vendors',
-           chunks: 'all',
+      moduleIds: "deterministic",
+      runtimeChunk: "single",
+      splitChunks: {
+         cacheGroups: {
+            vendor: {
+               test: /[\\/]node_modules[\\/]/,
+               name: "vendors",
+               chunks: "all",
+            },
          },
       },
-     },
    },
 };

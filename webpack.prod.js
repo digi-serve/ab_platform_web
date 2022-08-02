@@ -4,8 +4,10 @@ const CompressionPlugin = require("compression-webpack-plugin");
 
 module.exports = merge(common, {
    mode: "production",
-   plugins: [new CompressionPlugin({
-      exclude: /index\.ejs/
-   })],
+   plugins: [
+      new CompressionPlugin({
+         exclude: /index\.ejs/,
+      }),
+   ],
    devtool: "source-map",
 });
