@@ -8,7 +8,7 @@ on:
       branches: [master]
    # Allows user to trigger the workflow from GitHub's web UI
    workflow_dispatch:
-   
+
 jobs:
    e2etests:
       name: Test
@@ -25,29 +25,33 @@ jobs:
            with:
               path: ab_platform_web
               submodules: true
-              
+
          - uses: actions/checkout@v3
            with:
               path: web
               repository: digi-serve/ab_service_web
-              token: ${{ secrets.DS_REPO_PAT }}
-              
+
+         - uses: actions/checkout@v3
+           with:
+              path: api_sails
+              repository: digi-serve/ab_service_api_sails
+
          - run: npm i
            working-directory: ./ab_platform_web
-         
+
          - name: Webpack
            run: npm run build:${{ matrix.webpack }}
            working-directory: ./ab_platform_web
-           
+
         # webpack expects the folder to be called "web" ab-install action expects "ab_service_web"
          - run: mv web ab_service_web
+         - run: mv api_sails ab_service_api_sails
 
          - uses: digi-serve/ab-install-action@v1
            with:
               port: 8080
               folder: ab
-              repository: digi-serve/ab_service_web
-              
+
          - name: Check out kitchen-sink tests
            uses: actions/checkout@v2
            with:
@@ -64,18 +68,18 @@ jobs:
               wait-on-timeout: 300
               env: stack=ab
               install: false
-              
+
          - uses: actions/upload-artifact@v2
            if: failure()
            with:
               name: cypress-screenshots
               path: ./ab/test/e2e/cypress/screenshots
-              
-   # if its a push event and tests passed update ab_service_web           
+
+   # if its a push event and tests passed update ab_service_web
    update_ab_service_web:
       name: Update ab_service_web
       needs: e2etests
-      if: ${{ github.event_name == 'push' }} 
+      if: ${{ github.event_name == 'push' }}
       runs-on: ubuntu-latest
       strategy:
          matrix:
@@ -95,6 +99,12 @@ jobs:
               repository: digi-serve/ab_service_web
               ref: ${{ matrix.branch }}
               token: ${{ secrets.DS_REPO_PAT }}
+         - uses: actions/checkout@v3
+           with:
+              path: api_sails
+              repository: digi-serve/ab_service_api_sails
+              ref: ${{ matrix.branch }}
+              token: ${{ secrets.DS_REPO_PAT }}
          - run: npm i
            working-directory: ./ab_platform_web
          - run: npm run build:${{ matrix.webpack }}
@@ -102,3 +112,6 @@ jobs:
          - uses: EndBug/add-and-commit@v9
            with:
               cwd: ./web
+         - uses: EndBug/add-and-commit@v9
+           with:
+              cwd: ./api_sails
