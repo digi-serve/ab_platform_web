@@ -220,8 +220,8 @@ module.exports = class ABViewConditionalContainer extends (
 
       var baseComp = super.component(App);
 
-      var ifComp = this.views()[0].component(App),
-         elseComp = this.views()[1].component(App);
+      const ifComp = this.views()[0].component(App);
+      const elseComp = this.views()[1].component(App);
 
       ifComp.ui.batch = "if";
       elseComp.ui.batch = "else";
@@ -245,8 +245,10 @@ module.exports = class ABViewConditionalContainer extends (
          ],
       };
 
-      var _init = (options) => {
+      var _init = (options, accessLevel) => {
          baseComp.init(options);
+         ifComp.init(options, accessLevel);
+         elseComp.init(options, accessLevel);
 
          this.populateFilterComponent();
 
