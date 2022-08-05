@@ -913,12 +913,12 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
 
          var value = op.value;
 
-         if (value == "ab-current-user")
+         if (value == "ab-current-user") {
             value = this.currentForm.AB.Account.username();
 
          // in the case of a connected Field, we use op.value to get the
          // datacollection, and find it's currently selected value:
-         if (field.isConnection || op.valueType == "exist") {
+         } else if (field.isConnection || op.valueType == "exist") {
             // NOTE: 30 May 2018 :current decision from Ric is to limit this
             // to only handle 1:x connections where we update the current obj
             // with the PK of the value from the DC.
