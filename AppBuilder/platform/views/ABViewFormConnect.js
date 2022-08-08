@@ -187,9 +187,8 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
       );
 
       this.__filterComponent.setValue(
-         this.settings.objectWorkspace.filterConditions ||
-            ABViewFormConnectPropertyComponentDefaults.objectWorkspace
-               .filterConditions
+         this.settings.objectWorkspace.filterConditions ??
+            ABViewFormConnectPropertyComponentDefaults.filterConditions
       );
    }
 
