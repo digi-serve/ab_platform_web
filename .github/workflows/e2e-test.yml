@@ -47,7 +47,7 @@ jobs:
          - run: mv web ab_service_web
          - run: mv api_sails ab_service_api_sails
 
-         - uses: digi-serve/ab-install-action@v1
+         - uses: digi-serve/ab-install-action@platform_web
            with:
               port: 8080
               folder: ab
