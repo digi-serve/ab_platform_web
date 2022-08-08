@@ -5,15 +5,17 @@
  * well the main ABFactory object that will drive the rest of the applications.
  */
 
-var Webix = require("../js/webix/webix.js");
+import * as Webix from "../js/webix/webix.js";
 // NOTE: changed to require() so switching to webix_debug.js will work.
+// var Webix = require("../js/webix/webix-debug.js");
+
 import webixCSS from "../js/webix/webix.css";
 // Make sure webix is global object
 if (!window.webix) {
    window.webix = Webix;
 }
 
-require("../js/webix/locales/th-TH.js");
+import "../js/webix/locales/th-TH.js";
 
 import ABFactory from "../AppBuilder/ABFactory";
 
@@ -24,8 +26,8 @@ import BootstrapCSS from "../node_modules/bootstrap/dist/css/bootstrap.min.css";
 import Config from "../config/Config.js";
 
 import FormIO from "../node_modules/formiojs/dist/formio.full.min.js";
-import FormIOFormCSS from "../node_modules/formiojs/dist/formio.form.min.css";
-import FormIOBuilderCSS from "../node_modules/formiojs/dist/formio.builder.min.css";
+import "../node_modules/formiojs/dist/formio.form.min.css";
+import "../node_modules/formiojs/dist/formio.builder.min.css";
 // import FormIOCSS from "../node_modules/formiojs/dist/formio.full.min.css";
 
 import initConfig from "../init/initConfig.js";
@@ -35,14 +37,15 @@ import initDefinitions from "../init/initDefinitions.js";
 
 // import JSZipUtils from "jszip-utils/dist/jszip-utils.min.js";
 
-var QueryBuilder = require("../js/webix/components/querybuilder/querybuilder.min.js");
-// NOTE: changed QB to require() since import couldn't find the global webix object.
-import querybuilderCSS from "../js/webix/components/querybuilder/querybuilder.min.css";
+// Should use webix/query, querybuilder no longer maintained
+// var QueryBuilder = require("../js/webix/components/querybuilder/querybuilder.min.js");
+// // NOTE: changed QB to require() since import couldn't find the global webix object.
+// import querybuilderCSS from "../js/webix/components/querybuilder/querybuilder.min.css";
 
 import Selectivity from "../js/selectivity/selectivity.min.js";
 import selectivityCSS from "../js/selectivity/selectivity.min.css";
 
-import tinymce from "../js/webix/extras/tinymce";
+import * as tinymce from "../js/webix/extras/tinymce";
 import "tinymce/icons/default";
 import "tinymce/themes/silver";
 import "tinymce/plugins/link";

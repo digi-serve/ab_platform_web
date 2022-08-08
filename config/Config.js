@@ -2,7 +2,7 @@ import ConfigDesktop from "./configDesktop";
 import ConfigMobile from "./configMobile";
 
 // var EventEmitter = require("events").EventEmitter;
-var _defaultsDeep = require("lodash/defaultsDeep");
+import { defaultsDeep } from "lodash";
 
 var divConfigDefaults = {
    "appbuilder-portal-autoenter": true,
@@ -65,7 +65,7 @@ class Config {
 
    config(json) {
       this._config = json;
-      _defaultsDeep(this._config, configDefaults);
+      defaultsDeep(this._config, configDefaults);
    }
 
    setting(key, value) {
