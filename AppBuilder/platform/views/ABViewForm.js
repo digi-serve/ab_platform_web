@@ -1326,9 +1326,10 @@ module.exports = class ABViewForm extends ABViewFormCore {
     *
     * @param {webix form} formView
     * @param {ABObject} obj
+    * @param {ABDatacollection} dc
     * @param {ABDatacollection} dcLink [optional]
     */
-   getFormValues(formView, obj, dcLink) {
+   getFormValues(formView, obj, dc, dcLink) {
       // get the fields that are on this form
       var visibleFields = ["id"]; // we always want the id so we can udpate records
       var loopForm = formView.getValues(function (obj) {
@@ -1377,7 +1378,13 @@ module.exports = class ABViewForm extends ABViewFormCore {
       }
 
       // Add parent's data collection cursor when a connect field does not show
-      if (dcLink && dcLink.getCursor()) {
+      let linkValues;
+
+      if (dcLink) {
+         linkValues = dcLink.getCursor();
+      }
+
+      if (linkValues) {
          var objectLink = dcLink.datasource;
 
          var connectFields = obj.connectFields();
@@ -1391,11 +1398,29 @@ module.exports = class ABViewForm extends ABViewFormCore {
                formFieldCom.length < 1 && // check field does not show
                formVals[f.columnName] === undefined
             ) {
+               let linkColName = f.indexField
+                  ? f.indexField.columnName
+                  : objectLink.PK();
+
                formVals[f.columnName] = {};
-               formVals[f.columnName][objectLink.PK()] = dcLink.getCursor().id;
+               formVals[f.columnName][linkColName] =
+                  linkValues[linkColName] || linkValues.id;
             }
          });
       }
+
+      // NOTE: need to pull data of current cursor to calculate Calculate & Formula fields
+      // .formVals variable does not include data that does not display in the Form widget
+      let cursorFormVals = Object.assign(dc.getCursor() || {}, formVals);
+
+      // Set value of calculate or formula fields to use in record rule
+      obj.fields((f) => f.key == "calculate" || f.key == "formula").forEach(
+         (f) => {
+            if (formVals[f.columnName] == null) {
+               formVals[f.columnName] = f.format(cursorFormVals, true);
+            }
+         }
+      );
 
       return formVals;
    }
@@ -1528,7 +1553,12 @@ module.exports = class ABViewForm extends ABViewFormCore {
       if (model == null) return;
 
       // get update data
-      var formVals = this.getFormValues(formView, obj, dv.datacollectionLink);
+      var formVals = this.getFormValues(
+         formView,
+         obj,
+         dv,
+         dv.datacollectionLink
+      );
 
       // wait for our Record Rules to be ready before we continue.
       await this.recordRulesReady();

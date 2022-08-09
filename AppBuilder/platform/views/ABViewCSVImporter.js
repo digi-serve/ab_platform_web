@@ -1369,7 +1369,7 @@ class ABViewCSVImporterComponent extends ClassUI {
       let dcLink = dv?.datacollectionLink;
       let objectLink;
       let linkConnectFields = [];
-      let linkValueId;
+      let linkValues;
       if (dcLink && dcLink.getCursor()) {
          objectLink = dcLink.datasource;
 
@@ -1377,7 +1377,7 @@ class ABViewCSVImporterComponent extends ClassUI {
             (f) => f.isConnection && f.settings.linkObject == objectLink.id
          );
 
-         linkValueId = dcLink.getCursor().id;
+         linkValues = dcLink.getCursor();
       }
 
       let allValid = true;
@@ -1389,13 +1389,14 @@ class ABViewCSVImporterComponent extends ClassUI {
          let newRowData = {};
 
          // Set parent's data collection cursor
-         if (objectLink && linkConnectFields.length && linkValueId) {
+         if (objectLink && linkConnectFields.length && linkValues) {
             linkConnectFields.forEach((f) => {
                let linkColName = f.indexField
                   ? f.indexField.columnName
                   : objectLink.PK();
                newRowData[f.columnName] = {};
-               newRowData[f.columnName][linkColName] = linkValueId;
+               newRowData[f.columnName][linkColName] =
+                        linkValues[linkColName] || linkValues.id;
             });
          }
 

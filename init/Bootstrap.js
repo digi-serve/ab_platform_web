@@ -13,6 +13,8 @@ if (!window.webix) {
    window.webix = Webix;
 }
 
+require("../js/webix/locales/th-TH.js");
+
 import ABFactory from "../AppBuilder/ABFactory";
 
 var EventEmitter = require("events").EventEmitter;
@@ -28,6 +30,7 @@ import FormIOBuilderCSS from "../node_modules/formiojs/dist/formio.builder.min.c
 
 import initConfig from "../init/initConfig.js";
 import initDiv from "../init/initDiv.js";
+import initDefinitions from "../init/initDefinitions.js";
 // import initResources from "../init/initResources.js";
 
 // import JSZipUtils from "jszip-utils/dist/jszip-utils.min.js";
@@ -91,6 +94,13 @@ class Bootstrap extends EventEmitter {
                // 2) Request the User's Configuration Information from the
                //    server.
                return initConfig.init(this);
+               //load the definitions for current user
+            })
+            // load definitions for current user
+            .then(async () => {
+               if (Config.userConfig()) {
+                  await initDefinitions.init(this);
+               }
             })
 
             .then(() => {
@@ -103,6 +113,24 @@ class Bootstrap extends EventEmitter {
                var tenantInfo = Config.tenantConfig();
                if (tenantInfo) {
                   var plugins = Config.plugins() || [];
+
+                  // Short Term Fix: Don't load ABDesigner for non builders (need a way to assign plugins to users/roles);
+                  const designerIndex = plugins.indexOf("ABDesigner.js");
+                  if (designerIndex > -1) {
+                     const builderRoles = [
+                        "6cc04894-a61b-4fb5-b3e5-b8c3f78bd331",
+                        "e1be4d22-1d00-4c34-b205-ef84b8334b19",
+                     ];
+                     const userInfo = Config.userConfig();
+                     const userBuilderRoles = userInfo?.roles.filter(
+                        (role) => builderRoles.indexOf(role.uuid) > -1
+                     ).length;
+                     // Remove if no builder roles
+                     if (userBuilderRoles < 1 || userInfo == null) {
+                        plugins.splice(designerIndex, 1);
+                     }
+                  }
+
                   console.log("plugins:", plugins);
 
                   plugins.forEach((p) => {
@@ -150,6 +178,20 @@ class Bootstrap extends EventEmitter {
                   // webix recommends wrapping any webix code in the .ready()
                   // function that executes after page loading.
                   webix.ready(() => {
+                     const locales = {
+                        en: "en-US",
+                        "zh-hans": "zh-CN",
+                        th: "th-TH",
+                     };
+                     // locales - map ab languageCode to webix locale
+                     const { languageCode } = AB.Config.userConfig() ?? {};
+                     // save the webix locale used to set locale in ClassUIPage.renderPage()
+                     window.webixLocale =
+                        locales.hasOwnProperty(languageCode) &&
+                        webix.i18n.locales.hasOwnProperty(locales[languageCode])
+                           ? locales[languageCode]
+                           : false;
+
                      // webix pro offers a feature that hides scroll bars by
                      // default for browsers that include them due to the user's
                      // UI. The experience becomes more like a touch interface

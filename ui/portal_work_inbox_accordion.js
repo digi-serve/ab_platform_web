@@ -10,13 +10,14 @@ class PortalWorkInboxAccordion extends ClassUI {
    }
 
    ui() {
-      var self = this;
+      const self = this;
       // for .click() handler below:
 
       return {
          header: this.app.label,
          id: this.id,
          view: "accordionitem",
+         collapsed: true,
          css: "stayCollapsed",
          hidden: true,
          body: {
@@ -32,7 +33,7 @@ class PortalWorkInboxAccordion extends ClassUI {
                      value.replace(/{(.*?)}/, "")
                   );
                },
-               headerHeight: 24,
+               headerHeight: 35,
             },
             template: function (obj) {
                return (
@@ -45,39 +46,55 @@ class PortalWorkInboxAccordion extends ClassUI {
             select: true,
             data: [],
             click: function (id /* , ev */) {
-               var list = this;
-               // var parent = this.getParentView();
-               var selectedItem = this.getItem(id);
+               const list = this;
+               // const parent = this.getParentView();
+               const selectedItem = this.getItem(id);
 
-               var cells = [];
+               const cells = [];
                // {array}
                // the webix defs for the Form.io forms for this selection.
 
-               // var number = 1;
+               // const number = 1;
                selectedItem.items.forEach(function (task) {
-                  cells.push({
-                     id: "task-holder-" + task.uuid,
-                     unitlist: list,
-                     view: "layout",
-                     padding: 20,
-                     rows: [
-                        {
-                           id: task.uuid,
-                           view: "formiopreview",
-                           formComponents: task.ui,
-                           formData: task.data,
-                           onButton: function (value) {
-                              self.processItem(id, task, value);
+                  if (task.data?.url) {
+                     cells.push({
+                        id: "task-holder-" + task.uuid,
+                        unitlist: list,
+                        view: "layout",
+                        padding: 20,
+                        rows: [
+                           {
+                              id: task.uuid,
+                              view: "iframe",
+                              src: task.data.url,
                            },
-                        },
-                     ],
-                  });
+                        ],
+                     });
+                  } else
+                     cells.push({
+                        id: "task-holder-" + task.uuid,
+                        unitlist: list,
+                        view: "layout",
+                        padding: 20,
+                        rows: [
+                           {
+                              id: task.uuid,
+                              view: "formiopreview",
+                              formComponents: task.ui,
+                              formData: task.data,
+                              onButton: function (value) {
+                                 self.processItem(id, task, value);
+                              },
+                           },
+                        ],
+                     });
                });
 
                self.emit("showTasks", /*list, */ selectedItem.name, cells);
             },
             on: {
                onAfterRender() {
+                  $$(self.id).expand();
                   ClassUI.CYPRESS_REF(this);
                   this.data.each((a) => {
                      ClassUI.CYPRESS_REF(
@@ -113,13 +130,13 @@ class PortalWorkInboxAccordion extends ClassUI {
                return;
             }
 
-            var list = $$(this.idUnitList);
-            var selectedItem = list.getItem(context.unitID);
+            const list = $$(this.idUnitList);
+            const selectedItem = list.getItem(context.unitID);
 
             // clear out processed item from our accordion
             // prune the item from the group of similar processes in the unit list
             if (selectedItem) {
-               var parent = list.getParentView();
+               const parent = list.getParentView();
 
                selectedItem.items = selectedItem.items.filter(function (i) {
                   return i.uuid != context.uuid;

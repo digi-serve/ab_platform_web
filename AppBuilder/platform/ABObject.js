@@ -703,8 +703,15 @@ module.exports = class ABObject extends ABObjectCore {
       }
 
       // if label is empty, then show .id
-      if (!labelData.trim())
-         labelData = `${this.AB.isUUID(rowData.id) ? "ID: " : ""}${rowData.id}`; // show id of row
+      if (!labelData.trim()) {
+         let labelSettings = this.labelSettings || {};
+         if (labelSettings && labelSettings.isNoLabelDisplay) {
+            labelData = L(labelSettings.noLabelText || "[No Label]");
+         } else {
+            // show id of row
+            labelData = `${this.isUuid(rowData.id) ? "ID: " : ""}${rowData.id}`;
+         }
+      }
 
       return labelData;
    }
@@ -743,3 +750,4 @@ module.exports = class ABObject extends ABObjectCore {
       return this.AB.isUUID(text);
    }
 };
+

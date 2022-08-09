@@ -102,4 +102,28 @@ module.exports = class ABFieldDateTime extends ABFieldDateTimeCore {
 
       return detailComponentSetting;
    }
+
+   // Overwrite core.format to use webix locales.
+   format(rowData) {
+      if (!window.webixLocale) return super.format(rowData);
+      const d = this.dataValue(rowData);
+
+      if (d == "" || d == null) {
+         return "";
+      }
+      const dateObj = this.AB.toDate(d);
+
+      const dateFormat = this.settings.dateFormat;
+      // @const {int} dateFormat AB Date Format
+      // 1 - ignore, 2 - dd/mm/yyyy, 3 - mm/dd/yyyy, 4 - M D, yyyy, 5 - D M, yyyy
+      const timeToStr = webix.Date.dateToStr(this.getTimeFormat());
+
+      if (dateFormat >= 4) {
+         return `${webix.i18n.longDateFormatStr(dateObj)} ${timeToStr(
+            dateObj
+         )}`;
+      } else {
+         return `${webix.i18n.dateFormatStr(dateObj)} ${timeToStr(dateObj)}`;
+      }
+   }
 };

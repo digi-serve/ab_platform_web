@@ -17,7 +17,7 @@ const defaultSettings = {
 };
 
 const ABFieldSelectivityDefaults = {
-   key: "Selectivity",
+   key: "selectivity",
 };
 
 module.exports = class ABFieldSelectivity extends ABField {

@@ -913,12 +913,12 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
 
          var value = op.value;
 
-         if (value == "ab-current-user")
+         if (value == "ab-current-user") {
             value = this.currentForm.AB.Account.username();
 
          // in the case of a connected Field, we use op.value to get the
          // datacollection, and find it's currently selected value:
-         if (field.isConnection || op.valueType == "exist") {
+         } else if (field.isConnection || op.valueType == "exist") {
             // NOTE: 30 May 2018 :current decision from Ric is to limit this
             // to only handle 1:x connections where we update the current obj
             // with the PK of the value from the DC.
@@ -942,8 +942,6 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
             var filterConditions = this.currentForm.AB.cloneDeep(
                op.filterConditions
             );
-            // The cloned dataCollection is not copying the current cursor, so save it here
-            const cursor = dataCollection.getCursor();
             if (filterConditions && filterConditions.rules) {
                filterConditions.rules
                   .filter((r) => {
@@ -980,7 +978,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                // TODO: rename to 'select-cursor'
                case "select-one":
                default:
-                  value = cursor; // dataView.getItem(dataView.getCursor());
+                  value = clonedDataCollection.getCursor(); // dataView.getItem(dataView.getCursor());
 
                   if (value) {
                      // NOTE: webix documentation issue: .getCursor() is supposed to return
@@ -1002,23 +1000,44 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                   switch (op.op) {
                      case "set":
                         if (!value) break;
-                        // if we are setting a connection we do not want to pass the full object because
-                        // batch creates payload gets too large
-                        objectToUpdate[field.columnName] = {};
-                        objectToUpdate[field.columnName].id =
-                           value[field.datasourceLink.PK()];
-                        objectToUpdate[field.columnName][
-                           field.datasourceLink.PK()
-                        ] = value[field.datasourceLink.PK()] || value;
 
-                        field.datasourceLink
-                           .fields(
-                              (f) => f.key == "combined" || f.key == "AutoIndex"
-                           )
-                           .forEach((f) => {
-                              objectToUpdate[field.columnName][f.columnName] =
-                                 value[f.columnName];
-                           });
+                        if (field.isConnection) {
+                           // if we are setting a connection we do not want to pass the full object because
+                           // batch creates payload gets too large
+                           objectToUpdate[field.columnName] = {};
+                           objectToUpdate[field.columnName].id =
+                              value[field.datasourceLink.PK()];
+                           objectToUpdate[field.columnName][
+                              field.datasourceLink.PK()
+                           ] = value[field.datasourceLink.PK()];
+
+                           // If the connect field use the custom FK, then it requires to pass value of the custom FK.
+                           if (field.settings.isCustomFK) {
+                              if (field.indexField) {
+                                 objectToUpdate[field.columnName][
+                                    field.indexField.columnName
+                                 ] = value[field.indexField.columnName];
+                              }
+                              if (field.indexField2) {
+                                 objectToUpdate[field.columnName][
+                                    field.indexField2.columnName
+                                 ] = value[field.indexField2.columnName];
+                              }
+                           }
+
+                           field.datasourceLink
+                              .fields(
+                                 (f) =>
+                                    f.key == "combined" || f.key == "AutoIndex"
+                              )
+                              .forEach((f) => {
+                                 objectToUpdate[field.columnName][
+                                    f.columnName
+                                 ] = value[f.columnName];
+                              });
+                        } else {
+                           objectToUpdate[field.columnName] = value;
+                        }
 
                         break;
                   }

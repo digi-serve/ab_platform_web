@@ -17,9 +17,9 @@ class PortalWorkInboxTaskwindow extends ClassUI {
          id: this.id,
          view: "window",
          position: function (state) {
-            state.left = state.maxWidth / 2 - 400 / 2; // fixed values
+            state.left = state.maxWidth / 2 - 800 / 2; // fixed values
             state.top = state.maxHeight / 2 - (state.maxHeight * 0.7) / 2;
-            state.width = 400; // relative values
+            state.width = 800; // relative values
             state.height = state.maxHeight * 0.7;
          },
          modal: true,
@@ -59,7 +59,7 @@ class PortalWorkInboxTaskwindow extends ClassUI {
             rows: [
                {
                   view: "scrollview",
-                  scroll: "y",
+                  scroll: "xy",
                   body: {
                      id: this.idTaskMultiview,
                      cells: [
