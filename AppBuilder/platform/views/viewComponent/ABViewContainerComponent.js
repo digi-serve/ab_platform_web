@@ -83,7 +83,16 @@ module.exports = class ABViewContainerComponent extends ABViewComponent {
       var componentMap = {};
 
       views.forEach((v) => {
-         let component = v.component(/* App, idPrefix */);
+         // let component = v.component(/* App, idPrefix */);
+         // NOTE: PONG - Just temporary to be compatible old & new versions
+         let component;
+         try {
+            component = v.component();
+         } catch (err) {
+            component = v.component(this.AB._App);
+            component.ui = () => component.ui;
+         }
+
          this.viewComponents[v.id] = component;
 
          ////
