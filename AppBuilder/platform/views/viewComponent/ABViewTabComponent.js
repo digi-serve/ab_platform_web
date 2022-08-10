@@ -506,7 +506,7 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
          const $component = $$(ids.component);
 
          if (
-            baseView._viewComponents[i]?.component === null &&
+            !baseView._viewComponents[i]?.component &&
             baseView._viewComponents[i]?.view?.id === viewId
          ) {
             // show loading cursor
@@ -527,7 +527,7 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
                      id: baseView._viewComponents[i].view.id,
                      view: "scrollview",
                      css: "ab-multiview-scrollview",
-                     body: baseView._viewComponents[i].component.ui,
+                     body: baseView._viewComponents[i].component.ui(),
                   },
                   $viewID
                );
@@ -539,7 +539,7 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
                      id: baseView._viewComponents[i].view.id,
                      view: "scrollview",
                      css: "ab-tabview-scrollview",
-                     body: baseView._viewComponents[i].component.ui,
+                     body: baseView._viewComponents[i].component.ui(),
                   },
                   $viewID
                );
@@ -547,7 +547,7 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
 
             // for tabs we need to look at the view's accessLevels
             accessLevel = baseView._viewComponents[i].view.getUserAccess();
-            baseView._viewComponents[i].component.init(null, accessLevel);
+            baseView._viewComponents[i].component.init(this.AB, accessLevel);
 
             // done
             setTimeout(() => {
