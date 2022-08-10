@@ -518,7 +518,7 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
             ].view.component();
 
             const $viewID = $$(baseView._viewComponents[i].view.id);
-debugger
+
             if (baseView.settings.stackTabs) {
                // update multiview UI
                webix.ui(
