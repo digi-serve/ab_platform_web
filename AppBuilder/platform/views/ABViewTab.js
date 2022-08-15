@@ -1,11 +1,6 @@
-const { EventEmitter } = require("../../core/views/ABViewTabCore");
 const ABViewTabCore = require("../../core/views/ABViewTabCore");
 
 const ABViewTabComponent = require("./viewComponent/ABViewTabComponent");
-
-const ABViewTabPropertyComponentDefaults = ABViewTabCore.defaultValues();
-
-let L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABViewTab extends ABViewTabCore {
    /**
@@ -34,4 +29,6 @@ module.exports = class ABViewTab extends ABViewTabCore {
 
       return component;
    }
+
+   componentOld() {}
 };
