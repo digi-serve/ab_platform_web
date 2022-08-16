@@ -59,25 +59,26 @@ module.exports = class ABViewMenuComponent extends ABViewComponent {
    }
 
    uiToolbar() {
-      const settings = this.settings;
+      const view = this.view;
+      const settings = this.view.settings;
       const _uiMenu = this.uiMenu();
 
       let elems = [];
       let menuIncluded = false;
 
       // Legacy support: use old settings values if translated values are not set
-      this.menuTextLeft = this.menuTextLeft || settings.menuTextLeft;
-      this.menuTextCenter = this.menuTextCenter || settings.menuTextCenter;
-      this.menuTextRight = this.menuTextRight || settings.menuTextRight;
+      const menuTextLeft = view.menuTextLeft ?? settings.menuTextLeft;
+      const menuTextCenter = view.menuTextCenter ?? settings.menuTextCenter;
+      const menuTextRight = view.menuTextRight ?? settings.menuTextRight;
 
       if (settings.menuPosition == "left") {
          menuIncluded = true;
          elems.push(_uiMenu);
-      } else if (this.menuTextLeft?.length) {
-         const width = this.menuTextLeft.length * 15;
+      } else if (menuTextLeft?.length) {
+         const width = menuTextLeft.length * 15;
          elems.push({
             view: "label",
-            label: this.menuTextLeft,
+            label: menuTextLeft,
             align: "left",
             width: width,
          });
@@ -92,12 +93,12 @@ module.exports = class ABViewMenuComponent extends ABViewComponent {
       if (settings?.menuPosition == "center") {
          menuIncluded = true;
          elems.push(_uiMenu);
-      } else if (this.menuTextCenter?.length) {
-         const width = this.menuTextLeft.length * 15;
+      } else if (menuTextCenter?.length) {
+         const width = menuTextLeft.length * 15;
          elems.push({});
          elems.push({
             view: "label",
-            label: this.menuTextCenter,
+            label: menuTextCenter,
             align: "center",
             width: width,
          });
@@ -113,11 +114,11 @@ module.exports = class ABViewMenuComponent extends ABViewComponent {
       if (settings?.menuPosition == "right") {
          menuIncluded = true;
          elems.push(_uiMenu);
-      } else if (this.menuTextRight?.length) {
-         const width = this.menuTextLeft.length * 15;
+      } else if (menuTextRight?.length) {
+         const width = menuTextLeft.length * 15;
          elems.push({
             view: "label",
-            label: this.menuTextRight,
+            label: menuTextRight,
             align: "right",
             width: width,
          });
@@ -137,8 +138,8 @@ module.exports = class ABViewMenuComponent extends ABViewComponent {
          view: "toolbar",
          css:
             settings.menuTheme ?? ABViewMenuPropertyComponentDefaults.menuTheme,
-         padding: this.settings.menuPadding
-            ? parseInt(this.settings.menuPadding)
+         padding: settings.menuPadding
+            ? parseInt(settings.menuPadding)
             : ABViewMenuPropertyComponentDefaults.menuPadding,
          elements: elems,
       };
