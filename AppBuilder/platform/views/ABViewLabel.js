@@ -2,241 +2,39 @@ const ABViewLabelCore = require("../../core/views/ABViewLabelCore");
 
 const ABViewLabelPropertyComponentDefaults = ABViewLabelCore.defaultValues();
 
-let L = (...params) => AB.Multilingual.label(...params);
+const ABViewLabelComponent = require("./viewComponent/ABViewLabelComponent");
 
 module.exports = class ABViewLabel extends ABViewLabelCore {
-   // constructor(values, application, parent, defaultValues) {
-   //    super(values, application, parent, defaultValues);
-   // }
-
-   //
-   //	Editor Related
-   //
+   constructor(values, application, parent, defaultValues) {
+      super(values, application, parent, defaultValues);
+   }
 
    /**
-    * @method editorComponent
-    * return the Editor for this UI component.
-    * the editor should display either a "block" view or "preview" of
-    * the current layout of the view.
-    * @param {string} mode what mode are we in ['block', 'preview']
-    * @return {Component}
-    */
-   editorComponent(App, mode) {
-      var idBase = "ABViewLabelEditorComponent";
-      var ids = {
-         component: App.unique(`${idBase}_component`),
-      };
-
-      var _ui = {
-         type: "form",
-         margin: 10,
-         padding: 10,
-         borderless: true,
-         rows: [
-            {
-               id: ids.component,
-               view: "label",
-               label: this.text || "",
-               align: this.settings.alignment,
-            },
-            {},
-         ],
-      };
-
-      _ui = this.uiFormatting(_ui);
-
-      var _init = (options) => {};
-
-      // var _logic = {
-      // }
-
-      return {
-         ui: _ui,
-         init: _init,
-      };
-   }
-
-   //
-   // Property Editor
-   //
-
-   // static propertyEditorComponent(App) {
-   // 	return ABViewPropertyComponent.component(App);
-   // }
-
-   static propertyEditorDefaultElements(App, ids, _logic, ObjectDefaults) {
-      var commonUI = super.propertyEditorDefaultElements(
-         App,
-         ids,
-         _logic,
-         ObjectDefaults
-      );
-
-      // in addition to the common .label  values, we
-      // ask for:
-      return commonUI.concat([
-         // .text :  The Text displayed for this label
-         {
-            view: "text",
-            name: "text",
-            label: L("Text"),
-            placeholder: L("Text Placeholder"),
-            // labelWidth: this.AB.UISettings.config().labelWidthMedium,
-         },
-         {
-            view: "fieldset",
-            label: L("Format Options:"),
-            body: {
-               type: "clean",
-               padding: 10,
-               rows: [
-                  {
-                     view: "radio",
-                     name: "format",
-                     vertical: true,
-                     value: ABViewLabelPropertyComponentDefaults.format,
-                     options: [
-                        {
-                           id: 0,
-                           value: L("normal"),
-                        },
-                        {
-                           id: 1,
-                           value: L("title"),
-                        },
-                        {
-                           id: 2,
-                           value: L("description"),
-                        },
-                     ],
-                  },
-               ],
-            },
-         },
-         {
-            view: "fieldset",
-            label: L("Alignment:"),
-            body: {
-               type: "clean",
-               padding: 10,
-               rows: [
-                  {
-                     view: "radio",
-                     name: "alignment",
-                     vertical: true,
-                     value: ABViewLabelPropertyComponentDefaults.alignment,
-                     options: [
-                        {
-                           id: "left",
-                           value: L("Left"),
-                        },
-                        {
-                           id: "center",
-                           value: L("Center"),
-                        },
-                        {
-                           id: "right",
-                           value: L("Right"),
-                        },
-                     ],
-                  },
-               ],
-            },
-         },
-         {},
-      ]);
-   }
-
-   static propertyEditorPopulate(App, ids, view) {
-      super.propertyEditorPopulate(App, ids, view);
-
-      $$(ids.text).setValue(view.text);
-      $$(ids.format).setValue(view.settings.format);
-      $$(ids.alignment).setValue(view.settings.alignment);
-   }
-
-   static propertyEditorValues(ids, view) {
-      super.propertyEditorValues(ids, view);
-
-      view.text = $$(ids.text).getValue();
-      view.settings.format = $$(ids.format).getValue();
-      view.settings.alignment = $$(ids.alignment).getValue();
-   }
-
-   /*
-    * @component()
+    * @method component()
     * return a UI component based upon this view.
     * @param {obj} App
     * @return {obj} UI component
     */
-   component(App) {
-      // get a UI component for each of our child views
-      var viewComponents = [];
-      this.views().forEach((v) => {
-         viewComponents.push(v.component(App));
-      });
+   component(v1App = false) {
+      let component = new ABViewLabelComponent(this);
 
-      var idBase = `ABViewLabel_${this.id}`;
-      var ids = {
-         component: App.unique(`${idBase}_component`),
-      };
+      // if this is our v1Interface
+      if (v1App) {
+         const newComponent = component;
 
-      // an ABViewLabel is a simple Label
-      var _ui = {
-         type: "form",
-         padding: 15,
-         borderless: true,
-         rows: [
-            {
-               id: ids.component,
-               view: "label",
-               // css: 'ab-component-header ab-ellipses-text',
-               label: this.text || "*",
-               align: this.settings.alignment,
-               type: {
-                  height: "auto",
-               },
+         component = {
+            ui: newComponent.ui(),
+            init: (options, accessLevel) => {
+               return newComponent.init(this.AB);
             },
-         ],
-      };
-      _ui = this.uiFormatting(_ui);
-
-      // make sure each of our child views get .init() called
-      var _init = (options) => {};
-
-      return {
-         ui: _ui,
-         init: _init,
-      };
-   }
-
-   /**
-    * @method uiFormatting
-    * a common routine to properly update the displayed label
-    * UI with the css formatting for the given .settings
-    * @param {obj} _ui the current webix.ui definition
-    * @return {obj} a properly formatted webix.ui definition
-    */
-   uiFormatting(_ui) {
-      // add different css settings based upon it's format
-      // type.
-      switch (parseInt(this.settings.format)) {
-         // normal
-         case 0:
-            _ui.rows[0].css = "ab-component-label ab-ellipses-text";
-            break;
-
-         // title
-         case 1:
-            _ui.rows[0].css = "ab-component-header ab-ellipses-text";
-            break;
-
-         // description
-         case 2:
-            _ui.rows[0].css = "ab-component-description ab-ellipses-text";
-            break;
+            onShow: (...params) => {
+               return newComponent.onShow?.(...params);
+            },
+         };
       }
 
-      return _ui;
+      return component;
    }
+
+   componentOld() {}
 };
