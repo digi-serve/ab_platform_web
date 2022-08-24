@@ -398,6 +398,11 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       if (options && options.filterValue && options.filterValue.config.id) {
          let parentVal = $$(options.filterValue.config.id).getValue();
          if (parentVal) {
+            const value =
+               field.object
+                  .fieldByID(options.filterValue.config.dataFieldId)
+                  .getItemFromVal(parentVal)[options.filterColumn] ?? parentVal;
+
             // if we are filtering based off another selectivity's value we
             // need to do it on fetch each time because the value can change
             // copy the filters so we don't add to them every time there is a change
@@ -407,8 +412,9 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             let filter = {
                key: options.filterKey,
                rule: "equals",
-               value: parentVal,
+               value: value,
             };
+
             combineFilters.rules.push(filter);
          }
       }
