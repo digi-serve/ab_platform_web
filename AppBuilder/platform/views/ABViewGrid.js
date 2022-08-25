@@ -920,7 +920,7 @@ class ABViewGridComponent extends ABViewComponent {
       $$(this.ids.buttonSort).refresh();
 
       let gridElem = this.getDataTable();
-      if (gridElem.data.find({}).lesngth < gridElem.data.count()) {
+      if (gridElem.data.find({}).length < gridElem.data.count()) {
          try {
             // NOTE: Webix's client sorting does not support dynamic loading.
             // If the data does not be loaded, then load all data.
@@ -934,7 +934,7 @@ class ABViewGridComponent extends ABViewComponent {
       }
       // wait until the grid component will done to repaint UI
       setTimeout(() => {
-         gridElem.sort(this.PopupSortDataTableComponent.sort);
+         gridElem.sort((a, b) => this.PopupSortDataTableComponent.sort(a, b));
       }, 777);
    }
 
