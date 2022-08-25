@@ -12,14 +12,24 @@ module.exports = class ABViewLayoutComponent extends ABViewComponent {
          component: "",
       });
 
-      this.viewComponents = this.viewComponents || {}; // { viewId: viewComponent, ..., viewIdn: viewComponent }
+      this.viewComponents = this.viewComponents ?? {}; // { viewId: viewComponent, ..., viewIdn: viewComponent }
+      this.view.views().forEach((v) => {
+         try {
+            this.viewComponents[v.id] = v.component();
+         } catch (err) {
+            // NOTE: The 'Layout' component supports only view component v2
+            console.error(
+               `View: [${v.key}] might need to be updated to new version`,
+               err
+            );
+         }
+      });
    }
 
    ui() {
-      const uiComponents = this.view
-         .views()
-         .map((v) => this.viewComponents[v.id]?.ui())
-         .filter((v) => v); // Filter not null
+      const uiComponents = Object.keys(this.viewComponents ?? {})
+         .map((vId) => this.viewComponents[vId].ui())
+         .filter((ui) => ui);
 
       return {
          id: this.ids.component,
@@ -31,7 +41,6 @@ module.exports = class ABViewLayoutComponent extends ABViewComponent {
    init(options, accessLevel) {
       // make sure each of our child views get .init() called
       this.view.views().forEach((v) => {
-         this.viewComponents[v.id] = v.component(this.view, this.ids.component);
          const component = this.viewComponents[v.id];
 
          // initial sub-component
