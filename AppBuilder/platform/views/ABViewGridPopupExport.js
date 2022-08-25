@@ -7,7 +7,7 @@
 import ClassUI from "../../../ui/ClassUI";
 
 export default class ABWorkObjectPopupExport extends ClassUI {
-   constructor(App, idBase) {
+   constructor(idBase) {
       idBase = idBase || "abviewgridpopupExport";
 
       super({
