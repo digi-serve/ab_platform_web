@@ -19,7 +19,7 @@ var divConfigDefaults = {
    // {string} tenant
    // the tenant uuid for this AppBuilder instance.
 
-   "appbuilder-view": "auth_login_form",
+   "appbuilder-view": "work",
    // {string} view
    // the default view to display to the current user.
 
