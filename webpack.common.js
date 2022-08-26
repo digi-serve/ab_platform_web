@@ -27,9 +27,9 @@ module.exports = {
    plugins: [
       new HtmlWebpackPlugin({
          template: "./webpack/index.ejs",
-         filename: "../../../api_sails/views/site/index.ejs",
+         filename: "../../../web/assets/index.html",
          inject: "body",
-         publicPath: "assets/app",
+         publicPath: "/assets/app",
       }),
       new CleanWebpackPlugin(),
    ],

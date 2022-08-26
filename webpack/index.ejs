@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<% /*This template is used by webpack to generate an .ejs template for sails that includes the correct hashed app.js*/ %> <!-- see ab_platform_web/src/index.ejs -->
+<% /*This template is used by webpack to generate an index.html in ab-service-web. It includes the correct hashed app.js*/ %> <!-- see ab_platform_web/src/index.ejs -->
 <html>
 <head>
   <meta charset="utf-8">
-  <title><%= `<%= title ${'%'}>` %></title>
+  <title>AppBuilder</title>
   <style>
   </style>
-  <script type='text/javascript' src='assets/dependencies/sails.io.js' reconnection="true" ></script>
+  <script type='text/javascript' src='/assets/dependencies/sails.io.js' reconnection="true" ></script>
 </head>
 <body>
-    <div appbuilder-portal="default" appbuilder-portal-autoenter="true" <%= `<%- tenantID ${"%"}>` %> <%= `<%- defaultView ${"%"}>` %> ></div>
+    <div appbuilder-portal="default" appbuilder-portal-autoenter="true" ></div>
 </body>
 </html>
