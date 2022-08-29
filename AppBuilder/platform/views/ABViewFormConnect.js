@@ -34,31 +34,41 @@ function _onShow(App, compId, instance, component) {
    // default uuid is passed for all non CFK
    let filterColumn = null;
 
-   // the value stored is hash1:hash2:columnName
-   // hash1 = component view id of the element we want to get the value from
-   // hash2 = the id of the field we are using to filter our options
-   // filterColumn = the name of the column to get the value from
-   if (
-      instance.settings.filterConnectedValue &&
-      instance.settings.filterConnectedValue.indexOf(":") > -1
-   ) {
-      Object.keys(instance.parent.viewComponents).forEach((key, index) => {
-         // find component name, I (James) adjusted the ui to display better,
-         // but the result is two different ui types.
-         let uiName = $$(instance.parent.viewComponents[key].ui.inputId)?.config
-            ?.name;
-         if (
-            uiName &&
-            uiName == instance.settings.filterConnectedValue.split(":")[0]
-         ) {
-            filterValue = $$(instance.parent.viewComponents[key].ui.inputId);
+   const filterByConnectValue =
+      instance.settings.objectWorkspace.filterConditions.rules.filter(
+         (e) => e.rule === "filterByConnectValue"
+      )[0] ?? null;
+
+   if (filterByConnectValue) {
+      for (const key in instance.parent.viewComponents) {
+         const $ui = $$(instance.parent.viewComponents[key].ui.inputId) ?? null;
+
+         if ($ui?.config?.name === filterByConnectValue.value) {
+            filterValue = $ui;
+
+            break;
          }
-      });
+      }
 
       // if not found stop
       if (!filterValue) return;
-      filterKey = instance.settings.filterConnectedValue.split(":")[1];
-      filterColumn = instance.settings.filterConnectedValue.split(":")[2];
+
+      filterKey = filterByConnectValue.key;
+
+      const field = instance.AB.objectByID(
+         instance.settings.objectId
+      ).fieldByID(instance.settings.fieldId);
+      const linkedObject = instance.AB.objectByID(field.settings.linkObject);
+      const linkedField = linkedObject.fieldByID(filterByConnectValue.key);
+
+      if (linkedField.settings.isCustomFK)
+         filterColumn = instance.AB.objectByID(
+            linkedField.settings.linkObject
+         ).fields(
+            (filter) =>
+               filter.id === linkedField.settings.indexField ||
+               linkedField.settings.indexField2
+         )[0].columnName;
    }
 
    instance.options = {

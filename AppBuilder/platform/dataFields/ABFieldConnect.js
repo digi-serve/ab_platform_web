@@ -392,30 +392,34 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
    }
 
    getAndPopulateOptions(editor, options, field, form) {
-      let theEditor = editor;
-
+      const theEditor = editor;
       let combineFilters = {};
-      if (options && options.filterValue && options.filterValue.config.id) {
-         let parentVal = $$(options.filterValue.config.id).getValue();
-         if (parentVal) {
-            const value =
-               field.object
-                  .fieldByID(options.filterValue.config.dataFieldId)
-                  .getItemFromVal(parentVal)[options.filterColumn] ?? parentVal;
 
+      if (options?.filterValue?.config.id) {
+         let parentVal = $$(options.filterValue.config.id).getValue();
+
+         if (parentVal) {
             // if we are filtering based off another selectivity's value we
             // need to do it on fetch each time because the value can change
             // copy the filters so we don't add to them every time there is a change
-            combineFilters = JSON.parse(JSON.stringify(options.filters));
+            combineFilters = Object.assign({}, options.filters);
 
-            // if there is a value create a new filter rule
-            let filter = {
-               key: options.filterKey,
-               rule: "equals",
-               value: value,
-            };
+            combineFilters.rules = [
+               ...combineFilters.rules.filter(
+                  (e) => e.rule !== "filterByConnectValue"
+               ),
 
-            combineFilters.rules.push(filter);
+               // if there is a value create a new filter rule
+               {
+                  key: options.filterKey,
+                  rule: "equals",
+                  value:
+                     field.object
+                        .fieldByID(options.filterValue.config.dataFieldId)
+                        .getItemFromVal(parentVal)[options.filterColumn] ??
+                     parentVal,
+               },
+            ];
          }
       }
 
