@@ -246,15 +246,15 @@ module.exports = class FilterComplex extends FilterComplexCore {
     *
     * @param rowData {Object} - data row
     */
-   isValid(rowData) {
+   isValid(values, rowData) {
       let helper = () => true;
 
       let $query = $$(this.ids.querybuilder);
       if ($query) {
          helper = $query.getFilterFunction();
-         return helper(rowData);
+         return helper(values);
       } else {
-         return super.isValid(rowData);
+         return super.isValid(values, rowData);
       }
    }
 
