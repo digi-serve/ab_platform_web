@@ -1787,9 +1787,9 @@ class ABViewGridComponent extends ABViewComponent {
             settings.groupBy &&
             (settings.groupBy || "").indexOf(col.id) > -1
          ) {
-            var groupField = CurrentObject.fieldByID(col.fieldID);
+            var groupField = CurrentObject.fieldByID(col.id);
             if (groupField) {
-               col.template = (obj, common) => {
+               col.template = function (obj, common) {
                   // return common.treetable(obj, common) + obj.value;
                   if (obj.$group) {
                      let rowData = this.AB.cloneDeep(obj);
