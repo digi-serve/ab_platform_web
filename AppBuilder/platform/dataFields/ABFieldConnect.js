@@ -393,34 +393,61 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
    getAndPopulateOptions(editor, options, field, form) {
       const theEditor = editor;
-      let combineFilters = {};
 
-      if (options?.filterValue?.config.id) {
-         let parentVal = $$(options.filterValue.config.id).getValue();
+      // if we are filtering based off another selectivity's value we
+      // need to do it on fetch each time because the value can change
+      // copy the filters so we don't add to them every time there is a change
+      const combineFilters = Object.assign({}, options.filters);
 
-         if (parentVal) {
-            // if we are filtering based off another selectivity's value we
-            // need to do it on fetch each time because the value can change
-            // copy the filters so we don't add to them every time there is a change
-            combineFilters = Object.assign({}, options.filters);
+      if (options?.filterByConnectValues) {
+         const parseFilterByConnectValues = (conditions, values, depth = 0) => {
+            const valuesByDepth = values.filter((e) => e.depth === depth);
 
-            combineFilters.rules = [
-               ...combineFilters.rules.filter(
-                  (e) => e.rule !== "filterByConnectValue"
-               ),
+            return [
+               ...conditions.rules.map((e) => {
+                  if (e.glue)
+                     return {
+                        glue: e.glue,
+                        rules: parseFilterByConnectValues(e, values, depth + 1),
+                     };
 
-               // if there is a value create a new filter rule
-               {
-                  key: options.filterKey,
-                  rule: "equals",
-                  value:
-                     field.object
-                        .fieldByID(options.filterValue.config.dataFieldId)
-                        .getItemFromVal(parentVal)[options.filterColumn] ??
-                     parentVal,
-               },
+                  const value =
+                     valuesByDepth.filter(
+                        (ef) => ef.key === e.key && ef.value === e.value
+                     )[0] ?? null;
+
+                  if (!value) return e;
+
+                  const $parentField = value?.filterValue?.config.id
+                     ? $$(value.filterValue.config.id)
+                     : null;
+
+                  if (!$parentField)
+                     throw Error(
+                        "Some parent field's view components don't exist"
+                     );
+
+                  const parentValue = value?.filterValue
+                     ? $parentField.getValue() ?? ""
+                     : "";
+
+                  return {
+                     key: e.key,
+                     rule: "equals",
+                     value: value.filterColumn
+                        ? field.object
+                             .fieldByID(value.filterValue.config.dataFieldId)
+                             .getItemFromVal(parentValue)[value.filterColumn]
+                        : parentValue,
+                  };
+               }),
             ];
-         }
+         };
+
+         combineFilters.rules = parseFilterByConnectValues(
+            combineFilters,
+            options.filterByConnectValues
+         );
       }
 
       const handlerOptionData = (data) => {
