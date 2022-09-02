@@ -49,6 +49,11 @@ class Multilingual extends MLClass {
          altText = key;
       }
 
+      // We need to escape " characters or else they will get added to the the lang.js
+      // then we get errors next time we try to parse it as JSON (see appbuilder.label-missing)
+      altText = altText.replace(/"/g, '\\"');
+      key = key.replace(/"/g, '\\"');
+
       // NOTE: transition to new Labels
       // currently our code still uses the L(key, altText, values) format, but
       // the labels we get back are in L(altText, values) format.
@@ -75,6 +80,7 @@ class Multilingual extends MLClass {
          var sub = `{${i}}`;
          label = label.replaceAll(sub, v);
       });
+      label = label.replace(/\\"/g, '"'); // unescape " in the label
       return label;
    }
 
