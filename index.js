@@ -30,7 +30,7 @@ import "./js/webix/components/gantt/gantt.css";
 
 import kanban from "./js/webix/components/kanban/kanban.js";
 import pivot from "./js/webix/components/pivot/pivot.js";
-import report from "./js/webix/components/reports/reports.js";
+import * as report from "./js/webix/components/reports/reports.js";
 import "./js/webix/components/query/query.css";
 import query from "./js/webix/components/query/query.js";
 
