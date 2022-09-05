@@ -17,8 +17,6 @@ if (!window.webix) {
 
 import "../js/webix/locales/th-TH.js";
 
-import ABFactory from "../AppBuilder/ABFactory";
-
 var EventEmitter = require("events").EventEmitter;
 
 import BootstrapCSS from "../node_modules/bootstrap/dist/css/bootstrap.min.css";
@@ -54,6 +52,7 @@ import "tinymce/skins/ui/oxide/content.css"; // content.min.css ?
 import "tinymce/skins/content/default/content.min.css";
 
 import UI from "../ui/ui.js";
+import PreloadUI from "../ui/loading.js";
 
 class Bootstrap extends EventEmitter {
    constructor(definitions) {
@@ -86,6 +85,13 @@ class Bootstrap extends EventEmitter {
    }
 
    init() {
+      PreloadUI.attach();
+      this.ui(PreloadUI);
+      const loadABFactory = import("../AppBuilder/ABFactory");
+      // @const {Promise} loadABFactory Defer loading the ABFactory for a smaller
+      // inital file size, allowing us to show the loading UI sooner.
+      const preloadMessage = (m) => this.ui().preloadMessage(m);
+      preloadMessage("Waiting for the API Server");
       // on the web platform, we need to gather the appropriate configuration
       // information before we can show the UI
       return (
@@ -96,12 +102,13 @@ class Bootstrap extends EventEmitter {
             .then(() => {
                // 2) Request the User's Configuration Information from the
                //    server.
+               preloadMessage("Getting Configuration Settings");
                return initConfig.init(this);
-               //load the definitions for current user
             })
             // load definitions for current user
             .then(async () => {
                if (Config.userConfig()) {
+                  preloadMessage("Loading App Definitions");
                   await initDefinitions.init(this);
                }
             })
@@ -137,15 +144,18 @@ class Bootstrap extends EventEmitter {
                   console.log("plugins:", plugins);
 
                   plugins.forEach((p) => {
+                     preloadMessage(`Loading Plugin (${p})`);
                      allPluginsLoaded.push(loadScript(tenantInfo.id, p));
                   });
                }
                return Promise.all(allPluginsLoaded);
             })
 
-            .then(() => {
+            .then(async () => {
                // 3) Now we have enough info, to create an instance of our
                //    {ABFactory} that drives the rest of the AppBuilder objects
+               preloadMessage("Starting AppBuilder");
+               const { default: ABFactory } = await loadABFactory;
                var definitions = Config.definitions() || null;
                if (definitions) {
                   // NOTE: when loading up an unauthorized user,
@@ -158,6 +168,7 @@ class Bootstrap extends EventEmitter {
                this.AB = new ABFactory(definitions);
 
                if (!window.AB) window.AB = this.AB;
+
                // Make our Factory Global.
                // Transition: we still have some UI code that depends on accessing
                // our Factory as a Global var.  So until those are rewritten we will
