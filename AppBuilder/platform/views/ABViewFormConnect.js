@@ -90,7 +90,7 @@ function _onShow(App, compId, instance, component) {
 
    instance.options = {
       formView: instance.settings.formView,
-      filters: instance.settings.objectWorkspace.filterConditions,
+      filters: filterConditions,
       sort: instance.settings.objectWorkspace.sortFields,
       editable: instance.settings.disable === 1 ? false : true,
       editPage:

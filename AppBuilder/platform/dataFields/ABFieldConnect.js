@@ -436,10 +436,12 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                   return {
                      key: e.key,
                      rule: "equals",
-                     value: value.filterColumn
-                        ? field.object
-                             .fieldByID(value.filterValue.config.dataFieldId)
-                             .getItemFromVal(parentValue)[value.filterColumn]
+                     value: parentValue
+                        ? value.filterColumn
+                           ? field.object
+                                .fieldByID(value.filterValue.config.dataFieldId)
+                                .getItemFromVal(parentValue)[value.filterColumn]
+                           : parentValue
                         : parentValue,
                   };
                }),
