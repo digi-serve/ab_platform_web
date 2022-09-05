@@ -72,7 +72,7 @@ function _toExternal(cond, fields = []) {
    if (!cond) return;
    if (cond.field) {
       let field = fields.filter((f) => f.columnName == cond.field)[0];
-      cond.alias = alias || undefined;
+      // cond.alias = alias || undefined;
       cond.key = field?.id || cond.field;
       cond.condition = cond.condition || {};
       cond.rule = cond.condition.type;

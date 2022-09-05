@@ -709,7 +709,9 @@ module.exports = class ABObject extends ABObjectCore {
             labelData = L(labelSettings.noLabelText || "[No Label]");
          } else {
             // show id of row
-            labelData = `${this.isUuid(rowData.id) ? "ID: " : ""}${rowData.id}`;
+            labelData = `${this.AB.isUUID(rowData.id) ? "ID: " : ""}${
+               rowData.id
+            }`;
          }
       }
 
@@ -750,4 +752,3 @@ module.exports = class ABObject extends ABObjectCore {
       return this.AB.isUUID(text);
    }
 };
-

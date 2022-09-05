@@ -85,6 +85,8 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             selectedData.text =
                selectedData.text || linkedObject.displayData(selectedData);
             selectedData.value = selectedData.text;
+         } else if (typeof data == "string") {
+            selectedData = { text: data };
          }
       }
 
@@ -392,30 +394,74 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
    }
 
    getAndPopulateOptions(editor, options, field, form) {
-      let theEditor = editor;
+      const theEditor = editor;
 
-      let combineFilters = {};
-      if (options && options.filterValue && options.filterValue.config.id) {
-         let parentVal = $$(options.filterValue.config.id).getValue();
-         if (parentVal) {
-            // if we are filtering based off another selectivity's value we
-            // need to do it on fetch each time because the value can change
-            // copy the filters so we don't add to them every time there is a change
-            combineFilters = JSON.parse(JSON.stringify(options.filters));
+      // if we are filtering based off another selectivity's value we
+      // need to do it on fetch each time because the value can change
+      // copy the filters so we don't add to them every time there is a change
+      const combineFilters = Object.assign({}, options.filters);
 
-            // if there is a value create a new filter rule
-            let filter = {
-               key: options.filterKey,
-               rule: "equals",
-               value: parentVal,
-            };
-            combineFilters.rules.push(filter);
-         }
+      if (options?.filterByConnectValues) {
+         const parseFilterByConnectValues = (conditions, values, depth = 0) => {
+            const valuesByDepth = values.filter((e) => e.depth === depth);
+
+            return [
+               ...conditions.rules.map((e) => {
+                  if (e.glue)
+                     return {
+                        glue: e.glue,
+                        rules: parseFilterByConnectValues(e, values, depth + 1),
+                     };
+
+                  const value =
+                     valuesByDepth.filter(
+                        (ef) => ef.key === e.key && ef.value === e.value
+                     )[0] ?? null;
+
+                  if (!value) return e;
+
+                  const $parentField = value?.filterValue?.config.id
+                     ? $$(value.filterValue.config.id)
+                     : null;
+
+                  if (!$parentField)
+                     throw Error(
+                        "Some parent field's view components don't exist"
+                     );
+
+                  const parentValue = value?.filterValue
+                     ? $parentField.getValue() ?? ""
+                     : "";
+
+                  return {
+                     key: e.key,
+                     rule: "equals",
+                     value: value.filterColumn
+                        ? field.object
+                             .fieldByID(value.filterValue.config.dataFieldId)
+                             .getItemFromVal(parentValue)[value.filterColumn]
+                        : parentValue,
+                  };
+               }),
+            ];
+         };
+
+         combineFilters.rules = parseFilterByConnectValues(
+            combineFilters,
+            options.filterByConnectValues
+         );
       }
 
-      this.once("option.data", (data) => {
+      const handlerOptionData = (data) => {
          this.populateOptions(theEditor, data, field, form, true);
-      });
+      };
+
+      // try to make sure we don't continually add up listeners.
+      this.removeListener("option.data", handlerOptionData).once(
+         "option.data",
+         handlerOptionData
+      );
+
       this.getOptions(combineFilters, "").then((data) => {
          this.populateOptions(theEditor, data, field, form, false);
       });
