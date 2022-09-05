@@ -158,7 +158,10 @@ function _onShow(App, compId, instance, component) {
                );
             }
 
-            if (parentFields?.findIndex((e) => e.id === parentField?.id) < 0)
+            if (
+               parentField &&
+               parentFields.findIndex((e) => e.id === parentField.id) < 0
+            )
                parentFields.push(parentField);
          }
       }
