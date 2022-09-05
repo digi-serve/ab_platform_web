@@ -85,6 +85,8 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             selectedData.text =
                selectedData.text || linkedObject.displayData(selectedData);
             selectedData.value = selectedData.text;
+         } else if (typeof data == "string") {
+            selectedData = { text: data };
          }
       }
 

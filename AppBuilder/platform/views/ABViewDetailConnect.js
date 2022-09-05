@@ -101,11 +101,15 @@ module.exports = class ABViewDetailConnect extends ABViewDetailConnectCore {
       baseComp.ui.on = {
          //Add data-cy attribute for Cypress Testing
          onAfterRender: () => {
-            let columnName = this.field((fld) => {
+            let field = this.field((fld) => {
                return fld.id == this.settings.fieldId;
-            }).columnName;
-            const dataCy = `detail connected ${columnName} ${this.settings.fieldId} ${ids.detail}`;
-            $$(baseComp.ui.id)?.$view.setAttribute("data-cy", dataCy);
+            });
+            // some form fields are remaining in the UI even after removed from data structure
+            if (field?.columnName) {
+               let columnName = field.columnName;
+               const dataCy = `detail connected ${columnName} ${this.settings.fieldId} ${ids.detail}`;
+               $$(baseComp.ui.id)?.$view.setAttribute("data-cy", dataCy);
+            }
          },
       };
 

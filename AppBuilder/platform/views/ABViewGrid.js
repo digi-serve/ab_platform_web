@@ -1555,6 +1555,14 @@ class ABViewGridComponent extends ABViewComponent {
 
       if (this.settings.saveLocal) {
          this.localSettings(localSettings);
+         for (const item in GridSettings) {
+            GridSettings[item].forEach((item) => {
+               // we cannot include field info because of the cicular structure
+               if (item?.footer?.field) {
+                  delete item.footer.field;
+               }
+            });
+         }
          await this.AB.Storage.set(KEY_STORAGE_SETTINGS, GridSettings);
       }
 
@@ -1787,9 +1795,9 @@ class ABViewGridComponent extends ABViewComponent {
             settings.groupBy &&
             (settings.groupBy || "").indexOf(col.id) > -1
          ) {
-            var groupField = CurrentObject.fieldByID(col.id);
+            var groupField = CurrentObject.fieldByID(col.fieldID);
             if (groupField) {
-               col.template = function (obj, common) {
+               col.template = (obj, common) => {
                   // return common.treetable(obj, common) + obj.value;
                   if (obj.$group) {
                      let rowData = this.AB.cloneDeep(obj);
