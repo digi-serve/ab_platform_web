@@ -1555,6 +1555,14 @@ class ABViewGridComponent extends ABViewComponent {
 
       if (this.settings.saveLocal) {
          this.localSettings(localSettings);
+         for (const item in GridSettings) {
+            GridSettings[item].forEach((item) => {
+               // we cannot include field info because of the cicular structure
+               if (item?.footer?.field) {
+                  delete item.footer.field;
+               }
+            });
+         }
          await this.AB.Storage.set(KEY_STORAGE_SETTINGS, GridSettings);
       }
 
