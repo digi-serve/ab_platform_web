@@ -4,8 +4,8 @@ const ABViewComponent = require("./ABViewComponent").default;
 const ABPropertyComponentDefaults = ABViewContainerCore.defaultValues();
 
 module.exports = class ABViewContainerComponent extends ABViewComponent {
-   constructor(baseView, idBase) {
-      super(baseView, idBase);
+   constructor(baseView, idBase, ids) {
+      super(baseView, idBase, ids);
 
       this.idBase = idBase;
 
