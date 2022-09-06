@@ -60,36 +60,42 @@ class PortalWorkUserProfileWindow extends ClassUI {
                },
             ],
          },
+         // body: {
+         // view: "scrollview",
+         // minHeight: 455,
          body: {
             view: "layout",
-            width: 640,
-            css: {
-               "text-align": "center",
-               margin: "0px",
-               padding: "0px",
-            },
+            width: 480,
             rows: [
                {
-                  cols: [
+                  rows: [
+                     {
+                        id: ids.imageUser,
+                        view: "template",
+                        autoheight: true,
+                        borderless: true,
+                        css: {
+                           background: "#222f3e",
+                        },
+                        // width: 180,
+                        template: `<img src="file/${this.AB.Account.imageID()}" onerror="this.style.display='none'; document.getElementById('errorImage').style.display = 'block';" width="150" height="150" style="border-radius: 50%; margin: 10px auto; display: block; border: 3px solid white;" /><div id="errorImage" style="display: none; width: 150px; height: 150px; background: #CCC; border-radius: 50%; margin: 10px auto; border: 3px solid white;"><i class="fa fa-user" style="font-size: 118px; color: white; margin: 15px 0 0 32px;"></i></div>`,
+                     },
                      {
                         css: {
                            position: "absolute",
-                           left: "162px",
-                           top: "162px",
+                           top: "185px",
                         },
-                        rows: [
+                        cols: [
+                           {},
                            {
                               id: ids.uploaderImage,
                               view: "uploader",
                               type: "icon",
-                              width: 30,
-                              height: 30,
+                              width: 34,
+                              height: 32,
                               zIndex: 999,
-                              icon: "wxi-plus",
-                              algin: "right",
-                              css: {
-                                 "text-align": "center",
-                              },
+                              icon: "fa fa-upload",
+                              algin: "center",
                               inputName: "file",
                               apiOnly: true,
                               multiple: false,
@@ -123,7 +129,7 @@ class PortalWorkUserProfileWindow extends ClassUI {
                                     this.AB.Account._config.image_id = imageID;
 
                                     $imageUser.setHTML(
-                                       `<img src="file/${this.AB.Account.imageID()}" width="150" height="150" style="border-radius: 50%;" />`
+                                       `<img src="file/${this.AB.Account.imageID()}" onerror="this.style.display='none'; document.getElementById('errorImage').style.display = 'block';" width="150" height="150" style="border-radius: 50%; margin: 10px auto; display: block; border: 3px solid white;" /><div id="errorImage" style="display: none; width: 150px; height: 150px; background: #CCC; border-radius: 50%; margin: 10px auto; border: 3px solid white;"><i class="fa fa-user" style="font-size: 118px; color: white; margin: 15px 0 0 32px;"></i></div>`
                                     );
                                     $uploaderImage.enable();
                                  },
@@ -147,44 +153,24 @@ class PortalWorkUserProfileWindow extends ClassUI {
                         ],
                      },
                      {
-                        id: ids.imageUser,
-                        view: "template",
-                        autoheight: true,
-                        borderless: true,
-                        width: 228,
-                        css: {
-                           "text-align": "center",
-                        },
-                        template: `<img src="file/${this.AB.Account.imageID()}" width="150" height="150" style="border-radius: 50%;" />`,
-                     },
-                     {
                         id: ids.formUserInfo,
                         view: "form",
+                        width: 460,
                         borderless: true,
-                        width: 388,
-                        css: {
-                           "text-align": "left",
-                        },
                         elements: [
                            {
                               cols: [
                                  {
                                     view: "label",
-                                    width: 70,
-                                    css: {
-                                       "text-align": "center",
-                                    },
-                                    label: L("Tenant"),
-                                 },
-                                 {
-                                    view: "label",
-                                    width: 15,
-                                    label: ": ",
+                                    width: 180,
+                                    align: "right",
+                                    label: L("Tenant") + ": ",
                                  },
                                  {
                                     view: "label",
                                     name: "tenant",
                                     value: "",
+                                    css: "formText",
                                  },
                               ],
                            },
@@ -192,21 +178,15 @@ class PortalWorkUserProfileWindow extends ClassUI {
                               cols: [
                                  {
                                     view: "label",
-                                    width: 70,
-                                    css: {
-                                       "text-align": "center",
-                                    },
-                                    label: L("Username"),
-                                 },
-                                 {
-                                    view: "label",
-                                    width: 15,
-                                    label: ": ",
+                                    width: 180,
+                                    align: "right",
+                                    label: L("Username") + ": ",
                                  },
                                  {
                                     view: "label",
                                     name: "username",
                                     value: "",
+                                    css: "formText",
                                  },
                               ],
                            },
@@ -214,22 +194,16 @@ class PortalWorkUserProfileWindow extends ClassUI {
                               cols: [
                                  {
                                     view: "label",
-                                    width: 70,
-                                    css: {
-                                       "text-align": "center",
-                                    },
-                                    label: L("Email"),
-                                 },
-                                 {
-                                    view: "label",
-                                    width: 15,
-                                    label: ": ",
+                                    width: 180,
+                                    align: "right",
+                                    label: L("Email") + ": ",
                                  },
                                  {
                                     id: ids.dataEmail,
                                     view: "label",
                                     name: "email",
                                     value: "",
+                                    css: "formText",
                                  },
                                  {
                                     id: ids.editModeEmail,
@@ -365,22 +339,16 @@ class PortalWorkUserProfileWindow extends ClassUI {
                               cols: [
                                  {
                                     view: "label",
-                                    width: 70,
-                                    css: {
-                                       "text-align": "center",
-                                    },
-                                    label: L("Language"),
-                                 },
-                                 {
-                                    view: "label",
-                                    width: 15,
-                                    label: ": ",
+                                    width: 180,
+                                    align: "right",
+                                    label: L("Language") + ": ",
                                  },
                                  {
                                     id: ids.dataLanguage,
                                     view: "label",
                                     name: "language",
                                     value: "",
+                                    css: "formText",
                                  },
                                  {
                                     id: ids.editModeLanguage,
@@ -555,8 +523,8 @@ class PortalWorkUserProfileWindow extends ClassUI {
                         view: "button",
                         type: "icon",
                         icon: "wxi-angle-down",
-                        height: 30,
-                        css: "webix_transparent",
+                        height: 40,
+                        css: "webix_primary",
                         label: L("Advanced Options"),
                         on: {
                            onItemClick: (id) => {
@@ -580,26 +548,27 @@ class PortalWorkUserProfileWindow extends ClassUI {
                         hidden: true,
                         rows: [
                            {
-                              view: "label",
-                              width: 606,
-                              css: {
-                                 "text-align": "left",
-                                 margin: "0px 17px 0px 17px !important",
-                                 width: "606px !important",
-                              },
-                              label: `${L("New Password")}:`,
-                           },
-                           {
-                              id: ids.formNewPassword,
-                              view: "form",
-                              borderless: true,
-                              height: 38,
-                              elements: [
+                              cols: [
                                  {
-                                    css: {
-                                       margin: "0px 17px 0px 17px !important",
-                                    },
-                                    cols: [
+                                    rows: [
+                                       {
+                                          height: 20,
+                                       },
+                                       {
+                                          view: "label",
+                                          width: 180,
+                                          align: "right",
+                                          label: `${L("New Password")}: `,
+                                       },
+                                       {},
+                                    ],
+                                 },
+                                 {
+                                    id: ids.formNewPassword,
+                                    view: "form",
+                                    borderless: true,
+                                    width: 300,
+                                    elements: [
                                        {
                                           id: ids.fieldNewPassword,
                                           view: "text",
@@ -613,7 +582,6 @@ class PortalWorkUserProfileWindow extends ClassUI {
                                              return value.length >= 8;
                                           },
                                        },
-                                       { width: 10 },
                                        {
                                           view: "text",
                                           name: "confirmPassword",
@@ -631,11 +599,11 @@ class PortalWorkUserProfileWindow extends ClassUI {
                                              );
                                           },
                                        },
-                                       { width: 10 },
                                        {
                                           view: "button",
                                           type: "form",
                                           value: "Save",
+                                          align: "right",
                                           height: 32,
                                           width: 75,
                                           inputWidth: 75,
@@ -692,19 +660,12 @@ class PortalWorkUserProfileWindow extends ClassUI {
                               ],
                            },
                            {
-                              css: {
-                                 "text-align": "left",
-                                 margin: "0px 17px 0px 17px !important",
-                                 width: "606px !important",
-                              },
                               cols: [
                                  {
                                     view: "label",
-                                    width: 135,
-                                    css: {
-                                       "text-align": "left !important",
-                                    },
-                                    label: `${L("System Notification")}`,
+                                    width: 180,
+                                    align: "right",
+                                    label: `${L("System Notification")}: `,
                                  },
                                  {
                                     id: ids.systemNotification,
@@ -713,6 +674,7 @@ class PortalWorkUserProfileWindow extends ClassUI {
                                     width: 27,
                                     css: {
                                        "text-align": "center !important",
+                                       padding: "0 10px",
                                     },
                                     value: 0,
                                     on: {
@@ -745,12 +707,16 @@ class PortalWorkUserProfileWindow extends ClassUI {
                                  },
                               ],
                            },
+                           {
+                              height: 10,
+                           },
                         ],
                      },
                   ],
                },
             ],
          },
+         // },
       };
    }
 
