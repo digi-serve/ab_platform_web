@@ -217,7 +217,6 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
                   id: ids.component,
                   keepViews: true,
                   minWidth: baseView.settings.minWidth,
-                  height: baseView.settings.height || 500,
                   cells: baseView._viewComponents.map((view) => {
                      const tabUi = {
                         id: view.view.id,
@@ -331,7 +330,6 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
                            },
                         },
                         multiview: {
-                           height: baseView.settings.height || 500,
                            on: {
                               onViewChange: (prevId, nextId) => {
                                  this.onShow(nextId);
