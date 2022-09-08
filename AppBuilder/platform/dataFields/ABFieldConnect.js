@@ -399,7 +399,9 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       // if we are filtering based off another selectivity's value we
       // need to do it on fetch each time because the value can change
       // copy the filters so we don't add to them every time there is a change
-      const combineFilters = Object.assign({}, options.filters);
+      const combineFilters = options?.filters
+         ? Object.assign({}, options.filters)
+         : { glue: "and", rules: [] };
 
       if (options?.filterByConnectValues) {
          const parseFilterByConnectValues = (conditions, values, depth = 0) => {
@@ -413,10 +415,9 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                         rules: parseFilterByConnectValues(e, values, depth + 1),
                      };
 
-                  const value =
-                     valuesByDepth.filter(
-                        (ef) => ef.key === e.key && ef.value === e.value
-                     )[0] ?? null;
+                  const value = valuesByDepth.filter(
+                     (ef) => ef.key === e.key && ef.value === e.value
+                  )[0];
 
                   if (!value) return e;
 
