@@ -14,19 +14,19 @@ let SortComponent = null;
 let L = (...params) => AB.Multilingual.label(...params);
 
 function _onShow(App, compId, instance, component) {
-   const elem = $$(compId) ?? null;
+   const elem = $$(compId);
 
    if (!elem) return;
 
-   const field = instance.field() ?? null;
+   const field = instance.field();
 
    if (!field) return;
 
-   const node = elem.$view ?? null;
+   const node = elem.$view;
 
    if (!node) return;
 
-   const $node = $$(node) ?? null;
+   const $node = $$(node);
 
    if (!$node) return;
 
@@ -54,13 +54,12 @@ function _onShow(App, compId, instance, component) {
    const filterByConnectValues = getFilterByConnectValues(filterConditions).map(
       (e) => {
          for (const key in instance.parent.viewComponents) {
-            const $ui =
-               $$(instance.parent.viewComponents[key].ui.inputId) ?? null;
+            const $ui = $$(instance.parent.viewComponents[key].ui.inputId);
 
             if ($ui?.config?.name === e.value) {
                // we need to use the element id stored in the settings to find out what the
                // ui component id is so later we can use it to look up its current value
-               e.filterValue = $ui ?? null;
+               e.filterValue = $ui;
 
                break;
             }
@@ -111,8 +110,9 @@ function _onShow(App, compId, instance, component) {
             filterByConnectValues[i].filterValue &&
             filterByConnectValues[i].key
          ) {
-            const $filterValueConfig =
-               $$(filterByConnectValues[i].filterValue.config.id) ?? null;
+            const $filterValueConfig = $$(
+               filterByConnectValues[i].filterValue.config.id
+            );
 
             let parentField = null;
 
