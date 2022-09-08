@@ -12,6 +12,7 @@ class PreloadUI extends ClassUI {
                   {},
                   {
                      width: 360,
+                     height: 200,
                      rows: [
                         {
                            css: "portalLoginForm",
@@ -25,6 +26,14 @@ class PreloadUI extends ClassUI {
                                  borderless: true,
                                  height: 110,
                                  type: "clean",
+                                 on: {
+                                    onAfterRender() {
+                                       ClassUI.CYPRESS_REF(
+                                          this,
+                                          "preload-spinner"
+                                       );
+                                    },
+                                 },
                               },
                               {
                                  id: "preload-text",
@@ -46,6 +55,9 @@ class PreloadUI extends ClassUI {
    }
    preloadMessage(text) {
       $$("preload-text").setValues({ text });
+   }
+   destroy() {
+      $$("preloader").destructor();
    }
 }
 

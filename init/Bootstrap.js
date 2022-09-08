@@ -217,6 +217,7 @@ class Bootstrap extends EventEmitter {
                      var div = this.div();
 
                      UI.attach(div.id);
+                     this.ui().destroy(); // remove the preloading screen
                      this.ui(UI);
                      this.ui().init(this.AB);
                      // this.ui().init() routine handles the remaining
