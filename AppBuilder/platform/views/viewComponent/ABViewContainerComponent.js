@@ -90,7 +90,8 @@ module.exports = class ABViewContainerComponent extends ABViewComponent {
             component = v.component();
          } catch (err) {
             component = v.component(this.AB._App);
-            component.ui = () => component.ui;
+            let ui = component.ui;
+            component.ui = (() => ui).bind(component);
          }
 
          this.viewComponents[v.id] = component;
@@ -139,7 +140,7 @@ module.exports = class ABViewContainerComponent extends ABViewComponent {
          let mapKey = `${rowIndx}-${newPos}`;
          if (componentMap[mapKey]) {
             console.error(
-               `Component[${component.ids.component}] is overwriting component[${componentMap[mapKey].ids.component}]. <-- Reorder them to fix.`
+               `Component[${component?.ids?.component}] is overwriting component[${componentMap[mapKey].ids?.component}]. <-- Reorder them to fix.`
             );
          }
          componentMap[mapKey] = component;

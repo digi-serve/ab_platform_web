@@ -194,6 +194,14 @@ class ABViewFormConnectComponent extends ABViewComponent {
       let field = this.field;
       let form = this.view.parentFormComponent();
 
+      if (field == null) {
+         console.error(`This field could not found : ${this.settings.fieldId}`);
+         return {
+            view: "label",
+            label: ""
+         };
+      }
+
       let multiselect = field.settings.linkType == "many";
 
       var settings = {};
