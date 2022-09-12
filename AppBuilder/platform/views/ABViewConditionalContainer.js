@@ -6,26 +6,6 @@ const L = (...params) => AB.Multilingual.label(...params);
 module.exports = class ABViewConditionalContainer extends (
    ABViewConditionalContainerCore
 ) {
-   //
-   //	Editor Related
-   //
-
-   /**
-    * @method editorComponent
-    * return the Editor for this UI component.
-    * the editor should display either a "block" view or "preview" of
-    * the current layout of the view.
-    * @param {string} mode what mode are we in ['block', 'preview']
-    * @return {Component}
-    */
-   editorComponent(App, mode) {
-      var idBase = "ABViewConditionContainerEditorComponent";
-
-      var ConditionContainerComponent = this.component(App, idBase);
-
-      return ConditionContainerComponent;
-   }
-
    /**
     * @function component()
     * return a UI component based upon this view.
