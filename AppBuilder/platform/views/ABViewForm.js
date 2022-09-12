@@ -1185,8 +1185,8 @@ module.exports = class ABViewForm extends ABViewFormCore {
 
             if (relationFieldCom == null) return;
 
-            var relationFieldView = this.viewComponents[relationFieldCom.id].ui
-               .inputId;
+            var relationFieldView =
+               this.viewComponents[relationFieldCom.id].ui.inputId;
             // if (
             //    this.viewComponents[relationFieldCom.id].ui.rows &&
             //    this.viewComponents[relationFieldCom.id].ui.rows[0] &&
@@ -1385,20 +1385,20 @@ module.exports = class ABViewForm extends ABViewFormCore {
       }
 
       if (linkValues) {
-         var objectLink = dcLink.datasource;
+         const objectLink = dcLink.datasource;
 
-         var connectFields = obj.connectFields();
+         const connectFields = obj.connectFields();
          connectFields.forEach((f) => {
-            var formFieldCom = this.fieldComponents((fComp) => {
-               return fComp.field && fComp.field().id == f.id;
-            });
+            const formFieldCom = this.fieldComponents(
+               (fComp) => fComp?.field()?.id == f?.id
+            );
 
             if (
                objectLink.id == f.settings.linkObject &&
                formFieldCom.length < 1 && // check field does not show
                formVals[f.columnName] === undefined
             ) {
-               let linkColName = f.indexField
+               const linkColName = f.indexField
                   ? f.indexField.columnName
                   : objectLink.PK();
 
