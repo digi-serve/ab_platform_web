@@ -84,7 +84,13 @@ class Bootstrap extends EventEmitter {
       // this.on("error", ()=>{ Analytics.error })
    }
 
-   init() {
+   init(ab) {
+      // We rerun init after a sucessful login, at that point we already have AB.
+      // This means we can use `AB.Network` over the fetch API when loading
+      // config again. This prevents the session from being reset, which was
+      // happening inconsitently.
+      if (ab) this.AB = ab;
+
       PreloadUI.attach();
       this.ui(PreloadUI);
       const loadABFactory = import("../AppBuilder/ABFactory");
