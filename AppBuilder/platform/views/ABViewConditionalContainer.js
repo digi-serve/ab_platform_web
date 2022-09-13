@@ -84,13 +84,13 @@ module.exports = class ABViewConditionalContainer extends (
             this.eventAdd({
                emitter: dv,
                eventName: "loadData",
-               listener: () => _logic.displayView(),
+               listener: _logic.displayView.bind(this),
             });
 
             this.eventAdd({
                emitter: dv,
                eventName: "changeCursor",
-               listener: _logic.displayView,
+               listener: _logic.displayView.bind(this),
             });
          }
 
