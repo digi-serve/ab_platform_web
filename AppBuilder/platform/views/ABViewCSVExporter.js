@@ -1,6 +1,7 @@
 const ABViewCSVExporterCore = require("../../core/views/ABViewCSVExporterCore");
 
-const ABViewCSVExporterPropertyComponentDefaults = ABViewCSVExporterCore.defaultValues();
+const ABViewCSVExporterPropertyComponentDefaults =
+   ABViewCSVExporterCore.defaultValues();
 
 let L = (...params) => AB.Multilingual.label(...params);
 
