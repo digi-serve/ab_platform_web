@@ -106,7 +106,12 @@ class NetworkRestSocket extends NetworkRest {
                }
 
                if (typeof data == "string") {
-                  data = JSON.parse(data);
+                  // res.redirect() returns a string that wasn't parsable
+                  try {
+                     data = JSON.parse(data);
+                  } catch (e) {
+                     return;
+                  }
                }
 
                // Got a JSON response but was the service response an error?
