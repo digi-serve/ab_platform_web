@@ -43,8 +43,8 @@ class PortalAuth extends ClassUI {
             break;
       }
 
-      return this.ActivePortal.init(AB).then(() => {
-         this.ActivePortal.show();
+      return this.ActivePortal?.init(AB).then(() => {
+         this.ActivePortal?.show();
       });
    }
 
