@@ -39,7 +39,7 @@ function _toInternal(cond, fields = []) {
       };
 
       if (Array.isArray(cond.value)) cond.includes = cond.value;
-      else cond.includes = (cond.value || "").split(",");
+      else cond.includes = (cond.value ?? "").split(",");
 
       delete cond.key;
       delete cond.rule;
@@ -47,7 +47,7 @@ function _toInternal(cond, fields = []) {
    }
 
    if (cond.rules && cond.rules.length) {
-      (cond.rules || []).forEach((r) => {
+      (cond.rules ?? []).forEach((r) => {
          _toInternal(r, fields);
       });
    }
@@ -73,12 +73,12 @@ function _toExternal(cond, fields = []) {
    if (cond.field) {
       let field = fields.filter((f) => f.columnName == cond.field)[0];
       // cond.alias = alias || undefined;
-      cond.key = field?.id || cond.field;
-      cond.condition = cond.condition || {};
+      cond.key = field?.id ?? cond.field;
+      cond.condition = cond.condition ?? {};
       cond.rule = cond.condition.type;
 
       // Convert multi-values to a string
-      let values = cond.includes || [];
+      let values = cond.includes ?? [];
       if (cond.condition.filter && values.indexOf(cond.condition.filter) < 0)
          values.push(cond.condition.filter);
 
@@ -102,7 +102,7 @@ function _toExternal(cond, fields = []) {
    }
 
    if (cond.rules && cond.rules.length) {
-      (cond.rules || []).forEach((r) => {
+      (cond.rules ?? []).forEach((r) => {
          _toExternal(r, fields);
       });
    }
@@ -110,7 +110,7 @@ function _toExternal(cond, fields = []) {
 
 module.exports = class FilterComplex extends FilterComplexCore {
    constructor(idBase, AB) {
-      idBase = idBase || "ab_row_filter";
+      idBase = idBase ?? "ab_row_filter";
 
       super(idBase, AB);
 
@@ -120,7 +120,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
       // event.
 
       let labels = (this.labels = {
-         common: (AB._App || {}).labels,
+         common: (AB._App ?? {}).labels,
          component: {
             and: L("And"),
             or: L("Or"),
@@ -293,7 +293,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
       // start optimistically.
 
       if (cond.glue) {
-         (cond.rules || []).forEach((r) => {
+         (cond.rules ?? []).forEach((r) => {
             isComplete = isComplete && this.isConditionComplete(r);
          });
       } else {
@@ -373,7 +373,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
    getValue() {
       if ($$(this.ids.querybuilder)) {
          let settings = this.AB.cloneDeep(
-            $$(this.ids.querybuilder).getState().value || {}
+            $$(this.ids.querybuilder).getState().value ?? {}
          );
 
          // what we pull out of the QB will have .rules in our internal format:
@@ -406,7 +406,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
             el.config.fields.pop();
          }
          // Set fields
-         (this.fieldsToQB() || []).forEach((f) => {
+         (this.fieldsToQB() ?? []).forEach((f) => {
             el.config.fields.push(f);
          });
       }
@@ -437,7 +437,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
             template: function (o) {
                let str = o[field];
                let parser =
-                  format || (type == "date" ? webix.i18n.dateFormatStr : null);
+                  format ?? (type == "date" ? webix.i18n.dateFormatStr : null);
                if (parser) str = parser(str);
                return str;
             },
@@ -470,7 +470,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
             .concat(this.uiContextValue("this_object", "uuid"));
       }
 
-      let field = (this._Fields || []).filter(
+      let field = (this._Fields ?? []).filter(
          (f) => f.columnName == fieldColumnName
       )[0];
 
@@ -507,8 +507,21 @@ module.exports = class FilterComplex extends FilterComplexCore {
          //    break;
       }
 
-      if (field?.key != "connectObject") {
-         result = (result || [])
+      // Add filter options to Custom index
+      if (
+         field?.settings?.isCustomFK &&
+         // 1:M
+         ((field?.settings?.linkType === "one" &&
+         field?.settings?.linkViaType === "many") ||
+            // 1:1 isSource = true
+            (field?.settings?.linkType === "one" &&
+            field?.settings?.linkViaType === "one" &&
+            field?.settings?.isSource))
+      ) {
+         result = (result ?? []).concat(this.uiTextValue(field));
+      }
+      else if (field?.key != "connectObject") {
+         result = (result ?? [])
             .concat(this.uiTextValue(field))
             .concat(this.uiQueryFieldValue(field))
             .concat(this.uiContextValue(field));
@@ -520,10 +533,10 @@ module.exports = class FilterComplex extends FilterComplexCore {
       }
 
       if (this._isRecordRule) {
-         result = (result || []).concat(this.uiRecordRuleValue(field));
+         result = (result ?? []).concat(this.uiRecordRuleValue(field));
       }
 
-      result = (result || []).concat(this.uiCustomValue(field));
+      result = (result ?? []).concat(this.uiCustomValue(field));
 
       return result;
    }
@@ -561,8 +574,8 @@ module.exports = class FilterComplex extends FilterComplexCore {
                   let $layout =
                      this.queryView(function (a) {
                         return !a.getParentView();
-                     }, "parent") || this;
-                  $layout.$view.style.zIndex = 500;
+                     }, "parent") ?? this;
+                  $layout.$view.style.zIndex = 102;
                },
             },
          },
@@ -685,13 +698,13 @@ module.exports = class FilterComplex extends FilterComplexCore {
          {
             batch: "recordRule",
             view: "select",
-            options: this._recordRuleFieldOptions || [],
+            options: this._recordRuleFieldOptions ?? [],
          },
       ];
    }
 
    uiContextValue(field, processFieldKey = null) {
-      let processField = (this._ProcessFields || []).filter((pField) => {
+      let processField = (this._ProcessFields ?? []).filter((pField) => {
          if (!pField) return false;
 
          if (pField.field) {
@@ -729,9 +742,9 @@ module.exports = class FilterComplex extends FilterComplexCore {
    }
 
    uiCustomValue(field) {
-      let customOptions = this._customOptions || {};
-      let options = customOptions[field.id || field] || {};
-      return options.values || [];
+      let customOptions = this._customOptions ?? {};
+      let options = customOptions[field.id ?? field] ?? {};
+      return options.values ?? [];
    }
 
    popUp(...options) {
@@ -773,7 +786,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
     *                           }
     */
    addCustomOption(fieldId, options = {}) {
-      this._customOptions = this._customOptions || {};
+      this._customOptions = this._customOptions ?? {};
       this._customOptions[fieldId] = options;
    }
 };

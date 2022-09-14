@@ -14,157 +14,186 @@ let SortComponent = null;
 let L = (...params) => AB.Multilingual.label(...params);
 
 function _onShow(compId, instance) {
-   let elem = $$(compId);
+   const elem = $$(compId);
+
    if (!elem) return;
 
-   let field = instance.field();
+   const field = instance.field();
+
    if (!field) return;
 
-   let rowData = {},
-      node = elem.$view;
+   const node = elem.$view;
 
-   // we need to use the element id stored in the settings to find out what the
-   // ui component id is so later we can use it to look up its current value
-   let filterValue = null;
+   if (!node) return;
 
-   // we also need the id of the field that we are going to filter on
-   let filterKey = null;
+   const $node = $$(node);
 
-   // finally if this is a custom foreign key we need the stored columnName by
-   // default uuid is passed for all non CFK
-   let filterColumn = null;
+   if (!$node) return;
 
-   // the value stored is hash1:hash2:columnName
-   // hash1 = component view id of the element we want to get the value from
-   // hash2 = the id of the field we are using to filter our options
-   // filterColumn = the name of the column to get the value from
-   if (
-      instance.settings.filterConnectedValue &&
-      instance.settings.filterConnectedValue.indexOf(":") > -1
-   ) {
-      Object.keys(instance.parent.viewComponents).forEach((key, index) => {
-         // find component name, I (James) adjusted the ui to display better,
-         // but the result is two different ui types.
-         let uiName = $$(instance.parent.viewComponents[key].ui.inputId)?.config
-            ?.name;
-         if (
-            uiName &&
-            uiName == instance.settings.filterConnectedValue.split(":")[0]
-         ) {
-            filterValue = $$(instance.parent.viewComponents[key].ui.inputId);
+   const filterConditions = instance.settings.objectWorkspace
+      .filterConditions || { glue: "and", rules: [] };
+
+   const getFilterByConnectValues = (conditions, depth = 0) => {
+      return [
+         ...conditions.rules
+            .filter((e) => e.rule === "filterByConnectValue")
+            .map((e) => {
+               const filterByConnectValue = Object.assign({}, e);
+
+               filterByConnectValue.depth = depth;
+
+               return filterByConnectValue;
+            }),
+      ].concat(
+         ...conditions.rules
+            .filter((e) => e.glue)
+            .map((e) => getFilterByConnectValues(e, depth + 1))
+      );
+   };
+
+   const filterByConnectValues = getFilterByConnectValues(filterConditions).map(
+      (e) => {
+         for (const key in instance.parent.viewComponents) {
+            const $ui = $$(instance.parent.viewComponents[key].ui.inputId);
+
+            if ($ui?.config?.name === e.value) {
+               // we need to use the element id stored in the settings to find out what the
+               // ui component id is so later we can use it to look up its current value
+               e.filterValue = $ui;
+
+               break;
+            }
          }
-      });
 
-      // if not found stop
-      if (!filterValue) return;
-      filterKey = instance.settings.filterConnectedValue.split(":")[1];
-      filterColumn = instance.settings.filterConnectedValue.split(":")[2];
-   }
+         const field = instance.AB.objectByID(
+            instance.settings.objectId
+         ).fieldByID(instance.settings.fieldId);
+         const linkedObject = instance.AB.objectByID(field.settings.linkObject);
+         const linkedField = linkedObject.fieldByID(e.key);
+
+         if (linkedField.settings.isCustomFK) {
+            // finally if this is a custom foreign key we need the stored columnName by
+            // default uuid is passed for all non CFK
+            e.filterColumn = instance.AB.objectByID(
+               linkedField.settings.linkObject
+            ).fields(
+               (filter) =>
+                  filter.id === linkedField.settings.indexField ||
+                  linkedField.settings.indexField2
+            )[0].columnName;
+         } else e.filterColumn = null;
+
+         return e;
+      }
+   );
 
    instance.options = {
       formView: instance.settings.formView,
-      filters: instance.settings.filterConditions,
-      sort: instance.settings.sortFields,
-      filterValue: filterValue,
-      filterKey: filterKey,
-      filterColumn: filterColumn,
-      editable: instance.settings.disable == 1 ? false : true,
+      filters: filterConditions,
+      sort: instance.settings.objectWorkspace.sortFields,
+      editable: instance.settings.disable === 1 ? false : true,
       editPage:
-         !instance.settings.editForm || instance.settings.editForm == "none"
+         !instance.settings.editForm || instance.settings.editForm === "none"
             ? false
             : true,
+      filterByConnectValues,
    };
-
-   var multiselect = field.settings.linkType == "many";
-
-   var placeholder = L("Select item");
-   if (multiselect) {
-      placeholder = L("Select items");
-   }
-
-   var readOnly = false;
-   if (
-      instance.options.editable != null &&
-      instance.options.editable == false
-   ) {
-      readOnly = true;
-      placeholder = "";
-   }
 
    // if this field's options are filtered off another field's value we need
    // to make sure the UX helps the user know what to do.
-   let placeholderReadOnly = null;
-   if (instance.options.filterValue && instance.options.filterKey) {
-      if (!$$(instance.options.filterValue.config.id)) {
-         // this happens in the Interface Builder when only the single form UI is displayed
-         readOnly = true;
-         placeholderReadOnly = L("Must select item from '{0}' first.", [
-            L("PARENT ELEMENT"),
-         ]);
-      } else {
-         let val = field.getValue($$(instance.options.filterValue.config.id));
-         if (!val) {
-            // if there isn't a value on the parent select element set this one to readonly and change placeholder text
-            readOnly = true;
-            let label = $$(instance.options.filterValue.config.id);
-            placeholderReadOnly = L("Must select item from '{0}' first.", [
-               label.config.label,
-            ]);
+   // fetch the options and set placeholder text for this view
+   if (instance.options.editable) {
+      const parentFields = [];
+
+      for (let i = 0; i < filterByConnectValues?.length; i++) {
+         if (
+            filterByConnectValues[i].filterValue &&
+            filterByConnectValues[i].key
+         ) {
+            const $filterValueConfig = $$(
+               filterByConnectValues[i].filterValue.config.id
+            );
+
+            let parentField = null;
+
+            if (!$filterValueConfig) {
+               // this happens in the Interface Builder when only the single form UI is displayed
+               parentField = {
+                  id: "perentElement",
+                  label: L("PARENT ELEMENT"),
+               };
+            } else {
+               const value = field.getValue($filterValueConfig);
+
+               if (!value) {
+                  // if there isn't a value on the parent select element set this one to readonly and change placeholder text
+                  parentField = {
+                     id: filterByConnectValues[i].filterValue.config.id,
+                     label: $filterValueConfig.config.label,
+                  };
+               }
+
+               $filterValueConfig.attachEvent(
+                  "onChange",
+                  (e) => {
+                     const parentVal = $filterValueConfig.getValue();
+
+                     if (parentVal) {
+                        $node.define("disabled", false);
+                        $node.define("placeholder", L("Select items"));
+                     } else {
+                        $node.define("disabled", true);
+                        $node.define(
+                           "placeholder",
+                           L("Must select item from '{0}' first.", [
+                              $filterValueConfig.config.label,
+                           ])
+                        );
+                     }
+
+                     $node.setValue("");
+                     $node.refresh();
+                  },
+                  false
+               );
+            }
+
+            if (
+               parentField &&
+               parentFields.findIndex((e) => e.id === parentField.id) < 0
+            )
+               parentFields.push(parentField);
          }
       }
-   }
 
-   // fetch the options and set placeholder text for this view
-   if (node) {
-      if (readOnly) {
-         $$(node).define("placeholder", placeholderReadOnly);
-         $$(node).define("disabled", true);
+      if (parentFields.length) {
+         $node.define("disabled", true);
+         $node.define(
+            "placeholder",
+            L(
+               `Must select item from ${parentFields
+                  .map((e, i) => `'{${i}}'`)
+                  .join(", ")} first.`,
+               parentFields.map((e) => e.label)
+            )
+         );
       } else {
-         $$(node).define("placeholder", placeholder);
+         $node.define("disabled", false);
+         $node.define("placeholder", L("Select items"));
       }
-      $$(node).refresh();
-
-      field.getAndPopulateOptions(
-         $$(node),
-         this.options,
-         field,
-         instance.parentFormComponent()
-      );
-   }
-   if (
-      instance.options.filterValue &&
-      $$(instance.options.filterValue.config.id)
-   ) {
-      // let parentDomNode = $$(options.filterValue.ui.id).$view.querySelector(
-      //    ".connect-data-values"
-      // );
-      $$(instance.options.filterValue.config.id).attachEvent(
-         "onChange",
-         (e) => {
-            let parentVal = $$(
-               instance.options.filterValue.config.id
-            ).getValue();
-            if (parentVal) {
-               $$(node).define("disabled", false);
-               $$(node).define("placeholder", placeholder);
-               $$(node).setValue("");
-               $$(node).refresh();
-            } else {
-               $$(node).define("disabled", true);
-               $$(node).define("placeholder", placeholderReadOnly);
-               $$(node).setValue("");
-               $$(node).refresh();
-            }
-         },
-         false
-      );
+   } else {
+      $node.define("placeholder", "");
+      $node.define("disabled", true);
    }
 
-   // listen 'editPage' event
-   // if (!instance._editPageEvent) {
-   //    instance._editPageEvent = true;
-   //    field.on("editPage", component.logic.goToEditPage);
-   // }
+   $node.refresh();
+
+   field.getAndPopulateOptions(
+      $node,
+      instance.options,
+      field,
+      instance.parentFormComponent()
+   );
 }
 
 const ABViewComponent = require("./viewComponent/ABViewComponent").default;
@@ -535,7 +564,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
          init: baseComp.init,
          logic: baseComp.logic,
          onShow: () => {
-            _onShow(App, ids.component, this, baseComp);
+            _onShow(ids.component, this.view);
          },
       };
    }
@@ -1275,7 +1304,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
       }
 
       component.onShow = () => {
-         _onShow(App, ids.component, this, component);
+         _onShow(ids.component, this.view);
          let elem = $$(ids.component);
          if (!elem) return;
 

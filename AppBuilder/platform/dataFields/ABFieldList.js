@@ -168,9 +168,11 @@ module.exports = class ABFieldList extends ABFieldListCore {
                   hasCustomColor = "hascustomcolor";
                   optionHex = `background: ${val.hex};`;
                }
-               values.push(
-                  `<div style="${optionHex}" class='webix_multicombo_value ${hasCustomColor}'><span>${val.text}</span><!-- span data-uuid="${val.id}" class="webix_multicombo_delete" role="button" aria-label="Remove item"></span --></div>`
-               );
+               if (val.text) {
+                  values.push(
+                     `<div style="${optionHex}" class='webix_multicombo_value ${hasCustomColor}'><span>${val.text}</span><!-- span data-uuid="${val.id}" class="webix_multicombo_delete" role="button" aria-label="Remove item"></span --></div>`
+                  );
+               }
             });
             if (selectedData.length > 1) {
                values.push(
@@ -187,9 +189,11 @@ module.exports = class ABFieldList extends ABFieldListCore {
                hasCustomColor = "hascustomcolor";
                optionHex = `background: ${selectedObj.hex};`;
             }
-            values.push(
-               `<div style="${optionHex}" class='webix_multicombo_value ${hasCustomColor}'><span>${selectedObj.text}</span><!-- span data-uuid="${selectedObj.id}" class="webix_multicombo_delete" role="button" aria-label="Remove item"></span --></div>`
-            );
+            if (selectedObj.text) {
+               values.push(
+                  `<div style="${optionHex}" class='webix_multicombo_value ${hasCustomColor}'><span>${selectedObj.text}</span><!-- span data-uuid="${selectedObj.id}" class="webix_multicombo_delete" role="button" aria-label="Remove item"></span --></div>`
+               );
+            }
          } else {
             return "";
          }

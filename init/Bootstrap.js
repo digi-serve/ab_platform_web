@@ -35,6 +35,9 @@ import initDefinitions from "../init/initDefinitions.js";
 
 // import JSZipUtils from "jszip-utils/dist/jszip-utils.min.js";
 
+const WebixReports = require("../js/webix/components/reports/reports.min.js");
+import webixReportsCSS from "../js/webix/components/querybuilder/querybuilder.min.css";
+
 var QueryBuilder = require("../js/webix/components/querybuilder/querybuilder.min.js");
 // NOTE: changed QB to require() since import couldn't find the global webix object.
 import querybuilderCSS from "../js/webix/components/querybuilder/querybuilder.min.css";

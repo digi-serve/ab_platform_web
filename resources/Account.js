@@ -65,8 +65,14 @@ class Account extends EventEmitter {
 
    logout() {
       return this.AB.Network.post(
-         { url: "/auth/logout" },
-         { key: "account.logout", context: {} }
+         {
+            url: "/auth/logout",
+            data: { tenantUrl: this.AB.Tenant.setting("url") },
+         },
+         {
+            key: "account.logout",
+            context: {},
+         }
       );
    }
 
