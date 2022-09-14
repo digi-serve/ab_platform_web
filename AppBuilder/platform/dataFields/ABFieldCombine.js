@@ -28,7 +28,12 @@ module.exports = class ABFieldCombine extends ABFieldCombineCore {
       config.editor = null; // read only
       config.css = "textCell";
       config.template = (rowData) => {
-         return this.format(rowData);
+         // if this isn't part of a group header display the default format
+         if (!rowData.$group) {
+            return this.format(rowData);
+         } else {
+            return "";
+         }
       };
 
       return config;

@@ -476,23 +476,23 @@ export default class AB_Work_Object_Workspace_PopupSortFields extends ClassUI {
     * @param {Object} b
     */
    sort(a, b) {
-      var result = 0;
+      let result = 0;
 
-      var childViews = $$(this.ids.form).getChildViews();
+      const childViews = $$(this.ids.form).getChildViews();
       if (childViews.length > 1) {
          // Ignore 'Add new sort' button
          childViews.forEach((cView, index) => {
             if (childViews.length - 1 <= index || result != 0) return;
 
-            var fieldId = cView.getChildViews()[0].getValue();
-            var dir = cView.getChildViews()[1].getValue();
+            const fieldId = cView.getChildViews()[0].getValue();
+            const dir = cView.getChildViews()[1].getValue();
 
-            var field = this.CurrentObject.fieldByID(fieldId);
+            const field = this.CurrentObject.fieldByID(fieldId);
             if (!field) return;
 
-            var by = field.columnName; // column name
+            const by = field.columnName; // column name
 
-            var aValue = a[by],
+            let aValue = a[by],
                bValue = b[by];
 
             if (Array.isArray(aValue)) {
@@ -504,10 +504,8 @@ export default class AB_Work_Object_Workspace_PopupSortFields extends ClassUI {
             }
 
             if (Array.isArray(bValue)) {
-               bValue = (bValue || [])
-                  .map(function (item) {
-                     return item.text || item;
-                  })
+               bValue = (bValue ?? [])
+                  .map((item) => item.text || item)
                   .join(" ");
             }
 

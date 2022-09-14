@@ -86,6 +86,11 @@ module.exports = class ABViewConditionalContainer extends (
                eventName: "loadData",
                listener: () => _logic.displayView(),
             });
+            this.eventAdd({
+               emitter: dv,
+               eventName: "initializedData",
+               listener: () => _logic.displayView(),
+            });
 
             this.eventAdd({
                emitter: dv,

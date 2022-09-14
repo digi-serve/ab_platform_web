@@ -25,7 +25,12 @@ module.exports = class ABFieldString extends ABFieldStringCore {
       config.css = "textCell";
       // config.sort   = 'string'
       config.template = (obj, common, value /* , col, ind */) => {
-         return (value || "").toString().replace(/[<]/g, "&lt;");
+         // if this isn't part of a group header display the default format
+         if (!obj.$group) {
+            return (value || "").toString().replace(/[<]/g, "&lt;");
+         } else {
+            return "";
+         }
       };
 
       return config;

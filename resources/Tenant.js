@@ -14,6 +14,18 @@ class Tenant extends EventEmitter {
    init() {
       var config = Config.tenantConfig();
       if (config) {
+         // check if we have options that are stored as a string
+         if (
+            typeof config.options === "string" ||
+            config.options instanceof String
+         ) {
+            // if we do try to parse them into a JSON object
+            try {
+               config.options = JSON.parse(config.options);
+            } catch (error) {
+               console.error(error);
+            }
+         }
          this._config = config;
          this.textClickToEnter = config.options.textClickToEnter;
       }
