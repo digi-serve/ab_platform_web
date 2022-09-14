@@ -37,12 +37,12 @@ class Account extends EventEmitter {
          this._listUsers = MetaConfig.users || [];
       }
 
-      this.AB.Network.on("account.logout", (context, err) => {
+      this.AB.Network.on("account.logout", (context, err, data) => {
          if (err) {
             console.error(err);
             return;
          }
-         this.emit("logout");
+         this.emit("logout", data);
       });
 
       return Promise.resolve();
