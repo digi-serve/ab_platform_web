@@ -166,7 +166,7 @@ module.exports = class ABViewMenuComponent extends ABViewComponent {
       if ($item.type == "tab") {
          this.view.changePage($item.pageId);
 
-         const redirectPage = this.application.pages(
+         const redirectPage = this.view.application.pages(
             (p) => p.id == $item.pageId,
             true
          )[0];
