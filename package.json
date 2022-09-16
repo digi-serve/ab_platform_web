@@ -31,7 +31,7 @@
       "webpack-merge": "^5.8.0"
    },
    "dependencies": {
-      "ab-utils": "github:hiro-nakamura/ab-utils",
+      "ab-utils": "github:digi-serve/ab-utils",
       "atomicjs": "^4.4.1",
       "bootstrap": "^4.6.0",
       "formiojs": "^4.12.7",
