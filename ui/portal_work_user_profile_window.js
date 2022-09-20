@@ -60,36 +60,42 @@ class PortalWorkUserProfileWindow extends ClassUI {
                },
             ],
          },
+         // body: {
+         // view: "scrollview",
+         // minHeight: 455,
          body: {
             view: "layout",
-            width: 640,
-            css: {
-               "text-align": "center",
-               margin: "0px",
-               padding: "0px",
-            },
+            width: 460,
             rows: [
                {
-                  cols: [
+                  rows: [
+                     {
+                        id: ids.imageUser,
+                        view: "template",
+                        autoheight: true,
+                        borderless: true,
+                        css: {
+                           background: "#222f3e",
+                        },
+                        // width: 160,
+                        template: `<img src="file/${this.AB.Account.imageID()}" onerror="this.style.display='none'; document.getElementById('errorImage').style.display = 'block';" width="150" height="150" style="border-radius: 50%; margin: 10px auto; display: block; border: 3px solid white;" /><div id="errorImage" style="display: none; width: 150px; height: 150px; background: #dee2e6; border-radius: 50%; margin: 10px auto; border: 3px solid white;"><i class="fa fa-user" style="font-size: 118px; color: white; margin: 15px 0 0 32px;"></i></div>`,
+                     },
                      {
                         css: {
                            position: "absolute",
-                           left: "162px",
-                           top: "162px",
+                           top: "185px",
                         },
-                        rows: [
+                        cols: [
+                           {},
                            {
                               id: ids.uploaderImage,
                               view: "uploader",
                               type: "icon",
-                              width: 30,
-                              height: 30,
+                              width: 34,
+                              height: 32,
                               zIndex: 999,
-                              icon: "wxi-plus",
-                              algin: "right",
-                              css: {
-                                 "text-align": "center",
-                              },
+                              icon: "fa fa-upload",
+                              algin: "center",
                               inputName: "file",
                               apiOnly: true,
                               multiple: false,
@@ -123,7 +129,7 @@ class PortalWorkUserProfileWindow extends ClassUI {
                                     this.AB.Account._config.image_id = imageID;
 
                                     $imageUser.setHTML(
-                                       `<img src="file/${this.AB.Account.imageID()}" width="150" height="150" style="border-radius: 50%;" />`
+                                       `<img src="file/${this.AB.Account.imageID()}" onerror="this.style.display='none'; document.getElementById('errorImage').style.display = 'block';" width="150" height="150" style="border-radius: 50%; margin: 10px auto; display: block; border: 3px solid white;" /><div id="errorImage" style="display: none; width: 150px; height: 150px; background: #dee2e6; border-radius: 50%; margin: 10px auto; border: 3px solid white;"><i class="fa fa-user" style="font-size: 118px; color: white; margin: 15px 0 0 32px;"></i></div>`
                                     );
                                     $uploaderImage.enable();
                                  },
@@ -147,89 +153,74 @@ class PortalWorkUserProfileWindow extends ClassUI {
                         ],
                      },
                      {
-                        id: ids.imageUser,
-                        view: "template",
-                        autoheight: true,
-                        borderless: true,
-                        width: 228,
-                        css: {
-                           "text-align": "center",
-                        },
-                        template: `<img src="file/${this.AB.Account.imageID()}" width="150" height="150" style="border-radius: 50%;" />`,
-                     },
-                     {
                         id: ids.formUserInfo,
                         view: "form",
+                        width: 460,
+                        height: 160,
                         borderless: true,
-                        width: 388,
                         css: {
-                           "text-align": "left",
+                           position: "relative",
+                           top: "15px",
                         },
                         elements: [
                            {
+                              css: {
+                                 "border-bottom": "1px solid #dee2e6",
+                                 "margin-top": "0 !important",
+                              },
                               cols: [
                                  {
                                     view: "label",
-                                    width: 70,
-                                    css: {
-                                       "text-align": "center",
-                                    },
+                                    width: 160,
+                                    // align: "right",
                                     label: L("Tenant"),
-                                 },
-                                 {
-                                    view: "label",
-                                    width: 15,
-                                    label: ": ",
                                  },
                                  {
                                     view: "label",
                                     name: "tenant",
                                     value: "",
+                                    css: "formText",
                                  },
                               ],
                            },
                            {
+                              css: {
+                                 "border-bottom": "1px solid #dee2e6",
+                                 "margin-top": "0 !important",
+                              },
                               cols: [
                                  {
                                     view: "label",
-                                    width: 70,
-                                    css: {
-                                       "text-align": "center",
-                                    },
+                                    width: 160,
+                                    // align: "right",
                                     label: L("Username"),
-                                 },
-                                 {
-                                    view: "label",
-                                    width: 15,
-                                    label: ": ",
                                  },
                                  {
                                     view: "label",
                                     name: "username",
                                     value: "",
+                                    css: "formText",
                                  },
                               ],
                            },
                            {
+                              css: {
+                                 "border-bottom": "1px solid #dee2e6",
+                                 "margin-top": "0 !important",
+                              },
                               cols: [
                                  {
                                     view: "label",
-                                    width: 70,
-                                    css: {
-                                       "text-align": "center",
-                                    },
+                                    width: 160,
+                                    // align: "right",
                                     label: L("Email"),
-                                 },
-                                 {
-                                    view: "label",
-                                    width: 15,
-                                    label: ": ",
                                  },
                                  {
                                     id: ids.dataEmail,
                                     view: "label",
                                     name: "email",
                                     value: "",
+                                    css: "formText",
                                  },
                                  {
                                     id: ids.editModeEmail,
@@ -362,25 +353,22 @@ class PortalWorkUserProfileWindow extends ClassUI {
                               ],
                            },
                            {
+                              css: {
+                                 "margin-top": "0 !important",
+                              },
                               cols: [
                                  {
                                     view: "label",
-                                    width: 70,
-                                    css: {
-                                       "text-align": "center",
-                                    },
+                                    width: 160,
+                                    // align: "right",
                                     label: L("Language"),
-                                 },
-                                 {
-                                    view: "label",
-                                    width: 15,
-                                    label: ": ",
                                  },
                                  {
                                     id: ids.dataLanguage,
                                     view: "label",
                                     name: "language",
                                     value: "",
+                                    css: "formText",
                                  },
                                  {
                                     id: ids.editModeLanguage,
@@ -555,8 +543,8 @@ class PortalWorkUserProfileWindow extends ClassUI {
                         view: "button",
                         type: "icon",
                         icon: "wxi-angle-down",
-                        height: 30,
-                        css: "webix_transparent",
+                        height: 40,
+                        css: "webix_primary",
                         label: L("Advanced Options"),
                         on: {
                            onItemClick: (id) => {
@@ -580,108 +568,171 @@ class PortalWorkUserProfileWindow extends ClassUI {
                         hidden: true,
                         rows: [
                            {
-                              view: "label",
-                              width: 606,
-                              css: {
-                                 "text-align": "left",
-                                 margin: "0px 17px 0px 17px !important",
-                                 width: "606px !important",
-                              },
-                              label: `${L("New Password")}:`,
-                           },
-                           {
-                              id: ids.formNewPassword,
                               view: "form",
+                              width: 460,
                               borderless: true,
-                              height: 38,
                               elements: [
                                  {
+                                    cols: [
+                                       {
+                                          rows: [
+                                             {
+                                                height: 3,
+                                             },
+                                             {
+                                                view: "label",
+                                                width: 160,
+                                                // align: "right",
+                                                label: L("New Password"),
+                                             },
+                                             {},
+                                          ],
+                                       },
+                                       {
+                                          id: ids.formNewPassword,
+                                          view: "form",
+                                          borderless: true,
+                                          width: 260,
+                                          padding: 0,
+                                          elements: [
+                                             {
+                                                id: ids.fieldNewPassword,
+                                                view: "text",
+                                                name: "newPassword",
+                                                type: "password",
+                                                placeholder: L(
+                                                   "Enter a new Password (at least 8)"
+                                                ),
+                                                value: "",
+                                                validate: (value) => {
+                                                   return value.length >= 8;
+                                                },
+                                             },
+                                             {
+                                                view: "text",
+                                                name: "confirmPassword",
+                                                type: "password",
+                                                placeholder: L(
+                                                   "Confirm Password"
+                                                ),
+                                                value: "",
+                                                validate: (value) => {
+                                                   const $fieldNewPassword = $$(
+                                                      ids.fieldNewPassword
+                                                   );
+
+                                                   return (
+                                                      value ===
+                                                      $fieldNewPassword.getValue()
+                                                   );
+                                                },
+                                             },
+                                             {
+                                                view: "button",
+                                                type: "form",
+                                                value: "Save",
+                                                align: "right",
+                                                height: 32,
+                                                width: 75,
+                                                inputWidth: 75,
+                                                css: "webix_primary",
+                                                on: {
+                                                   onItemClick: async (id) => {
+                                                      const $thisButton = $$(
+                                                         id
+                                                      );
+                                                      const $formNewPassword = $$(
+                                                         ids.formNewPassword
+                                                      );
+
+                                                      if (
+                                                         $formNewPassword.validate()
+                                                      ) {
+                                                         try {
+                                                            const $fieldNewPassword = $$(
+                                                               ids.fieldNewPassword
+                                                            );
+                                                            const password = $fieldNewPassword.getValue();
+
+                                                            $thisButton.disable();
+                                                            $formNewPassword.disable();
+
+                                                            await this.AB.Network.post(
+                                                               {
+                                                                  url:
+                                                                     "/auth/password/reset",
+                                                                  data: {
+                                                                     password,
+                                                                  },
+                                                               },
+                                                               {
+                                                                  key:
+                                                                     "portal_auth_password_reset",
+                                                                  context: {},
+                                                               }
+                                                            );
+                                                         } catch (error) {
+                                                            console.log(error);
+                                                         } finally {
+                                                            $formNewPassword.clear();
+                                                            $formNewPassword.enable();
+                                                            $thisButton.enable();
+                                                         }
+                                                         webix.alert(
+                                                            "The new password is successfully updated!"
+                                                         );
+                                                      }
+                                                   },
+                                                },
+                                             },
+                                          ],
+                                       },
+                                    ],
+                                 },
+                                 {
                                     css: {
-                                       margin: "0px 17px 0px 17px !important",
+                                       "border-top": "1px solid #dee2e6",
                                     },
                                     cols: [
                                        {
-                                          id: ids.fieldNewPassword,
-                                          view: "text",
-                                          name: "newPassword",
-                                          type: "password",
-                                          placeholder: L(
-                                             "Enter a new Password (at least 8)"
-                                          ),
-                                          value: "",
-                                          validate: (value) => {
-                                             return value.length >= 8;
-                                          },
+                                          view: "label",
+                                          width: 160,
+                                          // align: "right",
+                                          label: L("System Notification"),
                                        },
-                                       { width: 10 },
                                        {
-                                          view: "text",
-                                          name: "confirmPassword",
-                                          type: "password",
-                                          placeholder: L("Confirm Password"),
-                                          value: "",
-                                          validate: (value) => {
-                                             const $fieldNewPassword = $$(
-                                                ids.fieldNewPassword
-                                             );
-
-                                             return (
-                                                value ===
-                                                $fieldNewPassword.getValue()
-                                             );
+                                          id: ids.systemNotification,
+                                          view: "checkbox",
+                                          borderless: true,
+                                          width: 27,
+                                          css: {
+                                             "text-align": "center !important",
+                                             padding: "0 10px",
                                           },
-                                       },
-                                       { width: 10 },
-                                       {
-                                          view: "button",
-                                          type: "form",
-                                          value: "Save",
-                                          height: 32,
-                                          width: 75,
-                                          inputWidth: 75,
-                                          css: "webix_primary",
+                                          value: 0,
                                           on: {
-                                             onItemClick: async (id) => {
-                                                const $thisButton = $$(id);
-                                                const $formNewPassword = $$(
-                                                   ids.formNewPassword
+                                             onItemClick: async () => {
+                                                const $systemNotification = $$(
+                                                   ids.systemNotification
                                                 );
 
-                                                if (
-                                                   $formNewPassword.validate()
-                                                ) {
-                                                   try {
-                                                      const $fieldNewPassword = $$(
-                                                         ids.fieldNewPassword
-                                                      );
-                                                      const password = $fieldNewPassword.getValue();
+                                                try {
+                                                   const sendEmailNotifications = $systemNotification.getValue();
+                                                   await this.AB.Network.put({
+                                                      url: `/app_builder/model/${
+                                                         this.AB.objectUser().id
+                                                      }/${this.AB.Account.uuid()}`,
+                                                      data: {
+                                                         sendEmailNotifications,
+                                                      },
+                                                   });
 
-                                                      $thisButton.disable();
-                                                      $formNewPassword.disable();
-
-                                                      await this.AB.Network.post(
-                                                         {
-                                                            url:
-                                                               "/auth/password/reset",
-                                                            data: {
-                                                               password,
-                                                            },
-                                                         },
-                                                         {
-                                                            key:
-                                                               "portal_auth_password_reset",
-                                                            context: {},
-                                                         }
-                                                      );
-                                                   } catch (error) {
-                                                      console.log(error);
-                                                   } finally {
-                                                      $formNewPassword.clear();
-                                                      $formNewPassword.enable();
-                                                      $thisButton.enable();
-                                                   }
-                                                   webix.alert(
-                                                      "The new password is successfully updated!"
+                                                   this.AB.Account._config.sendEmailNotifications = sendEmailNotifications;
+                                                } catch (error) {
+                                                   console.error(error);
+                                                } finally {
+                                                   $systemNotification.setValue(
+                                                      this.AB.Account.sendEmailNotifications()
                                                    );
                                                 }
                                              },
@@ -691,66 +742,13 @@ class PortalWorkUserProfileWindow extends ClassUI {
                                  },
                               ],
                            },
-                           {
-                              css: {
-                                 "text-align": "left",
-                                 margin: "0px 17px 0px 17px !important",
-                                 width: "606px !important",
-                              },
-                              cols: [
-                                 {
-                                    view: "label",
-                                    width: 135,
-                                    css: {
-                                       "text-align": "left !important",
-                                    },
-                                    label: `${L("System Notification")}`,
-                                 },
-                                 {
-                                    id: ids.systemNotification,
-                                    view: "checkbox",
-                                    borderless: true,
-                                    width: 27,
-                                    css: {
-                                       "text-align": "center !important",
-                                    },
-                                    value: 0,
-                                    on: {
-                                       onItemClick: async () => {
-                                          const $systemNotification = $$(
-                                             ids.systemNotification
-                                          );
-
-                                          try {
-                                             const sendEmailNotifications = $systemNotification.getValue();
-                                             await this.AB.Network.put({
-                                                url: `/app_builder/model/${
-                                                   this.AB.objectUser().id
-                                                }/${this.AB.Account.uuid()}`,
-                                                data: {
-                                                   sendEmailNotifications,
-                                                },
-                                             });
-
-                                             this.AB.Account._config.sendEmailNotifications = sendEmailNotifications;
-                                          } catch (error) {
-                                             console.error(error);
-                                          } finally {
-                                             $systemNotification.setValue(
-                                                this.AB.Account.sendEmailNotifications()
-                                             );
-                                          }
-                                       },
-                                    },
-                                 },
-                              ],
-                           },
                         ],
                      },
                   ],
                },
             ],
          },
+         // },
       };
    }
 

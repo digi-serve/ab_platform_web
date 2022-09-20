@@ -1673,3 +1673,6 @@ div.webix_dataview_item.webix_transparent {
    right: 0;
    top: 0;
 }
+.webix_el_label.formText .webix_el_box {
+   font-weight: normal;
+}

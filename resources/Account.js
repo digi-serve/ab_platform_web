@@ -37,12 +37,12 @@ class Account extends EventEmitter {
          this._listUsers = MetaConfig.users || [];
       }
 
-      this.AB.Network.on("account.logout", (context, err) => {
+      this.AB.Network.on("account.logout", (context, err, data) => {
          if (err) {
             console.error(err);
             return;
          }
-         this.emit("logout");
+         this.emit("logout", data);
       });
 
       return Promise.resolve();
@@ -65,8 +65,14 @@ class Account extends EventEmitter {
 
    logout() {
       return this.AB.Network.post(
-         { url: "/auth/logout" },
-         { key: "account.logout", context: {} }
+         {
+            url: "/auth/logout",
+            data: { tenantUrl: this.AB.Tenant.setting("url") },
+         },
+         {
+            key: "account.logout",
+            context: {},
+         }
       );
    }
 
