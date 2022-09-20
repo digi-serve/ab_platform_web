@@ -381,7 +381,8 @@ module.exports = class ABViewFormButton extends ABViewFormButtonCore {
                   //Focus on first focusable component
                   form.focusOnFirst();
                })
-               .catch(() => {
+               .catch((err) => {
+                  console.error(err);
                   if (saveButton && saveButton.$view) saveButton.enable();
                });
          },

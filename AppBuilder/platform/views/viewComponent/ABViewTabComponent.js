@@ -374,7 +374,7 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
          baseView.eventAdd({
             emitter: baseView._viewComponents[i].view,
             eventName: "changePage",
-            listener: this.changePage,
+            listener: this.changePage.bind(this),
          });
       }
 

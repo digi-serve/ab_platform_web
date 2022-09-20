@@ -59,7 +59,7 @@ module.exports = class ABViewDetailCustomComponent extends (
       let elem = $$(this.ids.component);
       if (!elem) return;
 
-      let detailCom = this.detailComponent(),
+      let detailCom = this.view.detailComponent(),
          rowData = detailCom.datacollection.getCursor() || {},
          node = elem.$view;
 

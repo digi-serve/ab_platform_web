@@ -1,7 +1,7 @@
 const ABViewComponent = require("./ABViewComponent").default;
 const ABViewDetailComponent = require("./ABViewDetailComponent");
-const ABViewPropertyLinkPage = require("../viewProperties/ABViewPropertyLinkPage")
-   .default;
+const ABViewPropertyLinkPage =
+   require("../viewProperties/ABViewPropertyLinkPage").default;
 
 module.exports = class ABViewDataviewComponent extends ABViewComponent {
    constructor(baseView, idBase) {
@@ -44,7 +44,7 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
    init(options) {
       const ids = this.ids;
 
-      const dc = this.datacollection;
+      const dc = this.view.datacollection;
       if (!dc) return;
 
       const dataView = $$(ids.dataFlexView);
@@ -52,7 +52,7 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
       // initial the link page helper
       this.linkPage = this.linkPageHelper.component();
       this.linkPage.init({
-         view: this,
+         view: this.view,
          datacollection: dc,
       });
 
