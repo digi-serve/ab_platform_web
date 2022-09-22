@@ -102,6 +102,9 @@ label {
    opacity: 1;
    cursor: pointer;
 }
+.webix_tooltip .webix_multicombo_delete {
+   display: none;
+}
 .webix_multicombo_delete:hover:after {
    color: rgba(0, 0, 0, 0.7);
 }
