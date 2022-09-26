@@ -221,6 +221,11 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
       ) {
          this.AB.error("Error: filter conditions do not exist", {
             error: "filterConditions do not exist",
+            viewLocation: {
+               application: this.application.name,
+               id: this.id,
+               name: this.label,
+            },
             view: this,
          });
          // manually place an empty filter
