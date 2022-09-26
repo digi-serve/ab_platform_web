@@ -215,6 +215,24 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
          this.datasource ? this.datasource : null
       );
 
+      if (
+         !this.settings.objectWorkspace ||
+         !this.settings.objectWorkspace.filterConditions
+      ) {
+         this.AB.error("Error: filter conditions do not exist", {
+            error: "filterConditions do not exist",
+            viewLocation: {
+               application: this.application.name,
+               id: this.id,
+               name: this.label,
+            },
+            view: this,
+         });
+         // manually place an empty filter
+         this.settings["objectWorkspace"] = {};
+         this.settings["objectWorkspace"]["filterConditions"] = { glue: "and" };
+      }
+
       this.__filterComponent.setValue(
          this.settings.objectWorkspace.filterConditions ??
             ABViewFormConnectPropertyComponentDefaults.filterConditions
