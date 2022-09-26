@@ -507,6 +507,7 @@ class ABViewGridComponent extends ABViewComponent {
    ui() {
       var tableUI = {
          type: "space",
+         borderless: true,
          rows: [
             {},
             {
