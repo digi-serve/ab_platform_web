@@ -2046,8 +2046,10 @@ class ABViewGridComponent extends ABViewComponent {
    async localSettingsSave() {
       var savedLocalSettings =
          (await this.AB.Storage.get(KEY_STORAGE_SETTINGS)) || {};
-      savedLocalSettings[this.settingsID()] =
-         GridSettings[this.settingsID()] || [];
+
+      savedLocalSettings[this.settingsID()] = GridSettings[this.settingsID()]
+         ? GridSettings[this.settingsID()]
+         : [];
 
       for (const item in savedLocalSettings) {
          savedLocalSettings[item].forEach((item) => {
