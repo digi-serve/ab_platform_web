@@ -1728,8 +1728,10 @@ class ABViewGridComponent extends ABViewComponent {
          // none of our functions can be stored in localStorage, so scan
          // the original column and attach any template functions to our
          // stashed copy.
+         // also the suggest for selects and connected fields may contain a
+         // function so go ahead and copy the original suggest to the column
          Object.keys(origCol).forEach((k) => {
-            if (typeof origCol[k] == "function") {
+            if (typeof origCol[k] == "function" || k == "suggest") {
                c[k] = origCol[k];
             }
          });
