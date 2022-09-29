@@ -1,10 +1,11 @@
 const ABViewFormConnectCore = require("../../core/views/ABViewFormConnectCore");
-const ABViewPropertyAddPage = require("./viewProperties/ABViewPropertyAddPage")
-   .default;
-const ABViewPropertyEditPage = require("./viewProperties/ABViewPropertyEditPage")
-   .default;
+const ABViewPropertyAddPage =
+   require("./viewProperties/ABViewPropertyAddPage").default;
+const ABViewPropertyEditPage =
+   require("./viewProperties/ABViewPropertyEditPage").default;
 
-const ABViewFormConnectPropertyComponentDefaults = ABViewFormConnectCore.defaultValues();
+const ABViewFormConnectPropertyComponentDefaults =
+   ABViewFormConnectCore.defaultValues();
 
 const ABPopupSort = require("../../../ABDesigner/ab_work_object_workspace_popupSortFields");
 
@@ -166,7 +167,7 @@ function _onShow(App, compId, instance, component) {
          }
       }
 
-      if (parentFields.length) {
+      if (parentFields.length && !$node.getValue()) {
          $node.define("disabled", true);
          $node.define(
             "placeholder",

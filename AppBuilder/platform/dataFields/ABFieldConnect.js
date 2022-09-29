@@ -438,16 +438,30 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                      ? $parentField.getValue() ?? ""
                      : "";
 
+                  let newVal = "";
+
+                  if (parentValue) {
+                     if (value.filterColumn) {
+                        if (
+                           field.object
+                              .fieldByID(value.filterValue.config.dataFieldId)
+                              .getItemFromVal(parentValue)
+                        ) {
+                           newVal = field.object
+                              .fieldByID(value.filterValue.config.dataFieldId)
+                              .getItemFromVal(parentValue)[value.filterColumn];
+                        } else {
+                           newVal = parentValue;
+                        }
+                     } else {
+                        newVal = parentValue;
+                     }
+                  }
+
                   return {
                      key: e.key,
                      rule: "equals",
-                     value: parentValue
-                        ? value.filterColumn
-                           ? field.object
-                                .fieldByID(value.filterValue.config.dataFieldId)
-                                .getItemFromVal(parentValue)[value.filterColumn]
-                           : parentValue
-                        : parentValue,
+                     value: newVal,
                   };
                }),
             ];
