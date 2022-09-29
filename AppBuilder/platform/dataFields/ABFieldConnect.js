@@ -132,8 +132,12 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                );
             }
          } else if (selectedData.value) {
+            let clear = "";
+            if (options.editable) {
+               clear = `<span class="webix_multicombo_delete clear-combo-value" role="button" aria-label="Remove item"></span>`;
+            }
             values.push(
-               `<div class='webix_multicombo_value'><span>${selectedData.value}</span><!-- span data-uuid="${selectedData.id}" class="webix_multicombo_delete" role="button" aria-label="Remove item"></span --></div>`
+               `<div class='webix_multicombo_value'>${clear}<span class="ellip">${selectedData.value}</span></div>`
             );
          } else {
             return "";

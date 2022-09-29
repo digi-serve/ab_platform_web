@@ -105,28 +105,28 @@ module.exports = class ABViewConditionalContainer extends (
       var _logic = {
          displayView: (currData) => {
             let dv = this.datacollection;
-            if (dv) {
+            if (dv && dv.dataStatus === dv.dataStatusFlag.initialized) {
                if (currData == null) {
                   currData = dv.getCursor();
                }
+               var isValid = this.__filterComponent.isValid(currData);
 
-               // show 'waiting' panel
+               // dataStatus initialized
+               // filter is valid
+               // currentData has been loaded from cursor
                if (
-                  !currData &&
-                  (dv.dataStatus == dv.dataStatusFlag.notInitial ||
-                     dv.dataStatus == dv.dataStatusFlag.initializing)
+                  isValid &&
+                  currData != undefined // if , at this point, there is no cursor; the data collection is empty
                ) {
-                  $$(ids.component).showBatch("wait");
-                  return;
+                  // if (isValid && currData) {
+                  $$(ids.component).showBatch("if");
+               } else {
+                  $$(ids.component).showBatch("else");
                }
-            }
-
-            var isValid = this.__filterComponent.isValid(currData);
-            if (isValid) {
-               // if (isValid && currData) {
-               $$(ids.component).showBatch("if");
             } else {
-               $$(ids.component).showBatch("else");
+               // show 'waiting' panel if data is not loaded
+               $$(ids.component).showBatch("wait");
+               return;
             }
          },
       };

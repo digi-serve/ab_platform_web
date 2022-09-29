@@ -50,9 +50,14 @@ class Portal extends ClassUI {
       // are prepared.
       if (this.AB.Account.isAuthenticated) {
          // Setup our listeners BEFORE the .init()s
-         this.AB.Account.on("logout", () => {
-            // on logout show Auth Portal
-            this.showAuthPortal();
+         this.AB.Account.on("logout", (data) => {
+            if (data?.redirect) {
+               // if we pass a redirect link follow it
+               window.document.location.href = data?.redirect;
+            } else {
+               // on logout show Auth Portal
+               this.showAuthPortal();
+            }
          });
 
          this.AB.Network.on("reauth", () => {
