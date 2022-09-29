@@ -2077,7 +2077,20 @@ class ABViewGridComponent extends ABViewComponent {
       if (value) {
          GridSettings[this.settingsID()] = value;
       } else {
-         return GridSettings[this.settingsID()];
+         if (GridSettings[this.settingsID()]) {
+            return GridSettings[this.settingsID()];
+         } else {
+            // if there are no local settings get the current settings
+            var CurrentObject = this.datacollection.datasource;
+            return CurrentObject.columnHeaders(
+               true,
+               this.settings.editable,
+               // TRANSITION: moving these from .columnHeaders() to here:
+               [], //settings.summaryColumns,
+               [], //settings.countColumns,
+               [] //settings.hiddenFields
+            );
+         }
       }
    }
 
