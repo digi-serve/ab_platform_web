@@ -6,9 +6,10 @@
   "scripts": {
     "lint": "eslint AppBuilder/. init/. resources/. ui/. webix_custom_components/. --fix --max-warnings=0 --report-unused-disable-directives && echo '✔  Your .js files look good.'",
     "test": "mocha -r esm --require @babel/register --config test/.mocharc.js test/**/*.test.js",
-    "build": "node_modules/.bin/webpack-cli --progress",
-    "build:update": "node_modules/.bin/webpack-cli",
-    "watch": "node_modules/.bin/webpack-cli --watch --progress",
+    "build": "webpack-cli --config webpack.prod.js --progress",
+    "build:update": "webpack-cli --config webpack.prod.js",
+    "build:dev": "webpack-cli --config webpack.dev.js",
+    "watch": "webpack-cli --config webpack.dev.js --watch --progress",
     "break": "node --inspect-brk=9229 ./node_modules/.bin/webpack-cli --watch --progress"
   },
   "author": "",
@@ -36,7 +37,7 @@
     "webpack-merge": "^5.8.0"
   },
   "dependencies": {
-    "ab-utils": "github:hiro-nakamura/ab-utils",
+    "ab-utils": "github:digi-serve/ab-utils",
     "atomicjs": "^4.4.1",
     "bootstrap": "^4.6.0",
     "formiojs": "^4.12.7",
