@@ -1,37 +1,34 @@
 const ABViewFormConnectCore = require("../../core/views/ABViewFormConnectCore");
-const ABViewPropertyAddPage = require("./viewProperties/ABViewPropertyAddPage")
-   .default;
-const ABViewPropertyEditPage = require("./viewProperties/ABViewPropertyEditPage")
-   .default;
+const ABViewPropertyAddPage =
+   require("./viewProperties/ABViewPropertyAddPage").default;
+const ABViewPropertyEditPage =
+   require("./viewProperties/ABViewPropertyEditPage").default;
 
-const ABViewFormConnectPropertyComponentDefaults = ABViewFormConnectCore.defaultValues();
+const ABViewFormConnectPropertyComponentDefaults =
+   ABViewFormConnectCore.defaultValues();
 
 const ABPopupSort = require("../../../ABDesigner/ab_work_object_workspace_popupSortFields");
 
 let FilterComponent = null;
 let SortComponent = null;
 
-let L = (...params) => AB.Multilingual.label(...params);
+const L = (...params) => AB.Multilingual.label(...params);
 
 function _onShow(compId, instance) {
    const elem = $$(compId);
-
    if (!elem) return;
 
    const field = instance.field();
-
    if (!field) return;
 
    const node = elem.$view;
-
    if (!node) return;
 
    const $node = $$(node);
-
    if (!$node) return;
 
    const filterConditions = instance.settings.objectWorkspace
-      .filterConditions || { glue: "and", rules: [] };
+      .filterConditions ?? { glue: "and", rules: [] };
 
    const getFilterByConnectValues = (conditions, depth = 0) => {
       return [
@@ -200,8 +197,9 @@ const ABViewComponent = require("./viewComponent/ABViewComponent").default;
 
 class ABViewFormConnectComponent extends ABViewComponent {
    constructor(baseView, idBase) {
-      var base = idBase || `ABViewFormComponent_${baseView.id}`;
-      super(base, {
+      const base = idBase ?? `ABViewFormComponent_${baseView.id}`;
+      super(baseView, base, {
+         component: "",
          popup: "",
          editpopup: "",
       });
@@ -220,25 +218,26 @@ class ABViewFormConnectComponent extends ABViewComponent {
 
    ui() {
       const ids = this.ids;
-      let field = this.field;
-      let form = this.view.parentFormComponent();
+      const field = this.field;
+      const form = this.view.parentFormComponent();
 
       if (field == null) {
          console.error(`This field could not found : ${this.settings.fieldId}`);
          return {
             view: "label",
-            label: ""
+            label: "",
          };
       }
 
-      let multiselect = field.settings.linkType == "many";
+      const multiselect = field.settings.linkType == "many";
 
-      var settings = {};
+      let settings = {};
       if (form) settings = form.settings;
 
       let _ui = {
          id: this.ids.component,
          view: multiselect ? "multicombo" : "combo",
+         name: field.columnName,
          // label: field.label,
          // labelWidth: settings.labelWidth,
          dataFieldId: field.id,
@@ -248,7 +247,7 @@ class ABViewFormConnectComponent extends ABViewComponent {
                   e.target.classList.contains("editConnectedPage") &&
                   e.target.dataset.itemId
                ) {
-                  let rowId = e.target.dataset.itemId;
+                  const rowId = e.target.dataset.itemId;
                   if (!rowId) return;
                   this.goToEditPage(rowId);
                }
@@ -263,8 +262,7 @@ class ABViewFormConnectComponent extends ABViewComponent {
                         // we need to convert either index or uuid to full data object
                         recordObj = field.getItemFromVal(record);
                      }
-                     if (recordObj && recordObj.id)
-                        selectedValues.push(recordObj.id);
+                     if (recordObj?.id) selectedValues.push(recordObj.id);
                   });
                } else {
                   selectedValues = data;
@@ -273,7 +271,7 @@ class ABViewFormConnectComponent extends ABViewComponent {
                      selectedValues = field.getItemFromVal(data);
                   }
                   // selectedValues = field.pullRecordRelationValues(selectedValues);
-                  if (selectedValues && selectedValues.id) {
+                  if (selectedValues?.id) {
                      selectedValues = selectedValues.id;
                   } else {
                      selectedValues = data;
@@ -282,7 +280,7 @@ class ABViewFormConnectComponent extends ABViewComponent {
                // We can now set the new value but we need to block event listening
                // so it doesn't trigger onChange again
                $$(ids.component).blockEvent();
-               let prepedVals = selectedValues.join
+               const prepedVals = selectedValues.join
                   ? selectedValues.join()
                   : selectedValues;
                $$(ids.component).setValue(prepedVals);
@@ -325,10 +323,10 @@ class ABViewFormConnectComponent extends ABViewComponent {
          customField: (id, e, trg) => {
             if (this.settings.disable == 1) return;
 
-            var rowData = {};
+            const rowData = {};
 
             if ($$(ids.component)) {
-               var node = $$(ids.component).$view;
+               const node = $$(ids.component).$view;
                field.customEdit(rowData, /* App,*/ node);
             }
          },
@@ -403,10 +401,10 @@ class ABViewFormConnectComponent extends ABViewComponent {
       const ids = this.ids;
 
       // find the select component
-      var elem = $$(ids.component);
+      const elem = $$(ids.component);
       if (!elem) return;
 
-      let field = this.field;
+      const field = this.field;
       field.once("option.data", (data) => {
          data.forEach((item) => {
             item.value = item.text;
@@ -414,10 +412,10 @@ class ABViewFormConnectComponent extends ABViewComponent {
          $$(ids.component).getList().clearAll();
          $$(ids.component).getList().define("data", data);
          if (field.settings.linkType == "many") {
-            let currentVals = $$(ids.component).getValue();
+            const currentVals = $$(ids.component).getValue();
             if (currentVals.indexOf(saveData.id) == -1) {
                $$(ids.component).setValue(
-                  currentVals ? currentVals + "," + saveData.id : saveData.id
+                  currentVals ? `${currentVals},${saveData.id}` : saveData.id
                );
             }
          } else {
@@ -446,7 +444,7 @@ class ABViewFormConnectComponent extends ABViewComponent {
    }
 
    getValue(rowData) {
-      var elem = $$(this.ids.component);
+      const elem = $$(this.ids.component);
 
       return this.field.getValue(elem, rowData);
    }
@@ -573,7 +571,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
       let templateElem = baseComp.ui;
       templateElem.id = ids.component;
 
-      var _ui = {
+      const _ui = {
          rows: [templateElem, {}],
       };
 
@@ -1024,7 +1022,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
 
       // if this is our v1Interface
       if (v1App) {
-         var newComponent = component;
+         const newComponent = component;
          component = {
             ui: component.ui(),
             init: (options, accessLevel) => {
