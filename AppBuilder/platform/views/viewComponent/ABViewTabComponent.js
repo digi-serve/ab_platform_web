@@ -511,9 +511,8 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
             if ($component?.showProgress)
                $component.showProgress({ type: "icon" });
 
-            baseView._viewComponents[i].component = baseView._viewComponents[
-               i
-            ].view.component();
+            baseView._viewComponents[i].component =
+               baseView._viewComponents[i].view.component();
 
             const $viewID = $$(baseView._viewComponents[i].view.id);
 
