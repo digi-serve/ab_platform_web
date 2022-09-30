@@ -1,12 +1,12 @@
 import ABViewConnectDataFilterCore from "../../core/views/ABViewConnectDataFilterCore";
-import ABViewComponent from "./ABViewComponent";
+import ABViewComponent from "./viewComponent/ABViewComponent";
 
 const L = (...params) => AB.Multilingual.label(...params);
 
 class ABViewConnectDataFilterComponent extends ABViewComponent {
    constructor(view, idbase) {
       super(idbase ?? `ABViewConnectDataFilter_${view.id}`, {
-         reset: ""
+         reset: "",
       });
 
       this.view = view;
@@ -59,8 +59,10 @@ class ABViewConnectDataFilterComponent extends ABViewComponent {
 
       const [field] = object.fields((f) => f.columnName == this.settings.field);
       if (!field) {
-         console.warn(`Cannot find field "${this.settings.field}" in ${object.name}`);
-         return
+         console.warn(
+            `Cannot find field "${this.settings.field}" in ${object.name}`
+         );
+         return;
       }
       this.field = field;
 
