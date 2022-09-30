@@ -45,7 +45,7 @@ module.exports = class ABViewDetailComponent extends ABViewContainerComponent {
          this.eventAdd({
             emitter: dv,
             eventName: "changeCursor",
-            listener: this.displayData,
+            listener: this.displayData.bind(this),
          });
 
          this.eventAdd({

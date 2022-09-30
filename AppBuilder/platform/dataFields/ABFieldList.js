@@ -190,8 +190,12 @@ module.exports = class ABFieldList extends ABFieldListCore {
                optionHex = `background: ${selectedObj.hex};`;
             }
             if (selectedObj.text) {
+               let clear = "";
+               if (options.editable) {
+                  clear = `<span class="webix_multicombo_delete clear-combo-value" role="button" aria-label="Remove item"></span>`;
+               }
                values.push(
-                  `<div style="${optionHex}" class='webix_multicombo_value ${hasCustomColor}'><span>${selectedObj.text}</span><!-- span data-uuid="${selectedObj.id}" class="webix_multicombo_delete" role="button" aria-label="Remove item"></span --></div>`
+                  `<div style="${optionHex}" class='webix_multicombo_value ${hasCustomColor}'>${clear}<span class="ellip">${selectedObj.text}</span></div>`
                );
             }
          } else {

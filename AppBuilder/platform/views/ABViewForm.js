@@ -1,8 +1,8 @@
 const ABViewFormCore = require("../../core/views/ABViewFormCore");
+const ABViewFormComponent = require("./viewComponent/ABViewFormComponent");
 const ABViewFormButton = require("./ABViewFormButton");
 const ABViewFormCustom = require("./ABViewFormCustom");
 const ABViewFormConnect = require("./ABViewFormConnect");
-// const ABViewFormComponent = require("./ABViewFormComponent");
 const ABViewFormSelectMultiple = require("./ABViewFormSelectMultiple");
 const ABViewFormTextbox = require("./ABViewFormTextbox");
 
@@ -18,114 +18,6 @@ const L = (...params) => AB.Multilingual.label(...params);
 //// LEFT OFF HERE: Review and Refactor
 ////
 const ABViewFormPropertyComponentDefaults = ABViewFormCore.defaultValues();
-
-const ABViewComponent = require("./viewComponent/ABViewComponent").default;
-
-class ABViewFormUIComponent extends ABViewComponent {
-   constructor(baseView, idBase) {
-      idBase = idBase || `ABViewForm_${baseView.id}`;
-      super(baseView, idBase, {
-         layout: "",
-         filterComplex: "",
-      });
-   }
-
-   ui() {
-      let superComponent = this.view.superComponent();
-      let rows = superComponent.ui().rows || [];
-
-      // Pull fields that have validation rules
-      var fieldValidations = [];
-      var validationUI = [];
-      // NOTE: this._currentObject can be set in the KanBan Side Panel
-      var object =
-         this.view.datacollection?.datasource ?? this.view._currentObject;
-      if (object) {
-         var existsFields = this.view.fieldComponents();
-
-         object.fields().forEach((f) => {
-            var view = existsFields.filter((com) => {
-               return f.id == com.settings.fieldId;
-            })[0];
-
-            // check to see if field has validation rules
-            if (view && f.settings.validationRules) {
-               // parse the rules because they were stored as a string
-               // check if rules are still a string...if so lets parse them
-               if (typeof f.settings.validationRules === "string") {
-                  f.settings.validationRules = JSON.parse(
-                     f.settings.validationRules
-                  );
-               }
-               // there could be more than one so lets loop through and build the UI
-               f.settings.validationRules.forEach((rule, indx) => {
-                  var Filter = this.AB.filterComplexNew(
-                     `${f.columnName}_${indx}`
-                  );
-                  // add the new ui to an array so we can add them all at the same time
-                  if (typeof Filter.ui == "function") {
-                     validationUI.push(Filter.ui());
-                  } else {
-                     // Legacy v1 method:
-                     validationUI.push(Filter.ui);
-                  }
-
-                  // store the filter's info so we can assign values and settings after the ui is rendered
-                  fieldValidations.push({
-                     filter: Filter,
-                     view: Filter.ids.querybuilder,
-                     columnName: f.columnName,
-                     validationRules: rule.rules,
-                     invalidMessage: rule.invalidMessage,
-                  });
-               });
-            }
-         });
-      }
-
-      var fieldValidationsHolder = [
-         {
-            hidden: true,
-            rows: validationUI,
-         },
-         // {},
-      ];
-
-      return {
-         // view: "scrollview",
-         // height: this.settings.height || ABViewFormPropertyComponentDefaults.height,
-         // body: {
-         id: this.ids.component,
-         view: "form",
-         abid: this.view.id,
-         rows: rows.concat(fieldValidationsHolder),
-         // elementsConfig: {
-         //    on: {
-         //       onChange: function(newv, oldv) {
-         //          this.validate();
-         //       }
-         //    }
-         // }
-         // }
-      };
-   }
-
-   init(AB, accessLevel, options = {}) {
-      this.AB = AB;
-
-      if (options.onBeforeSaveData) {
-         this.view._callbacks.onBeforeSaveData = options.onBeforeSaveData;
-      } else {
-         this.view._callbacks.onBeforeSaveData = () => true;
-      }
-
-      return Promise.resolve();
-   }
-
-   detatch() {
-      // TODO: remove any handlers we have attached.
-   }
-}
 
 module.exports = class ABViewForm extends ABViewFormCore {
    constructor(values, application, parent, defaultValues) {
@@ -759,7 +651,10 @@ module.exports = class ABViewForm extends ABViewFormCore {
    // }
 
    superComponent() {
-      return super.component();
+      if (this._superComponent == null)
+         this._superComponent = super.component();
+
+      return this._superComponent;
    }
 
    /**
@@ -769,11 +664,11 @@ module.exports = class ABViewForm extends ABViewFormCore {
     * @return {obj} UI component
     */
    component(v1App = false) {
-      let component = new ABViewFormUIComponent(this);
+      let component = new ABViewFormComponent(this);
 
       // if this is our v1Interface
       if (v1App) {
-         var newComponent = component;
+         const newComponent = component;
          component = {
             ui: newComponent.ui(),
             init: (options, accessLevel) => {
@@ -1343,32 +1238,33 @@ module.exports = class ABViewForm extends ABViewFormCore {
     */
    getFormValues(formView, obj, dc, dcLink) {
       // get the fields that are on this form
-      var visibleFields = ["id"]; // we always want the id so we can udpate records
-      var loopForm = formView.getValues(function (obj) {
+      const visibleFields = ["id"]; // we always want the id so we can udpate records
+      formView.getValues(function (obj) {
          visibleFields.push(obj.config.name);
       });
 
       // only get data passed from form
-      let allVals = formView.getValues();
-      let formVals = {};
+      const allVals = formView.getValues();
+      const formVals = {};
       visibleFields.forEach((val) => {
          formVals[val] = allVals[val];
       });
 
       // get custom values
-      var customFields = this.fieldComponents(
+      this.fieldComponents(
          (comp) =>
             comp instanceof ABViewFormCustom ||
             comp instanceof ABViewFormConnect ||
             comp instanceof ABViewFormSelectMultiple
-      );
-      customFields.forEach((f) => {
-         var vComponent = this.viewComponents[f.id];
+      ).forEach((f) => {
+         const vComponent = this.viewComponents[f.id];
          if (vComponent == null) return;
 
-         let field = f.field();
+         const field = f.field();
          if (field) {
-            formVals[field.columnName] = vComponent.logic.getValue(formVals);
+            const getValue = vComponent.getValue ?? vComponent.logic.getValue;
+            if (getValue)
+               formVals[field.columnName] = getValue.call(vComponent, formVals);
          }
       });
 
@@ -1384,7 +1280,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
       });
 
       // clear undefined values or empty arrays
-      for (var prop in formVals) {
+      for (const prop in formVals) {
          if (formVals[prop] == null || formVals[prop].length == 0)
             formVals[prop] = "";
       }
@@ -1416,14 +1312,14 @@ module.exports = class ABViewForm extends ABViewFormCore {
 
                formVals[f.columnName] = {};
                formVals[f.columnName][linkColName] =
-                  linkValues[linkColName] || linkValues.id;
+                  linkValues[linkColName] ?? linkValues.id;
             }
          });
       }
 
       // NOTE: need to pull data of current cursor to calculate Calculate & Formula fields
       // .formVals variable does not include data that does not display in the Form widget
-      let cursorFormVals = Object.assign(dc.getCursor() || {}, formVals);
+      const cursorFormVals = Object.assign(dc.getCursor() ?? {}, formVals);
 
       // Set value of calculate or formula fields to use in record rule
       obj.fields((f) => f.key == "calculate" || f.key == "formula").forEach(
@@ -1446,16 +1342,14 @@ module.exports = class ABViewForm extends ABViewFormCore {
     *
     * @return {boolean} isValid
     */
-   validateData(formView, object, formVals) {
+   validateData($formView, object, formVals) {
       let isValid = true;
 
       // validate required fields
-      let requiredFields = this.fieldComponents(
+      const requiredFields = this.fieldComponents(
          (fComp) =>
-            (fComp.field &&
-               fComp.field() &&
-               fComp.field().settings.required == true) ||
-            fComp.settings.required == true
+            fComp?.field?.().settings?.required == true ||
+            fComp?.settings?.required == true
       ).map((fComp) => fComp.field());
 
       // validate data
@@ -1465,34 +1359,36 @@ module.exports = class ABViewForm extends ABViewFormCore {
          isValid = validator.pass();
       }
 
-      $$(formView).validate();
+      // $$($formView).validate();
+      $formView.validate();
 
       // Display required messages
       requiredFields.forEach((f) => {
-         if (f && !formVals[f.columnName] && formVals[f.columnName] != "0") {
-            formView.markInvalid(f.columnName, L("This is a required field."));
+         if (!f) return;
+
+         const fieldVal = formVals[f.columnName];
+         if (fieldVal == "" || fieldVal == null || fieldVal.length < 1) {
+            $formView.markInvalid(f.columnName, L("This is a required field."));
             isValid = false;
 
             // Fix position of invalid message
-            let $forminput = formView.elements[f.columnName];
+            const $forminput = $formView.elements[f.columnName];
             if ($forminput) {
                // Y position
-               let height = $forminput.$height;
+               const height = $forminput.$height;
                if (height < 56) {
                   $forminput.define("height", 60);
                   $forminput.resize();
                }
 
                // X position
-               let domInvalidMessage = $forminput.$view.getElementsByClassName(
-                  "webix_inp_bottom_label"
-               )[0];
-               if (
-                  domInvalidMessage &&
-                  !domInvalidMessage.style["margin-left"]
-               ) {
+               const domInvalidMessage =
+                  $forminput.$view.getElementsByClassName(
+                     "webix_inp_bottom_label"
+                  )[0];
+               if (!domInvalidMessage?.style["margin-left"]) {
                   domInvalidMessage.style.marginLeft = `${
-                     this.settings.labelWidth ||
+                     this.settings.labelWidth ??
                      ABViewFormPropertyComponentDefaults.labelWidth
                   }px`;
                }
@@ -1502,20 +1398,20 @@ module.exports = class ABViewForm extends ABViewFormCore {
 
       // if data is invalid
       if (!isValid) {
-         let saveButton = formView.queryView({
+         const saveButton = $formView.queryView({
             view: "button",
             type: "form",
          });
 
          // error message
-         if (validator && validator.errors && validator.errors.length) {
+         if (validator?.errors?.length) {
             validator.errors.forEach((err) => {
-               formView.markInvalid(err.name, err.message);
+               $formView.markInvalid(err.name, err.message);
             });
 
-            if (saveButton) saveButton.disable();
+            saveButton?.disable();
          } else {
-            if (saveButton) saveButton.enable();
+            saveButton?.enable();
          }
       }
 
@@ -1535,38 +1431,38 @@ module.exports = class ABViewForm extends ABViewFormCore {
    /**
     * @method saveData
     * save data in to database
-    * @param formView - webix's form element
+    * @param $formView - webix's form element
     *
     * @return {Promise}
     */
-   async saveData(formView) {
+   async saveData($formView) {
       // call .onBeforeSaveData event
       // if this function returns false, then it will not go on.
       if (!this._callbacks?.onBeforeSaveData?.()) return;
 
       // form validate
-      if (!formView || !formView.validate()) {
+      if (!$formView || !$formView.validate()) {
          // TODO : error message
          return;
       }
 
-      formView.clearValidation();
+      $formView.clearValidation();
 
       // get ABDatacollection
-      var dv = this.datacollection;
+      const dv = this.datacollection;
       if (dv == null) return;
 
       // get ABObject
-      var obj = dv.datasource;
+      const obj = dv.datasource;
       if (obj == null) return;
 
       // get ABModel
-      var model = dv.model;
+      const model = dv.model;
       if (model == null) return;
 
       // get update data
-      var formVals = this.getFormValues(
-         formView,
+      const formVals = this.getFormValues(
+         $formView,
          obj,
          dv,
          dv.datacollectionLink
@@ -1579,33 +1475,34 @@ module.exports = class ABViewForm extends ABViewFormCore {
       this.doRecordRulesPre(formVals);
 
       // validate data
-      if (!this.validateData(formView, obj, formVals)) {
+      if (!this.validateData($formView, obj, formVals)) {
+         console.warn("Data is invalid.");
          return;
       }
 
       // show progress icon
-      formView.showProgress?.({ type: "icon" });
+      $formView.showProgress?.({ type: "icon" });
 
       // form ready function
-      var formReady = (newFormVals) => {
+      const formReady = (newFormVals) => {
          // clear cursor after saving.
          if (dv) {
             if (this.settings.clearOnSave) {
                dv.setCursor(null);
-               formView.clear();
+               $formView.clear();
             } else {
                if (newFormVals && newFormVals.id) dv.setCursor(newFormVals.id);
             }
          }
 
-         formView.hideProgress?.();
+         $formView.hideProgress?.();
 
          // if there was saved data pass it up to the onSaveData callback
          if (newFormVals) this._logic.callbacks.onSaveData(newFormVals);
       };
 
-      let formError = (err) => {
-         let saveButton = formView.queryView({
+      const formError = (err) => {
+         const $saveButton = $formView.queryView({
             view: "button",
             type: "form",
          });
@@ -1613,12 +1510,12 @@ module.exports = class ABViewForm extends ABViewFormCore {
          // mark error
          if (err) {
             if (err.invalidAttributes) {
-               for (let attr in err.invalidAttributes) {
+               for (const attr in err.invalidAttributes) {
                   let invalidAttrs = err.invalidAttributes[attr];
                   if (invalidAttrs && invalidAttrs[0])
                      invalidAttrs = invalidAttrs[0];
 
-                  formView.markInvalid(attr, invalidAttrs.message);
+                  $formView.markInvalid(attr, invalidAttrs.message);
                }
             } else if (err.sqlMessage) {
                webix.message({
@@ -1637,9 +1534,9 @@ module.exports = class ABViewForm extends ABViewFormCore {
             }
          }
 
-         saveButton?.enable();
+         $saveButton?.enable();
 
-         formView?.hideProgress?.();
+         $formView?.hideProgress?.();
       };
 
       let newFormVals;
@@ -1680,8 +1577,8 @@ module.exports = class ABViewForm extends ABViewFormCore {
    }
 
    focusOnFirst() {
-      var topPosition = 0;
-      var topPositionId = "";
+      let topPosition = 0;
+      let topPositionId = "";
       this.views().forEach((item) => {
          if (item.key == "textbox" || item.key == "numberbox") {
             if (item.position.y == topPosition) {
@@ -1690,7 +1587,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
             }
          }
       });
-      var childComponent = this.viewComponents[topPositionId];
+      let childComponent = this.viewComponents[topPositionId];
       if (childComponent && $$(childComponent.ui.id)) {
          $$(childComponent.ui.id).focus();
       }

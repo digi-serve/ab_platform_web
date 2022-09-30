@@ -14,6 +14,7 @@ jobs:
       name: Test
       runs-on: ubuntu-latest
       strategy:
+         fail-fast: true
          matrix:
             include:
                - branch: develop
@@ -59,7 +60,7 @@ jobs:
            with:
               working-directory: ./ab
               project: ./test/e2e
-              config: baseUrl=http://localhost:8080,responseTimeout=100000,defaultCommandTimeout=24000,retries=2
+              config: baseUrl=http://localhost:8080,responseTimeout=120000,defaultCommandTimeout=24000,retries=2
               wait-on: "http://localhost:8080"
               wait-on-timeout: 300
               env: stack=ab
