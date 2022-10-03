@@ -1,11 +1,10 @@
 const ABViewFormConnectCore = require("../../core/views/ABViewFormConnectCore");
-const ABViewPropertyAddPage =
-   require("./viewProperties/ABViewPropertyAddPage").default;
-const ABViewPropertyEditPage =
-   require("./viewProperties/ABViewPropertyEditPage").default;
+const ABViewPropertyAddPage = require("./viewProperties/ABViewPropertyAddPage")
+   .default;
+const ABViewPropertyEditPage = require("./viewProperties/ABViewPropertyEditPage")
+   .default;
 
-const ABViewFormConnectPropertyComponentDefaults =
-   ABViewFormConnectCore.defaultValues();
+const ABViewFormConnectPropertyComponentDefaults = ABViewFormConnectCore.defaultValues();
 
 const ABPopupSort = require("../../../ABDesigner/ab_work_object_workspace_popupSortFields");
 
@@ -931,19 +930,11 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
          button: true,
          selectAll: multiselect ? true : false,
          body: {
-            data: [],
             template: editForm + "#value#",
          },
-         on: {
-            onShow: () => {
-               field.getAndPopulateOptions(
-                  $$(ids.component),
-                  this.options,
-                  field,
-                  form
-               );
-            },
-         },
+         // Support partial matches
+         filter: ({ value }, search) =>
+            value.toLowerCase().includes(search.toLowerCase()),
       };
 
       component.ui.onClick = {

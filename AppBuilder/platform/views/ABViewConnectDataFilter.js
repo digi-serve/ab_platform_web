@@ -6,7 +6,7 @@ const L = (...params) => AB.Multilingual.label(...params);
 class ABViewConnectDataFilterComponent extends ABViewComponent {
    constructor(view, idbase) {
       super(idbase ?? `ABViewConnectDataFilter_${view.id}`, {
-         reset: ""
+         reset: "",
       });
 
       this.view = view;
@@ -59,18 +59,24 @@ class ABViewConnectDataFilterComponent extends ABViewComponent {
 
       const [field] = object.fields((f) => f.columnName == this.settings.field);
       if (!field) {
-         console.warn(`Cannot find field "${this.settings.field}" in ${object.name}`);
-         return
+         this.AB.notify.developer(
+            `Cannot find field "${this.settings.field}" in ${object.name}`,
+            {
+               context: "ABViewConnectDataFilterComponent.init()",
+               data: { settings: this.settings },
+            }
+         );
+         return;
       }
       this.field = field;
 
-      const suggest = {
-         on: {
-            onBeforeShow: function () {
-               field.getAndPopulateOptions(this, null, field);
-            },
-         },
-      };
+      const suggest = webix.ui({
+         view: "suggest",
+         filter: ({ value }, search) =>
+            value.toLowerCase().includes(search.toLowerCase()),
+      });
+      field.getAndPopulateOptions(suggest, null, field);
+
       $$(this.ids.component).define("suggest", suggest);
       $$(this.ids.component).define(
          "label",
