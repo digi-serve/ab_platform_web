@@ -933,7 +933,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
             template: editForm + "#value#",
          },
          on: {
-            onBeforeShow: () => {
+            onShow: () => {
                field.populateOptionsDataCy($$(ids.component), field, form);
             },
          },

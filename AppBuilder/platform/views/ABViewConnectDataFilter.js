@@ -75,7 +75,7 @@ class ABViewConnectDataFilterComponent extends ABViewComponent {
          filter: ({ value }, search) =>
             value.toLowerCase().includes(search.toLowerCase()),
          on: {
-            onBeforeShow: () => {
+            onShow: () => {
                field.populateOptionsDataCy($$(this.ids.component), field, {});
             },
          },
