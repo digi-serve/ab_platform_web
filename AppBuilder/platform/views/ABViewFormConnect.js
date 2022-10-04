@@ -141,6 +141,12 @@ function _onShow(App, compId, instance, component) {
                      if (parentVal) {
                         $node.define("disabled", false);
                         $node.define("placeholder", L("Select items"));
+                        field.getAndPopulateOptions(
+                           $node,
+                           instance.options,
+                           field,
+                           instance.parentFormComponent()
+                        );
                      } else {
                         $node.define("disabled", true);
                         $node.define(
