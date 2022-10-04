@@ -932,6 +932,11 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
          body: {
             template: editForm + "#value#",
          },
+         on: {
+            onBeforeShow: () => {
+               field.populateOptionsDataCy($$(ids.component), field, form);
+            },
+         },
          // Support partial matches
          filter: ({ value }, search) =>
             value.toLowerCase().includes(search.toLowerCase()),
