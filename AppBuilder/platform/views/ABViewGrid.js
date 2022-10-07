@@ -1570,8 +1570,8 @@ class ABViewGridComponent extends ABViewComponent {
          }
       }
 
+      this.localSettings(localSettings);
       if (this.settings.saveLocal) {
-         this.localSettings(localSettings);
          this.localSettingsSave();
          // for (const item in GridSettings) {
          //    GridSettings[item].forEach((item) => {
@@ -2077,20 +2077,7 @@ class ABViewGridComponent extends ABViewComponent {
       if (value) {
          GridSettings[this.settingsID()] = value;
       } else {
-         if (GridSettings[this.settingsID()]) {
-            return GridSettings[this.settingsID()];
-         } else {
-            // if there are no local settings get the current settings
-            var CurrentObject = this.datacollection.datasource;
-            return CurrentObject.columnHeaders(
-               true,
-               this.settings.editable,
-               // TRANSITION: moving these from .columnHeaders() to here:
-               [], //settings.summaryColumns,
-               [], //settings.countColumns,
-               [] //settings.hiddenFields
-            );
-         }
+         return GridSettings[this.settingsID()];
       }
    }
 
