@@ -6,6 +6,7 @@
  * and provide a way to lookup a SiteUser.
  */
 var ABProcessParticipantCore = require("../../core/process/ABProcessParticipantCore");
+const ABFieldUser = require("../dataFields/ABFieldUser");
 
 const L = (...params) => AB.Multilingual.label(...params);
 
@@ -210,9 +211,16 @@ module.exports = class ABProcessParticipant extends ABProcessParticipantCore {
       var ids = ABProcessParticipant.propertyIDs(id);
       var __Roles = this.AB.Account.rolesAll();
       var __Users = this.AB.Account.userList();
+      const __Fields = [].concat(
+         this.objectOfStartElement?.fields((f) => f instanceof ABFieldUser),
+         this.process
+            .processDataFields(this)
+            .filter((f) => f?.field instanceof ABFieldUser)
+      );
 
       __Roles.unshift({ id: "--", value: L("select a role") });
       __Users.unshift({ id: "--", value: L("select a user") });
+      __Fields.unshift({ id: "--", value: L("select a field") });
 
       return {
          view: "fieldset",
@@ -272,6 +280,40 @@ module.exports = class ABProcessParticipant extends ABProcessParticipantCore {
                         labelAlign: "left",
                         placeholder: L("Click or type to add user..."),
                         stringResult: false /* returns data as an array of [id] */,
+                     },
+                  ],
+               },
+               {
+                  cols: [
+                     {
+                        view: "checkbox",
+                        id: ids.useField,
+                        labelRight: L("by Field"),
+                        labelWidth: 0,
+                        width: 120,
+                        value: values.useField ? values.useField : 0,
+                        click: function (id /*, event */) {
+                           if (this.getValue()) {
+                              $$(ids.fields).enable();
+                           } else {
+                              $$(ids.fields).disable();
+                           }
+                        },
+                     },
+                     {
+                        id: ids.fields,
+                        view: "multicombo",
+                        value: values.fields ?? [],
+                        disabled: values.useField ? false : true,
+                        suggest: (__Fields ?? []).map((f) => {
+                           return {
+                              id: f.id ?? f.key,
+                              value: f.label,
+                           };
+                        }),
+                        labelAlign: "left",
+                        placeholder: L("Click or type to add user fields ..."),
+                        stringResult: false,
                      },
                   ],
                },
@@ -429,3 +471,4 @@ module.exports = class ABProcessParticipant extends ABProcessParticipantCore {
       this.stashed = true;
    }
 };
+
