@@ -6,6 +6,7 @@ import PortalWorkInboxTaskWindow from "./portal_work_inbox_taskWindow.js";
 import PortalWorkUserProfileWindow from "./portal_work_user_profile_window.js";
 import PortalWorkUserQRWindow from "./portal_work_user_qr_window.js";
 import PortalAccessLevelManager from "./portal_access_level_manager.js";
+import TranslationTool from "./portal_translation_tool.js";
 
 class PortalWork extends ClassUI {
    constructor() {
@@ -370,9 +371,8 @@ class PortalWork extends ClassUI {
             $sideBar.select(foundMenuEntry.id);
             this.selectApplication(foundMenuEntry.id);
 
-            const defaultPageID = this.AppState.lastPages[
-               foundMenuEntry.abApplication.id
-            ];
+            const defaultPageID =
+               this.AppState.lastPages[foundMenuEntry.abApplication.id];
 
             DefaultPage = foundMenuEntry.abApplication.pages(
                (p) => p.id === defaultPageID
@@ -680,13 +680,17 @@ class PortalWork extends ClassUI {
       $$("portal_work").show();
    }
 
-   showPage(page) {
+   showPage(page, viewId) {
       const pageUI = this.pageContainers[page?.id];
 
       if (pageUI) {
          pageUI.show();
          this.AppState.lastPages[page.application.id] = page.id;
          this.saveState();
+      }
+
+      if (viewId && $$(viewId)) {
+         $$(viewId).show(false, false);
       }
    }
 
@@ -826,6 +830,10 @@ class PortalWork extends ClassUI {
                      case "accessLevel":
                         PortalAccessLevelManager.init(this);
                         PortalAccessLevelManager.show();
+                        break;
+                     case "translation":
+                        TranslationTool.init(this);
+                        TranslationTool.show();
                         break;
                      default:
                         //eslint-disable-next-line

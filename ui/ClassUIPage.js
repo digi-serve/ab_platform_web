@@ -428,8 +428,12 @@ class ClassUIPage extends ClassUI {
 
       // if no pageID provided, then we are displaying a previous page:
       if (!pageID) {
-         // pull the last View displayed & remove it.
-         this.pageStack.pop();
+         if (this.pageStack.length) {
+            // pull the last View displayed & remove it.
+            this.pageStack.pop();
+         } else {
+            this.showPage(this.page.id);
+         }
       } else {
          // be sure not to add our Root Page to the stack
          if (this.page.id != pageID) {
