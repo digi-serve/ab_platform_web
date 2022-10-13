@@ -407,6 +407,10 @@ class ClassUIPage extends ClassUI {
     *       page + view.
     */
    showPage(pageID, viewId) {
+      // some instances of showPage expect first parm to be page object
+      if (pageID?.id) {
+         pageID = pageID.id;
+      }
       var showPageID = null;
       // {string}
       // This is the actual pageID of the ABViewPage to display.
@@ -428,12 +432,8 @@ class ClassUIPage extends ClassUI {
 
       // if no pageID provided, then we are displaying a previous page:
       if (!pageID) {
-         if (this.pageStack.length) {
-            // pull the last View displayed & remove it.
-            this.pageStack.pop();
-         } else {
-            this.showPage(this.page.id);
-         }
+         // pull the last View displayed & remove it.
+         this.pageStack.pop();
       } else {
          // be sure not to add our Root Page to the stack
          if (this.page.id != pageID) {

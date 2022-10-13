@@ -227,10 +227,14 @@ class PortalTranslationTool extends ClassUI {
    }
 
    showPage(pageId, viewId) {
-      if (viewId) {
-         this.portal.pageContainers[pageId].pageStack.push(viewId);
-      }
-      this.portal.showPage(this.portal.pageContainers[pageId], viewId);
+      // if (viewId) {
+      //    this.portal.pageContainers[pageId].pageStack.push(viewId);
+      // }
+      let page = this.application.views((v) => {
+         return v.id == pageId;
+      })[0];
+
+      this.portal.showPage(page, viewId);
    }
 
    /*
@@ -498,7 +502,7 @@ class PortalTranslationTool extends ClassUI {
                   // switch page
                   else {
                      if (item.type == "page") {
-                        if (item.icon == "clone") {
+                        if (item.icon == "clone" || item.icon == "file") {
                            this.showPage(item.pageId, item.id);
                         } else {
                            this.showPage(item.pageId || item.viewId);
