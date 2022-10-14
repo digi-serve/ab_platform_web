@@ -226,15 +226,12 @@ class PortalTranslationTool extends ClassUI {
       $$("quickTranslationTool_" + this.containerDomID).hide();
    }
 
-   showPage(pageId, viewId) {
-      // if (viewId) {
-      //    this.portal.pageContainers[pageId].pageStack.push(viewId);
-      // }
+   showPage(pageId) {
       let page = this.application.views((v) => {
          return v.id == pageId;
       })[0];
 
-      this.portal.showPage(page, viewId);
+      this.portal.showPage(page);
    }
 
    /*
@@ -478,9 +475,10 @@ class PortalTranslationTool extends ClassUI {
                   var item = $$(
                      "linetree_" + this.containerDomID + "_views"
                   ).getItem(branch);
-                  if (item.type == "tab") {
-                     this.showPage(item.pageId);
 
+                  this.showPage(item.pageId || item.viewId);
+
+                  if (item.type == "tab") {
                      var tabView = this.application.views(
                         (v) => v.id == item.id
                      )[0];
@@ -498,18 +496,14 @@ class PortalTranslationTool extends ClassUI {
                            tab.emit("changeTab", tabView.id);
                         }, 200);
                      }
-                  }
-                  // switch page
-                  else {
-                     if (item.type == "page") {
-                        if (item.icon == "clone" || item.icon == "file") {
-                           this.showPage(item.pageId, item.id);
-                        } else {
-                           this.showPage(item.pageId || item.viewId);
-                        }
-                     } else {
-                        this.showPage(item.pageId, item.viewId);
-                     }
+                  } else if (item.type == "page") {
+                     debugger;
+                     var pageView = this.application.views(
+                        (v) => v.id == item.id
+                     )[0];
+                     if (!pageView) return false;
+                     pageView.emit("changePage", pageView.id);
+                     // this.showPage(item.pageId);
                   }
 
                   return false;
