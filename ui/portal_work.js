@@ -680,20 +680,14 @@ class PortalWork extends ClassUI {
       $$("portal_work").show();
    }
 
-   showPage(page, viewId) {
+   showPage(page) {
       // this could be a subpage
-      const pageUI = page?.parent
-         ? this.pageContainers[page?.parent?.id]
-         : this.pageContainers[page?.id];
+      const pageUI = this.pageContainers[page?.id];
 
       if (pageUI) {
          pageUI.show();
          this.AppState.lastPages[page.application.id] = page.id;
          this.saveState();
-         if (viewId && $$(viewId)) {
-            pageUI.pageStack.push(viewId);
-            $$(viewId).show(false, false);
-         }
       }
    }
 

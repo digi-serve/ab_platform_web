@@ -407,10 +407,6 @@ class ClassUIPage extends ClassUI {
     *       page + view.
     */
    showPage(pageID, viewId) {
-      // some instances of showPage expect first parm to be page object
-      if (pageID?.id) {
-         pageID = pageID.id;
-      }
       var showPageID = null;
       // {string}
       // This is the actual pageID of the ABViewPage to display.
