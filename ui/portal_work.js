@@ -843,7 +843,7 @@ class PortalWork extends ClassUI {
                            Menu ID:<i>${item.id}</i>`
                         );
                   }
-                  $$("userMenu").hide();
+                  $$("settingsMenu").hide();
                },
 
                onAfterRender() {
