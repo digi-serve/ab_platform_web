@@ -14,7 +14,7 @@ class PortalTranslationTool extends ClassUI {
             rows: [
                {
                   view: "accordion",
-                  id: "qtt_accordion_" + this.containerDomID,
+                  id: `qtt_accordion_${this.containerDomID}`,
                   roles: [],
                   hidden: true,
                   collapsed: true,
@@ -22,7 +22,7 @@ class PortalTranslationTool extends ClassUI {
                   rows: [],
                },
                {
-                  id: "qtt_accordion_noSelection_" + this.containerDomID,
+                  id: `qtt_accordion_noSelection_${this.containerDomID}`,
                   rows: [{}],
                },
             ],
@@ -32,7 +32,7 @@ class PortalTranslationTool extends ClassUI {
       return {
          view: "window",
          css: "qttWindow",
-         id: "quickTranslationTool_" + this.containerDomID,
+         id: `quickTranslationTool_${this.containerDomID}`,
          position: function (state) {
             state.left = state.maxWidth - 400; // fixed values
             state.top = 0;
@@ -43,7 +43,7 @@ class PortalTranslationTool extends ClassUI {
             onShow: () => {
                // collapse all the accordion items but the top one
                var index = 0;
-               $$("qtt_accordion_" + this.containerDomID)
+               $$(`qtt_accordion_${this.containerDomID}`)
                   .getChildViews()
                   .forEach((a) => {
                      if (index == 0) {
@@ -52,9 +52,9 @@ class PortalTranslationTool extends ClassUI {
                         $$(a).collapse();
                      }
                      index++;
-                     $$("qtt_accordion_" + this.containerDomID).show();
+                     $$(`qtt_accordion_${this.containerDomID}`).show();
                      $$(
-                        "qtt_accordion_noSelection_" + this.containerDomID
+                        `qtt_accordion_noSelection_${this.containerDomID}`
                      ).hide();
                   });
             },
@@ -96,7 +96,7 @@ class PortalTranslationTool extends ClassUI {
                         icon: "nomargin fa fa-times",
                         click: () => {
                            $$(
-                              "quickTranslationTool_" + this.containerDomID
+                              `quickTranslationTool_${this.containerDomID}`
                            ).hide();
                         },
                      },
@@ -109,10 +109,7 @@ class PortalTranslationTool extends ClassUI {
                   css: "webix_dark",
                   rows: [
                      {
-                        id:
-                           "qtt_accordion_" +
-                           this.containerDomID +
-                           "_translateTo",
+                        id: `qtt_accordion_${this.containerDomID}_translateTo`,
                         view: "select",
                         labelWidth: 120,
                         label: "Translate to:",
@@ -130,10 +127,7 @@ class PortalTranslationTool extends ClassUI {
                         },
                      },
                      {
-                        id:
-                           "qtt_accordion_" +
-                           this.containerDomID +
-                           "_translateHint",
+                        id: `qtt_accordion_${this.containerDomID}_translateHint`,
                         view: "select",
                         labelWidth: 120,
                         label: "Hint language:",
@@ -180,21 +174,19 @@ class PortalTranslationTool extends ClassUI {
                   value: item.language_label,
                });
             });
-            $$("qtt_accordion_" + this.containerDomID + "_translateTo").define({
+            $$(`qtt_accordion_${this.containerDomID}_translateTo`).define({
                options: languageList,
                value: languageCode,
             });
+            $$(`qtt_accordion_${this.containerDomID}_translateTo`).refresh();
             $$(
-               "qtt_accordion_" + this.containerDomID + "_translateTo"
-            ).refresh();
-            $$(
-               "qtt_accordion_" + this.containerDomID + "_translateHint"
+               `qtt_accordion_${this.containerDomID}` + "_translateHint"
             ).define({
                options: languageList,
                value: languageList[0].id,
             });
             $$(
-               "qtt_accordion_" + this.containerDomID + "_translateHint"
+               `qtt_accordion_${this.containerDomID}` + "_translateHint"
             ).refresh();
             this.buildTranslationAccordion(
                this.application.objectsIncluded(),
@@ -219,11 +211,11 @@ class PortalTranslationTool extends ClassUI {
    }
 
    show() {
-      $$("quickTranslationTool_" + this.containerDomID).show();
+      $$(`quickTranslationTool_${this.containerDomID}`).show();
    }
 
    hide() {
-      $$("quickTranslationTool_" + this.containerDomID).hide();
+      $$(`quickTranslationTool_${this.containerDomID}`).hide();
    }
 
    showPage(pageId) {
@@ -242,11 +234,11 @@ class PortalTranslationTool extends ClassUI {
    }
 
    buildTranslationAccordion(objects, views) {
-      $$("qtt_accordion_" + this.containerDomID).removeView(
-         "qtt_accordionitem_" + this.containerDomID + "_objects"
+      $$(`qtt_accordion_${this.containerDomID}`).removeView(
+         `qtt_accordionitem_${this.containerDomID}_objects`
       );
-      $$("qtt_accordion_" + this.containerDomID).removeView(
-         "qtt_accordionitem_" + this.containerDomID + "_views"
+      $$(`qtt_accordion_${this.containerDomID}`).removeView(
+         `qtt_accordionitem_${this.containerDomID}_views`
       );
 
       var toggleParent = (element) => {
@@ -259,11 +251,11 @@ class PortalTranslationTool extends ClassUI {
 
       var objectTree = [
          {
-            id: "qtt_object_progress" + this.containerDomID,
+            id: `qtt_object_progress${this.containerDomID}`,
             height: 7,
          },
          {
-            id: "linetree_" + this.containerDomID + "_objects",
+            id: `linetree_${this.containerDomID}_objects`,
             view: "edittree",
             type: "lineTree",
             editable: true,
@@ -273,10 +265,10 @@ class PortalTranslationTool extends ClassUI {
             editValue: "value",
             template: (obj, common) => {
                let language = $$(
-                  "qtt_accordion_" + this.containerDomID + "_translateTo"
+                  `qtt_accordion_${this.containerDomID}_translateTo`
                ).getValue();
                var color = "gray";
-               if (obj.value.indexOf("[" + language + "]") > -1) {
+               if (obj.value.indexOf(`[${language}]`) > -1) {
                   color = "#ff5c4c";
                }
                if (!obj.icon) {
@@ -297,29 +289,29 @@ class PortalTranslationTool extends ClassUI {
             on: {
                onAfterLoad: (id) => {
                   if (
-                     !$$("qtt_object_progress" + this.containerDomID)
+                     !$$(`qtt_object_progress${this.containerDomID}`)
                         .showProgress
                   ) {
                      webix.extend(
-                        $$("qtt_object_progress" + this.containerDomID),
+                        $$(`qtt_object_progress${this.containerDomID}`),
                         webix.ProgressBar
                      );
                   }
-                  $$("linetree_" + this.containerDomID + "_objects").parse(
+                  $$(`linetree_${this.containerDomID}_objects`).parse(
                      this.getTranslationToolObjectsTree(
                         objects,
                         this.containerDomID
                      )
                   );
-                  $$("linetree_" + this.containerDomID + "_objects").openAll();
+                  $$(`linetree_${this.containerDomID}_objects`).openAll();
                },
                onAfterEditStop: (state, editor, ignoreUpdate) => {
                   if (state.old == state.value) return false;
                   let language = $$(
-                     "qtt_accordion_" + this.containerDomID + "_translateTo"
+                     `qtt_accordion_${this.containerDomID}_translateTo`
                   ).getValue();
                   let branch = $$(
-                     "linetree_" + this.containerDomID + "_objects"
+                     `linetree_${this.containerDomID}_objects`
                   ).data.getItem(editor.id);
                   let propName = branch.field;
                   let objectId = branch.objectId ? branch.objectId : branch.id;
@@ -396,19 +388,19 @@ class PortalTranslationTool extends ClassUI {
                   }
 
                   let progressBar = $$(
-                     "qtt_object_progress" + this.containerDomID
+                     `qtt_object_progress${this.containerDomID}`
                   );
                   let total = progressBar.config.total;
                   let completed = progressBar.config.completed;
 
                   if (
-                     state.old.indexOf("[" + language + "]") == -1 &&
-                     state.value.indexOf("[" + language + "]") > -1
+                     state.old.indexOf(`[${language}]`) == -1 &&
+                     state.value.indexOf(`[${language}]`) > -1
                   ) {
                      completed--;
                   } else if (
-                     state.old.indexOf("[" + language + "]") > -1 &&
-                     state.value.indexOf("[" + language + "]") > -1
+                     state.old.indexOf(`[${language}]`) > -1 &&
+                     state.value.indexOf(`[${language}]`) > -1
                   ) {
                      // no change to completed count
                   } else {
@@ -430,11 +422,11 @@ class PortalTranslationTool extends ClassUI {
 
       var viewTree = [
          {
-            id: "qtt_view_progress" + this.containerDomID,
+            id: `qtt_view_progress${this.containerDomID}`,
             height: 7,
          },
          {
-            id: "linetree_" + this.containerDomID + "_views",
+            id: `linetree_${this.containerDomID}_views`,
             view: "edittree",
             type: "lineTree",
             editable: true,
@@ -444,10 +436,10 @@ class PortalTranslationTool extends ClassUI {
             editValue: "value",
             template: (obj, common) => {
                let language = $$(
-                  "qtt_accordion_" + this.containerDomID + "_translateTo"
+                  `qtt_accordion_${this.containerDomID}_translateTo`
                ).getValue();
                var color = "gray";
-               if (obj.value.indexOf("[" + language + "]") > -1) {
+               if (obj.value.indexOf(`[${language}]`) > -1) {
                   color = "#ff5c4c";
                }
                if (!obj.icon) {
@@ -473,7 +465,7 @@ class PortalTranslationTool extends ClassUI {
             onClick: {
                externalLink: (event, branch, target) => {
                   var item = $$(
-                     "linetree_" + this.containerDomID + "_views"
+                     `linetree_${this.containerDomID}_views`
                   ).getItem(branch);
 
                   this.showPage(item.pageId || item.viewId);
@@ -512,28 +504,28 @@ class PortalTranslationTool extends ClassUI {
             on: {
                onAfterLoad: (id) => {
                   if (
-                     !$$("qtt_view_progress" + this.containerDomID).showProgress
+                     !$$(`qtt_view_progress${this.containerDomID}`).showProgress
                   ) {
                      webix.extend(
-                        $$("qtt_view_progress" + this.containerDomID),
+                        $$(`qtt_view_progress${this.containerDomID}`),
                         webix.ProgressBar
                      );
                   }
-                  $$("linetree_" + this.containerDomID + "_views").parse(
+                  $$(`linetree_${this.containerDomID}_views`).parse(
                      this.getTranslationToolViewsTree(
                         views,
                         this.containerDomID
                      )
                   );
-                  $$("linetree_" + this.containerDomID + "_views").openAll();
+                  $$(`linetree_${this.containerDomID}_views`).openAll();
                },
                onAfterEditStop: (state, editor, ignoreUpdate) => {
                   if (state.old == state.value) return false;
                   let language = $$(
-                     "qtt_accordion_" + this.containerDomID + "_translateTo"
+                     `qtt_accordion_${this.containerDomID}_translateTo`
                   ).getValue();
                   let branch = $$(
-                     "linetree_" + this.containerDomID + "_views"
+                     `linetree_${this.containerDomID}_views`
                   ).data.getItem(editor.id);
                   let propName = branch.field;
                   if (branch.type == "menu") {
@@ -607,18 +599,18 @@ class PortalTranslationTool extends ClassUI {
                      view.save();
                   }
                   let progressBar = $$(
-                     "qtt_view_progress" + this.containerDomID
+                     `qtt_view_progress${this.containerDomID}`
                   );
                   let total = progressBar.config.total;
                   let completed = progressBar.config.completed;
                   if (
-                     state.old.indexOf("[" + language + "]") == -1 &&
-                     state.value.indexOf("[" + language + "]") > -1
+                     state.old.indexOf(`[${language}]`) == -1 &&
+                     state.value.indexOf(`[${language}]`) > -1
                   ) {
                      completed--;
                   } else if (
-                     state.old.indexOf("[" + language + "]") > -1 &&
-                     state.value.indexOf("[" + language + "]") > -1
+                     state.old.indexOf(`[${language}]`) > -1 &&
+                     state.value.indexOf(`[${language}]`) > -1
                   ) {
                      // no change to completed count
                   } else {
@@ -640,7 +632,7 @@ class PortalTranslationTool extends ClassUI {
 
       var objectsAccordionItem = {
          view: "accordionitem",
-         id: "qtt_accordionitem_" + this.containerDomID + "_objects",
+         id: `qtt_accordionitem_${this.containerDomID}_objects`,
          header: "Data Objects",
          collapsed: true,
          body: {
@@ -651,7 +643,7 @@ class PortalTranslationTool extends ClassUI {
 
       var viewsAccordionItem = {
          view: "accordionitem",
-         id: "qtt_accordionitem_" + this.containerDomID + "_views",
+         id: `qtt_accordionitem_${this.containerDomID}_views`,
          header: "Interface Items",
          collapsed: true,
          body: {
@@ -660,28 +652,26 @@ class PortalTranslationTool extends ClassUI {
          },
       };
 
-      $$("qtt_accordion_" + this.containerDomID).addView(
+      $$(`qtt_accordion_${this.containerDomID}`).addView(
          objectsAccordionItem,
          -1
       );
-      $$("qtt_accordion_" + this.containerDomID).addView(
+      $$(`qtt_accordion_${this.containerDomID}`).addView(
          viewsAccordionItem,
          -1
       );
-      $$("qtt_accordion_" + this.containerDomID).show();
-      $$("qtt_accordionitem_" + this.containerDomID + "_views").collapse();
-      $$("qtt_accordion_noSelection_" + this.containerDomID).hide();
+      $$(`qtt_accordion_${this.containerDomID}`).show();
+      $$(`qtt_accordionitem_${this.containerDomID}_views`).collapse();
+      $$(`qtt_accordion_noSelection_${this.containerDomID}`).hide();
 
-      $$("linetree_" + this.containerDomID + "_objects").openAll();
-      $$("linetree_" + this.containerDomID + "_views").openAll();
+      $$(`linetree_${this.containerDomID}_objects`).openAll();
+      $$(`linetree_${this.containerDomID}_views`).openAll();
    }
 
    getTranslations(translations, domId, field, completed, total) {
       var missingHint = false;
       var missingTranslate = false;
-      var translateLang = $$(
-         "qtt_accordion_" + domId + "_translateTo"
-      ).getValue();
+      var translateLang = $$(`qtt_accordion_${domId}_translateTo`).getValue();
       var value = translations.filter((item) => {
          return item.language_code == translateLang;
       })[0];
@@ -690,7 +680,7 @@ class PortalTranslationTool extends ClassUI {
          missingTranslate = true;
          value = translations[0];
       }
-      var hintLang = $$("qtt_accordion_" + domId + "_translateHint").getValue();
+      var hintLang = $$(`qtt_accordion_${domId}_translateHint`).getValue();
       var hint = translations.filter((item) => {
          return item.language_code == hintLang;
       })[0];
@@ -717,14 +707,14 @@ class PortalTranslationTool extends ClassUI {
 
       var hintPrefix = "";
       if (missingHint) {
-         hintPrefix = "[" + hintLang + "] ";
+         hintPrefix = `[${hintLang}] `;
       }
       var translatePrefix = "";
       if (missingTranslate) {
-         translatePrefix = "[" + translateLang + "] ";
+         translatePrefix = `[${translateLang}] `;
       }
       if (
-         (valueLabel || "").indexOf("[" + translateLang + "]" == -1) &&
+         (valueLabel || "").indexOf(`[${translateLang}]` == -1) &&
          !missingTranslate
       ) {
          completed++;
@@ -756,7 +746,7 @@ class PortalTranslationTool extends ClassUI {
          var pageId = page.id;
          if (type == "button") {
             translations = page.settings.translations;
-            pageId = page.id + "_" + field;
+            pageId = `${page.id}_${field}`;
          }
          var labels = this.getTranslations(
             translations,
@@ -868,7 +858,7 @@ class PortalTranslationTool extends ClassUI {
       });
 
       // there is a webix bug that will not allow you to se the value of a progress bar to 0
-      let progressBar = $$("qtt_view_progress" + domId);
+      let progressBar = $$(`qtt_view_progress${domId}`);
       let position = completed / total + 0.0001;
       progressBar.showProgress({
          type: "top",
@@ -958,7 +948,7 @@ class PortalTranslationTool extends ClassUI {
       });
 
       // there is a webix bug that will not allow you to se the value of a progress bar to 0
-      let progressBar = $$("qtt_object_progress" + domId);
+      let progressBar = $$(`qtt_object_progress${domId}`);
       let position = completed / total + 0.0001;
       progressBar.showProgress({
          type: "top",
