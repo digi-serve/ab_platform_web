@@ -132,8 +132,12 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                );
             }
          } else if (selectedData.value) {
+            let clear = "";
+            if (options.editable) {
+               clear = `<span class="webix_multicombo_delete clear-combo-value" role="button" aria-label="Remove item"></span>`;
+            }
             values.push(
-               `<div class='webix_multicombo_value'><span>${selectedData.value}</span><!-- span data-uuid="${selectedData.id}" class="webix_multicombo_delete" role="button" aria-label="Remove item"></span --></div>`
+               `<div class='webix_multicombo_value'>${clear}<span class="ellip">${selectedData.value}</span></div>`
             );
          } else {
             return "";
@@ -434,16 +438,30 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                      ? $parentField.getValue() ?? ""
                      : "";
 
+                  let newVal = "";
+
+                  if (parentValue) {
+                     if (value.filterColumn) {
+                        if (
+                           field.object
+                              .fieldByID(value.filterValue.config.dataFieldId)
+                              .getItemFromVal(parentValue)
+                        ) {
+                           newVal = field.object
+                              .fieldByID(value.filterValue.config.dataFieldId)
+                              .getItemFromVal(parentValue)[value.filterColumn];
+                        } else {
+                           newVal = parentValue;
+                        }
+                     } else {
+                        newVal = parentValue;
+                     }
+                  }
+
                   return {
                      key: e.key,
                      rule: "equals",
-                     value: parentValue
-                        ? value.filterColumn
-                           ? field.object
-                                .fieldByID(value.filterValue.config.dataFieldId)
-                                .getItemFromVal(parentValue)[value.filterColumn]
-                           : parentValue
-                        : parentValue,
+                     value: newVal,
                   };
                }),
             ];

@@ -5,8 +5,8 @@ import ABPopupExport from "./ABViewGridPopupExport";
 import ABPopupMassUpdateClass from "./ABViewGridPopupMassUpdate";
 import ABPopupSortField from "./ABViewGridPopupSortFields";
 import ABViewGridFilter from "./viewProperties/ABViewPropertyFilterData";
-const ABViewPropertyLinkPage = require("./viewProperties/ABViewPropertyLinkPage")
-   .default;
+const ABViewPropertyLinkPage =
+   require("./viewProperties/ABViewPropertyLinkPage").default;
 
 const KEY_STORAGE_SETTINGS = "abviewgrid_settings";
 // {string}
@@ -507,6 +507,7 @@ class ABViewGridComponent extends ABViewComponent {
    ui() {
       var tableUI = {
          type: "space",
+         borderless: true,
          rows: [
             {},
             {
@@ -574,8 +575,8 @@ class ABViewGridComponent extends ABViewComponent {
 
          let verticalScrollState = DataTable.getScrollState().y,
             rowHeight = DataTable.config.rowHeight,
-            height = DataTable.$view.querySelector(".webix_ss_body")
-               .clientHeight,
+            height =
+               DataTable.$view.querySelector(".webix_ss_body").clientHeight,
             startRecIndex = Math.floor(verticalScrollState / rowHeight),
             endRecIndex = startRecIndex + DataTable.getVisibleCount(),
             index = 0;
@@ -662,6 +663,22 @@ class ABViewGridComponent extends ABViewComponent {
          } else if (e.target.className.indexOf("track") > -1) {
             self.emit("object.track", CurrentObject, id.row);
             // App.actions.openObjectTrack(CurrentObject, id.row);
+         } else if (e.target.className.indexOf("clear-combo-value") > -1) {
+            let clearValue = {};
+            clearValue[id.column] = "";
+            CurrentObject.model()
+               .update(id.row, clearValue)
+               .then((response) => {
+                  // console.log(response);
+               })
+               .catch((err) => {
+                  self.AB.notify.developer(err, {
+                     context: "ABViewGridComponent.onItemClick",
+                     message: "Error updating item",
+                     obj: CurrentObject.toObj(),
+                     id: id.row,
+                  });
+               });
          } else if (e.target.className.indexOf("trash") > -1) {
             // if this was our trash icon:
 
@@ -1553,17 +1570,18 @@ class ABViewGridComponent extends ABViewComponent {
          }
       }
 
+      this.localSettings(localSettings);
       if (this.settings.saveLocal) {
-         this.localSettings(localSettings);
-         for (const item in GridSettings) {
-            GridSettings[item].forEach((item) => {
-               // we cannot include field info because of the cicular structure
-               if (item?.footer?.field) {
-                  delete item.footer.field;
-               }
-            });
-         }
-         await this.AB.Storage.set(KEY_STORAGE_SETTINGS, GridSettings);
+         this.localSettingsSave();
+         // for (const item in GridSettings) {
+         //    GridSettings[item].forEach((item) => {
+         //       // we cannot include field info because of the cicular structure
+         //       if (item?.footer?.field) {
+         //          delete item.footer.field;
+         //       }
+         //    });
+         // }
+         // await this.AB.Storage.set(KEY_STORAGE_SETTINGS, GridSettings);
       }
 
       // refresh the display
@@ -1710,8 +1728,10 @@ class ABViewGridComponent extends ABViewComponent {
          // none of our functions can be stored in localStorage, so scan
          // the original column and attach any template functions to our
          // stashed copy.
+         // also the suggest for selects and connected fields may contain a
+         // function so go ahead and copy the original suggest to the column
          Object.keys(origCol).forEach((k) => {
-            if (typeof origCol[k] == "function") {
+            if (typeof origCol[k] == "function" || k == "suggest") {
                c[k] = origCol[k];
             }
          });
@@ -2026,7 +2046,20 @@ class ABViewGridComponent extends ABViewComponent {
    async localSettingsSave() {
       var savedLocalSettings =
          (await this.AB.Storage.get(KEY_STORAGE_SETTINGS)) || {};
-      savedLocalSettings[this.settingsID()] = GridSettings[this.settingsID()];
+
+      savedLocalSettings[this.settingsID()] = GridSettings[this.settingsID()]
+         ? GridSettings[this.settingsID()]
+         : [];
+
+      for (const item in savedLocalSettings) {
+         savedLocalSettings[item].forEach((item) => {
+            // we cannot include field info because of the cicular structure
+            if (item?.footer?.field) {
+               delete item.footer.field;
+            }
+         });
+      }
+
       await this.AB.Storage.set(KEY_STORAGE_SETTINGS, savedLocalSettings);
    }
 

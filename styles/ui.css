@@ -102,8 +102,32 @@ label {
    opacity: 1;
    cursor: pointer;
 }
+.webix_tooltip .webix_multicombo_delete {
+   display: none;
+}
+.webix_multicombo_delete:hover:after {
+   color: rgba(0, 0, 0, 0.7);
+}
+.webix_multicombo_delete:hover {
+   transform: scale(1.1);
+}
 .webix_multicombo_delete {
    margin-right: -7pt;
+}
+.webix_multicombo_delete.clear-combo-value {
+   margin-right: -5px;
+   position: relative;
+   right: 9px;
+   transition: all 0.2s ease-in-out;
+}
+.webix_multicombo_value {
+   display: flex;
+   /* width: 100%; */
+}
+.webix_multicombo_value .ellip {
+   text-overflow: ellipsis;
+   overflow: hidden;
+   white-space: nowrap;
 }
 .webix_cell .webix_multicombo_tag,
 .webix_cell .webix_multicombo_value {
@@ -814,10 +838,12 @@ input[type="text"].selectivity-multiple-input {
 }
 .ab-carousel-image-container {
    position: relative;
+   height: 100%;
 }
 .ab-carousel-image-container img {
    width: 100%;
-   height: auto;
+   height: 100%;
+   object-fit: contain;
 }
 .ab-carousel-image-title {
    position: absolute;

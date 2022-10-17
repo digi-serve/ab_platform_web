@@ -141,6 +141,12 @@ function _onShow(App, compId, instance, component) {
                      if (parentVal) {
                         $node.define("disabled", false);
                         $node.define("placeholder", L("Select items"));
+                        field.getAndPopulateOptions(
+                           $node,
+                           instance.options,
+                           field,
+                           instance.parentFormComponent()
+                        );
                      } else {
                         $node.define("disabled", true);
                         $node.define(
@@ -166,7 +172,7 @@ function _onShow(App, compId, instance, component) {
          }
       }
 
-      if (parentFields.length) {
+      if (parentFields.length && !$node.getValue()) {
          $node.define("disabled", true);
          $node.define(
             "placeholder",
@@ -214,6 +220,24 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
          this.datasource ? this.datasource.fields() : [],
          this.datasource ? this.datasource : null
       );
+
+      if (
+         !this.settings.objectWorkspace ||
+         !this.settings.objectWorkspace.filterConditions
+      ) {
+         this.AB.error("Error: filter conditions do not exist", {
+            error: "filterConditions do not exist",
+            viewLocation: {
+               application: this.application.name,
+               id: this.id,
+               name: this.label,
+            },
+            view: this,
+         });
+         // manually place an empty filter
+         this.settings["objectWorkspace"] = {};
+         this.settings["objectWorkspace"]["filterConditions"] = { glue: "and" };
+      }
 
       this.__filterComponent.setValue(
          this.settings.objectWorkspace.filterConditions ??
@@ -912,19 +936,16 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
          button: true,
          selectAll: multiselect ? true : false,
          body: {
-            data: [],
             template: editForm + "#value#",
          },
          on: {
             onShow: () => {
-               field.getAndPopulateOptions(
-                  $$(ids.component),
-                  this.options,
-                  field,
-                  form
-               );
+               field.populateOptionsDataCy($$(ids.component), field, form);
             },
          },
+         // Support partial matches
+         filter: ({ value }, search) =>
+            value.toLowerCase().includes(search.toLowerCase()),
       };
 
       component.ui.onClick = {

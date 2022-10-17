@@ -395,7 +395,7 @@ class PortalWork extends ClassUI {
          const pages = allApplications[i].pages() || [];
 
          for (let j = 0; j < pages.length; j++) {
-            if (pages[j].getUserAccess?.() === 0) break;
+            if (pages[j].getUserAccess?.() === 0) continue;
 
             allPlaceholders.push({
                id: this.pageID(pages[j]),
