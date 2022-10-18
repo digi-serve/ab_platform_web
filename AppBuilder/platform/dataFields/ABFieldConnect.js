@@ -505,7 +505,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
    populateOptionsDataCy(theEditor, field, form) {
       // Add data-cy attributes
-      if (theEditor.getList) {
+      if (theEditor?.getList) {
          if (!theEditor.getPopup) return;
          var popup = theEditor.getPopup();
          if (!popup) return;
