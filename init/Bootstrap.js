@@ -36,9 +36,10 @@ import initDefinitions from "../init/initDefinitions.js";
 // import JSZipUtils from "jszip-utils/dist/jszip-utils.min.js";
 
 // Should use webix/query, querybuilder no longer maintained
-// var QueryBuilder = require("../js/webix/components/querybuilder/querybuilder.min.js");
-// // NOTE: changed QB to require() since import couldn't find the global webix object.
-// import querybuilderCSS from "../js/webix/components/querybuilder/querybuilder.min.css";
+// But we still use this in some places (processing record rules, etc)
+import("../js/webix/components/querybuilder/querybuilder.min.js");
+// We need to do a dynamic import to ensure webix is loaded first
+import "../js/webix/components/querybuilder/querybuilder.min.css";
 
 import Selectivity from "../js/selectivity/selectivity.min.js";
 import selectivityCSS from "../js/selectivity/selectivity.min.css";
