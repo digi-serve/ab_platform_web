@@ -1015,7 +1015,7 @@ class ABViewCSVImporterComponent extends ClassUI {
                // let dateFormat = moment(data, f.format).format(
                //    "YYYY-MM-DD"
                // );
-               debugger;
+               // debugger;
                let dateFormat = this.AB.toDate(data, { format: f.format });
                dateFormat = this.AB.toDateFormat(dateFormat, {
                   format: "YYYY-MM-DD",
@@ -1058,6 +1058,8 @@ class ABViewCSVImporterComponent extends ClassUI {
    }
 
    refreshRemainingTimeText(startUpdateTime, total, index) {
+      const ids = this.ids;
+
       // Calculate remaining time
       let spentTime = new Date() - startUpdateTime; // milliseconds that has passed since last completed record since start
 
@@ -1091,10 +1093,10 @@ class ABViewCSVImporterComponent extends ClassUI {
       else result = L("Approximately {0} day(s) remaining", [days]);
 
       if (result) {
-         $$(ids.importButton).setValue(result);
+         $$(ids.importButton)?.setValue(result);
       } else {
-         var selected = $$(ids.datatable).find({ _included: true });
-         $$(ids.importButton).setValue(this.labelImport(selected));
+         var selected = $$(ids.datatable)?.find({ _included: true });
+         $$(ids.importButton)?.setValue(this.labelImport(selected));
       }
    }
 
@@ -1516,7 +1518,7 @@ class ABViewCSVImporterComponent extends ClassUI {
                allLookups.push(
                   connectModel
                      .findAll({
-                        where: {},
+                        where: {}, // !!!
                         populate: false,
                      })
                      .then((list) => {
