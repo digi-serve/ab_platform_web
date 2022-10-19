@@ -1095,7 +1095,7 @@ class ABViewCSVImporterComponent extends ClassUI {
       if (result) {
          $$(ids.importButton)?.setValue(result);
       } else {
-         var selected = $$(ids.datatable)?.find({ _included: true });
+         const selected = $$(ids.datatable)?.find({ _included: true });
          $$(ids.importButton)?.setValue(this.labelImport(selected));
       }
    }
