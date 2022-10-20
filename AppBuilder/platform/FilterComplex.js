@@ -497,15 +497,14 @@ module.exports = class FilterComplex extends FilterComplexCore {
          field?.settings?.isCustomFK &&
          // 1:M
          ((field?.settings?.linkType === "one" &&
-         field?.settings?.linkViaType === "many") ||
+            field?.settings?.linkViaType === "many") ||
             // 1:1 isSource = true
             (field?.settings?.linkType === "one" &&
-            field?.settings?.linkViaType === "one" &&
-            field?.settings?.isSource))
+               field?.settings?.linkViaType === "one" &&
+               field?.settings?.isSource))
       ) {
          result = (result ?? []).concat(this.uiTextValue(field));
-      }
-      else if (field?.key != "connectObject") {
+      } else if (field?.key != "connectObject") {
          result = (result ?? [])
             .concat(this.uiTextValue(field))
             .concat(this.uiQueryFieldValue(field))
