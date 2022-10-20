@@ -223,7 +223,9 @@ module.exports = class ABViewDetail extends ABViewDetailCore {
             this.eventAdd({
                emitter: dv,
                eventName: "changeCursor",
-               listener: _logic.displayData,
+               listener: (newRow) => {
+                  _logic.displayData(newRow);
+               },
             });
 
             this.eventAdd({

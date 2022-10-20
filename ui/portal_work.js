@@ -6,6 +6,7 @@ import PortalWorkInboxTaskWindow from "./portal_work_inbox_taskWindow.js";
 import PortalWorkUserProfileWindow from "./portal_work_user_profile_window.js";
 import PortalWorkUserQRWindow from "./portal_work_user_qr_window.js";
 import PortalAccessLevelManager from "./portal_access_level_manager.js";
+import TranslationTool from "./portal_translation_tool.js";
 
 class PortalWork extends ClassUI {
    constructor() {
@@ -370,9 +371,8 @@ class PortalWork extends ClassUI {
             $sideBar.select(foundMenuEntry.id);
             this.selectApplication(foundMenuEntry.id);
 
-            const defaultPageID = this.AppState.lastPages[
-               foundMenuEntry.abApplication.id
-            ];
+            const defaultPageID =
+               this.AppState.lastPages[foundMenuEntry.abApplication.id];
 
             DefaultPage = foundMenuEntry.abApplication.pages(
                (p) => p.id === defaultPageID
@@ -395,7 +395,7 @@ class PortalWork extends ClassUI {
          const pages = allApplications[i].pages() || [];
 
          for (let j = 0; j < pages.length; j++) {
-            if (pages[j].getUserAccess?.() === 0) break;
+            if (pages[j].getUserAccess?.() === 0) continue;
 
             allPlaceholders.push({
                id: this.pageID(pages[j]),
@@ -681,6 +681,7 @@ class PortalWork extends ClassUI {
    }
 
    showPage(page) {
+      // this could be a subpage
       const pageUI = this.pageContainers[page?.id];
 
       if (pageUI) {
@@ -827,6 +828,10 @@ class PortalWork extends ClassUI {
                         PortalAccessLevelManager.init(this);
                         PortalAccessLevelManager.show();
                         break;
+                     case "translation":
+                        TranslationTool.init(this);
+                        TranslationTool.show();
+                        break;
                      default:
                         //eslint-disable-next-line
                         const item = settingsMenuOptions.filter(
@@ -838,7 +843,7 @@ class PortalWork extends ClassUI {
                            Menu ID:<i>${item.id}</i>`
                         );
                   }
-                  $$("userMenu").hide();
+                  $$("settingsMenu").hide();
                },
 
                onAfterRender() {

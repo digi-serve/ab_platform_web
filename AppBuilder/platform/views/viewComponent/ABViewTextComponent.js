@@ -66,7 +66,7 @@ module.exports = class ABViewTextComponent extends ABViewComponent {
          baseView.eventAdd({
             emitter: dataview,
             eventName: "changeCursor",
-            listener: this.displayText,
+            listener: (...p) => this.displayText(...p),
          });
 
       this.displayText();

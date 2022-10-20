@@ -794,7 +794,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
             this.eventAdd({
                emitter: dc,
                eventName: "changeCursor",
-               listener: _logic.displayData,
+               listener: (...p) => _logic.displayData(...p),
             });
 
             this.eventAdd({
@@ -849,7 +849,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
                this.eventAdd({
                   emitter: linkDv,
                   eventName: "changeCursor",
-                  listener: _logic.displayParentData,
+                  listener: (...p) => _logic.displayParentData(...p),
                });
             }
 

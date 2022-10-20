@@ -59,20 +59,29 @@ class ABViewConnectDataFilterComponent extends ABViewComponent {
 
       const [field] = object.fields((f) => f.columnName == this.settings.field);
       if (!field) {
-         console.warn(
-            `Cannot find field "${this.settings.field}" in ${object.name}`
+         this.AB.notify.developer(
+            `Cannot find field "${this.settings.field}" in ${object.name}`,
+            {
+               context: "ABViewConnectDataFilterComponent.init()",
+               data: { settings: this.settings },
+            }
          );
          return;
       }
       this.field = field;
 
-      const suggest = {
+      const suggest = webix.ui({
+         view: "suggest",
+         filter: ({ value }, search) =>
+            value.toLowerCase().includes(search.toLowerCase()),
          on: {
-            onBeforeShow: function () {
-               field.getAndPopulateOptions(this, null, field);
+            onShow: () => {
+               field.populateOptionsDataCy($$(this.ids.component), field, {});
             },
          },
-      };
+      });
+      field.getAndPopulateOptions(suggest, null, field);
+
       $$(this.ids.component).define("suggest", suggest);
       $$(this.ids.component).define(
          "label",

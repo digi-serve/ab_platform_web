@@ -138,6 +138,12 @@ function _onShow(compId, instance) {
                      if (parentVal) {
                         $node.define("disabled", false);
                         $node.define("placeholder", L("Select items"));
+                        field.getAndPopulateOptions(
+                           $node,
+                           instance.options,
+                           field,
+                           instance.parentFormComponent()
+                        );
                      } else {
                         $node.define("disabled", true);
                         $node.define(
@@ -163,7 +169,7 @@ function _onShow(compId, instance) {
          }
       }
 
-      if (parentFields.length) {
+      if (parentFields.length && !$node.getValue()) {
          $node.define("disabled", true);
          $node.define(
             "placeholder",
@@ -1229,12 +1235,15 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
             }
             // We can now set the new value but we need to block event listening
             // so it doesn't trigger onChange again
-            $$(ids.component).blockEvent();
-            let prepedVals = selectedValues.join
-               ? selectedValues.join()
-               : selectedValues;
-            $$(ids.component).setValue(prepedVals);
-            $$(ids.component).unblockEvent();
+            const $$component = $$(ids.component);
+            if ($$component) {
+               $$component.blockEvent();
+               let prepedVals = selectedValues.join
+                  ? selectedValues.join()
+                  : selectedValues;
+               $$component.setValue(prepedVals);
+               $$component.unblockEvent();
+            }
          },
       };
 
@@ -1249,19 +1258,16 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
          button: true,
          selectAll: multiselect ? true : false,
          body: {
-            data: [],
             template: editForm + "#value#",
          },
          on: {
             onShow: () => {
-               field.getAndPopulateOptions(
-                  $$(ids.component),
-                  this.options,
-                  field,
-                  form
-               );
+               field.populateOptionsDataCy($$(ids.component), field, form);
             },
          },
+         // Support partial matches
+         filter: ({ value }, search) =>
+            value.toLowerCase().includes(search.toLowerCase()),
       };
 
       component.ui.onClick = {
