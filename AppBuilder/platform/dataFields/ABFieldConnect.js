@@ -145,16 +145,24 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          values.push("</div>");
          return values.join("");
       };
+
+      config.options = () =>
+         new AB.Webix.promise((success, fail) => {
+            field
+               .getOptions()
+               .then((data) => success(data))
+               .catch(fail);
+         });
+
       config.suggest = {
-         button: true,
-         on: {
-            onBeforeShow: function () {
-               field.getAndPopulateOptions(this);
-            },
-         },
+         // Support partial matches
+         filter: ({ value }, search) =>
+            value.toLowerCase().includes(search.toLowerCase()),
       };
+
       if (multiselect) {
          config.suggest.view = "checksuggest";
+         config.suggest.button = true;
       }
 
       return config;
