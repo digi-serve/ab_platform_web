@@ -359,13 +359,14 @@ export default class RowUpdater extends ClassUI {
          ),
          inputView = formFieldComponent.ui;
 
-      let options = [];
-
       // WORKAROUND: add '[Current User]' option to the user data field
       switch (field.key) {
          case "connectObject":
-            options = (await field.getOptions()) ?? [];
-            inputView.rows[0].options = options;
+            {
+               const options = (await field.getOptions()) ?? [];
+               const $combo = inputView.rows[0];
+               $combo.suggest.body.data = options;
+            }
             break;
          case "user":
             inputView.options = inputView.options || [];
