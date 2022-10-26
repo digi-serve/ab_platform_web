@@ -146,18 +146,19 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          return values.join("");
       };
 
-      config.options = () =>
-         new AB.Webix.promise((success, fail) => {
-            field
-               .getOptions()
-               .then((data) => success(data))
-               .catch(fail);
-         });
-
       config.suggest = {
+         on: {
+            onBeforeShow: function () {
+               field.getAndPopulateOptions(this);
+            },
+         },
+
          // Support partial matches
-         filter: ({ value }, search) =>
-            value.toLowerCase().includes(search.toLowerCase()),
+         filter: function (item, search) {
+            // Call filter to .getList of suggest
+            field.filterOptions(this, search);
+            return true;
+         },
       };
 
       if (multiselect) {
@@ -529,6 +530,23 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             );
          });
       }
+   }
+
+   filterOptions(theEditor, search) {
+      // Prevent flooding calls
+      if (this._toggleFilterOption) clearTimeout(this._toggleFilterOption);
+
+      const delayMS = 150;
+      this._toggleFilterOption = setTimeout(() => {
+         // Filter suggest list
+         theEditor
+            .getList()
+            .filter(({ value }) =>
+               (value ?? "")
+                  .toLowerCase()
+                  .includes((search ?? "").toLowerCase())
+            );
+      }, delayMS);
    }
 
    getItemFromVal(val) {
