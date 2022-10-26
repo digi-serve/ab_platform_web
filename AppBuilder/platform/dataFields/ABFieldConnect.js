@@ -149,16 +149,18 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       config.suggest = {
          on: {
             onBeforeShow: function () {
+               // PREVENT repeatedly pull data:
+               // If the options list was populated, then skip
+               const $list = this.getList();
+               if (!$list || ($list.find({}) ?? []).length) return;
+
                field.getAndPopulateOptions(this);
             },
          },
 
          // Support partial matches
-         filter: function (item, search) {
-            // Call filter to .getList of suggest
-            field.filterOptions(this, search);
-            return true;
-         },
+         filter: ({ value }, search) =>
+            (value ?? "").toLowerCase().includes((search ?? "").toLowerCase()),
       };
 
       if (multiselect) {
@@ -530,23 +532,6 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             );
          });
       }
-   }
-
-   filterOptions(theEditor, search) {
-      // Prevent flooding calls
-      if (this._toggleFilterOption) clearTimeout(this._toggleFilterOption);
-
-      const delayMS = 150;
-      this._toggleFilterOption = setTimeout(() => {
-         // Filter suggest list
-         theEditor
-            .getList()
-            .filter(({ value }) =>
-               (value ?? "")
-                  .toLowerCase()
-                  .includes((search ?? "").toLowerCase())
-            );
-      }, delayMS);
    }
 
    getItemFromVal(val) {
