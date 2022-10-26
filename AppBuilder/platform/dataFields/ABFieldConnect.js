@@ -152,7 +152,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                // PREVENT repeatedly pull data:
                // If the options list was populated, then skip
                const $list = this.getList();
-               if (!$list || ($list.find({}) ?? []).length) return;
+               if (($list?.find({}) ?? []).length) return;
 
                field.getAndPopulateOptions(this);
             },
