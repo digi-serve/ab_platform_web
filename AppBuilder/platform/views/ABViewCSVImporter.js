@@ -5,7 +5,8 @@ const ClassUI = require("../../../ui/ClassUI").default;
 const CSVImporter = require("../CSVImporter");
 const ABRecordRule = require("../../rules/ABViewRuleListFormRecordRules");
 
-const ABViewCSVImporterPropertyComponentDefaults = ABViewCSVImporterCore.defaultValues();
+const ABViewCSVImporterPropertyComponentDefaults =
+   ABViewCSVImporterCore.defaultValues();
 
 let L = (...params) => AB.Multilingual.label(...params);
 // multilingual Label fn()
@@ -1398,7 +1399,7 @@ class ABViewCSVImporterComponent extends ClassUI {
                   : objectLink.PK();
                newRowData[f.columnName] = {};
                newRowData[f.columnName][linkColName] =
-                        linkValues[linkColName] || linkValues.id;
+                  linkValues[linkColName] || linkValues.id;
             });
          }
 
@@ -1592,7 +1593,7 @@ class ABViewCSVImporterComponent extends ClassUI {
             // NOTE: Parallel exectuion of all these:
             var allSaves = [];
 
-            function createRecord(objModel, newRowsData, element, total) {
+            const createRecord = (objModel, newRowsData, element, total) => {
                return new Promise((resolve, reject) => {
                   element.doRecordRulesPre(newRowsData);
 
@@ -1657,10 +1658,11 @@ class ABViewCSVImporterComponent extends ClassUI {
                            });
                      })
                      .catch((errMessage) => {
+                        console.error(errMessage);
                         reject(errMessage);
                      });
                });
-            }
+            };
 
             validRows.forEach((data) => {
                let newRowData = data.data;
