@@ -152,6 +152,8 @@ module.exports = class FilterComplex extends FilterComplexCore {
             notContainsCondition: L("doesn't contain"),
             isCondition: L("is"),
             isNotCondition: L("is not"),
+            isEmpty: L("is empty"),
+            isNotEmpty: L("is not empty"),
 
             beforeCondition: L("is before"),
             afterCondition: L("is after"),
@@ -492,7 +494,8 @@ module.exports = class FilterComplex extends FilterComplexCore {
                .concat(this.uiQueryValue(field))
                .concat(this.uiUserValue(field))
                .concat(this.uiDataCollectionValue(field))
-               .concat(this.uiContextValue(field));
+               .concat(this.uiContextValue(field))
+               .concat(this.uiNoneValue());
             break;
          case "date":
          case "datetime":
@@ -509,11 +512,11 @@ module.exports = class FilterComplex extends FilterComplexCore {
          // case "number":
          //    result = ["text"];
          //    break;
-         // case "string":
-         // case "LongText":
-         // case "email":
-         //    result = ["text"];
-         //    break;
+         case "string":
+         case "LongText":
+         case "email":
+            result = this.uiNoneValue();
+            break;
       }
 
       // Add filter options to Custom index

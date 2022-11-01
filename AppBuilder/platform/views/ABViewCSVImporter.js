@@ -5,7 +5,8 @@ const ClassUI = require("../../../ui/ClassUI").default;
 const CSVImporter = require("../CSVImporter");
 const ABRecordRule = require("../../rules/ABViewRuleListFormRecordRules");
 
-const ABViewCSVImporterPropertyComponentDefaults = ABViewCSVImporterCore.defaultValues();
+const ABViewCSVImporterPropertyComponentDefaults =
+   ABViewCSVImporterCore.defaultValues();
 
 let L = (...params) => AB.Multilingual.label(...params);
 // multilingual Label fn()
@@ -1015,7 +1016,7 @@ class ABViewCSVImporterComponent extends ClassUI {
                // let dateFormat = moment(data, f.format).format(
                //    "YYYY-MM-DD"
                // );
-               debugger;
+               // debugger;
                let dateFormat = this.AB.toDate(data, { format: f.format });
                dateFormat = this.AB.toDateFormat(dateFormat, {
                   format: "YYYY-MM-DD",
@@ -1058,6 +1059,8 @@ class ABViewCSVImporterComponent extends ClassUI {
    }
 
    refreshRemainingTimeText(startUpdateTime, total, index) {
+      const ids = this.ids;
+
       // Calculate remaining time
       let spentTime = new Date() - startUpdateTime; // milliseconds that has passed since last completed record since start
 
@@ -1091,10 +1094,10 @@ class ABViewCSVImporterComponent extends ClassUI {
       else result = L("Approximately {0} day(s) remaining", [days]);
 
       if (result) {
-         $$(ids.importButton).setValue(result);
+         $$(ids.importButton)?.setValue(result);
       } else {
-         var selected = $$(ids.datatable).find({ _included: true });
-         $$(ids.importButton).setValue(this.labelImport(selected));
+         const selected = $$(ids.datatable)?.find({ _included: true });
+         $$(ids.importButton)?.setValue(this.labelImport(selected));
       }
    }
 
@@ -1396,7 +1399,7 @@ class ABViewCSVImporterComponent extends ClassUI {
                   : objectLink.PK();
                newRowData[f.columnName] = {};
                newRowData[f.columnName][linkColName] =
-                        linkValues[linkColName] || linkValues.id;
+                  linkValues[linkColName] || linkValues.id;
             });
          }
 
@@ -1516,7 +1519,7 @@ class ABViewCSVImporterComponent extends ClassUI {
                allLookups.push(
                   connectModel
                      .findAll({
-                        where: {},
+                        where: {}, // !!!
                         populate: false,
                      })
                      .then((list) => {
@@ -1590,7 +1593,7 @@ class ABViewCSVImporterComponent extends ClassUI {
             // NOTE: Parallel exectuion of all these:
             var allSaves = [];
 
-            function createRecord(objModel, newRowsData, element, total) {
+            const createRecord = (objModel, newRowsData, element, total) => {
                return new Promise((resolve, reject) => {
                   element.doRecordRulesPre(newRowsData);
 
@@ -1655,10 +1658,11 @@ class ABViewCSVImporterComponent extends ClassUI {
                            });
                      })
                      .catch((errMessage) => {
+                        console.error(errMessage);
                         reject(errMessage);
                      });
                });
-            }
+            };
 
             validRows.forEach((data) => {
                let newRowData = data.data;
