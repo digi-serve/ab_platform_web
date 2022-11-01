@@ -1498,7 +1498,8 @@ module.exports = class ABViewForm extends ABViewFormCore {
          $formView.hideProgress?.();
 
          // if there was saved data pass it up to the onSaveData callback
-         if (newFormVals) this._logic.callbacks.onSaveData(newFormVals);
+         // if (newFormVals) this._logic.callbacks.onSaveData(newFormVals);
+         if (newFormVals) this.emit("saved", newFormVals); // Q? is this the right upgrade?
       };
 
       const formError = (err) => {

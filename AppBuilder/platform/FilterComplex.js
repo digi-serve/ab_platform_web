@@ -110,9 +110,14 @@ function _toExternal(cond, fields = []) {
 
 module.exports = class FilterComplex extends FilterComplexCore {
    constructor(idBase, AB) {
-      idBase = idBase ?? "ab_row_filter";
+      idBase = idBase ?? "ab_filterComplex";
 
       super(idBase, AB);
+
+      this._initComplete = false;
+      // {bool}
+      // trying to prevent multiple .init() from being called due to
+      // various ways of initializing the component.
 
       this.observing = false;
       // {bool}
@@ -230,6 +235,8 @@ module.exports = class FilterComplex extends FilterComplexCore {
 
    // setting up UI
    init(options) {
+      if (this._initComplete) return;
+
       super.init(options);
 
       const el = $$(this.ids.querybuilder);
@@ -237,7 +244,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
          if (!this.observing) {
             el.getState().$observe("value", (v) => {
                if (this.__blockOnChange) return false;
-   
+
                this.emit("changed", this.getValue());
             });
 
@@ -253,6 +260,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
 
       this._isRecordRule = options?.isRecordRule ?? false;
       this._recordRuleFieldOptions = options?.fieldOptions ?? [];
+      this._initComplete = true;
    }
 
    /**
@@ -429,6 +437,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
          let inputs = this.uiValue(field);
 
          let ui = {
+            id: place.config.id,
             view: "filter",
             localId: "filter",
             conditions: conditions,
@@ -508,19 +517,16 @@ module.exports = class FilterComplex extends FilterComplexCore {
       }
 
       // Add filter options to Custom index
+      const LinkType = `${field?.settings?.linkType}:${field?.settings?.linkViaType}`;
       if (
          field?.settings?.isCustomFK &&
          // 1:M
-         ((field?.settings?.linkType === "one" &&
-         field?.settings?.linkViaType === "many") ||
+         (LinkType == "one:many" ||
             // 1:1 isSource = true
-            (field?.settings?.linkType === "one" &&
-            field?.settings?.linkViaType === "one" &&
-            field?.settings?.isSource))
+            (LinkType == "one:one" && field?.settings?.isSource))
       ) {
          result = (result ?? []).concat(this.uiTextValue(field));
-      }
-      else if (field?.key != "connectObject") {
+      } else if (field?.key != "connectObject") {
          result = (result ?? [])
             .concat(this.uiTextValue(field))
             .concat(this.uiQueryFieldValue(field))
