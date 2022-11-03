@@ -331,39 +331,42 @@ export default class ABViewGanttComponent extends ABViewComponent {
       // NOTE: keep .objectLoad() before any .initData() is called.
       this.objectLoad(DC.datasource);
 
-      this.eventAdd({
-         emitter: DC,
-         eventName: "initializedData",
-         listener: () => {
-            this.initData();
-         },
-      });
+      const eventNames = [
+         "create",
+         "update",
+         "delete",
+         "initializedData",
+      ];
 
-      // real-time update
-      this.eventAdd({
-         emitter: DC,
-         eventName: "create",
-         listener: () => {
-            this.initData();
-         },
-      });
+      eventNames.forEach((e) => {
+         if (e in DC._events) return;
 
-      this.eventAdd({
-         emitter: DC,
-         eventName: "update",
-         listener: () => {
-            this.initData();
-         },
-      });
+         switch(e) {
+            case "delete":
+               this.eventAdd({
+                  emitter: DC,
+                  eventName: "delete",
+                  listener: (taskId) => {
+                     // remove this task in gantt
+                     if (this.ganttElement.isExistsTask(taskId))
+                        this.ganttElement.removeTask(taskId);
+                  },
+               });
 
-      this.eventAdd({
-         emitter: DC,
-         eventName: "delete",
-         listener: (taskId) => {
-            // remove this task in gantt
-            if (this.ganttElement.isExistsTask(taskId))
-               this.ganttElement.removeTask(taskId);
-         },
+               break;
+
+            default:
+               this.eventAdd({
+                  emitter: DC,
+                  eventName: e,
+                  listener: () => {
+                     this.initData();
+                  },
+               });
+
+               break;
+
+         }
       });
    }
 
