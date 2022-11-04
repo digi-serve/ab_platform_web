@@ -145,4 +145,24 @@ module.exports = class ABProcess extends ABProcessCore {
       }
       return task;
    }
+
+   /**
+    * @method warningsAll()
+    * Return an array of mis configuration warnings for our object or any
+    * of our sub elements.
+    * @return {array} [ { message: "warning message", data:{} } ]
+    */
+   warningsAll() {
+      // report both OUR warnings, and any warnings from any of our fields
+      var allWarnings = [].concat(this._warnings);
+      this.elements().forEach((e) => {
+         allWarnings = allWarnings.concat(e.warnings());
+      });
+
+      if (this.elements().length == 0) {
+         allWarnings.push({ message: "I got no fields.", data: {} });
+      }
+
+      return allWarnings;
+   }
 };
