@@ -331,17 +331,12 @@ export default class ABViewGanttComponent extends ABViewComponent {
       // NOTE: keep .objectLoad() before any .initData() is called.
       this.objectLoad(DC.datasource);
 
-      const eventNames = [
-         "create",
-         "update",
-         "delete",
-         "initializedData",
-      ];
+      const eventNames = ["create", "update", "delete", "initializedData"];
 
       eventNames.forEach((e) => {
          if (e in DC._events) return;
 
-         switch(e) {
+         switch (e) {
             case "delete":
                this.eventAdd({
                   emitter: DC,
@@ -365,7 +360,6 @@ export default class ABViewGanttComponent extends ABViewComponent {
                });
 
                break;
-
          }
       });
    }
@@ -515,6 +509,8 @@ export default class ABViewGanttComponent extends ABViewComponent {
       const patch = this.convertValues(taskData);
 
       try {
+         // this method is being used in MyBackend addTask() method
+         // On Webix documents, the method addTask() have to return the added object so we have to pass the data we add through this method.
          return await this.CurrentObject?.model().create(patch);
       } catch (e) {
          webix.alert({
@@ -532,6 +528,8 @@ export default class ABViewGanttComponent extends ABViewComponent {
 
    async taskRemove(rowId) {
       try {
+         // this method is being used in MyBackend removeTask() method
+         // On Webix documents, the method removeTask() return {} (an empty object) so we return {} in removeTask() instead.
          await this.CurrentObject.model().delete(rowId);
       } catch (e) {
          webix.alert({
@@ -550,6 +548,8 @@ export default class ABViewGanttComponent extends ABViewComponent {
    async taskUpdate(rowId, updatedTask) {
       const patch = this.convertValues(updatedTask);
       try {
+         // this method is being used in MyBackend updateTask() method
+         // On Webix documents, the method updateTask() return {} (an empty object) so we return {} in updateTask() instead.
          await this.CurrentObject.model().update(rowId, patch);
       } catch (e) {
          webix.alert({
