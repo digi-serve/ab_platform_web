@@ -972,7 +972,7 @@ module.exports = class ABViewTab extends ABViewTabCore {
             this.eventAdd({
                emitter: v.view,
                eventName: "changePage",
-               listener: _logic.changePage,
+               listener: (...p) => _logic.changePage(...p),
             });
          });
 
@@ -980,7 +980,7 @@ module.exports = class ABViewTab extends ABViewTabCore {
          this.eventAdd({
             emitter: this,
             eventName: "changeTab",
-            listener: _logic.changeTab,
+            listener: (...p) => _logic.changeTab(...p),
          });
 
          // initialize the sidebar and figure out if it should be collased or not

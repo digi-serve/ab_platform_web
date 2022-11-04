@@ -145,19 +145,46 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          values.push("</div>");
          return values.join("");
       };
+
       config.suggest = {
-         button: true,
          on: {
             onBeforeShow: function () {
-               field.getAndPopulateOptions(this);
+               field.openOptions(this);
             },
          },
+
+         // Support partial matches
+         filter: ({ value }, search) =>
+            (value ?? "").toLowerCase().includes((search ?? "").toLowerCase()),
       };
+
       if (multiselect) {
          config.suggest.view = "checksuggest";
+         config.suggest.button = true;
       }
 
       return config;
+   }
+
+   openOptions($suggest) {
+      // PREVENT repeatedly pull data:
+      // If the options list was populated, then skip
+      const $list = $suggest.getList();
+      if (($list?.find({}) ?? []).length) return;
+
+      // Listen create/update events of the linked object, then clear data list to re-populate
+      ["create", "update"].forEach((key) => {
+         if (this[`_dc_${key}_event`]) return;
+
+         this[`_dc_${key}_event`] = this.AB.on(
+            `ab.datacollection.${key}`,
+            (res) => {
+               if (this.datasourceLink.id == res.objectId) $list.clearAll();
+            }
+         );
+      });
+
+      this.getAndPopulateOptions($suggest);
    }
 
    /*
@@ -505,7 +532,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
    populateOptionsDataCy(theEditor, field, form) {
       // Add data-cy attributes
-      if (theEditor.getList) {
+      if (theEditor?.getList) {
          if (!theEditor.getPopup) return;
          var popup = theEditor.getPopup();
          if (!popup) return;

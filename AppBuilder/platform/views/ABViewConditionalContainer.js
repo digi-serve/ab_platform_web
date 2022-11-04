@@ -269,7 +269,7 @@ module.exports = class ABViewConditionalContainer extends (
             this.eventAdd({
                emitter: dv,
                eventName: "changeCursor",
-               listener: _logic.displayView,
+               listener: (...p) => _logic.displayView(...p),
             });
          }
 

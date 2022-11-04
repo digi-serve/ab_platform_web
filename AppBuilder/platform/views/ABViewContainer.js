@@ -599,7 +599,7 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
                this.eventAdd({
                   emitter: v,
                   eventName: "changePage",
-                  listener: _logic.changePage,
+                  listener: (...p) => _logic.changePage(...p),
                });
             });
 

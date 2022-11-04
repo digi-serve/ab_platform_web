@@ -142,6 +142,8 @@ module.exports = class FilterComplex extends FilterComplexCore {
             notContainsCondition: L("doesn't contain"),
             isCondition: L("is"),
             isNotCondition: L("is not"),
+            isEmpty: L("is empty"),
+            isNotEmpty: L("is not empty"),
 
             beforeCondition: L("is before"),
             afterCondition: L("is after"),
@@ -468,7 +470,8 @@ module.exports = class FilterComplex extends FilterComplexCore {
                .concat(this.uiQueryValue(field))
                .concat(this.uiUserValue(field))
                .concat(this.uiDataCollectionValue(field))
-               .concat(this.uiContextValue(field));
+               .concat(this.uiContextValue(field))
+               .concat(this.uiNoneValue());
             break;
          case "date":
          case "datetime":
@@ -485,11 +488,11 @@ module.exports = class FilterComplex extends FilterComplexCore {
          // case "number":
          //    result = ["text"];
          //    break;
-         // case "string":
-         // case "LongText":
-         // case "email":
-         //    result = ["text"];
-         //    break;
+         case "string":
+         case "LongText":
+         case "email":
+            result = this.uiNoneValue();
+            break;
       }
 
       // Add filter options to Custom index
@@ -497,15 +500,14 @@ module.exports = class FilterComplex extends FilterComplexCore {
          field?.settings?.isCustomFK &&
          // 1:M
          ((field?.settings?.linkType === "one" &&
-         field?.settings?.linkViaType === "many") ||
+            field?.settings?.linkViaType === "many") ||
             // 1:1 isSource = true
             (field?.settings?.linkType === "one" &&
-            field?.settings?.linkViaType === "one" &&
-            field?.settings?.isSource))
+               field?.settings?.linkViaType === "one" &&
+               field?.settings?.isSource))
       ) {
          result = (result ?? []).concat(this.uiTextValue(field));
-      }
-      else if (field?.key != "connectObject") {
+      } else if (field?.key != "connectObject") {
          result = (result ?? [])
             .concat(this.uiTextValue(field))
             .concat(this.uiQueryFieldValue(field))

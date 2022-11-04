@@ -251,7 +251,7 @@ module.exports = class ABViewText extends ABViewTextCore {
             this.eventAdd({
                emitter: dv,
                eventName: "changeCursor",
-               listener: _logic.displayText,
+               listener: (...p) => _logic.displayText(...p),
             });
          }
 

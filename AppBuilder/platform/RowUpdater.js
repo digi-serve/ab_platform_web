@@ -256,7 +256,11 @@ export default class RowUpdater extends ClassUI {
 
             // Custom value
             if ($customValueElem && $customValueElem.isVisible()) {
-               if (
+               if (fieldInfo.key == "connectObject") {
+                  val.value = fieldInfo.getValue(
+                     $customValueElem.getChildViews()[0]
+                  );
+               } else if (
                   fieldInfo.key == "date" ||
                   fieldInfo.key == "datetime"
                ) {
@@ -332,7 +336,7 @@ export default class RowUpdater extends ClassUI {
     *        The webix.view that contains the value expression of the field
     *        that was selected.
     */
-   selectField(columnId, $viewItem) {
+   async selectField(columnId, $viewItem) {
       let field = this._Object.fieldByID(columnId);
       if (!field) {
          this.AB.notify.builder(
@@ -357,6 +361,13 @@ export default class RowUpdater extends ClassUI {
 
       // WORKAROUND: add '[Current User]' option to the user data field
       switch (field.key) {
+         case "connectObject":
+            {
+               const options = (await field.getOptions()) ?? [];
+               const $combo = inputView.rows[0];
+               $combo.suggest.body.data = options;
+            }
+            break;
          case "user":
             inputView.options = inputView.options || [];
             inputView.options.unshift({
