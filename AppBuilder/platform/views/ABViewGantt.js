@@ -14,7 +14,7 @@ export default class ABViewGantt extends ABViewGanttCore {
     * @return {obj} UI component
     */
    component(v1App = false) {
-      const component = new ABViewGanttComponent(this);
+      let component = new ABViewGanttComponent(this);
 
       // if this is our v1Interface
       if (v1App) {
