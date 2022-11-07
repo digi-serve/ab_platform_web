@@ -31,11 +31,16 @@ function _toInternal(cond, fields = []) {
       //       },
       //    ],
       // }
-      let field = fields.filter((f) => f.id == cond.key)[0];
+      const field = fields.filter((f) => f.id == cond.key)[0];
       cond.field = field?.columnName ?? field?.id;
+
+      let value = cond.value;
+      if (field.key == "date" || field.key == "datetime")
+         value = AB.toDate(value);
+
       cond.condition = {
          type: cond.rule,
-         filter: cond.value,
+         filter: value,
       };
 
       if (Array.isArray(cond.value)) cond.includes = cond.value;
