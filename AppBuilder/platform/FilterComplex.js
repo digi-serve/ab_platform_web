@@ -18,7 +18,7 @@ let L = (...params) => AB.Multilingual.label(...params);
  *                      }
  *        the QB condition format we use exernally in our AB system.
  */
- function _toInternal(cond, fields = []) {
+function _toInternal(cond, fields = []) {
    if (!cond) return;
    if (cond.key) {
       // Convert to format
