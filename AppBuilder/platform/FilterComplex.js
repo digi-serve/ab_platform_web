@@ -18,7 +18,7 @@ let L = (...params) => AB.Multilingual.label(...params);
  *                      }
  *        the QB condition format we use exernally in our AB system.
  */
-function _toInternal(cond, fields = []) {
+ function _toInternal(cond, fields = []) {
    if (!cond) return;
    if (cond.key) {
       // Convert to format
@@ -34,17 +34,21 @@ function _toInternal(cond, fields = []) {
       const field = fields.filter((f) => f.id == cond.key)[0];
       cond.field = field?.columnName ?? field?.id;
 
-      let value = cond.value;
-      if (field.key == "date" || field.key == "datetime")
-         value = AB.toDate(value);
-
       cond.condition = {
          type: cond.rule,
-         filter: value,
+         filter: cond.value,
       };
 
       if (Array.isArray(cond.value)) cond.includes = cond.value;
       else cond.includes = (cond.value ?? "").split(",");
+
+      if (field.key == "date" || field.key == "datetime") {
+         cond.condition.filter = cond.condition.filter
+            ? AB.toDate(cond.condition.filter)
+            : null;
+
+         cond.includes = cond.includes.map((v) => AB.toDate(v));
+      }
 
       delete cond.key;
       delete cond.rule;
