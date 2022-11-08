@@ -160,12 +160,10 @@ export default class ABViewGanttComponent extends ABViewComponent {
                            };
                         }
                         async updateTask(id, obj) {
-                           await _this.taskUpdate(obj.id, obj);
-                           return {};
+                           return await _this.taskUpdate(obj.id, obj);
                         }
                         async removeTask(id) {
-                           await _this.taskRemove(id);
-                           return {};
+                           return await _this.taskRemove(id);
                         }
                      },
                   ],
@@ -334,7 +332,11 @@ export default class ABViewGanttComponent extends ABViewComponent {
       const eventNames = ["create", "update", "delete", "initializedData"];
 
       eventNames.forEach((e) => {
-         if (e in DC._events) return;
+         if (
+            e in DC._events &&
+            this.__events.findIndex((eo) => eo.eventName === e) !== -1
+         )
+            return;
 
          switch (e) {
             case "delete":
@@ -464,8 +466,12 @@ export default class ABViewGanttComponent extends ABViewComponent {
    onShow() {
       const datacollection = this.view.datacollection;
 
-      this.datacollectionLoad(datacollection);
-      datacollection.loadData(0);
+      if (datacollection) {
+         this.datacollectionLoad(datacollection);
+         datacollection.loadData(0);
+      }
+
+      super.onShow();
 
       $$(this.ids.component)?.show();
    }
@@ -531,6 +537,8 @@ export default class ABViewGanttComponent extends ABViewComponent {
          // this method is being used in MyBackend removeTask() method
          // On Webix documents, the method removeTask() return {} (an empty object) so we return {} in removeTask() instead.
          await this.CurrentObject.model().delete(rowId);
+
+         return {};
       } catch (e) {
          webix.alert({
             title: L("Error Removing Item"),
@@ -551,6 +559,8 @@ export default class ABViewGanttComponent extends ABViewComponent {
          // this method is being used in MyBackend updateTask() method
          // On Webix documents, the method updateTask() return {} (an empty object) so we return {} in updateTask() instead.
          await this.CurrentObject.model().update(rowId, patch);
+
+         return {};
       } catch (e) {
          webix.alert({
             title: L("Error Updating Item"),
