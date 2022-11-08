@@ -246,6 +246,9 @@ module.exports = class FilterComplex extends FilterComplexCore {
 
       super.init(options);
 
+      this._isRecordRule = options?.isRecordRule ?? false;
+      this._recordRuleFieldOptions = options?.fieldOptions ?? [];
+
       const el = $$(this.ids.querybuilder);
       if (el) {
          if (!this.observing) {
@@ -263,11 +266,8 @@ module.exports = class FilterComplex extends FilterComplexCore {
             this.condition = _cond;
             this.observing = true;
          }
+         this._initComplete = true;
       }
-
-      this._isRecordRule = options?.isRecordRule ?? false;
-      this._recordRuleFieldOptions = options?.fieldOptions ?? [];
-      this._initComplete = true;
    }
 
    /**
