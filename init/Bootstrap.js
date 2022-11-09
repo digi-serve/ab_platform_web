@@ -5,17 +5,17 @@
  * well the main ABFactory object that will drive the rest of the applications.
  */
 
-var Webix = require("../js/webix/webix.js");
+import * as Webix from "../js/webix/webix.js";
 // NOTE: changed to require() so switching to webix_debug.js will work.
+// var Webix = require("../js/webix/webix-debug.js");
+
 import webixCSS from "../js/webix/webix.css";
 // Make sure webix is global object
 if (!window.webix) {
    window.webix = Webix;
 }
 
-require("../js/webix/locales/th-TH.js");
-
-import ABFactory from "../AppBuilder/ABFactory";
+import "../js/webix/locales/th-TH.js";
 
 var EventEmitter = require("events").EventEmitter;
 
@@ -24,8 +24,8 @@ import BootstrapCSS from "../node_modules/bootstrap/dist/css/bootstrap.min.css";
 import Config from "../config/Config.js";
 
 import FormIO from "../node_modules/formiojs/dist/formio.full.min.js";
-import FormIOFormCSS from "../node_modules/formiojs/dist/formio.form.min.css";
-import FormIOBuilderCSS from "../node_modules/formiojs/dist/formio.builder.min.css";
+import "../node_modules/formiojs/dist/formio.form.min.css";
+import "../node_modules/formiojs/dist/formio.builder.min.css";
 // import FormIOCSS from "../node_modules/formiojs/dist/formio.full.min.css";
 
 import initConfig from "../init/initConfig.js";
@@ -35,17 +35,16 @@ import initDefinitions from "../init/initDefinitions.js";
 
 // import JSZipUtils from "jszip-utils/dist/jszip-utils.min.js";
 
-const WebixReports = require("../js/webix/components/reports/reports.min.js");
-import webixReportsCSS from "../js/webix/components/querybuilder/querybuilder.min.css";
-
-var QueryBuilder = require("../js/webix/components/querybuilder/querybuilder.min.js");
-// NOTE: changed QB to require() since import couldn't find the global webix object.
-import querybuilderCSS from "../js/webix/components/querybuilder/querybuilder.min.css";
+// Should use webix/query, querybuilder no longer maintained
+// But we still use this in some places (processing record rules, etc)
+import("../js/webix/components/querybuilder/querybuilder.min.js");
+// We need to do a dynamic import to ensure webix is loaded first
+import "../js/webix/components/querybuilder/querybuilder.min.css";
 
 import Selectivity from "../js/selectivity/selectivity.min.js";
 import selectivityCSS from "../js/selectivity/selectivity.min.css";
 
-import tinymce from "../js/webix/extras/tinymce";
+import * as tinymce from "../js/webix/extras/tinymce";
 import "tinymce/icons/default";
 import "tinymce/themes/silver";
 import "tinymce/plugins/link";
@@ -54,6 +53,7 @@ import "tinymce/skins/ui/oxide/content.css"; // content.min.css ?
 import "tinymce/skins/content/default/content.min.css";
 
 import UI from "../ui/ui.js";
+import PreloadUI from "../ui/loading.js";
 
 class Bootstrap extends EventEmitter {
    constructor(definitions) {
@@ -85,7 +85,20 @@ class Bootstrap extends EventEmitter {
       // this.on("error", ()=>{ Analytics.error })
    }
 
-   init() {
+   init(ab) {
+      // We rerun init after a sucessful login, at that point we already have AB.
+      // This means we can use `AB.Network` over the fetch API when loading
+      // config again. This prevents the session from being reset, which was
+      // happening inconsitently.
+      if (ab) this.AB = ab;
+
+      PreloadUI.attach();
+      this.ui(PreloadUI);
+      const loadABFactory = import("../AppBuilder/ABFactory");
+      // @const {Promise} loadABFactory Defer loading the ABFactory for a smaller
+      // inital file size, allowing us to show the loading UI sooner.
+      const preloadMessage = (m) => this.ui().preloadMessage(m);
+      preloadMessage("Waiting for the API Server");
       // on the web platform, we need to gather the appropriate configuration
       // information before we can show the UI
       return (
@@ -96,12 +109,13 @@ class Bootstrap extends EventEmitter {
             .then(() => {
                // 2) Request the User's Configuration Information from the
                //    server.
+               preloadMessage("Getting Configuration Settings");
                return initConfig.init(this);
-               //load the definitions for current user
             })
             // load definitions for current user
             .then(async () => {
                if (Config.userConfig()) {
+                  preloadMessage("Loading App Definitions");
                   await initDefinitions.init(this);
                }
             })
@@ -137,15 +151,18 @@ class Bootstrap extends EventEmitter {
                   console.log("plugins:", plugins);
 
                   plugins.forEach((p) => {
+                     preloadMessage(`Loading Plugin (${p})`);
                      allPluginsLoaded.push(loadScript(tenantInfo.id, p));
                   });
                }
                return Promise.all(allPluginsLoaded);
             })
 
-            .then(() => {
+            .then(async () => {
                // 3) Now we have enough info, to create an instance of our
                //    {ABFactory} that drives the rest of the AppBuilder objects
+               preloadMessage("Starting AppBuilder");
+               const { default: ABFactory } = await loadABFactory;
                var definitions = Config.definitions() || null;
                if (definitions) {
                   // NOTE: when loading up an unauthorized user,
@@ -158,6 +175,7 @@ class Bootstrap extends EventEmitter {
                this.AB = new ABFactory(definitions);
 
                if (!window.AB) window.AB = this.AB;
+
                // Make our Factory Global.
                // Transition: we still have some UI code that depends on accessing
                // our Factory as a Global var.  So until those are rewritten we will
@@ -206,6 +224,7 @@ class Bootstrap extends EventEmitter {
                      var div = this.div();
 
                      UI.attach(div.id);
+                     this.ui().destroy(); // remove the preloading screen
                      this.ui(UI);
                      this.ui().init(this.AB);
                      // this.ui().init() routine handles the remaining
