@@ -36,11 +36,11 @@ class ABQL extends ABQLCore {
     *        the unique id for where the properties panel is displayed.
     */
    parseRow(row, id) {
-      // var allColumns = row.getChildViews();
+      // let allColumns = row.getChildViews();
       // allColumns.shift(); // remove selector
       this.parameterDefinitions.forEach((pDef) => {
-         // var col = allColumns.shift();
-         var myID = this.uiID(id);
+         // let col = allColumns.shift();
+         let myID = this.uiID(id);
          this.ids = this.toIDs(myID);
          this.params = this.params || {};
 
@@ -51,9 +51,9 @@ class ABQL extends ABQLCore {
 
             case "objectConditions":
             case "objectValues":
-               var uiCondition = $$(this.ids.condition);
+               let uiCondition = $$(this.ids.condition);
                if (uiCondition) {
-                  var condition = uiCondition.getValue();
+                  let condition = uiCondition.getValue();
                   if (condition && condition != "") {
                      this.params[pDef.name] = JSON.parse(condition);
                   }
@@ -95,7 +95,7 @@ class ABQL extends ABQLCore {
       // if our ui isn't down to the current .col element, then drill down
       if (!ui.cols) {
          if (ui.rows) {
-            for (var i = 0; i < ui.rows.length; i++) {
+            for (let i = 0; i < ui.rows.length; i++) {
                if (ui.rows[i].cols) {
                   this.uiAddParamForDef(pDef, id, ui.rows[i]);
                   break;
@@ -107,7 +107,7 @@ class ABQL extends ABQLCore {
          return;
       }
 
-      var paramUI = this.uiParamUI(pDef, id);
+      let paramUI = this.uiParamUI(pDef, id);
 
       if (paramUI) {
          // if we only have 1 param
@@ -137,7 +137,7 @@ class ABQL extends ABQLCore {
     *        the current webix ui definition we are building.
     */
    uiAddNext(id, ui) {
-      var uiRow = this.uiNextRow(id);
+      let uiRow = this.uiNextRow(id);
 
       // if we have a next operation defined, then add on the ui definitions
       // for that operation:
@@ -199,15 +199,15 @@ class ABQL extends ABQLCore {
     * @return {obj}
     */
    uiNextRow(id) {
-      var options = this.constructor.NextQLOps.map((op) => {
+      let options = this.constructor.NextQLOps.map((op) => {
          return { id: op.key, value: op.label };
       });
       options.unshift({ id: 0, value: L("choose next operation") });
 
-      var myID = this.uiID(id);
-      var ids = this.toIDs(myID);
+      let myID = this.uiID(id);
+      let ids = this.toIDs(myID);
 
-      var uiRow = {
+      let uiRow = {
          cols: [
             { view: "spacer", width: this.constructor.uiIndentNext || 10 },
             {
@@ -218,7 +218,7 @@ class ABQL extends ABQLCore {
                on: {
                   onChange: (newValue, oldValue) => {
                      function resetValue() {
-                        var select = $$(ids.select);
+                        let select = $$(ids.select);
                         select.blockEvent();
                         select.setValue(oldValue);
                         select.unblockEvent();
@@ -226,7 +226,7 @@ class ABQL extends ABQLCore {
                      if (newValue == oldValue) {
                         return;
                      }
-                     var newOP = this.constructor.NextQLOps.find((op) => {
+                     let newOP = this.constructor.NextQLOps.find((op) => {
                         return op.key == newValue;
                      });
                      if (!newOP) {
@@ -234,12 +234,12 @@ class ABQL extends ABQLCore {
                         return;
                      }
 
-                     var thisRow = $$(ids.select).getParentView();
-                     var thisQuery = thisRow.getParentView();
+                     let thisRow = $$(ids.select).getParentView();
+                     let thisQuery = thisRow.getParentView();
 
-                     var addOP = () => {
+                     let addOP = () => {
                         if (newOP) {
-                           var nextOP = new newOP({}, this, this.task, this.AB);
+                           let nextOP = new newOP({}, this, this.task, this.AB);
                            this.next = nextOP;
                            nextOP.viewAddParams(id, thisRow);
                            nextOP.viewAddNext(id, thisQuery);
@@ -248,7 +248,7 @@ class ABQL extends ABQLCore {
 
                      // if there are rows after this one, then warn
                      // about changing
-                     var allRows = thisQuery.getChildViews();
+                     let allRows = thisQuery.getChildViews();
                      if (allRows.length - 1 > allRows.indexOf(thisRow)) {
                         webix.confirm({
                            title: "continue?",
@@ -258,7 +258,7 @@ class ABQL extends ABQLCore {
                            callback: (result) => {
                               if (result) {
                                  // remove the current additional Rows:
-                                 var ir = allRows.length - 1;
+                                 let ir = allRows.length - 1;
                                  while (
                                     allRows[ir].config.id != thisRow.config.id
                                  ) {
@@ -267,8 +267,8 @@ class ABQL extends ABQLCore {
                                  }
 
                                  // now remove the parameters
-                                 var allCols = thisRow.getChildViews();
-                                 var ic = allCols.length;
+                                 let allCols = thisRow.getChildViews();
+                                 let ic = allCols.length;
                                  while (ic > 1) {
                                     thisRow.removeView(allCols[ic - 1]);
                                     ic--;
@@ -304,16 +304,16 @@ class ABQL extends ABQLCore {
     * @return {obj}
     */
    uiParamUI(pDef, id) {
-      var myID = this.uiID(id);
+      let myID = this.uiID(id);
       this.ids = this.toIDs(myID);
-      var paramUI = null;
+      let paramUI = null;
 
       // now add the parameter
       switch (pDef.type) {
          case "objectName":
             // an objectName parameter returns a select list of available
             // objects in this ABFactory.
-            var options = this.AB.objects().map((o) => {
+            let options = this.AB.objects().map((o) => {
                return { id: o.id, value: o.label };
             });
             paramUI = {
@@ -356,8 +356,8 @@ class ABQL extends ABQLCore {
             //     "uniqueID of the field (field.id)" : {webixUI definition}
             // }
 
-            var Filter = this.AB.filterComplexNew(id);
-            var hashFieldIDs = this.availableProcessDataFieldsHash();
+            let Filter = this.AB.filterComplexNew(id);
+            let hashFieldIDs = this.availableProcessDataFieldsHash();
             if (this.object) {
                Filter.fieldsLoad(this.object.fields(), this.object);
                // NOTE: this will create default filters based upon the
@@ -365,7 +365,7 @@ class ABQL extends ABQLCore {
 
                // Now we need to add in the Process Data Fields:
                // for each Process Data Field that matches our same object
-               var foundFields = Object.keys(hashFieldIDs)
+               let foundFields = Object.keys(hashFieldIDs)
                   .map((f) => {
                      return hashFieldIDs[f];
                   })
@@ -376,7 +376,7 @@ class ABQL extends ABQLCore {
                Filter.processFieldsLoad(foundFields);
                /*
                (foundFields || []).forEach((processField) => {
-                  var type = {};
+                  let type = {};
                   if (processField.field) {
                      type[processField.field.id] = {
                         view: "select",
@@ -394,7 +394,7 @@ class ABQL extends ABQLCore {
                   } else {
                      // if there is no .field, it is probably an embedded special field
                      // like: .uuid
-                     var key = processField.key.split(".").pop();
+                     let key = processField.key.split(".").pop();
                      type[key] = {
                         view: "select",
                         options: [
@@ -459,7 +459,7 @@ class ABQL extends ABQLCore {
             });
 
             // create the initial condition value from our inputs.
-            var initialCond = "";
+            let initialCond = "";
             if (this.params && this.params[pDef.name]) {
                Filter.setValue(this.params[pDef.name]);
                initialCond = JSON.stringify(this.params[pDef.name]);
@@ -467,7 +467,7 @@ class ABQL extends ABQLCore {
 
             // what we show on the panel, is a text representation
             // of the current condition.
-            var displayLabel = Filter.toShortHand();
+            let displayLabel = Filter.toShortHand();
             paramUI = {
                rows: [
                   {
@@ -498,8 +498,8 @@ class ABQL extends ABQLCore {
             // that allows you to add/remove additional field updates for
             // the current object.
 
-            var initialValue = "";
-            var Updater = new RowUpdater(myID, this.AB);
+            let initialValue = "";
+            let Updater = new RowUpdater(myID, this.AB);
             if (this.object) {
                Updater.objectLoad(this.object);
             }
@@ -523,9 +523,9 @@ class ABQL extends ABQLCore {
                initialValue = JSON.stringify(this.params[pDef.name]);
             }
 
-            var popUp = () => {
+            let popUp = () => {
                // show the RowUpdater in a popup:
-               var ui = {
+               let ui = {
                   id: this.ids.popup,
                   view: "popup",
                   position: "center",
@@ -557,13 +557,13 @@ class ABQL extends ABQLCore {
                            click: () => {
                               this.params = this.params || {};
                               this.params[pDef.name] = Updater.getValue();
-                              var sh = $$(this.ids.shorthand);
+                              let sh = $$(this.ids.shorthand);
                               sh.define({
                                  label: JSON.stringify(this.params[pDef.name]),
                               });
                               sh.refresh();
 
-                              var cond = $$(this.ids.condition);
+                              let cond = $$(this.ids.condition);
                               cond.define({
                                  value: JSON.stringify(this.params[pDef.name]),
                               });
@@ -625,7 +625,7 @@ class ABQL extends ABQLCore {
     *        row for each operation.
     */
    viewAddNext(id, topView) {
-      var uiRow = this.uiNextRow(id);
+      let uiRow = this.uiNextRow(id);
       topView.addView(uiRow);
    }
 
@@ -639,12 +639,12 @@ class ABQL extends ABQLCore {
     *        NOTE: this should be the ROW that the parameters are added to
     */
    viewAddParams(id, rowView) {
-      var params = [];
+      let params = [];
       this.parameterDefinitions.forEach((pDef) => {
          // get the definition from .uiParamUI()
          params.push(this.uiParamUI(pDef, id));
       });
-      var toInsert = null;
+      let toInsert = null;
       // stack parameters in a row if there are more than 1
       if (params.length > 1) {
          toInsert = {
@@ -673,7 +673,7 @@ class ABQL extends ABQLCore {
     static parseQuery(query) {
         // we want to see if the beginning of this query matches our
         // option_begin string.
-        var begQuery = query;
+        let begQuery = query;
         if (query.length > this.option_begin.length) {
             begQuery = query.slice(0, this.option_begin.length);
         }
@@ -707,7 +707,7 @@ class ABQL extends ABQLCore {
     }
 
     paramsToString() {
-        var strs = [];
+        let strs = [];
         this.parameterDefinitions.forEach((pDef) => {
             strs.push(this.params[pDef.name]);
             // switch (pDef.type) {
@@ -741,7 +741,7 @@ class ABQL extends ABQLCore {
     }
 
     fromQuery(queryString) {
-        var results = this.constructor.regEx.exec(queryString);
+        let results = this.constructor.regEx.exec(queryString);
         if (results) {
             this.entryComplete = true;
             this.queryValid = true;
@@ -749,8 +749,8 @@ class ABQL extends ABQLCore {
 
             if (this.paramsValid(results[1])) {
                 // now progress on to any next operations:
-                var newQuery = queryString.replace(this.constructor.regEx, "");
-                var matchingOPs = [];
+                let newQuery = queryString.replace(this.constructor.regEx, "");
+                let matchingOPs = [];
                 this.constructor.NextQLOps.forEach((OP) => {
                     if (OP.parseQuery(newQuery)) {
                         matchingOPs.push(OP);
@@ -758,7 +758,7 @@ class ABQL extends ABQLCore {
                 });
                 if (matchingOPs.length == 1) {
                     // exact match, so add next:
-                    var qlOP = new matchingOPs[0](
+                    let qlOP = new matchingOPs[0](
                         {},
                         this,
                         this.task,
@@ -785,7 +785,7 @@ class ABQL extends ABQLCore {
             // calculate the processing of our command + params:
             // if we have finished our begining
             if (this.currQuery.indexOf(this.constructor.option_begin) == 0) {
-                var param = this.currQuery.slice(
+                let param = this.currQuery.slice(
                     this.constructor.option_begin.length
                 );
 
@@ -803,7 +803,7 @@ class ABQL extends ABQLCore {
                 this._suggestions = null;
 
                 // try to regenerate the suggestions again:
-                var param = this.currQuery.slice(
+                let param = this.currQuery.slice(
                     this.constructor.option_begin.length
                 );
 
@@ -835,12 +835,12 @@ class ABQL extends ABQLCore {
     }
 
     paramPull(paramDef, queryString) {
-        var result = { param: queryString, balance: 0 };
+        let result = { param: queryString, balance: 0 };
         if (queryString.length > 0) {
             switch (paramDef.type) {
                 case "objectName":
                     // define a lexer for objectNames
-                    var lexerObjectName = moo.compile({
+                    let lexerObjectName = moo.compile({
                         comma: { match: "," },
                         name: {
                             match: /"(?:\\["\\]|[^\n"\\])*"/
@@ -850,9 +850,9 @@ class ABQL extends ABQLCore {
                         currKey: moo.error
                     });
                     lexerObjectName.reset(queryString);
-                    var name = "";
-                    var foundObj = null;
-                    var token = lexerObjectName.next();
+                    let name = "";
+                    let foundObj = null;
+                    let token = lexerObjectName.next();
 
                     if (token) {
                         // if this is the 2nd time through, might
@@ -875,7 +875,7 @@ class ABQL extends ABQLCore {
                     // define a lexer for objectConditions
                     // the goal of this lexer is to achieve json balance
                     // ( equal # of { & }) while reaching an end condition:
-                    var lexerObjectCond = moo.compile({
+                    let lexerObjectCond = moo.compile({
                         comma: { match: "," },
                         colon: { match: ":" },
                         lbrace: { match: "{" },
@@ -889,11 +889,11 @@ class ABQL extends ABQLCore {
                         currKey: moo.error
                     });
                     lexerObjectCond.reset(queryString);
-                    var balance = 0;
-                    var foundObj = null;
-                    var token = lexerObjectCond.next();
-                    var stop = false;
-                    var param = "";
+                    let balance = 0;
+                    let foundObj = null;
+                    let token = lexerObjectCond.next();
+                    let stop = false;
+                    let param = "";
                     while (token && !stop) {
                         if (token.type == "lbrace") {
                             balance++;
@@ -925,7 +925,7 @@ class ABQL extends ABQLCore {
     }
 
     suggestionComplete() {
-        var params = [];
+        let params = [];
         this.parameterDefinitions.forEach((pDef) => {
             params.push(this.params[pDef.name]);
         });
@@ -940,15 +940,15 @@ class ABQL extends ABQLCore {
      * @param {string} queryString
      * /
     paramsFromQuery(queryString) {
-        var keepGoing = true;
-        var current = queryString;
+        let keepGoing = true;
+        let current = queryString;
 
         // for each of our parameters,
         this.parameterDefinitions.forEach((pDef) => {
             if (!keepGoing) return;
 
             // pull the current param
-            var pullResult = this.paramPull(pDef, current);
+            let pullResult = this.paramPull(pDef, current);
             current = current.replace(pullResult.param, "");
 
             // if this param is NOT valid
@@ -960,9 +960,9 @@ class ABQL extends ABQLCore {
                 switch (pDef.type) {
                     case "objectName":
                         // return suggestions for our parameters
-                        var suggestions = [];
-                        var objects = this.application.objects((o) => {
-                            var quotedLabel = `"${o.label}"`;
+                        let suggestions = [];
+                        let objects = this.application.objects((o) => {
+                            let quotedLabel = `"${o.label}"`;
                             return (
                                 pullResult.param.length == 0 ||
                                 quotedLabel.indexOf(pullResult.param) == 0
@@ -976,8 +976,8 @@ class ABQL extends ABQLCore {
 
                     case "objectConditions":
                     case "objectValues":
-                        var paramComplete = false;
-                        var paramObj = null;
+                        let paramComplete = false;
+                        let paramObj = null;
                         try {
                             paramObj = JSON.parse(pullResult.param);
                             paramComplete = true;
@@ -990,7 +990,7 @@ class ABQL extends ABQLCore {
                             this._suggestions = this.suggestionComplete();
                         } else {
                             // define a lexer to help us parse through the provided cond string
-                            var lexer = moo.states({
+                            let lexer = moo.states({
                                 start: {
                                     lbrace: { match: "{", push: "key" }
                                 },
@@ -1021,11 +1021,11 @@ class ABQL extends ABQLCore {
                             // now follow our state, to figure out if we are entering a
                             // key, or a value, and then figure out how to offer suggestions
                             // based upon what they are entering now:
-                            var state = "start";
+                            let state = "start";
                             lexer.reset(pullResult.param);
-                            var token = lexer.next();
-                            var lastToken = null;
-                            var lastKey = null;
+                            let token = lexer.next();
+                            let lastToken = null;
+                            let lastKey = null;
                             while (token) {
                                 switch (state) {
                                     case "start":
@@ -1063,8 +1063,8 @@ class ABQL extends ABQLCore {
                                 case "key":
                                     // we are entering a Key, so suggest the available fields
                                     // from this object
-                                    var currKey = "";
-                                    var types = ["key", "currKey"];
+                                    let currKey = "";
+                                    let types = ["key", "currKey"];
                                     if (types.indexOf(lastToken.type) != -1) {
                                         currKey = lastToken.value;
                                     }
@@ -1080,8 +1080,8 @@ class ABQL extends ABQLCore {
                                 case "value":
                                     // entering a value, decide what to suggest based on what
                                     // the current key/field we are on:
-                                    var currValue = "";
-                                    var types = [
+                                    let currValue = "";
+                                    let types = [
                                         "value",
                                         "valueContext",
                                         "currVal"
@@ -1109,17 +1109,17 @@ class ABQL extends ABQLCore {
     }
 
     paramIsValid(paramDef, pullResult) {
-        var isValid = true;
+        let isValid = true;
         this.params = this.params || {};
         switch (paramDef.type) {
             case "objectName":
                 // verify it is valid
-                var param = pullResult.param;
-                var foundObj = null;
+                let param = pullResult.param;
+                let foundObj = null;
                 if (param) {
                     // see if we find a Matching Object
                     foundObj = this.application.objects((o) => {
-                        var quotedLabel = `"${o.label}"`;
+                        let quotedLabel = `"${o.label}"`;
                         return (
                             param.length == 0 || quotedLabel.indexOf(param) == 0
                         );
@@ -1163,12 +1163,12 @@ class ABQL extends ABQLCore {
     paramsValid(queryString) {
         // queryString represents the full text parameters. Might be > 1 params
 
-        var current = queryString;
-        var isValid = true; // so optimistic.
+        let current = queryString;
+        let isValid = true; // so optimistic.
 
         // for each of our defined parameters
         this.parameterDefinitions.forEach((pDef) => {
-            var pullResult = this.paramPull(pDef, current);
+            let pullResult = this.paramPull(pDef, current);
             current = current.replace(pullResult.param, "");
             isValid = isValid && this.paramIsValid(pDef, pullResult);
         });
@@ -1179,7 +1179,7 @@ class ABQL extends ABQLCore {
     suggestions() {
         if (this.entryComplete) {
             // return suggestions for next operations.
-            var suggestions = [];
+            let suggestions = [];
 
             this.constructor.NextQLOps.forEach((OP) => {
                 suggestions.push(OP.option);
