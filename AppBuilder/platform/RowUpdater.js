@@ -4,7 +4,7 @@ const ABViewForm = require("../platform/views/ABViewForm");
 
 var L = null;
 
-export default class RowUpdater extends ClassUI {
+class RowUpdater extends ClassUI {
    constructor(idBase, AB) {
       super(idBase, {
          form: `${idBase}_rowUpdaterForm`,
@@ -533,3 +533,5 @@ export default class RowUpdater extends ClassUI {
       }
    }
 }
+
+export default RowUpdater;

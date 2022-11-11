@@ -8,7 +8,7 @@
  *
  */
 const ABQLCore = require("../../core/ql/ABQLCore.js");
-const RowUpdater = require("../RowUpdater.js");
+const RowUpdater = require("../RowUpdater.js").default;
 
 const L = (...params) => AB.Multilingual.label(...params);
 
@@ -252,8 +252,7 @@ class ABQL extends ABQLCore {
                      if (allRows.length - 1 > allRows.indexOf(thisRow)) {
                         webix.confirm({
                            title: "continue?",
-                           text:
-                              "changing this rule will reset any following rules.",
+                           text: "changing this rule will reset any following rules.",
                            ok: "yes",
                            cancel: "no",
                            callback: (result) => {
@@ -500,7 +499,7 @@ class ABQL extends ABQLCore {
             // the current object.
 
             var initialValue = "";
-            var Updater = new RowUpdater(null, myID);
+            var Updater = new RowUpdater(myID, this.AB);
             if (this.object) {
                Updater.objectLoad(this.object);
             }
@@ -511,7 +510,7 @@ class ABQL extends ABQLCore {
                   (item) => {
                      return {
                         id: item.key,
-                        value: item.label
+                        value: item.label,
                      };
                   }
                )
@@ -546,9 +545,9 @@ class ABQL extends ABQLCore {
                                  width: 30,
                                  click: () => {
                                     $$(this.ids.popup).hide();
-                                 }
-                              }
-                           ]
+                                 },
+                              },
+                           ],
                         },
                         Updater.ui,
                         {
