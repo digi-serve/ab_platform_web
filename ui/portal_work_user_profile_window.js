@@ -30,6 +30,17 @@ class PortalWorkUserProfileWindow extends ClassUI {
          return this.label(...params);
       };
 
+      // [fix] preventing console 404 errors when user doesn't have an Account Image:
+      let acctImageID = this.AB.Account.imageID();
+      let imgTemplate = `<img src="file/${acctImageID}" onerror="this.style.display='none'; document.getElementById('errorImage').style.display = 'block';" width="150" height="150" style="border-radius: 50%; margin: 10px auto; display: block; border: 3px solid white;" />`;
+      let imgErrorDiv = `<div id="errorImage" style="display: none; width: 150px; height: 150px; background: #dee2e6; border-radius: 50%; margin: 10px auto; border: 3px solid white;"><i class="fa fa-user" style="font-size: 118px; color: white; margin: 15px 0 0 32px;"></i></div>`;
+
+      if (acctImageID) {
+         imgTemplate = `${imgTemplate}${imgErrorDiv}`; // show both in case value is invalid
+      } else {
+         imgTemplate = imgErrorDiv.replace("none;", "block;"); // show the Div
+      }
+
       return {
          id: ids.component,
          view: "window",
@@ -78,7 +89,7 @@ class PortalWorkUserProfileWindow extends ClassUI {
                            background: "#222f3e",
                         },
                         // width: 160,
-                        template: `<img src="file/${this.AB.Account.imageID()}" onerror="this.style.display='none'; document.getElementById('errorImage').style.display = 'block';" width="150" height="150" style="border-radius: 50%; margin: 10px auto; display: block; border: 3px solid white;" /><div id="errorImage" style="display: none; width: 150px; height: 150px; background: #dee2e6; border-radius: 50%; margin: 10px auto; border: 3px solid white;"><i class="fa fa-user" style="font-size: 118px; color: white; margin: 15px 0 0 32px;"></i></div>`,
+                        template: imgTemplate,
                      },
                      {
                         css: {
@@ -282,9 +293,8 @@ class PortalWorkUserProfileWindow extends ClassUI {
                                                 const $buttonEditModeEmail = $$(
                                                    ids.buttonEditModeEmail
                                                 );
-                                                const $editModeButtonsEmail = $$(
-                                                   ids.editModeButtonsEmail
-                                                );
+                                                const $editModeButtonsEmail =
+                                                   $$(ids.editModeButtonsEmail);
 
                                                 $editModeEmail.hide();
                                                 $editModeButtonsEmail.hide();
@@ -312,9 +322,8 @@ class PortalWorkUserProfileWindow extends ClassUI {
                                                 const $buttonEditModeEmail = $$(
                                                    ids.buttonEditModeEmail
                                                 );
-                                                const $editModeButtonsEmail = $$(
-                                                   ids.editModeButtonsEmail
-                                                );
+                                                const $editModeButtonsEmail =
+                                                   $$(ids.editModeButtonsEmail);
 
                                                 $editModeEmail.hide();
                                                 $editModeButtonsEmail.hide();
@@ -612,9 +621,8 @@ class PortalWorkUserProfileWindow extends ClassUI {
                                                 view: "text",
                                                 name: "confirmPassword",
                                                 type: "password",
-                                                placeholder: L(
-                                                   "Confirm Password"
-                                                ),
+                                                placeholder:
+                                                   L("Confirm Password"),
                                                 value: "",
                                                 validate: (value) => {
                                                    const $fieldNewPassword = $$(
@@ -638,12 +646,11 @@ class PortalWorkUserProfileWindow extends ClassUI {
                                                 css: "webix_primary",
                                                 on: {
                                                    onItemClick: async (id) => {
-                                                      const $thisButton = $$(
-                                                         id
-                                                      );
                                                       const $formNewPassword = $$(
                                                          ids.formNewPassword
                                                       );
+                                                      const $thisButton =
+                                                         $$(id);
 
                                                       if (
                                                          $formNewPassword.validate()
@@ -659,15 +666,13 @@ class PortalWorkUserProfileWindow extends ClassUI {
 
                                                             await this.AB.Network.post(
                                                                {
-                                                                  url:
-                                                                     "/auth/password/reset",
+                                                                  url: "/auth/password/reset",
                                                                   data: {
                                                                      password,
                                                                   },
                                                                },
                                                                {
-                                                                  key:
-                                                                     "portal_auth_password_reset",
+                                                                  key: "portal_auth_password_reset",
                                                                   context: {},
                                                                }
                                                             );

@@ -1,11 +1,11 @@
-var ABFactoryCore = require("./core/ABFactoryCore");
+import ABFactoryCore from "./core/ABFactoryCore";
 
-const _ = require("lodash");
-const moment = require("moment");
+import _ from "lodash";
+import moment from "moment";
 import { nanoid } from "nanoid";
-const uuid = require("uuid");
+import { v4 as uuidv4 } from "uuid";
 
-const FilterComplex = require("./platform/FilterComplex");
+import FilterComplex from "./platform/FilterComplex";
 
 //
 // Our Common Resources
@@ -30,7 +30,7 @@ import Network from "../resources/Network.js";
 import Storage from "../resources/Storage.js";
 // Storage: manages our interface for local storage
 
-const ABViewManager = require("./core/ABViewManagerCore");
+import ABViewManager from "./core/ABViewManagerCore";
 
 import Tenant from "../resources/Tenant.js";
 // Tenant: manages the Tenant information of the current instance
@@ -38,9 +38,10 @@ import Tenant from "../resources/Tenant.js";
 import UISettings from "./uiSettings/config.js";
 // UISettings: detailed settings for our common UI elements
 
-var Webix = require("../js/webix/webix.js");
+import Webix from "../js/webix/webix.js";
 // NOTE: moved to require() because using import with webix_debug.js
 // really messed things up!
+// var Webix = require("../js/webix/webix-debug.js");
 
 class ABValidator {
    constructor(AB) {
@@ -867,7 +868,7 @@ class ABFactory extends ABFactoryCore {
    }
 
    uuid() {
-      return uuid.v4();
+      return uuidv4();
    }
 
    warn(message, ...rest) {
