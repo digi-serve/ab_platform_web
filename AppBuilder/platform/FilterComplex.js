@@ -31,8 +31,9 @@ function _toInternal(cond, fields = []) {
       //       },
       //    ],
       // }
-      let field = fields.filter((f) => f.id == cond.key)[0];
+      const field = fields.filter((f) => f.id == cond.key)[0];
       cond.field = field?.columnName ?? field?.id;
+
       cond.condition = {
          type: cond.rule,
          filter: cond.value,
@@ -40,6 +41,14 @@ function _toInternal(cond, fields = []) {
 
       if (Array.isArray(cond.value)) cond.includes = cond.value;
       else cond.includes = (cond.value ?? "").split(",");
+
+      if (field?.key == "date" || field?.key == "datetime") {
+         cond.condition.filter = cond.condition.filter
+            ? AB.toDate(cond.condition.filter)
+            : null;
+
+         cond.includes = cond.includes.map((v) => AB.toDate(v));
+      }
 
       delete cond.key;
       delete cond.rule;

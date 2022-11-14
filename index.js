@@ -9,31 +9,30 @@ io.sails.reconnection = true;
 // I'm including this here more for documentation purposes.
 
 // Include these .css and .js files as part of our bundle.
-/* eslint-disable no-unused-vars */
-import cssLoader from "./styles/loader.css";
+import "./styles/loader.css";
 
 import webix from "./js/webix/webix.js";
-import webixCSS from "./js/webix/webix.css";
+import "./js/webix/webix.css";
 
-import cssUI from "./styles/ui.css";
+import "./styles/ui.css";
 
 // NOTE: keep Font Awesome AFTER webix css so webix wont
 // override our icon styles
-import cssFontAwesome from "./styles/font-awesome.min.css";
+import "./styles/font-awesome.min.css";
 /* eslint-enable no-unused-vars */
 
 import Bootstrap from "./init/Bootstrap.js";
 // Bootstrap is responsible for initializing the platform.
 
 // Import webix components
-const gantt = require("./js/webix/components/gantt/gantt.min.js");
-import ganttCSS from "./js/webix/components/gantt/gantt.css";
+import * as gantt from "./js/webix/components/gantt/gantt.min.js";
+import "./js/webix/components/gantt/gantt.css";
 
 import kanban from "./js/webix/components/kanban/kanban.js";
 import pivot from "./js/webix/components/pivot/pivot.js";
-import report from "./js/webix/components/reports/reports.js";
-import queryCSS from "./js/webix/components/query/query.css";
-const query = require("./js/webix/components/query/query.js");
+import * as report from "./js/webix/components/reports/reports.js";
+import "./js/webix/components/query/query.css";
+import query from "./js/webix/components/query/query.js";
 
 // Make sure webix is global object
 if (!window.webix) {

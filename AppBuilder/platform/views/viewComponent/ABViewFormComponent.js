@@ -277,8 +277,8 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
                )[0];
 
                if (
-                  pullDataDC?.dataStatus ==
-                  pullDataDC?.dataStatusFlag.notInitial
+                  pullDataDC != null &&
+                  pullDataDC.dataStatus == pullDataDC.dataStatusFlag.notInitial
                ) {
                   pullDataDC.loadData();
                }
