@@ -183,10 +183,10 @@ module.exports = class FilterComplex extends FilterComplexCore {
             containsCurrentUserCondition: L("contains current user"),
             notContainsCurrentUserCondition: L("does not contain current user"),
 
-            ContextDefaultOption: L("choose option"),
-            EqualsProcessValue: L("equals process value"),
-            NotEqualsProcessValueCondition: L("not equals process value"),
-            InProcessValueCondition: L("in process value"),
+            contextDefaultOption: L("choose option"),
+            equalsProcessValue: L("equals process value"),
+            notEqualsProcessValueCondition: L("not equals process value"),
+            inProcessValueCondition: L("in process value"),
             notInProcessValueCondition: L("not in process value"),
          },
       });
@@ -725,7 +725,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
             options: [
                {
                   id: "empty",
-                  value: this.labels.component.ContextDefaultOption,
+                  value: this.labels.component.contextDefaultOption,
                },
                {
                   id: processField.key,
@@ -743,6 +743,8 @@ module.exports = class FilterComplex extends FilterComplexCore {
    }
 
    popUp(...options) {
+      const condition = Object.assign({}, this.condition);
+
       if (!this.myPopup) {
          let ui = {
             id: this.ids.popup,
@@ -764,8 +766,8 @@ module.exports = class FilterComplex extends FilterComplexCore {
       // our fields and filters defined BEFORE a setValue() is performed.
       // this.uiInit();
 
-      if (this.condition) {
-         this.setValue(this.condition);
+      if (condition) {
+         this.setValue(condition);
       }
 
       this.myPopup.show(...options);
