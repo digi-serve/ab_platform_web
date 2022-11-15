@@ -393,9 +393,9 @@ class ABQL extends ABQLCore {
 
                // Now we need to add in the Process Data Fields:
                // for each Process Data Field that matches our same object
-               const foundFields = Object.keys(hashFieldIDs)
-                  .map((f) => hashFieldIDs[f])
-                  .filter((k) => k.object && k.object.id == this.object.id);
+               const foundFields = Object.keys(hashFieldIDs).map(
+                  (f) => hashFieldIDs[f]
+               );
 
                Filter.processFieldsLoad(foundFields);
                /*
