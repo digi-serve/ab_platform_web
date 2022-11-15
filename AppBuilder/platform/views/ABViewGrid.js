@@ -1561,7 +1561,7 @@ class ABViewGridComponent extends ABViewComponent {
          this.eventAdd({
             emitter: dv,
             eventName: "changeCursor",
-            listener: this.handler_select,
+            listener: this.handler_select.bind(this),
          });
       }
    }

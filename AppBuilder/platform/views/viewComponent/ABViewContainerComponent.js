@@ -163,7 +163,7 @@ module.exports = class ABViewContainerComponent extends ABViewComponent {
          this.eventAdd({
             emitter: v,
             eventName: "changePage",
-            listener: this._handlerChangePage,
+            listener: this._handlerChangePage.bind(this),
          });
       });
 

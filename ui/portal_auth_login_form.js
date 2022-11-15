@@ -1,4 +1,5 @@
 import ClassUI from "./ClassUI.js";
+import Bootstrap from "../init/Bootstrap.js";
 
 class PortalAuthLoginForm extends ClassUI {
    constructor() {
@@ -288,9 +289,16 @@ class PortalAuthLoginForm extends ClassUI {
             response.user ||
             (response.status == "success" && response.data.user)
          ) {
-            // we can .reload() from cache given that all our
-            // dynamic data comes from our initial /config call
-            window.location.reload(false);
+            // Login was successful -> rerun BootStrap.init() to load the
+            // config, definitions, plugins, etc for this user
+            Bootstrap.init(this.AB).catch((err) => {
+               Bootstrap.alert({
+                  type: "alert-error",
+                  title: "Error initializing Portal:",
+                  text: err.toString(),
+               });
+               Bootstrap.error(err);
+            });
          } else {
             if (response.status == "error") {
                console.log("what to do with this error:");

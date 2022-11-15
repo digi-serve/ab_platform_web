@@ -2,7 +2,7 @@ import ConfigDesktop from "./configDesktop";
 import ConfigMobile from "./configMobile";
 
 // var EventEmitter = require("events").EventEmitter;
-var _defaultsDeep = require("lodash/defaultsDeep");
+import { defaultsDeep } from "lodash";
 
 var divConfigDefaults = {
    "appbuilder-portal-autoenter": true,
@@ -19,7 +19,7 @@ var divConfigDefaults = {
    // {string} tenant
    // the tenant uuid for this AppBuilder instance.
 
-   "appbuilder-view": "auth_login_form",
+   "appbuilder-view": "work",
    // {string} view
    // the default view to display to the current user.
 
@@ -65,7 +65,7 @@ class Config {
 
    config(json) {
       this._config = json;
-      _defaultsDeep(this._config, configDefaults);
+      defaultsDeep(this._config, configDefaults);
    }
 
    setting(key, value) {

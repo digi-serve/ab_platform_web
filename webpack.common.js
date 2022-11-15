@@ -1,5 +1,7 @@
 const path = require("path");
 const APP = path.resolve(__dirname);
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 
 module.exports = {
    context: APP,
@@ -7,8 +9,8 @@ module.exports = {
       app: path.join(APP, "index.js"),
    },
    output: {
-      path: path.join(APP, "..", "web", "assets"),
-      filename: "[name].js",
+      path: path.join(APP, "..", "web", "assets", "app"),
+      filename: "[name].[contenthash].js",
    },
    module: {
       rules: [
@@ -22,10 +24,31 @@ module.exports = {
          },
       ],
    },
-   plugins: [],
+   plugins: [
+      new HtmlWebpackPlugin({
+         template: "./webpack/index.ejs",
+         filename: "../../../web/assets/index.html",
+         inject: "body",
+         publicPath: "/assets/app",
+      }),
+      new CleanWebpackPlugin(),
+   ],
    resolve: {
       alias: {
          assets: path.resolve(__dirname, "..", "web", "assets"),
+      },
+   },
+   optimization: {
+      moduleIds: "deterministic",
+      runtimeChunk: "single",
+      splitChunks: {
+         cacheGroups: {
+            vendor: {
+               test: /[\\/]node_modules[\\/]/,
+               name: "vendors",
+               chunks: "all",
+            },
+         },
       },
    },
 };

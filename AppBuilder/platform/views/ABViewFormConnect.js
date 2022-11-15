@@ -285,12 +285,15 @@ class ABViewFormConnectComponent extends ABViewComponent {
                }
                // We can now set the new value but we need to block event listening
                // so it doesn't trigger onChange again
-               $$(ids.component).blockEvent();
-               const prepedVals = selectedValues.join
-                  ? selectedValues.join()
-                  : selectedValues;
-               $$(ids.component).setValue(prepedVals);
-               $$(ids.component).unblockEvent();
+               const $$component = $$(ids.component);
+               if ($$component) {
+                  $$component.blockEvent();
+                  const prepedVals = selectedValues.join
+                     ? selectedValues.join()
+                     : selectedValues;
+                  $$component.setValue(prepedVals);
+                  $$component.unblockEvent();
+               }
             },
          },
       };
