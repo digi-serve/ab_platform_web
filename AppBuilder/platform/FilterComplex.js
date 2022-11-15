@@ -699,24 +699,66 @@ module.exports = class FilterComplex extends FilterComplexCore {
    }
 
    uiContextValue(field, processFieldKey = null) {
-      let processField = (this._ProcessFields ?? []).filter((pField) => {
-         if (!pField) return false;
+      const processFields = (this._ProcessFields ?? [])
+         .filter((pField) => {
+            if (!pField) return false;
 
-         if (pField.field) {
-            return pField.field.id == field.id;
-         } else if (pField.key) {
-            // uuid
-            let processFieldId = pField.key.split(".").pop();
-            return (
-               processFieldId == field.id ||
-               processFieldId == field.key ||
-               processFieldId == processFieldKey ||
-               pField.key == processFieldKey
-            );
-         }
-      })[0];
+            let result = false;
 
-      if (!processField) return [];
+            switch (field) {
+               case "this_object":
+                  result =
+                     this._Object.id === pField.object?.id && !pField.field;
+
+                  break;
+
+               default:
+                  switch (field.key) {
+                     case "connectObject":
+                        result =
+                           field.settings.linkObject ===
+                           (pField.field?.object.id ?? pField.object.id);
+
+                        if (field.settings.isCustomFK)
+                           result =
+                              result &&
+                              (field.settings.indexField ||
+                                 field.settings.indexField2) ===
+                                 pField.field.id;
+                        else result = result && !pField.field;
+
+                        break;
+
+                     default:
+                        if (pField.field)
+                           result = field.key === pField.field.key;
+                        else if (pField.key) {
+                           // uuid
+                           const processFieldId = pField.key.split(".").pop();
+
+                           result =
+                              processFieldId === field.id ||
+                              processFieldId === field.key ||
+                              processFieldId === processFieldKey ||
+                              pField.key === processFieldKey;
+                        }
+
+                        break;
+                  }
+
+                  break;
+            }
+
+            return result;
+         })
+         .map((e) => {
+            return {
+               id: e.key,
+               value: L("context({0})", [e.label]),
+            };
+         });
+
+      if (!processFields) return [];
 
       return [
          {
@@ -727,10 +769,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
                   id: "empty",
                   value: this.labels.component.contextDefaultOption,
                },
-               {
-                  id: processField.key,
-                  value: L("context({0})", [processField.label]),
-               },
+               ...processFields,
             ],
          },
       ];
