@@ -311,6 +311,16 @@ class ABQL extends ABQLCore {
       return uiRow;
    }
 
+   uiNextRowSelectorRefresh(id) {
+      const $select = $$(this.ids.select);
+
+      if (!$select) return;
+
+      const uiNextRow = this.uiNextRow(id);
+
+      webix.ui(uiNextRow.cols[1], $select);
+   }
+
    /**
     * @method uiParamUI()
     * return the webix UI definition for the parameter entry of this current
@@ -328,6 +338,7 @@ class ABQL extends ABQLCore {
       this.ids = this.toIDs(myID);
 
       let paramUI = null;
+      let options = null;
       let Filter = null;
       let hashFieldIDs = null;
       let initialCond = null;
@@ -338,6 +349,47 @@ class ABQL extends ABQLCore {
 
       // now add the parameter
       switch (pDef.type) {
+         case "objectFields":
+            // an objectFields parameter returns a select list of fields
+            // available on an Object.
+            if (this.object) {
+               options = this.object.fields().map((f) => {
+                  return { id: f.id, value: f.label };
+               });
+            }
+
+            options.unshift({
+               id: "_PK",
+               value: "[PK]",
+            });
+
+            // if not set, default .fieldID to the 1st entry in options
+            // so we will have a default.  In use, if a user sees the
+            // 1st item and continues on, then we will have chosen it.
+            if (!this.fieldID && options.length > 0) {
+               // act like it was selected:
+               this.params[pDef.name] = options[0].id;
+               this.paramChanged(pDef, id);
+            }
+
+            paramUI = {
+               id: this.ids.objectfields,
+               view: "select",
+               value: this.fieldID,
+               options: options,
+               on: {
+                  onChange: (newValue, oldValue) => {
+                     // this.params = this.params || {};
+                     if (newValue != this.params[pDef.name]) {
+                        this.params[pDef.name] = newValue;
+                        this.paramChanged(pDef, id);
+                     }
+                  },
+               },
+            };
+
+            break;
+
          case "objectName":
             // an objectName parameter returns a select list of available
             // objects in this ABFactory.
@@ -358,6 +410,7 @@ class ABQL extends ABQLCore {
                   },
                },
             };
+
             break;
 
          case "objectConditions":
@@ -517,6 +570,7 @@ class ABQL extends ABQLCore {
                   },
                ],
             };
+
             break;
 
          case "objectValues":
@@ -577,7 +631,7 @@ class ABQL extends ABQLCore {
                               },
                            ],
                         },
-                        Updater.ui,
+                        Updater.ui(),
                         {
                            view: "button",
                            value: L("Save"),
