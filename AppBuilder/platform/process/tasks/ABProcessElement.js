@@ -178,12 +178,14 @@ module.exports = class ABProcessElement extends ABProcessElementCore {
     * @return {json}
     */
    diagramProperties() {
+      const warnings = this.warnings();
       return [
          {
             id: this.diagramID,
             def: {
                name: this.name,
             },
+            warn: warnings.length ? warnings : null,
          },
       ];
    }

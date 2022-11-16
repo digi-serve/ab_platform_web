@@ -7,6 +7,7 @@ module.exports = class SubProcess extends SubProcessCore {
    //// Process Instance Methods
    ////
 
+   /*
    propertyIDs(id) {
       return {
          name: `${id}_name`,
@@ -20,7 +21,7 @@ module.exports = class SubProcess extends SubProcessCore {
     * display the properties panel for this Process Element.
     * @param {string} id
     *        the webix $$(id) of the properties panel area.
-    */
+    * /
    propertiesShow(id) {
       let ids = this.propertyIDs(id);
 
@@ -74,13 +75,14 @@ module.exports = class SubProcess extends SubProcessCore {
     * pull our values from our property panel.
     * @param {string} id
     *        the webix $$(id) of the properties panel area.
-    */
+    * /
    propertiesStash(id) {
       let ids = this.propertyIDs(id);
       this.name = this.property(ids.name);
       this.isEnable = this.property(ids.isEnable);
       this.parameterId = this.property(ids.parameterId);
    }
+   */
 
    /**
     * @method diagramProperties()
