@@ -31,7 +31,9 @@ function _toInternal(cond, fields = []) {
       //       },
       //    ],
       // }
-      const field = fields.filter((f) => f.id == cond.key)[0];
+      const field = fields.filter(
+         (f) => f.id == cond.key || f.columnName == cond.key
+      )[0];
       cond.field = field?.columnName ?? field?.id;
 
       cond.condition = {
@@ -118,10 +120,12 @@ function _toExternal(cond, fields = []) {
 }
 
 module.exports = class FilterComplex extends FilterComplexCore {
-   constructor(idBase, AB) {
+   constructor(idBase, AB, options = {}) {
       idBase = idBase ?? "ab_filterComplex";
 
       super(idBase, AB);
+
+      this._options = options ?? {};
 
       this._initComplete = false;
       // {bool}
@@ -235,6 +239,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
                view: "button",
                css: "webix_primary",
                value: L("Save"),
+               hidden: this._options.isSaveHidden ?? false,
                click: () => {
                   if (this.myPopup) this.myPopup.hide();
                   this.emit("save", this.getValue());
@@ -249,6 +254,9 @@ module.exports = class FilterComplex extends FilterComplexCore {
       if (this._initComplete) return;
 
       super.init(options);
+
+      this._isRecordRule = options?.isRecordRule ?? false;
+      this._recordRuleFieldOptions = options?.fieldOptions ?? [];
 
       const el = $$(this.ids.querybuilder);
       if (el) {
@@ -267,11 +275,8 @@ module.exports = class FilterComplex extends FilterComplexCore {
             this.condition = _cond;
             this.observing = true;
          }
+         this._initComplete = true;
       }
-
-      this._isRecordRule = options?.isRecordRule ?? false;
-      this._recordRuleFieldOptions = options?.fieldOptions ?? [];
-      this._initComplete = true;
    }
 
    /**
@@ -593,7 +598,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
                      this.queryView(function (a) {
                         return !a.getParentView();
                      }, "parent") ?? this;
-                  $layout.$view.style.zIndex = 102;
+                  $layout.$view.style.zIndex = 202;
                },
             },
          },
@@ -760,8 +765,10 @@ module.exports = class FilterComplex extends FilterComplexCore {
    }
 
    uiCustomValue(field) {
-      let customOptions = this._customOptions ?? {};
-      let options = customOptions[field.id ?? field] ?? {};
+      if (!field) return [];
+
+      const customOptions = this._customOptions ?? {};
+      const options = customOptions[field.id ?? field] ?? {};
       return options.values ?? [];
    }
 
