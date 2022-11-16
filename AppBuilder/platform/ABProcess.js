@@ -6,6 +6,11 @@ module.exports = class ABProcess extends ABProcessCore {
    constructor(attributes, AB) {
       super(attributes, AB);
 
+      this._unknownShapes = [];
+      // {array} [ BPMN:Shape, ... ]
+      // Generic Shapes that are added to the Process are registered here.
+      // We will list these as warnings to the ABDesigner.
+
       // listen
       this.AB.on("ab.abprocess.update", (data) => {
          if (this.id == data.objectId) this.fromValues(data.data);
@@ -101,10 +106,24 @@ module.exports = class ABProcess extends ABProcessCore {
                // where they might not have before.  So now
                // rebuild our this._elements hash with all id
                var _new = {};
+               let _old = this._elements;
                Object.keys(this._elements).forEach((k) => {
                   _new[this._elements[k].id] = this._elements[k];
                });
                this._elements = _new;
+
+               // check to see if an update happened and then make
+               // sure we have that saved.
+               let needSave = false;
+               Object.keys(_new).forEach((k) => {
+                  if (!_old[k]) {
+                     needSave = true;
+                  }
+               });
+
+               if (needSave) {
+                  return this.save();
+               }
             });
       });
    }
@@ -147,6 +166,26 @@ module.exports = class ABProcess extends ABProcessCore {
    }
 
    /**
+    * @method unknownShape()
+    * store a reference to a BPMN Shape that is in our XML diagram,
+    * but we don't have an element for.
+    * @param {BPMN:Shape} shape
+    */
+   unknownShape(shape) {
+      this.unknownShapeRemove(shape);
+      this._unknownShapes.push(shape);
+   }
+
+   /**
+    * @method unknownShapeRemove()
+    * make sure we no longer track the provided BPMN Shape as an unknown shape.
+    * @param {BPMN:Shape} shape
+    */
+   unknownShapeRemove(shape) {
+      this._unknownShapes = this._unknownShapes.filter((s) => s.id != shape.id);
+   }
+
+   /**
     * @method warningsAll()
     * Return an array of mis configuration warnings for our object or any
     * of our sub elements.
@@ -160,7 +199,60 @@ module.exports = class ABProcess extends ABProcessCore {
       });
 
       if (this.elements().length == 0) {
-         allWarnings.push({ message: "I got no fields.", data: {} });
+         allWarnings.push({ message: "No process Tasks defined.", data: {} });
+      }
+
+      // perform a check of our xml document to see if we have any unknown
+      // shapes
+      if (!this._DOMParser) {
+         if (window.DOMParser) {
+            // Handy snippet from https://stackoverflow.com/questions/17604071/parse-xml-using-javascript
+            this._DOMParser = function (xmlStr) {
+               return new window.DOMParser().parseFromString(
+                  xmlStr,
+                  "text/xml"
+               );
+            };
+         } else if (
+            typeof window.ActiveXObject != "undefined" &&
+            new window.ActiveXObject("Microsoft.XMLDOM")
+         ) {
+            this._DOMParser = function (xmlStr) {
+               var xmlDoc = new window.ActiveXObject("Microsoft.XMLDOM");
+               xmlDoc.async = "false";
+               xmlDoc.loadXML(xmlStr);
+               return xmlDoc;
+            };
+         } else {
+            throw new Error("No XML parser found");
+         }
+      }
+
+      // find any references to our generic shapes
+      let xml = this._DOMParser(this.xmlDefinition);
+      const genericShapes = [
+         "bpmn2:startEvent",
+         "bpmn2:task",
+         "bpmn2:endEvent",
+      ];
+      genericShapes.forEach((s) => {
+         let allElements = xml.getElementsByTagName(s);
+         for (let x = 0; x < allElements.length; x++) {
+            // if we don't know about this shape
+            let ele = allElements[x];
+            let myEle = this.elementForDiagramID(allElements[x].id);
+            if (!myEle) {
+               this.unknownShape(allElements[x]);
+            }
+         }
+      });
+
+      // if any unknown shapes have been reported:
+      if (this._unknownShapes.length) {
+         allWarnings.push({
+            message: "Generic Tasks still undefined.",
+            data: {},
+         });
       }
 
       return allWarnings;

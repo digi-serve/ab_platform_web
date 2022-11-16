@@ -146,7 +146,6 @@ module.exports = class ABClassApplication extends ABApplicationCore {
     * @return {Promise}
     */
    processInsert(process) {
-      this._processes.push(process);
       return this._listInsert(process, "processIDs");
    }
 
@@ -158,7 +157,6 @@ module.exports = class ABClassApplication extends ABApplicationCore {
     * @return {Promise}
     */
    processRemove(process) {
-      this._processes = this._processes.filter((p) => p.id != process.id);
       return this._listRemove(process, "processIDs");
    }
 
