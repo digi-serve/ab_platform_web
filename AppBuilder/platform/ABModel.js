@@ -264,7 +264,7 @@ module.exports = class ABModel extends ABModelCore {
     * @method findAll
     * performs a data find with the provided condition.
     */
-   findAll(cond) {
+   async findAll(cond) {
       cond = cond || {};
 
       // 		// prepare our condition:
