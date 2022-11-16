@@ -54,6 +54,7 @@ import "tinymce/skins/content/default/content.min.css";
 
 import UI from "../ui/ui.js";
 import PreloadUI from "../ui/loading.js";
+import ErrorNoDefsUI from "../ui/error_noDefs.js";
 
 class Bootstrap extends EventEmitter {
    constructor(definitions) {
@@ -173,6 +174,24 @@ class Bootstrap extends EventEmitter {
                   });
                }
                this.AB = new ABFactory(definitions);
+
+               // NOTE: special case: User has no Roles defined and thus no definitions
+               // for this case, definitions should be [] and not null;  Skip this if
+               // definitions == null;
+               if (definitions && definitions.length == 0) {
+                  await this.AB.init();
+                  ErrorNoDefsUI.attach();
+                  if (Config.userReal()) {
+                     ErrorNoDefsUI.init(this.AB);
+                     ErrorNoDefsUI.switcherooUser(Config.userConfig());
+                  }
+                  this.ui().destroy(); // remove the preloading screen
+                  this.ui(ErrorNoDefsUI);
+
+                  let err = new Error("No Definitions");
+                  err.code = "ENODEFS";
+                  throw err;
+               }
 
                if (!window.AB) window.AB = this.AB;
 

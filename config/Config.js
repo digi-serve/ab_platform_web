@@ -168,5 +168,9 @@ class Config {
       }
       return null;
    }
+
+   userReal() {
+      return this._config?.userReal ?? false;
+   }
 }
 export default new Config();

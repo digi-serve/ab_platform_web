@@ -855,7 +855,7 @@ class PortalWorkUserProfileWindow extends ClassUI {
 
       try {
          const Language = this.AB.objectLanguage();
-         const response = await Language.model().findAll({});
+         const response = await Language.model().findAll();
          for (let i = 0; i < response.data.length; i++)
             data.push({
                id: response.data[i].language_code,
