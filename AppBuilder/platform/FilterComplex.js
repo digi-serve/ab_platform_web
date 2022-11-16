@@ -31,7 +31,9 @@ function _toInternal(cond, fields = []) {
       //       },
       //    ],
       // }
-      const field = fields.filter((f) => f.id == cond.key)[0];
+      const field = fields.filter(
+         (f) => f.id == cond.key || f.columnName == cond.key
+      )[0];
       cond.field = field?.columnName ?? field?.id;
 
       cond.condition = {
@@ -118,10 +120,12 @@ function _toExternal(cond, fields = []) {
 }
 
 module.exports = class FilterComplex extends FilterComplexCore {
-   constructor(idBase, AB) {
+   constructor(idBase, AB, options = {}) {
       idBase = idBase ?? "ab_filterComplex";
 
       super(idBase, AB);
+
+      this._options = options ?? {};
 
       this._initComplete = false;
       // {bool}
@@ -235,6 +239,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
                view: "button",
                css: "webix_primary",
                value: L("Save"),
+               hidden: this._options.isSaveHidden ?? false,
                click: () => {
                   if (this.myPopup) this.myPopup.hide();
                   this.emit("save", this.getValue());
@@ -250,14 +255,19 @@ module.exports = class FilterComplex extends FilterComplexCore {
 
       super.init(options);
 
+      this._isRecordRule = options?.isRecordRule ?? false;
+      this._recordRuleFieldOptions = options?.fieldOptions ?? [];
+
       const el = $$(this.ids.querybuilder);
       if (el) {
          if (!this.observing) {
+            this.__blockOnChange = true;
             el.getState().$observe("value", (v) => {
                if (this.__blockOnChange) return false;
 
                this.emit("changed", this.getValue());
             });
+            this.__blockOnChange = false;
 
             // HACK!! The process of setting the $observe() is actually
             // calling the cb() when set.  This is clearing our .condition
@@ -267,11 +277,8 @@ module.exports = class FilterComplex extends FilterComplexCore {
             this.condition = _cond;
             this.observing = true;
          }
+         this._initComplete = true;
       }
-
-      this._isRecordRule = options?.isRecordRule ?? false;
-      this._recordRuleFieldOptions = options?.fieldOptions ?? [];
-      this._initComplete = true;
    }
 
    /**
@@ -358,10 +365,19 @@ module.exports = class FilterComplex extends FilterComplexCore {
 
    setValue(settings) {
       super.setValue(settings);
-      if (!settings) return;
+      this.condition = settings;
 
       const el = $$(this.ids.querybuilder);
       if (el) {
+         if (!settings) {
+            // Clear settings value of webix.query
+            el.define("value", {
+               glue: "and",
+               rules: [],
+            });
+            return;
+         }
+
          let qbSettings = this.AB.cloneDeep(settings);
 
          // Settings should match a condition built upon our QB format:
@@ -593,7 +609,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
                      this.queryView(function (a) {
                         return !a.getParentView();
                      }, "parent") ?? this;
-                  $layout.$view.style.zIndex = 102;
+                  $layout.$view.style.zIndex = 202;
                },
             },
          },
@@ -608,13 +624,11 @@ module.exports = class FilterComplex extends FilterComplexCore {
 
       // populate the list of Queries for this_object:
       if (field == "this_object" && this._Object) {
-         options = this._Queries?.filter((q) =>
-            q.canFilterObject(this._Object)
-         );
+         options = this.queries((q) => q.canFilterObject(this._Object));
       }
       // populate the list of Queries for a query field
       else if (isQueryField) {
-         options = this._Queries?.filter(
+         options = this.queries(
             (q) =>
                (this._Object ? this._Object.id : "") != q.id && // Prevent filter looping
                q.canFilterObject(field.datasourceLink)
@@ -760,8 +774,10 @@ module.exports = class FilterComplex extends FilterComplexCore {
    }
 
    uiCustomValue(field) {
-      let customOptions = this._customOptions ?? {};
-      let options = customOptions[field.id ?? field] ?? {};
+      if (!field) return [];
+
+      const customOptions = this._customOptions ?? {};
+      const options = customOptions[field.id ?? field] ?? {};
       return options.values ?? [];
    }
 
