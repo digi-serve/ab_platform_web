@@ -261,11 +261,13 @@ module.exports = class FilterComplex extends FilterComplexCore {
       const el = $$(this.ids.querybuilder);
       if (el) {
          if (!this.observing) {
+            this.__blockOnChange = true;
             el.getState().$observe("value", (v) => {
                if (this.__blockOnChange) return false;
 
                this.emit("changed", this.getValue());
             });
+            this.__blockOnChange = false;
 
             // HACK!! The process of setting the $observe() is actually
             // calling the cb() when set.  This is clearing our .condition
@@ -363,10 +365,19 @@ module.exports = class FilterComplex extends FilterComplexCore {
 
    setValue(settings) {
       super.setValue(settings);
-      if (!settings) return;
+      this.condition = settings;
 
       const el = $$(this.ids.querybuilder);
       if (el) {
+         if (!settings) {
+            // Clear settings value of webix.query
+            el.define("value", {
+               glue: "and",
+               rules: [],
+            });
+            return;
+         }
+
          let qbSettings = this.AB.cloneDeep(settings);
 
          // Settings should match a condition built upon our QB format:
@@ -613,13 +624,11 @@ module.exports = class FilterComplex extends FilterComplexCore {
 
       // populate the list of Queries for this_object:
       if (field == "this_object" && this._Object) {
-         options = this._Queries?.filter((q) =>
-            q.canFilterObject(this._Object)
-         );
+         options = this.queries((q) => q.canFilterObject(this._Object));
       }
       // populate the list of Queries for a query field
       else if (isQueryField) {
-         options = this._Queries?.filter(
+         options = this.queries(
             (q) =>
                (this._Object ? this._Object.id : "") != q.id && // Prevent filter looping
                q.canFilterObject(field.datasourceLink)
