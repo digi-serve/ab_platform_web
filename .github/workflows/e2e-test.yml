@@ -54,6 +54,7 @@ jobs:
            with:
               repository: digi-serve/kitchensink_app
               path: ab/test/e2e/cypress/integration/kitchensink_app
+              ref: nh/fix-reload
 
          - name: Run Cypress Tests
            uses: cypress-io/github-action@v2
