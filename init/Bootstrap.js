@@ -175,14 +175,13 @@ class Bootstrap extends EventEmitter {
                }
                this.AB = new ABFactory(definitions);
 
-               // NOTE: special case: User has no Roles defined and thus no definitions
-               // for this case, definitions should be [] and not null;  Skip this if
-               // definitions == null;
-               if (definitions && definitions.length == 0) {
+               // NOTE: special case: User has no Roles defined.
+               // direct them to our special ErrorNoDefsUI
+               if ((this.AB.Config.userConfig()?.roles ?? []).length == 0) {
                   await this.AB.init();
+                  ErrorNoDefsUI.init(this.AB);
                   ErrorNoDefsUI.attach();
                   if (Config.userReal()) {
-                     ErrorNoDefsUI.init(this.AB);
                      ErrorNoDefsUI.switcherooUser(Config.userConfig());
                   }
                   this.ui().destroy(); // remove the preloading screen
