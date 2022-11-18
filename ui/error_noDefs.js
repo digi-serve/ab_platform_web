@@ -25,7 +25,7 @@ class ErrorNoDefsUI extends ClassUI {
                   },
                   {
                      view: "button",
-                     value: '<div style="text-align: center; font-size: 12px;"><i class="fa-fw fa fa-times"></i></div>',
+                     value: '<div style="text-align: center; font-size: 12px; color:#FFFFFF"><i class="fa-fw fa fa-times"></i></div>',
                      align: "center",
                      width: 30,
                      css: "webix_transparent",
