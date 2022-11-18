@@ -79,7 +79,7 @@ module.exports = class ABViewCSVExporterComponent extends ClassUI {
    }
 
    downloadCsvFile() {
-      let url = `/appbuilder/csv-export/${this.id}`;
+      let url = `/appbuilder/csv-export/${this.view.id}`;
       const where = this.clientFilter.getValue();
 
       if (where && (where.rules || []).length) {
