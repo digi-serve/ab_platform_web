@@ -50,7 +50,7 @@ if (!myClass) {
                         {
                            id: ids.switchBack,
                            view: "button",
-                           value: '<div style="text-align: center; font-size: 12px;"><i class="fa-fw fa fa-undo"></i></div>',
+                           value: '<div style="text-align: center; font-size: 12px;"><i class="fa-fw fa fa-times"></i></div>',
                            align: "center",
                            css: "webix_transparent",
                            width: 44,
