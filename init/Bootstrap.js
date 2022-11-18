@@ -177,7 +177,8 @@ class Bootstrap extends EventEmitter {
 
                // NOTE: special case: User has no Roles defined.
                // direct them to our special ErrorNoDefsUI
-               if ((this.AB.Config.userConfig()?.roles ?? []).length == 0) {
+               const userConfig = this.AB.Config.userConfig();
+               if (userConfig && userConfig.roles.length == 0) {
                   await this.AB.init();
                   ErrorNoDefsUI.init(this.AB);
                   ErrorNoDefsUI.attach();
