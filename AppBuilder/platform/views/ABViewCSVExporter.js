@@ -1,4 +1,5 @@
 const ABViewCSVExporterCore = require("../../core/views/ABViewCSVExporterCore");
+const ABViewCSVExporterComponent = require("./viewComponent/ABViewCSVExporterComponent");
 
 const ABViewCSVExporterPropertyComponentDefaults =
    ABViewCSVExporterCore.defaultValues();
@@ -8,29 +9,6 @@ let L = (...params) => AB.Multilingual.label(...params);
 let PropertyFilter = null;
 
 module.exports = class ABViewCSVExporter extends ABViewCSVExporterCore {
-   constructor(values, application, parent, defaultValues) {
-      super(values, application, parent, defaultValues);
-   }
-
-   //
-   //	Editor Related
-   //
-
-   /**
-    * @method editorComponent
-    * return the Editor for this UI component.
-    * the editor should display either a "block" view or "preview" of
-    * the current layout of the view.
-    * @param {string} mode what mode are we in ['block', 'preview']
-    * @return {Component}
-    */
-   editorComponent(App, mode) {
-      let idBase = "ABViewCsvExporterEditorComponent";
-      let component = this.component(App, idBase);
-
-      return component;
-   }
-
    //
    // Property Editor
    //
@@ -282,7 +260,35 @@ module.exports = class ABViewCSVExporter extends ABViewCSVExporterCore {
       }
    }
 
-   component(App, idBase) {
+   /**
+    * @method component()
+    * return a UI component based upon this view.
+    * @param {obj } v1App
+    * @param {string} idPrefix - define to support in 'Datacollection' widget
+    *
+    * @return {obj } UI component
+    */
+   component(v1App, idPrefix) {
+      let component = new ABViewCSVExporterComponent(this);
+
+      // if this is our v1Interface
+      if (v1App) {
+         var newComponent = component;
+         component = {
+            ui: component.ui(),
+            init: (options, accessLevel) => {
+               return newComponent.init(this.AB, accessLevel);
+            },
+            onShow: (...params) => {
+               return newComponent.onShow?.(...params);
+            },
+         };
+      }
+
+      return component;
+   }
+
+   componentOld(App, idBase) {
       idBase = idBase || "ABCSVExporter_" + this.id;
       let ids = {
          button: App.unique(`${idBase}_button`),
