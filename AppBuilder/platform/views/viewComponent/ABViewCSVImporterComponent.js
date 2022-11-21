@@ -82,7 +82,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
    }
 
    uiConfig() {
-      var ids = this.ids;
+      const ids = this.ids;
 
       return {
          view: "form",
@@ -178,7 +178,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
    }
 
    uiRecordsView() {
-      var ids = this.ids;
+      const ids = this.ids;
       return {
          gravity: 2,
          rows: [
@@ -213,7 +213,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
                css: "ab-csv-importer",
                borderless: false,
                tooltip: (obj) => {
-                  var tooltip = obj._errorMsg
+                  const tooltip = obj._errorMsg
                      ? obj._errorMsg
                      : "No validation errors";
                   return tooltip;
@@ -223,13 +223,13 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
                on: {
                   onValidationError: function (id, obj, details) {
                      // console.log(`item ${id} invalid`);
-                     var errors = "";
+                     let errors = "";
                      Object.keys(details).forEach((key) => {
                         this.$view.complexValidations[key].forEach((err) => {
                            errors += err.invalidMessage + "</br>";
                         });
                      });
-                     var $dt = $$(ids.datatable);
+                     const $dt = $$(ids.datatable);
                      $dt.blockEvent();
                      $dt.updateItem(id, {
                         _status: "invalid",
@@ -240,7 +240,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
                   },
                   onValidationSuccess: function (id, obj, details) {
                      // console.log(`item ${id} valid`);
-                     var $dt = $$(ids.datatable);
+                     const $dt = $$(ids.datatable);
                      $dt.blockEvent();
                      $dt.updateItem(id, {
                         _status: "valid",
@@ -250,7 +250,9 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
                      this.validationError = false;
                   },
                   onCheck: () => {
-                     var selected = $$(ids.datatable).find({ _included: true });
+                     const selected = $$(ids.datatable).find({
+                        _included: true,
+                     });
                      $$(ids.importButton).setValue(this.labelImport(selected));
                      if (this.overLimitAlert(selected)) {
                         $$(ids.importButton).disable();
@@ -280,7 +282,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
    }
 
    uiPopup() {
-      var ids = this.ids;
+      const ids = this.ids;
 
       return {
          id: ids.popup,
@@ -381,7 +383,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
 
    init(AB) {
       this.AB = AB;
-      var ids = this.ids;
+      const ids = this.ids;
 
       // Populate values to rules
 
@@ -412,7 +414,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
    }
 
    formClear() {
-      var ids = this.ids;
+      const ids = this.ids;
       this._dataRows = null;
       this._csvFileInfo = null;
 
@@ -497,7 +499,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
          return false;
       }
 
-      var ids = this.ids;
+      const ids = this.ids;
 
       // show loading cursor
       $$(ids.form)?.showProgress?.({ type: "icon" });
@@ -531,8 +533,8 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
    }
 
    populateColumnList() {
-      var ids = this.ids;
-      var self = this;
+      const ids = this.ids;
+      const self = this;
 
       // clear list
       webix.ui([], $$(ids.columnList));
@@ -805,7 +807,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
    }
 
    overLimitAlert(data) {
-      var limit = 1000;
+      const limit = 1000;
       if (data.length > limit) {
          // we only allow 1000 record imports
          webix.alert({
@@ -822,7 +824,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
    }
 
    loadDataToGrid() {
-      var ids = this.ids;
+      const ids = this.ids;
       let $datatable = $$(ids.datatable);
       if (!$datatable) return;
 
@@ -852,11 +854,11 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
          width: 30,
       });
 
-      var fieldValidations = [];
-      var rulePops = [];
+      const fieldValidations = [];
+      let rulePops = [];
       // populate columns
       (matchFields || []).forEach((f) => {
-         var validationRules = f.field.settings.validationRules;
+         let validationRules = f.field.settings.validationRules;
          // parse the rules because they were stored as a string
          // check if rules are still a string...if so lets parse them
          if (validationRules && typeof validationRules === "string") {
@@ -864,10 +866,10 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
          }
 
          if (validationRules && validationRules.length) {
-            var validationUI = [];
+            const validationUI = [];
             // there could be more than one so lets loop through and build the UI
             validationRules.forEach((rule) => {
-               var Filter = this.AB.filterComplexNew(
+               const Filter = this.AB.filterComplexNew(
                   `${f.field.id}_${webix.uid()}`
                );
                // add the new ui to an array so we can add them all at the same time
@@ -883,7 +885,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
                });
             });
             // create a unique view id for popup
-            var popUpId = ids.rules + "_" + f.field.id + "_" + webix.uid();
+            const popUpId = `${ids.rules}_${f.field.id}_${webix.uid()}`;
             // store the popup ids so we can remove the later
             rulePops.push(popUpId);
             // add the popup to the UI but don't show it
@@ -897,14 +899,8 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
             });
          }
 
-         var editor = "text";
-         switch (f.field.key) {
-            case "number":
-               editor = "number";
-               break;
-            default:
-            // code block
-         }
+         const editor = f.field?.key == "number" ? "number" : "text";
+
          columns.push({
             id: f.columnIndex,
             header: f.field.label,
@@ -919,7 +915,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
 
       if (fieldValidations.length) {
          // we need to store the rules for use later so lets build a container array
-         var complexValidations = [];
+         const complexValidations = [];
          fieldValidations.forEach((f) => {
             // init each ui to have the properties (app and fields) of the object we are editing
             // f.filter.applicationLoad(App);
@@ -939,15 +935,15 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
                columnIndex: f.columnIndex,
             });
          });
-         var rules = {};
-         var dataTable = $$(ids.datatable);
+         const rules = {};
+         const dataTable = $$(ids.datatable);
          // store the rules in a data param to be used later
          dataTable.$view.complexValidations = complexValidations;
          // use the lookup to build the validation rules
          Object.keys(complexValidations).forEach(function (key) {
             rules[key] = function (value, data) {
                // default valid is true
-               var isValid = true;
+               let isValid = true;
                dataTable.$view.complexValidations[key].forEach((filter) => {
                   let rowValue = {};
                   // use helper funtion to check if valid
@@ -963,7 +959,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
                      }
                      rowValue[f.field.id] = record;
                   });
-                  var ruleValid = filter.filters(rowValue);
+                  const ruleValid = filter.filters(rowValue);
                   // if invalid we need to tell the field
                   if (ruleValid == false) {
                      isValid = false;
@@ -1108,8 +1104,8 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
     *                    ]
     */
    getMatchFields() {
-      let result = [];
-      var ids = this.ids;
+      const result = [];
+      const ids = this.ids;
 
       // get richselect components
       let $selectorViews = $$(ids.columnList)
@@ -1144,7 +1140,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
                });
 
                // convert all dates into mysql date format YYYY-DD-MM
-               var format;
+               let format;
                switch (fieldData.order) {
                   case "1":
                      format =
@@ -1205,7 +1201,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
    }
 
    labelImport(selected) {
-      var length = selected;
+      let length = selected;
       if (Array.isArray(selected)) length = selected.length;
 
       return L("Import {0} Records", [length]);
@@ -1232,7 +1228,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
       // let model = dv.model;
       // if (model == null) return Promise.resolve();
 
-      var ids = this.ids;
+      const ids = this.ids;
       $$(ids.importButton).disable();
 
       // Show loading cursor
@@ -1356,7 +1352,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
          $$(ids.statusMessage).setValue("");
          $$(ids.statusMessage).hide();
 
-         var selected = $$(ids.datatable).find({ _included: true });
+         const selected = $$(ids.datatable).find({ _included: true });
          $$(ids.importButton).setValue(this.labelImport(selected));
 
          this.emit("done");
@@ -1473,22 +1469,22 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
       // if pass, then continue to process each row
       // ?? : can we process in Parallel?
       // ?? : implement hash Lookups for connected Fields
-      var hashLookups = {};
+      const hashLookups = {};
       // {obj}  /*  { connectField.id : { 'searchWord' : "uuid"}}
       // use this hash to reduce the # of lookups needed to fill in our
       // connected entries
 
-      let connectedFields = matchFields.filter(
+      const connectedFields = matchFields.filter(
          (f) => f && f.field && f.field.isConnection && f.searchField
       );
 
       let startUpdateTime;
-      var numDone = 0;
+      let numDone = 0;
       return Promise.resolve()
          .then(() => {
             // forEach connectedFields in csv
 
-            var allLookups = [];
+            const allLookups = [];
 
             (connectedFields || []).forEach((f) => {
                let connectField = f.field;
@@ -1552,11 +1548,11 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
                // forEach ConnectedField
                (connectedFields || []).forEach((f) => {
                   // find newRowData[field.columnName] = { field.PK : hash[field.id][searchWord] }
-                  let connectField = f.field;
-                  let linkIdKey = connectField.indexField
+                  const connectField = f.field;
+                  const linkIdKey = connectField.indexField
                      ? connectField.indexField.columnName
                      : connectField.object.PK();
-                  var uuid =
+                  const uuid =
                      hashLookups[connectField.id][
                         newRowData[connectField.columnName]
                      ];
@@ -1585,7 +1581,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
                return Promise.resolve();
             }
             // NOTE: Parallel exectuion of all these:
-            var allSaves = [];
+            const allSaves = [];
 
             const createRecord = (objModel, newRowsData, element, total) => {
                return new Promise((resolve, reject) => {
@@ -1594,7 +1590,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
                   objModel
                      .batchCreate({ batch: newRowsData })
                      .then((result) => {
-                        var recordRules = [];
+                        const recordRules = [];
 
                         // Show errors of each row
                         Object.keys(result.errors).forEach((rowIndex) => {
@@ -1665,9 +1661,9 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
 
             // we are going to store these promises in an array of
             // arrays with 50 in each sub array
-            var throttledSaves = [];
-            var index = 0;
-            var total = allSaves.length;
+            const throttledSaves = [];
+            const total = allSaves.length;
+            let index = 0;
             while (allSaves.length) {
                throttledSaves[index] = allSaves.splice(0, 50);
                index++;
@@ -1698,9 +1694,9 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
                requests
                   .then(() => {
                      // when done get the next 10
-                     var nextRecords = remainingRecords.shift();
+                     const nextRecords = remainingRecords.shift();
                      // if there are any remaining in the group call performThrottledSaves
-                     if (nextRecords && nextRecords.length) {
+                     if (nextRecords?.length) {
                         return performThrottledSaves(
                            nextRecords,
                            remainingRecords,
@@ -1723,7 +1719,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
             // this is when the real work starts so lets begin our countdown timer now
             startUpdateTime = new Date();
             // get the first group of Promises out of the collection
-            var next = throttledSaves.shift();
+            const next = throttledSaves.shift();
             // execute our Promise iterator
             return performThrottledSaves(
                next,
