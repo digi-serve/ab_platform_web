@@ -48,6 +48,11 @@ class ABQL extends ABQLCore {
          let $uiCondition = null;
 
          switch (pDef.type) {
+            case "objectFields":
+               this.params[pDef.name] = $$(this.ids.objectfields).getValue();
+
+               break;
+
             case "objectName":
                this.params[pDef.name] = $$(this.ids.objectname).getValue();
 
@@ -66,6 +71,10 @@ class ABQL extends ABQLCore {
                }
 
                break;
+
+            case "taskParam":
+               this.params[pDef.name] = $$(this.ids.taskparam).getValue();
+               break;
          }
       });
    }
@@ -79,10 +88,12 @@ class ABQL extends ABQLCore {
    toIDs(myID) {
       return {
          condition: `${myID}_condition`,
+         objectfields: `${myID}_objectfields`,
          objectname: `${myID}_objname`,
          popup: `${myID}_popup`,
          select: `${myID}_select`,
          shorthand: `${myID}_shorthand`,
+         taskparam: `${myID}_taskparam`,
       };
    }
 
@@ -692,6 +703,25 @@ class ABQL extends ABQLCore {
                      hidden: true,
                   },
                ],
+            };
+
+            break;
+
+         case "taskParam":
+            paramUI = {
+               id: this.ids.taskparam,
+               view: "text",
+               value: this.params[pDef.name],
+               placeholder: "enter parameter name",
+               on: {
+                  onChange: (newValue, oldValue) => {
+                     // this.params = this.params || {};
+                     if (newValue != this.params[pDef.name]) {
+                        this.params[pDef.name] = newValue;
+                        this.paramChanged(pDef, id);
+                     }
+                  },
+               },
             };
 
             break;

@@ -71,6 +71,7 @@ class ABQLSetPluck extends ABQLSetPluckCore {
          // if (this.field && this.field.isConnected) {
          if (this.field && this.field.key == "connectObject") {
             this.objectOut = this.field.datasourceLink;
+            this.objectOutID = this.objectOut.id;
 
             // ?? is this correct?
             // if we already have created a .next operation, and we have
