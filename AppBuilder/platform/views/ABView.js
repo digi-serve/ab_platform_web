@@ -450,34 +450,7 @@ module.exports = class ABView extends ABViewCore {
    component() {
       const component = new ABViewComponent(this);
 
-      let idBase = `ABView_${this.id}`;
-      let ids = {
-         component: `${idBase}_component`,
-      };
-
-      // an ABView is a collection of rows:
-      let _ui = {
-         id: ids.component,
-         view: "layout",
-         type: "space",
-         rows: [],
-      };
-
-      // if this form is empty, then force a minimal row height
-      // so the component isn't completely hidden on the screen.
-      // (important in the editor so we don't loose the ability to edit the
-      // component)
-      if (_ui.rows.length == 0) {
-         _ui.height = 30;
-      }
-
-      // make sure each of our child views get .init() called
-      var _init = (options) => {};
-
-      return {
-         ui: _ui,
-         init: _init,
-      };
+      return component;
    }
 
    /*

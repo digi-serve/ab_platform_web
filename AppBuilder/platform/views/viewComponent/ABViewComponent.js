@@ -48,6 +48,26 @@ export default class ABViewComponent extends ClassUI {
       return this.AB.datacollectionByID(this.CurrentDatacollectionID);
    }
 
+   ui() {
+      // an ABView is a collection of rows:
+      this._ui = this._ui ?? {
+         id: this.ids.component,
+         view: "layout",
+         type: "space",
+         rows: [],
+      };
+
+      // if this form is empty, then force a minimal row height
+      // so the component isn't completely hidden on the screen.
+      // (important in the editor so we don't loose the ability to edit the
+      // component)
+      if (this._ui.rows.length == 0) {
+         this._ui.height = 30;
+      }
+
+      return this._ui;
+   }
+
    init(AB) {
       this.AB = AB;
    }
