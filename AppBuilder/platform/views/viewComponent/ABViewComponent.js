@@ -117,12 +117,10 @@ export default class ABViewComponent extends ClassUI {
    onShow() {
       // if we manage a datacollection, then make sure it has started
       // loading it's data when we are showing our component.
-      var dv = this.datacollection;
-      if (dv) {
-         if (dv.dataStatus == dv.dataStatusFlag.notInitial) {
-            // load data when a widget is showing
-            dv.loadData();
-         }
+      const dv = this.datacollection ?? this.view.datacollection;
+      if (dv && dv.dataStatus == dv.dataStatusFlag.notInitial) {
+         // load data when a widget is showing
+         dv.loadData();
       }
    }
 }

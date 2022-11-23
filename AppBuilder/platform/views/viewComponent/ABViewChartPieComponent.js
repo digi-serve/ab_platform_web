@@ -25,7 +25,6 @@ module.exports = class ABViewChartPieComponent extends (
             ? {
                  width: baseView.parent.settings.labelWidth,
                  template: `<div style='font-size: ${baseView.settings.labelFontSize}px;'>#label#</div>`,
-                 values: [], // TODO : bug in webix 5.1.7
               }
             : null,
          pieInnerText: `<div style='font-size: ${baseView.settings.innerFontSize}px;'>#value#</div>`,
