@@ -24,7 +24,7 @@ class ABViewGridComponent extends ABViewComponent {
    constructor(viewGrid, idBase) {
       var base = idBase || `ABViewGrid_${viewGrid.id}`;
 
-      super(base, {
+      super(viewGrid, base, {
          // component: `${base}_component`,
          toolbar: "",
          buttonDeleteSelected: "",
