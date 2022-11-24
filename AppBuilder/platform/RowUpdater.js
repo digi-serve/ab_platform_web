@@ -251,7 +251,7 @@ export default class RowUpdater extends ClassUI {
             let fieldInfo = this._Object.fieldByID(fieldId);
 
             let val = {
-               fieldId: fieldId
+               fieldId: fieldId,
             };
 
             // Custom value
@@ -273,7 +273,7 @@ export default class RowUpdater extends ClassUI {
                   }
                } else {
                   // Get value from data field manager
-                  val = fieldInfo.getValue($customValueElem);
+                  val.value = fieldInfo.getValue($customValueElem);
                }
             }
             // Process value
