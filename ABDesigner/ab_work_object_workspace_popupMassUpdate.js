@@ -79,6 +79,8 @@ module.exports = class AB_Work_Object_Workspace_PopupMassUpdate extends (
          }
 
          webix.ui(this.ui);
+
+         rowUpdater.init(this.AB);
       };
 
       let CurrentObject = null;
