@@ -140,12 +140,12 @@ if (!myClass) {
          // Save to a switched user.
          if (!user || !userID) {
             // if no user, then remove our current Switcheroo assignment
-            let response = await this.AB.Network.delete({
+            /* let response = */ await this.AB.Network.delete({
                url: `/auth/switcheroo`,
                // data: {},
             });
          } else {
-            let response = await this.AB.Network.post({
+            /* let response = */ await this.AB.Network.post({
                url: `/auth/switcheroo/${user.uuid}`,
                // data: {},
             });
