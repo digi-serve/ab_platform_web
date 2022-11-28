@@ -94,6 +94,7 @@ export default class ABViewGridPopupMassUpdate extends ClassUI {
 
    async init(AB) {
       webix.ui(this.ui());
+      this.rowUpdater.init(AB);
 
       return Promise.resolve();
    }

@@ -148,7 +148,10 @@ export default class RowUpdater extends ClassUI {
       };
    }
 
-   init(/* AB */) {
+   init(AB) {
+      const $form = $$(this.ids.form);
+      if ($form) AB.Webix.extend($form, AB.Webix.ProgressBar);
+
       return Promise.resolve();
    }
 
@@ -363,9 +366,11 @@ export default class RowUpdater extends ClassUI {
       switch (field.key) {
          case "connectObject":
             {
-               const options = (await field.getOptions()) ?? [];
+               this.busy();
+               const getOptTask = field.getOptions();
                const $combo = inputView.rows[0];
-               $combo.suggest.body.data = options;
+               $combo.suggest.body.data = (await getOptTask) ?? [];
+               this.ready();
             }
             break;
          case "user":
@@ -531,5 +536,15 @@ export default class RowUpdater extends ClassUI {
          $customOption.show();
          $processOption.hide();
       }
+   }
+
+   busy() {
+      $$(this.ids.addNew).disable();
+      $$(this.ids.form)?.showProgress({ type: "icon" });
+   }
+
+   ready() {
+      $$(this.ids.addNew).enable();
+      $$(this.ids.form)?.hideProgress();
    }
 }
