@@ -11,12 +11,12 @@ class ABQLRowPluck extends ABQLRowPluckCore {
     */
    paramChanged(pDef, id) {
       super.paramChanged(pDef);
-      if (pDef.name == "fieldID") {
-         // Re-generate next select options
-         this.uiNextRowSelectorRefresh(id);
-      }
+
+      // Re-generate next select options
+      if (pDef.name === "fieldID") this.uiNextRowSelectorRefresh(id);
    }
 }
+
 ABQLRowPluck.uiIndentNext = 20;
 
 module.exports = ABQLRowPluck;

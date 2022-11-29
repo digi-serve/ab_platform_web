@@ -20,6 +20,7 @@ class ABQLRowUpdate extends ABQLRowUpdateCore {
    /// Instance Methods
    ///
 }
+
 ABQLRowUpdate.uiIndentNext = 20;
 
 module.exports = ABQLRowUpdate;

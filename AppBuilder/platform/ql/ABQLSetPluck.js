@@ -60,7 +60,7 @@ class ABQLSetPluck extends ABQLSetPluckCore {
     *        changed.
     */
    paramChanged(pDef) {
-      if (pDef.name == "fieldID") {
+      if (pDef.name === "fieldID") {
          // debugger;
          this.fieldID = this.params[pDef.name];
          // v2 method:
@@ -69,16 +69,14 @@ class ABQLSetPluck extends ABQLSetPluckCore {
 
          // v2 method:
          // if (this.field && this.field.isConnected) {
-         if (this.field && this.field.key == "connectObject") {
+         if (this.field && this.field.key === "connectObject") {
             this.objectOut = this.field.datasourceLink;
             this.objectOutID = this.objectOut.id;
 
             // ?? is this correct?
             // if we already have created a .next operation, and we have
             // just changed our .object, pass that information forward.
-            if (this.next) {
-               this.next.object = this.objectOut;
-            }
+            if (this.next) this.next.object = this.objectOut;
          }
       }
    }
@@ -110,25 +108,26 @@ class ABQLSetPluck extends ABQLSetPluckCore {
       // relevant .object and .objectOut
       this.AB.objects((o) => {
          if (!this.field) {
-            // var field = o.fieldByID(this.fieldID);
-            var field = o.fieldByID(this.fieldID);
-            if (field) {
-               this.field = field;
-            }
+            // const field = o.fieldByID(this.fieldID);
+            const field = o.fieldByID(this.fieldID);
+
+            if (field) this.field = field;
          }
       });
 
       if (this.field) {
          this.object = this.field.object;
+
          // v2 method:
          // if (this.field.isConnected) {
-         if (this.field && this.field.key == "connectObject") {
+         if (this.field && this.field.key === "connectObject") {
             this.objectOut = this.field.datasourceLink;
             this.objectOutID = this.objectOut.id;
          }
       }
    }
 }
+
 ABQLSetPluck.uiIndentNext = 10;
 
 module.exports = ABQLSetPluck;
