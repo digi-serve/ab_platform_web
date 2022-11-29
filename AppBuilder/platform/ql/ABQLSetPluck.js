@@ -60,7 +60,7 @@ class ABQLSetPluck extends ABQLSetPluckCore {
     *        changed.
     */
    paramChanged(pDef) {
-      if (pDef.name == "field") {
+      if (pDef.name == "fieldID") {
          // debugger;
          this.fieldID = this.params[pDef.name];
          // v2 method:
@@ -104,7 +104,7 @@ class ABQLSetPluck extends ABQLSetPluckCore {
    parseRow(row, id) {
       super.parseRow(row, id);
 
-      this.fieldID = this.params.field;
+      this.fieldID = this.params.fieldID;
 
       // we now have to build backwards from the current fieldID to set our
       // relevant .object and .objectOut
@@ -124,6 +124,7 @@ class ABQLSetPluck extends ABQLSetPluckCore {
          // if (this.field.isConnected) {
          if (this.field && this.field.key == "connectObject") {
             this.objectOut = this.field.datasourceLink;
+            this.objectOutID = this.objectOut.id;
          }
       }
    }

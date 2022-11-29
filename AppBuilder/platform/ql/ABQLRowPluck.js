@@ -11,7 +11,7 @@ class ABQLRowPluck extends ABQLRowPluckCore {
     */
    paramChanged(pDef, id) {
       super.paramChanged(pDef);
-      if (pDef.name == "field") {
+      if (pDef.name == "fieldID") {
          // Re-generate next select options
          this.uiNextRowSelectorRefresh(id);
       }

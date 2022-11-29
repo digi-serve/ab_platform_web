@@ -33,8 +33,10 @@ class ABQLSetSave extends ABQLSetSaveCore {
    parseRow(row, id) {
       super.parseRow(row, id);
 
+      this.taskParam = this.params["task_param"];
+
       if (!this.registered) {
-         this.task.registerDatasource(this);
+         this.task.registerDatasource(this.object);
          this.registered = true;
       }
    }

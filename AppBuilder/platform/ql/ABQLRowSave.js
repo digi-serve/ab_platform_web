@@ -6,9 +6,13 @@
  *
  */
 
-const ABQLSetSaveCore = require("../../core/ql/ABQLSetSaveCore.js");
+const ABQLRowSaveCore = require("../../core/ql/ABQLRowSaveCore.js");
 
-class ABQLRowSave extends ABQLSetSaveCore {}
+class ABQLRowSave extends ABQLRowSaveCore {
+   paramChanged(pDef, id) {
+      super.paramChanged(pDef);
+   }
+}
 ABQLRowSave.uiIndentNext = 20;
 
 module.exports = ABQLRowSave;

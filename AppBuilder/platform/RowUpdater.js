@@ -273,7 +273,7 @@ class RowUpdater extends ClassUI {
                   }
                } else {
                   // Get value from data field manager
-                  val = fieldInfo.getValue($customValueElem);
+                  val.value = fieldInfo.getValue($customValueElem);
                }
             }
             // Process value

@@ -741,7 +741,6 @@ module.exports = class FilterComplex extends FilterComplexCore {
             if (!pField) return false;
 
             let result = false;
-
             switch (field) {
                case "this_object":
                   result =
@@ -751,25 +750,68 @@ module.exports = class FilterComplex extends FilterComplexCore {
 
                default:
                   switch (field.key) {
+                     case "boolean":
+                        result = ["boolean"].includes(pField.field?.key);
+
+                        break;
+
                      case "connectObject":
                         result =
                            field.settings.linkObject ===
                            (pField.field?.object.id ?? pField.object.id);
 
-                        if (field.settings.isCustomFK)
-                           result =
-                              result &&
-                              (field.settings.indexField ||
-                                 field.settings.indexField2) ===
-                                 pField.field.id;
-                        else result = result && !pField.field;
+                        if (!field.settings.isCustomFK) {
+                           result = result && !pField.field;
+
+                           break;
+                        }
+
+                        result =
+                           result &&
+                           (field.settings.indexField ||
+                              field.settings.indexField2) === pField.field?.id;
+
+                        break;
+
+                     case "date":
+                     case "datetime":
+                        result = ["date", "datetime"].includes(
+                           pField.field?.key
+                        );
+
+                        break;
+
+                     case "calculate":
+                     case "formula":
+                     case "number":
+                        result = ["calculate", "formula", "number"].includes(
+                           pField.field?.key
+                        );
+
+                        break;
+
+                     case "string":
+                     case "LongText":
+                     case "email":
+                     case "AutoIndex":
+                     case "list":
+                        result = [
+                           "string",
+                           "LongText",
+                           "email",
+                           "AutoIndex",
+                           "list",
+                        ].includes(pField.field?.key);
+
+                        break;
+
+                     case "user":
+                        result = ["user"].includes(pField.field?.key);
 
                         break;
 
                      default:
-                        if (pField.field)
-                           result = field.key === pField.field.key;
-                        else if (pField.key) {
+                        if (pField.key) {
                            // uuid
                            const processFieldId = pField.key.split(".").pop();
 
