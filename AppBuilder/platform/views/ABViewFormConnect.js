@@ -51,7 +51,7 @@ function _onShow(compId, instance) {
    const filterByConnectValues = getFilterByConnectValues(filterConditions).map(
       (e) => {
          for (const key in instance.parent.viewComponents) {
-            const $ui = $$(instance.parent.viewComponents[key].ui.inputId);
+            const $ui = $$(instance.parent.viewComponents[key].ui().inputId);
 
             if ($ui?.config?.name === e.value) {
                // we need to use the element id stored in the settings to find out what the
@@ -577,7 +577,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
       };
 
       let baseComp = this.component(App);
-      let templateElem = baseComp.ui;
+      let templateElem = baseComp.ui();
       templateElem.id = ids.component;
 
       const _ui = {

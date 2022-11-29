@@ -16,7 +16,9 @@ let PopupCarouselFilterMenu = null;
 class ABViewCarouselComponent extends ABViewComponent {
    constructor(viewCarousel, idBase) {
       var base = idBase || `ABViewCarousel_${viewCarousel.id}`;
-      super(base, {});
+      super(base, {
+         component: "",
+      });
 
       this.view = viewCarousel;
       this.settings = viewCarousel.settings;

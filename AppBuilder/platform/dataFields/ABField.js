@@ -673,6 +673,8 @@ module.exports = class ABField extends ABFieldCore {
          // .newInstance() is used to create the view instance when the component
          // 		is dropped onto the ABView list.
          newInstance: (application, parent) => {
+            application = application ?? this.AB._mockApp;
+
             // NOTE: in case you were wondering, the base ABField
             // 		 will just return a label with 'ABFieldPlaceholder'
             // 		 as the text.  Any sub class of ABField should overwrite
@@ -711,6 +713,8 @@ module.exports = class ABField extends ABFieldCore {
          // .newInstance() is used to create the view instance when the component
          // 		is dropped onto the ABView list.
          newInstance: (application, parent) => {
+            application = application ?? this.AB._mockApp;
+
             // store object id and field id to field component
             const values = this.detailComponent().common();
             values.settings = values.settings || {};

@@ -60,7 +60,8 @@ module.exports = class ABViewChartComponent extends ABViewContainerComponent {
             });
 
          eventNames.forEach((e) => {
-            if (e in dc._events) return;
+            // Do we need this ? .eventAdd should check exists listener below
+            // if (e in dc._events) return;
 
             baseView.eventAdd({
                emitter: dc,

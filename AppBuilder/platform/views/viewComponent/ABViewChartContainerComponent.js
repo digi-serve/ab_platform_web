@@ -16,6 +16,8 @@ module.exports = class ABViewChartContainerComponent extends ABViewComponent {
 
    async init(AB) {
       super.init(AB);
+
+      this.datacollection = this.view.parent.datacollection;
    }
 
    onShow() {
