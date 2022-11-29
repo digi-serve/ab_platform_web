@@ -259,7 +259,10 @@ export default class RowUpdater extends ClassUI {
 
             // Custom value
             if ($customValueElem && $customValueElem.isVisible()) {
-               if (fieldInfo.key == "connectObject") {
+               if (
+                  fieldInfo.key == "connectObject" ||
+                  fieldInfo.key == "user"
+               ) {
                   val.value = fieldInfo.getValue(
                      $customValueElem.getChildViews()[0]
                   );
@@ -365,20 +368,20 @@ export default class RowUpdater extends ClassUI {
       // WORKAROUND: add '[Current User]' option to the user data field
       switch (field.key) {
          case "connectObject":
+         case "user":
             {
                this.busy();
                const getOptTask = field.getOptions();
                const $combo = inputView.rows[0];
                $combo.suggest.body.data = (await getOptTask) ?? [];
+               if (field.key == "user") {
+                  $combo.suggest.body.data.unshift({
+                     id: "ab-current-user",
+                     value: L("[Current User]"),
+                  });
+               }
                this.ready();
             }
-            break;
-         case "user":
-            inputView.options = inputView.options || [];
-            inputView.options.unshift({
-               id: "ab-current-user",
-               value: L("[Current User]"),
-            });
             break;
          case "date":
          case "datetime":
@@ -426,14 +429,14 @@ export default class RowUpdater extends ClassUI {
             {
                view: "richselect",
                options: this._extendedOptions,
-               hidden: true
+               hidden: true,
             },
             5
          );
       } else {
          $viewItem.addView(
             {
-               hidden: true
+               hidden: true,
             },
             5
          );
