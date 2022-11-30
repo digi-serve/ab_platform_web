@@ -4,7 +4,7 @@ import ConfigMobile from "./configMobile";
 // var EventEmitter = require("events").EventEmitter;
 import { defaultsDeep } from "lodash";
 
-var divConfigDefaults = {
+const settingsDefault = {
    "appbuilder-portal-autoenter": true,
    // {bool} autoenter
    // open up the portal as soon as we load.
@@ -77,10 +77,10 @@ class Config {
    }
 
    settingsFromDiv(div) {
-      Object.keys(divConfigDefaults).forEach((d) => {
+      Object.keys(settingsDefault).forEach((d) => {
          var val = div.getAttribute(d);
          if (!val) {
-            val = divConfigDefaults[d];
+            val = settingsDefault[d];
          }
          if (val === "false") val = false;
          if (val === "true") val = true;
@@ -88,6 +88,13 @@ class Config {
          var key = d.split("-").pop();
          this.setting(key, val);
       });
+   }
+
+   settings(json = {}) {
+      for (let key in settingsDefault) {
+         const val = json[key] ?? settingsDefault[key];
+         this.setting(key.split("-").pop(), val);
+      }
    }
 
    /**

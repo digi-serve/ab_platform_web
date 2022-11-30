@@ -34,7 +34,9 @@ export default {
                BS.error(`Error communicating with Server: ${response.status}`);
             }
          }
-         console.log({ configData });
+         // Hotfix 11/30/22, Since we no longer send settings on the div including in config.
+         BS.Config.settings(configData.settings);
+         delete configData.settings;
          BS.Config.config(configData);
       } catch (err) {
          BS.error("initConfig: GET /config:", err);
