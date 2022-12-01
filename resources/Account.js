@@ -48,6 +48,17 @@ class Account extends EventEmitter {
       return Promise.resolve();
    }
 
+   canSwitcheroo() {
+      return (
+         this.roles((r) => r.uuid === "320ef94a-73b5-476e-9db4-c08130c64bb8")
+            .length > 0
+      );
+   }
+
+   isSwitcherood() {
+      return this.AB.Config.userReal();
+   }
+
    isSystemDesigner() {
       return (
          this.roles((r) => r.uuid === "6cc04894-a61b-4fb5-b3e5-b8c3f78bd331")

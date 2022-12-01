@@ -1,3 +1,4 @@
+import { nanoid } from "nanoid";
 export default {
    init: async (BS) => {
       // BS {Bootstrap}
@@ -29,6 +30,13 @@ export default {
       } catch (err) {
          BS.error("initDefinitions: GET /definition/check-update", err);
          return;
+      }
+
+      // if we are Switcherood to another user, we need to ignore our current
+      // cached definition.  Current way to do that is to simply give a random
+      // hash for our 'updated' value.
+      if (BS.Config?.userReal()) {
+         updated = nanoid();
       }
       await new Promise((resolve, reject) => {
          var cb = () => resolve();

@@ -1702,3 +1702,22 @@ div.webix_dataview_item.webix_transparent {
 .webix_el_label.formText .webix_el_box {
    font-weight: normal;
 }
+
+
+.switcheroo .webix_win_head .webix_layout_line {
+  background: #657584; 
+  color: #fff;
+}
+.switcheroo .webix_win_head .webix_view .webix_template {
+  background: #657584; 
+  color: #fff;
+}
+  
+.portal_work_switcheroo_user_switched .webix_view {
+  background: #E64B2A;
+  color: #fff;
+}
+
+.portal_work_switcheroo_user_switched .webix_el_box {
+  color: #fff;
+}

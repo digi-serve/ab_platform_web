@@ -43,6 +43,9 @@ window.gantt = gantt;
 window.reports = report;
 
 Bootstrap.init().catch((err) => {
+   // This is a known error that has already been handled.
+   if (err.code == "ENODEFS") return;
+
    var errorMSG = err.toString();
 
    Bootstrap.alert({
