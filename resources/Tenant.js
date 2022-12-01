@@ -35,7 +35,7 @@ class Tenant extends EventEmitter {
    }
 
    id() {
-      if (this._config.id == "??") {
+      if (!this._config || this._config.id == "??") {
          return null;
       }
       return this._config.id;
