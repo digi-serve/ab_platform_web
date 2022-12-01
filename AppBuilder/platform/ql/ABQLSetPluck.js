@@ -128,6 +128,4 @@ class ABQLSetPluck extends ABQLSetPluckCore {
    }
 }
 
-ABQLSetPluck.uiIndentNext = 10;
-
 module.exports = ABQLSetPluck;

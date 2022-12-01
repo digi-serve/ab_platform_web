@@ -10,6 +10,4 @@ const ABQLValueSaveCore = require("../../core/ql/ABQLValueSaveCore.js");
 
 class ABQLValueSave extends ABQLValueSaveCore {}
 
-ABQLValueSave.uiIndentNext = 30;
-
 module.exports = ABQLValueSave;

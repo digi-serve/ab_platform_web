@@ -14,6 +14,4 @@ class ABQLRowSave extends ABQLRowSaveCore {
    }
 }
 
-ABQLRowSave.uiIndentNext = 20;
-
 module.exports = ABQLRowSave;

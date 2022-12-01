@@ -36,12 +36,10 @@ class ABQLSetSave extends ABQLSetSaveCore {
       this.taskParam = this.params["task_param"];
 
       if (!this.registered) {
-         this.task.registerDatasource(this.object);
+         this.task.registerDatasource(this);
          this.registered = true;
       }
    }
 }
-
-ABQLSetSave.uiIndentNext = 10;
 
 module.exports = ABQLSetSave;

@@ -95,6 +95,7 @@ class ABQL extends ABQLCore {
          select: `${myID}_select`,
          shorthand: `${myID}_shorthand`,
          taskparam: `${myID}_taskparam`,
+         spacer: `${myID}_spacer`,
       };
    }
 
@@ -129,7 +130,10 @@ class ABQL extends ABQLCore {
 
       if (paramUI) {
          // if we only have 1 param
-         if (this.parameterDefinitions.length === 1) ui.cols.push(paramUI);
+         if (this.parameterDefinitions.length === 1) {
+            ui.cols.pop();
+            ui.cols.push(paramUI);
+         }
          // if we haven't already added a parameter
          else {
             // create a row stack of parameters:
@@ -222,7 +226,6 @@ class ABQL extends ABQLCore {
 
       const uiRow = {
          cols: [
-            { view: "spacer", width: this.constructor.uiIndentNext || 10 },
             {
                id: ids.select,
                view: "select",
@@ -308,6 +311,9 @@ class ABQL extends ABQLCore {
                   },
                },
             },
+            {
+               id: ids.spacer,
+            },
          ],
       };
 
@@ -377,6 +383,8 @@ class ABQL extends ABQLCore {
             paramUI = {
                id: this.ids.objectfields,
                view: "select",
+               label: "Field",
+               labelWidth: 70,
                value: this.fieldID,
                options: options,
                on: {
@@ -395,13 +403,23 @@ class ABQL extends ABQLCore {
          case "objectName":
             // an objectName parameter returns a select list of available
             // objects in this ABFactory.
+            options = this.AB.objects().map((o) => {
+               return { id: o.id, value: o.label };
+            });
+
+            if (!this.objectID && options.length > 0) {
+               this.objectID = options[0].id;
+               this.params[pDef.name] = this.objectID;
+               this.paramChanged(pDef);
+            }
+
             paramUI = {
                id: this.ids.objectname,
                view: "select",
+               label: L("Data Source"),
+               labelWidth: 100,
                value: this.objectID,
-               options: this.AB.objects().map((o) => {
-                  return { id: o.id, value: o.label };
-               }),
+               options: options,
                on: {
                   onChange: (newValue /*, oldValue */) => {
                      this.params = this.params ?? {};
@@ -555,7 +573,7 @@ class ABQL extends ABQLCore {
                rows: [
                   {
                      id: this.ids.shorthand,
-                     view: "label",
+                     view: "button",
                      label: displayLabel,
                      on: {
                         onItemClick: () => {
@@ -643,7 +661,7 @@ class ABQL extends ABQLCore {
                               const sh = $$(this.ids.shorthand);
 
                               sh.define({
-                                 label: JSON.stringify(this.params[pDef.name]),
+                                 badge: this.params[pDef.name].length,
                               });
                               sh.refresh();
 
@@ -667,9 +685,8 @@ class ABQL extends ABQLCore {
 
                // NOTE: on a RowUpdater, the values need to be set
                // AFTER it is displayed:
-               if (this.params && this.params[pDef.name]) {
+               if (this.params && this.params[pDef.name])
                   Updater.setValue(this.params[pDef.name]);
-               }
             };
 
             paramUI = {
@@ -677,8 +694,9 @@ class ABQL extends ABQLCore {
                   // the textual shorthand for these values
                   {
                      id: this.ids.shorthand,
-                     view: "label",
-                     label: initialValue,
+                     view: "button",
+                     label: L("Update Popout"),
+                     badge: this.params[pDef.name]?.length,
                      on: {
                         onItemClick: () => {
                            popUp();
@@ -701,8 +719,10 @@ class ABQL extends ABQLCore {
             paramUI = {
                id: this.ids.taskparam,
                view: "text",
+               label: "Variable",
+               labelWidth: 70,
                value: this.params[pDef.name],
-               placeholder: "enter parameter name",
+               placeholder: "Enter parameter name",
                on: {
                   onChange: (newValue, oldValue) => {
                      // this.params = this.params ?? {};
@@ -762,7 +782,10 @@ class ABQL extends ABQLCore {
          };
       else toInsert = params.pop();
 
-      if (toInsert) rowView.addView(toInsert);
+      if (toInsert) {
+         rowView.removeView(rowView.getChildViews()[1]);
+         rowView.addView(toInsert);
+      }
    }
 
    ////

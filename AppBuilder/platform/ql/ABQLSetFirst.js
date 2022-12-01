@@ -17,6 +17,4 @@ class ABQLSetFirst extends ABQLSetFirstCore {
    ///
 }
 
-ABQLSetFirst.uiIndentNext = 20;
-
 module.exports = ABQLSetFirst;

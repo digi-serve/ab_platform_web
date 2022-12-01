@@ -17,6 +17,4 @@ class ABQLRowPluck extends ABQLRowPluckCore {
    }
 }
 
-ABQLRowPluck.uiIndentNext = 20;
-
 module.exports = ABQLRowPluck;

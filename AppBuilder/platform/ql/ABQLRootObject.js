@@ -67,6 +67,4 @@ class ABQLObject extends ABQLRootObjectCore {
    }
 }
 
-ABQLObject.uiIndentNext = 10;
-
 module.exports = ABQLObject;
