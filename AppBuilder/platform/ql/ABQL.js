@@ -342,6 +342,8 @@ class ABQL extends ABQLCore {
     * @return {obj}
     */
    uiParamUI(pDef, id) {
+      const uiConfig = AB.Config.uiSettings();
+
       let myID = this.uiID(id);
 
       this.ids = this.toIDs(myID);
@@ -417,7 +419,7 @@ class ABQL extends ABQLCore {
                id: this.ids.objectname,
                view: "select",
                label: L("Data Source"),
-               labelWidth: 100,
+               labelWidth: uiConfig.labelWidthLarge,
                value: this.objectID,
                options: options,
                on: {
