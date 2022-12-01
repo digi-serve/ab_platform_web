@@ -251,8 +251,9 @@ class Bootstrap extends EventEmitter {
       return this._div;
    }
 
-   error(message) {
-      console.error(message);
+   error(...params) {
+      console.error(...params);
+      let message = params[0];
       this.emit(message);
    }
 

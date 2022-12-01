@@ -148,7 +148,10 @@ export default class RowUpdater extends ClassUI {
       };
    }
 
-   init(/* AB */) {
+   init(AB) {
+      const $form = $$(this.ids.form);
+      if ($form) AB.Webix.extend($form, AB.Webix.ProgressBar);
+
       return Promise.resolve();
    }
 
@@ -251,12 +254,15 @@ export default class RowUpdater extends ClassUI {
             let fieldInfo = this._Object.fieldByID(fieldId);
 
             let val = {
-               fieldId: fieldId
+               fieldId: fieldId,
             };
 
             // Custom value
             if ($customValueElem && $customValueElem.isVisible()) {
-               if (fieldInfo.key == "connectObject") {
+               if (
+                  fieldInfo.key == "connectObject" ||
+                  fieldInfo.key == "user"
+               ) {
                   val.value = fieldInfo.getValue(
                      $customValueElem.getChildViews()[0]
                   );
@@ -273,7 +279,7 @@ export default class RowUpdater extends ClassUI {
                   }
                } else {
                   // Get value from data field manager
-                  val = fieldInfo.getValue($customValueElem);
+                  val.value = fieldInfo.getValue($customValueElem);
                }
             }
             // Process value
@@ -362,18 +368,20 @@ export default class RowUpdater extends ClassUI {
       // WORKAROUND: add '[Current User]' option to the user data field
       switch (field.key) {
          case "connectObject":
-            {
-               const options = (await field.getOptions()) ?? [];
-               const $combo = inputView.rows[0];
-               $combo.suggest.body.data = options;
-            }
-            break;
          case "user":
-            inputView.options = inputView.options || [];
-            inputView.options.unshift({
-               id: "ab-current-user",
-               value: L("[Current User]"),
-            });
+            {
+               this.busy();
+               const getOptTask = field.getOptions();
+               const $combo = inputView.rows[0];
+               $combo.suggest.body.data = (await getOptTask) ?? [];
+               if (field.key == "user") {
+                  $combo.suggest.body.data.unshift({
+                     id: "ab-current-user",
+                     value: L("[Current User]"),
+                  });
+               }
+               this.ready();
+            }
             break;
          case "date":
          case "datetime":
@@ -421,14 +429,14 @@ export default class RowUpdater extends ClassUI {
             {
                view: "richselect",
                options: this._extendedOptions,
-               hidden: true
+               hidden: true,
             },
             5
          );
       } else {
          $viewItem.addView(
             {
-               hidden: true
+               hidden: true,
             },
             5
          );
@@ -531,5 +539,15 @@ export default class RowUpdater extends ClassUI {
          $customOption.show();
          $processOption.hide();
       }
+   }
+
+   busy() {
+      $$(this.ids.addNew).disable();
+      $$(this.ids.form)?.showProgress({ type: "icon" });
+   }
+
+   ready() {
+      $$(this.ids.addNew).enable();
+      $$(this.ids.form)?.hideProgress();
    }
 }

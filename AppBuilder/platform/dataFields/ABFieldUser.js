@@ -155,11 +155,23 @@ module.exports = class ABFieldUser extends ABFieldUserCore {
       }
    }
 
-   // getValue() {
-   //    var elem = $$(ids.component);
-   //
-   //    return field.getValue(elem, rowData);
-   // }
+   getValue(item) {
+      let val = super.getValue(item);
+
+      if (val) {
+         if (typeof val == "string")
+            val = val.replace(/ab-current-user/g, this.AB.Account.username());
+         else if (Array.isArray(val))
+            val = val.map((v) =>
+               (v.id ?? v)?.replace(
+                  /ab-current-user/g,
+                  this.AB.Account.username()
+               )
+            );
+      }
+
+      return val;
+   }
 
    setValue(item, rowData) {
       let val = rowData[this.columnName];

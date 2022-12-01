@@ -27,7 +27,7 @@ export default {
             updated = res.data;
          }
       } catch (err) {
-         BS.Error("initDefinitions: GET /definition/check-update", err);
+         BS.error("initDefinitions: GET /definition/check-update", err);
          return;
       }
       await new Promise((resolve, reject) => {

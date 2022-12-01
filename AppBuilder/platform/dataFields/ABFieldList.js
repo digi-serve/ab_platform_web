@@ -191,7 +191,7 @@ module.exports = class ABFieldList extends ABFieldListCore {
             }
             if (selectedObj.text) {
                let clear = "";
-               if (options.editable) {
+               if (options.editable && !this.settings.required) {
                   clear = `<span class="webix_multicombo_delete clear-combo-value" role="button" aria-label="Remove item"></span>`;
                }
                values.push(
