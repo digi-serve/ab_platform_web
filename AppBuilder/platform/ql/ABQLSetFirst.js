@@ -16,6 +16,5 @@ class ABQLSetFirst extends ABQLSetFirstCore {
    /// Instance Methods
    ///
 }
-ABQLSetFirst.uiIndentNext = 20;
 
 module.exports = ABQLSetFirst;

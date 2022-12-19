@@ -25,7 +25,7 @@ class ABQLSetSave extends ABQLSetSaveCore {
     *        changed.
     */
    paramChanged(pDef) {
-      if (pDef.name == "task_param") {
+      if (pDef.name === "task_param") {
          this.taskParam = this.params[pDef.name];
       }
    }
@@ -33,12 +33,13 @@ class ABQLSetSave extends ABQLSetSaveCore {
    parseRow(row, id) {
       super.parseRow(row, id);
 
+      this.taskParam = this.params["task_param"];
+
       if (!this.registered) {
          this.task.registerDatasource(this);
          this.registered = true;
       }
    }
 }
-ABQLSetSave.uiIndentNext = 10;
 
 module.exports = ABQLSetSave;

@@ -7,8 +7,9 @@
  */
 
 const ABQLManagerCore = require("../../core/ql/ABQLManagerCore.js");
+const ABQLRootObject = require("./ABQLRootObject.js");
 
-var ABQLManager = {
+const ABQLManager = {
    /**
     * @method fromAttributes()
     * return an {ABQL} object that represents the given attributes that
@@ -30,7 +31,7 @@ var ABQLManager = {
     *		  the webix base id of the parameters panel.
     * @return {object}
     */
-   ids: function (id) {
+   ids: (id) => {
       return {
          root: `${id}_root`,
          select: `${id}_root_select`,
@@ -52,121 +53,30 @@ var ABQLManager = {
     *		  the {ABFactory} active for this display.
     * @return {object}
     */
-   builder: function (rootOP, task, AB) {
-      // var rootOP = this.fromAttributes(attributes, task, AB);
-      let L = (...params) => AB.Multilingual.label(...params);
+   builder: (rootOP, task, AB) => {
+      // const rootOP = this.fromAttributes(attributes, task, AB);
+      const L = (...params) => AB.Multilingual.label(...params);
 
       return {
-         ui: function (id) {
-            var options = [{ id: 0, value: L("choose Root") }];
-            ABQLManagerCore.QLOps.forEach((op) => {
-               options.push({ id: op.key, value: op.label });
-            });
+         ui: (id) => {
+            rootOP = rootOP ?? new ABQLRootObject({}, task, AB);
 
-            var ids = ABQLManager.ids(id);
-            var ui = {
+            const ids = ABQLManager.ids(id);
+            const ui = {
                rows: [
                   {
-                     view: "label",
-                     label: L("Query:"),
-                  },
-                  {
                      id: ids.root,
-                     cols: [
-                        {
-                           id: ids.select,
-                           view: "select",
-                           value: rootOP ? rootOP.constructor.key : 0,
-                           options: options,
-                           on: {
-                              onChange: (newValue, oldValue) => {
-                                 function resetValue() {
-                                    var select = $$(ids.select);
-                                    select.blockEvent();
-                                    select.setValue(oldValue);
-                                    select.unblockEvent();
-                                 }
-                                 if (newValue == oldValue) {
-                                    return;
-                                 }
-                                 var newOP = ABQLManagerCore.QLOps.find(
-                                    (op) => {
-                                       return op.key == newValue;
-                                    }
-                                 );
-                                 if (!newOP) {
-                                    resetValue();
-                                    return;
-                                 }
-                                 function addOP() {
-                                    if (newOP) {
-                                       rootOP = new newOP({}, task, AB);
-                                       rootOP.viewAddParams(id, $$(ids.root));
-                                       rootOP.viewAddNext(
-                                          id,
-                                          $$(ids.root).getParentView()
-                                       );
-                                    }
-                                 }
-                                 var topEntry = $$(ids.root).getParentView();
-                                 var allRows = topEntry.getChildViews();
-                                 if (allRows.length > 2) {
-                                    webix.confirm({
-                                       title: "continue?",
-                                       text:
-                                          "changing this rule will reset any following rules.",
-                                       ok: "yes",
-                                       cancel: "no",
-                                       callback: (result) => {
-                                          if (result) {
-                                             // remove the current additional Rows:
-                                             var thisView = $$(ids.root);
-                                             var ir = allRows.length - 1;
-                                             while (
-                                                allRows[ir].config.id !=
-                                                thisView.config.id
-                                             ) {
-                                                topEntry.removeView(
-                                                   allRows[ir]
-                                                );
-                                                ir--;
-                                             }
-
-                                             // now remove the parameters
-                                             var allCols = thisView.getChildViews();
-                                             var ic = allCols.length;
-                                             while (ic > 1) {
-                                                thisView.removeView(
-                                                   allCols[ic - 1]
-                                                );
-                                                ic--;
-                                             }
-
-                                             addOP();
-                                          } else {
-                                             resetValue();
-                                          }
-                                       },
-                                    });
-                                 } else {
-                                    addOP();
-                                 } // if allRows.length > 2
-                              }, // onChange
-                           },
-                        },
-                     ],
+                     cols: [],
                   },
                ],
             };
 
-            if (rootOP) {
-               rootOP.uiAddParams(id, ui);
-               rootOP.uiAddNext(id, ui);
-            }
+            rootOP.uiAddParams(id, ui);
+            rootOP.uiAddNext(id, ui);
 
             return ui;
          },
-         init: function (id) {},
+         init: (id) => {},
       };
    },
 
@@ -183,45 +93,44 @@ var ABQLManager = {
     *		  the {ABFactory} object that is currently active.
     * @return {object}
     */
-   parse: function (id, task, AB) {
-      var ids = ABQLManager.ids(id);
-      var root = $$(ids.root);
+   parse: (id, task, AB) => {
+      const ids = ABQLManager.ids(id);
+      const root = $$(ids.root);
 
       if (!root) {
          console.warn("ABQLManager.parse(): unable to find root element");
+
          return;
       }
 
       // get all the input rows
-      var rows = root.getParentView().getChildViews();
-      rows.shift(); // remove the query label row:
+      const rows = root.getParentView().getChildViews();
 
-      function parseCurrent(rows, options, prevOP) {
-         if (rows.length == 0) {
-            return null;
-         }
-         var row = rows.shift();
+      const parseCurrent = (rows, options, prevOP) => {
+         if (rows.length === 0) return null;
+
+         const row = rows.shift();
 
          // get which operation was selected
          // find the operation selector (skip any indents)
-         var views = row.getChildViews();
-         var selector = views.shift();
-         while (!selector.getValue) {
-            selector = views.shift();
-         }
-         var value = selector.getValue();
+         const views = row.getChildViews();
+
+         let selector = views.shift();
+
+         while (!selector.getValue) selector = views.shift();
+
+         const value = selector.getValue();
 
          // figure out the QLOP object
-         var OP = options.find((o) => {
-            return o.key == value;
+         const OP = options.find((o) => {
+            return o.key === value || o.key === ABQLRootObject.key;
          });
+
          if (OP) {
-            var currOP = null;
-            if (prevOP) {
-               currOP = new OP({}, prevOP, task, AB);
-            } else {
-               currOP = new OP({}, task, AB);
-            }
+            let currOP = null;
+
+            if (prevOP) currOP = new OP({}, prevOP, task, AB);
+            else currOP = new OP({}, task, AB);
 
             // now get currOP to initialize from it's parameters:
             currOP.parseRow(row, id);
@@ -230,21 +139,27 @@ var ABQLManager = {
             // by the .parseRow():
             if (!currOP.object && prevOP) {
                currOP.object = prevOP.object;
-               currOP.objectID = currOP.object ? currOP.object.id : null;
+               currOP.objectID = currOP.object?.id ?? null;
             }
 
-            var nextRow = parseCurrent(
+            const nextRow = parseCurrent(
                rows,
                currOP.constructor.NextQLOps,
                currOP
             );
+
             currOP.next = nextRow;
+
             return currOP;
          }
+
          return null;
-      }
-      var operation = parseCurrent(rows, ABQLManagerCore.QLOps, null);
+      };
+
+      const operation = parseCurrent(rows, ABQLManagerCore.QLOps, null);
+
       return operation;
    },
 };
+
 module.exports = ABQLManager;

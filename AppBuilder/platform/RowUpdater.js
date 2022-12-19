@@ -4,7 +4,7 @@ const ABViewForm = require("../platform/views/ABViewForm");
 
 var L = null;
 
-export default class RowUpdater extends ClassUI {
+class RowUpdater extends ClassUI {
    constructor(idBase, AB) {
       super(idBase, {
          form: `${idBase}_rowUpdaterForm`,
@@ -49,7 +49,7 @@ export default class RowUpdater extends ClassUI {
                      // Label
                      view: "label",
                      width: 40,
-                     label: L("Set")
+                     label: L("Set"),
                   },
                   {
                      // Field list
@@ -57,17 +57,17 @@ export default class RowUpdater extends ClassUI {
                      id: this.ids.field,
                      options: this.getFieldList(true),
                      on: {
-                        onChange: function(columnId) {
+                        onChange: function (columnId) {
                            let $viewItem = this.getParentView();
                            self.selectField(columnId, $viewItem);
-                        }
-                     }
+                        },
+                     },
                   },
                   {
                      // Label
                      view: "label",
                      width: 40,
-                     label: L("To")
+                     label: L("To"),
                   },
                   {
                      view: "segmented",
@@ -76,27 +76,27 @@ export default class RowUpdater extends ClassUI {
                      maxWidth: 160,
                      options: [
                         { id: "custom", value: L("Custom") },
-                        { id: "process", value: L("Process") }
+                        { id: "process", value: L("Process") },
                      ],
                      hidden:
                         this._extendedOptions == null ||
                         !this._extendedOptions.length,
                      on: {
-                        onChange: function(val) {
+                        onChange: function (val) {
                            let $viewItem = this.getParentView();
 
                            self.toggleCustomProcessOption(
                               $viewItem,
                               val == "process"
                            );
-                        }
-                     }
+                        },
+                     },
                   },
                   // Field value
                   {},
                   // Extended value
                   {
-                     hidden: true
+                     hidden: true,
                   },
                   {
                      // "Remove" button
@@ -106,13 +106,13 @@ export default class RowUpdater extends ClassUI {
                      type: "icon",
                      autowidth: true,
 
-                     click: function() {
+                     click: function () {
                         let $viewCond = this.getParentView().getParentView();
 
                         self.removeItem($viewCond);
-                     }
+                     },
                   },
-               ]
+               ],
             },
          ],
       };
@@ -484,9 +484,7 @@ export default class RowUpdater extends ClassUI {
             { view: "segmented" },
             "self"
          );
-         $valueTypeButton.setValue(
-            item.isProcessValue ? "process" : "custom"
-         );
+         $valueTypeButton.setValue(item.isProcessValue ? "process" : "custom");
 
          let $customValueElem = $viewItem.getChildViews()[4];
          let $processValueElem = $viewItem.getChildViews()[5];
@@ -551,3 +549,5 @@ export default class RowUpdater extends ClassUI {
       $$(this.ids.form)?.hideProgress();
    }
 }
+
+export default RowUpdater;
