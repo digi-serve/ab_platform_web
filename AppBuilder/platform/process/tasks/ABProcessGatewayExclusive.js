@@ -9,7 +9,7 @@ module.exports = class ABProcessGatewayExclusive extends (
    //// Process Instance Methods
    ////
 
-   propertyIDs(id) {
+   /*  propertyIDs(id) {
       return {
          name: `${id}_name`,
       };
@@ -20,7 +20,7 @@ module.exports = class ABProcessGatewayExclusive extends (
     * display the properties panel for this Process Element.
     * @param {string} id
     *        the webix $$(id) of the properties panel area.
-    */
+    * /
    propertiesShow(id, App) {
       var ids = this.propertyIDs(id);
 
@@ -106,7 +106,7 @@ module.exports = class ABProcessGatewayExclusive extends (
     * pull our values from our property panel.
     * @param {string} id
     *        the webix $$(id) of the properties panel area.
-    */
+    * /
    propertiesStash(id) {
       var ids = this.propertyIDs(id);
       this.name = this.property(ids.name);
@@ -126,7 +126,7 @@ module.exports = class ABProcessGatewayExclusive extends (
          }
       });
    }
-
+*/
    /**
     * diagramProperties()
     * return a set of values for the XML shape definition based upon
@@ -135,7 +135,8 @@ module.exports = class ABProcessGatewayExclusive extends (
     */
    diagramProperties() {
       // the first entry is for the gateway element itself
-      var properties = [
+      var properties = super.diagramProperties();
+      /*[
          {
             id: this.diagramID,
             def: {
@@ -143,6 +144,7 @@ module.exports = class ABProcessGatewayExclusive extends (
             },
          },
       ];
+      */
 
       // now add any additional updates for each of our connections:
       var myOutgoingConnections = this.process.connectionsOutgoing(
@@ -152,10 +154,15 @@ module.exports = class ABProcessGatewayExclusive extends (
          properties.push({
             id: conn.id,
             def: {
-               name: this.conditions[conn.id].label,
+               name: this.conditions[conn.id]?.label ?? "",
             },
          });
       });
       return properties;
+   }
+
+   warningsEval() {
+      super.warningsEval();
+      this.onProcessReady();
    }
 };
