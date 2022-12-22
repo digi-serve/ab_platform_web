@@ -1083,10 +1083,19 @@ class ABViewGridComponent extends ABViewComponent {
                      let sum = 0;
 
                      listData.forEach((r) => {
-                        sum += f.format(r) * 1;
+                        // we only want numbers returned so pass `true` as third param
+                        // to signify that this is part of a grouping row
+                        sum += f.format(r, false, true) * 1;
                      });
 
-                     return sum;
+                     // simulate reformat from ABFieldFormulaCore
+                     if (!f.fieldLink || f.fieldLink.key == "calculate") {
+                        return sum;
+                     } else {
+                        const rowDataFormat = {};
+                        rowDataFormat[f.fieldLink.columnName] = sum;
+                        return f.fieldLink.format(rowDataFormat);
+                     }
                   },
                ];
                break;

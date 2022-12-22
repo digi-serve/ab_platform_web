@@ -163,7 +163,7 @@ module.exports = class ABFieldUser extends ABFieldUserCore {
             val = val.replace(/ab-current-user/g, this.AB.Account.username());
          else if (Array.isArray(val))
             val = val.map((v) =>
-               (v.id ?? v)?.replace(
+               (v.username ?? v.uuid ?? v.id ?? v)?.replace(
                   /ab-current-user/g,
                   this.AB.Account.username()
                )

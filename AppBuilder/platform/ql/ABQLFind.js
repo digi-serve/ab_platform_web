@@ -15,6 +15,5 @@ class ABQLFind extends ABQLFindCore {
    /// Instance Methods
    ///
 }
-ABQLFind.uiIndentNext = 10;
 
 module.exports = ABQLFind;

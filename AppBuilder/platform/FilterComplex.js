@@ -197,10 +197,10 @@ module.exports = class FilterComplex extends FilterComplexCore {
             containsCurrentUserCondition: L("contains current user"),
             notContainsCurrentUserCondition: L("does not contain current user"),
 
-            ContextDefaultOption: L("choose option"),
-            EqualsProcessValue: L("equals process value"),
-            NotEqualsProcessValueCondition: L("not equals process value"),
-            InProcessValueCondition: L("in process value"),
+            contextDefaultOption: L("choose option"),
+            equalsProcessValue: L("equals process value"),
+            notEqualsProcessValueCondition: L("not equals process value"),
+            inProcessValueCondition: L("in process value"),
             notInProcessValueCondition: L("not in process value"),
          },
       });
@@ -736,24 +736,108 @@ module.exports = class FilterComplex extends FilterComplexCore {
    }
 
    uiContextValue(field, processFieldKey = null) {
-      let processField = (this._ProcessFields ?? []).filter((pField) => {
-         if (!pField) return false;
+      const processFields = (this._ProcessFields ?? [])
+         .filter((pField) => {
+            if (!pField) return false;
 
-         if (pField.field) {
-            return pField.field.id == field.id;
-         } else if (pField.key) {
-            // uuid
-            let processFieldId = pField.key.split(".").pop();
-            return (
-               processFieldId == field.id ||
-               processFieldId == field.key ||
-               processFieldId == processFieldKey ||
-               pField.key == processFieldKey
-            );
-         }
-      })[0];
+            let result = false;
+            switch (field) {
+               case "this_object":
+                  result =
+                     this._Object.id === pField.object?.id && !pField.field;
 
-      if (!processField) return [];
+                  break;
+
+               default:
+                  switch (field.key) {
+                     case "boolean":
+                        result = ["boolean"].includes(pField.field?.key);
+
+                        break;
+
+                     case "connectObject":
+                        result =
+                           field.settings.linkObject ===
+                           (pField.field?.object.id ?? pField.object.id);
+
+                        if (!field.settings.isCustomFK) {
+                           result = result && !pField.field;
+
+                           break;
+                        }
+
+                        result =
+                           result &&
+                           (field.settings.indexField ||
+                              field.settings.indexField2) === pField.field?.id;
+
+                        break;
+
+                     case "date":
+                     case "datetime":
+                        result = ["date", "datetime"].includes(
+                           pField.field?.key
+                        );
+
+                        break;
+
+                     case "calculate":
+                     case "formula":
+                     case "number":
+                        result = ["calculate", "formula", "number"].includes(
+                           pField.field?.key
+                        );
+
+                        break;
+
+                     case "string":
+                     case "LongText":
+                     case "email":
+                     case "AutoIndex":
+                     case "list":
+                        result = [
+                           "string",
+                           "LongText",
+                           "email",
+                           "AutoIndex",
+                           "list",
+                        ].includes(pField.field?.key);
+
+                        break;
+
+                     case "user":
+                        result = ["user"].includes(pField.field?.key);
+
+                        break;
+
+                     default:
+                        if (pField.key) {
+                           // uuid
+                           const processFieldId = pField.key.split(".").pop();
+
+                           result =
+                              processFieldId === field.id ||
+                              processFieldId === field.key ||
+                              processFieldId === processFieldKey ||
+                              pField.key === processFieldKey;
+                        }
+
+                        break;
+                  }
+
+                  break;
+            }
+
+            return result;
+         })
+         .map((e) => {
+            return {
+               id: e.key,
+               value: L("context({0})", [e.label]),
+            };
+         });
+
+      if (!processFields) return [];
 
       return [
          {
@@ -762,12 +846,9 @@ module.exports = class FilterComplex extends FilterComplexCore {
             options: [
                {
                   id: "empty",
-                  value: this.labels.component.ContextDefaultOption,
+                  value: this.labels.component.contextDefaultOption,
                },
-               {
-                  id: processField.key,
-                  value: L("context({0})", [processField.label]),
-               },
+               ...processFields,
             ],
          },
       ];
@@ -782,6 +863,8 @@ module.exports = class FilterComplex extends FilterComplexCore {
    }
 
    popUp(...options) {
+      const condition = Object.assign({}, this.condition);
+
       if (!this.myPopup) {
          let ui = {
             id: this.ids.popup,
@@ -803,8 +886,8 @@ module.exports = class FilterComplex extends FilterComplexCore {
       // our fields and filters defined BEFORE a setValue() is performed.
       // this.uiInit();
 
-      if (this.condition) {
-         this.setValue(this.condition);
+      if (condition) {
+         this.setValue(condition);
       }
 
       this.myPopup.show(...options);

@@ -12,7 +12,7 @@ const ABQLRootObjectCore = require("../../core/ql/ABQLRootObjectCore.js");
 
 class ABQLObject extends ABQLRootObjectCore {
    // constructor(attributes, task, application) {
-   //     // NOTE: keep this so we can insert the prevOp == null
+   //     // NOTE: keep this so we can insert the prevOp === null
    //     super(attributes, ParameterDefinitions, null, task, application);
    // }
 
@@ -29,16 +29,14 @@ class ABQLObject extends ABQLRootObjectCore {
     *        changed.
     */
    paramChanged(pDef) {
-      if (pDef.name == "name") {
+      if (pDef.name === "name") {
          this.objectID = this.params[pDef.name];
          this.object = this.objectLookup(this.objectID);
 
          // ?? is this correct?
          // if we already have created a .next operation, and we have
          // just changed our .object, pass that information forward.
-         if (this.next) {
-            this.next.object = this.object;
-         }
+         if (this.next) this.next.object = this.object;
       }
    }
 
@@ -68,6 +66,5 @@ class ABQLObject extends ABQLRootObjectCore {
       }
    }
 }
-ABQLObject.uiIndentNext = 10;
 
 module.exports = ABQLObject;
