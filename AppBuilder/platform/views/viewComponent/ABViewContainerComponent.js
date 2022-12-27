@@ -69,7 +69,7 @@ module.exports = class ABViewContainerComponent extends ABViewComponent {
          if (parentAccessLevel > 0) {
             allInits.push(component.init(AB, parentAccessLevel));
          } else {
-            $$(this.viewComponentIDs[key]).hide();
+            $$(this.viewComponentIDs[key])?.hide();
          }
       }
 
