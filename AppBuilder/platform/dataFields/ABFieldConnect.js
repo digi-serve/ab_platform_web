@@ -456,13 +456,13 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                      ? $$(value.filterValue.config.id)
                      : null;
 
-                  if (!$parentField)
-                     throw Error(
-                        "Some parent field's view components don't exist"
-                     );
+                  // if (!$parentField)
+                  //    throw Error(
+                  //       "Some parent field's view components don't exist"
+                  //    );
 
                   const parentValue = value?.filterValue
-                     ? $parentField.getValue() ?? ""
+                     ? $parentField?.getValue() ?? ""
                      : "";
 
                   let newVal = "";

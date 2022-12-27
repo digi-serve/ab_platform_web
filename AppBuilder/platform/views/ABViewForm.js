@@ -1596,6 +1596,15 @@ module.exports = class ABViewForm extends ABViewFormCore {
 
    get viewComponents() {
       const superComponent = this.superComponent();
-      return superComponent.viewComponents;
+      let result = superComponent.viewComponents;
+
+      // When this function is called in ABDesigner.properties, then it has to populate .viewComponents here
+      if (!result || !Object.keys(result).length) {
+         const views = superComponent.view.viewsSortByPosition();
+         superComponent.getElements(views);
+         result = superComponent.viewComponents;
+      }
+
+      return result ?? {};
    }
 };
