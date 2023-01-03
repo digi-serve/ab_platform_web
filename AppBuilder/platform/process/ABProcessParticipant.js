@@ -123,73 +123,73 @@ module.exports = class ABProcessParticipant extends ABProcessParticipantCore {
     * @param {string} id
     *        the webix $$(id) of the properties panel area.
     */
-   propertiesShow(id) {
-      console.error("TODO: refactor to ABDesigner");
+   // propertiesShow(id) {
+   //    console.error("TODO: refactor to ABDesigner");
 
-      var ids = ABProcessParticipant.propertyIDs(id);
+   //    var ids = ABProcessParticipant.propertyIDs(id);
 
-      var ui = {
-         id: id,
-         rows: [
-            { view: "label", label: `${this.type} :` },
-            {
-               view: "form",
-               id: ids.form,
-               // width: 300,
-               elements: [
-                  {
-                     id: ids.name,
-                     view: "text",
-                     label: L("Name"),
-                     name: "name",
-                     value: this.name,
-                  },
-                  // { template: "Select Users", type: "section" },
-                  // {
-                  //     id: id + "_userView",
-                  //     cols: [
-                  //         {
-                  //             view: "checkbox",
-                  //             id: ids.useRole,
-                  //             labelRight: "by Role",
-                  //             value: this.useRole || 0
-                  //         },
-                  //         {
-                  //             id: ids.role,
-                  //             view: "select",
-                  //             label: "Role",
-                  //             value: this.role,
-                  //             options: __Roles,
-                  //             labelAlign: "left"
-                  //         }
-                  //     ]
-                  // }
-                  // {
-                  //     margin: 5,
-                  //     cols: [
-                  //         {
-                  //             view: "button",
-                  //             value: "Login",
-                  //             css: "webix_primary"
-                  //         },
-                  //         { view: "button", value: "Cancel" }
-                  //     ]
-                  // }
-               ],
-            },
-         ],
-      };
+   //    var ui = {
+   //       id: id,
+   //       rows: [
+   //          { view: "label", label: `${this.type} :` },
+   //          {
+   //             view: "form",
+   //             id: ids.form,
+   //             // width: 300,
+   //             elements: [
+   //                {
+   //                   id: ids.name,
+   //                   view: "text",
+   //                   label: L("Name"),
+   //                   name: "name",
+   //                   value: this.name,
+   //                },
+   //                // { template: "Select Users", type: "section" },
+   //                // {
+   //                //     id: id + "_userView",
+   //                //     cols: [
+   //                //         {
+   //                //             view: "checkbox",
+   //                //             id: ids.useRole,
+   //                //             labelRight: "by Role",
+   //                //             value: this.useRole || 0
+   //                //         },
+   //                //         {
+   //                //             id: ids.role,
+   //                //             view: "select",
+   //                //             label: "Role",
+   //                //             value: this.role,
+   //                //             options: __Roles,
+   //                //             labelAlign: "left"
+   //                //         }
+   //                //     ]
+   //                // }
+   //                // {
+   //                //     margin: 5,
+   //                //     cols: [
+   //                //         {
+   //                //             view: "button",
+   //                //             value: "Login",
+   //                //             css: "webix_primary"
+   //                //         },
+   //                //         { view: "button", value: "Cancel" }
+   //                //     ]
+   //                // }
+   //             ],
+   //          },
+   //       ],
+   //    };
 
-      // If we don't have any sub lanes, then offer the select user options:
-      if (this.laneIDs && this.laneIDs.length == 0) {
-         var userUI = ABProcessParticipant.selectUsersUi(id, this);
-         ui.rows[1].elements.push(userUI);
-      }
+   //    // If we don't have any sub lanes, then offer the select user options:
+   //    if (this.laneIDs && this.laneIDs.length == 0) {
+   //       var userUI = ABProcessParticipant.selectUsersUi(id, this);
+   //       ui.rows[1].elements.push(userUI);
+   //    }
 
-      webix.ui(ui, $$(id));
+   //    webix.ui(ui, $$(id));
 
-      $$(id).show();
-   }
+   //    $$(id).show();
+   // }
 
    /**
     * selectUsersUi()
@@ -200,85 +200,85 @@ module.exports = class ABProcessParticipant extends ABProcessParticipantCore {
     * @param {json} values
     *        the current values represented for this user selection.
     */
-   static selectUsersUi(AB, id, values) {
-      console.warn("!!! Where is this used???");
+   // static selectUsersUi(AB, id, values) {
+   //    console.warn("!!! Where is this used???");
 
-      var L = (...params) => {
-         return this.AB.Multilingual.label(...params);
-      };
+   //    var L = (...params) => {
+   //       return this.AB.Multilingual.label(...params);
+   //    };
 
-      var ids = ABProcessParticipant.propertyIDs(id);
-      var __Roles = this.AB.Account.rolesAll();
-      var __Users = this.AB.Account.userList();
+   //    var ids = ABProcessParticipant.propertyIDs(id);
+   //    var __Roles = this.AB.Account.rolesAll();
+   //    var __Users = this.AB.Account.userList();
 
-      __Roles.unshift({ id: "--", value: L("select a role") });
-      __Users.unshift({ id: "--", value: L("select a user") });
+   //    __Roles.unshift({ id: "--", value: L("select a role") });
+   //    __Users.unshift({ id: "--", value: L("select a user") });
 
-      return {
-         view: "fieldset",
-         label: L("Select Users"),
-         body: {
-            rows: [
-               {
-                  cols: [
-                     {
-                        view: "checkbox",
-                        id: ids.useRole,
-                        labelRight: L("by Role"),
-                        labelWidth: 0,
-                        width: 120,
-                        value: values.useRole ? values.useRole : 0,
-                        click: function (id /*, event */) {
-                           if ($$(id).getValue()) {
-                              $$(ids.role).enable();
-                           } else {
-                              $$(ids.role).disable();
-                           }
-                        },
-                     },
-                     {
-                        id: ids.role,
-                        view: "select",
-                        value: values.role ? values.role : "",
-                        disabled: values.useRole ? false : true,
-                        options: __Roles,
-                        labelAlign: "left",
-                     },
-                  ],
-               },
-               {
-                  cols: [
-                     {
-                        view: "checkbox",
-                        id: ids.useAccount,
-                        labelRight: L("by Account"),
-                        labelWidth: 0,
-                        width: 120,
-                        value: values.useAccount ? values.useAccount : 0,
-                        click: function (id /*, event */) {
-                           if ($$(id).getValue()) {
-                              $$(ids.account).enable();
-                           } else {
-                              $$(ids.account).disable();
-                           }
-                        },
-                     },
-                     {
-                        id: ids.account,
-                        view: "multicombo",
-                        value: values.account ? values.account : 0,
-                        disabled: values.useAccount ? false : true,
-                        suggest: __Users,
-                        labelAlign: "left",
-                        placeholder: L("Click or type to add user..."),
-                        stringResult: false /* returns data as an array of [id] */,
-                     },
-                  ],
-               },
-            ],
-         },
-      };
-   }
+   //    return {
+   //       view: "fieldset",
+   //       label: L("Select Users"),
+   //       body: {
+   //          rows: [
+   //             {
+   //                cols: [
+   //                   {
+   //                      view: "checkbox",
+   //                      id: ids.useRole,
+   //                      labelRight: L("by Role"),
+   //                      labelWidth: 0,
+   //                      width: 120,
+   //                      value: values.useRole ? values.useRole : 0,
+   //                      click: function (id /*, event */) {
+   //                         if ($$(id).getValue()) {
+   //                            $$(ids.role).enable();
+   //                         } else {
+   //                            $$(ids.role).disable();
+   //                         }
+   //                      },
+   //                   },
+   //                   {
+   //                      id: ids.role,
+   //                      view: "select",
+   //                      value: values.role ? values.role : "",
+   //                      disabled: values.useRole ? false : true,
+   //                      options: __Roles,
+   //                      labelAlign: "left",
+   //                   },
+   //                ],
+   //             },
+   //             {
+   //                cols: [
+   //                   {
+   //                      view: "checkbox",
+   //                      id: ids.useAccount,
+   //                      labelRight: L("by Account"),
+   //                      labelWidth: 0,
+   //                      width: 120,
+   //                      value: values.useAccount ? values.useAccount : 0,
+   //                      click: function (id /*, event */) {
+   //                         if ($$(id).getValue()) {
+   //                            $$(ids.account).enable();
+   //                         } else {
+   //                            $$(ids.account).disable();
+   //                         }
+   //                      },
+   //                   },
+   //                   {
+   //                      id: ids.account,
+   //                      view: "multicombo",
+   //                      value: values.account ? values.account : 0,
+   //                      disabled: values.useAccount ? false : true,
+   //                      suggest: __Users,
+   //                      labelAlign: "left",
+   //                      placeholder: L("Click or type to add user..."),
+   //                      stringResult: false /* returns data as an array of [id] */,
+   //                   },
+   //                ],
+   //             },
+   //          ],
+   //       },
+   //    };
+   // }
 
    /**
     * selectManagersUi()
@@ -417,15 +417,15 @@ module.exports = class ABProcessParticipant extends ABProcessParticipantCore {
     * @param {string} id
     *        the webix $$(id) of the properties panel area.
     */
-   propertiesStash(id) {
-      var ids = ABProcessParticipant.propertyIDs(id);
-      this.name = $$(ids.name).getValue();
-      if (this.laneIDs.length == 0) {
-         var userDef = ABProcessParticipant.stashUsersUi(id);
-         Object.keys(userDef).forEach((k) => {
-            this[k] = userDef[k];
-         });
-      }
-      this.stashed = true;
-   }
+   // propertiesStash(id) {
+   //    var ids = ABProcessParticipant.propertyIDs(id);
+   //    this.name = $$(ids.name).getValue();
+   //    if (this.laneIDs.length == 0) {
+   //       var userDef = ABProcessParticipant.stashUsersUi(id);
+   //       Object.keys(userDef).forEach((k) => {
+   //          this[k] = userDef[k];
+   //       });
+   //    }
+   //    this.stashed = true;
+   // }
 };
