@@ -1,6 +1,5 @@
 const ABViewContainerCore = require("../../core/views/ABViewContainerCore");
-
-const ABPropertyComponentDefaults = ABViewContainerCore.defaultValues();
+const ABViewContainerComponent = require("./viewComponent/ABViewContainerComponent");
 
 let L = (...params) => AB.Multilingual.label(...params);
 
@@ -21,6 +20,7 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
     * @param {string} mode what mode are we in ['block', 'preview']
     * @return {Component}
     */
+   /*
    editorComponent(App, mode) {
       var idBase = "ABViewContainerEditorComponent";
       var ids = {
@@ -138,7 +138,7 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
           * render the list template for the View
           * @param {obj} obj the current View instance
           * @param {obj} common  Webix provided object with common UI tools
-          */
+          * /
          template: (child) => {
             return `<div>
                <i class="fa fa-${child.icon} webix_icon_btn"></i> ${child.label}
@@ -158,7 +158,7 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
           * @param {obj} e the onClick event object
           * @param {integer} id the id of the element to delete
           * @param {obj} trg  Webix provided object
-          */
+          * /
          viewDelete: (e, id, trg) => {
             var deletedView = this.views((v) => v.id == id)[0];
             if (!deletedView) return false;
@@ -225,7 +225,7 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
           * @param {obj} e the onClick event object
           * @param {integer} id the id of the element to edit
           * @param {obj} trg  Webix provided object
-          */
+          * /
          viewEdit: (e, id, trg) => {
             var view = this.views((v) => v.id == id)[0];
 
@@ -237,6 +237,7 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
             // that causes errors.)
             setTimeout(() => {
                App.actions.populateInterfaceWorkspace(view);
+               this.emit("view.edit", view);
             }, 50);
 
             e.preventDefault();
@@ -351,6 +352,7 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
          onShow: _onShow,
       };
    }
+   */
 
    //
    // Property Editor
@@ -359,7 +361,7 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
    // static propertyEditorComponent(App) {
    // 	return ABViewPropertyComponent.component(App);
    // }
-
+   /*
    static propertyEditorDefaultElements(App, ids, _logic, ObjectDefaults) {
       var commonUI = super.propertyEditorDefaultElements(
          App,
@@ -510,7 +512,7 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
       let editorComponent = view.editorComponent(this._App);
       await editorComponent.logic.onReorder();
    }
-
+  */
    /**
     * @method component()
     * return a UI component based upon this view.
@@ -519,7 +521,29 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
     *
     * @return {obj} UI component
     */
-   component(App, idPrefix) {
+
+   component(v1App = false) {
+      let component = new ABViewContainerComponent(this);
+
+      // if this is our v1Interface
+      if (v1App) {
+         var newComponent = component;
+         component = {
+            ui: component.ui(),
+            init: (options, accessLevel) => {
+               return newComponent.init(this.AB, accessLevel);
+            },
+            onShow: (...params) => {
+               return newComponent.onShow?.(...params);
+            },
+         };
+      }
+
+      return component;
+   }
+
+   /*
+   componentV1(App, idPrefix) {
       var idBase = "ABViewContainer_" + (idPrefix || "") + this.id;
       var ids = {
          component: App.unique(`${idBase}_component`),
@@ -671,4 +695,5 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
          onShow: _onShow,
       };
    }
+   */
 };

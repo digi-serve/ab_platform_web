@@ -1,15 +1,7 @@
 const ABViewDetailCustomCore = require("../../core/views/ABViewDetailCustomCore");
+const ABViewDetailCustomComponent = require("./viewComponent/ABViewDetailCustomComponent");
 
 module.exports = class ABViewDetailCustom extends ABViewDetailCustomCore {
-   /**
-    * @param {obj} values  key=>value hash of ABView values
-    * @param {ABApplication} application the application object this view is under
-    * @param {ABView} parent the ABView this view is a child of. (can be null)
-    */
-   // constructor(values, application, parent, defaultValues) {
-   //    super(values, application, parent, defaultValues);
-   // }
-
    //
    //	Editor Related
    //
@@ -22,69 +14,64 @@ module.exports = class ABViewDetailCustom extends ABViewDetailCustomCore {
     * @param {string} mode what mode are we in ['block', 'preview']
     * @return {Component}
     */
-   editorComponent(App, mode) {
-      var idBase = "ABViewDetailCustomEditorComponent";
-      var ids = {
-         component: App.unique(`${idBase}_component`),
-      };
+   // editorComponent(App, mode) {
+   //    var idBase = "ABViewDetailCustomEditorComponent";
+   //    var ids = {
+   //       component: App.unique(`${idBase}_component`),
+   //    };
 
-      var component = this.component(App);
+   //    var component = this.component(App);
 
-      var textElem = component.ui;
-      textElem.id = ids.component;
+   //    var textElem = component.ui;
+   //    textElem.id = ids.component;
 
-      var _ui = {
-         rows: [textElem, {}],
-      };
+   //    var _ui = {
+   //       rows: [textElem, {}],
+   //    };
 
-      var _init = component.init;
-      var _logic = component.logic;
+   //    var _init = component.init;
+   //    var _logic = component.logic;
 
-      var _onShow = component.onShow;
+   //    var _onShow = component.onShow;
 
-      return {
-         ui: _ui,
-         init: _init,
-         logic: _logic,
+   //    return {
+   //       ui: _ui,
+   //       init: _init,
+   //       logic: _logic,
 
-         onShow: _onShow,
-      };
-   }
-
-   //
-   // Property Editor
-   //
-
-   static propertyEditorDefaultElements(App, ids, _logic, ObjectDefaults) {
-      var commonUI = super.propertyEditorDefaultElements(
-         App,
-         ids,
-         _logic,
-         ObjectDefaults
-      );
-
-      // in addition to the common .label  values, we
-      // ask for:
-      return commonUI.concat([]);
-   }
-
-   static propertyEditorPopulate(App, ids, view) {
-      super.propertyEditorPopulate(App, ids, view);
-   }
-
-   static propertyEditorValues(ids, view) {
-      super.propertyEditorValues(ids, view);
-   }
+   //       onShow: _onShow,
+   //    };
+   // }
 
    /**
-    * @component()
+    * @method component()
     * return a UI component based upon this view.
-    * @param {obj} App
+    * @param {obj} v1App
     * @param {string} idPrefix
     *
     * @return {obj} UI component
     */
-   component(App, idPrefix) {
+   component(v1App) {
+      let component = new ABViewDetailCustomComponent(this);
+
+      // if this is our v1Interface
+      if (v1App) {
+         let newComponent = component;
+         component = {
+            ui: component.ui(),
+            init: (options, accessLevel) => {
+               return newComponent.init(this.AB, accessLevel);
+            },
+            onShow: (...params) => {
+               return newComponent.onShow?.(...params);
+            },
+         };
+      }
+
+      return component;
+   }
+
+   componentOld(App, idPrefix) {
       var component = super.component(App);
       var field = this.field();
       var detailView = this.detailComponent();

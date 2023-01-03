@@ -128,14 +128,19 @@ class PortalWorkUserProfileWindow extends ClassUI {
 
                                     $uploaderImage.disable();
 
-                                    await this.AB.Network.put({
-                                       url: `/app_builder/model/${
-                                          this.AB.objectUser().id
-                                       }/${this.AB.Account.uuid()}`,
-                                       data: {
+                                    // await this.AB.Network.put({
+                                    //    url: `/app_builder/model/${
+                                    //       this.AB.objectUser().id
+                                    //    }/${this.AB.Account.uuid()}`,
+                                    //    data: {
+                                    //       image_id: response.data.uuid,
+                                    //    },
+                                    // });
+                                    await this.AB.objectUser()
+                                       .model()
+                                       .update(this.AB.Account.uuid(), {
                                           image_id: response.data.uuid,
-                                       },
-                                    });
+                                       });
 
                                     this.AB.Account._config.image_id = imageID;
 
@@ -155,7 +160,9 @@ class PortalWorkUserProfileWindow extends ClassUI {
 
                                     $uploaderImage.enable();
 
-                                    console.error(error);
+                                    this.AB.notify.developer(error, {
+                                       context: "Error uploading file",
+                                    });
                                     webix.alert(error);
                                  },
                               },
@@ -332,22 +339,36 @@ class PortalWorkUserProfileWindow extends ClassUI {
                                                 $buttonEditModeEmail.show();
 
                                                 try {
-                                                   const email = $editModeEmail.getValue();
+                                                   const email =
+                                                      $editModeEmail.getValue();
 
                                                    $buttonEditModeEmail.disable();
 
-                                                   await this.AB.Network.put({
-                                                      url: `/app_builder/model/${
-                                                         this.AB.objectUser().id
-                                                      }/${this.AB.Account.uuid()}`,
-                                                      data: {
-                                                         email,
-                                                      },
-                                                   });
+                                                   // await this.AB.Network.put({
+                                                   //    url: `/app_builder/model/${
+                                                   //       this.AB.objectUser().id
+                                                   //    }/${this.AB.Account.uuid()}`,
+                                                   //    data: {
+                                                   //       email,
+                                                   //    },
+                                                   // });
+                                                   await this.AB.objectUser()
+                                                      .model()
+                                                      .update(
+                                                         this.AB.Account.uuid(),
+                                                         { email }
+                                                      );
 
-                                                   this.AB.Account._config.email = email;
+                                                   this.AB.Account._config.email =
+                                                      email;
                                                 } catch (error) {
-                                                   console.error(error);
+                                                   this.AB.notify.developer(
+                                                      error,
+                                                      {
+                                                         context:
+                                                            "error updating user profile email",
+                                                      }
+                                                   );
                                                 } finally {
                                                    $dataEmail.setValue(
                                                       this.AB.Account.email()
@@ -446,12 +467,14 @@ class PortalWorkUserProfileWindow extends ClassUI {
                                                 const $editModeLanguage = $$(
                                                    ids.editModeLanguage
                                                 );
-                                                const $buttonEditModeLanguage = $$(
-                                                   ids.buttonEditModeLanguage
-                                                );
-                                                const $editModeButtonsLanguage = $$(
-                                                   ids.editModeButtonsLanguage
-                                                );
+                                                const $buttonEditModeLanguage =
+                                                   $$(
+                                                      ids.buttonEditModeLanguage
+                                                   );
+                                                const $editModeButtonsLanguage =
+                                                   $$(
+                                                      ids.editModeButtonsLanguage
+                                                   );
 
                                                 $editModeLanguage.hide();
                                                 $editModeButtonsLanguage.hide();
@@ -467,8 +490,13 @@ class PortalWorkUserProfileWindow extends ClassUI {
                                                    );
                                                 } catch (error) {
                                                    $dataLanguage.setValue(null);
-
-                                                   console.error(error);
+                                                   this.AB.notify.developer(
+                                                      error,
+                                                      {
+                                                         context:
+                                                            "portal_work_user_profile_window: Error updating language",
+                                                      }
+                                                   );
                                                 } finally {
                                                    $buttonEditModeLanguage.enable();
                                                 }
@@ -490,12 +518,14 @@ class PortalWorkUserProfileWindow extends ClassUI {
                                                 const $editModeLanguage = $$(
                                                    ids.editModeLanguage
                                                 );
-                                                const $buttonEditModeLanguage = $$(
-                                                   ids.buttonEditModeLanguage
-                                                );
-                                                const $editModeButtonsLanguage = $$(
-                                                   ids.editModeButtonsLanguage
-                                                );
+                                                const $buttonEditModeLanguage =
+                                                   $$(
+                                                      ids.buttonEditModeLanguage
+                                                   );
+                                                const $editModeButtonsLanguage =
+                                                   $$(
+                                                      ids.editModeButtonsLanguage
+                                                   );
 
                                                 $editModeLanguage.hide();
                                                 $editModeButtonsLanguage.hide();
@@ -504,20 +534,34 @@ class PortalWorkUserProfileWindow extends ClassUI {
                                                 $buttonEditModeLanguage.show();
 
                                                 try {
-                                                   const languageCode = $editModeLanguage.getValue();
+                                                   const languageCode =
+                                                      $editModeLanguage.getValue();
 
-                                                   await this.AB.Network.put({
-                                                      url: `/app_builder/model/${
-                                                         this.AB.objectUser().id
-                                                      }/${this.AB.Account.uuid()}`,
-                                                      data: {
-                                                         languageCode,
-                                                      },
-                                                   });
+                                                   // await this.AB.Network.put({
+                                                   //    url: `/app_builder/model/${
+                                                   //       this.AB.objectUser().id
+                                                   //    }/${this.AB.Account.uuid()}`,
+                                                   //    data: {
+                                                   //       languageCode,
+                                                   //    },
+                                                   // });
+                                                   await this.AB.objectUser()
+                                                      .model()
+                                                      .update(
+                                                         this.AB.Account.uuid(),
+                                                         { languageCode }
+                                                      );
 
-                                                   this.AB.Account._config.languageCode = languageCode;
+                                                   this.AB.Account._config.languageCode =
+                                                      languageCode;
                                                 } catch (error) {
-                                                   console.error(error);
+                                                   this.AB.notify.developer(
+                                                      error,
+                                                      {
+                                                         context:
+                                                            "portal_work_user_profile_window: Error updating language Code",
+                                                      }
+                                                   );
                                                 } finally {
                                                    try {
                                                       $dataLanguage.setValue(
@@ -530,7 +574,13 @@ class PortalWorkUserProfileWindow extends ClassUI {
                                                          null
                                                       );
 
-                                                      console.error(error);
+                                                      this.AB.notify.developer(
+                                                         error,
+                                                         {
+                                                            context:
+                                                               "portal_work_user_profile_window: Error updating languageCodeToWord()",
+                                                         }
+                                                      );
                                                    }
 
                                                    $buttonEditModeLanguage.enable();
@@ -646,9 +696,10 @@ class PortalWorkUserProfileWindow extends ClassUI {
                                                 css: "webix_primary",
                                                 on: {
                                                    onItemClick: async (id) => {
-                                                      const $formNewPassword = $$(
-                                                         ids.formNewPassword
-                                                      );
+                                                      const $formNewPassword =
+                                                         $$(
+                                                            ids.formNewPassword
+                                                         );
                                                       const $thisButton =
                                                          $$(id);
 
@@ -656,10 +707,12 @@ class PortalWorkUserProfileWindow extends ClassUI {
                                                          $formNewPassword.validate()
                                                       ) {
                                                          try {
-                                                            const $fieldNewPassword = $$(
-                                                               ids.fieldNewPassword
-                                                            );
-                                                            const password = $fieldNewPassword.getValue();
+                                                            const $fieldNewPassword =
+                                                               $$(
+                                                                  ids.fieldNewPassword
+                                                               );
+                                                            const password =
+                                                               $fieldNewPassword.getValue();
 
                                                             $thisButton.disable();
                                                             $formNewPassword.disable();
@@ -677,7 +730,13 @@ class PortalWorkUserProfileWindow extends ClassUI {
                                                                }
                                                             );
                                                          } catch (error) {
-                                                            console.log(error);
+                                                            this.AB.notify.developer(
+                                                               error,
+                                                               {
+                                                                  context:
+                                                                     "portal_work_user_profile_window:Error resetting password",
+                                                               }
+                                                            );
                                                          } finally {
                                                             $formNewPassword.clear();
                                                             $formNewPassword.enable();
@@ -722,19 +781,36 @@ class PortalWorkUserProfileWindow extends ClassUI {
                                                 );
 
                                                 try {
-                                                   const sendEmailNotifications = $systemNotification.getValue();
-                                                   await this.AB.Network.put({
-                                                      url: `/app_builder/model/${
-                                                         this.AB.objectUser().id
-                                                      }/${this.AB.Account.uuid()}`,
-                                                      data: {
-                                                         sendEmailNotifications,
-                                                      },
-                                                   });
+                                                   const sendEmailNotifications =
+                                                      $systemNotification.getValue();
+                                                   // await this.AB.Network.put({
+                                                   //    url: `/app_builder/model/${
+                                                   //       this.AB.objectUser().id
+                                                   //    }/${this.AB.Account.uuid()}`,
+                                                   //    data: {
+                                                   //       sendEmailNotifications,
+                                                   //    },
+                                                   // });
 
-                                                   this.AB.Account._config.sendEmailNotifications = sendEmailNotifications;
+                                                   await this.AB.objectUser()
+                                                      .model()
+                                                      .update(
+                                                         this.AB.Account.uuid(),
+                                                         {
+                                                            sendEmailNotifications,
+                                                         }
+                                                      );
+
+                                                   this.AB.Account._config.sendEmailNotifications =
+                                                      sendEmailNotifications;
                                                 } catch (error) {
-                                                   console.error(error);
+                                                   this.AB.notify.developer(
+                                                      error,
+                                                      {
+                                                         context:
+                                                            "portal_work_user_profile_window:Error updating email notifications",
+                                                      }
+                                                   );
                                                 } finally {
                                                    $systemNotification.setValue(
                                                       this.AB.Account.sendEmailNotifications()
@@ -778,18 +854,17 @@ class PortalWorkUserProfileWindow extends ClassUI {
       const data = [];
 
       try {
-         const response = await this.AB.Network.get({
-            // The object "SITE_LANGUAGE"
-            url: "/app_builder/model/d84cd351-d96c-490f-9afb-2a0b880ca0ec",
-         });
-
+         const Language = this.AB.objectLanguage();
+         const response = await Language.model().findAll();
          for (let i = 0; i < response.data.length; i++)
             data.push({
                id: response.data[i].language_code,
                value: response.data[i].language_label,
             });
       } catch (error) {
-         console.error(error);
+         this.AB.notify.developer(error, {
+            context: "Error getting Languages",
+         });
       }
 
       return data;
@@ -814,7 +889,9 @@ class PortalWorkUserProfileWindow extends ClassUI {
          } catch (error) {
             $dataLanguage.setValue(null);
 
-            console.error(error);
+            this.AB.notify.developer(error, {
+               context: "Error setting Languages",
+            });
          }
 
          $buttonEditModeLanguage.enable();

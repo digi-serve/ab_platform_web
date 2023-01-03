@@ -7,6 +7,7 @@ module.exports = class SubProcess extends SubProcessCore {
    //// Process Instance Methods
    ////
 
+   /*
    propertyIDs(id) {
       return {
          name: `${id}_name`,
@@ -20,7 +21,7 @@ module.exports = class SubProcess extends SubProcessCore {
     * display the properties panel for this Process Element.
     * @param {string} id
     *        the webix $$(id) of the properties panel area.
-    */
+    * /
    propertiesShow(id) {
       let ids = this.propertyIDs(id);
 
@@ -74,13 +75,14 @@ module.exports = class SubProcess extends SubProcessCore {
     * pull our values from our property panel.
     * @param {string} id
     *        the webix $$(id) of the properties panel area.
-    */
+    * /
    propertiesStash(id) {
       let ids = this.propertyIDs(id);
       this.name = this.property(ids.name);
       this.isEnable = this.property(ids.isEnable);
       this.parameterId = this.property(ids.parameterId);
    }
+   */
 
    /**
     * @method diagramProperties()
@@ -135,7 +137,7 @@ module.exports = class SubProcess extends SubProcessCore {
     * @return {Promise}
     */
    destroy() {
-      // reuse .destroy function of ABProcess 
+      // reuse .destroy function of ABProcess
       // to clear tasks within this sub process
       return this.process.destroy.call(this);
    }
@@ -148,7 +150,7 @@ module.exports = class SubProcess extends SubProcessCore {
     *						.resolve( {this} )
     */
    save() {
-      // reuse .save function of ABProcess 
+      // reuse .save function of ABProcess
       // to update tasks within this sub process
       return this.process.save.call(this);
    }
@@ -163,13 +165,10 @@ module.exports = class SubProcess extends SubProcessCore {
     * @param {BPMN:Element} element
     *        the BPMN modeler diagram element definition
     * @return {ABProcessParticipant|ABProcessLane|ABProcessElement}
-    * 
+    *
     */
    elementNewForModelDefinition(element) {
-      let task = this.application.processElementNewForModelDefinition(
-         element,
-         this
-      );
+      let task = this.AB.processElementNewForModelDefinition(element, this);
 
       // Add a new task to this sub process
       if (task) {

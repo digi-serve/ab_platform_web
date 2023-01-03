@@ -1,5 +1,5 @@
 import ABViewConnectDataFilterCore from "../../core/views/ABViewConnectDataFilterCore";
-import ABViewComponent from "./ABViewComponent";
+import ABViewComponent from "./viewComponent/ABViewComponent";
 
 const L = (...params) => AB.Multilingual.label(...params);
 

@@ -1,8 +1,9 @@
 const ABViewDetailTextCore = require("../../core/views/ABViewDetailTextCore");
+const ABViewDetailTextComponent = require("./viewComponent/ABViewDetailTextComponent");
 
-const ABViewDetailTextPropertyComponentDefaults = ABViewDetailTextCore.defaultValues();
+// const ABViewDetailTextPropertyComponentDefaults = ABViewDetailTextCore.defaultValues();
 
-let L = (...params) => AB.Multilingual.label(...params);
+// let L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABViewDetailText extends ABViewDetailTextCore {
    /**
@@ -26,78 +27,62 @@ module.exports = class ABViewDetailText extends ABViewDetailTextCore {
     * @param {string} mode what mode are we in ['block', 'preview']
     * @return {Component}
     */
-   editorComponent(App, mode) {
-      var idBase = "ABViewDetailTextEditorComponent";
-      var ids = {
-         component: App.unique(`${idBase}_component`),
-      };
+   // editorComponent(App, mode) {
+   //    var idBase = "ABViewDetailTextEditorComponent";
+   //    var ids = {
+   //       component: App.unique(`${idBase}_component`),
+   //    };
 
-      var textElem = this.component(App).ui;
-      textElem.id = ids.component;
+   //    var textElem = this.component(App).ui;
+   //    textElem.id = ids.component;
 
-      var _ui = {
-         rows: [textElem, {}],
-      };
+   //    var _ui = {
+   //       rows: [textElem, {}],
+   //    };
 
-      var _init = (options) => {};
+   //    var _init = (options) => {};
 
-      var _logic = {};
+   //    var _logic = {};
 
-      return {
-         ui: _ui,
-         init: _init,
-         logic: _logic,
-      };
-   }
+   //    return {
+   //       ui: _ui,
+   //       init: _init,
+   //       logic: _logic,
+   //    };
+   // }
 
    //
    // Property Editor
    //
 
-   static propertyEditorDefaultElements(App, ids, _logic, ObjectDefaults) {
-      var commonUI = super.propertyEditorDefaultElements(
-         App,
-         ids,
-         _logic,
-         ObjectDefaults
-      );
-
-      // in addition to the common .label  values, we
-      // ask for:
-      return commonUI.concat([
-         {
-            view: "counter",
-            name: "height",
-            label: L("Height:"),
-            labelWidth: this.AB.UISettings.config().labelWidthLarge,
-         },
-      ]);
-   }
-
-   static propertyEditorPopulate(App, ids, view) {
-      super.propertyEditorPopulate(App, ids, view);
-
-      $$(ids.height).setValue(
-         view.settings.height ||
-            ABViewDetailTextPropertyComponentDefaults.height
-      );
-   }
-
-   static propertyEditorValues(ids, view) {
-      super.propertyEditorValues(ids, view);
-
-      view.settings.height = $$(ids.height).getValue();
-   }
-
    /**
-    * @component()
+    * @method component()
     * return a UI component based upon this view.
     * @param {obj} App
-    * @param {string} idPrefix
     *
     * @return {obj} UI component
     */
-   component(App, idPrefix) {
+   component(v1App) {
+      let component = new ABViewDetailTextComponent(this);
+
+      // if this is our v1Interface
+      if (v1App) {
+         var newComponent = component;
+         component = {
+            ui: newComponent.ui(),
+            init: (options, accessLevel) => {
+               return newComponent.init(this.AB, accessLevel);
+            },
+            onShow: (...params) => {
+               return newComponent.onShow?.(...params);
+            },
+         };
+      }
+
+      return component;
+   }
+
+   componentOld(App, idPrefix) {
       var component = super.component(App);
       var field = this.field();
       var idBase = "ABViewDetailText_" + (idPrefix || "") + this.id;

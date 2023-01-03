@@ -4,6 +4,7 @@ import ClassUIPage from "./ClassUIPage.js";
 import PortalWorkInbox from "./portal_work_inbox.js";
 import PortalWorkInboxTaskWindow from "./portal_work_inbox_taskWindow.js";
 import PortalWorkUserProfileWindow from "./portal_work_user_profile_window.js";
+import PortalWorkUserSwitcheroo from "./portal_work_user_switcheroo.js";
 import PortalWorkUserQRWindow from "./portal_work_user_qr_window.js";
 import PortalAccessLevelManager from "./portal_access_level_manager.js";
 import TranslationTool from "./portal_translation_tool.js";
@@ -17,6 +18,39 @@ class PortalWork extends ClassUI {
       return {
          id: "portal_work",
          rows: [
+            {
+               id: "portal_work_switcheroo_user_switched",
+               height: 23,
+               css: "portal_work_switcheroo_user_switched",
+               hidden: true,
+               cols: [
+                  {
+                     width: 5,
+                  },
+                  {
+                     id: "portal_work_switcheroo_user_switched_label",
+                     view: "label",
+                     align: "center",
+                  },
+                  {
+                     view: "button",
+                     value: '<div style="text-align: center; font-size: 12px; color:#FFFFFF"><i class="fa-fw fa fa-times"></i></div>',
+                     align: "center",
+                     width: 30,
+                     css: "webix_transparent",
+                     on: {
+                        onItemClick: () => {
+                           PortalWorkUserSwitcheroo.switcherooClear();
+                           $$("portal_work_switcheroo_user_switched").hide();
+                        },
+                     },
+                  },
+                  {
+                     width: 5,
+                  },
+               ],
+            },
+
             {
                view: "toolbar",
                id: "mainToolbar",
@@ -208,6 +242,7 @@ class PortalWork extends ClassUI {
       const allInits = [];
 
       allInits.push(PortalWorkUserProfileWindow.init(this.AB));
+      allInits.push(PortalWorkUserSwitcheroo.init(this.AB));
 
       // {hash}  { ABViewPage.id : ClassUIPage() }
       // track each of the page containers (instances of ClassUIPage) that
@@ -233,13 +268,25 @@ class PortalWork extends ClassUI {
 
       const userMenuOptions = [
          { id: "user_profile", label: L("User Profile"), icon: "user" },
-         {
+         { id: "user_logout", label: L("Logout"), icon: "ban" },
+      ];
+
+      if (this.AB.Account.canSwitcheroo()) {
+         userMenuOptions.splice(1, 0, {
             id: "user_switcheroo",
             label: L("Switcheroo"),
             icon: "user-secret",
-         },
-         { id: "user_logout", label: L("Logout"), icon: "ban" },
-      ];
+         });
+      }
+
+      if (this.AB.Account.isSwitcherood()) {
+         $$("portal_work_switcheroo_user_switched_label").setValue(
+            L('*You are viewing this site as "{0}"*', [
+               this.AB.Account.username(),
+            ])
+         );
+         $$("portal_work_switcheroo_user_switched").show();
+      }
 
       // Only add the QR Code option if the relay service is enabled
       const { relay } = this.AB.Config.siteConfig();
@@ -269,6 +316,9 @@ class PortalWork extends ClassUI {
                   switch (id) {
                      case "user_profile":
                         PortalWorkUserProfileWindow.show();
+                        break;
+                     case "user_switcheroo":
+                        PortalWorkUserSwitcheroo.show();
                         break;
                      case "user_logout":
                         AB.Account.logout();

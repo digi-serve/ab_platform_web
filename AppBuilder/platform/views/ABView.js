@@ -1,4 +1,5 @@
 const ABViewCore = require("../../core/views/ABViewCore.js");
+const ABViewComponent = require("./viewComponent/ABViewComponent").default;
 
 let L = (...params) => AB.Multilingual.label(...params);
 
@@ -440,41 +441,16 @@ module.exports = class ABView extends ABViewCore {
    //    return list;
    // }
 
-   /*
-    * @component()
+   /**
+    * @method component()
     * return a UI component based upon this view.
-    * @param {obj} App
+    *
     * @return {obj} UI component
     */
-   component(App) {
-      var idBase = "ABView_" + this.id;
-      var ids = {
-         component: App.unique(`${idBase}_component`),
-      };
+   component() {
+      const component = new ABViewComponent(this);
 
-      // an ABView is a collection of rows:
-      var _ui = {
-         id: ids.component,
-         view: "layout",
-         type: "space",
-         rows: [],
-      };
-
-      // if this form is empty, then force a minimal row height
-      // so the component isn't completely hidden on the screen.
-      // (important in the editor so we don't loose the ability to edit the
-      // component)
-      if (_ui.rows.length == 0) {
-         _ui.height = 30;
-      }
-
-      // make sure each of our child views get .init() called
-      var _init = (options) => {};
-
-      return {
-         ui: _ui,
-         init: _init,
-      };
+      return component;
    }
 
    /*

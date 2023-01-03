@@ -199,7 +199,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
    //// NOTE: why do we pass in row, App, and node?  is this something we do in our external components?
    ////       are these values present when this Object is instanciated? Can't we just pass these into the
    ////       object constructor and have it internally track these things?
-   customEdit(row, App, node) {
+   customEdit(row, /*App,*/ node) {
       // var selectedData = this.pullRelationValues(row);
       // this._selectedData = selectedData;
    }

@@ -110,8 +110,7 @@ class PortalAuthLoginForm extends ClassUI {
                                              view: "button",
                                              label: L("Login"),
                                              type: "form",
-                                             id:
-                                                "portal_auth_login_form_submit",
+                                             id: "portal_auth_login_form_submit",
                                              css: "webix_primary",
                                              width: 150,
                                              hotkey: "enter",
@@ -141,8 +140,7 @@ class PortalAuthLoginForm extends ClassUI {
                                                          data: values,
                                                       },
                                                       {
-                                                         key:
-                                                            "portal_auth_login" /*, context:{} */,
+                                                         key: "portal_auth_login" /*, context:{} */,
                                                       }
                                                    ).catch((err) => {
                                                       $$(
@@ -163,11 +161,9 @@ class PortalAuthLoginForm extends ClassUI {
                                           },
                                           {
                                              view: "button",
-                                             label:
-                                                "<i class='fa fa-circle-o-notch fa-fw fa-spin'></i>",
+                                             label: "<i class='fa fa-circle-o-notch fa-fw fa-spin'></i>",
                                              type: "form",
-                                             id:
-                                                "portal_auth_login_form_submit_wait",
+                                             id: "portal_auth_login_form_submit_wait",
                                              css: "webix_primary",
                                              width: 150,
                                              hidden: true,
@@ -289,16 +285,19 @@ class PortalAuthLoginForm extends ClassUI {
             response.user ||
             (response.status == "success" && response.data.user)
          ) {
+            // reload the page to gather all the config info:
+            window.location.reload(true);
+
             // Login was successful -> rerun BootStrap.init() to load the
             // config, definitions, plugins, etc for this user
-            Bootstrap.init(this.AB).catch((err) => {
-               Bootstrap.alert({
-                  type: "alert-error",
-                  title: "Error initializing Portal:",
-                  text: err.toString(),
-               });
-               Bootstrap.error(err);
-            });
+            // Bootstrap.init(this.AB).catch((err) => {
+            //    Bootstrap.alert({
+            //       type: "alert-error",
+            //       title: "Error initializing Portal:",
+            //       text: err.toString(),
+            //    });
+            //    Bootstrap.error(err);
+            // });
          } else {
             if (response.status == "error") {
                console.log("what to do with this error:");

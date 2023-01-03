@@ -1,28 +1,32 @@
 const ABViewFormCore = require("../../core/views/ABViewFormCore");
+const ABViewFormComponent = require("./viewComponent/ABViewFormComponent");
 const ABViewFormButton = require("./ABViewFormButton");
 const ABViewFormCustom = require("./ABViewFormCustom");
 const ABViewFormConnect = require("./ABViewFormConnect");
-const ABViewFormComponent = require("./ABViewFormComponent");
 const ABViewFormSelectMultiple = require("./ABViewFormSelectMultiple");
 const ABViewFormTextbox = require("./ABViewFormTextbox");
 
-const ABRecordRule = require("../../rules/ABViewRuleListFormRecordRules");
-const ABSubmitRule = require("../../rules/ABViewRuleListFormSubmitRules");
+const L = (...params) => AB.Multilingual.label(...params);
 
-let PopupRecordRule = null;
-let PopupSubmitRule = null;
+// const ABRecordRule = require("../../rules/ABViewRuleListFormRecordRules");
+// const ABSubmitRule = require("../../rules/ABViewRuleListFormSubmitRules");
+
+// let PopupRecordRule = null;
+// let PopupSubmitRule = null;
 
 ////
 //// LEFT OFF HERE: Review and Refactor
 ////
 const ABViewFormPropertyComponentDefaults = ABViewFormCore.defaultValues();
 
-let L = (...params) => AB.Multilingual.label(...params);
-
 module.exports = class ABViewForm extends ABViewFormCore {
-   // constructor(values, application, parent, defaultValues) {
-   //    super(values, application, parent, defaultValues);
-   // }
+   constructor(values, application, parent, defaultValues) {
+      super(values, application, parent, defaultValues);
+
+      this._callbacks = {
+         onBeforeSaveData: () => true,
+      };
+   }
 
    /**
     * @method editorComponent
@@ -32,535 +36,535 @@ module.exports = class ABViewForm extends ABViewFormCore {
     * @param {string} mode what mode are we in ['block', 'preview']
     * @return {Component}
     */
-   editorComponent(App, mode) {
-      var comp = super.editorComponent(App, mode);
+   // editorComponent(App, mode) {
+   //    var comp = super.editorComponent(App, mode);
 
-      // Define height of cell
-      comp.ui.rows[0].cellHeight = 75;
+   //    // Define height of cell
+   //    comp.ui.rows[0].cellHeight = 75;
 
-      return comp;
-   }
+   //    return comp;
+   // }
 
    //
    // Property Editor
    //
 
-   static propertyEditorDefaultElements(App, ids, _logic, ObjectDefaults) {
-      var commonUI = super.propertyEditorDefaultElements(
-         App,
-         ids,
-         _logic,
-         ObjectDefaults
-      );
-
-      var idBase = "ABViewForm";
-
-      // PopupDisplayRule = new ABDisplayRule(App, idBase + "_displayrule");
-
-      PopupRecordRule = new ABRecordRule();
-      PopupRecordRule.component(App, `${idBase}_recordrule`); // prepare the UI component.
-
-      PopupSubmitRule = new ABSubmitRule();
-      PopupSubmitRule.component(App, `${idBase}_submitrule`);
-
-      // _logic functions
-
-      _logic.selectSource = (dcId, oldDcId) => {
-         // TODO : warning message
-
-         _logic.busy();
-
-         let currView = _logic.currentEditObject();
-         let formView = currView.parentFormComponent();
-
-         currView.settings.dataviewID = dcId;
-
-         // clear sub views
-         var viewsToRemove = currView._views;
-         currView._views = [];
-
-         return (
-            Promise.resolve()
-               .then(() => {
-                  var allRemoves = [];
-                  viewsToRemove.forEach((v) => {
-                     allRemoves.push(v.destroy());
-                  });
-                  return Promise.all(allRemoves);
-               })
-               // .then(() => {
-               // 	// remove all old components
-               // 	let destroyTasks = [];
-               // 	if (oldDcId != null) {
-               // 		let oldComps = formView.views();
-               // 		oldComps.forEach(child => destroyTasks.push(() => child.destroy()));
-               // 	}
-
-               // 	return destroyTasks.reduce((promiseChain, currTask) => {
-               // 		return promiseChain.then(currTask);
-               // 	}, Promise.resolve([]));
-               // })
-               .then(() => {
-                  // refresh UI
-                  // formView.emit('properties.updated', currView);
-
-                  _logic.busy();
-
-                  // Update field options in property
-                  this.propertyUpdateFieldOptions(ids, currView, dcId);
-
-                  // add all fields to editor by default
-                  if (currView._views.length > 0) return Promise.resolve();
-
-                  let saveTasks = [];
-                  let fields = $$(ids.fields).find({});
-                  fields.reverse();
-                  fields.forEach((f, index) => {
-                     if (!f.selected) {
-                        let yPosition = fields.length - index - 1;
-
-                        // Add new form field
-                        let newFieldView = currView.addFieldToForm(
-                           f,
-                           yPosition
-                        );
-                        if (newFieldView) {
-                           newFieldView.once("destroyed", () =>
-                              this.propertyEditorPopulate(App, ids, currView)
-                           );
-
-                           // // Call save API
-                           saveTasks.push(newFieldView.save());
-                        }
-
-                        // update item to UI list
-                        f.selected = 1;
-                        $$(ids.fields).updateItem(f.id, f);
-                     }
-                  });
-
-                  let defaultButton = formView.refreshDefaultButton(ids);
-                  if (defaultButton) saveTasks.push(defaultButton.save());
-
-                  return Promise.all(saveTasks);
-               })
-               // Saving
-               .then(() => {
-                  //// NOTE: the way the .addFieldToForm() works, it will prevent
-                  //// the typical field.save() -> triggering the form.save() on a
-                  //// new Field.  So once all our field.saves() are finished, we
-                  //// need to perform a form.save() to persist the changes.
-                  return currView.save();
-               })
-               // Finally
-               .then(() => {
-                  // refresh UI
-                  formView.emit("properties.updated", currView);
-
-                  // Update field options in property
-                  this.propertyUpdateRules(ids, currView, dcId);
-
-                  _logic.ready();
-
-                  return Promise.resolve();
-               })
-         );
-      };
-
-      _logic.listTemplate = (field, common) => {
-         let currView = _logic.currentEditObject();
-
-         // disable in form
-         var fieldComponent = field.formComponent();
-         if (fieldComponent == null)
-            return "<i class='fa fa-times'></i>  #label# <div class='ab-component-form-fields-component-info'> Disable </div>".replace(
-               "#label#",
-               field.label
-            );
-
-         var componentKey = fieldComponent.common().key;
-         var formComponent = currView.application.viewAll(
-            (v) => v.common().key == componentKey
-         )[0];
-
-         return `${common.markCheckbox(field)} ${
-            field.label
-         } <div class='ab-component-form-fields-component-info'> <i class='fa fa-${
-            formComponent ? formComponent.common().icon : "fw"
-         }'></i> ${
-            formComponent ? L(formComponent.common().labelKey) : ""
-         } </div>`;
-      };
-
-      _logic.check = (e, fieldId) => {
-         let currView = _logic.currentEditObject();
-         let formView = currView.parentFormComponent();
-
-         // update UI list
-         let item = $$(ids.fields).getItem(fieldId);
-         item.selected = item.selected ? 0 : 1;
-         $$(ids.fields).updateItem(fieldId, item);
-
-         let doneFn = () => {
-            formView
-               .refreshDefaultButton(ids)
-               .save()
-               .then(() => {
-                  // refresh UI
-                  currView.emit("properties.updated", currView);
-               });
-
-            // // trigger a save()
-            // this.propertyEditorSave(ids, currView);
-         };
-
-         // add a field to the form
-         if (item.selected) {
-            let fieldView = currView.addFieldToForm(item);
-            if (fieldView) {
-               fieldView.save().then(() => {
-                  fieldView.once("destroyed", () =>
-                     this.propertyEditorPopulate(App, ids, currView)
-                  );
-                  currView.save().then(() => {
-                     doneFn();
-                  });
-               });
-            }
-         }
-         // remove field in the form
-         else {
-            let fieldView = formView
-               .fieldComponents()
-               .filter((c) => c.settings.fieldId == fieldId)[0];
-            if (fieldView) {
-               // let remainingViews = formView.views(c => c.settings.fieldId != fieldId);
-               // formView._views = remainingViews;
-
-               fieldView.destroy().then(() => {
-                  doneFn();
-               });
-            }
-         }
-      };
-
-      // Display rule
-      _logic.displayRuleShow = () => {
-         // var currView = _logic.currentEditObject();
-         // PopupDisplayRule.setValue(currView.settings.displayRules);
-         // PopupDisplayRule.show();
-      };
-
-      _logic.displayRuleSave = () => {};
-
-      // Record rule
-      _logic.recordRuleShow = () => {
-         var currView = _logic.currentEditObject();
-
-         var selectedDv = currView.datacollection;
-         if (selectedDv) {
-            PopupRecordRule.objectLoad(selectedDv.datasource);
-         }
-         PopupRecordRule.formLoad(currView);
-         PopupRecordRule.fromSettings(currView.settings.recordRules);
-         PopupRecordRule.show();
-
-         // NOTE: Querybuilder v5.2 has a bug where it won't display the [and/or]
-         // choosers properly if it hasn't been shown before the .setValue() call.
-         // so this work around allows us to refresh the display after the .show()
-         // on the popup.
-         // When they've fixed the bug, we'll remove this workaround:
-         PopupRecordRule.qbFixAfterShow();
-      };
-
-      _logic.recordRuleSave = (settings) => {
-         var currView = _logic.currentEditObject();
-         currView.settings.recordRules = settings;
-
-         // trigger a save()
-         this.propertyEditorSave(ids, currView);
-
-         // update badge number of rules
-         this.populateBadgeNumber(ids, currView);
-      };
-
-      // Submit rule
-      _logic.submitRuleShow = () => {
-         var currView = _logic.currentEditObject();
-
-         PopupSubmitRule.fromSettings(currView.settings.submitRules);
-         PopupSubmitRule.show();
-      };
-
-      _logic.submitRuleSave = (settings) => {
-         var currView = _logic.currentEditObject();
-         currView.settings.submitRules = settings;
-
-         // trigger a save()
-         this.propertyEditorSave(ids, currView);
-
-         // update badge number of rules
-         this.populateBadgeNumber(ids, currView);
-      };
-
-      /** Initial rule popups */
-      // PopupDisplayRule.init({
-      // 	onSave: _logic.displayRuleSave
-      // });
-
-      PopupRecordRule.init({
-         onSave: _logic.recordRuleSave,
-      });
-
-      PopupSubmitRule.init({
-         onSave: _logic.submitRuleSave,
-      });
-
-      return commonUI.concat([
-         {
-            name: "datacollection",
-            view: "richselect",
-            label: L("Data Source"),
-            labelWidth: this.AB.UISettings.config().labelWidthLarge,
-            skipAutoSave: true,
-            on: {
-               onChange: _logic.selectSource,
-            },
-         },
-
-         {
-            view: "fieldset",
-            label: L("Form Fields:"),
-            labelWidth: this.AB.UISettings.config().labelWidthLarge,
-            body: {
-               type: "clean",
-               padding: 10,
-               rows: [
-                  {
-                     name: "fields",
-                     view: "list",
-                     select: false,
-                     minHeight: 200,
-                     template: _logic.listTemplate,
-                     type: {
-                        markCheckbox: function (item) {
-                           return (
-                              "<span class='check webix_icon fa fa-" +
-                              (item.selected ? "check-" : "") +
-                              "square-o'></span>"
-                           );
-                        },
-                     },
-                     onClick: {
-                        check: _logic.check,
-                     },
-                  },
-               ],
-            },
-         },
-         {
-            name: "showLabel",
-            view: "checkbox",
-            label: L("Display Label"),
-            labelWidth: this.AB.UISettings.config().labelWidthLarge,
-         },
-         {
-            name: "labelPosition",
-            view: "richselect",
-            label: L("Label Position"),
-            labelWidth: this.AB.UISettings.config().labelWidthLarge,
-            options: [
-               {
-                  id: "left",
-                  value: L("Left"),
-               },
-               {
-                  id: "top",
-                  value: L("Top"),
-               },
-            ],
-         },
-         {
-            name: "labelWidth",
-            view: "counter",
-            label: L("Label Width"),
-            labelWidth: this.AB.UISettings.config().labelWidthLarge,
-         },
-         {
-            view: "counter",
-            name: "height",
-            label: L("Height:"),
-            labelWidth: this.AB.UISettings.config().labelWidthLarge,
-         },
-         {
-            name: "clearOnLoad",
-            view: "checkbox",
-            label: L("Clear on load"),
-            labelWidth: this.AB.UISettings.config().labelWidthLarge,
-         },
-         {
-            name: "clearOnSave",
-            view: "checkbox",
-            label: L("Clear on save"),
-            labelWidth: this.AB.UISettings.config().labelWidthLarge,
-         },
-         {
-            view: "fieldset",
-            label: L("Rules:"),
-            labelWidth: this.AB.UISettings.config().labelWidthLarge,
-            body: {
-               type: "clean",
-               padding: 10,
-               rows: [
-                  {
-                     cols: [
-                        {
-                           view: "label",
-                           label: L("Submit Rules:"),
-                           width: this.AB.UISettings.config().labelWidthLarge,
-                        },
-                        {
-                           view: "button",
-                           css: "webix_primary",
-                           name: "buttonSubmitRules",
-                           label: L("Settings"),
-                           icon: "fa fa-gear",
-                           type: "icon",
-                           badge: 0,
-                           click: function () {
-                              _logic.submitRuleShow();
-                           },
-                        },
-                     ],
-                  },
-                  {
-                     cols: [
-                        {
-                           view: "label",
-                           label: L("Display Rules:"),
-                           width: this.AB.UISettings.config().labelWidthLarge,
-                        },
-                        {
-                           view: "button",
-                           name: "buttonDisplayRules",
-                           css: "webix_primary",
-                           label: L("Settings"),
-                           icon: "fa fa-gear",
-                           type: "icon",
-                           badge: 0,
-                           click: function () {
-                              _logic.displayRuleShow();
-                           },
-                        },
-                     ],
-                  },
-                  {
-                     cols: [
-                        {
-                           view: "label",
-                           label: L("Record Rules:"),
-                           width: this.AB.UISettings.config().labelWidthLarge,
-                        },
-                        {
-                           view: "button",
-                           name: "buttonRecordRules",
-                           css: "webix_primary",
-                           label: L("Settings"),
-                           icon: "fa fa-gear",
-                           type: "icon",
-                           badge: 0,
-                           click: function () {
-                              _logic.recordRuleShow();
-                           },
-                        },
-                     ],
-                  },
-               ],
-            },
-         },
-      ]);
-   }
-
-   static propertyEditorPopulate(App, ids, view, logic) {
-      super.propertyEditorPopulate(App, ids, view, logic);
-
-      var formCom = view.parentFormComponent();
-      var datacollectionId = formCom.settings.dataviewID
-         ? formCom.settings.dataviewID
-         : null;
-      var SourceSelector = $$(ids.datacollection);
-
-      // Pull data collections to options
-      var dcOptions = view.propertyDatacollections((dc) => {
-         var obj = dc.datasource;
-
-         return dc.sourceType == "object" && obj && !obj.isImported;
-      });
-      SourceSelector.define("options", dcOptions);
-      SourceSelector.define("value", datacollectionId);
-      SourceSelector.refresh();
-
-      this.propertyUpdateFieldOptions(ids, view, datacollectionId);
-
-      // update properties when a field component is deleted
-      view.views().forEach((v) => {
-         if (v instanceof ABViewFormComponent)
-            v.once("destroyed", () =>
-               this.propertyEditorPopulate(App, ids, view)
-            );
-      });
-
-      SourceSelector.enable();
-      $$(ids.showLabel).setValue(view.settings.showLabel);
-      $$(ids.labelPosition).setValue(
-         view.settings.labelPosition ||
-            ABViewFormPropertyComponentDefaults.labelPosition
-      );
-      $$(ids.labelWidth).setValue(
-         view.settings.labelWidth ||
-            ABViewFormPropertyComponentDefaults.labelWidth
-      );
-      $$(ids.height).setValue(
-         view.settings.height || ABViewFormPropertyComponentDefaults.height
-      );
-      $$(ids.clearOnLoad).setValue(
-         view.settings.clearOnLoad ||
-            ABViewFormPropertyComponentDefaults.clearOnLoad
-      );
-      $$(ids.clearOnSave).setValue(
-         view.settings.clearOnSave ||
-            ABViewFormPropertyComponentDefaults.clearOnSave
-      );
-
-      this.propertyUpdateRules(ids, view, datacollectionId);
-      this.populateBadgeNumber(ids, view);
-
-      // when a change is made in the properties the popups need to reflect the change
-      this.updateEventIds = this.updateEventIds || {}; // { viewId: boolean, ..., viewIdn: boolean }
-      if (!this.updateEventIds[view.id]) {
-         this.updateEventIds[view.id] = true;
-
-         view.addListener("properties.updated", () => {
-            this.populateBadgeNumber(ids, view);
-         });
-      }
-   }
-
-   static propertyEditorValues(ids, view) {
-      super.propertyEditorValues(ids, view);
-
-      view.settings.dataviewID = $$(ids.datacollection).getValue();
-      view.settings.showLabel = $$(ids.showLabel).getValue();
-      view.settings.labelPosition =
-         $$(ids.labelPosition).getValue() ||
-         ABViewFormPropertyComponentDefaults.labelPosition;
-      view.settings.labelWidth =
-         $$(ids.labelWidth).getValue() ||
-         ABViewFormPropertyComponentDefaults.labelWidth;
-      view.settings.height = $$(ids.height).getValue();
-      view.settings.clearOnLoad = $$(ids.clearOnLoad).getValue();
-      view.settings.clearOnSave = $$(ids.clearOnSave).getValue();
-   }
+   // static propertyEditorDefaultElements(App, ids, _logic, ObjectDefaults) {
+   //    var commonUI = super.propertyEditorDefaultElements(
+   //       App,
+   //       ids,
+   //       _logic,
+   //       ObjectDefaults
+   //    );
+
+   //    var idBase = "ABViewForm";
+
+   //    // PopupDisplayRule = new ABDisplayRule(App, idBase + "_displayrule");
+
+   //    PopupRecordRule = new ABRecordRule();
+   //    PopupRecordRule.component(App, `${idBase}_recordrule`); // prepare the UI component.
+
+   //    PopupSubmitRule = new ABSubmitRule();
+   //    PopupSubmitRule.component(App, `${idBase}_submitrule`);
+
+   //    // _logic functions
+
+   //    _logic.selectSource = (dcId, oldDcId) => {
+   //       // TODO : warning message
+
+   //       _logic.busy();
+
+   //       let currView = _logic.currentEditObject();
+   //       let formView = currView.parentFormComponent();
+
+   //       currView.settings.dataviewID = dcId;
+
+   //       // clear sub views
+   //       var viewsToRemove = currView._views;
+   //       currView._views = [];
+
+   //       return (
+   //          Promise.resolve()
+   //             .then(() => {
+   //                var allRemoves = [];
+   //                viewsToRemove.forEach((v) => {
+   //                   allRemoves.push(v.destroy());
+   //                });
+   //                return Promise.all(allRemoves);
+   //             })
+   //             // .then(() => {
+   //             // 	// remove all old components
+   //             // 	let destroyTasks = [];
+   //             // 	if (oldDcId != null) {
+   //             // 		let oldComps = formView.views();
+   //             // 		oldComps.forEach(child => destroyTasks.push(() => child.destroy()));
+   //             // 	}
+
+   //             // 	return destroyTasks.reduce((promiseChain, currTask) => {
+   //             // 		return promiseChain.then(currTask);
+   //             // 	}, Promise.resolve([]));
+   //             // })
+   //             .then(() => {
+   //                // refresh UI
+   //                // formView.emit('properties.updated', currView);
+
+   //                _logic.busy();
+
+   //                // Update field options in property
+   //                this.propertyUpdateFieldOptions(ids, currView, dcId);
+
+   //                // add all fields to editor by default
+   //                if (currView._views.length > 0) return Promise.resolve();
+
+   //                let saveTasks = [];
+   //                let fields = $$(ids.fields).find({});
+   //                fields.reverse();
+   //                fields.forEach((f, index) => {
+   //                   if (!f.selected) {
+   //                      let yPosition = fields.length - index - 1;
+
+   //                      // Add new form field
+   //                      let newFieldView = currView.addFieldToForm(
+   //                         f,
+   //                         yPosition
+   //                      );
+   //                      if (newFieldView) {
+   //                         newFieldView.once("destroyed", () =>
+   //                            this.propertyEditorPopulate(App, ids, currView)
+   //                         );
+
+   //                         // // Call save API
+   //                         saveTasks.push(newFieldView.save());
+   //                      }
+
+   //                      // update item to UI list
+   //                      f.selected = 1;
+   //                      $$(ids.fields).updateItem(f.id, f);
+   //                   }
+   //                });
+
+   //                let defaultButton = formView.refreshDefaultButton(ids);
+   //                if (defaultButton) saveTasks.push(defaultButton.save());
+
+   //                return Promise.all(saveTasks);
+   //             })
+   //             // Saving
+   //             .then(() => {
+   //                //// NOTE: the way the .addFieldToForm() works, it will prevent
+   //                //// the typical field.save() -> triggering the form.save() on a
+   //                //// new Field.  So once all our field.saves() are finished, we
+   //                //// need to perform a form.save() to persist the changes.
+   //                return currView.save();
+   //             })
+   //             // Finally
+   //             .then(() => {
+   //                // refresh UI
+   //                formView.emit("properties.updated", currView);
+
+   //                // Update field options in property
+   //                this.propertyUpdateRules(ids, currView, dcId);
+
+   //                _logic.ready();
+
+   //                return Promise.resolve();
+   //             })
+   //       );
+   //    };
+
+   //    _logic.listTemplate = (field, common) => {
+   //       let currView = _logic.currentEditObject();
+
+   //       // disable in form
+   //       var fieldComponent = field.formComponent();
+   //       if (fieldComponent == null)
+   //          return "<i class='fa fa-times'></i>  #label# <div class='ab-component-form-fields-component-info'> Disable </div>".replace(
+   //             "#label#",
+   //             field.label
+   //          );
+
+   //       var componentKey = fieldComponent.common().key;
+   //       var formComponent = currView.application.viewAll(
+   //          (v) => v.common().key == componentKey
+   //       )[0];
+
+   //       return `${common.markCheckbox(field)} ${
+   //          field.label
+   //       } <div class='ab-component-form-fields-component-info'> <i class='fa fa-${
+   //          formComponent ? formComponent.common().icon : "fw"
+   //       }'></i> ${
+   //          formComponent ? L(formComponent.common().labelKey) : ""
+   //       } </div>`;
+   //    };
+
+   //    _logic.check = (e, fieldId) => {
+   //       let currView = _logic.currentEditObject();
+   //       let formView = currView.parentFormComponent();
+
+   //       // update UI list
+   //       let item = $$(ids.fields).getItem(fieldId);
+   //       item.selected = item.selected ? 0 : 1;
+   //       $$(ids.fields).updateItem(fieldId, item);
+
+   //       let doneFn = () => {
+   //          formView
+   //             .refreshDefaultButton(ids)
+   //             .save()
+   //             .then(() => {
+   //                // refresh UI
+   //                currView.emit("properties.updated", currView);
+   //             });
+
+   //          // // trigger a save()
+   //          // this.propertyEditorSave(ids, currView);
+   //       };
+
+   //       // add a field to the form
+   //       if (item.selected) {
+   //          let fieldView = currView.addFieldToForm(item);
+   //          if (fieldView) {
+   //             fieldView.save().then(() => {
+   //                fieldView.once("destroyed", () =>
+   //                   this.propertyEditorPopulate(App, ids, currView)
+   //                );
+   //                currView.save().then(() => {
+   //                   doneFn();
+   //                });
+   //             });
+   //          }
+   //       }
+   //       // remove field in the form
+   //       else {
+   //          let fieldView = formView
+   //             .fieldComponents()
+   //             .filter((c) => c.settings.fieldId == fieldId)[0];
+   //          if (fieldView) {
+   //             // let remainingViews = formView.views(c => c.settings.fieldId != fieldId);
+   //             // formView._views = remainingViews;
+
+   //             fieldView.destroy().then(() => {
+   //                doneFn();
+   //             });
+   //          }
+   //       }
+   //    };
+
+   //    // Display rule
+   //    _logic.displayRuleShow = () => {
+   //       // var currView = _logic.currentEditObject();
+   //       // PopupDisplayRule.setValue(currView.settings.displayRules);
+   //       // PopupDisplayRule.show();
+   //    };
+
+   //    _logic.displayRuleSave = () => {};
+
+   //    // Record rule
+   //    _logic.recordRuleShow = () => {
+   //       var currView = _logic.currentEditObject();
+
+   //       var selectedDv = currView.datacollection;
+   //       if (selectedDv) {
+   //          PopupRecordRule.objectLoad(selectedDv.datasource);
+   //       }
+   //       PopupRecordRule.formLoad(currView);
+   //       PopupRecordRule.fromSettings(currView.settings.recordRules);
+   //       PopupRecordRule.show();
+
+   //       // NOTE: Querybuilder v5.2 has a bug where it won't display the [and/or]
+   //       // choosers properly if it hasn't been shown before the .setValue() call.
+   //       // so this work around allows us to refresh the display after the .show()
+   //       // on the popup.
+   //       // When they've fixed the bug, we'll remove this workaround:
+   //       PopupRecordRule.qbFixAfterShow();
+   //    };
+
+   //    _logic.recordRuleSave = (settings) => {
+   //       var currView = _logic.currentEditObject();
+   //       currView.settings.recordRules = settings;
+
+   //       // trigger a save()
+   //       this.propertyEditorSave(ids, currView);
+
+   //       // update badge number of rules
+   //       this.populateBadgeNumber(ids, currView);
+   //    };
+
+   //    // Submit rule
+   //    _logic.submitRuleShow = () => {
+   //       var currView = _logic.currentEditObject();
+
+   //       PopupSubmitRule.fromSettings(currView.settings.submitRules);
+   //       PopupSubmitRule.show();
+   //    };
+
+   //    _logic.submitRuleSave = (settings) => {
+   //       var currView = _logic.currentEditObject();
+   //       currView.settings.submitRules = settings;
+
+   //       // trigger a save()
+   //       this.propertyEditorSave(ids, currView);
+
+   //       // update badge number of rules
+   //       this.populateBadgeNumber(ids, currView);
+   //    };
+
+   //    /** Initial rule popups */
+   //    // PopupDisplayRule.init({
+   //    // 	onSave: _logic.displayRuleSave
+   //    // });
+
+   //    PopupRecordRule.init({
+   //       onSave: _logic.recordRuleSave,
+   //    });
+
+   //    PopupSubmitRule.init({
+   //       onSave: _logic.submitRuleSave,
+   //    });
+
+   //    return commonUI.concat([
+   //       {
+   //          name: "datacollection",
+   //          view: "richselect",
+   //          label: L("Data Source"),
+   //          labelWidth: this.AB.UISettings.config().labelWidthLarge,
+   //          skipAutoSave: true,
+   //          on: {
+   //             onChange: _logic.selectSource,
+   //          },
+   //       },
+
+   //       {
+   //          view: "fieldset",
+   //          label: L("Form Fields:"),
+   //          labelWidth: this.AB.UISettings.config().labelWidthLarge,
+   //          body: {
+   //             type: "clean",
+   //             padding: 10,
+   //             rows: [
+   //                {
+   //                   name: "fields",
+   //                   view: "list",
+   //                   select: false,
+   //                   minHeight: 200,
+   //                   template: _logic.listTemplate,
+   //                   type: {
+   //                      markCheckbox: function (item) {
+   //                         return (
+   //                            "<span class='check webix_icon fa fa-" +
+   //                            (item.selected ? "check-" : "") +
+   //                            "square-o'></span>"
+   //                         );
+   //                      },
+   //                   },
+   //                   onClick: {
+   //                      check: _logic.check,
+   //                   },
+   //                },
+   //             ],
+   //          },
+   //       },
+   //       {
+   //          name: "showLabel",
+   //          view: "checkbox",
+   //          label: L("Display Label"),
+   //          labelWidth: this.AB.UISettings.config().labelWidthLarge,
+   //       },
+   //       {
+   //          name: "labelPosition",
+   //          view: "richselect",
+   //          label: L("Label Position"),
+   //          labelWidth: this.AB.UISettings.config().labelWidthLarge,
+   //          options: [
+   //             {
+   //                id: "left",
+   //                value: L("Left"),
+   //             },
+   //             {
+   //                id: "top",
+   //                value: L("Top"),
+   //             },
+   //          ],
+   //       },
+   //       {
+   //          name: "labelWidth",
+   //          view: "counter",
+   //          label: L("Label Width"),
+   //          labelWidth: this.AB.UISettings.config().labelWidthLarge,
+   //       },
+   //       {
+   //          view: "counter",
+   //          name: "height",
+   //          label: L("Height:"),
+   //          labelWidth: this.AB.UISettings.config().labelWidthLarge,
+   //       },
+   //       {
+   //          name: "clearOnLoad",
+   //          view: "checkbox",
+   //          label: L("Clear on load"),
+   //          labelWidth: this.AB.UISettings.config().labelWidthLarge,
+   //       },
+   //       {
+   //          name: "clearOnSave",
+   //          view: "checkbox",
+   //          label: L("Clear on save"),
+   //          labelWidth: this.AB.UISettings.config().labelWidthLarge,
+   //       },
+   //       {
+   //          view: "fieldset",
+   //          label: L("Rules:"),
+   //          labelWidth: this.AB.UISettings.config().labelWidthLarge,
+   //          body: {
+   //             type: "clean",
+   //             padding: 10,
+   //             rows: [
+   //                {
+   //                   cols: [
+   //                      {
+   //                         view: "label",
+   //                         label: L("Submit Rules:"),
+   //                         width: this.AB.UISettings.config().labelWidthLarge,
+   //                      },
+   //                      {
+   //                         view: "button",
+   //                         css: "webix_primary",
+   //                         name: "buttonSubmitRules",
+   //                         label: L("Settings"),
+   //                         icon: "fa fa-gear",
+   //                         type: "icon",
+   //                         badge: 0,
+   //                         click: function () {
+   //                            _logic.submitRuleShow();
+   //                         },
+   //                      },
+   //                   ],
+   //                },
+   //                {
+   //                   cols: [
+   //                      {
+   //                         view: "label",
+   //                         label: L("Display Rules:"),
+   //                         width: this.AB.UISettings.config().labelWidthLarge,
+   //                      },
+   //                      {
+   //                         view: "button",
+   //                         name: "buttonDisplayRules",
+   //                         css: "webix_primary",
+   //                         label: L("Settings"),
+   //                         icon: "fa fa-gear",
+   //                         type: "icon",
+   //                         badge: 0,
+   //                         click: function () {
+   //                            _logic.displayRuleShow();
+   //                         },
+   //                      },
+   //                   ],
+   //                },
+   //                {
+   //                   cols: [
+   //                      {
+   //                         view: "label",
+   //                         label: L("Record Rules:"),
+   //                         width: this.AB.UISettings.config().labelWidthLarge,
+   //                      },
+   //                      {
+   //                         view: "button",
+   //                         name: "buttonRecordRules",
+   //                         css: "webix_primary",
+   //                         label: L("Settings"),
+   //                         icon: "fa fa-gear",
+   //                         type: "icon",
+   //                         badge: 0,
+   //                         click: function () {
+   //                            _logic.recordRuleShow();
+   //                         },
+   //                      },
+   //                   ],
+   //                },
+   //             ],
+   //          },
+   //       },
+   //    ]);
+   // }
+
+   // static propertyEditorPopulate(App, ids, view, logic) {
+   //    super.propertyEditorPopulate(App, ids, view, logic);
+
+   //    var formCom = view.parentFormComponent();
+   //    var datacollectionId = formCom.settings.dataviewID
+   //       ? formCom.settings.dataviewID
+   //       : null;
+   //    var SourceSelector = $$(ids.datacollection);
+
+   //    // Pull data collections to options
+   //    var dcOptions = view.propertyDatacollections((dc) => {
+   //       var obj = dc.datasource;
+
+   //       return dc.sourceType == "object" && obj && !obj.isImported;
+   //    });
+   //    SourceSelector.define("options", dcOptions);
+   //    SourceSelector.define("value", datacollectionId);
+   //    SourceSelector.refresh();
+
+   //    this.propertyUpdateFieldOptions(ids, view, datacollectionId);
+
+   //    // update properties when a field component is deleted
+   //    view.views().forEach((v) => {
+   //       if (v instanceof ABViewFormComponent)
+   //          v.once("destroyed", () =>
+   //             this.propertyEditorPopulate(App, ids, view)
+   //          );
+   //    });
+
+   //    SourceSelector.enable();
+   //    $$(ids.showLabel).setValue(view.settings.showLabel);
+   //    $$(ids.labelPosition).setValue(
+   //       view.settings.labelPosition ||
+   //          ABViewFormPropertyComponentDefaults.labelPosition
+   //    );
+   //    $$(ids.labelWidth).setValue(
+   //       view.settings.labelWidth ||
+   //          ABViewFormPropertyComponentDefaults.labelWidth
+   //    );
+   //    $$(ids.height).setValue(
+   //       view.settings.height || ABViewFormPropertyComponentDefaults.height
+   //    );
+   //    $$(ids.clearOnLoad).setValue(
+   //       view.settings.clearOnLoad ||
+   //          ABViewFormPropertyComponentDefaults.clearOnLoad
+   //    );
+   //    $$(ids.clearOnSave).setValue(
+   //       view.settings.clearOnSave ||
+   //          ABViewFormPropertyComponentDefaults.clearOnSave
+   //    );
+
+   //    this.propertyUpdateRules(ids, view, datacollectionId);
+   //    this.populateBadgeNumber(ids, view);
+
+   //    // when a change is made in the properties the popups need to reflect the change
+   //    this.updateEventIds = this.updateEventIds || {}; // { viewId: boolean, ..., viewIdn: boolean }
+   //    if (!this.updateEventIds[view.id]) {
+   //       this.updateEventIds[view.id] = true;
+
+   //       view.addListener("properties.updated", () => {
+   //          this.populateBadgeNumber(ids, view);
+   //       });
+   //    }
+   // }
+
+   // static propertyEditorValues(ids, view) {
+   //    super.propertyEditorValues(ids, view);
+
+   //    view.settings.dataviewID = $$(ids.datacollection).getValue();
+   //    view.settings.showLabel = $$(ids.showLabel).getValue();
+   //    view.settings.labelPosition =
+   //       $$(ids.labelPosition).getValue() ||
+   //       ABViewFormPropertyComponentDefaults.labelPosition;
+   //    view.settings.labelWidth =
+   //       $$(ids.labelWidth).getValue() ||
+   //       ABViewFormPropertyComponentDefaults.labelWidth;
+   //    view.settings.height = $$(ids.height).getValue();
+   //    view.settings.clearOnLoad = $$(ids.clearOnLoad).getValue();
+   //    view.settings.clearOnSave = $$(ids.clearOnSave).getValue();
+   // }
 
    /**
     * @method propertyUpdateFieldOptions
@@ -570,80 +574,87 @@ module.exports = class ABViewForm extends ABViewFormCore {
     * @param {ABViewForm} view - the current component
     * @param {string} dcId - id of ABDatacollection
     */
-   static propertyUpdateFieldOptions(ids, view, dcId) {
-      var formComponent = view.parentFormComponent();
-      var existsFields = formComponent.fieldComponents();
-      var datacollection = view.AB.datacollectionByID(dcId);
-      var object = datacollection ? datacollection.datasource : null;
+   // static propertyUpdateFieldOptions(ids, view, dcId) {
+   //    var formComponent = view.parentFormComponent();
+   //    var existsFields = formComponent.fieldComponents();
+   //    var datacollection = view.AB.datacollectionByID(dcId);
+   //    var object = datacollection ? datacollection.datasource : null;
 
-      // Pull field list
-      var fieldOptions = [];
-      if (object != null) {
-         fieldOptions = object.fields().map((f) => {
-            f.selected =
-               existsFields.filter((com) => {
-                  return f.id == com.settings.fieldId;
-               }).length > 0;
+   //    // Pull field list
+   //    var fieldOptions = [];
+   //    if (object != null) {
+   //       fieldOptions = object.fields().map((f) => {
+   //          f.selected =
+   //             existsFields.filter((com) => {
+   //                return f.id == com.settings.fieldId;
+   //             }).length > 0;
 
-            return f;
-         });
-      }
+   //          return f;
+   //       });
+   //    }
 
-      $$(ids.fields).clearAll();
-      $$(ids.fields).parse(fieldOptions);
-   }
+   //    $$(ids.fields).clearAll();
+   //    $$(ids.fields).parse(fieldOptions);
+   // }
 
-   static propertyUpdateRules(ids, view, dcId) {
-      if (!view) return;
+   // static propertyUpdateRules(ids, view, dcId) {
+   //    if (!view) return;
 
-      // Populate values to rules
-      var selectedDv = view.datacollection;
-      if (selectedDv) {
-         // PopupDisplayRule.objectLoad(selectedDv.datasource);
-         PopupRecordRule.objectLoad(selectedDv.datasource);
-         PopupSubmitRule.objectLoad(selectedDv.datasource);
-      }
+   //    // Populate values to rules
+   //    var selectedDv = view.datacollection;
+   //    if (selectedDv) {
+   //       // PopupDisplayRule.objectLoad(selectedDv.datasource);
+   //       PopupRecordRule.objectLoad(selectedDv.datasource);
+   //       PopupSubmitRule.objectLoad(selectedDv.datasource);
+   //    }
 
-      // PopupDisplayRule.formLoad(view);
-      PopupRecordRule.formLoad(view);
-      PopupSubmitRule.formLoad(view);
-   }
+   //    // PopupDisplayRule.formLoad(view);
+   //    PopupRecordRule.formLoad(view);
+   //    PopupSubmitRule.formLoad(view);
+   // }
 
-   static populateBadgeNumber(ids, view) {
-      if (!view) return;
+   // static populateBadgeNumber(ids, view) {
+   //    if (!view) return;
 
-      if (view.settings.submitRules) {
-         $$(ids.buttonSubmitRules).define(
-            "badge",
-            view.settings.submitRules.length || null
-         );
-         $$(ids.buttonSubmitRules).refresh();
-      } else {
-         $$(ids.buttonSubmitRules).define("badge", null);
-         $$(ids.buttonSubmitRules).refresh();
-      }
+   //    if (view.settings.submitRules) {
+   //       $$(ids.buttonSubmitRules).define(
+   //          "badge",
+   //          view.settings.submitRules.length || null
+   //       );
+   //       $$(ids.buttonSubmitRules).refresh();
+   //    } else {
+   //       $$(ids.buttonSubmitRules).define("badge", null);
+   //       $$(ids.buttonSubmitRules).refresh();
+   //    }
 
-      if (view.settings.displayRules) {
-         $$(ids.buttonDisplayRules).define(
-            "badge",
-            view.settings.displayRules.length || null
-         );
-         $$(ids.buttonDisplayRules).refresh();
-      } else {
-         $$(ids.buttonDisplayRules).define("badge", null);
-         $$(ids.buttonDisplayRules).refresh();
-      }
+   //    if (view.settings.displayRules) {
+   //       $$(ids.buttonDisplayRules).define(
+   //          "badge",
+   //          view.settings.displayRules.length || null
+   //       );
+   //       $$(ids.buttonDisplayRules).refresh();
+   //    } else {
+   //       $$(ids.buttonDisplayRules).define("badge", null);
+   //       $$(ids.buttonDisplayRules).refresh();
+   //    }
 
-      if (view.settings.recordRules) {
-         $$(ids.buttonRecordRules).define(
-            "badge",
-            view.settings.recordRules.length || null
-         );
-         $$(ids.buttonRecordRules).refresh();
-      } else {
-         $$(ids.buttonRecordRules).define("badge", null);
-         $$(ids.buttonRecordRules).refresh();
-      }
+   //    if (view.settings.recordRules) {
+   //       $$(ids.buttonRecordRules).define(
+   //          "badge",
+   //          view.settings.recordRules.length || null
+   //       );
+   //       $$(ids.buttonRecordRules).refresh();
+   //    } else {
+   //       $$(ids.buttonRecordRules).define("badge", null);
+   //       $$(ids.buttonRecordRules).refresh();
+   //    }
+   // }
+
+   superComponent() {
+      if (this._superComponent == null)
+         this._superComponent = super.component();
+
+      return this._superComponent;
    }
 
    /**
@@ -652,7 +663,27 @@ module.exports = class ABViewForm extends ABViewFormCore {
     * @param {obj} App
     * @return {obj} UI component
     */
-   component(App) {
+   component(v1App = false) {
+      let component = new ABViewFormComponent(this);
+
+      // if this is our v1Interface
+      if (v1App) {
+         const newComponent = component;
+         component = {
+            ui: newComponent.ui(),
+            init: (options, accessLevel) => {
+               return newComponent.init(this.AB, accessLevel);
+            },
+            onShow: (...params) => {
+               return newComponent.onShow?.(...params);
+            },
+         };
+      }
+
+      return component;
+   }
+
+   componentOld(App) {
       this.App = App;
       var idBase = "ABViewForm_" + this.id;
       this.uniqueInstanceID = webix.uid();
@@ -1061,8 +1092,8 @@ module.exports = class ABViewForm extends ABViewFormCore {
 
             if (relationFieldCom == null) return;
 
-            var relationFieldView = this.viewComponents[relationFieldCom.id].ui
-               .inputId;
+            var relationFieldView =
+               this.viewComponents[relationFieldCom.id].ui.inputId;
             // if (
             //    this.viewComponents[relationFieldCom.id].ui.rows &&
             //    this.viewComponents[relationFieldCom.id].ui.rows[0] &&
@@ -1207,32 +1238,33 @@ module.exports = class ABViewForm extends ABViewFormCore {
     */
    getFormValues(formView, obj, dc, dcLink) {
       // get the fields that are on this form
-      var visibleFields = ["id"]; // we always want the id so we can udpate records
-      var loopForm = formView.getValues(function (obj) {
+      const visibleFields = ["id"]; // we always want the id so we can udpate records
+      formView.getValues(function (obj) {
          visibleFields.push(obj.config.name);
       });
 
       // only get data passed from form
-      let allVals = formView.getValues();
-      let formVals = {};
+      const allVals = formView.getValues();
+      const formVals = {};
       visibleFields.forEach((val) => {
          formVals[val] = allVals[val];
       });
 
       // get custom values
-      var customFields = this.fieldComponents(
+      this.fieldComponents(
          (comp) =>
             comp instanceof ABViewFormCustom ||
             comp instanceof ABViewFormConnect ||
             comp instanceof ABViewFormSelectMultiple
-      );
-      customFields.forEach((f) => {
-         var vComponent = this.viewComponents[f.id];
+      ).forEach((f) => {
+         const vComponent = this.viewComponents[f.id];
          if (vComponent == null) return;
 
-         let field = f.field();
+         const field = f.field();
          if (field) {
-            formVals[field.columnName] = vComponent.logic.getValue(formVals);
+            const getValue = vComponent.getValue ?? vComponent.logic.getValue;
+            if (getValue)
+               formVals[field.columnName] = getValue.call(vComponent, formVals);
          }
       });
 
@@ -1248,7 +1280,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
       });
 
       // clear undefined values or empty arrays
-      for (var prop in formVals) {
+      for (const prop in formVals) {
          if (formVals[prop] == null || formVals[prop].length == 0)
             formVals[prop] = "";
       }
@@ -1261,33 +1293,33 @@ module.exports = class ABViewForm extends ABViewFormCore {
       }
 
       if (linkValues) {
-         var objectLink = dcLink.datasource;
+         const objectLink = dcLink.datasource;
 
-         var connectFields = obj.connectFields();
+         const connectFields = obj.connectFields();
          connectFields.forEach((f) => {
-            var formFieldCom = this.fieldComponents((fComp) => {
-               return fComp.field && fComp.field().id == f.id;
-            });
+            const formFieldCom = this.fieldComponents(
+               (fComp) => fComp?.field()?.id == f?.id
+            );
 
             if (
                objectLink.id == f.settings.linkObject &&
                formFieldCom.length < 1 && // check field does not show
                formVals[f.columnName] === undefined
             ) {
-               let linkColName = f.indexField
+               const linkColName = f.indexField
                   ? f.indexField.columnName
                   : objectLink.PK();
 
                formVals[f.columnName] = {};
                formVals[f.columnName][linkColName] =
-                  linkValues[linkColName] || linkValues.id;
+                  linkValues[linkColName] ?? linkValues.id;
             }
          });
       }
 
       // NOTE: need to pull data of current cursor to calculate Calculate & Formula fields
       // .formVals variable does not include data that does not display in the Form widget
-      let cursorFormVals = Object.assign(dc.getCursor() || {}, formVals);
+      const cursorFormVals = Object.assign(dc.getCursor() ?? {}, formVals);
 
       // Set value of calculate or formula fields to use in record rule
       obj.fields((f) => f.key == "calculate" || f.key == "formula").forEach(
@@ -1310,16 +1342,14 @@ module.exports = class ABViewForm extends ABViewFormCore {
     *
     * @return {boolean} isValid
     */
-   validateData(formView, object, formVals) {
+   validateData($formView, object, formVals) {
       let isValid = true;
 
       // validate required fields
-      let requiredFields = this.fieldComponents(
+      const requiredFields = this.fieldComponents(
          (fComp) =>
-            (fComp.field &&
-               fComp.field() &&
-               fComp.field().settings.required == true) ||
-            fComp.settings.required == true
+            fComp?.field?.().settings?.required == true ||
+            fComp?.settings?.required == true
       ).map((fComp) => fComp.field());
 
       // validate data
@@ -1329,34 +1359,36 @@ module.exports = class ABViewForm extends ABViewFormCore {
          isValid = validator.pass();
       }
 
-      $$(formView).validate();
+      // $$($formView).validate();
+      $formView.validate();
 
       // Display required messages
       requiredFields.forEach((f) => {
-         if (f && !formVals[f.columnName] && formVals[f.columnName] != "0") {
-            formView.markInvalid(f.columnName, L("This is a required field."));
+         if (!f) return;
+
+         const fieldVal = formVals[f.columnName];
+         if (fieldVal == "" || fieldVal == null || fieldVal.length < 1) {
+            $formView.markInvalid(f.columnName, L("This is a required field."));
             isValid = false;
 
             // Fix position of invalid message
-            let $forminput = formView.elements[f.columnName];
+            const $forminput = $formView.elements[f.columnName];
             if ($forminput) {
                // Y position
-               let height = $forminput.$height;
+               const height = $forminput.$height;
                if (height < 56) {
                   $forminput.define("height", 60);
                   $forminput.resize();
                }
 
                // X position
-               let domInvalidMessage = $forminput.$view.getElementsByClassName(
-                  "webix_inp_bottom_label"
-               )[0];
-               if (
-                  domInvalidMessage &&
-                  !domInvalidMessage.style["margin-left"]
-               ) {
+               const domInvalidMessage =
+                  $forminput.$view.getElementsByClassName(
+                     "webix_inp_bottom_label"
+                  )[0];
+               if (!domInvalidMessage?.style["margin-left"]) {
                   domInvalidMessage.style.marginLeft = `${
-                     this.settings.labelWidth ||
+                     this.settings.labelWidth ??
                      ABViewFormPropertyComponentDefaults.labelWidth
                   }px`;
                }
@@ -1366,20 +1398,20 @@ module.exports = class ABViewForm extends ABViewFormCore {
 
       // if data is invalid
       if (!isValid) {
-         let saveButton = formView.queryView({
+         const saveButton = $formView.queryView({
             view: "button",
             type: "form",
          });
 
          // error message
-         if (validator && validator.errors && validator.errors.length) {
+         if (validator?.errors?.length) {
             validator.errors.forEach((err) => {
-               formView.markInvalid(err.name, err.message);
+               $formView.markInvalid(err.name, err.message);
             });
 
-            if (saveButton) saveButton.disable();
+            saveButton?.disable();
          } else {
-            if (saveButton) saveButton.enable();
+            saveButton?.enable();
          }
       }
 
@@ -1399,38 +1431,38 @@ module.exports = class ABViewForm extends ABViewFormCore {
    /**
     * @method saveData
     * save data in to database
-    * @param formView - webix's form element
+    * @param $formView - webix's form element
     *
     * @return {Promise}
     */
-   async saveData(formView) {
+   async saveData($formView) {
       // call .onBeforeSaveData event
       // if this function returns false, then it will not go on.
-      if (!this._logic.callbacks.onBeforeSaveData()) return;
+      if (!this._callbacks?.onBeforeSaveData?.()) return;
 
       // form validate
-      if (!formView || !formView.validate()) {
+      if (!$formView || !$formView.validate()) {
          // TODO : error message
          return;
       }
 
-      formView.clearValidation();
+      $formView.clearValidation();
 
       // get ABDatacollection
-      var dv = this.datacollection;
+      const dv = this.datacollection;
       if (dv == null) return;
 
       // get ABObject
-      var obj = dv.datasource;
+      const obj = dv.datasource;
       if (obj == null) return;
 
       // get ABModel
-      var model = dv.model;
+      const model = dv.model;
       if (model == null) return;
 
       // get update data
-      var formVals = this.getFormValues(
-         formView,
+      const formVals = this.getFormValues(
+         $formView,
          obj,
          dv,
          dv.datacollectionLink
@@ -1443,33 +1475,35 @@ module.exports = class ABViewForm extends ABViewFormCore {
       this.doRecordRulesPre(formVals);
 
       // validate data
-      if (!this.validateData(formView, obj, formVals)) {
+      if (!this.validateData($formView, obj, formVals)) {
+         console.warn("Data is invalid.");
          return;
       }
 
       // show progress icon
-      formView.showProgress?.({ type: "icon" });
+      $formView.showProgress?.({ type: "icon" });
 
       // form ready function
-      var formReady = (newFormVals) => {
+      const formReady = (newFormVals) => {
          // clear cursor after saving.
          if (dv) {
             if (this.settings.clearOnSave) {
                dv.setCursor(null);
-               formView.clear();
+               $formView.clear();
             } else {
                if (newFormVals && newFormVals.id) dv.setCursor(newFormVals.id);
             }
          }
 
-         formView.hideProgress?.();
+         $formView.hideProgress?.();
 
          // if there was saved data pass it up to the onSaveData callback
-         if (newFormVals) this._logic.callbacks.onSaveData(newFormVals);
+         // if (newFormVals) this._logic.callbacks.onSaveData(newFormVals);
+         if (newFormVals) this.emit("saved", newFormVals); // Q? is this the right upgrade?
       };
 
-      let formError = (err) => {
-         let saveButton = formView.queryView({
+      const formError = (err) => {
+         const $saveButton = $formView.queryView({
             view: "button",
             type: "form",
          });
@@ -1477,12 +1511,12 @@ module.exports = class ABViewForm extends ABViewFormCore {
          // mark error
          if (err) {
             if (err.invalidAttributes) {
-               for (let attr in err.invalidAttributes) {
+               for (const attr in err.invalidAttributes) {
                   let invalidAttrs = err.invalidAttributes[attr];
                   if (invalidAttrs && invalidAttrs[0])
                      invalidAttrs = invalidAttrs[0];
 
-                  formView.markInvalid(attr, invalidAttrs.message);
+                  $formView.markInvalid(attr, invalidAttrs.message);
                }
             } else if (err.sqlMessage) {
                webix.message({
@@ -1501,9 +1535,9 @@ module.exports = class ABViewForm extends ABViewFormCore {
             }
          }
 
-         saveButton?.enable();
+         $saveButton?.enable();
 
-         formView?.hideProgress?.();
+         $formView?.hideProgress?.();
       };
 
       let newFormVals;
@@ -1544,8 +1578,8 @@ module.exports = class ABViewForm extends ABViewFormCore {
    }
 
    focusOnFirst() {
-      var topPosition = 0;
-      var topPositionId = "";
+      let topPosition = 0;
+      let topPositionId = "";
       this.views().forEach((item) => {
          if (item.key == "textbox" || item.key == "numberbox") {
             if (item.position.y == topPosition) {
@@ -1554,9 +1588,14 @@ module.exports = class ABViewForm extends ABViewFormCore {
             }
          }
       });
-      var childComponent = this.viewComponents[topPositionId];
+      let childComponent = this.viewComponents[topPositionId];
       if (childComponent && $$(childComponent.ui.id)) {
          $$(childComponent.ui.id).focus();
       }
+   }
+
+   get viewComponents() {
+      const superComponent = this.superComponent();
+      return superComponent.viewComponents;
    }
 };

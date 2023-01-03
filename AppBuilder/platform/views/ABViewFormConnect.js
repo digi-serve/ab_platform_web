@@ -1,37 +1,34 @@
 const ABViewFormConnectCore = require("../../core/views/ABViewFormConnectCore");
-const ABViewPropertyAddPage = require("./viewProperties/ABViewPropertyAddPage")
-   .default;
-const ABViewPropertyEditPage = require("./viewProperties/ABViewPropertyEditPage")
-   .default;
+const ABViewPropertyAddPage =
+   require("./viewProperties/ABViewPropertyAddPage").default;
+const ABViewPropertyEditPage =
+   require("./viewProperties/ABViewPropertyEditPage").default;
 
-const ABViewFormConnectPropertyComponentDefaults = ABViewFormConnectCore.defaultValues();
+const ABViewFormConnectPropertyComponentDefaults =
+   ABViewFormConnectCore.defaultValues();
 
 const ABPopupSort = require("../../../ABDesigner/ab_work_object_workspace_popupSortFields");
 
 let FilterComponent = null;
 let SortComponent = null;
 
-let L = (...params) => AB.Multilingual.label(...params);
+const L = (...params) => AB.Multilingual.label(...params);
 
-function _onShow(App, compId, instance, component) {
+function _onShow(compId, instance) {
    const elem = $$(compId);
-
    if (!elem) return;
 
    const field = instance.field();
-
    if (!field) return;
 
    const node = elem.$view;
-
    if (!node) return;
 
    const $node = $$(node);
-
    if (!$node) return;
 
    const filterConditions = instance.settings.objectWorkspace
-      .filterConditions || { glue: "and", rules: [] };
+      .filterConditions ?? { glue: "and", rules: [] };
 
    const getFilterByConnectValues = (conditions, depth = 0) => {
       return [
@@ -54,7 +51,7 @@ function _onShow(App, compId, instance, component) {
    const filterByConnectValues = getFilterByConnectValues(filterConditions).map(
       (e) => {
          for (const key in instance.parent.viewComponents) {
-            const $ui = $$(instance.parent.viewComponents[key].ui.inputId);
+            const $ui = $$(instance.parent.viewComponents[key].ui().inputId);
 
             if ($ui?.config?.name === e.value) {
                // we need to use the element id stored in the settings to find out what the
@@ -202,6 +199,322 @@ function _onShow(App, compId, instance, component) {
    );
 }
 
+const ABViewComponent = require("./viewComponent/ABViewComponent").default;
+
+class ABViewFormConnectComponent extends ABViewComponent {
+   constructor(baseView, idBase) {
+      const base = idBase ?? `ABViewFormComponent_${baseView.id}`;
+      super(baseView, base, {
+         component: "",
+         popup: "",
+         editpopup: "",
+      });
+
+      this.view = baseView;
+      this.settings = baseView.settings;
+      this.AB = baseView.AB;
+
+      this.addPageComponent = null;
+      this.editPageComponent = null;
+   }
+
+   get field() {
+      return this.view.field();
+   }
+
+   ui() {
+      const ids = this.ids;
+      const field = this.field;
+      const form = this.view.parentFormComponent();
+
+      if (field == null) {
+         console.error(`This field could not found : ${this.settings.fieldId}`);
+         return {
+            view: "label",
+            label: "",
+         };
+      }
+
+      const multiselect = field.settings.linkType == "many";
+
+      let settings = {};
+      if (form) settings = form.settings;
+
+      let _ui = {
+         id: this.ids.component,
+         view: multiselect ? "multicombo" : "combo",
+         name: field.columnName,
+         // label: field.label,
+         // labelWidth: settings.labelWidth,
+         dataFieldId: field.id,
+         on: {
+            onItemClick: (id, e) => {
+               if (
+                  e.target.classList.contains("editConnectedPage") &&
+                  e.target.dataset.itemId
+               ) {
+                  const rowId = e.target.dataset.itemId;
+                  if (!rowId) return;
+                  this.goToEditPage(rowId);
+               }
+            },
+            onChange: (data) => {
+               let selectedValues;
+               if (Array.isArray(data)) {
+                  selectedValues = [];
+                  data.forEach((record) => {
+                     let recordObj = record;
+                     if (typeof record != "object") {
+                        // we need to convert either index or uuid to full data object
+                        recordObj = field.getItemFromVal(record);
+                     }
+                     if (recordObj?.id) selectedValues.push(recordObj.id);
+                  });
+               } else {
+                  selectedValues = data;
+                  if (typeof data != "object") {
+                     // we need to convert either index or uuid to full data object
+                     selectedValues = field.getItemFromVal(data);
+                  }
+                  // selectedValues = field.pullRecordRelationValues(selectedValues);
+                  if (selectedValues?.id) {
+                     selectedValues = selectedValues.id;
+                  } else {
+                     selectedValues = data;
+                  }
+               }
+               // We can now set the new value but we need to block event listening
+               // so it doesn't trigger onChange again
+               const $$component = $$(ids.component);
+               if ($$component) {
+                  $$component.blockEvent();
+                  const prepedVals = selectedValues.join
+                     ? selectedValues.join()
+                     : selectedValues;
+                  $$component.setValue(prepedVals);
+                  $$component.unblockEvent();
+               }
+            },
+         },
+      };
+
+      if (settings.showLabel) {
+         _ui.label = field.label;
+         _ui.labelWidth = settings.labelWidth;
+         _ui.labelPosition = settings.labelPosition;
+      }
+
+      let editForm = "";
+      if (settings.editForm && settings.editForm != "") {
+         editForm =
+            '<i data-item-id="#id#" class="fa fa-cog editConnectedPage"></i>';
+      }
+      _ui.suggest = {
+         button: true,
+         selectAll: multiselect ? true : false,
+         body: {
+            data: [],
+            template: editForm + "#value#",
+         },
+         on: {
+            onShow: () => {
+               field.getAndPopulateOptions(
+                  $$(ids.component),
+                  this.view.options,
+                  field,
+                  form
+               );
+            },
+         },
+      };
+
+      _ui.onClick = {
+         customField: (id, e, trg) => {
+            if (this.settings.disable == 1) return;
+
+            const rowData = {};
+
+            if ($$(ids.component)) {
+               const node = $$(ids.component).$view;
+               field.customEdit(rowData, /* App,*/ node);
+            }
+         },
+      };
+
+      let apcUI = null; // this.addPageComponent.ui();
+      if (apcUI) {
+         // reset some component vals to make room for button
+         _ui.label = "";
+         _ui.labelWidth = 0;
+
+         // add click event to add new button
+         apcUI.on = {
+            onItemClick: (/*id, evt*/) => {
+               // let $form = $$(id).getFormView();
+               let dc = form.datacollection;
+               this.addPageComponent.onClick(dc);
+               return false;
+            },
+         };
+
+         _ui = {
+            inputId: _ui.id,
+            rows: [
+               {
+                  cols: [
+                     {
+                        view: "label",
+                        label: field.label,
+                        width: settings.labelWidth,
+                        align: "left",
+                     },
+                     apcUI,
+                     _ui,
+                  ],
+               },
+            ],
+         };
+      } else {
+         _ui = {
+            inputId: _ui.id,
+            rows: [_ui],
+         };
+      }
+
+      return _ui;
+   }
+
+   init(AB) {
+      this.AB = AB;
+
+      console.error("TODO: ABViewFormConnect.addPageComponent()");
+      // this.addPageComponent = this.view.addPageTool.component(/*App, idBase */);
+      // this.addPageComponent.applicationLoad(this.view.application);
+      // this.addPageComponent.init({
+      //    onSaveData: component.logic.callbackSaveData,
+      //    onCancelClick: component.logic.callbackCancel,
+      //    clearOnLoad: component.logic.callbackClearOnLoad,
+      // });
+
+      console.error("TODO: ABViewFormConnect.editPageComponent()");
+      // this.editPageComponent = this.view.editPageTool.component(/*App, idBase*/);
+      // this.editPageComponent.applicationLoad(this.view.application);
+      // this.editPageComponent.init({
+      //    onSaveData: component.logic.callbackSaveData,
+      //    onCancelClick: component.logic.callbackCancel,
+      //    clearOnLoad: component.logic.callbackClearOnLoad,
+      // });
+   }
+
+   callbackSaveData(saveData) {
+      const ids = this.ids;
+
+      // find the select component
+      const elem = $$(ids.component);
+      if (!elem) return;
+
+      const field = this.field;
+      field.once("option.data", (data) => {
+         data.forEach((item) => {
+            item.value = item.text;
+         });
+         $$(ids.component).getList().clearAll();
+         $$(ids.component).getList().define("data", data);
+         if (field.settings.linkType == "many") {
+            const currentVals = $$(ids.component).getValue();
+            if (currentVals.indexOf(saveData.id) == -1) {
+               $$(ids.component).setValue(
+                  currentVals ? `${currentVals},${saveData.id}` : saveData.id
+               );
+            }
+         } else {
+            $$(ids.component).setValue(saveData.id);
+         }
+         // close the popup when we are finished
+         $$(ids.popup)?.close();
+         $$(ids.editpopup)?.close();
+      });
+
+      field
+         .getOptions(this.settings.filterConditions, "")
+         .then(function (data) {
+            // we need new option that will be returned from server (above)
+            // so we will not set this and then just reset it.
+         });
+   }
+
+   callbackCancel() {
+      $$(this.ids.popup).close();
+      return false;
+   }
+
+   callbackClearOnLoad() {
+      return true;
+   }
+
+   getValue(rowData) {
+      const elem = $$(this.ids.component);
+
+      return this.field.getValue(elem, rowData);
+   }
+
+   formBusy($form) {
+      if (!$form) return;
+
+      $form.disable?.();
+      $form.showProgress?.({ type: "icon" });
+   }
+
+   formReady($form) {
+      if (!$form) return;
+
+      $form.enable?.();
+      $form.hideProgress?.();
+   }
+
+   goToEditPage(rowId) {
+      if (!this.settings.editForm) return;
+
+      let editForm = this.view.application.urlResolve(this.settings.editForm);
+      if (!editForm) return;
+
+      let $form;
+      let $elem = $$(this.ids.component);
+      if ($elem) {
+         $form = $elem.getFormView();
+      }
+
+      // Open the form popup
+      this.editPageComponent.onClick().then(() => {
+         let dc = editForm.datacollection;
+         if (dc) {
+            dc.setCursor(rowId);
+
+            if (!this.__editFormDcEvent) {
+               this.__editFormDcEvent = dc.on("initializedData", () => {
+                  dc.setCursor(rowId);
+               });
+            }
+         }
+      });
+   }
+
+   onShow() {
+      const ids = this.ids;
+      _onShow(ids.component, this.view);
+      let elem = $$(ids.component);
+      if (!elem) return;
+
+      let node = elem.$view;
+
+      let field = this.field;
+
+      // Add data-cy attributes
+      const dataCy = `${field.key} ${field.columnName} ${field.id} ${this.view.parent.id}`;
+      node.setAttribute("data-cy", dataCy);
+   }
+}
+
 module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
    /**
     * @param {obj} values  key=>value hash of ABView values
@@ -264,10 +577,10 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
       };
 
       let baseComp = this.component(App);
-      let templateElem = baseComp.ui;
+      let templateElem = baseComp.ui();
       templateElem.id = ids.component;
 
-      var _ui = {
+      const _ui = {
          rows: [templateElem, {}],
       };
 
@@ -276,7 +589,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
          init: baseComp.init,
          logic: baseComp.logic,
          onShow: () => {
-            _onShow(App, ids.component, this, baseComp);
+            _onShow(ids.component, this.view);
          },
       };
    }
@@ -615,10 +928,8 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
       view.settings.filterConnectedValue = $$(
          ids.filterConnectedValue
       ).getValue();
-      view.settings.objectWorkspace = {
-         filterConditions: FilterComponent.getValue(),
-         sortFields: SortComponent.getValue(),
-      };
+      view.settings.filterConditions = FilterComponent.getValue();
+      view.settings.sortFields = SortComponent.getValue();
 
       view.settingsAddPage = this.addPageProperty.getSettings(view);
       view.settingsEditPage = this.editPageProperty.getSettings(view);
@@ -630,13 +941,12 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
 
    static populateBadgeNumber(ids, view) {
       if (
-         view.settings.objectWorkspace &&
-         view.settings.objectWorkspace.filterConditions &&
-         view.settings.objectWorkspace.filterConditions.rules
+         view.settings.filterConditions &&
+         view.settings.filterConditions.rules
       ) {
          $$(ids.buttonFilter).define(
             "badge",
-            view.settings.objectWorkspace.filterConditions.rules.length || null
+            view.settings.filterConditions.rules.length || null
          );
          $$(ids.buttonFilter).refresh();
       } else {
@@ -644,14 +954,10 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
          $$(ids.buttonFilter).refresh();
       }
 
-      if (
-         view.settings.objectWorkspace &&
-         view.settings.objectWorkspace.sortFields &&
-         view.settings.objectWorkspace.sortFields.length
-      ) {
+      if (view.settings.sortFields && view.settings.sortFields.length) {
          $$(ids.buttonSort).define(
             "badge",
-            view.settings.objectWorkspace.sortFields.length || null
+            view.settings.sortFields.length || null
          );
          $$(ids.buttonSort).refresh();
       } else {
@@ -685,14 +991,10 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
 
    static populatePopupEditors(view) {
       let filterConditions =
-         ABViewFormConnectPropertyComponentDefaults.objectWorkspace
-            .filterConditions;
+         ABViewFormConnectPropertyComponentDefaults.filterConditions;
 
-      if (
-         view.settings.objectWorkspace &&
-         view.settings.objectWorkspace.filterConditions
-      )
-         filterConditions = view.settings.objectWorkspace.filterConditions;
+      if (view.settings.filterConditions)
+         filterConditions = view.settings.filterConditions;
 
       // Populate data to popups
       // FilterComponent.objectLoad(objectCopy);
@@ -707,7 +1009,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
       FilterComponent.setValue(filterConditions);
 
       if (linkedObj) SortComponent.objectLoad(linkedObj);
-      SortComponent.setValue(view.settings.objectWorkspace.sortFields);
+      SortComponent.setValue(view.settings.sortFields);
    }
 
    static get addPageProperty() {
@@ -724,7 +1026,27 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
     * @param {obj} App
     * @return {obj} UI component
     */
-   component(App, idPrefix) {
+   component(v1App) {
+      let component = new ABViewFormConnectComponent(this);
+
+      // if this is our v1Interface
+      if (v1App) {
+         const newComponent = component;
+         component = {
+            ui: component.ui(),
+            init: (options, accessLevel) => {
+               return newComponent.init(this.AB, accessLevel);
+            },
+            onShow: (...params) => {
+               return newComponent.onShow?.(...params);
+            },
+         };
+      }
+
+      return component;
+   }
+
+   componentOld(App, idPrefix) {
       var field = this.field();
       // this field may be deleted
       if (!field) return super.component(App);
@@ -805,7 +1127,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
             });
 
             field
-               .getOptions(this.settings.objectWorkspace.filterConditions, "")
+               .getOptions(this.settings.filterConditions, "")
                .then(function (data) {
                   // we need new option that will be returned from server (above)
                   // so we will not set this and then just reset it.
@@ -1007,7 +1329,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
       }
 
       component.onShow = () => {
-         _onShow(App, ids.component, this, component);
+         _onShow(ids.component, this.view);
          let elem = $$(ids.component);
          if (!elem) return;
 

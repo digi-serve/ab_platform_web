@@ -5,7 +5,7 @@
  *
  */
 
-const ABViewComponent = require("./ABViewComponent").default;
+const ABViewComponent = require("./viewComponent/ABViewComponent").default;
 const ABViewForm = require("./ABViewForm");
 const ABViewFormButton = require("./ABViewFormButton");
 

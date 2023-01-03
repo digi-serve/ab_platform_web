@@ -193,7 +193,8 @@ module.exports = class ABViewFormButton extends ABViewFormButtonCore {
    component(App) {
       var idBase = this.parentFormUniqueID(`ABViewFormButton_${this.id}_f_`);
       var ids = {
-         component: App.unique(`${idBase}_component`),
+         // component: App.unique(`${idBase}_component`),
+         component: "",
       };
 
       var form = this.parentFormComponent();
@@ -380,14 +381,16 @@ module.exports = class ABViewFormButton extends ABViewFormButtonCore {
                   //Focus on first focusable component
                   form.focusOnFirst();
                })
-               .catch(() => {
+               .catch((err) => {
+                  console.error(err);
                   if (saveButton && saveButton.$view) saveButton.enable();
                });
          },
       });
 
       return {
-         ui: _ui,
+         // ui: _ui,
+         ui: () => _ui,
          init: _init,
          logic: _logic,
       };

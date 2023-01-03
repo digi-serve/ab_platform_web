@@ -1,13 +1,17 @@
-const ABViewFormComponentCore = require("../../core/views/ABViewFormComponentCore");
+const ABViewFormItemCore = require("../../core/views/ABViewFormItemCore");
+const ABViewFormItemComponent = require("./viewComponent/ABViewFormItemComponent");
 
-const ABViewFormFieldPropertyComponentDefaults = ABViewFormComponentCore.defaultValues();
+const ABViewFormFieldPropertyComponentDefaults =
+   ABViewFormItemCore.defaultValues();
 
-let L = (...params) => AB.Multilingual.label(...params);
-
-module.exports = class ABViewFormComponent extends ABViewFormComponentCore {
+module.exports = class ABViewFormItem extends ABViewFormItemCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
    // }
+
+   static get componentUI() {
+      return ABViewFormItemComponent;
+   }
 
    static propertyEditorDefaultElements(App, ids, _logic, ObjectDefaults) {
       var commonUI = super.propertyEditorDefaultElements(
@@ -81,7 +85,27 @@ module.exports = class ABViewFormComponent extends ABViewFormComponentCore {
     * @param {obj} App
     * @return {obj} UI component
     */
-   component(App) {
+   component(v1App = false) {
+      let component = new ABViewFormItemComponent(this);
+
+      // if this is our v1Interface
+      if (v1App) {
+         var newComponent = component;
+         component = {
+            ui: newComponent.ui(),
+            init: (options, accessLevel) => {
+               return newComponent.init(this.AB, accessLevel);
+            },
+            onShow: (...params) => {
+               return newComponent.onShow?.(...params);
+            },
+         };
+      }
+
+      return component;
+   }
+
+   componentV1(App) {
       // setup 'label' of the element
       var form = this.parentFormComponent(),
          field = this.field(),

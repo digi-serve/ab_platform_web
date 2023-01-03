@@ -99,8 +99,6 @@ class ABFactory extends ABFactoryCore {
       // Common Reference to Configuration Values
       this.Config = Config;
 
-      this.Class.FilterComplex = FilterComplex;
-
       //
       // Resources
       //
@@ -116,6 +114,7 @@ class ABFactory extends ABFactoryCore {
       this.ClassUI = ClassUI;
 
       // additional Class definitions
+      this.Class.FilterComplex = FilterComplex;
       this.Class.ABViewManager = ABViewManager;
 
       // Temp placeholders until Resources are implemented:

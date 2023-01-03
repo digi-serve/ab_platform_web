@@ -20,4 +20,14 @@ module.exports = class ABProcessEnd extends ABProcessEndCore {
    //         resolve(true);
    //     });
    // }
+
+   fromValues(attributes) {
+      super.fromValues(attributes);
+
+      if (!this.name) {
+         this.emit("warning", `T[${this.id}] is missing a name`, {
+            task: this.id,
+         });
+      }
+   }
 };
