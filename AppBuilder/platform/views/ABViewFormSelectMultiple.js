@@ -139,7 +139,8 @@ module.exports = class ABViewFormSelectMultiple extends (
          component.ui.tagTemplate = function (values) {
             let selectedOptions = [];
             values.forEach((val) => {
-               selectedOptions.push($$(ids.component).getList().getItem(val));
+               const $component = $$(ids.component) ?? $$(component.ui.id);
+               selectedOptions.push($component.getList().getItem(val));
             });
             let vals = selectedOptions;
             if (field.getSelectedOptions) {
