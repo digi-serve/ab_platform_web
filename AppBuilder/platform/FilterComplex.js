@@ -231,6 +231,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
                      data: () => [],
                      // data: async (field) => await this.pullOptions(field),
                      fields: [],
+                     height: this._options.height,
                   },
                ],
             },
