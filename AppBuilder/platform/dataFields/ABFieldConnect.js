@@ -611,9 +611,17 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          if (this.settings.linkType != "one" && !Array.isArray(val)) {
             val = [val];
          }
+
          item.getList().define("data", val);
       }
-      item.define("value", val);
+
+      item.define(
+         "value",
+         this.settings.linkType === "many"
+            ? val.map((e) => e.text).join(",")
+            : val.text
+      );
+      item.refresh();
    }
 
    /**

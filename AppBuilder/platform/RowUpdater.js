@@ -12,8 +12,6 @@ class RowUpdater extends ClassUI {
          field: `${idBase}_rowUpdaterField`,
       });
 
-      this.idBase = idBase;
-
       this._Object = null;
       // {ABObject}
       // The ABObject we are building a form for.
@@ -57,9 +55,10 @@ class RowUpdater extends ClassUI {
                      id: this.ids.field,
                      options: this.getFieldList(true),
                      on: {
-                        onChange: function (columnId) {
+                        onChange: async function (columnId) {
                            let $viewItem = this.getParentView();
-                           self.selectField(columnId, $viewItem);
+
+                           await self.selectField(columnId, $viewItem);
                         },
                      },
                   },
@@ -148,11 +147,9 @@ class RowUpdater extends ClassUI {
       };
    }
 
-   init(AB) {
+   async init(AB) {
       const $form = $$(this.ids.form);
       if ($form) AB.Webix.extend($form, AB.Webix.ProgressBar);
-
-      return Promise.resolve();
    }
 
    /**
@@ -303,19 +300,19 @@ class RowUpdater extends ClassUI {
     */
    objectLoad(object) {
       this._Object = object;
-
-      this._mockApp = this.AB.applicationNew({});
       this._mockFormWidget = new ABViewForm(
          {
+            id: `${this.ids.form}_view`,
+            key: ABViewForm.common().key,
             settings: {
                showLabel: false,
                labelWidth: 0,
             },
          },
-         this._mockApp // just need any ABApplication here
+         this.AB._mockApp // just need any ABApplication here
       );
-      this._mockFormWidget.objectLoad(object);
 
+      this._mockFormWidget.objectLoad(object);
       this.setValue(null); // clear
    }
 
@@ -343,7 +340,8 @@ class RowUpdater extends ClassUI {
     *        that was selected.
     */
    async selectField(columnId, $viewItem) {
-      let field = this._Object.fieldByID(columnId);
+      const field = this._Object.fieldByID(columnId);
+
       if (!field) {
          this.AB.notify.builder(
             new Error(`could not find field for id[${columnId}]`),
@@ -352,37 +350,61 @@ class RowUpdater extends ClassUI {
                fieldID: columnId,
             }
          );
+
          return;
       }
-      let fieldComponent = field.formComponent(),
+
+      const fieldComponent = field.formComponent(),
          formFieldWidget = fieldComponent.newInstance(
-            this._mockApp,
+            this.AB._mockApp,
             this._mockFormWidget
          ),
-         formFieldComponent = formFieldWidget.component(
-            this.AB._App,
-            this.idBase
-         ),
-         inputView = formFieldComponent.ui;
+         formFieldComponent = formFieldWidget.component();
+      const childViews = $viewItem.getChildViews();
+
+      let inputView = formFieldComponent.ui();
+
+      // Add extended value options
+      $viewItem.removeView(childViews[5]);
+
+      if (this._extendedOptions && this._extendedOptions.length) {
+         $viewItem.addView(
+            {
+               view: "richselect",
+               options: this._extendedOptions,
+               hidden: true,
+            },
+            5
+         );
+      } else {
+         $viewItem.addView(
+            {
+               hidden: true,
+            },
+            5
+         );
+      }
+
+      await this.busy();
 
       // WORKAROUND: add '[Current User]' option to the user data field
       switch (field.key) {
          case "connectObject":
          case "user":
-            {
-               this.busy();
-               const getOptTask = field.getOptions();
-               const $combo = inputView.rows[0];
-               $combo.suggest.body.data = (await getOptTask) ?? [];
-               if (field.key == "user") {
-                  $combo.suggest.body.data.unshift({
-                     id: "ab-current-user",
-                     value: L("[Current User]"),
-                  });
-               }
-               this.ready();
-            }
+            // inputView = inputView.rows[0];
+            inputView.rows[0].suggest.body.data =
+               (await field.getOptions()).map((e) => {
+                  return { id: e.value, value: e.value };
+               }) ?? [];
+
+            if (field.key === "user")
+               inputView.rows[0].suggest.body.data.unshift({
+                  id: "ab-current-user",
+                  value: L("ab-current-user"),
+               });
+
             break;
+
          case "date":
          case "datetime":
             inputView = {
@@ -407,10 +429,9 @@ class RowUpdater extends ClassUI {
                   inputView,
                ],
             };
+
             break;
       }
-
-      let childViews = $viewItem.getChildViews();
 
       // Change component to display value
       $viewItem.removeView(childViews[4]);
@@ -422,35 +443,15 @@ class RowUpdater extends ClassUI {
       if (field.customDisplay)
          field.customDisplay({}, this.AB._App, childViews[4].$view);
 
-      // Add extended value options
-      $viewItem.removeView(childViews[5]);
-      if (this._extendedOptions && this._extendedOptions.length) {
-         $viewItem.addView(
-            {
-               view: "richselect",
-               options: this._extendedOptions,
-               hidden: true,
-            },
-            5
-         );
-      } else {
-         $viewItem.addView(
-            {
-               hidden: true,
-            },
-            5
-         );
-      }
-
       this.toggleCustomProcessOption(
          $viewItem,
-         childViews[3].getValue() == "process"
+         childViews[3].getValue() === "process"
       );
 
-      // _logic.refreshFieldList();
-      // $$(this).adjust();
       $$($viewItem).adjust();
       $viewItem.getFormView().adjust();
+
+      this.ready();
    }
 
    /**
@@ -475,31 +476,47 @@ class RowUpdater extends ClassUI {
       settings = settings || [];
       if (settings.length < 1) return;
 
-      settings.forEach((item) => {
+      settings.forEach(async (item) => {
          let $viewContainer = $$(this.addItem());
          let $viewItem = $viewContainer.getChildViews()[0];
-
-         $viewItem.$$(this.ids.field).setValue(item.fieldId);
          let $valueTypeButton = $viewItem.queryView(
             { view: "segmented" },
             "self"
          );
+
          $valueTypeButton.setValue(item.isProcessValue ? "process" : "custom");
 
-         let $customValueElem = $viewItem.getChildViews()[4];
-         let $processValueElem = $viewItem.getChildViews()[5];
-         if (!$customValueElem && !$processValueElem) return;
+         const $field = $viewItem.$$(this.ids.field);
+
+         $field.define("value", item.fieldId);
+         $field.refresh();
+
+         await this.selectField(item.fieldId, $viewItem);
 
          let fieldInfo = this._Object.fieldByID(item.fieldId);
+
          if (!fieldInfo) return;
 
-         // Set custom value
-         let rowData = {};
-         rowData[fieldInfo.columnName] = item.value;
-         fieldInfo.setValue($customValueElem, rowData);
-
          // Set process value
-         $processValueElem.setValue(item.value);
+         if (item.isProcessValue) {
+            let $processValueElem = $viewItem.getChildViews()[5];
+
+            $processValueElem.setValue?.(item.value);
+
+            return;
+         }
+
+         // Set custom value
+         let $customValueElem = $viewItem.getChildViews()[4];
+         let rowData = {};
+
+         rowData[fieldInfo.columnName] = item.value?.value ?? item.value;
+         fieldInfo.setValue(
+            fieldInfo.key === "user" || fieldInfo.key === "connectObject"
+               ? $customValueElem.getChildViews()[0]
+               : $customValueElem,
+            rowData
+         );
       });
 
       this.toggleForm();
@@ -539,14 +556,21 @@ class RowUpdater extends ClassUI {
       }
    }
 
-   busy() {
+   async busy() {
       $$(this.ids.addNew).disable();
-      $$(this.ids.form)?.showProgress({ type: "icon" });
+
+      const $form = $$(this.ids.form);
+
+      if (!$form) return;
+
+      if (!$form.showProgress) await this.init(this.AB);
+
+      $form.showProgress({ type: "icon" });
    }
 
    ready() {
       $$(this.ids.addNew).enable();
-      $$(this.ids.form)?.hideProgress();
+      $$(this.ids.form).hideProgress();
    }
 }
 
