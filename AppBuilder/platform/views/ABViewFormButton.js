@@ -1,8 +1,10 @@
 const ABViewFormButtonCore = require("../../core/views/ABViewFormButtonCore");
+const ABViewFormButtonComponent = require("./viewComponent/ABViewFormButtonComponent");
 
-const ABViewFormButtonPropertyComponentDefaults = ABViewFormButtonCore.defaultValues();
+const ABViewFormButtonPropertyComponentDefaults =
+   ABViewFormButtonCore.defaultValues();
 
-let L = (...params) => AB.Multilingual.label(...params);
+const L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABViewFormButton extends ABViewFormButtonCore {
    // constructor(values, application, parent, defaultValues) {
@@ -21,168 +23,168 @@ module.exports = class ABViewFormButton extends ABViewFormButtonCore {
     * @param {string} mode what mode are we in ['block', 'preview']
     * @return {Component}
     */
-   editorComponent(App, mode) {
-      var idBase = "ABViewFormButtonEditorComponent";
-      var ids = {
-         component: App.unique(`${idBase}_component`),
-      };
+   // editorComponent(App, mode) {
+   //    var idBase = "ABViewFormButtonEditorComponent";
+   //    var ids = {
+   //       component: App.unique(`${idBase}_component`),
+   //    };
 
-      var button = this.component(App).ui;
-      button.id = ids.component;
+   //    var button = this.component(App).ui;
+   //    button.id = ids.component;
 
-      var _ui = {
-         rows: [button, {}],
-      };
+   //    var _ui = {
+   //       rows: [button, {}],
+   //    };
 
-      var _init = (options) => {};
+   //    var _init = (options) => {};
 
-      var _logic = {};
+   //    var _logic = {};
 
-      return {
-         ui: _ui,
-         init: _init,
-         logic: _logic,
-      };
-   }
+   //    return {
+   //       ui: _ui,
+   //       init: _init,
+   //       logic: _logic,
+   //    };
+   // }
 
    //
    // Property Editor
    //
 
-   static propertyEditorDefaultElements(App, ids, _logic, ObjectDefaults) {
-      var commonUI = super.propertyEditorDefaultElements(
-         App,
-         ids,
-         _logic,
-         ObjectDefaults
-      );
+   // static propertyEditorDefaultElements(App, ids, _logic, ObjectDefaults) {
+   //    var commonUI = super.propertyEditorDefaultElements(
+   //       App,
+   //       ids,
+   //       _logic,
+   //       ObjectDefaults
+   //    );
 
-      // in addition to the common .label  values, we
-      // ask for:
-      return commonUI.concat([
-         {
-            name: "includeSave",
-            view: "checkbox",
-            label: L("Save"),
-         },
-         {
-            name: "saveLabel",
-            view: "text",
-            labelWidth: this.AB.UISettings.config().labelWidthLarge,
-            label: L("Save Label"),
-            placeholder: L("Save Placeholder"),
-         },
-         {
-            name: "includeCancel",
-            view: "checkbox",
-            label: L("Cancel"),
-         },
-         {
-            name: "cancelLabel",
-            view: "text",
-            labelWidth: this.AB.UISettings.config().labelWidthLarge,
-            label: L("Cancel Label"),
-            placeholder: L("Cancel Placeholder"),
-         },
-         {
-            name: "includeReset",
-            view: "checkbox",
-            label: L("Reset"),
-         },
-         {
-            name: "resetLabel",
-            view: "text",
-            labelWidth: this.AB.UISettings.config().labelWidthLarge,
-            label: L("Reset Label"),
-            placeholder: L("Reset Placeholder"),
-         },
-         {
-            name: "afterCancel",
-            view: "richselect",
-            labelWidth: this.AB.UISettings.config().labelWidthLarge,
-            label: L("After Cancel"),
-            // options: []
-         },
-         {
-            name: "alignment",
-            view: "richselect",
-            labelWidth: this.AB.UISettings.config().labelWidthLarge,
-            label: L("Alignment"),
-            options: [
-               {
-                  id: "left",
-                  value: L("Left"),
-               },
-               {
-                  id: "center",
-                  value: L("Center"),
-               },
-               {
-                  id: "right",
-                  value: L("Right"),
-               },
-            ],
-         },
-      ]);
-   }
+   //    // in addition to the common .label  values, we
+   //    // ask for:
+   //    return commonUI.concat([
+   //       {
+   //          name: "includeSave",
+   //          view: "checkbox",
+   //          label: L("Save"),
+   //       },
+   //       {
+   //          name: "saveLabel",
+   //          view: "text",
+   //          labelWidth: this.AB.UISettings.config().labelWidthLarge,
+   //          label: L("Save Label"),
+   //          placeholder: L("Save Placeholder"),
+   //       },
+   //       {
+   //          name: "includeCancel",
+   //          view: "checkbox",
+   //          label: L("Cancel"),
+   //       },
+   //       {
+   //          name: "cancelLabel",
+   //          view: "text",
+   //          labelWidth: this.AB.UISettings.config().labelWidthLarge,
+   //          label: L("Cancel Label"),
+   //          placeholder: L("Cancel Placeholder"),
+   //       },
+   //       {
+   //          name: "includeReset",
+   //          view: "checkbox",
+   //          label: L("Reset"),
+   //       },
+   //       {
+   //          name: "resetLabel",
+   //          view: "text",
+   //          labelWidth: this.AB.UISettings.config().labelWidthLarge,
+   //          label: L("Reset Label"),
+   //          placeholder: L("Reset Placeholder"),
+   //       },
+   //       {
+   //          name: "afterCancel",
+   //          view: "richselect",
+   //          labelWidth: this.AB.UISettings.config().labelWidthLarge,
+   //          label: L("After Cancel"),
+   //          // options: []
+   //       },
+   //       {
+   //          name: "alignment",
+   //          view: "richselect",
+   //          labelWidth: this.AB.UISettings.config().labelWidthLarge,
+   //          label: L("Alignment"),
+   //          options: [
+   //             {
+   //                id: "left",
+   //                value: L("Left"),
+   //             },
+   //             {
+   //                id: "center",
+   //                value: L("Center"),
+   //             },
+   //             {
+   //                id: "right",
+   //                value: L("Right"),
+   //             },
+   //          ],
+   //       },
+   //    ]);
+   // }
 
-   static propertyEditorPopulate(App, ids, view) {
-      super.propertyEditorPopulate(App, ids, view);
+   // static propertyEditorPopulate(App, ids, view) {
+   //    super.propertyEditorPopulate(App, ids, view);
 
-      var pagesList = [];
-      var allPage = view.application.pages();
-      view.AddPagesToList(pagesList, view.application, view.pageRoot().id);
+   //    var pagesList = [];
+   //    var allPage = view.application.pages();
+   //    view.AddPagesToList(pagesList, view.application, view.pageRoot().id);
 
-      var opts = pagesList.map(function (opt) {
-         return {
-            id: opt.id,
-            value: opt.value,
-         };
-      });
-      $$(ids.afterCancel).define("options", opts);
+   //    var opts = pagesList.map(function (opt) {
+   //       return {
+   //          id: opt.id,
+   //          value: opt.value,
+   //       };
+   //    });
+   //    $$(ids.afterCancel).define("options", opts);
 
-      $$(ids.includeSave).setValue(
-         view.settings.includeSave != null
-            ? view.settings.includeSave
-            : ABViewFormButtonPropertyComponentDefaults.includeSave
-      );
-      $$(ids.includeCancel).setValue(
-         view.settings.includeCancel != null
-            ? view.settings.includeCancel
-            : ABViewFormButtonPropertyComponentDefaults.includeCancel
-      );
-      $$(ids.includeReset).setValue(
-         view.settings.includeReset != null
-            ? view.settings.includeReset
-            : ABViewFormButtonPropertyComponentDefaults.includeReset
-      );
+   //    $$(ids.includeSave).setValue(
+   //       view.settings.includeSave != null
+   //          ? view.settings.includeSave
+   //          : ABViewFormButtonPropertyComponentDefaults.includeSave
+   //    );
+   //    $$(ids.includeCancel).setValue(
+   //       view.settings.includeCancel != null
+   //          ? view.settings.includeCancel
+   //          : ABViewFormButtonPropertyComponentDefaults.includeCancel
+   //    );
+   //    $$(ids.includeReset).setValue(
+   //       view.settings.includeReset != null
+   //          ? view.settings.includeReset
+   //          : ABViewFormButtonPropertyComponentDefaults.includeReset
+   //    );
 
-      $$(ids.saveLabel).setValue(view.settings.saveLabel || "");
-      $$(ids.cancelLabel).setValue(view.settings.cancelLabel || "");
-      $$(ids.resetLabel).setValue(view.settings.resetLabel || "");
+   //    $$(ids.saveLabel).setValue(view.settings.saveLabel || "");
+   //    $$(ids.cancelLabel).setValue(view.settings.cancelLabel || "");
+   //    $$(ids.resetLabel).setValue(view.settings.resetLabel || "");
 
-      $$(ids.afterCancel).setValue(
-         view.settings.afterCancel ||
-            ABViewFormButtonPropertyComponentDefaults.afterCancel
-      );
-      $$(ids.alignment).setValue(
-         view.settings.alignment ||
-            ABViewFormButtonPropertyComponentDefaults.alignment
-      );
-   }
+   //    $$(ids.afterCancel).setValue(
+   //       view.settings.afterCancel ||
+   //          ABViewFormButtonPropertyComponentDefaults.afterCancel
+   //    );
+   //    $$(ids.alignment).setValue(
+   //       view.settings.alignment ||
+   //          ABViewFormButtonPropertyComponentDefaults.alignment
+   //    );
+   // }
 
-   static propertyEditorValues(ids, view) {
-      super.propertyEditorValues(ids, view);
+   // static propertyEditorValues(ids, view) {
+   //    super.propertyEditorValues(ids, view);
 
-      view.settings.includeSave = $$(ids.includeSave).getValue();
-      view.settings.saveLabel = $$(ids.saveLabel).getValue();
-      view.settings.includeCancel = $$(ids.includeCancel).getValue();
-      view.settings.cancelLabel = $$(ids.cancelLabel).getValue();
-      view.settings.includeReset = $$(ids.includeReset).getValue();
-      view.settings.resetLabel = $$(ids.resetLabel).getValue();
-      view.settings.afterCancel = $$(ids.afterCancel).getValue();
-      view.settings.alignment = $$(ids.alignment).getValue();
-   }
+   //    view.settings.includeSave = $$(ids.includeSave).getValue();
+   //    view.settings.saveLabel = $$(ids.saveLabel).getValue();
+   //    view.settings.includeCancel = $$(ids.includeCancel).getValue();
+   //    view.settings.cancelLabel = $$(ids.cancelLabel).getValue();
+   //    view.settings.includeReset = $$(ids.includeReset).getValue();
+   //    view.settings.resetLabel = $$(ids.resetLabel).getValue();
+   //    view.settings.afterCancel = $$(ids.afterCancel).getValue();
+   //    view.settings.alignment = $$(ids.alignment).getValue();
+   // }
 
    /**
     * @method component()
@@ -190,7 +192,57 @@ module.exports = class ABViewFormButton extends ABViewFormButtonCore {
     * @param {obj} App
     * @return {obj} UI component
     */
-   component(App) {
+   component(v1App = false) {
+      let component = new ABViewFormButtonComponent(this);
+
+      // if this is our v1Interface
+      if (v1App) {
+         const newComponent = component;
+         component = {
+            ui: newComponent.ui(),
+            init: (options, accessLevel) => {
+               return newComponent.init(this.AB, accessLevel);
+            },
+            onShow: (...params) => {
+               return newComponent.onShow?.(...params);
+            },
+         };
+      }
+
+      return component;
+   }
+
+   AddPagesToList(pagesList, parent, rootPageId) {
+      if (!parent || !parent.pages || !pagesList) return;
+
+      const pages = parent.pages() || [];
+
+      pages.forEach((page) => {
+         if (!page.parent || page.id === rootPageId) {
+            pagesList.push({
+               id: page.id,
+               value: page.label,
+            });
+
+            this.AddPagesToList(pagesList, page, page.id);
+         }
+      });
+   }
+
+   /**
+    * @method parentFormUniqueID
+    * return a unique ID based upon the closest form object this component is on.
+    * @param {string} key  The basic id string we will try to make unique
+    * @return {string}
+    */
+   parentFormUniqueID(key) {
+      const form = this.parentFormComponent();
+      const uniqueInstanceID = form?.uniqueInstanceID ?? webix.uid();
+
+      return key + uniqueInstanceID;
+   }
+
+   componentOld(App) {
       var idBase = this.parentFormUniqueID(`ABViewFormButton_${this.id}_f_`);
       var ids = {
          // component: App.unique(`${idBase}_component`),
@@ -394,40 +446,5 @@ module.exports = class ABViewFormButton extends ABViewFormButtonCore {
          init: _init,
          logic: _logic,
       };
-   }
-
-   AddPagesToList(pagesList, parent, rootPageId) {
-      if (!parent || !parent.pages || !pagesList) return;
-
-      var pages = parent.pages() || [];
-
-      pages.forEach((page) => {
-         if (page.parent != null || page.id == rootPageId) {
-            pagesList.push({
-               id: page.id,
-               value: page.label,
-            });
-
-            this.AddPagesToList(pagesList, page, page.id);
-         }
-      });
-   }
-
-   /**
-    * @method parentFormUniqueID
-    * return a unique ID based upon the closest form object this component is on.
-    * @param {string} key  The basic id string we will try to make unique
-    * @return {string}
-    */
-   parentFormUniqueID(key) {
-      var form = this.parentFormComponent();
-      var uniqueInstanceID;
-      if (form) {
-         uniqueInstanceID = form.uniqueInstanceID;
-      } else {
-         uniqueInstanceID = webix.uid();
-      }
-
-      return key + uniqueInstanceID;
    }
 };
