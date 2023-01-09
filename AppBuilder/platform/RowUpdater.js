@@ -378,7 +378,7 @@ class RowUpdater extends ClassUI {
       // Add extended value options
       $viewItem.removeView(childViews[5]);
 
-      if (this._extendedOptions && this._extendedOptions.length)
+      if (this._extendedOptions?.length)
          $viewItem.addView(
             {
                view: "richselect",
