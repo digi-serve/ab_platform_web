@@ -9,7 +9,7 @@ module.exports = class ABViewFormDatepickerComponent extends (
    }
 
    ui() {
-      const _ui = {};
+      const _ui = super.ui();
       const field = this.view.field();
 
       _ui.id = this.ids.component;

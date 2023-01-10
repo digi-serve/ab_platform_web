@@ -71,7 +71,7 @@ module.exports = class ABViewFormItemComponent extends ABViewComponent {
                      );
                   });
                }
-               this.getInputNode().setAttribute(
+               this.getInputNode?.().setAttribute?.(
                   "data-cy",
                   `${field.key} ${field.columnName} ${field.id} ${
                      form ? form.id : "nf"
