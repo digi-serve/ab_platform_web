@@ -1,48 +1,6 @@
 const ABViewFormCheckboxCore = require("../../core/views/ABViewFormCheckboxCore");
 
-const ABViewComponent = require("./viewComponent/ABViewComponent").default;
-
 module.exports = class ABViewFormCheckbox extends ABViewFormCheckboxCore {
-   // constructor(values, application, parent, defaultValues) {
-   //    super(values, application, parent, defaultValues);
-   // }
-
-   //
-   //	Editor Related
-   //
-
-   /**
-    * @method editorComponent
-    * return the Editor for this UI component.
-    * the editor should display either a "block" view or "preview" of
-    * the current layout of the view.
-    * @param {string} mode what mode are we in ['block', 'preview']
-    * @return {Component}
-    */
-   editorComponent(App, mode) {
-      var idBase = "ABViewFormCheckboxEditorComponent";
-      var ids = {
-         component: App.unique(`${idBase}_component`),
-      };
-
-      var checkboxElem = this.component(App).ui;
-      checkboxElem.id = ids.component;
-
-      var _ui = {
-         rows: [checkboxElem, {}],
-      };
-
-      var _init = (options) => {};
-
-      var _logic = {};
-
-      return {
-         ui: _ui,
-         init: _init,
-         logic: _logic,
-      };
-   }
-
    /**
     * @method component()
     * return a UI component based upon this view.

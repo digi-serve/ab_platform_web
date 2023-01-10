@@ -5,7 +5,7 @@ const ABViewComponent = require("./ABViewComponent").default;
 module.exports = class ABViewFormItemComponent extends ABViewComponent {
    constructor(baseView, idBase, ids) {
       var base = idBase || `ABViewFormComponent_${baseView.id}`;
-      super(base, ids);
+      super(baseView, base, ids);
 
       this.view = baseView;
       this.settings = baseView.settings;
@@ -71,7 +71,7 @@ module.exports = class ABViewFormItemComponent extends ABViewComponent {
                      );
                   });
                }
-               this.getInputNode().setAttribute(
+               this.getInputNode?.().setAttribute?.(
                   "data-cy",
                   `${field.key} ${field.columnName} ${field.id} ${
                      form ? form.id : "nf"
