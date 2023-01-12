@@ -57,6 +57,8 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
 
    ui() {
       return {
+         // TODO: We have to refactor becuase we need "id" on the very top level for each viewComponent.
+         id: `${this.ids.component}_temp`,
          cols: [
             {
                view: "button",

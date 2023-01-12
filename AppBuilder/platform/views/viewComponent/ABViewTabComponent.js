@@ -353,6 +353,9 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
          };
       }
 
+      // TODO: We have to refactor becuase we need "id" on the very top level for each viewComponent.
+      _ui.id = `${this.ids.component}_temp`;
+
       return _ui;
    }
 

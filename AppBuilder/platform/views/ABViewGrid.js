@@ -512,6 +512,8 @@ class ABViewGridComponent extends ABViewComponent {
 
    ui() {
       var tableUI = {
+         // TODO: We have to refactor becuase we need "id" on the very top level for each viewComponent.
+         id: `${this.ids.component}_temp`,
          type: "space",
          borderless: true,
          rows: [

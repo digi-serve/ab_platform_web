@@ -23,6 +23,8 @@ module.exports = class ABViewFormItemComponent extends ABViewComponent {
       if (form) settings = form.settings;
 
       var _ui = {
+         // TODO: We have to refactor becuase we need "id" on the very top level for each viewComponent.
+         id: `${this.ids.component}_temp`,
          labelPosition: settings.labelPosition,
          labelWidth: settings.labelWidth,
          label: label,

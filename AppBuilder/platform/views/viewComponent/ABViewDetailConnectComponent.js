@@ -19,9 +19,9 @@ module.exports = class ABViewDetailConnectComponent extends (
             let columnName = this.view.field(
                (fld) => fld.id == this.settings.fieldId
             ).columnName;
-            const dataCy = `detail connected ${columnName} ${this.settings.fieldId} ${
-               this.view.parentDetailComponent()?.id || this.view.parent.id
-            }`;
+            const dataCy = `detail connected ${columnName} ${
+               this.settings.fieldId
+            } ${this.view.parentDetailComponent()?.id || this.view.parent.id}`;
             $$(this.ids.component)?.$view.setAttribute("data-cy", dataCy);
          },
       };
