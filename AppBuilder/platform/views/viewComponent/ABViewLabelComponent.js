@@ -19,7 +19,7 @@ module.exports = class ABViewLabelComponent extends ABViewComponent {
 
       const _ui = {
          // TODO: We have to refactor becuase we need "id" on the very top level for each viewComponent.
-         id: `${this.ids.component}_temp`,
+         id: `${this.ids.component.replace("Label", "LabelLabel")}_temp`,
          type: "form",
          padding: 15,
          borderless: true,
