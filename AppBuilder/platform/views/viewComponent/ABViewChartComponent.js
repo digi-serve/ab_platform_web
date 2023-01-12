@@ -12,6 +12,8 @@ module.exports = class ABViewChartComponent extends ABViewContainerComponent {
 
    ui() {
       return {
+         // TODO: We have to refactor becuase we need "id" on the very top level for each viewComponent.
+         id: `${this.ids.component}_temp`,
          type: "form",
          borderless: true,
          rows: [

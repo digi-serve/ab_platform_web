@@ -22,6 +22,8 @@ module.exports = class ABViewCSVExporterComponent extends ClassUI {
       const ids = this.ids;
 
       return {
+         // TODO: We have to refactor becuase we need "id" on the very top level for each viewComponent.
+         id: `${this.ids.component}_temp`,
          view: "layout",
          type: "clean",
          borderless: true,
