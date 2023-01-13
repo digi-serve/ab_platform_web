@@ -23,6 +23,9 @@ module.exports = class ABViewConditionalContainerComponent extends (
    }
 
    ui() {
+      // NOTE: call this to listen "changePage" event !!!
+      super.ui();
+
       const ifComp = this.ifComponent;
       const elseComp = this.elseComponent;
 
@@ -93,11 +96,17 @@ module.exports = class ABViewConditionalContainerComponent extends (
    }
 
    get ifComponent() {
-      return this.view.views()[0]?.component();
+      if (!this._ifComponent)
+         this._ifComponent = this.view.views()[0]?.component();
+
+      return this._ifComponent;
    }
 
    get elseComponent() {
-      return this.view.views()[1]?.component();
+      if (!this._elseComponent)
+         this._elseComponent = this.view.views()[1]?.component();
+
+      return this._elseComponent;
    }
 
    displayView(currData) {
@@ -122,8 +131,10 @@ module.exports = class ABViewConditionalContainerComponent extends (
       if (isValid) {
          // if (isValid && currData) {
          $$(this.ids.component).showBatch("if");
+         this.ifComponent?.onShow?.();
       } else {
          $$(this.ids.component).showBatch("else");
+         this.elseComponent?.onShow?.();
       }
    }
 
