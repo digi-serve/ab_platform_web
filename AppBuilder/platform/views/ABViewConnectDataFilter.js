@@ -5,7 +5,7 @@ const L = (...params) => AB.Multilingual.label(...params);
 
 class ABViewConnectDataFilterComponent extends ABViewComponent {
    constructor(view, idbase) {
-      super(idbase ?? `ABViewConnectDataFilter_${view.id}`, {
+      super(view, idbase ?? `ABViewConnectDataFilter_${view.id}`, {
          reset: "",
       });
 
