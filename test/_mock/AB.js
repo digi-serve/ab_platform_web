@@ -12,12 +12,23 @@ export default class AB {
 
       this.Class = {
          ABFieldManager: {
-            allFields: () => {}
-         }
+            allFields: () => {},
+         },
       };
       this.ClassUI = ClassUI;
       this.Config = new Config();
       this.Multilingual = Multilingual;
+      this._App = {
+         Label: () => {},
+         unique: () => {},
+      };
+   }
+
+   filterComplexNew() {
+      return {
+         fieldsLoad: () => {},
+         setValue: () => {},
+      };
    }
 }
 
@@ -43,4 +54,5 @@ class Multilingual {
    static labelPlugin(...params) {
       this._params = params;
    }
+   static label() {}
 }
