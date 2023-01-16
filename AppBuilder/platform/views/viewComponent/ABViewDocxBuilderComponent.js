@@ -69,6 +69,8 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
          ABViewDocxBuilderPropertyComponentDefaults.buttonlabel; // Use || to check empty string ""
 
       return {
+         // TODO: We have to refactor becuase we need "id" on the very top level for each viewComponent.
+         id: `${this.ids.component}_temp`,
          view: "toolbar",
          css:
             view.settings.toolbarBackground ??

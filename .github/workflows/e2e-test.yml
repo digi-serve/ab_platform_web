@@ -32,6 +32,7 @@ jobs:
               path: web
               repository: digi-serve/ab_service_web
               token: ${{ secrets.DS_REPO_PAT }}
+              ref: ${{ matrix.branch }}
 
          - run: npm i
            working-directory: ./ab_platform_web
@@ -55,6 +56,12 @@ jobs:
               repository: digi-serve/kitchensink_app
               path: ab/test/e2e/cypress/integration/kitchensink_app
 
+         # These next steps are to save our ablogs to file
+         - run: npm install pm2@latest -g
+         - name: Save Logs
+           run: pm2 start ./logs.js -- --toFile logs/ABServices.log
+           working-directory: ./ab
+
          - name: Run Cypress Tests
            uses: cypress-io/github-action@v2
            with:
@@ -72,6 +79,12 @@ jobs:
            with:
               name: cypress-screenshots
               path: ./ab/test/e2e/cypress/screenshots
+
+         - uses: actions/upload-artifact@v2
+           if: failure()
+           with:
+              name: ABServices.log
+              path: ./ab/logs/ABServices.log
 
    # if its a push event and tests passed update ab_service_web
    update_ab_service_web:

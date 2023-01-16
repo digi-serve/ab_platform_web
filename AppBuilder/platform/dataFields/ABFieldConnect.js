@@ -608,12 +608,21 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       // put in current values as options so we can display them before
       // the rest of the options are fetched when field is clicked
       if (item.getList && item.getList().count() == 0) {
-         if (this.settings.linkType != "one" && !Array.isArray(val)) {
+         if (this.settings.linkType !== "one" && !Array.isArray(val)) {
             val = [val];
          }
-         item.getList().define("data", val);
+
+         const $list = item.getList();
+
+         $list.define("data", val);
+         $list.refresh();
       }
-      item.define("value", val);
+
+      item.define(
+         "value",
+         Array.isArray(val) ? val.map((e) => e.text).join(",") : val.text
+      );
+      item.refresh();
    }
 
    /**
