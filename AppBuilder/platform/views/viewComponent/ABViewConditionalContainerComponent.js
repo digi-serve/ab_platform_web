@@ -3,8 +3,6 @@ const ABViewContainerComponent = require("./ABViewContainerComponent");
 
 const ABViewPropertyDefaults = ABViewConditionalContainerCore.defaultValues();
 
-const L = (...params) => AB.Multilingual.label(...params);
-
 module.exports = class ABViewConditionalContainerComponent extends (
    ABViewContainerComponent
 ) {
@@ -49,7 +47,7 @@ module.exports = class ABViewConditionalContainerComponent extends (
                rows: [
                   {
                      view: "label",
-                     label: L("Please wait..."),
+                     label: this.label("Please wait..."),
                   },
                ],
             },

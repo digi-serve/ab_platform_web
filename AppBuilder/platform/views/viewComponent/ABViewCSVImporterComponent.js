@@ -2,8 +2,6 @@ const ABViewCSVImporterCore = require("../../../core/views/ABViewCSVImporterCore
 const ClassUI = require("../../../../ui/ClassUI").default;
 const CSVImporter = require("../../CSVImporter");
 
-const L = (...params) => AB.Multilingual.label(...params);
-
 const ABViewCSVImporterPropertyComponentDefaults =
    ABViewCSVImporterCore.defaultValues();
 
@@ -40,7 +38,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
       // {json}
       // a local copy of the settings for our ABView
 
-      this.csvImporter = new CSVImporter(L);
+      this.csvImporter = new CSVImporter(this.label);
       // {CSVImporter}
       // An instance of the object that imports the CSV data.
 
@@ -65,7 +63,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
                css: "webix_primary",
                type: "icon",
                icon: "fa fa-upload",
-               label: L(
+               label: this.label(
                   this.settings.buttonLabel ||
                      ABViewCSVImporterPropertyComponentDefaults.buttonLabel
                ),
@@ -101,7 +99,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
                      view: "uploader",
                      name: "csvFile",
                      css: "webix_primary",
-                     value: L("Choose a CSV file"),
+                     value: this.label("Choose a CSV file"),
                      accept: "text/csv",
                      multiple: false,
                      autosend: false,
@@ -133,7 +131,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
                            id: ids.separatedBy,
                            view: "richselect",
                            name: "separatedBy",
-                           label: L("Separated by"),
+                           label: this.label("Separated by"),
                            labelWidth: 140,
                            options: this.csvImporter.getSeparateItems(),
                            value: ",",
@@ -147,7 +145,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
                            id: ids.headerOnFirstLine,
                            view: "checkbox",
                            name: "headerOnFirstLine",
-                           label: L("Header on first line"),
+                           label: this.label("Header on first line"),
                            labelWidth: 140,
                            disabled: true,
                            value: true,
@@ -194,7 +192,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
                      view: "search",
                      value: "",
                      label: "",
-                     placeholder: L("Search records..."),
+                     placeholder: this.label("Search records..."),
                      keyPressTimeout: 200,
                      on: {
                         onTimedKeyPress: () => {
@@ -272,7 +270,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
                view: "button",
                name: "import",
                id: ids.importButton,
-               value: L("Import"),
+               value: this.label("Import"),
                css: "webix_primary",
                disabled: true,
                click: () => {
@@ -300,7 +298,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
                {},
                {
                   view: "label",
-                  label: L("CSV Importer"),
+                  label: this.label("CSV Importer"),
                   autowidth: true,
                },
                {},
@@ -342,7 +340,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
                      {
                         view: "button",
                         name: "cancel",
-                        value: L("Cancel"),
+                        value: this.label("Cancel"),
                         css: "ab-cancel-button",
                         autowidth: true,
                         click: () => {
@@ -493,9 +491,9 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
 
       if (!this.csvImporter.validateFile(this._csvFileInfo)) {
          webix.alert({
-            title: L("This file extension is not allowed"),
-            text: L("Please only upload CSV files"),
-            ok: L("Ok"),
+            title: this.label("This file extension is not allowed"),
+            text: this.label("Please only upload CSV files"),
+            ok: this.label("Ok"),
          });
 
          return false;
@@ -583,7 +581,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
          for (let i = 0; i < firstLine.length; i++) {
             csvColumnList.push({
                id: i + 1, // webix .options list disallow value 0
-               value: L("Column {0}", [i + 1]),
+               value: this.label("Column {0}", [i + 1]),
                key: this.csvImporter.getGuessDataType(this._dataRows, i),
             });
          }
@@ -592,7 +590,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
       // Add unselect item
       csvColumnList.unshift({
          id: "none",
-         value: L("None"),
+         value: this.label("None"),
       });
 
       // populate columns to UI
@@ -631,32 +629,32 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
          if (f.key == "date") {
             let dateSeparatorOptions = ["/", "-", ".", ",", " "];
             let dayFormatOptions = [
-               { value: L("1 to 31"), id: "D" },
-               { value: L("01 to 31"), id: "DD" },
+               { value: this.label("1 to 31"), id: "D" },
+               { value: this.label("01 to 31"), id: "DD" },
             ];
             let monthFormatOptions = [
-               { value: L("1 to 12"), id: "M" },
-               { value: L("01 to 12"), id: "MM" },
+               { value: this.label("1 to 12"), id: "M" },
+               { value: this.label("01 to 12"), id: "MM" },
             ];
             let yearFormatOptions = [
-               { value: L("00 to 99"), id: "YY" },
-               { value: L("2000 to 2099"), id: "YYYY" },
+               { value: this.label("00 to 99"), id: "YY" },
+               { value: this.label("2000 to 2099"), id: "YYYY" },
             ];
             let dateOrderOptions = [
                {
-                  value: L("D-M-Y"),
+                  value: this.label("D-M-Y"),
                   id: 1,
                },
                {
-                  value: L("M-D-Y"),
+                  value: this.label("M-D-Y"),
                   id: 2,
                },
                {
-                  value: L("Y-M-D"),
+                  value: this.label("Y-M-D"),
                   id: 3,
                },
                {
-                  value: L("Y-D-M"),
+                  value: this.label("Y-D-M"),
                   id: 4,
                },
             ];
@@ -667,7 +665,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
                   columnOptUI,
                   {
                      view: "richselect",
-                     label: L("Separator"),
+                     label: this.label("Separator"),
                      labelWidth: 100,
                      on: {
                         onChange: () => {
@@ -681,7 +679,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
                   },
                   {
                      view: "richselect",
-                     label: L("Day"),
+                     label: this.label("Day"),
                      labelWidth: 100,
                      on: {
                         onChange: () => {
@@ -695,7 +693,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
                   },
                   {
                      view: "richselect",
-                     label: L("Month"),
+                     label: this.label("Month"),
                      labelWidth: 100,
                      on: {
                         onChange: () => {
@@ -709,7 +707,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
                   },
                   {
                      view: "richselect",
-                     label: L("Year"),
+                     label: this.label("Year"),
                      labelWidth: 100,
                      on: {
                         onChange: () => {
@@ -723,7 +721,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
                   },
                   {
                      view: "richselect",
-                     label: L("Order"),
+                     label: this.label("Order"),
                      labelWidth: 100,
                      on: {
                         onChange: () => {
@@ -813,8 +811,8 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
       if (data.length > limit) {
          // we only allow 1000 record imports
          webix.alert({
-            title: L("Too many records"),
-            ok: L("Ok"),
+            title: this.label("Too many records"),
+            ok: this.label("Ok"),
             text: L(
                "Due to browser limitations we only allow imports of {0} records. Please upload a new CSV or deselect records to import.",
                [limit]
@@ -1070,20 +1068,22 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
 
       if (seconds < 1) result = "";
       else if (seconds < 60)
-         result = L("Approximately {0} second(s) remaining", [seconds]);
+         result = this.label("Approximately {0} second(s) remaining", [
+            seconds,
+         ]);
       // result = `Approximately ${seconds} second${
       //    seconds > 1 ? "s" : ""
       // }`;
       else if (minutes == 1)
-         result = L("Approximately 1 minute {0} seconds remaining", [
+         result = this.label("Approximately 1 minute {0} seconds remaining", [
             seconds - 60,
          ]);
       // result = `Approximately 1 minute ${seconds - 60} seconds`;
       else if (minutes < 60)
-         result = L("Approximately {0} minutes remaining", [minutes]);
+         result = this.label("Approximately {0} minutes remaining", [minutes]);
       else if (hours < 24)
-         result = L("Approximately {0} hour(s) remaining", [hours]);
-      else result = L("Approximately {0} day(s) remaining", [days]);
+         result = this.label("Approximately {0} hour(s) remaining", [hours]);
+      else result = this.label("Approximately {0} day(s) remaining", [days]);
 
       if (result) {
          $$(ids.importButton)?.setValue(result);
@@ -1206,7 +1206,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
       let length = selected;
       if (Array.isArray(selected)) length = selected.length;
 
-      return L("Import {0} Records", [length]);
+      return this.label("Import {0} Records", [length]);
    }
 
    /**
@@ -1458,9 +1458,9 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
          uiCleanUp();
 
          webix.alert({
-            title: L("Invalid Data"),
-            ok: L("Ok"),
-            text: L(
+            title: this.label("Invalid Data"),
+            ok: this.label("Ok"),
+            text: this.label(
                "The highlighted row has invalid data. Please edit in the window or update the CSV and try again."
             ),
          });
@@ -1572,9 +1572,9 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
          .then(() => {
             if (!allValid) {
                webix.alert({
-                  title: L("Invalid Data"),
-                  ok: L("Ok"),
-                  text: L(
+                  title: this.label("Invalid Data"),
+                  ok: this.label("Ok"),
+                  text: this.label(
                      "The highlighted row has invalid data. Please edit in the window or update the CSV and try again."
                   ),
                });
@@ -1733,9 +1733,9 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
          .catch((err) => {
             // resolve Error UI
             webix.alert({
-               title: L("Error Creating Records"),
-               ok: L("Ok"),
-               text: L("One or more records failed upon creation."),
+               title: this.label("Error Creating Records"),
+               ok: this.label("Ok"),
+               text: this.label("One or more records failed upon creation."),
             });
             // $$(ids.datatable).unblockEvent();
             uiCleanUp();
