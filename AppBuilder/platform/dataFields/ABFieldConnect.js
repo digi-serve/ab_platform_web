@@ -424,7 +424,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       }
    }
 
-   getAndPopulateOptions(editor, options, field, form) {
+   async getAndPopulateOptions(editor, options, field, form) {
       const theEditor = editor;
 
       // if we are filtering based off another selectivity's value we
@@ -510,8 +510,11 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          handlerOptionData
       );
 
-      this.getOptions(combineFilters, "").then((data) => {
-         this.populateOptions(theEditor, data, field, form, false);
+      return new Promise((resolve, reject) => {
+         this.getOptions(combineFilters, "").then((data) => {
+            this.populateOptions(theEditor, data, field, form, false);
+            resolve();
+         });
       });
    }
 
@@ -544,7 +547,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             if (!node) return;
             node.setAttribute(
                "data-cy",
-               `${field.key} options ${option.id} ${field.id} ${form.id}`
+               `${field.key} options ${option.id} ${field.id} ${form?.id}`
             );
          });
       }
