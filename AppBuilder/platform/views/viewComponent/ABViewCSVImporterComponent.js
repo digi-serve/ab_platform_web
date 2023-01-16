@@ -1206,7 +1206,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
       let length = selected;
       if (Array.isArray(selected)) length = selected.length;
 
-      returnthis.label("Import {0} Records", [length]);
+      return this.label("Import {0} Records", [length]);
    }
 
    /**
