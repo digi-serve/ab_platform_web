@@ -38,7 +38,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
       // {json}
       // a local copy of the settings for our ABView
 
-      this.csvImporter = new CSVImporter(this.label);
+      this.csvImporter = new CSVImporter((...args) => this.label(...args));
       // {CSVImporter}
       // An instance of the object that imports the CSV data.
 
