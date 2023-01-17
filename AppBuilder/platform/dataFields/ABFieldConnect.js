@@ -510,8 +510,11 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          handlerOptionData
       );
 
-      this.getOptions(combineFilters, "").then((data) => {
-         this.populateOptions(theEditor, data, field, form, false);
+      return new Promise((resolve, reject) => {
+         this.getOptions(combineFilters, "").then((data) => {
+            this.populateOptions(theEditor, data, field, form, false);
+            resolve();
+         });
       });
    }
 
@@ -544,7 +547,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             if (!node) return;
             node.setAttribute(
                "data-cy",
-               `${field.key} options ${option.id} ${field.id} ${form.id}`
+               `${field.key} options ${option.id} ${field.id} ${form?.id}`
             );
          });
       }
