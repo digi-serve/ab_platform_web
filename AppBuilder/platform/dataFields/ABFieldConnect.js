@@ -424,7 +424,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       }
    }
 
-   async getAndPopulateOptions(editor, options, field, form) {
+   getAndPopulateOptions(editor, options, field, form) {
       const theEditor = editor;
 
       // if we are filtering based off another selectivity's value we
