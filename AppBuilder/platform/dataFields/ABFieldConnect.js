@@ -519,6 +519,8 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
    }
 
    populateOptions(theEditor, data, field, form, addCy) {
+      if (theEditor == null) return;
+
       theEditor.blockEvent();
       theEditor.getList().clearAll();
       theEditor.getList().define("data", data);
