@@ -63,7 +63,7 @@ module.exports = class ABViewFormTextboxComponent extends (
             .getChildViews()[0]
             .getEditor(true)
             .then((editor) => {
-               const dataCy = `${this.key} rich ${_ui.name} ${this.id} ${this.parent.id}`;
+               const dataCy = `${this.view.key} rich ${_ui.name} ${this.id} ${this.parent.id}`;
                editor.contentAreaContainer.setAttribute("data-cy", dataCy);
             });
       }
