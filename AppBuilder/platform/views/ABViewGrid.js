@@ -534,7 +534,10 @@ class ABViewGridComponent extends ABViewComponent {
          if (this.settings.showToolbar) {
             tableUI.rows.push(this.uiToolbar());
          }
-         if (this.settings.gridFilter.filterOption) {
+         if (
+            this.settings.gridFilter.filterOption == 1 &&
+            this.settings.gridFilter.userFilterPosition == "form"
+         ) {
             tableUI.rows.push(this.uiFilter());
          }
 

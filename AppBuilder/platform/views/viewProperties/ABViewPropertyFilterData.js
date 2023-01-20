@@ -422,9 +422,11 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
       this.emit("filter.data", null, rowFilterRules);
 
       if (badgeCount == 0) badgeCount = false;
-      let $button = $$(this.ids.buttonAddfilter);
-      $button.config.badge = badgeCount;
-      $button.refresh();
+      const $button = $$(this.ids.buttonAddfilter);
+      if ($button) {
+         $button.config.badge = badgeCount;
+         $button.refresh();
+      }
    }
 
    resetFilter() {
@@ -457,7 +459,7 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
       if (externalText) {
          search = externalText;
       } else {
-         search = ($$(this.ids.globalFilterForm).getValue() || "").trim();
+         search = ($$(this.ids.globalFilterForm)?.getValue() ?? "").trim();
       }
       if (!search) return null; // <-- includes ""
 
