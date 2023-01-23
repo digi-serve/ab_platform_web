@@ -203,9 +203,8 @@ const ABViewComponent = require("./viewComponent/ABViewComponent").default;
 
 class ABViewFormConnectComponent extends ABViewComponent {
    constructor(baseView, idBase) {
-      const base = idBase ?? `ABViewFormComponent_${baseView.id}`;
+      const base = idBase ?? `ABViewFormConnect_${baseView.id}`;
       super(baseView, base, {
-         component: "",
          popup: "",
          editpopup: "",
       });

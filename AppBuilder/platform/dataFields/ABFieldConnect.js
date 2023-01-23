@@ -519,6 +519,8 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
    }
 
    populateOptions(theEditor, data, field, form, addCy) {
+      if (theEditor == null) return;
+
       theEditor.blockEvent();
       theEditor.getList().clearAll();
       theEditor.getList().define("data", data);
@@ -621,11 +623,11 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          $list.refresh();
       }
 
-      item.define(
-         "value",
-         Array.isArray(val) ? val.map((e) => e.text).join(",") : val.text
+      item.setValue(
+         Array.isArray(val)
+            ? val.map((e) => e.id ?? e.uuid ?? e).join(",")
+            : val.id ?? val.uuid ?? val
       );
-      item.refresh();
    }
 
    /**
