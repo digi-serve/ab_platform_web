@@ -388,23 +388,32 @@ class ABViewFormConnectComponent extends ABViewComponent {
 
       this._options = options ?? {};
 
+      if (this.view.settings.addForm) {
       console.error("TODO: ABViewFormConnect.addPageComponent()");
       // this.addPageComponent = this.view.addPageTool.component(/*App, idBase */);
       // this.addPageComponent.applicationLoad(this.view.application);
-      // this.addPageComponent.init({
-      //    onSaveData: component.logic.callbackSaveData,
-      //    onCancelClick: component.logic.callbackCancel,
+         this.addPageComponent = this.view.addPageTool.component(
+            AB,
+            this.view.settings.addForm
+         );
+         this.addPageComponent.applicationLoad(this.view.application);
+         let component = this.component;
+         this.addPageComponent.init({
+            onSaveData: component.logic.callbackSaveData,
+            onCancelClick: component.logic.callbackCancel,
+            clearOnLoad: component.logic.callbackClearOnLoad,
+         });
+      }
+      if (this.view.settings.editForm) {
+         console.error("TODO: ABViewFormConnect.editPageComponent()");
+         this.editPageComponent = this.view.editPageTool.component(
+            AB,
+            this.view.settings.editForm
+         );
+         this.editPageComponent.applicationLoad(this.view.application);
       //    clearOnLoad: component.logic.callbackClearOnLoad,
       // });
-
-      console.error("TODO: ABViewFormConnect.editPageComponent()");
-      // this.editPageComponent = this.view.editPageTool.component(/*App, idBase*/);
-      // this.editPageComponent.applicationLoad(this.view.application);
-      // this.editPageComponent.init({
-      //    onSaveData: component.logic.callbackSaveData,
-      //    onCancelClick: component.logic.callbackCancel,
-      //    clearOnLoad: component.logic.callbackClearOnLoad,
-      // });
+      }
    }
 
    callbackSaveData(saveData) {
