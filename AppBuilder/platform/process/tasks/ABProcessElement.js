@@ -247,4 +247,29 @@ module.exports = class ABProcessElement extends ABProcessElementCore {
 
       this.emit("switchTo", child);
    }
+
+   /**
+    * @method warningsEval()
+    * re-evaluate our warnings for this Process Task.
+    * Most of our ProcessTasks need to also verify data related to
+    * other available tasks, so we need to call the onProcessReady()
+    * so we can access those values.
+    */
+   warningsEval() {
+      super.warningsEval();
+      this.onProcessReady();
+   }
+
+   /**
+    * @method warningMessage(message)
+    * Save a warning message in a common format for our ProcessTasks.
+    */
+   warningMessage(message) {
+      this.emit(
+         "warning",
+         `${this.defaults.key}[${
+            this.label ? this.label : this.name
+         }]: ${message}`
+      );
+   }
 };

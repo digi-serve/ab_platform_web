@@ -6,9 +6,4 @@ module.exports = class ABProcessTaskEmail extends ABProcessTaskEmailCore {
    ////
    //// Process Instance Methods
    ////
-
-   warningsEval() {
-      super.warningsEval();
-      this.onProcessReady();
-   }
 };
