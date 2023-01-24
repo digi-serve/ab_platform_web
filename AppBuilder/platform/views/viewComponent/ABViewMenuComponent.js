@@ -135,6 +135,8 @@ module.exports = class ABViewMenuComponent extends ABViewComponent {
       }
 
       return {
+         // TODO: We have to refactor becuase we need "id" on the very top level for each viewComponent.
+         id: `${this.ids.component}_temp`,
          view: "toolbar",
          css:
             settings.menuTheme ?? ABViewMenuPropertyComponentDefaults.menuTheme,

@@ -10,8 +10,8 @@ const ABObjectQuery = require("../../ABObjectQuery");
 const ABViewComponent = require("./ABViewComponent").default;
 const ABViewDocxBuilderCore = require("../../../core/views/ABViewDocxBuilderCore");
 
-const ABViewDocxBuilderPropertyComponentDefaults = ABViewDocxBuilderCore.defaultValues();
-const L = (...params) => AB.Multilingual.label(...params);
+const ABViewDocxBuilderPropertyComponentDefaults =
+   ABViewDocxBuilderCore.defaultValues();
 
 module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
    constructor(baseView, idBase) {
@@ -69,6 +69,8 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
          ABViewDocxBuilderPropertyComponentDefaults.buttonlabel; // Use || to check empty string ""
 
       return {
+         // TODO: We have to refactor becuase we need "id" on the very top level for each viewComponent.
+         id: `${this.ids.component}_temp`,
          view: "toolbar",
          css:
             view.settings.toolbarBackground ??
@@ -103,7 +105,7 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
             {
                id: this.ids.noFile,
                view: "label",
-               label: L("No template file"),
+               label: this.label("No template file"),
             },
             {
                type: "spacer",

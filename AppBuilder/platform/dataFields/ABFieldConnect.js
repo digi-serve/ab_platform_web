@@ -510,12 +510,17 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          handlerOptionData
       );
 
-      this.getOptions(combineFilters, "").then((data) => {
-         this.populateOptions(theEditor, data, field, form, false);
+      return new Promise((resolve, reject) => {
+         this.getOptions(combineFilters, "").then((data) => {
+            this.populateOptions(theEditor, data, field, form, false);
+            resolve();
+         });
       });
    }
 
    populateOptions(theEditor, data, field, form, addCy) {
+      if (theEditor == null) return;
+
       theEditor.blockEvent();
       theEditor.getList().clearAll();
       theEditor.getList().define("data", data);
@@ -544,7 +549,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             if (!node) return;
             node.setAttribute(
                "data-cy",
-               `${field.key} options ${option.id} ${field.id} ${form.id}`
+               `${field.key} options ${option.id} ${field.id} ${form?.id}`
             );
          });
       }
@@ -608,12 +613,21 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       // put in current values as options so we can display them before
       // the rest of the options are fetched when field is clicked
       if (item.getList && item.getList().count() == 0) {
-         if (this.settings.linkType != "one" && !Array.isArray(val)) {
+         if (this.settings.linkType !== "one" && !Array.isArray(val)) {
             val = [val];
          }
-         item.getList().define("data", val);
+
+         const $list = item.getList();
+
+         $list.define("data", val);
+         $list.refresh();
       }
-      item.define("value", val);
+
+      item.setValue(
+         Array.isArray(val)
+            ? val.map((e) => e.id ?? e.uuid ?? e).join(",")
+            : val.id ?? val.uuid ?? val
+      );
    }
 
    /**

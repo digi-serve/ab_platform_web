@@ -1298,7 +1298,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
          const connectFields = obj.connectFields();
          connectFields.forEach((f) => {
             const formFieldCom = this.fieldComponents(
-               (fComp) => fComp?.field()?.id == f?.id
+               (fComp) => fComp?.field?.()?.id == f?.id
             );
 
             if (

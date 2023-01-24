@@ -203,9 +203,8 @@ const ABViewComponent = require("./viewComponent/ABViewComponent").default;
 
 class ABViewFormConnectComponent extends ABViewComponent {
    constructor(baseView, idBase) {
-      const base = idBase ?? `ABViewFormComponent_${baseView.id}`;
+      const base = idBase ?? `ABViewFormConnect_${baseView.id}`;
       super(baseView, base, {
-         component: "",
          popup: "",
          editpopup: "",
       });
@@ -223,7 +222,6 @@ class ABViewFormConnectComponent extends ABViewComponent {
    }
 
    ui() {
-      const ids = this.ids;
       const field = this.field;
       const form = this.view.parentFormComponent();
 
@@ -285,7 +283,7 @@ class ABViewFormConnectComponent extends ABViewComponent {
                }
                // We can now set the new value but we need to block event listening
                // so it doesn't trigger onChange again
-               const $$component = $$(ids.component);
+               const $$component = $$(this.ids.component);
                if ($$component) {
                   $$component.blockEvent();
                   const prepedVals = selectedValues.join
@@ -317,9 +315,9 @@ class ABViewFormConnectComponent extends ABViewComponent {
             template: editForm + "#value#",
          },
          on: {
-            onShow: () => {
-               field.getAndPopulateOptions(
-                  $$(ids.component),
+            onShow: async () => {
+               await field.getAndPopulateOptions(
+                  $$(this.ids.component),
                   this.view.options,
                   field,
                   form
@@ -334,8 +332,8 @@ class ABViewFormConnectComponent extends ABViewComponent {
 
             const rowData = {};
 
-            if ($$(ids.component)) {
-               const node = $$(ids.component).$view;
+            if ($$(this.ids.component)) {
+               const node = $$(this.ids.component).$view;
                field.customEdit(rowData, /* App,*/ node);
             }
          },
@@ -384,8 +382,10 @@ class ABViewFormConnectComponent extends ABViewComponent {
       return _ui;
    }
 
-   init(AB) {
+   init(AB, options) {
       this.AB = AB;
+
+      this._options = options ?? {};
 
       console.error("TODO: ABViewFormConnect.addPageComponent()");
       // this.addPageComponent = this.view.addPageTool.component(/*App, idBase */);

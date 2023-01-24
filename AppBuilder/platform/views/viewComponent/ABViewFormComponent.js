@@ -319,13 +319,6 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
 
          // do this for the initial form display so we can see defaults
          this.displayData(rowData);
-
-         // select parent data to default value
-         const linkDv = dc.datacollectionLink;
-         if (linkDv && rowData == null) {
-            const parentData = linkDv.getCursor();
-            this.displayParentData(parentData);
-         }
       } else {
          // show blank data in the form
          this.displayData(data ?? {});
@@ -367,7 +360,7 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
             // set value to each components
             const defaultRowData = {};
             field.defaultValue(defaultRowData);
-            field.setValue($$(comp.ui.id), defaultRowData);
+            field.setValue($$(comp.ids.component), defaultRowData);
 
             comp?.refresh?.(defaultRowData);
          });
@@ -390,8 +383,16 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
             // set value to each components
             const values = {};
             field.defaultValue(values);
-            $$(comp.ui.id)?.setValue(values[colName] ?? "");
+            $$(comp.ids.component)?.setValue(values[colName] ?? "");
          });
+
+         // select parent data to default value
+         const dc = this.view.datacollection;
+         const linkDv = dc.datacollectionLink;
+         if (linkDv) {
+            const parentData = linkDv.getCursor();
+            this.displayParentData(parentData);
+         }
       }
 
       // Populate value to custom fields
@@ -403,7 +404,7 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
             if (this._showed) comp?.onShow?.();
 
             // set value to each components
-            f?.field()?.setValue($$(comp.ui.id), rowData);
+            f?.field()?.setValue($$(comp.ids.component), rowData);
 
             comp?.refresh?.(rowData);
          });
@@ -433,7 +434,7 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
       const relationFieldView = this.view.viewComponents[relationFieldCom.id];
       if (relationFieldView == null) return;
 
-      const relationElem = $$(relationFieldView.ui.id),
+      const relationElem = $$(relationFieldView.ids.component),
          relationName = relationField.relationName();
 
       // pull data of parent's dc
@@ -460,8 +461,8 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
          }
       });
       const childComponent = this.view.viewComponents[topPositionId];
-      if (childComponent && $$(childComponent.ui.id)) {
-         $$(childComponent.ui.id).focus();
+      if (childComponent && $$(childComponent.ids.component)) {
+         $$(childComponent.ids.component).focus();
       }
    }
 };
