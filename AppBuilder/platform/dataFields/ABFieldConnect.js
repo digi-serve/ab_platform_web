@@ -501,6 +501,10 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       }
 
       const handlerOptionData = (data) => {
+         if (theEditor.$destructed) {
+            this.removeListener("option.data", handlerOptionData);
+            return;
+         }
          this.populateOptions(theEditor, data, field, form, true);
       };
 
@@ -520,6 +524,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
    populateOptions(theEditor, data, field, form, addCy) {
       if (theEditor == null) return;
+      if (theEditor.$destructed) return;
 
       theEditor.blockEvent();
       theEditor.getList().clearAll();
@@ -536,6 +541,8 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
    }
 
    populateOptionsDataCy(theEditor, field, form) {
+      if (theEditor.$destructed) return;
+
       // Add data-cy attributes
       if (theEditor?.getList) {
          if (!theEditor.getPopup) return;
