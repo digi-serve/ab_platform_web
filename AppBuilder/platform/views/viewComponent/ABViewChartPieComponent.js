@@ -4,38 +4,32 @@ module.exports = class ABViewChartPieComponent extends (
    ABViewChartContainerComponent
 ) {
    constructor(baseView, idBase) {
-      idBase = idBase ?? `ABViewChartPie_${baseView.id}`;
-
-      super(baseView, idBase);
-
-      this.view = baseView;
-      this.AB = this.view.AB;
+      super(baseView, idBase ?? `ABViewChartPie_${baseView.id}`);
    }
 
    ui() {
-      const baseView = this.view;
+      const settings = this.settings;
 
-      return {
-         id: this.ids.component,
+      return super.ui({
          view: "chart",
-         type: baseView.settings.pieType,
+         type: settings.pieType,
          value: "#value#",
          color: "#color#",
-         legend: baseView.settings.isLegend
+         legend: settings.isLegend
             ? {
-                 width: baseView.parent.settings.labelWidth,
-                 template: `<div style='font-size: ${baseView.settings.labelFontSize}px;'>#label#</div>`,
+                 width: this.view.parent.settings.labelWidth,
+                 template: `<div style='font-size: ${settings.labelFontSize}px;'>#label#</div>`,
               }
             : null,
-         pieInnerText: `<div style='font-size: ${baseView.settings.innerFontSize}px;'>#value#</div>`,
+         pieInnerText: `<div style='font-size: ${settings.innerFontSize}px;'>#value#</div>`,
          shadow: 1,
-         height: baseView.settings.height,
-         // width: baseView.settings.chartWidth,
-      };
+         height: settings.height,
+         // width: settings.chartWidth,
+      });
    }
 
    async init(AB) {
-      super.init(AB);
+      await super.init(AB);
    }
 
    onShow() {

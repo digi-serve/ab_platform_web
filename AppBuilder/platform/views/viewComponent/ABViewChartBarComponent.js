@@ -4,52 +4,46 @@ module.exports = class ABViewChartBarComponent extends (
    ABViewChartContainerComponent
 ) {
    constructor(baseView, idBase) {
-      idBase = idBase ?? `ABViewChartBar_${baseView.id}`;
-
-      super(baseView, idBase);
-
-      this.view = baseView;
-      this.AB = this.view.AB;
+      super(baseView, idBase ?? `ABViewChartBar_${baseView.id}`);
    }
 
    ui() {
-      const baseView = this.view;
+      const settings = this.settings;
 
-      return {
-         id: this.ids.component,
+      return super.ui({
          view: "chart",
-         type: baseView.settings.barType,
-         preset: baseView.settings.barPreset,
+         type: settings.barType,
+         preset: settings.barPreset,
          value: "#value#",
          color: "#color#",
          yAxis: {
             start: 0,
-            step: baseView.settings.stepValue, //"#stepValue#",
-            end: baseView.settings.maxValue, //"#maxValue#"
+            step: settings.stepValue, //"#stepValue#",
+            end: settings.maxValue, //"#maxValue#"
          },
          xAxis: {
-            template: baseView.settings.isLegend
-               ? `<div style='font-size:${baseView.settings.labelFontSize}px;'>#label#</div>`
+            template: settings.isLegend
+               ? `<div style='font-size:${settings.labelFontSize}px;'>#label#</div>`
                : "",
          },
          legend:
-            baseView.settings.barType === "bar" || !baseView.settings.barType
-               ? baseView.settings.isLegend
-                  ? `<div style='font-size:${baseView.settings.labelFontSize}px;'>#label#</div>`
+            settings.barType === "bar" || !settings.barType
+               ? settings.isLegend
+                  ? `<div style='font-size:${settings.labelFontSize}px;'>#label#</div>`
                   : ""
-               : baseView.settings.isLegend
+               : settings.isLegend
                ? {
-                    template: `<div style='font-size:${baseView.settings.labelFontSize}px;'>#label#</div>`,
+                    template: `<div style='font-size:${settings.labelFontSize}px;'>#label#</div>`,
                     values: [], // TODO : bug in webix 5.1.7
                  }
                : null,
-         height: baseView.settings.height,
-         // width: baseView.settings.chartWidth,
-      };
+         height: settings.height,
+         // width: settings.chartWidth,
+      });
    }
 
    async init(AB) {
-      super.init(AB);
+      await super.init(AB);
    }
 
    onShow() {
