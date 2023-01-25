@@ -374,7 +374,7 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
          // view._viewComponents[i].component.init(options);
 
          // Trigger 'changePage' event to parent
-         baseView.eventAdd({
+         this.eventAdd({
             emitter: baseView._viewComponents[i].view,
             eventName: "changePage",
             listener: (...p) => this.changePage(...p),
@@ -382,7 +382,7 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
       }
 
       // Trigger 'changeTab' event to parent
-      baseView.eventAdd({
+      this.eventAdd({
          emitter: baseView,
          eventName: "changeTab",
          listener: (...p) => this.changeTab(...p),

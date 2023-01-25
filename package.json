@@ -27,8 +27,8 @@
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.2.1",
     "esm": "^3.2.25",
-    "jsdom": "^20.0.0",
     "html-webpack-plugin": "^5.5.0",
+    "jsdom": "^20.0.0",
     "mocha": "^9.1.2",
     "prettier": "^2.2.1",
     "sinon": "^14.0.0",
@@ -42,6 +42,7 @@
     "ab-utils": "github:digi-serve/ab-utils",
     "atomicjs": "^4.4.1",
     "bootstrap": "^4.6.0",
+    "chai": "^4.3.7",
     "formiojs": "^4.12.7",
     "jszip-utils": "^0.1.0",
     "nanoid": "^3.3.4",
@@ -49,7 +50,7 @@
     "uuid": "^8.3.2"
   },
   "sideEffects": [
-     "*.css",
-     "./js/webix/extras/tinymce.js"
+    "*.css",
+    "./js/webix/extras/tinymce.js"
   ]
 }

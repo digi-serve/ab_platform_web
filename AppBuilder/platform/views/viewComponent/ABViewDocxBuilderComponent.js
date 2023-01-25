@@ -10,12 +10,12 @@ const ABObjectQuery = require("../../ABObjectQuery");
 const ABViewComponent = require("./ABViewComponent").default;
 const ABViewDocxBuilderCore = require("../../../core/views/ABViewDocxBuilderCore");
 
-const ABViewDocxBuilderPropertyComponentDefaults = ABViewDocxBuilderCore.defaultValues();
-const L = (...params) => AB.Multilingual.label(...params);
+const ABViewDocxBuilderPropertyComponentDefaults =
+   ABViewDocxBuilderCore.defaultValues();
 
 module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
    constructor(baseView, idBase) {
-      idBase = idBase ?? `ABViewDocxBuilderComponent_${baseView.id}`;
+      idBase = idBase ?? `ABViewDocxBuilder_${baseView.id}`;
       super(baseView, idBase, {
          button: "",
          noFile: "",
@@ -105,7 +105,7 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
             {
                id: this.ids.noFile,
                view: "label",
-               label: L("No template file"),
+               label: this.label("No template file"),
             },
             {
                type: "spacer",
@@ -115,7 +115,7 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
       };
    }
 
-   init(options) {
+   async init(AB) {
       const DownloadButton = $$(this.ids.button);
       const NoFileLabel = $$(this.ids.noFile);
 

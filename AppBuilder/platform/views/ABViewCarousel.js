@@ -92,8 +92,8 @@ class ABViewCarouselComponent extends ABViewComponent {
    }
 
    // make sure each of our child views get .init() called
-   init(AB, parentAccessLevel = 0) {
-      this.AB = AB;
+   async init(AB, accessLevel = 0) {
+      await super.init(AB);
 
       let dv = this.view.datacollection;
       if (!dv) return;
@@ -161,8 +161,6 @@ class ABViewCarouselComponent extends ABViewComponent {
                `${this.view.key} button next ${this.view.id}`
             );
       }
-
-      return Promise.resolve();
    }
 
    /**

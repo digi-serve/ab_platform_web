@@ -510,12 +510,17 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          handlerOptionData
       );
 
-      this.getOptions(combineFilters, "").then((data) => {
-         this.populateOptions(theEditor, data, field, form, false);
+      return new Promise((resolve, reject) => {
+         this.getOptions(combineFilters, "").then((data) => {
+            this.populateOptions(theEditor, data, field, form, false);
+            resolve();
+         });
       });
    }
 
    populateOptions(theEditor, data, field, form, addCy) {
+      if (theEditor == null) return;
+
       theEditor.blockEvent();
       theEditor.getList().clearAll();
       theEditor.getList().define("data", data);
@@ -544,7 +549,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             if (!node) return;
             node.setAttribute(
                "data-cy",
-               `${field.key} options ${option.id} ${field.id} ${form.id}`
+               `${field.key} options ${option.id} ${field.id} ${form?.id}`
             );
          });
       }
@@ -618,11 +623,11 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          $list.refresh();
       }
 
-      item.define(
-         "value",
-         Array.isArray(val) ? val.map((e) => e.text).join(",") : val.text
+      item.setValue(
+         Array.isArray(val)
+            ? val.map((e) => e.id ?? e.uuid ?? e).join(",")
+            : val.id ?? val.uuid ?? val
       );
-      item.refresh();
    }
 
    /**

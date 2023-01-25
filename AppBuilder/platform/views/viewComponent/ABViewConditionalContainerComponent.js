@@ -86,33 +86,21 @@ module.exports = class ABViewConditionalContainerComponent extends (
    }
 
    get ifComponent() {
-      let _ifComponent = this._ifComponent;
-
-      if (!_ifComponent) {
-         _ifComponent = this.view
+      return (this._ifComponent =
+         this._ifComponent ||
+         this.view
             .views()
             .find((v) => v.name === "If")
-            .component();
-
-         this._ifComponent = _ifComponent;
-      }
-
-      return _ifComponent;
+            .component());
    }
 
    get elseComponent() {
-      let _elseComponent = this._elseComponent;
-
-      if (!_elseComponent) {
-         _elseComponent = this.view
+      return (this._elseComponent =
+         this._elseComponent ||
+         this.view
             .views()
             .find((v) => v.name === "Else")
-            .component();
-
-         this._elseComponent = _elseComponent;
-      }
-
-      return _elseComponent;
+            .component());
    }
 
    displayView(currData) {
@@ -137,8 +125,14 @@ module.exports = class ABViewConditionalContainerComponent extends (
 
       const isValid = this.__filterComponent.isValid(currData);
 
-      if (isValid) $conditionalContainer?.showBatch("if");
-      else $conditionalContainer?.showBatch("else");
+      if (isValid) {
+         // if (isValid && currData) {
+         $conditionalContainer.showBatch("if");
+         this.ifComponent?.onShow?.();
+      } else {
+         $conditionalContainer.showBatch("else");
+         this.elseComponent?.onShow?.();
+      }
    }
 
    populateFilterComponent() {

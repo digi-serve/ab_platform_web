@@ -10,7 +10,7 @@ module.exports = class ABViewFormSelectSingleComponentComponent extends (
    ABViewFormItemComponent
 ) {
    constructor(baseView, idBase) {
-      idBase = idBase ?? `ABViewFormSelectSingleComponent_${baseView.id}`;
+      idBase = idBase ?? `ABViewFormSelectSingle_${baseView.id}`;
       super(baseView, idBase, {});
    }
 

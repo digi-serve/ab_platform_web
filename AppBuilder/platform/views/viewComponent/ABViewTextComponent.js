@@ -63,7 +63,7 @@ module.exports = class ABViewTextComponent extends ABViewComponent {
       const dataview = baseView.datacollection ?? null;
 
       if (dataview && baseView.parent.key !== "dataview")
-         baseView.eventAdd({
+         this.eventAdd({
             emitter: dataview,
             eventName: "changeCursor",
             listener: (...p) => this.displayText(...p),

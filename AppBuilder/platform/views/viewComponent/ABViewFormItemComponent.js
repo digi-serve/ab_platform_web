@@ -4,7 +4,7 @@ const ABViewComponent = require("./ABViewComponent").default;
 
 module.exports = class ABViewFormItemComponent extends ABViewComponent {
    constructor(baseView, idBase, ids) {
-      var base = idBase || `ABViewFormComponent_${baseView.id}`;
+      var base = idBase || `ABViewFormItem_${baseView.id}`;
       super(baseView, base, ids);
 
       this.view = baseView;
@@ -61,8 +61,9 @@ module.exports = class ABViewFormItemComponent extends ABViewComponent {
                   if (!popup) return;
                   this.getList().data.each((option) => {
                      if (!option) return;
+                     // our option.ids are based on builder input and can include the ' character
                      var node = popup.$view.querySelector(
-                        "[webix_l_id='" + option.id + "']"
+                        `[webix_l_id='${option.id.replaceAll("'", "\\'")}']`
                      );
                      if (!node) return;
                      node.setAttribute(
