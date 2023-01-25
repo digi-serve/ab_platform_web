@@ -5,46 +5,50 @@ const ABViewPropertyLinkPage =
 
 module.exports = class ABViewDataviewComponent extends ABViewComponent {
    constructor(baseView, idBase) {
-      idBase = idBase ?? `ABViewDataviewComponent_${baseView.id}`;
-      super(baseView, idBase, {
+      super(baseView, idBase ?? `ABViewDataview_${baseView.id}`, {
          scrollview: "",
          dataFlexView: "",
       });
+
+      this.linkPage = null;
    }
 
    ui() {
       const ids = this.ids;
+      const _ui = super.ui([
+         {
+            id: ids.scrollview,
+            view: "scrollview",
+            scroll: "y",
+            body: {
+               id: ids.dataFlexView,
+               view: "flexlayout",
+               paddingX: 15,
+               paddingY: 19,
+               type: "space",
+               cols: [],
+            },
+            on: {
+               onAfterScroll: async () => {
+                  const pos = $$(ids.scrollview).getScrollState();
 
-      return {
-         id: ids.component,
-         rows: [
-            {
-               id: ids.scrollview,
-               view: "scrollview",
-               scroll: "y",
-               body: {
-                  id: ids.dataFlexView,
-                  view: "flexlayout",
-                  paddingX: 15,
-                  paddingY: 19,
-                  type: "space",
-                  cols: [],
-               },
-               on: {
-                  onAfterScroll: () => {
-                     const pos = $$(ids.scrollview).getScrollState();
-                     this.scroll(pos);
-                  },
+                  await this.scroll(pos);
                },
             },
-         ],
-      };
+         },
+      ]);
+
+      delete _ui.type;
+
+      return _ui;
    }
 
-   init(options) {
-      const ids = this.ids;
+   async init(AB) {
+      await super.init(AB);
 
-      const dc = this.view.datacollection;
+      const ids = this.ids;
+      const dc = this.datacollection;
+
       if (!dc) return;
 
       const dataView = $$(ids.dataFlexView);
@@ -97,19 +101,14 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
       // });
    }
 
-   async onShow() {
-      const dc = this.view.datacollection;
+   onShow() {
+      super.onShow();
+
+      const dc = this.datacollection;
+
       if (!dc) return;
 
-      switch (dc.dataStatus) {
-         case dc.dataStatusFlag.notInitial:
-            // load data when a widget is showing
-            dc.loadData();
-            break;
-         case dc.dataStatusFlag.initialized:
-            this.renderData();
-            break;
-      }
+      if (dc.dataStatus === dc.dataStatusFlag.initialized) this.renderData();
    }
 
    get yPosition() {
@@ -130,9 +129,10 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
 
       Layout.disable();
 
-      if (!Scroll.showProgress) {
-         this.AB.Webix.extend(Scroll, this.AB.Webix.ProgressBar);
-      }
+      const abWebix = this.AB.Webix;
+
+      if (!Scroll.showProgress) abWebix.extend(Scroll, abWebix.ProgressBar);
+
       Scroll.showProgress({ type: "icon" });
    }
 
@@ -146,9 +146,11 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
 
       Layout.enable();
 
-      if (Scroll && !Scroll.hideProgress) {
-         this.AB.Webix.extend(Scroll, this.AB.Webix.ProgressBar);
-      }
+      const AB = this.AB;
+
+      if (Scroll && !Scroll.hideProgress)
+         AB.Webix.extend(Scroll, AB.Webix.ProgressBar);
+
       Scroll.hideProgress();
    }
 
@@ -156,21 +158,25 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
       const ids = this.ids;
       const editPage = this.settings.editPage;
       const detailsPage = this.settings.detailsPage;
-      let records = [];
+      const records = [];
+      const dc = this.datacollection;
 
-      const dc = this.view.datacollection;
       if (!dc) {
          this.ready();
+
          return;
       }
 
       const Layout = $$(ids.dataFlexView) || $$(ids.component);
+
       if (!Layout || isNaN(Layout.$width)) {
          this.ready();
+
          return;
       }
 
-      const xCount = parseInt(this.view.settings.xCount);
+      const baseView = this.view;
+      const xCount = parseInt(baseView.settings.xCount);
       const recordWidth = Math.floor(
          (Layout.$width - 20 - xCount * 20) / xCount
       );
@@ -178,8 +184,9 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
       const rows = dc.getData();
 
       // if this amount of data is already parsed just skip the rest.
-      if (Layout.currentLength == rows.length) {
+      if (Layout.currentLength === rows.length) {
          this.ready();
+
          return;
       }
 
@@ -190,31 +197,26 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
 
       let stopPos = rows.length;
 
-      if (dc.settings.loadAll || this._startPos == 0) {
-         stopPos = rows.length;
-      } else if (rows.length - this._startPos > 20) {
-         stopPos = this._startPos + 20;
-      }
+      if (dc.settings.loadAll || this._startPos === 0) stopPos = rows.length;
+      else if (rows.length - this._startPos > 20) stopPos = this._startPos + 20;
 
       for (let i = this._startPos; i < stopPos; i++) {
          // get the components configuation
-         let detailCom = new ABViewDetailComponent(this.view, rows[i].id);
-
-         let _ui = detailCom.ui();
+         const detailCom = new ABViewDetailComponent(baseView, rows[i].id);
+         const _ui = detailCom.ui();
 
          // adjust the UI to make sure it will look like a "card"
          _ui.type = "space";
          _ui.css = "ab-detail-view";
+
          if (detailsPage || editPage) {
             _ui.css += ` ab-detail-hover ab-record-${rows[i].id}`;
 
-            if (detailsPage) {
-               _ui.css += " ab-detail-page";
-            }
-            if (editPage) {
-               _ui.css += " ab-edit-page";
-            }
+            if (detailsPage) _ui.css += " ab-detail-page";
+
+            if (editPage) _ui.css += " ab-edit-page";
          }
+
          _ui.paddingX = 10;
          _ui.paddingY = 6;
          _ui.minWidth = recordWidth - 10;
@@ -224,13 +226,11 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
             Layout.addView(_ui, -1);
             detailCom.init(null, 2); // 2 - Always allow access to components inside data view
             setTimeout(detailCom.displayData(rows[i]), 0);
-         } else {
-            records.push(_ui);
-         }
+         } else records.push(_ui);
       }
 
       if (records.length) {
-         let flexlayout = {
+         const flexlayout = {
             id: ids.dataFlexView,
             view: "flexlayout",
             paddingX: 15,
@@ -238,10 +238,12 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
             type: "space",
             cols: records,
          };
+
          this.AB.Webix.ui(flexlayout, $$(ids.scrollview), $$(ids.dataFlexView));
 
          for (let j = this._startPos; j < stopPos; j++) {
-            let detailCom = new ABViewDetailComponent(this.view, rows[j].id);
+            const detailCom = new ABViewDetailComponent(baseView, rows[j].id);
+
             detailCom.init(null, 2); // 2 - Always allow access to components inside data view
             setTimeout(detailCom.displayData(rows[j]), 0);
          }
@@ -253,8 +255,9 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
          if (detailsPage || editPage) {
             Layout.$view.onclick = (e) => {
                let clicked = false;
+
                if (editPage) {
-                  for (let p of e.path) {
+                  for (const p of e.path) {
                      if (
                         p.className &&
                         p.className.indexOf("webix_accordionitem_header") > -1
@@ -272,8 +275,9 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
                      }
                   }
                }
+
                if (detailsPage && !clicked) {
-                  for (let p of e.path) {
+                  for (const p of e.path) {
                      if (
                         p.className &&
                         p.className.indexOf("webix_accordionitem") > -1
@@ -286,6 +290,7 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
                               // com.logic.toggleTab(detailsTab, ids.component);
                            }
                         });
+
                         break;
                      }
                   }
@@ -295,26 +300,28 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
       }
 
       //Add data-cy attributes for cypress tests
-      const name = this.view.name.replace(".dataview", "");
+      const name = baseView.name.replace(".dataview", "");
+
       Layout.$view.setAttribute(
          "data-cy",
-         `dataview container ${name} ${this.view.id}`
+         `dataview container ${name} ${baseView.id}`
       );
 
       Layout.getChildViews().forEach((child, i) => {
          const uuid = rows[i + this._startPos]["uuid"];
          const view = child.$view;
+
          view
             .querySelector(".webix_accordionitem_body")
-            .setAttribute(
+            ?.setAttribute(
                "data-cy",
-               `dataview item ${name} ${uuid} ${this.view.id}`
+               `dataview item ${name} ${uuid} ${baseView.id}`
             );
          view
             .querySelector(".webix_accordionitem_button")
-            .setAttribute(
+            ?.setAttribute(
                "data-cy",
-               `dataview item button ${name} ${uuid} ${this.view.id}`
+               `dataview item button ${name} ${uuid} ${baseView.id}`
             );
       });
 
@@ -331,6 +338,7 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
          css: { background: "#ebedf0 !important" },
          cols: [],
       };
+
       this.AB.Webix.ui(flexlayout, $$(ids.scrollview), $$(ids.dataFlexView));
    }
 
@@ -345,17 +353,17 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
       const ids = this.ids;
       const Layout = $$(ids.dataFlexView);
       const Scroll = $$(ids.scrollview);
-
-      let loadWhen = 40;
-
+      const loadWhen = 40;
       const y = pos.y;
       const maxYPos = Layout.$height - Scroll.$height;
+
       if (maxYPos - y <= loadWhen) {
          if (this.loadMoreTimer) return;
 
          this.yPosition = y;
 
-         const dc = this.view.datacollection;
+         const dc = this.datacollection;
+
          if (!dc) return;
 
          if (Layout.getChildViews().length >= dc.totalCount) return;
@@ -372,9 +380,7 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
    }
 
    get linkPageHelper() {
-      if (this.__linkPageHelper == null)
-         this.__linkPageHelper = new ABViewPropertyLinkPage();
-
-      return this.__linkPageHelper;
+      return (this.__linkPageHelper =
+         this.__linkPageHelper || new ABViewPropertyLinkPage());
    }
 };
