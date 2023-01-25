@@ -1,28 +1,22 @@
 const ABViewComponent = require("./ABViewComponent").default;
 
 module.exports = class ABViewDetailItemComponent extends ABViewComponent {
-   constructor(baseView, idBase, ids) {
-      idBase = idBase || `ABViewDetailComponent_${baseView.id}`;
-      super(baseView, idBase, ids);
-
-      this.view = baseView;
-      this.settings = baseView.settings;
-      this.AB = baseView.AB;
+   constructor(baseView, idBase) {
+      super(baseView, idBase ?? `ABViewDetailItem_${baseView.id}`, {
+         detail: "",
+      });
    }
 
-   ui() {
-      let ids = this.ids;
+   ui(uiDetailComponent) {
+      const baseView = this.view;
 
       // setup 'label' of the element
-      let detailView = this.view.detailComponent(),
-         field = this.view.field();
-
-      let settings = detailView?.settings ?? {};
-      let isUsers = field?.key == "user";
+      const settings = baseView.detailComponent()?.settings ?? {};
 
       let templateLabel = "";
-      if (settings.showLabel == true) {
-         if (settings.labelPosition == "top")
+
+      if (settings.showLabel) {
+         if (settings.labelPosition === "top")
             templateLabel =
                "<label style='display:block; text-align: left;' class='webix_inp_top_label'>#label#</label>#display#";
          else
@@ -30,49 +24,57 @@ module.exports = class ABViewDetailItemComponent extends ABViewComponent {
                "<label style='width: #width#px; display: inline-block; float: left; line-height: 32px;'>#label#</label><div class='ab-detail-component-holder' style='margin-left: #width#px;'>#display#</div>";
       }
       // no label
-      else {
-         templateLabel = "#display#";
-      }
+      else templateLabel = "#display#";
 
-      let template = templateLabel
+      const field = baseView.field();
+      const template = templateLabel
          .replace(/#width#/g, settings.labelWidth)
          .replace(/#label#/g, field?.label ?? "");
 
       let height = 38;
-      if (settings.labelPosition == "top") height = height * 2;
 
-      if (field?.settings?.useHeight == 1) {
+      if (settings.labelPosition === "top") height = height * 2;
+
+      if (field?.settings?.useHeight === 1)
          height = parseInt(field.settings.imageHeight) || height;
-      }
 
-      let _ui = {
-         id: ids.component,
-         view: "template",
-         borderless: true,
-         height: height,
-         isUsers: isUsers,
-         template: template,
-         data: { display: "" }, // show empty data in template
-      };
+      const _ui = super.ui([
+         Object.assign(
+            {
+               id: this.ids.detail,
+               view: "template",
+               borderless: true,
+               height: height,
+               isUsers: field?.key === "user",
+               template: template,
+               data: { display: "" }, // show empty data in template
+            },
+            uiDetailComponent ?? {}
+         ),
+      ]);
+
+      delete _ui.type;
 
       return _ui;
    }
 
-   init(AB) {
-      this.AB = AB;
-      return Promise.resolve();
+   async init(AB) {
+      await super.init(AB);
    }
 
-   setValue(val, componentId) {
-      componentId = componentId ?? this.ids.component;
+   setValue(val, detailId) {
+      const $detail = $$(detailId ?? this.ids.detail);
 
-      if (!$$(componentId)) return;
+      if (!$detail) return;
 
-      let field = this.view.field();
-      if (field?.key == "string" || field?.key == "LongText") {
-         val = val.replace(/[<]/g, "&lt;");
+      const field = this.view.field();
+
+      if (field?.key === "string" || field?.key === "LongText") {
+         $detail.setValues({ display: val.replace(/[<]/g, "&lt;") });
+
+         return;
       }
 
-      $$(componentId).setValues({ display: val });
+      $detail.setValues({ display: val });
    }
 };

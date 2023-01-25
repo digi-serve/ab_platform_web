@@ -4,8 +4,7 @@ module.exports = class ABViewDetailTreeComponent extends (
    ABViewDetailItemComponent
 ) {
    constructor(baseView, idBase) {
-      idBase = idBase ?? `ABViewDetailTreeComponent_${baseView.id}`;
-      super(baseView, idBase);
+      super(baseView, idBase ?? `ABViewDetailTree_${baseView.id}`);
    }
 
    get className() {
@@ -13,61 +12,59 @@ module.exports = class ABViewDetailTreeComponent extends (
    }
 
    ui() {
-      let _ui = super.ui();
-
-      _ui.id = this.ids.component;
-
-      return _ui;
+      return super.ui();
    }
 
-   init(options) {
-      super.init(options);
+   async init(AB) {
+      await super.init(AB);
 
       // add div of tree to detail
-      let divTree = `<div class="${this.className}"></div>`;
-      this.setValue(divTree);
+      this.setValue(`<div class="${this.className}"></div>`);
    }
 
    getDomTree() {
-      let elem = $$(this.ids.component);
-      if (!elem) return;
+      const $detail = $$(this.ids.detail);
 
-      return elem.$view.getElementsByClassName(this.className)[0];
+      if (!$detail) return;
+
+      return $detail.$view.getElementsByClassName(this.className)[0];
    }
 
    setValue(val) {
       // convert value to array
-      if (val != null && !(val instanceof Array)) {
-         val = [val];
-      }
+      const vals = [];
+
+      if (val && !Array.isArray(val)) vals.push(val);
 
       setTimeout(() => {
          // get tree dom
-         let domTree = this.getDomTree();
+         const domTree = this.getDomTree();
+
          if (!domTree) return false;
 
-         let field = this.view.field();
-         let branches = [];
-         if (typeof field.settings.options.data == "undefined") {
+         const field = this.view.field();
+         const branches = [];
+
+         if (typeof field.settings.options.data === "undefined")
             field.settings.options = new webix.TreeCollection({
                data: field.settings.options,
             });
-         }
 
          field.settings.options.data.each(function (obj) {
-            if (val != null && val.indexOf(obj.id) != -1) {
+            if (vals.indexOf(obj.id) !== -1) {
                let html = "";
-
                let rootid = obj.id;
+
                while (this.getParentId(rootid)) {
                   field.settings.options.data.each(function (par) {
                      if (
-                        field.settings.options.data.getParentId(rootid) ==
+                        field.settings.options.data.getParentId(rootid) ===
                         par.id
                      ) {
                         html = `${par.text}: ${html}`;
                      }
                   });
+
                   rootid = this.getParentId(rootid);
                }
 
@@ -76,19 +73,25 @@ module.exports = class ABViewDetailTreeComponent extends (
             }
          });
 
-         let myHex = "#4CAF50";
+         const myHex = "#4CAF50";
+
          let nodeHTML = "<div class='list-data-values'>";
+
          branches.forEach(function (item) {
             nodeHTML += `<span class="selectivity-multiple-selected-item rendered" style="background-color: ${myHex} !important;">${item}</span>`;
          });
+
          nodeHTML += "</div>";
          domTree.innerHTML = nodeHTML;
 
          let height = 33;
+
          if (domTree.scrollHeight > 33) height = domTree.scrollHeight;
 
-         $$(this.ids.component).config.height = height;
-         $$(this.ids.component).resize();
+         const $detail = $$(this.ids.detail);
+
+         $detail.config.height = height;
+         $detail.resize();
       }, 50);
    }
 };

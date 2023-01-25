@@ -4,27 +4,25 @@ module.exports = class ABViewDetailCheckboxComponent extends (
    ABViewDetailItemComponent
 ) {
    constructor(baseView, idBase) {
-      idBase = idBase ?? `ABViewDetailCheckboxComponent_${baseView.id}`;
-      super(baseView, idBase);
+      super(baseView, idBase ?? `ABViewDetailCheckbox_${baseView.id}`);
    }
 
    ui() {
-      let _ui = super.ui();
+      const baseView = this.view;
+      const field = baseView.field();
 
-      let field = this.view.field();
+      return super.ui({
+         on: {
+            //Add data-cy attribute for Cypress Testing
+            onAfterRender: () => {
+               const dataCy = `detail checkbox ${field?.columnName} ${
+                  field?.id
+               } ${baseView.parentDetailComponent()?.id ?? baseView.parent.id}`;
 
-      _ui.id = this.ids.component;
-      _ui.on = {
-         //Add data-cy attribute for Cypress Testing
-         onAfterRender: () => {
-            const dataCy = `detail checkbox ${field?.columnName} ${field?.id} ${
-               this.view.parentDetailComponent()?.id ?? this.view.parent.id
-            }`;
-            $$(_ui.id)?.$view.setAttribute("data-cy", dataCy);
+               $$(this.ids.detail)?.$view.setAttribute("data-cy", dataCy);
+            },
          },
-      };
-
-      return _ui;
+      });
    }
 
    setValue(val) {
