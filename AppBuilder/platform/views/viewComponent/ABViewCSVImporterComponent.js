@@ -1,20 +1,9 @@
 const ABViewComponent = require("./ABViewComponent").default;
 const CSVImporter = require("../../CSVImporter");
 
-<<<<<<< HEAD
 module.exports = class ABViewCSVImporterComponent extends ABViewComponent {
    constructor(baseView, idBase) {
       super(baseView, idBase ?? `ABCSVImporter_${baseView.id}`, {
-=======
-const ABViewCSVImporterPropertyComponentDefaults =
-   ABViewCSVImporterCore.defaultValues();
-
-module.exports = class ABViewCSVImporterComponent extends ClassUI {
-   constructor(viewCSVImporter, idBase) {
-      idBase = idBase || `ABCSVImporter_${viewCSVImporter.id}`;
-
-      super(idBase, {
->>>>>>> master
          button: "",
          popup: "",
 
@@ -35,17 +24,6 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
          rules: "",
       });
 
-<<<<<<< HEAD
-=======
-      this.view = viewCSVImporter;
-      // {ABViewCSVImporter}
-      // The ABView that has created this CSVImporter.
-
-      this.settings = this.view.settings;
-      // {json}
-      // a local copy of the settings for our ABView
-
->>>>>>> master
       this.csvImporter = new CSVImporter((...args) => this.label(...args));
       // {CSVImporter}
       // An instance of the object that imports the CSV data.
@@ -57,7 +35,6 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
    }
 
    ui() {
-<<<<<<< HEAD
       const settings = this.settings;
       const defaultSettings = this.view.constructor.defaultValues();
       const _ui = super.ui([
@@ -75,26 +52,6 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
                   click: () => {
                      this.showPopup();
                   },
-=======
-      return {
-         // TODO: We have to refactor becuase we need "id" on the very top level for each viewComponent.
-         id: `${this.ids.component}_temp`,
-         cols: [
-            {
-               view: "button",
-               css: "webix_primary",
-               type: "icon",
-               icon: "fa fa-upload",
-               label: this.label(
-                  this.settings.buttonLabel ||
-                     ABViewCSVImporterPropertyComponentDefaults.buttonLabel
-               ),
-               width:
-                  this.settings.width ||
-                  ABViewCSVImporterPropertyComponentDefaults.width,
-               click: () => {
-                  this.showPopup();
->>>>>>> master
                },
                {
                   fillspace: true,
@@ -523,17 +480,12 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
    async loadCsvFile() {
       const _csvFileInfo = this._csvFileInfo;
 
-<<<<<<< HEAD
       if (!_csvFileInfo) return false;
 
       const csvImporter = this.csvImporter;
 
       if (!csvImporter.validateFile(_csvFileInfo)) {
          this.AB.Webix.alert({
-=======
-      if (!this.csvImporter.validateFile(this._csvFileInfo)) {
-         webix.alert({
->>>>>>> master
             title: this.label("This file extension is not allowed"),
             text: this.label("Please only upload CSV files"),
             ok: this.label("Ok"),
@@ -646,11 +598,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
             csvColumnList.push({
                id: i + 1, // webix .options list disallow value 0
                value: this.label("Column {0}", [i + 1]),
-<<<<<<< HEAD
                key: csvImporter.getGuessDataType(_dataRows, i),
-=======
-               key: this.csvImporter.getGuessDataType(this._dataRows, i),
->>>>>>> master
             });
          });
 
@@ -695,7 +643,6 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
          };
 
          // Add date format options
-<<<<<<< HEAD
          if (f.key === "date") {
             const dateSeparatorOptions = ["/", "-", ".", ",", " "];
             const dayFormatOptions = [
@@ -707,19 +654,6 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
                { value: this.label("01 to 12"), id: "MM" },
             ];
             const yearFormatOptions = [
-=======
-         if (f.key == "date") {
-            let dateSeparatorOptions = ["/", "-", ".", ",", " "];
-            let dayFormatOptions = [
-               { value: this.label("1 to 31"), id: "D" },
-               { value: this.label("01 to 31"), id: "DD" },
-            ];
-            let monthFormatOptions = [
-               { value: this.label("1 to 12"), id: "M" },
-               { value: this.label("01 to 12"), id: "MM" },
-            ];
-            let yearFormatOptions = [
->>>>>>> master
                { value: this.label("00 to 99"), id: "YY" },
                { value: this.label("2000 to 2099"), id: "YYYY" },
             ];
@@ -894,17 +828,10 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
 
       if (data.length > limit) {
          // we only allow 1000 record imports
-<<<<<<< HEAD
          this.AB.Webix.alert({
             title: this.label("Too many records"),
             ok: this.label("Ok"),
             text: this.label(
-=======
-         webix.alert({
-            title: this.label("Too many records"),
-            ok: this.label("Ok"),
-            text: L(
->>>>>>> master
                "Due to browser limitations we only allow imports of {0} records. Please upload a new CSV or deselect records to import.",
                [limit]
             ),
@@ -1588,11 +1515,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
          //    _logic.callbacks.onDone();
          uiCleanUp();
 
-<<<<<<< HEAD
          abWebix.alert({
-=======
-         webix.alert({
->>>>>>> master
             title: this.label("Invalid Data"),
             ok: this.label("Ok"),
             text: this.label(
@@ -1653,113 +1576,12 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
                      // store in hash[field.id] = { 'searchKey' : "uuid" }
 
                      hashLookups[connectField.id][
-<<<<<<< HEAD
                         row[f.searchField.columnName]
                      ] = row[linkIdKey];
                   });
                } catch (err) {
                   console.error(err);
                }
-=======
-                        newRowData[connectField.columnName]
-                     ];
-
-                  if (!uuid) {
-                     itemInvalid(data.id, [{ name: connectField.columnName }]);
-                     allValid = false;
-                  }
-
-                  newRowData[connectField.columnName] = {};
-                  newRowData[connectField.columnName][linkIdKey] = uuid;
-               });
-            });
-         })
-         .then(() => {
-            if (!allValid) {
-               webix.alert({
-                  title: this.label("Invalid Data"),
-                  ok: this.label("Ok"),
-                  text: this.label(
-                     "The highlighted row has invalid data. Please edit in the window or update the CSV and try again."
-                  ),
-               });
-               uiCleanUp();
-
-               return Promise.resolve();
-            }
-            // NOTE: Parallel exectuion of all these:
-            const allSaves = [];
-
-            const createRecord = (objModel, newRowsData, element, total) => {
-               return new Promise((resolve, reject) => {
-                  element.doRecordRulesPre(newRowsData);
-
-                  objModel
-                     .batchCreate({ batch: newRowsData })
-                     .then((result) => {
-                        const recordRules = [];
-
-                        // Show errors of each row
-                        Object.keys(result.errors).forEach((rowIndex) => {
-                           let error = result.errors[rowIndex];
-                           if (error) {
-                              itemFailed(
-                                 rowIndex,
-                                 error.message || error.sqlMessage || error
-                              );
-                           }
-                        });
-
-                        Object.keys(result.data).forEach((rowIndex) => {
-                           let rowData = result.data[rowIndex];
-                           recordRules.push(
-                              new Promise((next, err) => {
-                                 // Process Record Rule
-                                 element
-                                    .doRecordRules(rowData)
-                                    .then(() => {
-                                       itemPass(rowIndex);
-                                       next();
-                                    })
-                                    .catch((errMessage) => {
-                                       itemFailed(rowIndex, errMessage);
-                                       err("that didn't work");
-                                    });
-                              })
-                           );
-                        });
-                        Promise.all(recordRules)
-                           .then(() => {
-                              newRowsData.forEach((row) => {
-                                 // itemPass(row.id);
-                                 numDone++;
-                                 if (numDone % 50 == 0) {
-                                    this.refreshRemainingTimeText(
-                                       startUpdateTime,
-                                       validRows.length,
-                                       numDone
-                                    );
-                                 }
-                              });
-                              if (numDone == total) {
-                                 uiCleanUp();
-                                 $$(ids.importButton).disable();
-                              }
-                              resolve();
-                           })
-                           .catch((err) => {
-                              // newRowsData.forEach((row) => {
-                              //    itemFailed(row.id, err);
-                              // });
-                              reject(err);
-                           });
-                     })
-                     .catch((errMessage) => {
-                        console.error(errMessage);
-                        reject(errMessage);
-                     });
-               });
->>>>>>> master
             };
 
             allLookups.push(gethashLookup());
@@ -1971,30 +1793,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
                   }
                };
 
-<<<<<<< HEAD
                processRequest();
-=======
-            // now we are going to processes these new containers one at a time
-            // $$(ids.datatable).blockEvent();
-            // this is when the real work starts so lets begin our countdown timer now
-            startUpdateTime = new Date();
-            // get the first group of Promises out of the collection
-            const next = throttledSaves.shift();
-            // execute our Promise iterator
-            return performThrottledSaves(
-               next,
-               throttledSaves,
-               this.view,
-               total
-            );
-         })
-         .catch((err) => {
-            // resolve Error UI
-            webix.alert({
-               title: this.label("Error Creating Records"),
-               ok: this.label("Ok"),
-               text: this.label("One or more records failed upon creation."),
->>>>>>> master
             });
 
          // now we are going to processes these new containers one at a time
