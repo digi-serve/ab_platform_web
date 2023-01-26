@@ -430,9 +430,10 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                                          r.condition.filter
                                                       )
                                                    ) {
-                                                      r.condition.filter = this.AB.toDate(
-                                                         r.condition.filter
-                                                      );
+                                                      r.condition.filter =
+                                                         this.AB.rules.toDate(
+                                                            r.condition.filter
+                                                         );
                                                    }
 
                                                    if (
@@ -443,10 +444,11 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                                             .start
                                                       )
                                                    ) {
-                                                      r.condition.filter.start = this.AB.toDate(
-                                                         r.condition.filter
-                                                            .start
-                                                      );
+                                                      r.condition.filter.start =
+                                                         this.AB.rules.toDate(
+                                                            r.condition.filter
+                                                               .start
+                                                         );
                                                    }
 
                                                    if (
@@ -455,9 +457,11 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                                          r.condition.filter.end
                                                       )
                                                    ) {
-                                                      r.condition.filter.end = this.AB.toDate(
-                                                         r.condition.filter.end
-                                                      );
+                                                      r.condition.filter.end =
+                                                         this.AB.rules.toDate(
+                                                            r.condition.filter
+                                                               .end
+                                                         );
                                                    }
                                                 }
                                                 break;
@@ -782,11 +786,10 @@ module.exports = class ABViewReportsManager extends ABViewReportsManagerCore {
                                     reportRow[col] = row[columnName];
                                     if (reportRow[col]) {
                                        if (!(reportRow[col] instanceof Date)) {
-                                          reportRow[
-                                             col
-                                          ] = compInstance.AB.toDate(
-                                             row[columnName]
-                                          );
+                                          reportRow[col] =
+                                             compInstance.AB.rules.toDate(
+                                                row[columnName]
+                                             );
                                        }
                                     } else {
                                        reportRow[col] = "";

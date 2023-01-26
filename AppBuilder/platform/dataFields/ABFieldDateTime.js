@@ -61,7 +61,7 @@ module.exports = class ABFieldDateTime extends ABFieldDateTimeCore {
          }
 
          // else retun the actual ISO string => Date() value
-         return this.AB.toDate(d);
+         return this.AB.rules.toDate(d);
       };
 
       return config;
@@ -111,7 +111,7 @@ module.exports = class ABFieldDateTime extends ABFieldDateTimeCore {
       if (d == "" || d == null) {
          return "";
       }
-      const dateObj = this.AB.toDate(d);
+      const dateObj = this.AB.rules.toDate(d);
 
       const dateFormat = this.settings.dateFormat;
       // @const {int} dateFormat AB Date Format
