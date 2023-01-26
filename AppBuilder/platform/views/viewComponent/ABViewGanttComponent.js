@@ -1,23 +1,4 @@
-// const ABViewComponent = require("./ABViewComponent").default;
 import ABViewComponent from "./ABViewComponent";
-
-const DAY_SCALE = { unit: "day", format: "%d" },
-   WEEK_SCALE = {
-      unit: "week",
-      format: (start) => {
-         const parser = webix.Date.dateToStr("%d %M");
-         const wstart = webix.Date.weekStart(start);
-         const wend = webix.Date.add(
-            webix.Date.add(wstart, 1, "week", true),
-            -1,
-            "day",
-            true
-         );
-         return parser(wstart) + " - " + parser(wend);
-      },
-   },
-   MONTH_SCALE = { unit: "month", format: "%F" },
-   YEAR_SCALE = { unit: "year", format: "%Y" };
 
 export default class ABViewGanttComponent extends ABViewComponent {
    constructor(baseView, idBase) {
@@ -75,6 +56,7 @@ export default class ABViewGanttComponent extends ABViewComponent {
    ui() {
       const ids = this.ids;
       const self = this;
+      const { YEAR_SCALE, MONTH_SCALE, DAY_SCALE } = this.getConstantScales;
       const _ui = super.ui([
          {
             cols: [
@@ -307,23 +289,22 @@ export default class ABViewGanttComponent extends ABViewComponent {
    datacollectionLoad(datacollection) {
       super.datacollectionLoad(datacollection);
 
-      let DC = this.CurrentDatacollection;
+      const dc = this.CurrentDatacollection || datacollection;
 
-      if (!DC && datacollection) {
-         // NOTE: this can happen in the ABDesigner object workspace.
-         // we send in a temp DC with no .id
-         this._tempDC = datacollection;
-         DC = datacollection;
-      }
+      if (!dc) return;
+
+      // NOTE: this can happen in the ABDesigner object workspace.
+      // we send in a temp DC with no .id
+      this._tempDC = datacollection;
 
       // NOTE: keep .objectLoad() before any .initData() is called.
-      this.objectLoad(DC.datasource);
+      this.objectLoad(dc.datasource);
 
       const eventNames = ["create", "update", "delete", "initializedData"];
 
       eventNames.forEach((e) => {
          if (
-            e in DC._events &&
+            e in dc._events &&
             this.__events.findIndex((eo) => eo.eventName === e) !== -1
          )
             return;
@@ -331,7 +312,7 @@ export default class ABViewGanttComponent extends ABViewComponent {
          switch (e) {
             case "delete":
                this.eventAdd({
-                  emitter: DC,
+                  emitter: dc,
                   eventName: "delete",
                   listener: (taskId) => {
                      // remove this task in gantt
@@ -344,7 +325,7 @@ export default class ABViewGanttComponent extends ABViewComponent {
 
             default:
                this.eventAdd({
-                  emitter: DC,
+                  emitter: dc,
                   eventName: e,
                   listener: () => {
                      this.initData();
@@ -413,6 +394,34 @@ export default class ABViewGanttComponent extends ABViewComponent {
       }, 10);
    }
 
+   get getConstantScales() {
+      const DAY_SCALE = { unit: "day", format: "%d" },
+         WEEK_SCALE = {
+            unit: "week",
+            format: (start) => {
+               const parser = webix.Date.dateToStr("%d %M");
+               const wstart = webix.Date.weekStart(start);
+               const wend = webix.Date.add(
+                  webix.Date.add(wstart, 1, "week", true),
+                  -1,
+                  "day",
+                  true
+               );
+
+               return parser(wstart) + " - " + parser(wend);
+            },
+         },
+         MONTH_SCALE = { unit: "month", format: "%F" },
+         YEAR_SCALE = { unit: "year", format: "%Y" };
+
+      return {
+         DAY_SCALE,
+         WEEK_SCALE,
+         MONTH_SCALE,
+         YEAR_SCALE,
+      };
+   }
+
    setScale(scale) {
       const ganttElem = $$(this.ids.gantt);
 
@@ -423,6 +432,8 @@ export default class ABViewGanttComponent extends ABViewComponent {
       if (!ganttData) return;
 
       const newScales = [];
+      const { YEAR_SCALE, MONTH_SCALE, WEEK_SCALE, DAY_SCALE } =
+         this.getConstantScales;
 
       switch (scale) {
          case "day":
@@ -443,9 +454,10 @@ export default class ABViewGanttComponent extends ABViewComponent {
             break;
       }
 
+      const abWebix = this.AB.Webix;
       const currScale = ganttElem.getService("local").getScales(),
-         start = webix.Date.add(this.originalStartDate, -1, scale, true),
-         end = webix.Date.add(this.originalEndDate, 1, scale, true);
+         start = abWebix.Date.add(this.originalStartDate, -1, scale, true),
+         end = abWebix.Date.add(this.originalEndDate, 1, scale, true);
 
       ganttData.setScales(
          start,
@@ -464,14 +476,8 @@ export default class ABViewGanttComponent extends ABViewComponent {
     * Show this component.
     */
    onShow() {
-      const datacollection = this.view.datacollection;
-
-      if (datacollection) {
-         this.datacollectionLoad(datacollection);
-         datacollection.loadData(0);
-      }
-
       super.onShow();
+      this.datacollectionLoad(this.datacollection);
 
       $$(this.ids.component)?.show();
    }
@@ -513,18 +519,19 @@ export default class ABViewGanttComponent extends ABViewComponent {
 
    async taskAdd(taskData) {
       const patch = this.convertValues(taskData);
+      const ab = this.AB;
 
       try {
          // this method is being used in MyBackend addTask() method
          // On Webix documents, the method addTask() have to return the added object so we have to pass the data we add through this method.
          return await this.CurrentObject?.model().create(patch);
       } catch (e) {
-         webix.alert({
+         ab.Webix.alert({
             title: this.label("Error Saving Item"),
             ok: this.label("Okay"),
             text: this.label("Unable to save this item."),
          });
-         this.AB.notify.developer(e, {
+         ab.notify.developer(e, {
             context: "ABViewGantt:taskAdd(): Error Saving Item",
             patch,
          });
@@ -534,6 +541,8 @@ export default class ABViewGanttComponent extends ABViewComponent {
    }
 
    async taskRemove(rowId) {
+      const ab = this.AB;
+
       try {
          // this method is being used in MyBackend removeTask() method
          // On Webix documents, the method removeTask() return {} (an empty object) so we return {} in removeTask() instead.
@@ -541,12 +550,12 @@ export default class ABViewGanttComponent extends ABViewComponent {
 
          return {};
       } catch (e) {
-         webix.alert({
+         ab.Webix.alert({
             title: this.label("Error Removing Item"),
             ok: this.label("Okay"),
             text: this.label("Unable to remove this item."),
          });
-         this.AB.notify.developer(e, {
+         ab.notify.developer(e, {
             context: "ABViewGantt:taskRemove(): Error Removing Item",
             rowId,
          });
@@ -557,6 +566,7 @@ export default class ABViewGanttComponent extends ABViewComponent {
 
    async taskUpdate(rowId, updatedTask) {
       const patch = this.convertValues(updatedTask);
+      const ab = this.AB;
 
       try {
          // this method is being used in MyBackend updateTask() method
@@ -565,12 +575,12 @@ export default class ABViewGanttComponent extends ABViewComponent {
 
          return {};
       } catch (e) {
-         webix.alert({
+         ab.Webix.alert({
             title: this.label("Error Updating Item"),
             ok: this.label("Okay"),
             text: this.label("Unable to update this item."),
          });
-         this.AB.notify.developer(e, {
+         ab.notify.developer(e, {
             context: "ABViewGantt:taskUpdate(): Error Updating Item",
             patch,
          });

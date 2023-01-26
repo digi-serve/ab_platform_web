@@ -87,14 +87,14 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
                // create a menu item for the collapse option to use later
                const collapseMenu = {
                   id: ids.collapseMenu,
-                  value: L("Collapse Menu"),
+                  value: this.label("Collapse Menu"),
                   icon: "chevron-circle-left",
                };
 
                // create a menu item from the expand option to use later
                const expandMenu = {
                   id: ids.expandMenu,
-                  value: L("Expand Menu"),
+                  value: this.label("Expand Menu"),
                   icon: "chevron-circle-right",
                   hidden: true,
                };
@@ -400,14 +400,14 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
       // create a menu item for the collapse option to use later
       const collapseMenu = {
          id: ids.collapseMenu,
-         value: L("Collapse Menu"),
+         value: this.label("Collapse Menu"),
          icon: "chevron-circle-left",
       };
 
       // create a menu item from the expand option to use later
       const expandMenu = {
          id: ids.expandMenu,
-         value: L("Expand Menu"),
+         value: this.label("Expand Menu"),
          icon: "chevron-circle-right",
          hidden: true,
       };

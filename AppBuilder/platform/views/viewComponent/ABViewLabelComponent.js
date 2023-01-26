@@ -1,10 +1,8 @@
 const ABViewComponent = require("./ABViewComponent").default;
 
-const L = (...params) => AB.Multilingual.label(...params);
-
 module.exports = class ABViewLabelComponent extends ABViewComponent {
    constructor(baseView, idBase) {
-      super(baseView, idBase ?? `ABViewLabel_${baseView.id}`, {});
+      super(baseView, idBase ?? `ABViewLabel_${baseView.id}`);
    }
 
    ui() {

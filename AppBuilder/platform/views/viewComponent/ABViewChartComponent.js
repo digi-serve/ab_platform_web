@@ -13,8 +13,9 @@ module.exports = class ABViewChartComponent extends ABViewContainerComponent {
       await super.init(AB, accessLevel);
 
       const $component = $$(this.ids.component);
+      const abWebix = this.AB.Webix;
 
-      if ($component) webix.extend($component, webix.ProgressBar);
+      if ($component) abWebix.extend($component, abWebix.ProgressBar);
 
       const baseView = this.view;
       const dc = this.datacollection;

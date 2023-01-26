@@ -46,7 +46,7 @@ module.exports = class ABViewDetailTreeComponent extends (
          const branches = [];
 
          if (typeof field.settings.options.data === "undefined")
-            field.settings.options = new webix.TreeCollection({
+            field.settings.options = new this.AB.Webix.TreeCollection({
                data: field.settings.options,
             });
 

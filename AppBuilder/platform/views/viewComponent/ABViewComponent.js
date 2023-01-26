@@ -76,7 +76,7 @@ export default class ABViewComponent extends ClassUI {
     * @param datacollection {ABDatacollection}
     */
    datacollectionLoad(datacollection) {
-      this.CurrentDatacollectionID = datacollection.id;
+      this.CurrentDatacollectionID = datacollection?.id;
    }
 
    objectLoad(object) {
