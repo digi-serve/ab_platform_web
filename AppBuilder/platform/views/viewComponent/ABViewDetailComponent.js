@@ -81,7 +81,7 @@ module.exports = class ABViewDetailComponent extends ABViewContainerComponent {
          if (f.field) {
             const field = f.field();
 
-            if (!field || !rowData) return;
+            if (!field) return;
 
             // get value of relation when field is a connect field
             switch (field.key) {

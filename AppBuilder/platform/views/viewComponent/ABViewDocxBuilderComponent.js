@@ -8,30 +8,24 @@ const ABFieldImage = require("../../dataFields/ABFieldImage");
 const ABObjectQuery = require("../../ABObjectQuery");
 
 const ABViewComponent = require("./ABViewComponent").default;
-const ABViewDocxBuilderCore = require("../../../core/views/ABViewDocxBuilderCore");
-
-const ABViewDocxBuilderPropertyComponentDefaults =
-   ABViewDocxBuilderCore.defaultValues();
 
 module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
    constructor(baseView, idBase) {
-      idBase = idBase ?? `ABViewDocxBuilder_${baseView.id}`;
-      super(baseView, idBase, {
-         button: "",
-         noFile: "",
+      super(baseView, idBase ?? `ABViewDocxBuilder_${baseView.id}`, {
+         downloadButton: "",
+         noFileLabel: "",
       });
    }
 
    ui() {
-      const view = this.view;
+      const baseView = this.view;
+      const settings = baseView.settings;
+      const defaultSettings = baseView.constructor.defaultValues();
+      const buttonWidth = settings.width ?? defaultSettings.width;
 
       let autowidth = false;
-      let buttonWidth =
-         view.settings.width ??
-         ABViewDocxBuilderPropertyComponentDefaults.width;
-      if (buttonWidth == 0) {
-         autowidth = true;
-      }
+
+      if (buttonWidth === 0) autowidth = true;
 
       let leftSpacer = {
          type: "spacer",
@@ -42,10 +36,7 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
          width: 1,
       };
 
-      switch (
-         view.settings.buttonPosition ??
-         ABViewDocxBuilderPropertyComponentDefaults.buttonPosition
-      ) {
+      switch (settings.buttonPosition ?? defaultSettings.buttonPosition) {
          case "left":
             break;
          case "center":
@@ -64,78 +55,83 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
       }
 
       const buttonLabelText =
-         view.buttonlabel ||
-         view.settings.buttonlabel ||
-         ABViewDocxBuilderPropertyComponentDefaults.buttonlabel; // Use || to check empty string ""
-
-      return {
-         // TODO: We have to refactor becuase we need "id" on the very top level for each viewComponent.
-         id: `${this.ids.component}_temp`,
-         view: "toolbar",
-         css:
-            view.settings.toolbarBackground ??
-            ABViewDocxBuilderPropertyComponentDefaults.toolbarBackground,
-         cols: [
-            leftSpacer,
-            {
-               id: this.ids.button,
-               view: "button",
-               css: "webix_primary",
-               type: "icon",
-               icon: "fa fa-file-word-o",
-               label: buttonLabelText,
-               width:
-                  view.settings.width ??
-                  ABViewDocxBuilderPropertyComponentDefaults.width,
-               autowidth: autowidth,
-               click: () => {
-                  this.renderFile();
-               },
-               on: {
-                  // Add data-cy attribute for cypress tests
-                  onAfterRender: () => {
-                     const name = view.name.replace(".docxBuilder", "");
-                     const dataCy = `docx download ${name} ${view.id}`;
-                     $$(this.ids.button)
-                        ?.$view.querySelector("button")
-                        .setAttribute("data-cy", dataCy);
+         baseView.buttonlabel ||
+         settings.buttonlabel ||
+         defaultSettings.buttonlabel; // Use || to check empty string ""
+      const ids = this.ids;
+      const _ui = super.ui([
+         {
+            view: "toolbar",
+            css:
+               settings.toolbarBackground ?? defaultSettings.toolbarBackground,
+            cols: [
+               leftSpacer,
+               {
+                  id: ids.downloadButton,
+                  view: "button",
+                  css: "webix_primary",
+                  type: "icon",
+                  icon: "fa fa-file-word-o",
+                  label: buttonLabelText,
+                  width: settings.width || defaultSettings.width,
+                  autowidth: autowidth,
+                  click: () => {
+                     this.renderFile();
+                  },
+                  on: {
+                     // Add data-cy attribute for cypress tests
+                     onAfterRender: () => {
+                        const name = baseView.name.replace(".docxBuilder", "");
+                        const dataCy = `docx download ${name} ${baseView.id}`;
+                        $$(ids.downloadButton)
+                           ?.$view.querySelector("button")
+                           .setAttribute("data-cy", dataCy);
+                     },
                   },
                },
-            },
-            {
-               id: this.ids.noFile,
-               view: "label",
-               label: this.label("No template file"),
-            },
-            {
-               type: "spacer",
-            },
-            rightSpacer,
-         ],
-      };
+               {
+                  id: ids.noFileLabel,
+                  view: "label",
+                  label: this.label("No template file"),
+               },
+               {
+                  type: "spacer",
+               },
+               rightSpacer,
+            ],
+         },
+      ]);
+
+      delete _ui.type;
+
+      return _ui;
    }
 
    async init(AB) {
-      const DownloadButton = $$(this.ids.button);
-      const NoFileLabel = $$(this.ids.noFile);
+      await super.init(AB);
+
+      const ids = this.ids;
+      const $downloadButton = $$(ids.downloadButton);
+      const $noFileLabel = $$(ids.noFileLabel);
 
       if (this.view.settings.filename) {
-         DownloadButton.show();
-         NoFileLabel.hide();
+         $downloadButton.show();
+         $noFileLabel.hide();
       } else {
-         DownloadButton.hide();
-         NoFileLabel.show();
+         $downloadButton.hide();
+         $noFileLabel.show();
       }
    }
 
    async onShow() {
-      let tasks = [];
+      super.onShow;
+
+      const tasks = [];
 
       this.view.datacollections.forEach((dc) => {
-         if (dc && dc.dataStatus == dc.dataStatusFlag.notInitial) {
+         if (dc.dataStatus === dc.dataStatusFlag.notInitial)
             // load data when a widget is showing
             tasks.push(dc.loadData());
-         }
       });
 
       // Show loading cursor
@@ -148,23 +144,23 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
    }
 
    busy() {
-      const DownloadButton = $$(this.ids.button);
-      if (!DownloadButton) return;
+      const $downloadButton = $$(this.ids.downloadButton);
 
-      DownloadButton.disable();
+      if (!$downloadButton) return;
 
-      DownloadButton.define("icon", "fa fa-refresh fa-spin");
-      DownloadButton.refresh();
+      $downloadButton.disable();
+      $downloadButton.define("icon", "fa fa-refresh fa-spin");
+      $downloadButton.refresh();
    }
 
    ready() {
-      const DownloadButton = $$(this.ids.button);
-      if (!DownloadButton) return;
+      const $downloadButton = $$(this.ids.downloadButton);
 
-      DownloadButton.enable();
+      if (!$downloadButton) return;
 
-      DownloadButton.define("icon", "fa fa-file-word-o");
-      DownloadButton.refresh();
+      $downloadButton.enable();
+      $downloadButton.define("icon", "fa fa-file-word-o");
+      $downloadButton.refresh();
    }
 
    async renderFile() {
@@ -187,34 +183,36 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
          images
       );
 
+      const baseView = this.view;
+
       // Let user download the output file
-      this.view.letUserDownload(blobFile, this.view.filelabel);
+      baseView.letUserDownload(blobFile, baseView.filelabel);
 
       // Final step
       this.ready();
    }
 
    getReportData() {
-      let result = {};
+      const result = {};
 
       // Get current cursor
       const datacollections = this.view.datacollections;
       const isDcLabelAdded = datacollections.length > 1;
 
       datacollections
-         .filter((dc) => dc && dc.datasource)
+         .filter((dc) => dc.datasource)
          .forEach((dc) => {
             const obj = dc.datasource;
             const dcCursor = dc.getCursor();
-
-            let dcValues = [];
-            let dataList = [];
+            const dcValues = [];
+            const dataList = [];
 
             // merge cursor to support dc and tree cursor in the report
             if (dcCursor) {
                const treeCursor = dc.getCursor(true);
+
                dataList.push(this.AB.merge({}, dcCursor, treeCursor));
-            } else dataList = this.AB.cloneDeep(dc.getData());
+            } else dataList.push(...this.AB.cloneDeep(dc.getData()));
 
             // update property names to column labels to match format names in docx file
             const mlFields = obj.multilingualFields();
@@ -224,42 +222,40 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
 
                // For support label of columns every languages
                obj.fields().forEach((f) => {
-                  let fieldLabels = [];
+                  const fieldLabels = [];
 
                   // Query Objects
                   if (obj instanceof ABObjectQuery) {
-                     if (typeof f.object.translations == "string")
+                     if (typeof f.object.translations === "string")
                         f.object.translations = JSON.parse(
                            f.object.translations
                         );
 
-                     if (typeof f.translations == "string")
+                     if (typeof f.translations === "string")
                         f.translations = JSON.parse(f.translations);
 
                      (f.object.translations || []).forEach((objTran) => {
-                        let fieldTran = (f.translations || []).filter(
+                        const fieldTran = (f.translations || []).filter(
                            (fieldTran) =>
-                              fieldTran.language_code == objTran.language_code
+                              fieldTran.language_code === objTran.language_code
                         )[0];
 
                         if (!fieldTran) return;
 
-                        let objectLabel = objTran.label;
-                        let fieldLabel = fieldTran.label;
+                        const objectLabel = objTran.label;
+                        const fieldLabel = fieldTran.label;
 
                         // Replace alias with label of object
                         fieldLabels.push(`${objectLabel}.${fieldLabel}`);
                      });
                   }
                   // Normal Objects
-                  else {
-                     if (typeof f.translations == "string")
-                        f.translations = JSON.parse(f.translations);
+                  else if (typeof f.translations === "string")
+                     f.translations = JSON.parse(f.translations);
 
-                     f.translations.forEach((tran) => {
-                        fieldLabels.push(tran.label);
-                     });
-                  }
+                  f.translations.forEach((tran) => {
+                     fieldLabels.push(tran.label);
+                  });
 
                   resultData = this.setReportValues(
                      data,
@@ -276,35 +272,40 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
             });
 
             // If data sources have more than 1 or the result data more than 1 items, then add label of data source
-            let datacollectionData =
+            const datacollectionData =
                dcValues.length > 1 ? dcValues : dcValues[0];
+
             if (
                isDcLabelAdded ||
                (Array.isArray(datacollectionData) &&
                   datacollectionData.length > 1)
-            ) {
+            )
                (dc.translations || []).forEach((tran) => {
                   result[tran.label] = datacollectionData;
                });
-            } else result = datacollectionData;
+            else Object.assign(result, datacollectionData);
          });
 
       return result;
    }
 
    setReportValues(data, field, fieldLabels = [], multilinguageFields) {
-      let result = {};
+      const result = {};
+
       let val = null;
 
       result.id = data.id;
       result[`${field.columnName}_ORIGIN`] = data[field.columnName]; // Keep origin value for compare value with custom index
 
+      const baseView = this.view;
+
       // Translate multilinguage fields
       if (multilinguageFields.length) {
-         let transFields = (multilinguageFields || []).filter(
+         const transFields = (multilinguageFields || []).filter(
             (fieldName) => data[fieldName] != null
          );
-         this.view.translate(data, data, transFields, this.view.languageCode);
+
+         baseView.translate(data, data, transFields, baseView.languageCode);
       }
 
       // Pull value
@@ -315,9 +316,9 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
          // }
          val = data[field.columnName];
 
-         if (val && val.forEach) {
+         if (val?.forEach)
             val.forEach((v) => {
-               if (v == null) return;
+               if (!v) return;
 
                // format relation data
                if (field.datasourceLink) {
@@ -327,35 +328,32 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
                         v[`${f.columnName}_ORIGIN`] = v[f.columnName];
 
                         v[f.columnName] = f.format(v, {
-                           languageCode: this.view.languageCode,
+                           languageCode: baseView.languageCode,
                         });
                      });
                }
 
                // Keep ABObject to relation data
-               if (v && typeof v == "object") v._object = field.datasourceLink;
+               if (v && typeof v === "object") v._object = field.datasourceLink;
             });
-         }
+
          // TODO
          // data[label + '_label'] = field.format(baseData);
-      } else {
+      } else
          val = field.format(data, {
-            languageCode: this.view.languageCode,
+            languageCode: baseView.languageCode,
          });
-      }
 
       // Set value to report with every languages of label
       fieldLabels.forEach((label) => {
-         if (val) {
-            result[label] = val;
-         } else if (!result[label]) {
-            result[label] = "";
-         }
+         if (val) result[label] = val;
+         else if (!result[label]) result[label] = "";
       });
 
       // normalize child items
-      if (data.data && data.data.length) {
+      if (data.data?.length) {
          result.data = result.data || [];
+
          (data.data || []).forEach((childItem, index) => {
             // add new data item
             result.data[index] = this.setReportValues(
@@ -371,29 +369,25 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
    }
 
    async downloadImages() {
-      let images = {};
-      let tasks = [];
-
-      let addDownloadTask = (fieldImage, data = []) => {
+      const images = {};
+      const tasks = [];
+      const addDownloadTask = (fieldImage, data = []) => {
          data.forEach((d) => {
-            let imageVal = fieldImage.format(d);
+            const imageVal = fieldImage.format(d);
+
             if (imageVal && !images[imageVal]) {
                tasks.push(
-                  new Promise((ok, bad) => {
-                     let imgUrl = fieldImage.urlImage(imageVal); // `/opsportal/image/${this.application.name}/${imageVal}`;
+                  new Promise((resolve, reject) => {
+                     const imgUrl = fieldImage.urlImage(imageVal); // `/opsportal/image/${this.application.name}/${imageVal}`;
 
-                     JSZipUtils.getBinaryContent(
-                        imgUrl,
-                        function (error, content) {
-                           if (error) return bad(error);
-                           else {
-                              // store binary of image
-                              images[imageVal] = content;
+                     JSZipUtils.getBinaryContent(imgUrl, (error, content) => {
+                        if (error) return reject(error);
 
-                              ok();
-                           }
-                        }
-                     );
+                        // store binary of image
+                        images[imageVal] = content;
+
+                        resolve();
+                     });
                   })
                );
             }
@@ -404,14 +398,16 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
       };
 
       this.view.datacollections
-         .filter((dc) => dc && dc.datasource)
+         .filter((dc) => dc?.datasource)
          .forEach((dc) => {
             const obj = dc.datasource;
 
             let currCursor = dc.getCursor();
+
             if (currCursor) {
                // Current cursor
-               let treeCursor = dc.getCursor(true);
+               const treeCursor = dc.getCursor(true);
+
                currCursor = [this.AB.merge({}, currCursor, treeCursor)];
             } // List of data
             else currCursor = dc.getData();
@@ -426,7 +422,7 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
       return images;
    }
 
-   async downloadTemplateFile() {
+   downloadTemplateFile() {
       const url = this.view.downloadUrl();
 
       return new Promise((resolve, reject) => {
@@ -439,11 +435,10 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
    }
 
    generateDocxFile(contentFile, data, images) {
-      let summaries = {}; // { varName: sum number, ..., varName2: number2 }
-      let zip = new JSZip(contentFile);
-      let doc = new Docxtemplater();
-
-      let imageModule = new ImageModule({
+      const summaries = {}; // { varName: sum number, ..., varName2: number2 }
+      const zip = new JSZip(contentFile);
+      const doc = new Docxtemplater();
+      const imageModule = new ImageModule({
          centered: false,
          getImage: (tagValue, tagName) => {
             // NOTE: .getImage of version 3.0.2 does not support async
@@ -453,14 +448,17 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
             return images[tagValue] || "";
          },
          getSize: (imgBuffer, tagValue, tagName) => {
-            let defaultVal = [300, 160];
+            const defaultVal = [300, 160];
+            const baseView = this.view;
+            const dc = baseView.datacollection;
 
-            let dc = this.view.datacollection;
             if (!dc) {
-               let dcs = this.view.datacollections;
+               const dcs = baseView.datacollections;
+
                if (dcs) {
                   dcs.forEach((dc) => {
                      let obj = dc.datasource;
+
                      if (!obj) return false;
 
                      // This is a query object
@@ -468,16 +466,19 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
                         let tagNames = tagName.split(".");
 
                         if (!obj.objects) return false; // not a query
-                        obj = obj.objects((o) => o.label == tagNames[0])[0]; // Label of object
+
+                        obj = obj.objects((o) => o.label === tagNames[0])[0]; // Label of object
+
                         if (!obj) return false;
 
                         tagName = tagNames[1]; // Field name
                      }
 
-                     let imageField = obj.fields(
-                        (f) => f.columnName == tagName
+                     const imageField = obj.fields(
+                        (f) => f.columnName === tagName
                      )[0];
-                     if (!imageField || !imageField.settings) return false;
+
+                     if (!imageField?.settings) return false;
 
                      if (
                         imageField.settings.useWidth &&
@@ -493,26 +494,30 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
 
                      return false;
                   });
+
                   return defaultVal;
-               } else {
-                  return defaultVal;
-               }
+               } else return defaultVal;
             } else {
                let obj = dc.datasource;
+
                if (!obj) return defaultVal;
 
                // This is a query object
                if (tagName.indexOf(".") > -1) {
-                  let tagNames = tagName.split(".");
+                  const tagNames = tagName.split(".");
 
-                  obj = obj.objects((o) => o.label == tagNames[0])[0]; // Label of object
+                  obj = obj.objects((o) => o.label === tagNames[0])[0]; // Label of object
+
                   if (!obj) return defaultVal;
 
                   tagName = tagNames[1]; // Field name
                }
 
-               let imageField = obj.fields((f) => f.columnName == tagName)[0];
-               if (!imageField || !imageField.settings) return defaultVal;
+               const imageField = obj.fields(
+                  (f) => f.columnName === tagName
+               )[0];
+
+               if (!imageField?.settings) return defaultVal;
 
                if (
                   imageField.settings.useWidth &&
@@ -562,8 +567,8 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
                   return {
                      get: function (scope, context) {
                         // NOTE: AppBuilder custom filter : no return empty items
-                        if (tag.indexOf("data|") == 0) {
-                           let prop = (tag.split("|")[1] || "").trim();
+                        if (tag.indexOf("data|") === 0) {
+                           const prop = (tag.split("|")[1] || "").trim();
 
                            return (scope["data"] || []).filter(function (item) {
                               return item[prop] ? true : false;
@@ -571,33 +576,32 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
                         }
                         // Mark number to add to a variable
                         else if (tag.indexOf("|$sum?") > -1) {
-                           let prop = tag.split("|$sum?")[0];
-                           let varName = tag.split("|$sum?")[1];
+                           const prop = tag.split("|$sum?")[0];
+                           const varName = tag.split("|$sum?")[1];
 
                            let number = scope[prop];
-                           if (typeof number == "string") {
+
+                           if (typeof number === "string")
                               number = number.replace(
                                  /[^\d.]/g, // return only number and dot
                                  ""
                               );
-                           }
 
-                           if (summaries[varName] == null)
-                              summaries[varName] = 0.0;
+                           if (!summaries[varName]) summaries[varName] = 0.0;
 
                            summaries[varName] += parseFloat(number);
 
                            return scope[prop];
                         }
                         // Show sum value ^
-                        else if (tag.indexOf("$sum?") == 0) {
-                           let varName = tag.replace("$sum?", "");
+                        else if (tag.indexOf("$sum?") === 0) {
+                           const varName = tag.replace("$sum?", "");
 
                            return summaries[varName] || 0;
                         }
                         // // Sum number of .data (Grouped query)
-                        // else if (tag.indexOf("$sum|") == 0) {
-                        //    let prop = (
+                        // else if (tag.indexOf("$sum|") === 0) {
+                        //    const prop = (
                         //       tag.split("|")[1] || ""
                         //    ).trim();
 
@@ -607,7 +611,7 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
                         //          if (!childItem[prop]) return;
 
                         //          let number = childItem[prop];
-                        //          if (typeof number == "string") {
+                        //          if (typeof number === "string") {
                         //             number = number.replace(
                         //                /[^\d.]/g, // return only number and dot
                         //                ""
@@ -635,22 +639,26 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
                         //    return sum;
                         // }
                         // NOTE: AppBuilder custom filter of another data source
-                        else if (tag.indexOf("$") == 0) {
-                           let props = tag.replace("$", "").split("|");
-                           let propSource = props[0].trim();
-                           let propFilter = props[1].trim(); // column name of ABFieldConnect
+                        else if (tag.indexOf("$") === 0) {
+                           const props = tag.replace("$", "").split("|");
+                           const propSource = props[0].trim();
+                           const propFilter = props[1].trim(); // column name of ABFieldConnect
 
                            if (!propSource || !propFilter) return "";
 
                            // Pull Index field of connect field
                            let indexColName;
-                           let obj = scope._object;
+
+                           const obj = scope._object;
+
                            if (obj) {
-                              let connectedField = obj.fields(
-                                 (f) => f.columnName == propFilter
+                              const connectedField = obj.fields(
+                                 (f) => f.columnName === propFilter
                               )[0];
+
                               if (connectedField) {
-                                 let indexField = connectedField.indexField;
+                                 const indexField = connectedField.indexField;
+
                                  indexColName = indexField
                                     ? indexField.columnName
                                     : null;
@@ -658,17 +666,15 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
                            }
 
                            let sourceVals = data[propSource];
+
                            if (sourceVals && !Array.isArray(sourceVals))
                               sourceVals = [sourceVals];
 
-                           let getVal = (data) => {
-                              return (
-                                 data[`${indexColName}_ORIGIN`] || // Pull origin data to compare by custom index
-                                 data[indexColName] ||
-                                 data.id ||
-                                 data
-                              );
-                           };
+                           const getVal = (data) =>
+                              data[`${indexColName}_ORIGIN`] || // Pull origin data to compare by custom index
+                              data[indexColName] ||
+                              data.id ||
+                              data;
 
                            return (sourceVals || []).filter(function (item) {
                               // Pull data of parent to compare
@@ -677,21 +683,21 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
                               if (Array.isArray(comparer))
                                  return (
                                     comparer.filter(
-                                       (c) => getVal(c) == getVal(item)
+                                       (c) => getVal(c) === getVal(item)
                                     ).length > 0
                                  );
-                              else {
-                                 return getVal(item) == getVal(comparer);
-                              }
+                              else return getVal(item) === getVal(comparer);
                            });
                         }
                         // ์NOTE : Custom filter
                         else if (tag.indexOf("?") > -1) {
-                           let result = scope;
-                           let prop = tag.split("?")[0];
-                           let condition = tag.split("?")[1];
+                           const result = scope;
+                           const prop = tag.split("?")[0];
+                           const condition = tag.split("?")[1];
+
                            if (prop && condition) {
                               let data = scope[prop];
+
                               if (data) {
                                  if (!Array.isArray(data)) data = [data];
 
@@ -701,18 +707,15 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
                               }
                            }
                            return result;
-                        } else if (tag === ".") {
-                           return scope;
-                        } else {
-                           return scope[tag];
-                        }
+                        } else if (tag === ".") return scope;
+                        else return scope[tag];
                      },
                   };
                },
             })
             .render(); // render the document
       } catch (error) {
-         return err(error);
+         return error;
       }
 
       // Output the document using Data-URI

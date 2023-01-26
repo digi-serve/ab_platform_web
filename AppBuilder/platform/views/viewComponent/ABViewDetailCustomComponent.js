@@ -47,18 +47,20 @@ module.exports = class ABViewDetailCustomComponent extends (
    }
 
    onShow() {
+      super.onShow;
+
       const baseView = this.view;
       const field = baseView.field();
 
       if (!field) return;
 
-      const elem = $$(this.ids.detail);
+      const $detail = $$(this.ids.detail);
 
-      if (!elem) return;
+      if (!$detail) return;
 
       const detailCom = baseView.detailComponent(),
          rowData = detailCom.datacollection.getCursor() || {},
-         node = elem.$view;
+         node = $detail.$view;
 
       field.customDisplay(rowData, null, node, {
          editable: false,
@@ -70,14 +72,14 @@ module.exports = class ABViewDetailCustomComponent extends (
 
       if (!field) return;
 
-      const elem = $$(this.ids.detail);
+      const $detail = $$(this.ids.detail);
 
-      if (!elem) return;
+      if (!$detail) return;
 
       const rowData = {};
 
       rowData[field.columnName] = val;
 
-      field.setValue(elem, rowData);
+      field.setValue($detail, rowData);
    }
 };
