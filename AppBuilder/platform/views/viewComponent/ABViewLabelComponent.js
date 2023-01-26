@@ -4,38 +4,25 @@ const L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABViewLabelComponent extends ABViewComponent {
    constructor(baseView, idBase) {
-      idBase = idBase ?? `ABViewLabel_${baseView.id}`;
-
-      super(baseView, idBase, {});
-
-      this.view = baseView;
-
-      this.AB = this.view.AB;
+      super(baseView, idBase ?? `ABViewLabel_${baseView.id}`, {});
    }
 
    ui() {
-      const ids = this.ids;
       const baseView = this.view;
 
-      const _ui = {
-         // TODO: We have to refactor becuase we need "id" on the very top level for each viewComponent.
-         id: `${this.ids.component.replace("Label", "LabelLabel")}_temp`,
-         type: "form",
-         padding: 15,
-         borderless: true,
-         rows: [
-            {
-               id: ids.component,
-               view: "label",
-               // css: 'ab-component-header ab-ellipses-text',
-               label: baseView.text || "*",
-               align: baseView.settings.alignment,
-               type: {
-                  height: "auto",
-               },
+      const _ui = super.ui([
+         {
+            view: "label",
+            // css: 'ab-component-header ab-ellipses-text',
+            label: baseView.text || "*",
+            align: baseView.settings.alignment,
+            type: {
+               height: "auto",
             },
-         ],
-      };
+         },
+      ]);
+
+      delete _ui.type;
 
       return this.uiFormatting(_ui);
    }
@@ -71,6 +58,6 @@ module.exports = class ABViewLabelComponent extends ABViewComponent {
    }
 
    async init(AB) {
-      this.AB = AB;
+      await super.init(AB);
    }
 };
