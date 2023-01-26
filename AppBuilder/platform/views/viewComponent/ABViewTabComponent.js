@@ -18,6 +18,7 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
 
       super(baseView, idBase ?? `ABViewTab_${baseView.id}`, {
          tab: "",
+
          sidebar: "",
          expandMenu: "",
          collapseMenu: "",
@@ -92,6 +93,7 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
                // find out what the first option is so we can set it later
                let selectedItem = `${_viewComponents[0].view.id}_menu`;
 
+               const abStorage = ab.Storage;
                const sidebar = {
                   view: "sidebar",
                   type: "customIcons", // define the sidebar type with the new template created above
@@ -120,7 +122,7 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
                               $sidebar.select(selectedItem);
                               // store this state in local storage the user preference is
                               // remembered next time they see this sidebar
-                              ab.Storage.set(
+                              abStorage.set(
                                  `${ids.tab}-state`,
                                  $sidebar.getState()
                               );
@@ -140,7 +142,7 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
                               $sidebar.select(selectedItem);
                               // store this state in local storage the user preference is
                               // remembered next time they see this sidebar
-                              ab.Storage.set(
+                              abStorage.set(
                                  `${ids.tab}-state`,
                                  $sidebar.getState()
                               );

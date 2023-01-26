@@ -4,11 +4,9 @@ module.exports = class ABViewTextComponent extends ABViewComponent {
    constructor(baseView, idBase) {
       idBase = idBase ?? `ABViewText_${baseView.id}`;
 
-      super(baseView, idBase, {});
-
-      this.view = baseView;
-
-      this.AB = this.view.AB;
+      super(baseView, idBase ?? `ABViewText_${baseView.id}`, {
+         text: "",
+      });
    }
 
    ui() {
@@ -16,7 +14,7 @@ module.exports = class ABViewTextComponent extends ABViewComponent {
       const baseView = this.view;
 
       const _ui = {
-         id: ids.component,
+         id: ids.text,
          view: "template",
          minHeight: 10,
          css: "ab-custom-template",
@@ -30,35 +28,28 @@ module.exports = class ABViewTextComponent extends ABViewComponent {
    }
 
    async init(AB) {
-      this.AB = AB;
-
-      const ids = this.ids;
-
-      const $component = $$(ids.component);
+      await super.init(AB);
    }
 
    displayText(value) {
       const ids = this.ids;
       const baseView = this.view;
-      const result = baseView.displayText(value, ids.component);
+      const result = baseView.displayText(value, ids.text);
 
-      const $component = $$(ids.component) ?? null;
+      const $text = $$(ids.text);
 
-      if (!$component) return;
+      if (!$text) return;
 
-      $component.define("template", result);
-      $component.refresh();
+      $text.define("template", result);
+      $text.refresh();
    }
 
-   onShow(viewId) {
-      const ids = this.ids;
-
-      const baseView = this.view;
-
-      super.onShow(viewId);
+   onShow() {
+      super.onShow();
 
       // listen DC events
-      const dataview = baseView.datacollection ?? null;
+      const dataview = this.datacollection;
+      const baseView = this.view;
 
       if (dataview && baseView.parent.key !== "dataview")
          this.eventAdd({
