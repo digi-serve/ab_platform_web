@@ -1,8 +1,6 @@
 // const ABViewComponent = require("./ABViewComponent").default;
 import ABViewComponent from "./ABViewComponent";
 
-let L = null;
-
 const DAY_SCALE = { unit: "day", format: "%d" },
    WEEK_SCALE = {
       unit: "week",
@@ -23,15 +21,10 @@ const DAY_SCALE = { unit: "day", format: "%d" },
 
 export default class ABViewGanttComponent extends ABViewComponent {
    constructor(baseView, idBase) {
-      idBase = idBase || `ABViewGantt_${baseView.id}`;
-
-      super(baseView, idBase, {
+      super(baseView, idBase || `ABViewGantt_${baseView.id}`, {
          menu: "",
          gantt: "",
       });
-
-      this.view = baseView;
-      this.AB = this.view.AB;
 
       this._tempDC = null;
       // {ABDataCollection}
@@ -56,9 +49,11 @@ export default class ABViewGanttComponent extends ABViewComponent {
       // generated on the same item, we catch the repeats and just return
       // the same data for each.
 
+      const ids = this.ids;
+
       this.ganttElement = {
          isExistsTask: (taskId) => {
-            const localService = $$(this.ids.gantt).getService("local");
+            const localService = $$(ids.gantt).getService("local");
             if (!localService) return false;
 
             const tasksData = localService.tasks();
@@ -69,112 +64,106 @@ export default class ABViewGanttComponent extends ABViewComponent {
          removeTask: (taskId) => {
             if (!this.ganttElement.isExistsTask(taskId)) return;
 
-            const opsService = $$(this.ids.gantt).getService("operations");
+            const opsService = $$(ids.gantt).getService("operations");
             if (!opsService) return;
 
             return opsService.removeTask(taskId);
          },
       };
-
-      if (!L) {
-         L = (...params) => {
-            return this.AB.Multilingual.label(...params);
-         };
-      }
    }
 
    ui() {
       const ids = this.ids;
-      const _this = this;
-
-      return {
-         id: ids.component,
-         rows: [
-            {
-               cols: [
-                  { fillspace: true },
-                  {
-                     view: "menu",
-                     id: ids.menu,
-                     layout: "x",
-                     width: 300,
-                     data: [
-                        {
-                           id: "day",
-                           value: L("Day"),
-                        },
-                        {
-                           id: "week",
-                           value: L("Week"),
-                        },
-                        {
-                           id: "month",
-                           value: L("Month"),
-                        },
-                        {
-                           id: "year",
-                           value: L("Year"),
-                        },
-                     ],
-                     on: {
-                        onItemClick: (id /* , e, node */) => {
-                           this.setScale(id);
-                        },
+      const self = this;
+      const _ui = super.ui([
+         {
+            cols: [
+               { fillspace: true },
+               {
+                  view: "menu",
+                  id: ids.menu,
+                  layout: "x",
+                  width: 300,
+                  data: [
+                     {
+                        id: "day",
+                        value: this.label("Day"),
                      },
-                  },
-               ],
-            },
-            {
-               id: ids.gantt,
-               view: "gantt",
-               scales: [YEAR_SCALE, MONTH_SCALE, DAY_SCALE],
-               override: new Map([
-                  [
-                     gantt.services.Backend,
-                     // global webix gantt object
-                     class MyBackend extends gantt.services.Backend {
-                        async tasks() {
-                           const DC = _this.CurrentDatacollection;
-                           if (!DC) return [];
-
-                           // if (DC.dataStatus != DC.dataStatusFlag.initialized) {
-                           //    await DC.loadData().catch((err) => {
-                           //       console.error(err);
-                           //    });
-                           // }
-                           return (DC.getData() || []).map((d, indx) =>
-                              _this.convertFormat(d, indx)
-                           );
-                        }
-                        links() {
-                           return Promise.resolve([]);
-                        }
-                        async addTask(obj, index, parent) {
-                           if (!_this.pendingAdds[obj.id]) {
-                              _this.pendingAdds[obj.id] = _this.taskAdd(obj);
-                           }
-                           const newTask = await _this.pendingAdds[obj.id];
-                           delete _this.pendingAdds[obj.id];
-                           return {
-                              id: (newTask || {}).id,
-                           };
-                        }
-                        async updateTask(id, obj) {
-                           return await _this.taskUpdate(obj.id, obj);
-                        }
-                        async removeTask(id) {
-                           return await _this.taskRemove(id);
-                        }
+                     {
+                        id: "week",
+                        value: this.label("Week"),
+                     },
+                     {
+                        id: "month",
+                        value: this.label("Month"),
+                     },
+                     {
+                        id: "year",
+                        value: this.label("Year"),
                      },
                   ],
-               ]),
-            },
-         ],
-      };
+                  on: {
+                     onItemClick: (id /* , e, node */) => {
+                        this.setScale(id);
+                     },
+                  },
+               },
+            ],
+         },
+         {
+            id: ids.gantt,
+            view: "gantt",
+            scales: [YEAR_SCALE, MONTH_SCALE, DAY_SCALE],
+            override: new Map([
+               [
+                  gantt.services.Backend,
+                  // global webix gantt object
+                  class MyBackend extends gantt.services.Backend {
+                     async tasks() {
+                        const DC = self.CurrentDatacollection;
+                        if (!DC) return [];
+
+                        // if (DC.dataStatus != DC.dataStatusFlag.initialized) {
+                        //    await DC.loadData().catch((err) => {
+                        //       console.error(err);
+                        //    });
+                        // }
+                        return (DC.getData() || []).map((d, indx) =>
+                           self.convertFormat(d, indx)
+                        );
+                     }
+                     links() {
+                        return Promise.resolve([]);
+                     }
+                     async addTask(obj, index, parent) {
+                        if (!self.pendingAdds[obj.id]) {
+                           self.pendingAdds[obj.id] = self.taskAdd(obj);
+                        }
+                        const newTask = await self.pendingAdds[obj.id];
+                        delete self.pendingAdds[obj.id];
+                        return {
+                           id: (newTask || {}).id,
+                        };
+                     }
+                     async updateTask(id, obj) {
+                        return await self.taskUpdate(obj.id, obj);
+                     }
+                     async removeTask(id) {
+                        return await self.taskRemove(id);
+                     }
+                  },
+               ],
+            ]),
+         },
+      ]);
+
+      delete _ui.type;
+
+      return _ui;
    }
 
    async init(AB) {
-      this.AB = AB;
+      await super.init(AB);
 
       // #HACK!: as of webix v.8.1.1 there is a visual glitch of the Gantt
       // object if you replace a gantt widget with a new definition (like in
@@ -182,9 +171,8 @@ export default class ABViewGanttComponent extends ABViewComponent {
       // workspace).  In that one case, the menu would disappear even though
       // the data is present.  So this makes sure the menu is shown
       const $menu = $$(this.ids.menu);
-      if ($menu) {
-         $menu.showItem("day");
-      }
+
+      if ($menu) $menu.showItem("day");
    }
 
    /**
@@ -193,11 +181,7 @@ export default class ABViewGanttComponent extends ABViewComponent {
     * @return {ABDataCollection}
     */
    get CurrentDatacollection() {
-      let DC = super.CurrentDatacollection;
-      if (!DC) {
-         DC = this._tempDC;
-      }
-      return DC;
+      return super.CurrentDatacollection || this._tempDC;
    }
 
    /**
@@ -211,35 +195,40 @@ export default class ABViewGanttComponent extends ABViewComponent {
     *         A key=>value hash corresponding to the gantt task that
     *         represents this row of data.
     */
-   convertFormat(row, index = null) {
+   convertFormat(row = {}, index = null) {
       const data = {};
-      row = row || {};
+      const StartDateField = this.StartDateField;
+      const EndDateField = this.EndDateField;
+      const DurationField = this.DurationField;
 
-      if (!this.StartDateField || (!this.EndDateField && !this.DurationField))
-         return data;
+      if (!StartDateField || (!EndDateField && !DurationField)) return data;
 
       const currDate = new Date();
+
       data["id"] = row.id || row.uuid;
       data["type"] = "task";
       data["parent"] = 0;
       data["open"] = true;
+
       // define label
-      data["text"] = this.TitleField
-         ? row[this.TitleField.columnName] || ""
+      const TitleField = this.TitleField;
+      const ProgressField = this.ProgressField;
+      const NotesField = this.NotesField;
+
+      data["text"] = TitleField
+         ? row[TitleField.columnName] || ""
          : this.CurrentObject.displayData(row);
-      data["start_date"] = row[this.StartDateField.columnName] || currDate;
-      data["progress"] = this.ProgressField
-         ? parseFloat(row[this.ProgressField.columnName] || 0)
+      data["start_date"] = row[StartDateField.columnName] || currDate;
+      data["progress"] = ProgressField
+         ? parseFloat(row[ProgressField.columnName] || 0)
          : 0;
 
-      if (this.NotesField)
-         data["details"] = row[this.NotesField.columnName] || "";
+      if (NotesField) data["details"] = row[NotesField.columnName] || "";
 
-      if (this.EndDateField)
-         data["end_date"] = row[this.EndDateField.columnName] || currDate;
+      if (EndDateField)
+         data["end_date"] = row[EndDateField.columnName] || currDate;
 
-      if (this.DurationField)
-         data["duration"] = row[this.DurationField.columnName] || 1;
+      if (DurationField) data["duration"] = row[DurationField.columnName] || 1;
 
       // Default values
       if (!data["end_date"] && !data["duration"]) {
@@ -247,7 +236,7 @@ export default class ABViewGanttComponent extends ABViewComponent {
          data["duration"] = 1;
       }
 
-      if (index != null) data["order"] = index;
+      if (index) data["order"] = index;
 
       return data;
    }
@@ -263,25 +252,25 @@ export default class ABViewGanttComponent extends ABViewComponent {
     */
    convertValues(task) {
       const patch = {};
+      const TitleField = this.TitleField;
+      const StartDateField = this.StartDateField;
+      const ProgressField = this.ProgressField;
+      const NotesField = this.NotesField;
+      const EndDateField = this.EndDateField;
+      const DurationField = this.DurationField;
 
-      if (this.TitleField)
-         patch[this.TitleField.columnName] = task["text"] || "";
+      if (TitleField) patch[TitleField.columnName] = task["text"] || "";
 
-      if (this.StartDateField)
-         patch[this.StartDateField.columnName] = task["start_date"];
+      if (StartDateField) patch[StartDateField.columnName] = task["start_date"];
 
-      if (this.ProgressField)
-         patch[this.ProgressField.columnName] = parseFloat(
-            task["progress"] || 0
-         );
+      if (ProgressField)
+         patch[ProgressField.columnName] = parseFloat(task["progress"] || 0);
 
-      if (this.NotesField) patch[this.NotesField.columnName] = task["details"];
+      if (NotesField) patch[NotesField.columnName] = task["details"];
 
-      if (this.EndDateField)
-         patch[this.EndDateField.columnName] = task["end_date"];
+      if (EndDateField) patch[EndDateField.columnName] = task["end_date"];
 
-      if (this.DurationField)
-         patch[this.DurationField.columnName] = task["duration"];
+      if (DurationField) patch[DurationField.columnName] = task["duration"];
 
       return patch;
    }
@@ -319,6 +308,7 @@ export default class ABViewGanttComponent extends ABViewComponent {
       super.datacollectionLoad(datacollection);
 
       let DC = this.CurrentDatacollection;
+
       if (!DC && datacollection) {
          // NOTE: this can happen in the ABDesigner object workspace.
          // we send in a temp DC with no .id
@@ -376,12 +366,15 @@ export default class ABViewGanttComponent extends ABViewComponent {
 
    initData() {
       const ganttElem = $$(this.ids.gantt);
+
       if (!ganttElem) return;
 
       const dataService = ganttElem.getService("local");
+
       if (!dataService) return;
 
       const dcTasks = dataService.tasks();
+
       if (!dcTasks) return;
 
       // gantt v 8.1.1
@@ -412,6 +405,7 @@ export default class ABViewGanttComponent extends ABViewComponent {
 
          // Keep original start and end dates for calculate scale to display
          const currScale = dataService.getScales();
+
          this.originalStartDate = currScale.start;
          this.originalEndDate = currScale.end;
 
@@ -421,25 +415,31 @@ export default class ABViewGanttComponent extends ABViewComponent {
 
    setScale(scale) {
       const ganttElem = $$(this.ids.gantt);
+
       if (!ganttElem) return;
 
       const ganttData = ganttElem.getService("local");
+
       if (!ganttData) return;
 
-      let newScales = [];
+      const newScales = [];
 
       switch (scale) {
          case "day":
-            newScales = [YEAR_SCALE, MONTH_SCALE, DAY_SCALE];
+            newScales.push(YEAR_SCALE, MONTH_SCALE, DAY_SCALE);
+
             break;
          case "week":
-            newScales = [YEAR_SCALE, MONTH_SCALE, WEEK_SCALE];
+            newScales.push(YEAR_SCALE, MONTH_SCALE, WEEK_SCALE);
+
             break;
          case "month":
-            newScales = [YEAR_SCALE, MONTH_SCALE];
+            newScales.push(YEAR_SCALE, MONTH_SCALE);
+
             break;
          case "year":
-            newScales = [YEAR_SCALE];
+            newScales.push(YEAR_SCALE);
+
             break;
       }
 
@@ -520,14 +520,15 @@ export default class ABViewGanttComponent extends ABViewComponent {
          return await this.CurrentObject?.model().create(patch);
       } catch (e) {
          webix.alert({
-            title: L("Error Saving Item"),
-            ok: L("Okay"),
-            text: L("Unable to save this item."),
+            title: this.label("Error Saving Item"),
+            ok: this.label("Okay"),
+            text: this.label("Unable to save this item."),
          });
          this.AB.notify.developer(e, {
             context: "ABViewGantt:taskAdd(): Error Saving Item",
             patch,
          });
+
          throw e;
       }
    }
@@ -541,20 +542,22 @@ export default class ABViewGanttComponent extends ABViewComponent {
          return {};
       } catch (e) {
          webix.alert({
-            title: L("Error Removing Item"),
-            ok: L("Okay"),
-            text: L("Unable to remove this item."),
+            title: this.label("Error Removing Item"),
+            ok: this.label("Okay"),
+            text: this.label("Unable to remove this item."),
          });
          this.AB.notify.developer(e, {
             context: "ABViewGantt:taskRemove(): Error Removing Item",
             rowId,
          });
+
          throw e;
       }
    }
 
    async taskUpdate(rowId, updatedTask) {
       const patch = this.convertValues(updatedTask);
+
       try {
          // this method is being used in MyBackend updateTask() method
          // On Webix documents, the method updateTask() return {} (an empty object) so we return {} in updateTask() instead.
@@ -563,14 +566,15 @@ export default class ABViewGanttComponent extends ABViewComponent {
          return {};
       } catch (e) {
          webix.alert({
-            title: L("Error Updating Item"),
-            ok: L("Okay"),
-            text: L("Unable to update this item."),
+            title: this.label("Error Updating Item"),
+            ok: this.label("Okay"),
+            text: this.label("Unable to update this item."),
          });
          this.AB.notify.developer(e, {
             context: "ABViewGantt:taskUpdate(): Error Updating Item",
             patch,
          });
+
          throw e;
       }
    }
