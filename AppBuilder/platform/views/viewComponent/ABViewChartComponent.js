@@ -33,7 +33,7 @@ module.exports = class ABViewChartComponent extends ABViewContainerComponent {
             dc.datacollectionLink &&
             !("changeCursor" in (dc.datacollectionLink._events ?? []))
          )
-            this.eventAdd({
+            baseView.eventAdd({
                emitter: dc.datacollectionLink,
                eventName: "changeCursor",
                listener: () => {
@@ -42,7 +42,7 @@ module.exports = class ABViewChartComponent extends ABViewContainerComponent {
             });
 
          eventNames.forEach((evtName) => {
-            this.eventAdd({
+            baseView.eventAdd({
                emitter: dc,
                eventName: evtName,
                listener: () => {
