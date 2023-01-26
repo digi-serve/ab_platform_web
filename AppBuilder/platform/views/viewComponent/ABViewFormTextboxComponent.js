@@ -51,21 +51,22 @@ module.exports = class ABViewFormTextboxComponent extends (
    onShow() {
       const settings = this.view.settings ?? {};
       const _ui = this.ui();
-      const $elem = $$(_ui.id);
+      let $elem = $$(_ui.id);
 
       // WORKAROUND : to fix breaks TinyMCE when switch pages/tabs
       // https://forum.webix.com/discussion/6772/switching-tabs-breaks-tinymce
       if (settings.type == "rich" && $elem) {
          // recreate rich editor
-         webix.ui(_ui, $elem);
+         $elem = webix.ui(_ui, $elem);
          // Add dataCy to TinyMCE text editor
          $elem
             .getChildViews()[0]
             .getEditor(true)
             .then((editor) => {
-               const dataCy = `${this.view.key} rich ${_ui.name} ${this.id} ${this.parent.id}`;
+               const dataCy = `${this.view.key} rich ${_ui.name} ${this.view?.id ?? ""} ${this.view?.parent?.id ?? ""}`;
                editor.contentAreaContainer.setAttribute("data-cy", dataCy);
             });
       }
    }
 };
+
