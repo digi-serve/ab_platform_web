@@ -18,7 +18,7 @@ module.exports = class ABViewDetailConnectComponent extends (
          onAfterRender: () => {
             let columnName = this.view.field(
                (fld) => fld.id == this.settings.fieldId
-            ).columnName;
+            )?.columnName;
             const dataCy = `detail connected ${columnName} ${
                this.settings.fieldId
             } ${this.view.parentDetailComponent()?.id || this.view.parent.id}`;

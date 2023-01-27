@@ -145,11 +145,20 @@ class Multilingual extends MLClass {
          this.AB.Network.post({
             url: "/multilingual/label-missing",
             data: { labels: JSON.stringify(batchLabels) },
-         }).then(() => {
-            if (Object.keys(this._missingLabels).length > 0) {
-               sendBatch();
-            }
-         });
+         })
+            .then(() => {
+               if (Object.keys(this._missingLabels).length > 0) {
+                  sendBatch();
+               }
+            })
+            .catch((err) => {
+               const strErr = err.toString();
+               if (strErr.indexOf("unable to get") > -1) {
+                  console.error(
+                     "Missing language file for :" + this.currentLanguage()
+                  );
+               }
+            });
       };
       this._missingLabelID = setTimeout(() => {
          sendBatch();

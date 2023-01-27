@@ -33,10 +33,10 @@ module.exports = class ABViewFormCustomComponent extends (
       const field = this.view.field();
       const form = this.view.parentFormComponent();
       const form_settings = form?.settings ?? {};
-      const settings = this.view.settings ?? {};
+      const settings = field?.settings ?? this.view.settings ?? {};
 
       const requiredClass =
-         field.settings.required || settings.required ? "webix_required" : "";
+         field?.settings?.required || settings.required ? "webix_required" : "";
 
       let templateLabel = "";
       if (form_settings.showLabel) {
@@ -48,12 +48,12 @@ module.exports = class ABViewFormCustomComponent extends (
 
       let height = 38;
       if (field instanceof ABFieldImage) {
-         if (field.settings.useHeight) {
+         if (settings.useHeight) {
             if (form_settings.labelPosition == "top") {
-               height = parseInt(field.settings.imageHeight) || DEFAULT_HEIGHT;
+               height = parseInt(settings.imageHeight) || DEFAULT_HEIGHT;
                height += 38;
             } else {
-               height = parseInt(field.settings.imageHeight) || DEFAULT_HEIGHT;
+               height = parseInt(settings.imageHeight) || DEFAULT_HEIGHT;
             }
          } else if (form_settings.labelPosition == "top") {
             height = DEFAULT_HEIGHT + 38;
@@ -72,16 +72,16 @@ module.exports = class ABViewFormCustomComponent extends (
       const template =
          `<div class="customField ${form_settings.labelPosition}">${templateLabel}#template#</div>`
             .replace(/#width#/g, form_settings.labelWidth)
-            .replace(/#label#/g, field.label)
+            .replace(/#label#/g, field?.label ?? "")
             .replace(
                /#template#/g,
                field
-                  .columnHeader({
+                  ?.columnHeader({
                      width: this.new_width,
                      height: height,
                      editable: true,
                   })
-                  .template({})
+                  .template({}) ?? ""
             );
 
       return {
@@ -116,7 +116,7 @@ module.exports = class ABViewFormCustomComponent extends (
 
                   // var node = $$(ids.component).$view;
                   let node = $$(trg).getParentView().$view;
-                  field.customEdit(
+                  field?.customEdit(
                      rowData,
                      this.AB_App,
                      node,

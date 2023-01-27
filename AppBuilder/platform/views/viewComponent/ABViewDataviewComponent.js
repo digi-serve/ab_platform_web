@@ -253,8 +253,16 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
          if (detailsPage || editPage) {
             Layout.$view.onclick = (e) => {
                let clicked = false;
+               let divs = e.path ?? [];
+
+               // NOTE: Some web browser clients do not support .path
+               if (!divs.length) {
+                  divs.push(e.target);
+                  divs.push(e.target.parentNode);
+               }
+
                if (editPage) {
-                  for (let p of e.path) {
+                  for (let p of divs) {
                      if (
                         p.className &&
                         p.className.indexOf("webix_accordionitem_header") > -1
@@ -273,7 +281,7 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
                   }
                }
                if (detailsPage && !clicked) {
-                  for (let p of e.path) {
+                  for (let p of divs) {
                      if (
                         p.className &&
                         p.className.indexOf("webix_accordionitem") > -1
