@@ -1007,8 +1007,10 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
                //    "YYYY-MM-DD"
                // );
                // debugger;
-               let dateFormat = this.AB.toDate(data, { format: f.format });
-               dateFormat = this.AB.toDateFormat(dateFormat, {
+               let dateFormat = this.AB.rules.toDate(data, {
+                  format: f.format,
+               });
+               dateFormat = this.AB.rules.toDateFormat(dateFormat, {
                   format: "YYYY-MM-DD",
                });
                if (dateFormat == "Invalid date") {
