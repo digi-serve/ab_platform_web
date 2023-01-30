@@ -46,10 +46,10 @@ function _toInternal(cond, fields = []) {
 
       if (field?.key == "date" || field?.key == "datetime") {
          cond.condition.filter = cond.condition.filter
-            ? AB.toDate(cond.condition.filter)
+            ? AB.rules.toDate(cond.condition.filter)
             : null;
 
-         cond.includes = cond.includes.map((v) => AB.toDate(v));
+         cond.includes = cond.includes.map((v) => AB.rules.toDate(v));
       }
 
       delete cond.key;

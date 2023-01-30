@@ -579,7 +579,9 @@ class ABQL extends ABQLCore {
                      label: displayLabel,
                      on: {
                         onItemClick: () => {
-                           Filter.popUp();
+                           Filter.popUp($$(this.ids.shorthand), null, {
+                              pos: "center",
+                           });
                         },
                      },
                   },

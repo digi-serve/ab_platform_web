@@ -27,8 +27,14 @@ function _onShow(compId, instance) {
    const $node = $$(node);
    if (!$node) return;
 
-   const filterConditions = instance.settings.objectWorkspace
+   let filterConditions = instance.settings.objectWorkspace
       .filterConditions ?? { glue: "and", rules: [] };
+
+   if (
+      !filterConditions?.rules?.length &&
+      instance.settings?.filterConditions?.rules?.length
+   )
+      filterConditions = instance.settings.filterConditions;
 
    const getFilterByConnectValues = (conditions, depth = 0) => {
       return [
