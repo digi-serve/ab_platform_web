@@ -330,6 +330,11 @@ export default class ABViewPropertyAddPage extends ABViewProperty {
          for (let c in _logic.callbacks) {
             _logic.callbacks[c] = options[c] || _logic.callbacks[c];
          }
+         if (ui) {
+            for (let c in options) {
+               ui.on[c] = options[c];
+            }
+         }
       };
 
       return {
