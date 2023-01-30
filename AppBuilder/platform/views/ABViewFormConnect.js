@@ -308,6 +308,20 @@ class ABViewFormConnectComponent extends ABViewComponent {
          _ui.labelPosition = settings.labelPosition;
       }
 
+      // generate UI for add/edit page tools
+      if (this.view?.settings?.formView) {
+         this.addPageComponent = this.view.addPageTool.component(
+            AB,
+            this.view.settings.formView
+         );
+      }
+      if (this.view?.settings?.editForm) {
+         this.editPageComponent = this.view.editPageTool.component(
+            AB,
+            this.view.settings.editForm
+         );
+      }
+
       let editForm = "";
       if (settings.editForm && settings.editForm != "") {
          editForm =
@@ -345,7 +359,7 @@ class ABViewFormConnectComponent extends ABViewComponent {
          },
       };
 
-      let apcUI = null; // this.addPageComponent.ui();
+      let apcUI = this.addPageComponent?.ui || null; // this.addPageComponent.ui();
       if (apcUI) {
          // reset some component vals to make room for button
          _ui.label = "";
@@ -393,22 +407,39 @@ class ABViewFormConnectComponent extends ABViewComponent {
 
       this._options = options ?? {};
 
-      if (this.view.settings.addForm) {
-      console.error("TODO: ABViewFormConnect.addPageComponent()");
-      // this.addPageComponent = this.view.addPageTool.component(/*App, idBase */);
-      // this.addPageComponent.applicationLoad(this.view.application);
+      // console.dir(this.view.settings);
+      if (this.view?.settings?.formView) {
          this.addPageComponent = this.view.addPageTool.component(
             AB,
-            this.view.settings.addForm
+            this.view.settings.formView
          );
          this.addPageComponent.applicationLoad(this.view.application);
-         let component = this.component;
          this.addPageComponent.init({
-            onSaveData: component.logic.callbackSaveData,
-            onCancelClick: component.logic.callbackCancel,
-            clearOnLoad: component.logic.callbackClearOnLoad,
+            onSaveData: this.callbackSaveData,
+            onCancelClick: this.callbackCancel,
+            clearOnLoad: this.callbackClearOnLoad,
          });
+
+         // if (this.addPageComponent.ui)
+         //    // let component = this.view.__addPageTool.ids.component
+         //    // reset some component vals to make room for button
+         //    component.ui.label = "";
+         // component.ui.labelWidth = 0;
+
+         // add click event to add new button
+         this.addPageComponent.ui.on = {
+            onItemClick: (id, evt) => {
+               let $form = $$(id).getFormView();
+
+               let dc = $form.datacollection;
+
+               this.addPageComponent.onClick(dc);
+
+               return false;
+            },
+         };
       }
+
       if (this.view.settings.editForm) {
          console.error("TODO: ABViewFormConnect.editPageComponent()");
          this.editPageComponent = this.view.editPageTool.component(
@@ -416,8 +447,11 @@ class ABViewFormConnectComponent extends ABViewComponent {
             this.view.settings.editForm
          );
          this.editPageComponent.applicationLoad(this.view.application);
-      //    clearOnLoad: component.logic.callbackClearOnLoad,
-      // });
+         this.editPageComponent.init({
+            onSaveData: this.callbackSaveData,
+            onCancelClick: this.callbackCancel,
+            clearOnLoad: this.callbackClearOnLoad,
+         });
       }
    }
 
