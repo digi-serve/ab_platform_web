@@ -315,18 +315,17 @@ class ABViewFormConnectComponent extends ABViewComponent {
             this.view.settings.formView
          );
       }
+
+      let editForm = "";
       if (this.view?.settings?.editForm) {
          this.editPageComponent = this.view.editPageTool.component(
             AB,
             this.view.settings.editForm
          );
-      }
-
-      let editForm = "";
-      if (settings.editForm && settings.editForm != "") {
          editForm =
             '<i data-item-id="#id#" class="fa fa-cog editConnectedPage"></i>';
       }
+
       _ui.suggest = {
          button: true,
          selectAll: multiselect ? true : false,
@@ -455,6 +454,11 @@ class ABViewFormConnectComponent extends ABViewComponent {
       }
    }
 
+   /**
+    * @function callbackSaveData
+    * recive data from add/edit popup, update current popup vals
+    *
+    */
    callbackSaveData(saveData) {
       const ids = this.ids;
 
