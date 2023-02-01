@@ -1,4 +1,5 @@
 import ABViewProperty from "./ABViewProperty";
+import ABViewFormButton from "../ABViewFormButton";
 
 let L = (...params) => AB.Multilingual.label(...params);
 
@@ -207,6 +208,17 @@ export default class ABViewPropertyAddPage extends ABViewProperty {
                // pageClone.id = pageClone.id + "-" + webix.uid(); // lets take the stored id can create a new dynamic one so our views don't duplicate
                let popUpComp = pageClone.component(App);
                let ui = popUpComp.ui;
+
+               // Listen 'saved' event of the form widget
+               const button = pageClone.views(
+                  (v) => v instanceof ABViewFormButton,
+                  true
+               )[0];
+               if (button) {
+                  button.parent.on("saved", (savedData) => {
+                     _logic?.callbacks?.onSaveData(savedData);
+                  });
+               }
 
                let popupTemplate = {
                   view: "window",
