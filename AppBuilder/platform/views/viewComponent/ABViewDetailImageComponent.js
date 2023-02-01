@@ -3,8 +3,8 @@ const ABViewDetailItemComponent = require("./ABViewDetailItemComponent");
 module.exports = class ABViewDetailImageComponent extends (
    ABViewDetailItemComponent
 ) {
-   constructor(baseView, idBase) {
-      super(baseView, idBase ?? `ABViewDetailImage_${baseView.id}`);
+   constructor(baseView, idBase, ids) {
+      super(baseView, idBase || `ABViewDetailImage_${baseView.id}`, ids);
    }
 
    ui() {
@@ -18,7 +18,7 @@ module.exports = class ABViewDetailImageComponent extends (
                   baseView.parentDetailComponent()?.id || baseView.parent.id
                }`;
 
-               $$(this.ids.detail)?.$view.setAttribute("data-cy", dataCy);
+               $$(this.ids.detailItem)?.$view.setAttribute("data-cy", dataCy);
             },
          },
       };

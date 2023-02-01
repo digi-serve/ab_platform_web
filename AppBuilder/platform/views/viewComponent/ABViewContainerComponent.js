@@ -2,7 +2,7 @@ const ABViewComponent = require("./ABViewComponent").default;
 
 module.exports = class ABViewContainerComponent extends ABViewComponent {
    constructor(baseView, idBase, ids) {
-      super(baseView, idBase ?? `ABViewContainer_${baseView.id}`, ids);
+      super(baseView, idBase || `ABViewContainer_${baseView.id}`, ids);
 
       this.viewComponents = {
          /* view.id : {viewComponent} */
@@ -25,7 +25,7 @@ module.exports = class ABViewContainerComponent extends ABViewComponent {
       // Generate rows & cols of views to .layout
       const views = this.view.viewsSortByPosition();
       const rowViews = this.getElements(views);
-      const _ui = super.ui(uiComponents ?? rowViews);
+      const _ui = super.ui(uiComponents || rowViews);
 
       delete _ui.type;
 

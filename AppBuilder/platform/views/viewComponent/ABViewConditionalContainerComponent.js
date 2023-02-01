@@ -3,10 +3,17 @@ const ABViewContainerComponent = require("./ABViewContainerComponent");
 module.exports = class ABViewConditionalContainerComponent extends (
    ABViewContainerComponent
 ) {
-   constructor(baseView, idBase) {
-      super(baseView, idBase ?? `ABViewConditionalContainer_${baseView.id}`, {
-         conditionalContainer: "",
-      });
+   constructor(baseView, idBase, ids) {
+      super(
+         baseView,
+         idBase || `ABViewConditionalContainer_${baseView.id}`,
+         Object.assign(
+            {
+               conditionalContainer: "",
+            },
+            ids
+         )
+      );
 
       this._ifComponent = null;
       this._elseComponent = null;
@@ -20,8 +27,8 @@ module.exports = class ABViewConditionalContainerComponent extends (
    }
 
    ui() {
-      const uiConditionalContainer = {
-         id: this.ids.conditionalContainer,
+      const _uiConditionalContainer = {
+         id: this.ids.batch,
          view: "multiview",
          cells: [
             {
@@ -36,9 +43,9 @@ module.exports = class ABViewConditionalContainerComponent extends (
             },
          ],
       };
-      const _ui = super.ui([uiConditionalContainer]);
+      const _ui = super.ui([_uiConditionalContainer]);
 
-      uiConditionalContainer.cells.push(
+      _uiConditionalContainer.cells.push(
          Object.assign({ batch: "if" }, this.ifComponent.ui()),
          Object.assign({ batch: "else" }, this.elseComponent.ui())
       );
@@ -108,7 +115,7 @@ module.exports = class ABViewConditionalContainerComponent extends (
    displayView(currData) {
       const dc = this.datacollection;
       const ids = this.ids;
-      const $conditionalContainer = $$(ids.conditionalContainer);
+      const $batch = $$(ids.batch);
 
       if (dc) {
          if (!currData) currData = dc.getCursor();
@@ -119,7 +126,7 @@ module.exports = class ABViewConditionalContainerComponent extends (
             (dc.dataStatus === dc.dataStatusFlag.notInitial ||
                dc.dataStatus === dc.dataStatusFlag.initializing)
          ) {
-            $conditionalContainer?.showBatch("wait");
+            $batch?.showBatch("wait");
 
             return;
          }
@@ -129,10 +136,10 @@ module.exports = class ABViewConditionalContainerComponent extends (
 
       if (isValid) {
          // if (isValid && currData) {
-         $conditionalContainer.showBatch("if");
+         $batch.showBatch("if");
          this.ifComponent?.onShow?.();
       } else {
-         $conditionalContainer.showBatch("else");
+         $batch.showBatch("else");
          this.elseComponent?.onShow?.();
       }
    }
@@ -144,11 +151,9 @@ module.exports = class ABViewConditionalContainerComponent extends (
       if (dc?.datasource) __filterComponent.fieldsLoad(dc.datasource.fields());
       else __filterComponent.fieldsLoad([]);
 
-      const baseView = this.view;
-      const defaultSettings = baseView.constructor.defaultValues();
-
       __filterComponent.setValue(
-         baseView.settings.filterConditions ?? defaultSettings.filterConditions
+         this.settings.filterConditions ??
+            this.view.constructor.defaultValues().filterConditions
       );
    }
 };

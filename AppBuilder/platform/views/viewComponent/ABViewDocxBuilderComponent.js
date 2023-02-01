@@ -10,16 +10,23 @@ const ABObjectQuery = require("../../ABObjectQuery");
 const ABViewComponent = require("./ABViewComponent").default;
 
 module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
-   constructor(baseView, idBase) {
-      super(baseView, idBase ?? `ABViewDocxBuilder_${baseView.id}`, {
-         downloadButton: "",
-         noFileLabel: "",
-      });
+   constructor(baseView, idBase, ids) {
+      super(
+         baseView,
+         idBase || `ABViewDocxBuilder_${baseView.id}`,
+         Object.assign(
+            {
+               downloadButton: "",
+               noFileLabel: "",
+            },
+            ids
+         )
+      );
    }
 
    ui() {
       const baseView = this.view;
-      const settings = baseView.settings;
+      const settings = this.settings;
       const defaultSettings = baseView.constructor.defaultValues();
       const buttonWidth = settings.width ?? defaultSettings.width;
 

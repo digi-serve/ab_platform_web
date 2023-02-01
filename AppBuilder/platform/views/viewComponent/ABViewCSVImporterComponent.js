@@ -2,27 +2,34 @@ const ABViewComponent = require("./ABViewComponent").default;
 const CSVImporter = require("../../CSVImporter");
 
 module.exports = class ABViewCSVImporterComponent extends ABViewComponent {
-   constructor(baseView, idBase) {
-      super(baseView, idBase ?? `ABCSVImporter_${baseView.id}`, {
-         button: "",
-         popup: "",
+   constructor(baseView, idBase, ids) {
+      super(
+         baseView,
+         idBase || `ABCSVImporter_${baseView.id}`,
+         Object.assign(
+            {
+               button: "",
+               popup: "",
 
-         form: "",
-         uploader: "",
-         uploadFileList: "",
-         separatedBy: "",
-         headerOnFirstLine: "",
-         columnList: "",
+               form: "",
+               uploader: "",
+               uploadFileList: "",
+               separatedBy: "",
+               headerOnFirstLine: "",
+               columnList: "",
 
-         search: "",
-         datatable: "",
+               search: "",
+               datatable: "",
 
-         statusMessage: "",
-         progressBar: "",
+               statusMessage: "",
+               progressBar: "",
 
-         importButton: "",
-         rules: "",
-      });
+               importButton: "",
+               rules: "",
+            },
+            ids
+         )
+      );
 
       this.csvImporter = new CSVImporter((...args) => this.label(...args));
       // {CSVImporter}

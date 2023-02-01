@@ -2,8 +2,8 @@ const ABObjectQuery = require("../../ABObjectQuery");
 const ABViewContainerComponent = require("./ABViewContainerComponent");
 
 module.exports = class ABViewDetailComponent extends ABViewContainerComponent {
-   constructor(baseView, idBase) {
-      super(baseView, idBase ?? `ABViewDetail_${baseView.id}`);
+   constructor(baseView, idBase, ids) {
+      super(baseView, idBase || `ABViewDetail_${baseView.id}`, ids);
    }
 
    ui() {
@@ -177,7 +177,7 @@ module.exports = class ABViewDetailComponent extends ABViewContainerComponent {
          }
 
          // set value to each components
-         const vComponent = f.component(null, this.ids.component);
+         const vComponent = f.component(null, this.ids.detailItem);
 
          // vComponent?.onShow();
 

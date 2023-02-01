@@ -1,4 +1,5 @@
 const ABViewFormCheckboxCore = require("../../core/views/ABViewFormCheckboxCore");
+const ABViewFormCheckboxComponent = require("./viewComponent/ABViewFormCheckboxComponent");
 
 module.exports = class ABViewFormCheckbox extends ABViewFormCheckboxCore {
    /**
@@ -8,16 +9,7 @@ module.exports = class ABViewFormCheckbox extends ABViewFormCheckboxCore {
     * @return {obj} UI component
     */
    component(v1App) {
-      let component = super.component();
-
-      component._ui = component.ui();
-      component._ui.id = `ABViewFormCheckbox_${this.id}_f_`;
-
-      component.ui = () => {
-         component._ui.view = "checkbox";
-
-         return component._ui;
-      };
+      let component = new ABViewFormCheckboxComponent(this);
 
       // if this is our v1Interface
       if (v1App) {
@@ -38,19 +30,19 @@ module.exports = class ABViewFormCheckbox extends ABViewFormCheckboxCore {
    }
 
    componentOld(App) {
-      var component = super.component(App);
+      // var component = super.component(App);
 
-      var idBase = this.parentFormUniqueID(`ABViewFormCheckbox_${this.id}_f_`);
-      var ids = {
-         component: App.unique(`${idBase}_component`),
-      };
+      // var idBase = this.parentFormUniqueID(`ABViewFormCheckbox_${this.id}_f_`);
+      // var ids = {
+      //    component: App.unique(`${idBase}_component`),
+      // };
 
-      component.ui.id = ids.component;
-      component.ui.view = "checkbox";
+      // component.ui.id = ids.component;
+      // component.ui.view = "checkbox";
 
-      // make sure each of our child views get .init() called
-      component.init = (options) => {};
+      // // make sure each of our child views get .init() called
+      // component.init = (options) => {};
 
-      return component;
+      // return component;
    }
 };

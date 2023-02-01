@@ -3,8 +3,8 @@ const ABViewDetailItemComponent = require("./ABViewDetailItemComponent");
 module.exports = class ABViewDetailTreeComponent extends (
    ABViewDetailItemComponent
 ) {
-   constructor(baseView, idBase) {
-      super(baseView, idBase ?? `ABViewDetailTree_${baseView.id}`);
+   constructor(baseView, idBase, ids) {
+      super(baseView, idBase || `ABViewDetailTree_${baseView.id}`, ids);
    }
 
    get className() {
@@ -23,11 +23,11 @@ module.exports = class ABViewDetailTreeComponent extends (
    }
 
    getDomTree() {
-      const $detail = $$(this.ids.detail);
+      const $detailItem = $$(this.ids.detailItem);
 
-      if (!$detail) return;
+      if (!$detailItem) return;
 
-      return $detail.$view.getElementsByClassName(this.className)[0];
+      return $detailItem.$view.getElementsByClassName(this.className)[0];
    }
 
    setValue(val) {
@@ -88,10 +88,10 @@ module.exports = class ABViewDetailTreeComponent extends (
 
          if (domTree.scrollHeight > 33) height = domTree.scrollHeight;
 
-         const $detail = $$(this.ids.detail);
+         const $detailItem = $$(this.ids.detailItem);
 
-         $detail.config.height = height;
-         $detail.resize();
+         $detailItem.config.height = height;
+         $detailItem.resize();
       }, 50);
    }
 };

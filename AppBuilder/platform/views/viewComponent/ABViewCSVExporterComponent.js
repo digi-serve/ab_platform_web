@@ -1,12 +1,19 @@
 const ABViewComponent = require("./ABViewComponent").default;
 
 module.exports = class ABViewCSVExporterComponent extends ABViewComponent {
-   constructor(baseView, idBase) {
-      super(baseView, idBase ?? `ABCSVExporter_${baseView.id}`, {
-         button: "",
-         buttonFilter: "",
-         popupFilter: "",
-      });
+   constructor(baseView, idBase, ids) {
+      super(
+         baseView,
+         idBase || `ABCSVExporter_${baseView.id}`,
+         Object.assign(
+            {
+               button: "",
+               buttonFilter: "",
+               filterComplex: "",
+            },
+            ids
+         )
+      );
 
       this.clientFilter = null;
    }
@@ -61,9 +68,7 @@ module.exports = class ABViewCSVExporterComponent extends ABViewComponent {
       await super.init(AB);
 
       if (!this.clientFilter) {
-         const clientFilter = AB.filterComplexNew(
-            `${this.ids.component}_filter`
-         );
+         const clientFilter = AB.filterComplexNew(this.ids.filterComplex);
 
          const dc = this.datacollection;
 

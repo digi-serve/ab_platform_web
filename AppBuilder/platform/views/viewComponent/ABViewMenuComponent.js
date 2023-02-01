@@ -1,16 +1,21 @@
 const ABViewComponent = require("./ABViewComponent").default;
 
-const L = (...params) => AB.Multilingual.label(...params);
-
 module.exports = class ABViewMenuComponent extends ABViewComponent {
-   constructor(baseView, idBase) {
-      super(baseView, idBase ?? `ABMenuLabel_${baseView.id}`, {
-         menu: "",
-      });
+   constructor(baseView, idBase, ids) {
+      super(
+         baseView,
+         idBase || `ABViewMenu_${baseView.id}`,
+         Object.assign(
+            {
+               menu: "",
+            },
+            ids
+         )
+      );
    }
 
    ui() {
-      const settings = this.view.settings;
+      const settings = this.settings;
       const _ui = super.ui([
          parseInt(settings.menuInToolbar) ? this.uiToolbar() : this.uiMenu(),
       ]);
@@ -22,7 +27,7 @@ module.exports = class ABViewMenuComponent extends ABViewComponent {
 
    uiMenu() {
       const baseView = this.view;
-      const settings = baseView.settings;
+      const settings = this.settings;
       const defaultSettings = baseView.constructor.defaultValues();
       const css = `${settings.buttonStyle || defaultSettings.buttonStyle} ${
          settings.menuAlignment || defaultSettings.menuAlignment
@@ -51,8 +56,8 @@ module.exports = class ABViewMenuComponent extends ABViewComponent {
    }
 
    uiToolbar() {
+      const settings = this.settings;
       const baseView = this.view;
-      const settings = baseView.settings;
       const defaultSettings = baseView.constructor.defaultValues();
       const _uiMenu = this.uiMenu();
 
@@ -142,25 +147,25 @@ module.exports = class ABViewMenuComponent extends ABViewComponent {
    async init(AB) {
       await super.init(AB);
 
-      const $Menu = $$(this.ids.menu);
+      const $menu = $$(this.ids.menu);
       const baseView = this.view;
 
-      if ($Menu) {
-         const settings = baseView.settings;
+      if ($menu) {
+         const settings = this.settings;
 
-         baseView.ClearPagesInView($Menu);
+         baseView.ClearPagesInView($menu);
 
          if (settings.order?.length) {
-            baseView.AddPagesToView($Menu, settings.order);
+            baseView.AddPagesToView($menu, settings.order);
             // Force onAfterRender to fire
-            $Menu.refresh();
+            $menu.refresh();
          }
       }
    }
 
    onClick(itemId) {
-      const $Menu = $$(this.ids.menu);
-      const $item = $Menu.getMenuItem(itemId);
+      const $menu = $$(this.ids.menu);
+      const $item = $menu.getMenuItem(itemId);
       const baseView = this.view;
 
       // switch tab view
@@ -183,6 +188,7 @@ module.exports = class ABViewMenuComponent extends ABViewComponent {
          if (!tab) return;
 
          this.toggleParent(tab);
+
          // if (!$$(tabView.id) || !$$(tabView.id).isVisible()) {
          const showIt = setInterval(() => {
             if ($$(tabView.id) && $$(tabView.id).isVisible()) {
@@ -211,12 +217,12 @@ module.exports = class ABViewMenuComponent extends ABViewComponent {
    }
 
    defineCypress() {
-      const Menu = $$(this.ids.menu);
+      const $menu = $$(this.ids.menu);
 
-      if (!Menu) return;
+      if (!$menu) return;
 
-      Menu.data.each((item) => {
-         const node = Menu.getItemNode(item.id);
+      $menu.data.each((item) => {
+         const node = $menu.getItemNode(item.id);
 
          if (!node) return;
 

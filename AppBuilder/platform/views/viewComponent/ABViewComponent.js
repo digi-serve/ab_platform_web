@@ -6,7 +6,7 @@ import ClassUI from "../../../../ui/ClassUI";
 
 export default class ABViewComponent extends ClassUI {
    constructor(baseView, idBase, ids) {
-      super(idBase ?? `ABView_${baseView.id}`, ids);
+      super(idBase || `ABView_${baseView.id}`, ids);
 
       this.view = baseView;
       this.settings = baseView.settings;

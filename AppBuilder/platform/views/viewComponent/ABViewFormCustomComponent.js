@@ -7,71 +7,67 @@ const DEFAULT_HEIGHT = 80;
 module.exports = class ABViewFormCustomComponent extends (
    ABViewFormItemComponent
 ) {
-   constructor(baseView, idBase) {
-      idBase = idBase ?? `ABViewFormCustom_${baseView.id}`;
-      super(baseView, idBase, {});
+   constructor(baseView, idBase, ids) {
+      super(baseView, idBase || `ABViewFormCustom_${baseView.id}`, ids);
    }
 
    get new_width() {
-      const form = this.view.parentFormComponent();
-      const form_settings = form?.settings ?? {};
-      const settings = this.view.settings ?? {};
+      const baseView = this.view;
+      const form = baseView.parentFormComponent();
+      const formSettings = form?.settings ?? {};
+      const settings = baseView.settings ?? {};
 
-      let newWidth = form_settings.labelWidth;
+      let newWidth = formSettings.labelWidth;
+
       if (settings.formView) newWidth += 40;
-      else if (
-         form_settings.showLabel == true &&
-         form_settings.labelPosition == "top"
-      )
+      else if (formSettings.showLabel && formSettings.labelPosition === "top")
          newWidth = 0;
 
       return newWidth;
    }
 
    ui() {
-      const base_ui = super.ui();
-      const field = this.view.field();
-      const form = this.view.parentFormComponent();
-      const form_settings = form?.settings ?? {};
-      const settings = this.view.settings ?? {};
+      const baseView = this.view;
+      const field = baseView.field();
+      const form = baseView.parentFormComponent();
+      const formSettings = form?.settings ?? {};
+      const settings = baseView.settings ?? {};
 
       const requiredClass =
          field.settings.required || settings.required ? "webix_required" : "";
 
       let templateLabel = "";
-      if (form_settings.showLabel) {
-         if (form_settings.labelPosition == "top")
+
+      if (formSettings.showLabel) {
+         if (formSettings.labelPosition === "top")
             templateLabel = `<label style="display:block; text-align: left; margin: 0; padding:1px 7.5px 0 3px; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;" class="webix_inp_top_label ${requiredClass}">#label#</label>`;
          else
             templateLabel = `<label style="width: #width#px; display: inline-block; line-height: 32px; float: left; margin: 0; padding:1px 7.5px 0 3px; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;" class="${requiredClass}">#label#</label>`;
       }
 
       let height = 38;
+
       if (field instanceof ABFieldImage) {
          if (field.settings.useHeight) {
-            if (form_settings.labelPosition == "top") {
+            if (formSettings.labelPosition === "top") {
                height = parseInt(field.settings.imageHeight) || DEFAULT_HEIGHT;
                height += 38;
             } else {
                height = parseInt(field.settings.imageHeight) || DEFAULT_HEIGHT;
             }
-         } else if (form_settings.labelPosition == "top") {
+         } else if (formSettings.labelPosition === "top") {
             height = DEFAULT_HEIGHT + 38;
          } else {
             if (DEFAULT_HEIGHT > 38) {
                height = DEFAULT_HEIGHT;
             }
          }
-      } else if (
-         form_settings.showLabel == true &&
-         form_settings.labelPosition == "top"
-      ) {
+      } else if (formSettings.showLabel && formSettings.labelPosition === "top")
          height = DEFAULT_HEIGHT;
-      }
 
       const template =
-         `<div class="customField ${form_settings.labelPosition}">${templateLabel}#template#</div>`
-            .replace(/#width#/g, form_settings.labelWidth)
+         `<div class="customField ${formSettings.labelPosition}">${templateLabel}#template#</div>`
+            .replace(/#width#/g, formSettings.labelWidth)
             .replace(/#label#/g, field.label)
             .replace(
                /#template#/g,
@@ -84,19 +80,16 @@ module.exports = class ABViewFormCustomComponent extends (
                   .template({})
             );
 
-      return {
-         id: this.ids.component,
+      return super.ui({
          view: "forminput",
          labelWidth: 0,
          paddingY: 0,
          paddingX: 0,
          css: "ab-custom-field",
-         name: base_ui.name,
          // label:  field.label,
          // labelPosition: settings.labelPosition, // webix.forminput does not have .labelPosition T T
          // labelWidth: settings.labelWidth,
          body: {
-            // id: ids.component,
             view: new FocusableTemplate(this.AB._App).key,
             css: "customFieldCls",
             borderless: true,
@@ -104,7 +97,7 @@ module.exports = class ABViewFormCustomComponent extends (
             height: height,
             onClick: {
                customField: (evt, e, trg) => {
-                  if (settings.disable == 1) return;
+                  if (settings.disable === 1) return;
 
                   let rowData = {};
 
@@ -114,36 +107,39 @@ module.exports = class ABViewFormCustomComponent extends (
                      if (dv) rowData = dv.getCursor() || {};
                   }
 
-                  // var node = $$(ids.component).$view;
+                  // var node = $$(ids.formItem).$view;
                   let node = $$(trg).getParentView().$view;
                   field.customEdit(
                      rowData,
                      this.AB_App,
                      node,
-                     this.ids.component,
+                     this.ids.formItem,
                      evt
                   );
                },
             },
          },
-      };
+      });
    }
 
    onShow() {
-      const elem = $$(this.ids.component);
-      if (!elem) return;
+      const ids = this.ids;
+      const $formItem = $$(ids.formItem);
 
-      const field = this.view.field(),
+      if (!$formItem) return;
+
+      const baseView = this.view;
+      const field = baseView.field(),
          rowData = {},
-         node = elem.$view;
+         node = $formItem.$view;
 
       // Add data-cy attributes
-      const dataCy = `${this.view.key} ${field.key} ${field.columnName} ${this.view.id} ${this.view.parent.id}`;
+      const dataCy = `${baseView.key} ${field.key} ${field.columnName} ${baseView.id} ${baseView.parent.id}`;
       node.setAttribute("data-cy", dataCy);
 
-      let options = {
-         formId: this.ids.component,
-         editable: this.view.settings.disable == 1 ? false : true,
+      const options = {
+         formId: ids.formItem,
+         editable: baseView.settings.disable === 1 ? false : true,
       };
 
       if (field instanceof ABFieldImage) {
@@ -160,8 +156,8 @@ module.exports = class ABViewFormCustomComponent extends (
 
    getValue(rowData) {
       const field = this.view.field();
-      const elem = $$(this.ids.component);
+      const $formItem = $$(this.ids.formItem);
 
-      return field.getValue(elem, rowData);
+      return field.getValue($formItem, rowData);
    }
 };

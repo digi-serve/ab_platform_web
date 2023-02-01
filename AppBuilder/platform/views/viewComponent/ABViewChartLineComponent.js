@@ -3,8 +3,8 @@ const ABViewChartContainerComponent = require("./ABViewChartContainerComponent")
 module.exports = class ABViewChartLineComponent extends (
    ABViewChartContainerComponent
 ) {
-   constructor(baseView, idBase) {
-      super(baseView, idBase ?? `ABViewChartLine_${baseView.id}`);
+   constructor(baseView, idBase, ids) {
+      super(baseView, idBase || `ABViewChartLine_${baseView.id}`, ids);
    }
 
    ui() {

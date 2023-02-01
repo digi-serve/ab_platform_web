@@ -1,4 +1,5 @@
 const ABViewDetailSelectivityCore = require("../../core/views/ABViewDetailSelectivityCore");
+const ABViewDetailSelectivityComponent = require("./viewComponent/ABViewDetailSelectivityComponent");
 
 const ABViewDetailPropertyComponentDefaults = ABViewDetailSelectivityCore.defaultValues();
 
@@ -98,81 +99,102 @@ module.exports = class ABViewDetailSelectivity extends (
     *
     * @return {obj} UI component
     */
-   component(App, idPrefix) {
-      var component = super.component(App);
-      var field = this.field();
+   component(v1App = false) {
+      let component = new ABViewDetailSelectivityComponent(this);
 
-      var idBase = `ABViewDetailSelectivity_${idPrefix || ""}${this.id}`;
-      var ids = {
-         component: App.unique(`${idBase}_component`),
-         detail: this.parentDetailComponent()?.id || this.parent.id,
-      };
-      var className = "ab-detail-selectivity";
+      // if this is our v1Interface
+      if (v1App) {
+         const newComponent = component;
 
-      component.ui.id = ids.component;
+         component = {
+            ui: newComponent.ui(),
+            init: (options, accessLevel) => {
+               return newComponent.init(this.AB);
+            },
+            onShow: (...params) => {
+               return newComponent.onShow?.(...params);
+            },
+         };
+      }
 
-      component.ui.on = {
-         //Add data-cy attribute for Cypress Testing
-         onAfterRender: () => {
-            const dataCy = `detail selectivity ${field?.columnName} ${field?.id} ${ids.detail}`;
-            $$(ids.component)?.$view.setAttribute("data-cy", dataCy);
-         },
-      };
+      return component;
+   }
 
-      if (this.settings.height) component.ui.height = this.settings.height;
+   componentOld(App, idPrefix) {
+      // var component = super.component(App);
+      // var field = this.field();
 
-      var _init = (options) => {
-         component.init(options);
+      // var idBase = `ABViewDetailSelectivity_${idPrefix || ""}${this.id}`;
+      // var ids = {
+      //    component: App.unique(`${idBase}_component`),
+      //    detail: this.parentDetailComponent()?.id || this.parent.id,
+      // };
+      // var className = "ab-detail-selectivity";
 
-         // add div of selectivity to detail
-         var divSelectivity = `<div class="${className}"></div>`;
-         component.logic.setValue(ids.component, divSelectivity);
-      };
+      // component.ui.id = ids.component;
 
-      var _logic = {
-         getDomSelectivity: () => {
-            var elem = $$(ids.component);
-            if (!elem) return;
+      // component.ui.on = {
+      //    //Add data-cy attribute for Cypress Testing
+      //    onAfterRender: () => {
+      //       const dataCy = `detail selectivity ${field?.columnName} ${field?.id} ${ids.detail}`;
+      //       $$(ids.component)?.$view.setAttribute("data-cy", dataCy);
+      //    },
+      // };
 
-            return elem.$view.getElementsByClassName(className)[0];
-         },
+      // if (this.settings.height) component.ui.height = this.settings.height;
 
-         setValue: (val) => {
-            // convert value to array
-            if (val != null && !(val instanceof Array)) {
-               val = [val];
-            }
+      // var _init = (options) => {
+      //    component.init(options);
 
-            setTimeout(function () {
-               // get selectivity dom
-               var domSelectivity = _logic.getDomSelectivity();
-               var isUsers = false;
-               if (component.ui.isUsers) isUsers = component.ui.isUsers;
+      //    // add div of selectivity to detail
+      //    var divSelectivity = `<div class="${className}"></div>`;
+      //    component.logic.setValue(ids.component, divSelectivity);
+      // };
 
-               // render selectivity to html dom
-               var selectivitySettings = {
-                  multiple: true,
-                  readOnly: true,
-                  isUsers: isUsers,
-               };
-               field.selectivityRender(
-                  domSelectivity,
-                  selectivitySettings,
-                  App,
-                  {}
-               );
+      // var _logic = {
+      //    getDomSelectivity: () => {
+      //       var elem = $$(ids.component);
+      //       if (!elem) return;
 
-               // set value to selectivity
-               field.selectivitySet(domSelectivity, val, App);
-            }, 50);
-         },
-      };
+      //       return elem.$view.getElementsByClassName(className)[0];
+      //    },
 
-      return {
-         ui: component.ui,
+      //    setValue: (val) => {
+      //       // convert value to array
+      //       if (val != null && !(val instanceof Array)) {
+      //          val = [val];
+      //       }
 
-         init: _init,
-         logic: _logic,
-      };
+      //       setTimeout(function () {
+      //          // get selectivity dom
+      //          var domSelectivity = _logic.getDomSelectivity();
+      //          var isUsers = false;
+      //          if (component.ui.isUsers) isUsers = component.ui.isUsers;
+
+      //          // render selectivity to html dom
+      //          var selectivitySettings = {
+      //             multiple: true,
+      //             readOnly: true,
+      //             isUsers: isUsers,
+      //          };
+      //          field.selectivityRender(
+      //             domSelectivity,
+      //             selectivitySettings,
+      //             App,
+      //             {}
+      //          );
+
+      //          // set value to selectivity
+      //          field.selectivitySet(domSelectivity, val, App);
+      //       }, 50);
+      //    },
+      // };
+
+      // return {
+      //    ui: component.ui,
+
+      //    init: _init,
+      //    logic: _logic,
+      // };
    }
 };

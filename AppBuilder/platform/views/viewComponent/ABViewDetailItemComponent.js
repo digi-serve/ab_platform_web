@@ -1,13 +1,20 @@
 const ABViewComponent = require("./ABViewComponent").default;
 
 module.exports = class ABViewDetailItemComponent extends ABViewComponent {
-   constructor(baseView, idBase) {
-      super(baseView, idBase ?? `ABViewDetailItem_${baseView.id}`, {
-         detail: "",
-      });
+   constructor(baseView, idBase, ids) {
+      super(
+         baseView,
+         idBase || `ABViewDetailItem_${baseView.id}`,
+         Object.assign(
+            {
+               detailItem: "",
+            },
+            ids
+         )
+      );
    }
 
-   ui(uiDetailComponent) {
+   ui(uiDetailItemComponent = {}) {
       const baseView = this.view;
 
       // setup 'label' of the element
@@ -41,7 +48,7 @@ module.exports = class ABViewDetailItemComponent extends ABViewComponent {
       const _ui = super.ui([
          Object.assign(
             {
-               id: this.ids.detail,
+               id: this.ids.detailItem,
                view: "template",
                borderless: true,
                height: height,
@@ -49,7 +56,7 @@ module.exports = class ABViewDetailItemComponent extends ABViewComponent {
                template: template,
                data: { display: "" }, // show empty data in template
             },
-            uiDetailComponent ?? {}
+            uiDetailItemComponent
          ),
       ]);
 
@@ -63,18 +70,18 @@ module.exports = class ABViewDetailItemComponent extends ABViewComponent {
    }
 
    setValue(val, detailId) {
-      const $detail = $$(detailId ?? this.ids.detail);
+      const $detailItem = $$(detailId ?? this.ids.detailItem);
 
-      if (!$detail) return;
+      if (!$detailItem) return;
 
       const field = this.view.field();
 
       if (field?.key === "string" || field?.key === "LongText") {
-         $detail.setValues({ display: val.replace(/[<]/g, "&lt;") });
+         $detailItem.setValues({ display: val.replace(/[<]/g, "&lt;") });
 
          return;
       }
 
-      $detail.setValues({ display: val });
+      $detailItem.setValues({ display: val });
    }
 };

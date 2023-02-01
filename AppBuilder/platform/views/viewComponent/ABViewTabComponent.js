@@ -3,7 +3,7 @@ const ABViewComponent = require("./ABViewComponent").default;
 const L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABViewTabComponent extends ABViewComponent {
-   constructor(baseView, idBase) {
+   constructor(baseView, idBase, ids) {
       // get a UI component for each of our child views
       baseView._viewComponents =
          baseView._viewComponents ||
@@ -16,17 +16,24 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
                };
             });
 
-      super(baseView, idBase ?? `ABViewTab_${baseView.id}`, {
-         tab: "",
+      super(
+         baseView,
+         idBase || `ABViewTab_${baseView.id}`,
+         Object.assign(
+            {
+               tab: "",
 
-         sidebar: "",
-         expandMenu: "",
-         collapseMenu: "",
+               sidebar: "",
+               expandMenu: "",
+               collapseMenu: "",
 
-         popupTabManager: "",
-         popupTabManagerForm: "",
-         popupTabManagerSaveButton: "",
-      });
+               popupTabManager: "",
+               popupTabManagerForm: "",
+               popupTabManagerSaveButton: "",
+            },
+            ids
+         )
+      );
    }
 
    ui() {
@@ -59,7 +66,7 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
       });
 
       const _viewComponents = baseView._viewComponents;
-      const settings = baseView.settings;
+      const settings = this.settings;
 
       if (_viewComponents.length > 0) {
          if (settings.stackTabs) {
@@ -429,7 +436,7 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
       // switch tab view
       this.toggleParent(baseView.parent);
 
-      if (baseView.settings.stackTabs)
+      if (this.settings.stackTabs)
          if (!$tabViewId.isVisible()) {
             const showIt = setInterval(() => {
                if ($tabViewId.isVisible()) clearInterval(showIt);
@@ -486,7 +493,7 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
 
          // create view's component once
          const $tab = $$(ids.tab);
-         const settings = baseView.settings;
+         const settings = this.settings;
 
          if (!vc?.component && vc?.view?.id === viewId) {
             // show loading cursor

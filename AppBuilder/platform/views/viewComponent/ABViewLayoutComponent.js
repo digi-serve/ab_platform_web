@@ -1,8 +1,8 @@
 const ABViewComponent = require("./ABViewComponent").default;
 
 module.exports = class ABViewLayoutComponent extends ABViewComponent {
-   constructor(baseView, idBase) {
-      super(baseView, idBase ?? `ABViewLayout_${baseView.id}`);
+   constructor(baseView, idBase, ids) {
+      super(baseView, idBase || `ABViewLayout_${baseView.id}`, ids);
 
       const viewComponents = this.viewComponents ?? {}; // { viewId: viewComponent, ..., viewIdn: viewComponent }
 
@@ -38,7 +38,9 @@ module.exports = class ABViewLayoutComponent extends ABViewComponent {
       return _ui;
    }
 
-   init(AB, accessLevel) {
+   async init(AB, accessLevel) {
+      await super.init(AB);
+
       const baseView = this.view;
 
       // make sure each of our child views get .init() called

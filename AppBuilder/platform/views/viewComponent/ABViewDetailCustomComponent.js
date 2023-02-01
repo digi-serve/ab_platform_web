@@ -3,8 +3,8 @@ const ABViewDetailItemComponent = require("./ABViewDetailItemComponent");
 module.exports = class ABViewDetailCustomComponent extends (
    ABViewDetailItemComponent
 ) {
-   constructor(baseView, idBase) {
-      super(baseView, idBase ?? `ABViewDetailCustom_${baseView.id}`);
+   constructor(baseView, idBase, ids) {
+      super(baseView, idBase || `ABViewDetailCustom_${baseView.id}`, ids);
    }
 
    ui() {
@@ -40,7 +40,7 @@ module.exports = class ABViewDetailCustomComponent extends (
                   field?.id
                } ${baseView.parentDetailComponent()?.id || baseView.parent.id}`;
 
-               $$(this.ids.detail)?.$view.setAttribute("data-cy", dataCy);
+               $$(this.ids.detailItem)?.$view.setAttribute("data-cy", dataCy);
             },
          },
       });
@@ -54,13 +54,13 @@ module.exports = class ABViewDetailCustomComponent extends (
 
       if (!field) return;
 
-      const $detail = $$(this.ids.detail);
+      const $detailItem = $$(this.ids.detailItem);
 
-      if (!$detail) return;
+      if (!$detailItem) return;
 
       const detailCom = baseView.detailComponent(),
          rowData = detailCom.datacollection.getCursor() || {},
-         node = $detail.$view;
+         node = $detailItem.$view;
 
       field.customDisplay(rowData, null, node, {
          editable: false,
@@ -72,14 +72,14 @@ module.exports = class ABViewDetailCustomComponent extends (
 
       if (!field) return;
 
-      const $detail = $$(this.ids.detail);
+      const $detailItem = $$(this.ids.detailItem);
 
-      if (!$detail) return;
+      if (!$detailItem) return;
 
       const rowData = {};
 
       rowData[field.columnName] = val;
 
-      field.setValue($detail, rowData);
+      field.setValue($detailItem, rowData);
    }
 };

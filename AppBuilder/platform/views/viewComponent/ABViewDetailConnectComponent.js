@@ -3,8 +3,8 @@ const ABViewDetailItemComponent = require("./ABViewDetailItemComponent");
 module.exports = class ABViewDetailConnectComponent extends (
    ABViewDetailItemComponent
 ) {
-   constructor(baseView, idBase) {
-      super(baseView, idBase ?? `ABViewDetailConnect_${baseView.id}`);
+   constructor(baseView, idBase, ids) {
+      super(baseView, idBase || `ABViewDetailConnect_${baseView.id}`, ids);
    }
 
    ui() {
@@ -22,7 +22,7 @@ module.exports = class ABViewDetailConnectComponent extends (
                   settings.fieldId
                } ${baseView.parentDetailComponent()?.id || baseView.parent.id}`;
 
-               $$(this.ids.detail)?.$view.setAttribute("data-cy", dataCy);
+               $$(this.ids.detailItem)?.$view.setAttribute("data-cy", dataCy);
             },
          },
       });

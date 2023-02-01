@@ -1,28 +1,28 @@
 const ABViewComponent = require("./ABViewComponent").default;
 
 module.exports = class ABViewLabelComponent extends ABViewComponent {
-   constructor(baseView, idBase) {
-      super(baseView, idBase ?? `ABViewLabel_${baseView.id}`);
+   constructor(baseView, idBase, ids) {
+      super(baseView, idBase || `ABViewLabel_${baseView.id}`, ids);
    }
 
    ui() {
       const baseView = this.view;
 
       const _ui = super.ui([
-         {
+         this.uiFormatting({
             view: "label",
             // css: 'ab-component-header ab-ellipses-text',
             label: baseView.text || "*",
-            align: baseView.settings.alignment,
+            align: this.settings.alignment,
             type: {
                height: "auto",
             },
-         },
+         }),
       ]);
 
       delete _ui.type;
 
-      return this.uiFormatting(_ui);
+      return _ui;
    }
 
    /**
@@ -38,17 +38,17 @@ module.exports = class ABViewLabelComponent extends ABViewComponent {
       switch (parseInt(this.settings.format)) {
          // normal
          case 0:
-            ui.rows[0].css = "ab-component-label ab-ellipses-text";
+            ui.css = "ab-component-label ab-ellipses-text";
             break;
 
          // title
          case 1:
-            ui.rows[0].css = "ab-component-header ab-ellipses-text";
+            ui.css = "ab-component-header ab-ellipses-text";
             break;
 
          // description
          case 2:
-            ui.rows[0].css = "ab-component-description ab-ellipses-text";
+            ui.css = "ab-component-description ab-ellipses-text";
             break;
       }
 

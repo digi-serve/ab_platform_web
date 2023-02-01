@@ -1,10 +1,17 @@
 const ABViewComponent = require("./ABViewComponent").default;
 
 module.exports = class ABViewCommentComponent extends ABViewComponent {
-   constructor(baseView, idBase) {
-      super(baseView, idBase ?? `ABViewComment_${baseView.id}`, {
-         comment: "",
-      });
+   constructor(baseView, idBase, ids) {
+      super(
+         baseView,
+         idBase || `ABViewComment_${baseView.id}`,
+         Object.assign(
+            {
+               comment: "",
+            },
+            ids
+         )
+      );
    }
 
    ui() {

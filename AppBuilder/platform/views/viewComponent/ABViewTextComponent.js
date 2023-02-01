@@ -1,19 +1,24 @@
 const ABViewComponent = require("./ABViewComponent").default;
 
 module.exports = class ABViewTextComponent extends ABViewComponent {
-   constructor(baseView, idBase) {
-      idBase = idBase ?? `ABViewText_${baseView.id}`;
-
-      super(baseView, idBase ?? `ABViewText_${baseView.id}`, {
-         text: "",
-      });
+   constructor(baseView, idBase, ids) {
+      super(
+         baseView,
+         idBase || `ABViewText_${baseView.id}`,
+         Object.assign(
+            {
+               text: "",
+            },
+            ids
+         )
+      );
    }
 
    ui() {
       const ids = this.ids;
-      const baseView = this.view;
+      const settings = this.settings;
 
-      const _ui = {
+      const _uiText = {
          id: ids.text,
          view: "template",
          minHeight: 10,
@@ -21,8 +26,12 @@ module.exports = class ABViewTextComponent extends ABViewComponent {
          borderless: true,
       };
 
-      if (baseView.settings.height) _ui.height = baseView.settings.height;
-      else _ui.autoheight = true;
+      if (settings.height) _uiText.height = settings.height;
+      else _uiText.autoheight = true;
+
+      const _ui = super.ui([_uiText]);
+
+      delete _ui.type;
 
       return _ui;
    }
@@ -33,8 +42,7 @@ module.exports = class ABViewTextComponent extends ABViewComponent {
 
    displayText(value) {
       const ids = this.ids;
-      const baseView = this.view;
-      const result = baseView.displayText(value, ids.text);
+      const result = this.view.displayText(value, ids.text);
 
       const $text = $$(ids.text);
 

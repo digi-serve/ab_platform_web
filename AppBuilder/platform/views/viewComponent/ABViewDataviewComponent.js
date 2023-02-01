@@ -4,11 +4,18 @@ const ABViewPropertyLinkPage =
    require("../viewProperties/ABViewPropertyLinkPage").default;
 
 module.exports = class ABViewDataviewComponent extends ABViewComponent {
-   constructor(baseView, idBase) {
-      super(baseView, idBase ?? `ABViewDataview_${baseView.id}`, {
-         scrollview: "",
-         dataFlexView: "",
-      });
+   constructor(baseView, idBase, ids) {
+      super(
+         baseView,
+         idBase || `ABViewDataview_${baseView.id}`,
+         Object.assign(
+            {
+               scrollview: "",
+               dataFlexView: "",
+            },
+            ids
+         )
+      );
 
       this.linkPage = null;
    }
@@ -176,7 +183,7 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
       }
 
       const baseView = this.view;
-      const xCount = parseInt(baseView.settings.xCount);
+      const xCount = parseInt(this.settings.xCount);
       const recordWidth = Math.floor(
          (Layout.$width - 20 - xCount * 20) / xCount
       );

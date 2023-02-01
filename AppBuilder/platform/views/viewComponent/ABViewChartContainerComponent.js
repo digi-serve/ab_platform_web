@@ -1,15 +1,22 @@
 const ABViewComponent = require("./ABViewComponent").default;
 
 module.exports = class ABViewChartContainerComponent extends ABViewComponent {
-   constructor(baseView, idBase) {
-      super(baseView, idBase ?? `ABViewChartContainer_${baseView.id}`, {
-         chart: "",
-      });
+   constructor(baseView, idBase, ids) {
+      super(
+         baseView,
+         idBase || `ABViewChartContainer_${baseView.id}`,
+         Object.assign(
+            {
+               chartContainer: "",
+            },
+            ids
+         )
+      );
    }
 
    ui(uiChartComponent) {
       const _ui = super.ui([
-         Object.assign({ id: this.ids.chart }, uiChartComponent ?? {}),
+         Object.assign({ id: this.ids.chartContainer }, uiChartComponent ?? {}),
       ]);
 
       delete _ui.type;
@@ -35,8 +42,8 @@ module.exports = class ABViewChartContainerComponent extends ABViewComponent {
    }
 
    refreshData(dcChart) {
-      const $chart = $$(this.ids.chart);
+      const $chartContainer = $$(this.ids.chartContainer);
 
-      if ($chart?.data) $chart.data.sync(dcChart);
+      if ($chartContainer?.data) $chartContainer.data.sync(dcChart);
    }
 };

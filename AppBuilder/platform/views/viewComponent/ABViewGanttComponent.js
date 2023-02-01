@@ -1,11 +1,18 @@
 import ABViewComponent from "./ABViewComponent";
 
 export default class ABViewGanttComponent extends ABViewComponent {
-   constructor(baseView, idBase) {
-      super(baseView, idBase || `ABViewGantt_${baseView.id}`, {
-         menu: "",
-         gantt: "",
-      });
+   constructor(baseView, idBase, ids) {
+      super(
+         baseView,
+         idBase || `ABViewGantt_${baseView.id}`,
+         Object.assign(
+            {
+               menu: "",
+               gantt: "",
+            },
+            ids
+         )
+      );
 
       this._tempDC = null;
       // {ABDataCollection}
@@ -30,14 +37,15 @@ export default class ABViewGanttComponent extends ABViewComponent {
       // generated on the same item, we catch the repeats and just return
       // the same data for each.
 
-      const ids = this.ids;
+      const idGantt = this.ids.gantt;
 
       this.ganttElement = {
          isExistsTask: (taskId) => {
-            const localService = $$(ids.gantt).getService("local");
+            const localService = $$(idGantt).getService("local");
             if (!localService) return false;
 
             const tasksData = localService.tasks();
+
             if (!tasksData || !tasksData.exists) return false;
 
             return tasksData.exists(taskId);
@@ -45,7 +53,8 @@ export default class ABViewGanttComponent extends ABViewComponent {
          removeTask: (taskId) => {
             if (!this.ganttElement.isExistsTask(taskId)) return;
 
-            const opsService = $$(ids.gantt).getService("operations");
+            const opsService = $$(idGantt).getService("operations");
+
             if (!opsService) return;
 
             return opsService.removeTask(taskId);
@@ -265,20 +274,15 @@ export default class ABViewGanttComponent extends ABViewComponent {
       super.objectLoad(object);
 
       const baseView = this.view;
+      const settings = this.settings;
 
       if (object) {
-         this.TitleField = object.fieldByID(baseView.settings.titleFieldID);
-         this.StartDateField = object.fieldByID(
-            baseView.settings.startDateFieldID
-         );
-         this.EndDateField = object.fieldByID(baseView.settings.endDateFieldID);
-         this.DurationField = object.fieldByID(
-            baseView.settings.durationFieldID
-         );
-         this.ProgressField = object.fieldByID(
-            baseView.settings.progressFieldID
-         );
-         this.NotesField = object.fieldByID(baseView.settings.notesFieldID);
+         this.TitleField = object.fieldByID(settings.titleFieldID);
+         this.StartDateField = object.fieldByID(settings.startDateFieldID);
+         this.EndDateField = object.fieldByID(settings.endDateFieldID);
+         this.DurationField = object.fieldByID(settings.durationFieldID);
+         this.ProgressField = object.fieldByID(settings.progressFieldID);
+         this.NotesField = object.fieldByID(settings.notesFieldID);
       }
    }
 

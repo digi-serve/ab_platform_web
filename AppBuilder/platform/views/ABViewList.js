@@ -1,4 +1,5 @@
 const ABViewListCore = require("../../core/views/ABViewListCore");
+const ABViewListComponent = require("./viewComponent/ABViewListComponent");
 
 let L = (...params) => AB.Multilingual.label(...params);
 
@@ -142,59 +143,80 @@ module.exports = class ABViewList extends ABViewListCore {
          parseInt(view.settings.height) || ABViewList.defaultValues().height;
    }
 
-   /*
-    * @component()
+   /**
+    * @method component()
     * return a UI component based upon this view.
     * @param {obj} App
     * @return {obj} UI component
     */
-   component(App) {
-      let baseCom = super.component(App);
+   component(v1App = false) {
+      let component = new ABViewListComponent(this);
 
-      var idBase = "ABViewListEditorComponent";
-      var ids = {
-         component: App.unique(`${idBase}_component`),
-      };
+      // if this is our v1Interface
+      if (v1App) {
+         const newComponent = component;
 
-      var _ui = {
-         id: ids.component,
-         view: "dataview",
-         type: {
-            width: 1000,
-            height: 30,
-         },
-         template: (item) => {
-            var field = this.field();
-            if (!field) return "";
-
-            return field.format(item);
-         },
-      };
-
-      // set height or autoHeight
-      if (this.settings.height != 0) {
-         _ui.height = this.settings.height;
-      } else {
-         _ui.autoHeight = true;
+         component = {
+            ui: component.ui(),
+            init: (options, accessLevel) => {
+               return newComponent.init(this.AB, accessLevel);
+            },
+            onShow: (...params) => {
+               return newComponent.onShow?.(...params);
+            },
+         };
       }
 
-      var _init = (options) => {
-         var dv = this.datacollection;
-         if (!dv) return;
-
-         // bind dc to component
-         dv.bind($$(ids.component));
-         // $$(ids.component).sync(dv);
-      };
-
-      // var _logic = {
-      // }
-
-      return {
-         ui: _ui,
-         init: _init,
-
-         onShow: baseCom.onShow,
-      };
+      return component;
    }
+
+   // componentOld(App) {
+   //    let baseCom = super.component(App);
+
+   //    var idBase = "ABViewListEditorComponent";
+   //    var ids = {
+   //       component: App.unique(`${idBase}_component`),
+   //    };
+
+   //    var _ui = {
+   //       id: ids.component,
+   //       view: "dataview",
+   //       type: {
+   //          width: 1000,
+   //          height: 30,
+   //       },
+   //       template: (item) => {
+   //          var field = this.field();
+   //          if (!field) return "";
+
+   //          return field.format(item);
+   //       },
+   //    };
+
+   //    // set height or autoHeight
+   //    if (this.settings.height != 0) {
+   //       _ui.height = this.settings.height;
+   //    } else {
+   //       _ui.autoHeight = true;
+   //    }
+
+   //    var _init = (options) => {
+   //       var dv = this.datacollection;
+   //       if (!dv) return;
+
+   //       // bind dc to component
+   //       dv.bind($$(ids.component));
+   //       // $$(ids.component).sync(dv);
+   //    };
+
+   //    // var _logic = {
+   //    // }
+
+   //    return {
+   //       ui: _ui,
+   //       init: _init,
+
+   //       onShow: baseCom.onShow,
+   //    };
+   // }
 };
