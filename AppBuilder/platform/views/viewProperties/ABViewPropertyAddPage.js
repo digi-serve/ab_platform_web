@@ -118,12 +118,17 @@ export default class ABViewPropertyAddPage extends ABViewProperty {
          settings.formView || this.constructor.default.formView;
    }
 
-   component(App, idBase) {
-      let ids = {
-         popup: App.unique(`${idBase}_popup_add_new`),
+   getIds(idBase, App) {
+      return {
+         popup: App._App.unique(`${idBase}_popup_add_new`),
          field: idBase.split("_")[1],
-         button: App.unique(`${idBase}_popup_add_new_button`),
+         button: App._App.unique(`${idBase}_popup_add_new_button`),
       };
+   }
+
+   component(App, idBase) {
+      // This can be overwritten by creating a different getIds before calling .super
+      let ids = this.getIds(idBase, App);
 
       let ui = "";
 
@@ -324,6 +329,11 @@ export default class ABViewPropertyAddPage extends ABViewProperty {
       let init = (options) => {
          for (let c in _logic.callbacks) {
             _logic.callbacks[c] = options[c] || _logic.callbacks[c];
+         }
+         if (ui) {
+            for (let c in options) {
+               ui.on[c] = options[c];
+            }
          }
       };
 

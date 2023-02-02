@@ -1,8 +1,4 @@
 const ABViewFormItemComponent = require("./ABViewFormItemComponent");
-const ABViewFormTextboxCore = require("../../../core/views/ABViewFormTextboxCore");
-
-const ABViewFormTextboxPropertyComponentDefaults =
-   ABViewFormTextboxCore.defaultValues();
 
 module.exports = class ABViewFormTextboxComponent extends (
    ABViewFormItemComponent
@@ -64,7 +60,9 @@ module.exports = class ABViewFormTextboxComponent extends (
             .getChildViews()[0]
             .getEditor(true)
             .then((editor) => {
-               const dataCy = `${baseView.key} rich ${_ui.name} ${baseView.id} ${baseView.parent.id}`;
+               const dataCy = `${baseView.key} rich ${_ui.name} ${
+                  baseView.id ?? ""
+               } ${baseView.parent.id ?? ""}`;
 
                editor.contentAreaContainer.setAttribute("data-cy", dataCy);
             });

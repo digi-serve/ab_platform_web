@@ -732,6 +732,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
    }
 
    // componentOld(App, idPrefix) {
+   //    console.error("how is this open");
    //    var field = this.field();
    //    // this field may be deleted
    //    if (!field) return super.component(App);
@@ -763,19 +764,19 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
    //       if (form) settings = form.settings;
 
    //       addPageComponent.applicationLoad(this.application);
-   //       addPageComponent.init({
-   //          onSaveData: component.logic.callbackSaveData,
-   //          onCancelClick: component.logic.callbackCancel,
-   //          clearOnLoad: component.logic.callbackClearOnLoad,
-   //       });
+   //       // addPageComponent.init({
+   //       //    onSaveData: component.logic.callbackSaveData,
+   //       //    onCancelClick: component.logic.callbackCancel,
+   //       //    clearOnLoad: component.logic.callbackClearOnLoad,
+   //       // });
 
    //       editPageComponent = this.editPageTool.component(App, idBase);
-   //       editPageComponent.applicationLoad(this.application);
-   //       editPageComponent.init({
-   //          onSaveData: component.logic.callbackSaveData,
-   //          onCancelClick: component.logic.callbackCancel,
-   //          clearOnLoad: component.logic.callbackClearOnLoad,
-   //       });
+   //       // editPageComponent.applicationLoad(this.application);
+   //       // editPageComponent.init({
+   //       //    onSaveData: component.logic.callbackSaveData,
+   //       //    onCancelClick: component.logic.callbackCancel,
+   //       //    clearOnLoad: component.logic.callbackClearOnLoad,
+   //       // });
    //    };
 
    //    component.logic = {

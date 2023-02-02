@@ -31,10 +31,10 @@ module.exports = class ABViewFormCustomComponent extends (
       const field = baseView.field();
       const form = baseView.parentFormComponent();
       const formSettings = form?.settings ?? {};
-      const settings = baseView.settings ?? {};
+      const settings = field?.settings ?? baseView.settings ?? {};
 
       const requiredClass =
-         field.settings.required || settings.required ? "webix_required" : "";
+         field?.settings?.required || settings.required ? "webix_required" : "";
 
       let templateLabel = "";
 
@@ -48,12 +48,12 @@ module.exports = class ABViewFormCustomComponent extends (
       let height = 38;
 
       if (field instanceof ABFieldImage) {
-         if (field.settings.useHeight) {
+         if (settings.useHeight) {
             if (formSettings.labelPosition === "top") {
-               height = parseInt(field.settings.imageHeight) || DEFAULT_HEIGHT;
+               height = parseInt(settings.imageHeight) || DEFAULT_HEIGHT;
                height += 38;
             } else {
-               height = parseInt(field.settings.imageHeight) || DEFAULT_HEIGHT;
+               height = parseInt(settings.imageHeight) || DEFAULT_HEIGHT;
             }
          } else if (formSettings.labelPosition === "top") {
             height = DEFAULT_HEIGHT + 38;
@@ -72,12 +72,12 @@ module.exports = class ABViewFormCustomComponent extends (
             .replace(
                /#template#/g,
                field
-                  .columnHeader({
+                  ?.columnHeader({
                      width: this.new_width,
                      height: height,
                      editable: true,
                   })
-                  .template({})
+                  .template({}) ?? ""
             );
 
       return super.ui({
@@ -109,7 +109,7 @@ module.exports = class ABViewFormCustomComponent extends (
 
                   // var node = $$(ids.formItem).$view;
                   let node = $$(trg).getParentView().$view;
-                  field.customEdit(
+                  field?.customEdit(
                      rowData,
                      this.AB_App,
                      node,

@@ -124,8 +124,16 @@ export default class ABViewPropertyEditPage extends ABViewPropertyAddPage {
    }
 
    component(App, idBase) {
-      idBase = `${idBase}_popup_edit_form`;
+      // Overwrite the popup-lookup function
+      function getIds(idBase, App) {
+         return {
+            popup: App._App.unique(`${idBase}_popup_edit_form`),
+            field: idBase.split("_")[1],
+         };
+      }
+      this.getIds = getIds;
 
+      // call to addpage
       let comp = super.component(App, idBase);
 
       comp.onClick = () => {

@@ -1050,9 +1050,10 @@ module.exports = class ABViewCSVImporterComponent extends ABViewComponent {
                //    "YYYY-MM-DD"
                // );
                // debugger;
-               let dateFormat = ab.toDate(data, { format: f.format });
-
-               dateFormat = ab.toDateFormat(dateFormat, {
+               let dateFormat = ab.rules.toDate(data, {
+                  format: f.format,
+               });
+               dateFormat = ab.rules.toDateFormat(dateFormat, {
                   format: "YYYY-MM-DD",
                });
 
