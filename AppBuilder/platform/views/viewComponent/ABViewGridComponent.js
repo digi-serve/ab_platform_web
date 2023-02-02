@@ -570,7 +570,7 @@ export default class ABViewGridComponent extends ABViewComponent {
       let throttleCustomDisplay = null;
       let scrollStarted = null;
 
-      if (!$DataTable) return Promise.resolve();
+      if (!$DataTable) return;
 
       abWebix.extend($DataTable, abWebix.ProgressBar);
 
