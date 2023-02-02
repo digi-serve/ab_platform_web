@@ -615,7 +615,7 @@ export default class ABViewGridComponent extends ABViewComponent {
          );
       };
 
-      $DataTable.attachEvent("onAfterRender", (data) => {
+      $DataTable.attachEvent("onAfterRender", function (data) {
          $DataTable.resize();
 
          if (throttleCustomDisplay) clearTimeout(throttleCustomDisplay);
@@ -637,7 +637,7 @@ export default class ABViewGridComponent extends ABViewComponent {
       // we have some data types that have custom displays that don't look
       // right after scrolling large data sets we need to call customDisplays
       // again
-      $DataTable.attachEvent("onScroll", () => {
+      $DataTable.attachEvent("onScroll", function () {
          if (scrollStarted) clearTimeout(scrollStarted);
          if (throttleCustomDisplay) clearTimeout(throttleCustomDisplay);
 
@@ -645,7 +645,7 @@ export default class ABViewGridComponent extends ABViewComponent {
             customDisplays(this.data);
          }, 1500);
       });
-      $DataTable.attachEvent("onAfterScroll", () => {
+      $DataTable.attachEvent("onAfterScroll", function () {
          if (throttleCustomDisplay) clearTimeout(throttleCustomDisplay);
 
          throttleCustomDisplay = setTimeout(() => {
@@ -656,7 +656,7 @@ export default class ABViewGridComponent extends ABViewComponent {
 
       // Process our onItemClick events.
       // this is a good place to check if our delete/trash icon was clicked.
-      $DataTable.attachEvent("onItemClick", (id, e, node) => {
+      $DataTable.attachEvent("onItemClick", function (id, e, node) {
          // make sure we have an object selected before processing this.
          const dv = self.datacollection;
          const CurrentObject = dv?.datasource;
