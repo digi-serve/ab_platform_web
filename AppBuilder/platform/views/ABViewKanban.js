@@ -1,5 +1,5 @@
 const ABViewKanbanCore = require("../../core/views/ABViewKanbanCore");
-const ABViewKanBanComponent = require("./viewComponent/ABViewKanBanComponent");
+const ABViewKanbanComponent = require("./viewComponent/ABViewKanbanComponent");
 
 const ABViewPropertyLinkPage =
    require("./viewProperties/ABViewPropertyLinkPage").default;
@@ -45,7 +45,7 @@ export default class ABViewKanban extends ABViewKanbanCore {
     */
 
    component(v1App = false) {
-      let component = new ABViewKanBanComponent(this);
+      let component = new ABViewKanbanComponent(this);
 
       // if this is our v1Interface
       if (v1App) {
