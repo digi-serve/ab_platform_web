@@ -264,7 +264,7 @@ export default class ABViewGridComponent extends ABViewComponent {
                   // if we are deleting or updating rows
                   self.toggleUpdateDelete();
                } else {
-                  if (self.settings.isEditable) {
+                  if (settings.isEditable) {
                      // if the colum is not the select item column move on to
                      // the next step to save
                      const state = {
@@ -578,7 +578,14 @@ export default class ABViewGridComponent extends ABViewComponent {
 
       if (accessLevel < 2) $DataTable.define("editable", false);
 
-      const dc = this.datacollection;
+      const settings = this.settings;
+      const dc =
+         this.datacollection || settings.dataviewID
+            ? this.AB.datacollectionByID(settings.dataviewID)
+            : null;
+
+      if (dc) this.datacollectionLoad(dc);
+
       const customDisplays = (data) => {
          const CurrentObject = dc?.datasource;
 
@@ -602,7 +609,7 @@ export default class ABViewGridComponent extends ABViewComponent {
             index++;
          });
 
-         let editable = this.settings.isEditable;
+         let editable = settings.isEditable;
 
          if ($DataTable.config.accessLevel < 2) editable = false;
 
@@ -639,6 +646,7 @@ export default class ABViewGridComponent extends ABViewComponent {
       // again
       $DataTable.attachEvent("onScroll", function () {
          if (scrollStarted) clearTimeout(scrollStarted);
+
          if (throttleCustomDisplay) clearTimeout(throttleCustomDisplay);
 
          scrollStarted = setTimeout(() => {
@@ -663,18 +671,18 @@ export default class ABViewGridComponent extends ABViewComponent {
 
          if (!CurrentObject) return;
 
-         if (self.settings.isEditable === 0) {
+         if (settings.isEditable === 0) {
             const items = $DataTable.getItem(id);
          }
          // if this was our edit icon:
          // console.log(e.target.className);
          if (e === "auto" || e.target.className.indexOf("eye") > -1) {
             // View a Details Page:
-            self.changePage(dv, id, self.settings.detailsPage);
-            self.toggleTab(self.settings.detailsTab, this);
+            self.changePage(dv, id, settings.detailsPage);
+            self.toggleTab(settings.detailsTab, this);
          } else if (e.target.className.indexOf("pencil") > -1) {
-            self.changePage(dv, id, self.settings.editPage);
-            self.toggleTab(self.settings.editTab, this);
+            self.changePage(dv, id, settings.editPage);
+            self.toggleTab(settings.editTab, this);
          } else if (e.target.className.indexOf("track") > -1)
             self.emit("object.track", CurrentObject, id.row);
          // App.actions.openObjectTrack(CurrentObject, id.row);
@@ -733,73 +741,65 @@ export default class ABViewGridComponent extends ABViewComponent {
                   return true;
                },
             });
-         else if (self.settings.detailsPage.length) {
+         else if (settings.detailsPage.length) {
             // If an icon wasn't selected but a details page is set
             // view the details page
-            self.changePage(dv, id, self.settings.detailsPage);
-            self.toggleTab(self.settings.detailsTab, this);
-         } else if (self.settings.editPage.length) {
+            self.changePage(dv, id, settings.detailsPage);
+            self.toggleTab(settings.detailsTab, this);
+         } else if (settings.editPage.length) {
             // If an icon wasn't selected but an edit page is set
             // view the edit page
-            self.changePage(dv, id, self.settings.editPage);
-            self.toggleTab(self.settings.editTab, this);
+            self.changePage(dv, id, settings.editPage);
+            self.toggleTab(settings.editTab, this);
          }
       });
 
       // ABViewGrid Original init();
-
-      if (this.settings.showToolbar) {
+      if (settings.showToolbar) {
          if (
-            this.settings.massUpdate ||
-            this.settings.isSortable ||
-            this.settings.isExportable ||
-            (this.settings.gridFilter &&
-               this.settings.gridFilter.filterOption &&
-               this.settings.gridFilter.userFilterPosition === "toolbar")
+            settings.massUpdate ||
+            settings.isSortable ||
+            settings.isExportable ||
+            (settings.gridFilter &&
+               settings.gridFilter.filterOption &&
+               settings.gridFilter.userFilterPosition === "toolbar")
          )
             $$(ids.toolbar).show();
 
-         if (!this.settings.massUpdate) {
+         if (!settings.massUpdate) {
             $$(ids.buttonMassUpdate).hide();
             $$(ids.buttonDeleteSelected).hide();
          }
 
-         if (!this.settings.allowDelete) $$(ids.buttonDeleteSelected).hide();
+         if (!settings.allowDelete) $$(ids.buttonDeleteSelected).hide();
 
-         if (this.settings.gridFilter) {
+         if (settings.gridFilter) {
             if (
-               this.settings.gridFilter.filterOption !== 1 ||
-               this.settings.gridFilter.userFilterPosition !== "toolbar"
+               settings.gridFilter.filterOption !== 1 ||
+               settings.gridFilter.userFilterPosition !== "toolbar"
             )
                $$(ids.buttonFilter).hide();
 
             if (
-               this.settings.gridFilter.filterOption === 3 &&
-               this.settings.gridFilter.globalFilterPosition === "single"
+               settings.gridFilter.filterOption === 3 &&
+               settings.gridFilter.globalFilterPosition === "single"
             )
                $DataTable.hide();
 
-            if (this.settings.gridFilter.isGlobalToolbar)
+            if (settings.gridFilter.isGlobalToolbar)
                $$(ids.globalSearchToolbar).show();
             else $$(ids.globalSearchToolbar).hide();
 
-            if (this.settings.gridFilter.filterOption)
+            if (settings.gridFilter.filterOption)
                this.view.filterHelper.init(this.AB);
          }
 
-         if (!this.settings.isSortable) $$(ids.buttonSort).hide();
+         if (!settings.isSortable) $$(ids.buttonSort).hide();
 
-         if (!this.settings.isExportable) $$(ids.buttonExport).hide();
+         if (!settings.isExportable) $$(ids.buttonExport).hide();
       }
 
-      if (this.settings.hideHeader) this.hideHeader();
-
-      if (!dc)
-         if (this.settings.dataviewID) {
-            const dv = this.AB.datacollectionByID(this.settings.dataviewID);
-
-            this.datacollectionLoad(dv);
-         }
+      if (settings.hideHeader) this.hideHeader();
 
       // Make sure
       this._gridSettings =
