@@ -63,10 +63,9 @@ module.exports = class ABViewFormItemComponent extends ABViewComponent {
                      if (!option) return;
                      // our option.ids are based on builder input and can include the ' character
                      var node = popup.$view.querySelector(
-                        `[webix_l_id='${(option.id ?? "").replaceAll(
-                           "'",
-                           "\\'"
-                        )}']`
+                        `[webix_l_id='${(option?.id ?? "")
+                           .toString()
+                           .replaceAll("'", "\\'")}']`
                      );
                      if (!node) return;
                      node.setAttribute(
