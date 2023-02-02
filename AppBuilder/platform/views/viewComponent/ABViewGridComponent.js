@@ -66,6 +66,10 @@ export default class ABViewGridComponent extends ABViewComponent {
       // {integer}
       // The # columns to the right to freeze.
 
+      this.datacollection = null;
+      // {ABDataCollection}
+      // The Webix DataCollection that manages the data we are displaying.
+
       this.validationError = false;
       // {bool}
       // Has a Validation Error occured?
@@ -579,12 +583,15 @@ export default class ABViewGridComponent extends ABViewComponent {
       if (accessLevel < 2) $DataTable.define("editable", false);
 
       const settings = this.settings;
-      const dc =
-         this.datacollection || settings.dataviewID
-            ? this.AB.datacollectionByID(settings.dataviewID)
-            : null;
 
-      if (dc) this.datacollectionLoad(dc);
+      let dc = this.datacollection;
+
+      if (!dc)
+         if (settings.dataviewID) {
+            dc = this.AB.datacollectionByID(settings.dataviewID);
+
+            this.datacollectionLoad(dc);
+         }
 
       const customDisplays = (data) => {
          const CurrentObject = dc?.datasource;
