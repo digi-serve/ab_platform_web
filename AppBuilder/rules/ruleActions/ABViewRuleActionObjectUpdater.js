@@ -928,9 +928,10 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
             // we insert our PK into the value from the DC.
 
             // op.value is the ABDatacollection.id we need to find
-            var dataCollection = this.currentForm.AB.datacollectionByID(
+            const dataCollection = this.currentForm.AB.datacollectionByID(
                op.value
             );
+            if (!dataCollection) return;
 
             // we don't want to mess with the dataView directly since it might
             // be used by other parts of the system and this refresh might reset
@@ -951,9 +952,10 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                      );
                   })
                   .forEach((item) => {
-                     var valueField = this.currentForm.datacollection.datasource.fieldByID(
-                        item.value
-                     );
+                     var valueField =
+                        this.currentForm.datacollection.datasource.fieldByID(
+                           item.value
+                        );
                      if (valueField.isConnection) {
                         item.value = valueField.format(this._formData);
                      } else {
@@ -968,9 +970,8 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                   });
             }
 
-            let clonedDataCollection = dataCollection.filteredClone(
-               filterConditions
-            );
+            let clonedDataCollection =
+               dataCollection.filteredClone(filterConditions);
 
             switch (op.selectBy) {
                // the 'select-one' is getting the currently set cursor on this data collection
