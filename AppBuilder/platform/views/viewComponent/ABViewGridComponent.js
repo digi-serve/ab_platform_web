@@ -66,9 +66,9 @@ export default class ABViewGridComponent extends ABViewComponent {
       // {integer}
       // The # columns to the right to freeze.
 
-      this.datacollection = null;
-      // {ABDataCollection}
-      // The Webix DataCollection that manages the data we are displaying.
+      // this.datacollection = null;
+      // // {ABDataCollection}
+      // // The Webix DataCollection that manages the data we are displaying.
 
       this.validationError = false;
       // {bool}
@@ -138,6 +138,8 @@ export default class ABViewGridComponent extends ABViewComponent {
       // {hash} { grid.id : [ {columnHeader}, {columnHeader} ...]}
       // Keep a global copy of our local Grid settings, so we can optimize the header
       // sizes.
+
+      this._isDatacollectionLoaded = false;
    }
 
    // {string}
@@ -688,42 +690,49 @@ export default class ABViewGridComponent extends ABViewComponent {
 
             clearValue[id.column] = "";
 
-            CurrentObject.model()
-               .update(id.row, clearValue)
-               .then((response) => {
+            const updateRow = async () => {
+               try {
+                  const response = await CurrentObject.model().update(
+                     id.row,
+                     clearValue
+                  );
+
                   // console.log(response);
-               })
-               .catch((err) => {
+               } catch (err) {
                   self.AB.notify.developer(err, {
                      context: "ABViewGridComponent.onItemClick",
                      message: "Error updating item",
                      obj: CurrentObject.toObj(),
                      id: id.row,
                   });
-               });
+               }
+            };
+
+            updateRow();
          }
          // if this was our trash icon:
          else if (e.target.className.indexOf("trash") > -1)
             abWebix.confirm({
-               title: this.label("Delete data"),
-               text: this.label("Do you want to delete this row?"),
+               title: self.label("Delete data"),
+               text: self.label("Do you want to delete this row?"),
                callback: function (result) {
                   if (result) {
-                     CurrentObject.model()
-                        .delete(id.row)
-                        .then((response) => {
+                     const deleteRow = async () => {
+                        try {
+                           const response = await CurrentObject.model().delete(
+                              id.row
+                           );
+
                            if (response.numRows > 0) {
                               $DataTable.remove(id);
                               $DataTable.clearSelection();
-                           } else {
+                           } else
                               abWebix.alert({
-                                 text: this.label(
+                                 text: self.label(
                                     "No rows were effected.  This does not seem right."
                                  ),
                               });
-                           }
-                        })
-                        .catch((err) => {
+                        } catch (err) {
                            self.AB.notify.developer(err, {
                               context: "ABViewGridComponent.onItemClick",
                               message: "Error deleting item",
@@ -732,7 +741,10 @@ export default class ABViewGridComponent extends ABViewComponent {
                            });
 
                            //// TODO: what do we do here?
-                        });
+                        }
+                     };
+
+                     deleteRow();
                   }
 
                   $DataTable.clearSelection();
@@ -800,16 +812,10 @@ export default class ABViewGridComponent extends ABViewComponent {
 
       if (settings.hideHeader) this.hideHeader();
 
-      let dc = this.datacollection;
+      const dc =
+         this.datacollection || this.AB.datacollectionByID(settings.dataviewID);
 
-      if (!dc)
-         if (settings.dataviewID) {
-            this.datacollectionLoad(
-               this.AB.datacollectionByID(settings.dataviewID)
-            );
-
-            dc = this.datacollection;
-         }
+      if (!this._isDatacollectionLoaded) this.datacollectionLoad(dc);
 
       // Make sure
       this._gridSettings =
@@ -982,6 +988,8 @@ export default class ABViewGridComponent extends ABViewComponent {
             dc.removeListener("loadData", this.__handler_dc_loadData);
             dc.on("loadData", this.__handler_dc_loadData);
             this.grouping();
+
+            this._isDatacollectionLoad = true;
          } else $DataTable.unbind();
 
          // Be sure to pass on our CurrentObject to our dependent components.
