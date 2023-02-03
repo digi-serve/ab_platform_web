@@ -9,7 +9,7 @@ module.exports = class ABViewConditionalContainerComponent extends (
          idBase || `ABViewConditionalContainer_${baseView.id}`,
          Object.assign(
             {
-               conditionalContainer: "",
+               batch: "",
             },
             ids
          )
@@ -126,7 +126,7 @@ module.exports = class ABViewConditionalContainerComponent extends (
             (dc.dataStatus === dc.dataStatusFlag.notInitial ||
                dc.dataStatus === dc.dataStatusFlag.initializing)
          ) {
-            $batch?.showBatch("wait");
+            $batch.showBatch("wait");
 
             return;
          }
