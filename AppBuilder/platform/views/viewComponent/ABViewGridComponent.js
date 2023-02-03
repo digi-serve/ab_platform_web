@@ -189,7 +189,7 @@ export default class ABViewGridComponent extends ABViewComponent {
          selectType = "row";
 
       return {
-         view: view,
+         view,
          id: ids.datatable,
          resizeColumn: { size: 10 },
          resizeRow: { size: 10 },
@@ -226,9 +226,9 @@ export default class ABViewGridComponent extends ABViewComponent {
                   return false;
                } else if (settings.isEditable) {
                   const currObject = self.datacollection.datasource;
-                  const selectField = currObject.fields((f) => {
-                     return f.columnName == data.column;
-                  })[0];
+                  const selectField = currObject.fields(
+                     (f) => f.columnName === data.column
+                  )[0];
 
                   if (selectField == null) return true;
 
@@ -244,9 +244,8 @@ export default class ABViewGridComponent extends ABViewComponent {
                      self.AB._App,
                      cellNode
                   );
-               } else if (!settings.detailsPage && !settings.editPage) {
+               } else if (!settings.detailsPage && !settings.editPage)
                   return false;
-               }
             },
             onAfterSelect: (data, preserve) => {
                // {ABObject} data
@@ -584,17 +583,8 @@ export default class ABViewGridComponent extends ABViewComponent {
 
       const settings = this.settings;
 
-      let dc = this.datacollection;
-
-      if (!dc)
-         if (settings.dataviewID) {
-            dc = this.AB.datacollectionByID(settings.dataviewID);
-
-            this.datacollectionLoad(dc);
-         }
-
       const customDisplays = (data) => {
-         const CurrentObject = dc?.datasource;
+         const CurrentObject = this.datacollection?.datasource;
 
          if (!CurrentObject || !$DataTable.data) return;
 
@@ -673,8 +663,8 @@ export default class ABViewGridComponent extends ABViewComponent {
       // this is a good place to check if our delete/trash icon was clicked.
       $DataTable.attachEvent("onItemClick", function (id, e, node) {
          // make sure we have an object selected before processing this.
-         const dv = self.datacollection;
-         const CurrentObject = dv?.datasource;
+         const dc = self.datacollection;
+         const CurrentObject = dc?.datasource;
 
          if (!CurrentObject) return;
 
@@ -685,10 +675,10 @@ export default class ABViewGridComponent extends ABViewComponent {
          // console.log(e.target.className);
          if (e === "auto" || e.target.className.indexOf("eye") > -1) {
             // View a Details Page:
-            self.changePage(dv, id, settings.detailsPage);
+            self.changePage(dc, id, settings.detailsPage);
             self.toggleTab(settings.detailsTab, this);
          } else if (e.target.className.indexOf("pencil") > -1) {
-            self.changePage(dv, id, settings.editPage);
+            self.changePage(dc, id, settings.editPage);
             self.toggleTab(settings.editTab, this);
          } else if (e.target.className.indexOf("track") > -1)
             self.emit("object.track", CurrentObject, id.row);
@@ -711,8 +701,9 @@ export default class ABViewGridComponent extends ABViewComponent {
                      id: id.row,
                   });
                });
-         } else if (e.target.className.indexOf("trash") > -1)
-            // if this was our trash icon:
+         }
+         // if this was our trash icon:
+         else if (e.target.className.indexOf("trash") > -1)
             abWebix.confirm({
                title: this.label("Delete data"),
                text: this.label("Do you want to delete this row?"),
@@ -745,18 +736,19 @@ export default class ABViewGridComponent extends ABViewComponent {
                   }
 
                   $DataTable.clearSelection();
+
                   return true;
                },
             });
          else if (settings.detailsPage.length) {
             // If an icon wasn't selected but a details page is set
             // view the details page
-            self.changePage(dv, id, settings.detailsPage);
+            self.changePage(dc, id, settings.detailsPage);
             self.toggleTab(settings.detailsTab, this);
          } else if (settings.editPage.length) {
             // If an icon wasn't selected but an edit page is set
             // view the edit page
-            self.changePage(dv, id, settings.editPage);
+            self.changePage(dc, id, settings.editPage);
             self.toggleTab(settings.editTab, this);
          }
       });
@@ -807,6 +799,17 @@ export default class ABViewGridComponent extends ABViewComponent {
       }
 
       if (settings.hideHeader) this.hideHeader();
+
+      let dc = this.datacollection;
+
+      if (!dc)
+         if (settings.dataviewID) {
+            this.datacollectionLoad(
+               this.AB.datacollectionByID(settings.dataviewID)
+            );
+
+            dc = this.datacollection;
+         }
 
       // Make sure
       this._gridSettings =
@@ -2014,7 +2017,6 @@ export default class ABViewGridComponent extends ABViewComponent {
 
       this.freezeDeleteColumn();
       $DataTable.refreshColumns();
-
       // }
    }
 

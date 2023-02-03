@@ -168,7 +168,7 @@ module.exports = class ABViewFormConnectComponent extends (
          };
 
          _ui = {
-            inputId: _ui.id,
+            inputId: ids.formItem,
             rows: [
                {
                   cols: [
@@ -186,11 +186,15 @@ module.exports = class ABViewFormConnectComponent extends (
          };
       } else
          _ui = {
-            inputId: _ui.id,
+            inputId: ids.formItem,
             rows: [_ui],
          };
 
-      return super.ui(_ui);
+      _ui = super.ui(_ui);
+
+      delete _ui.id;
+
+      return _ui;
    }
 
    async init(AB, options) {
@@ -316,15 +320,15 @@ module.exports = class ABViewFormConnectComponent extends (
 
    onShow() {
       const ids = this.ids;
-      const elem = $$(ids.formItem);
+      const $formItem = $$(ids.formItem);
 
-      if (!elem) return;
+      if (!$formItem) return;
 
       const field = this.field;
 
       if (!field) return;
 
-      const node = elem.$view;
+      const node = $formItem.$view;
 
       if (!node) return;
 
@@ -361,7 +365,19 @@ module.exports = class ABViewFormConnectComponent extends (
          filterConditions
       ).map((e) => {
          for (const key in baseView.parent.viewComponents) {
-            const $ui = $$(baseView.parent.viewComponents[key].ui().inputId);
+            if (
+               !(
+                  baseView.parent.viewComponents[key] instanceof
+                  this.constructor
+               )
+            )
+               continue;
+
+            const $ui = $$(
+               baseView.parent.viewComponents[key]
+                  .ui()
+                  .rows.find((vc) => vc.inputId)?.inputId
+            );
 
             if ($ui?.config?.name === e.value) {
                // we need to use the element id stored in the settings to find out what the
@@ -448,7 +464,7 @@ module.exports = class ABViewFormConnectComponent extends (
                               $node,
                               baseView.options,
                               field,
-                              this.parentFormComponent()
+                              baseView.parentFormComponent()
                            );
                         } else {
                            $node.define("disabled", true);

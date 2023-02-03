@@ -10,6 +10,7 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
    }
 
    ui() {
+      const self = this;
       const baseView = this.view;
       const settings = this.settings;
       const ab = this.AB;
@@ -210,7 +211,7 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
                               const getData = async () => {
                                  try {
                                     dcData[dcId] =
-                                       (await this.getData(dcId)) || [];
+                                       (await self.getData(dcId)) || [];
 
                                     resolve();
                                  } catch (err) {
