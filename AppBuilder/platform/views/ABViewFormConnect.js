@@ -309,18 +309,18 @@ class ABViewFormConnectComponent extends ABViewComponent {
       }
 
       // generate UI for add/edit page tools
-      if (this.view?.settings?.formView) {
-         this.addPageComponent = this.view.addPageTool.component(
-            AB,
-            this.view.settings.formView
-         );
+      let addFormID = this.ids?.popup || this.view?.settings?.formView || null;
+      if (addFormID) {
+         this.addPageComponent = this.view.addPageTool.component(AB, addFormID);
       }
 
+      let editFormID =
+         this.ids?.editpopup || this.view?.settings?.editForm || null;
       let editForm = "";
-      if (this.view?.settings?.editForm) {
+      if (editFormID) {
          this.editPageComponent = this.view.editPageTool.component(
             AB,
-            this.view.settings.editForm
+            editFormID
          );
          editForm =
             '<i data-item-id="#id#" class="fa fa-cog editConnectedPage"></i>';
@@ -448,14 +448,14 @@ class ABViewFormConnectComponent extends ABViewComponent {
          this.editPageComponent.applicationLoad(this.view.application);
          this.editPageComponent.init({
             onSaveData: this.callbackSaveData,
-            onCancelClick: this.callbackCancel
+            onCancelClick: this.callbackCancel,
          });
       }
    }
 
    /**
     * @function callbackSaveData
-    * recive data from add/edit popup, update current popup vals
+    * receive data from add/edit popup, update current popup vals
     *
     */
    callbackSaveData(saveData) {
