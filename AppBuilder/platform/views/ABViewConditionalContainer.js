@@ -143,13 +143,13 @@ module.exports = class ABViewConditionalContainer extends (
    async save() {
       const viewIf = this.views()[0];
       const viewElse = this.views()[1];
-      const penddingSave = [];
+      const pendingSave = [];
 
-      if (viewIf) penddingSave.push(viewIf.save());
+      if (viewIf) pendingSave.push(viewIf.save());
 
-      if (viewElse) penddingSave.push(viewElse.save());
+      if (viewElse) pendingSave.push(viewElse.save());
 
-      await Promise.all(penddingSave);
+      await Promise.all(pendingSave);
 
       await super.save();
    }
