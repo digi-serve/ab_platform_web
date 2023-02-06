@@ -448,8 +448,7 @@ class ABViewFormConnectComponent extends ABViewComponent {
          this.editPageComponent.applicationLoad(this.view.application);
          this.editPageComponent.init({
             onSaveData: this.callbackSaveData,
-            onCancelClick: this.callbackCancel,
-            clearOnLoad: this.callbackClearOnLoad,
+            onCancelClick: this.callbackCancel
          });
       }
    }
