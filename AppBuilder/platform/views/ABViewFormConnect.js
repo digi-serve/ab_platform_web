@@ -413,41 +413,16 @@ class ABViewFormConnectComponent extends ABViewComponent {
          // );
          this.addPageComponent.applicationLoad(this.view.application);
          this.addPageComponent.init({
-            onSaveData: this.callbackSaveData,
+            onSaveData: (saveData) => this.callbackSaveData(saveData),
             onCancelClick: this.callbackCancel,
             clearOnLoad: this.callbackClearOnLoad,
          });
-
-         // if (this.addPageComponent.ui)
-         //    // let component = this.view.__addPageTool.ids.component
-         //    // reset some component vals to make room for button
-         //    component.ui.label = "";
-         // component.ui.labelWidth = 0;
-
-         // ! this overwrites ALL on events
-         // // add click event to add new button
-         // this.addPageComponent.ui.on[""] = {
-         //    onItemClick: (id, evt) => {
-         //       let $form = $$(id).getFormView();
-
-         //       let dc = $form.datacollection;
-
-         //       this.addPageComponent.onClick(dc);
-
-         //       return false;
-         //    },
-         // };
       }
 
       if (this.editPageComponent || this.view.settings.editForm) {
-         // console.error("TODO: ABViewFormConnect.editPageComponent()");
-         // this.editPageComponent = this.view.editPageTool.component(
-         //    AB,
-         //    this.view.settings.editForm
-         // );
          this.editPageComponent.applicationLoad(this.view.application);
          this.editPageComponent.init({
-            onSaveData: this.callbackSaveData,
+            onSaveData: (saveData) => this.callbackSaveData(saveData),
             onCancelClick: this.callbackCancel,
          });
       }
