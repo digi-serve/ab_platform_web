@@ -184,15 +184,18 @@ module.exports = class ABViewFormConnectComponent extends (
                },
             ],
          };
-      } else
+
+         _ui = super.ui(_ui);
+      } else {
          _ui = {
             inputId: ids.formItem,
             rows: [_ui],
          };
 
-      _ui = super.ui(_ui);
+         _ui = super.ui(_ui);
 
-      delete _ui.id;
+         delete _ui.rows[0].id;
+      }
 
       return _ui;
    }
