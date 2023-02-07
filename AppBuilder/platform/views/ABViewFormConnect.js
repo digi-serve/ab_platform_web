@@ -366,9 +366,12 @@ class ABViewFormConnectComponent extends ABViewComponent {
 
          // add click event to add new button
          apcUI.on = {
-            onItemClick: (/*id, evt*/) => {
-               // let $form = $$(id).getFormView();
-               let dc = form.datacollection;
+            onItemClick: (id, e) => {
+               let $form = $$(id).getFormView();
+               let dc = $form.datacollection;
+               if (!dc) {
+                  console.error("no data collection");
+               }
                this.addPageComponent.onClick(dc);
                return false;
             },
@@ -407,15 +410,13 @@ class ABViewFormConnectComponent extends ABViewComponent {
       this._options = options ?? {};
 
       if (this.addPageComponent || this.view?.settings?.formView) {
-         // this.addPageComponent = this.view.addPageTool.component(
-         //    AB,
-         //    this.view.settings.formView
-         // );
          this.addPageComponent.applicationLoad(this.view.application);
          this.addPageComponent.init({
             onSaveData: (saveData) => this.callbackSaveData(saveData),
             onCancelClick: this.callbackCancel,
-            // clearOnLoad: this.callbackClearOnLoad, // this should clear on load by default
+            clearOnLoad: () => {
+               return true; // this should clear on load by default
+            },
          });
       }
 
@@ -424,7 +425,7 @@ class ABViewFormConnectComponent extends ABViewComponent {
          this.editPageComponent.init({
             onSaveData: (saveData) => this.callbackSaveData(saveData),
             clearOnLoad: () => {
-               return false;
+               return false; // should always keep data
             },
             onCancelClick: this.callbackCancel,
          });
@@ -442,7 +443,6 @@ class ABViewFormConnectComponent extends ABViewComponent {
       // find the select component
       const elem = $$(ids?.component);
       if (!elem) return;
-      // ! ids.component is often not defined
 
       const field = this.field;
       field.once("option.data", (data) => {
@@ -1076,304 +1076,6 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
 
       return component;
    }
-
-   // componentOld(App, idPrefix) {
-   //    console.error("how is this open");
-   //    var field = this.field();
-   //    // this field may be deleted
-   //    if (!field) return super.component(App);
-
-   //    idPrefix = idPrefix ? idPrefix + "_" : "";
-
-   //    var component = super.component(App);
-   //    var form = this.parentFormComponent();
-   //    var idBase = this.parentFormUniqueID(
-   //       "ABViewFormConnect_" + this.id + "_f_"
-   //    );
-   //    var ids = {
-   //       component: App.unique(`${idPrefix}${idBase}_component`),
-   //       popup: App.unique(`${idPrefix}${idBase}_popup_add_new`),
-   //       editpopup: App.unique(
-   //          `${idPrefix}${idBase}_popup_edit_form_popup_add_new`
-   //       ),
-   //    };
-
-   //    var settings = {};
-   //    if (form) settings = form.settings;
-
-   //    let addPageComponent = this.addPageTool.component(App, idBase);
-   //    let editPageComponent;
-
-   //    component.init = (optionsParam) => {
-   //       var settings = {};
-   //       var options = optionsParam || {};
-   //       if (form) settings = form.settings;
-
-   //       addPageComponent.applicationLoad(this.application);
-   //       // addPageComponent.init({
-   //       //    onSaveData: component.logic.callbackSaveData,
-   //       //    onCancelClick: component.logic.callbackCancel,
-   //       //    clearOnLoad: component.logic.callbackClearOnLoad,
-   //       // });
-
-   //       editPageComponent = this.editPageTool.component(App, idBase);
-   //       // editPageComponent.applicationLoad(this.application);
-   //       // editPageComponent.init({
-   //       //    onSaveData: component.logic.callbackSaveData,
-   //       //    onCancelClick: component.logic.callbackCancel,
-   //       //    clearOnLoad: component.logic.callbackClearOnLoad,
-   //       // });
-   //    };
-
-   //    component.logic = {
-   //       /**
-   //        * @function callbackSaveData
-   //        *
-   //        */
-   //       callbackSaveData: (saveData) => {
-   //          // find the selectivity component
-   //          var elem = $$(ids.component);
-   //          if (!elem) return;
-
-   //          field.once("option.data", (data) => {
-   //             data.forEach((item) => {
-   //                item.value = item.text;
-   //             });
-   //             $$(ids.component).getList().clearAll();
-   //             $$(ids.component).getList().define("data", data);
-   //             if (field.settings.linkType == "many") {
-   //                let currentVals = $$(ids.component).getValue();
-   //                if (currentVals.indexOf(saveData.id) == -1) {
-   //                   $$(ids.component).setValue(
-   //                      currentVals
-   //                         ? currentVals + "," + saveData.id
-   //                         : saveData.id
-   //                   );
-   //                }
-   //             } else {
-   //                $$(ids.component).setValue(saveData.id);
-   //             }
-   //             // close the popup when we are finished
-   //             $$(ids.popup)?.close();
-   //             $$(ids.editpopup)?.close();
-   //          });
-
-   //          field
-   //             .getOptions(this.settings.filterConditions, "")
-   //             .then(function (data) {
-   //                // we need new option that will be returned from server (above)
-   //                // so we will not set this and then just reset it.
-   //             });
-   //       },
-
-   //       callbackCancel: () => {
-   //          $$(ids.popup).close();
-   //          return false;
-   //       },
-
-   //       callbackClearOnLoad: () => {
-   //          return true;
-   //       },
-
-   //       getValue: (rowData) => {
-   //          var elem = $$(ids.component);
-
-   //          return field.getValue(elem, rowData);
-   //       },
-
-   //       formBusy: ($form) => {
-   //          if (!$form) return;
-
-   //          if ($form.disable) $form.disable();
-
-   //          if ($form.showProgress) $form.showProgress({ type: "icon" });
-   //       },
-
-   //       formReady: ($form) => {
-   //          if (!$form) return;
-
-   //          if ($form.enable) $form.enable();
-
-   //          if ($form.hideProgress) $form.hideProgress();
-   //       },
-
-   //       goToEditPage: (rowId) => {
-   //          if (!this.settings.editForm) return;
-
-   //          let editForm = this.application.urlResolve(this.settings.editForm);
-   //          if (!editForm) return;
-
-   //          let $form;
-   //          let $elem = $$(ids.component);
-   //          if ($elem) {
-   //             $form = $elem.getFormView();
-   //          }
-
-   //          // Open the form popup
-   //          editPageComponent.onClick().then(() => {
-   //             let dc = editForm.datacollection;
-   //             if (dc) {
-   //                dc.setCursor(rowId);
-
-   //                if (!this.__editFormDcEvent) {
-   //                   this.__editFormDcEvent = dc.on("initializedData", () => {
-   //                      dc.setCursor(rowId);
-   //                   });
-   //                }
-   //             }
-   //          });
-   //       },
-   //    };
-
-   //    var multiselect = field.settings.linkType == "many";
-
-   //    component.ui.label = field.label;
-   //    component.ui.labelWidth = settings.labelWidth;
-   //    component.ui.id = ids.component;
-   //    component.ui.view = multiselect ? "multicombo" : "combo";
-   //    component.ui.on = {
-   //       onItemClick: (id, e) => {
-   //          if (
-   //             e.target.classList.contains("editConnectedPage") &&
-   //             e.target.dataset.itemId
-   //          ) {
-   //             let rowId = e.target.dataset.itemId;
-   //             if (!rowId) return;
-   //             component.logic.goToEditPage(rowId);
-   //          }
-   //       },
-   //       onChange: (data) => {
-   //          let selectedValues;
-   //          if (Array.isArray(data)) {
-   //             selectedValues = [];
-   //             data.forEach((record) => {
-   //                let recordObj = record;
-   //                if (typeof record != "object") {
-   //                   // we need to convert either index or uuid to full data object
-   //                   recordObj = field.getItemFromVal(record);
-   //                }
-   //                if (recordObj && recordObj.id)
-   //                   selectedValues.push(recordObj.id);
-   //             });
-   //          } else {
-   //             selectedValues = data;
-   //             if (typeof data != "object") {
-   //                // we need to convert either index or uuid to full data object
-   //                selectedValues = field.getItemFromVal(data);
-   //             }
-   //             // selectedValues = field.pullRecordRelationValues(selectedValues);
-   //             if (selectedValues && selectedValues.id) {
-   //                selectedValues = selectedValues.id;
-   //             } else {
-   //                selectedValues = data;
-   //             }
-   //          }
-   //          // We can now set the new value but we need to block event listening
-   //          // so it doesn't trigger onChange again
-   //          const $$component = $$(ids.component);
-   //          if ($$component) {
-   //             $$component.blockEvent();
-   //             let prepedVals = selectedValues.join
-   //                ? selectedValues.join()
-   //                : selectedValues;
-   //             $$component.setValue(prepedVals);
-   //             $$component.unblockEvent();
-   //          }
-   //       },
-   //    };
-
-   //    component.ui.dataFieldId = field.id;
-
-   //    let editForm = "";
-   //    if (settings.editForm && settings.editForm != "") {
-   //       editForm =
-   //          '<i data-item-id="#id#" class="fa fa-cog editConnectedPage"></i>';
-   //    }
-   //    component.ui.suggest = {
-   //       button: true,
-   //       selectAll: multiselect ? true : false,
-   //       body: {
-   //          template: editForm + "#value#",
-   //       },
-   //       on: {
-   //          onShow: () => {
-   //             field.populateOptionsDataCy($$(ids.component), field, form);
-   //          },
-   //       },
-   //       // Support partial matches
-   //       filter: ({ value }, search) =>
-   //          value.toLowerCase().includes(search.toLowerCase()),
-   //    };
-
-   //    component.ui.onClick = {
-   //       customField: (id, e, trg) => {
-   //          if (this.settings.disable == 1) return;
-
-   //          var rowData = {};
-
-   //          if ($$(ids.component)) {
-   //             var node = $$(ids.component).$view;
-   //             field.customEdit(rowData, App, node);
-   //          }
-   //       },
-   //    };
-
-   //    if (addPageComponent.ui) {
-   //       // reset some component vals to make room for button
-   //       component.ui.label = "";
-   //       component.ui.labelWidth = 0;
-
-   //       // add click event to add new button
-   //       addPageComponent.ui.on = {
-   //          onItemClick: (id, evt) => {
-   //             let $form = $$(id).getFormView();
-
-   //             let dc = form.datacollection;
-
-   //             addPageComponent.onClick(dc);
-
-   //             return false;
-   //          },
-   //       };
-
-   //       component.ui = {
-   //          inputId: component.ui.id,
-   //          rows: [
-   //             {
-   //                cols: [
-   //                   {
-   //                      view: "label",
-   //                      label: field.label,
-   //                      width: settings.labelWidth,
-   //                      align: "left",
-   //                   },
-   //                   addPageComponent.ui,
-   //                   component.ui,
-   //                ],
-   //             },
-   //          ],
-   //       };
-   //    } else {
-   //       component.ui = {
-   //          inputId: component.ui.id,
-   //          rows: [component.ui],
-   //       };
-   //    }
-
-   //    component.onShow = () => {
-   //       _onShow(ids.component, this.view);
-   //       let elem = $$(ids.component);
-   //       if (!elem) return;
-
-   //       let node = elem.$view;
-
-   //       // Add data-cy attributes
-   //       const dataCy = `${field.key} ${field.columnName} ${field.id} ${this.parent.id}`;
-   //       node.setAttribute("data-cy", dataCy);
-   //    };
-
-   //    return component;
-   // }
 
    get addPageTool() {
       if (this.__addPageTool == null)
