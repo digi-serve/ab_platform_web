@@ -174,6 +174,9 @@ export default class ABViewPropertyAddPage extends ABViewProperty {
             onClearOnLoad: () => {
                return true;
             },
+            clearOnLoad: () => {
+               return true;
+            },
          },
 
          applicationLoad: (application) => {
@@ -217,6 +220,15 @@ export default class ABViewPropertyAddPage extends ABViewProperty {
                if (button) {
                   button.parent.on("saved", (savedData) => {
                      _logic?.callbacks?.onSaveData(savedData);
+                     // ? is there ever a case where we want to keep an add popup open after saving?
+                     // ! setting this to always close
+
+                     if ($$(ids.popup)) {
+                        $$(ids.popup).close();
+                     } else {
+                        var popup = this.getTopParentView();
+                        popup.close();
+                     }
                   });
                }
 
@@ -270,7 +282,8 @@ export default class ABViewPropertyAddPage extends ABViewProperty {
                   popUpComp.init({
                      onSaveData: _logic.callbacks.onSaveData,
                      onCancelClick: _logic.callbacks.onCancel,
-                     clearOnLoad: _logic.callbacks.onClearOnLoad,
+                     clearOnLoad: _logic.callbacks.clearOnLoad,
+                     onClearOnLoad: _logic.callbacks.onClearOnLoad,
                   });
 
                   popUpComp.onShow();

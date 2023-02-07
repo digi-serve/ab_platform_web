@@ -39,8 +39,9 @@ module.exports = class ABViewContainerComponent extends ABViewComponent {
    }
 
    // make sure each of our child views get .init() called
-   init(AB, parentAccessLevel = 0) {
+   init(AB, parentAccessLevel = 0, options = {}) {
       this.AB = AB;
+      this.options = options;
 
       let allInits = [];
 
@@ -67,7 +68,7 @@ module.exports = class ABViewContainerComponent extends ABViewComponent {
 
          // Initial component along with options in case there are callbacks we need to listen for
          if (parentAccessLevel > 0) {
-            allInits.push(component.init(AB, parentAccessLevel));
+            allInits.push(component.init(AB, parentAccessLevel, options));
          } else {
             $$(this.viewComponentIDs[key]).hide();
          }

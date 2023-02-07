@@ -415,7 +415,7 @@ class ABViewFormConnectComponent extends ABViewComponent {
          this.addPageComponent.init({
             onSaveData: (saveData) => this.callbackSaveData(saveData),
             onCancelClick: this.callbackCancel,
-            clearOnLoad: this.callbackClearOnLoad,
+            // clearOnLoad: this.callbackClearOnLoad, // this should clear on load by default
          });
       }
 
@@ -423,6 +423,9 @@ class ABViewFormConnectComponent extends ABViewComponent {
          this.editPageComponent.applicationLoad(this.view.application);
          this.editPageComponent.init({
             onSaveData: (saveData) => this.callbackSaveData(saveData),
+            clearOnLoad: () => {
+               return false;
+            },
             onCancelClick: this.callbackCancel,
          });
       }
@@ -437,8 +440,9 @@ class ABViewFormConnectComponent extends ABViewComponent {
       const ids = this.ids;
 
       // find the select component
-      const elem = $$(ids.component);
+      const elem = $$(ids?.component);
       if (!elem) return;
+      // ! ids.component is often not defined
 
       const field = this.field;
       field.once("option.data", (data) => {
@@ -900,7 +904,7 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
                      }
                   });
 
-                  // only add optinos that have a fieldToCheck
+                  // only add options that have a fieldToCheck
                   if (fieldToCheck) {
                      // get the component we are referencing so we can display its label
                      let formComponent = view.parent.viewComponents[element.id]; // need to ensure that just looking at parent is okay in all cases
