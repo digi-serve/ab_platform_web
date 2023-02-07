@@ -267,12 +267,13 @@ class ABViewFormConnectComponent extends ABViewComponent {
                if (Array.isArray(data)) {
                   selectedValues = [];
                   data.forEach((record) => {
-                     let recordObj = record;
-                     if (typeof record != "object") {
-                        // we need to convert either index or uuid to full data object
-                        recordObj = field.getItemFromVal(record);
-                     }
-                     if (recordObj?.id) selectedValues.push(recordObj.id);
+                     selectedValues.push(record.id || record);
+                     // let recordObj = record;
+                     // if (typeof record != "object") {
+                     //    // we need to convert either index or uuid to full data object
+                     //    recordObj = field.getItemFromVal(record);
+                     // }
+                     // if (recordObj?.id) selectedValues.push(recordObj.id);
                   });
                } else {
                   selectedValues = data;
