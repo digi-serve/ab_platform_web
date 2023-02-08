@@ -39,7 +39,7 @@
     "webpack-merge": "^5.8.0"
   },
   "dependencies": {
-    "ab-utils": "github:digi-serve/ab-utils",
+    "ab-utils": "npm:@digiserve/ab-utils@^1.2.1",
     "atomicjs": "^4.4.1",
     "bootstrap": "^4.6.0",
     "chai": "^4.3.7",
