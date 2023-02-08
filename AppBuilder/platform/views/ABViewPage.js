@@ -424,7 +424,7 @@ module.exports = class ABViewPage extends ABViewPageCore {
             ui: component.ui(),
             init: (options, accessLevel) => {
                accessLevel = accessLevel ?? this.getUserAccess();
-               return newComponent.init(this.AB, accessLevel);
+               return newComponent.init(this.AB, accessLevel, options);
             },
             onShow: (...params) => {
                return newComponent.onShow?.(...params);

@@ -48,10 +48,14 @@ export default class ABViewPropertyEditPage extends ABViewPropertyAddPage {
             onSave: function () {
                console.warn("NO onSave()!");
             },
+            clearOnLoad: () => {
+               return false; // always false, we're trying to edit data
+            },
          },
 
          setSettings: (view, settings = {}) => {
             if (view == null) return;
+            settings.clearOnLoad = false; // doesn't work
 
             // Set the options of the possible edit forms
             let editForms = [

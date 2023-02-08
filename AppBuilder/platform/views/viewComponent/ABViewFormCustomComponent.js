@@ -108,7 +108,7 @@ module.exports = class ABViewFormCustomComponent extends (
 
                   let rowData = {};
 
-                  const formView = this.view.parentFormComponent();
+                  const formView = this?.parentFormComponent() || this.view?.parentFormComponent();
                   if (formView) {
                      const dv = formView.datacollection;
                      if (dv) rowData = dv.getCursor() || {};
