@@ -141,8 +141,8 @@ module.exports = class ABViewConditionalContainer extends (
    // }
 
    async save() {
-      const viewIf = this.views()[0];
-      const viewElse = this.views()[1];
+      const viewIf = this.views().find((v) => v.name === "If");
+      const viewElse = this.views().find((v) => v.name === "Else");
       const pendingSave = [];
 
       if (viewIf) pendingSave.push(viewIf.save());
