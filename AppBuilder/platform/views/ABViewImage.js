@@ -174,45 +174,4 @@ module.exports = class ABViewImage extends ABViewImageCore {
 
       return component;
    }
-
-   // componentOld(App) {
-   //    var idBase = `ABViewImage_${this.id}`;
-   //    var ids = {
-   //       component: App.unique(`${idBase}_component`),
-   //    };
-
-   //    // an ABViewLabel is a simple Label
-   //    var _ui = {
-   //       cols: [
-   //          {
-   //             id: ids.component,
-   //             view: "template",
-   //             template: "",
-   //             height: this.settings.height,
-   //             width: this.settings.width,
-   //          },
-   //          {},
-   //       ],
-   //    };
-
-   //    make sure each of our child views get .init() called
-   //    var _init = (options) => {
-   //       if (!$$(ids.component)) return;
-
-   //       if (this.settings.filename) {
-   //          let imgTag = `<img src="/file/${this.settings.filename}" height="${this.settings.height}" width="${this.settings.width}">`;
-
-   //          $$(ids.component).define("template", imgTag);
-   //       } else {
-   //          $$(ids.component).define("template", "");
-   //       }
-
-   //       $$(ids.component).refresh();
-   //    };
-
-   //    return {
-   //       ui: _ui,
-   //       init: _init,
-   //    };
-   // }
 };

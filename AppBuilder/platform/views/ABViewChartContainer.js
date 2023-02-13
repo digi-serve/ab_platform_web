@@ -53,6 +53,4 @@ module.exports = class ABViewChartContainer extends ABViewWidget {
    get datacollection() {
       return this.parent.datacollection;
    }
-
-   componentOld() {}
 };

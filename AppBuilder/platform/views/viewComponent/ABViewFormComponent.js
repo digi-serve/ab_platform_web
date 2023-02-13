@@ -134,6 +134,11 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
    }
 
    initCallbacks(options = {}) {
+      // ? We need to determine from these options whether to clear on load?
+      if (options?.clearOnLoad) {
+         // does this need to be a function?
+         this.view.settings.clearOnLoad = options.clearOnLoad();
+      }
       // Q: Should we use emit the event instead ?
       const baseView = this.view;
 

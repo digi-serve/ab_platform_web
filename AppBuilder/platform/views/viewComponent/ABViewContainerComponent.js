@@ -4,6 +4,8 @@ module.exports = class ABViewContainerComponent extends ABViewComponent {
    constructor(baseView, idBase, ids) {
       super(baseView, idBase || `ABViewContainer_${baseView.id}`, ids);
 
+      this.options = null;
+
       this.viewComponents = {
          /* view.id : {viewComponent} */
       };
@@ -33,8 +35,10 @@ module.exports = class ABViewContainerComponent extends ABViewComponent {
    }
 
    // make sure each of our child views get .init() called
-   async init(AB, accessLevel = 0) {
+   async init(AB, accessLevel = 0, options = {}) {
       await super.init(AB);
+
+      this.options = options;
 
       const allInits = [];
 
@@ -64,7 +68,7 @@ module.exports = class ABViewContainerComponent extends ABViewComponent {
 
          // Initial component along with options in case there are callbacks we need to listen for
          if (accessLevel) {
-            allInits.push(viewComponents[key].init(AB, accessLevel));
+            allInits.push(viewComponents[key].init(AB, accessLevel, options));
 
             continue;
          }

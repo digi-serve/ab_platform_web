@@ -1,4 +1,5 @@
 import ABViewProperty from "./ABViewProperty";
+import ABViewFormButton from "../ABViewFormButton";
 
 let L = (...params) => AB.Multilingual.label(...params);
 
@@ -173,6 +174,9 @@ export default class ABViewPropertyAddPage extends ABViewProperty {
             onClearOnLoad: () => {
                return true;
             },
+            clearOnLoad: () => {
+               return true;
+            },
          },
 
          applicationLoad: (application) => {
@@ -207,6 +211,26 @@ export default class ABViewPropertyAddPage extends ABViewProperty {
                // pageClone.id = pageClone.id + "-" + webix.uid(); // lets take the stored id can create a new dynamic one so our views don't duplicate
                let popUpComp = pageClone.component(App);
                let ui = popUpComp.ui;
+
+               // Listen 'saved' event of the form widget
+               const button = pageClone.views(
+                  (v) => v instanceof ABViewFormButton,
+                  true
+               )[0];
+               if (button) {
+                  button.parent.on("saved", (savedData) => {
+                     _logic?.callbacks?.onSaveData(savedData);
+                     // ? is there ever a case where we want to keep an add popup open after saving?
+                     // ! setting this to always close
+
+                     if ($$(ids.popup)) {
+                        $$(ids.popup).close();
+                     } else {
+                        var popup = this.getTopParentView();
+                        popup.close();
+                     }
+                  });
+               }
 
                let popupTemplate = {
                   view: "window",
@@ -258,7 +282,8 @@ export default class ABViewPropertyAddPage extends ABViewProperty {
                   popUpComp.init({
                      onSaveData: _logic.callbacks.onSaveData,
                      onCancelClick: _logic.callbacks.onCancel,
-                     clearOnLoad: _logic.callbacks.onClearOnLoad,
+                     clearOnLoad: _logic.callbacks.clearOnLoad,
+                     onClearOnLoad: _logic.callbacks.onClearOnLoad,
                   });
 
                   popUpComp.onShow();

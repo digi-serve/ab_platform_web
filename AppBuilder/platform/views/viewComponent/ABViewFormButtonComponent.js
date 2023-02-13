@@ -34,7 +34,7 @@ module.exports = class ABViewFormButton extends ABViewFormItemComponent {
                autowidth: true,
                value: settings.cancelLabel || this.label("Cancel"),
                click: function () {
-                    self.onCancel(this);
+                  self.onCancel(this);
                },
                on: {
                   onAfterRender: function () {
@@ -42,11 +42,11 @@ module.exports = class ABViewFormButton extends ABViewFormItemComponent {
                         "data-cy",
                         `button cancel ${form.id}`
                      );
-                  },
-               },
+                  }
+               }
             },
             {
-               width: 10,
+               width: 10
             }
          );
       }
@@ -59,7 +59,7 @@ module.exports = class ABViewFormButton extends ABViewFormItemComponent {
                autowidth: true,
                value: settings.resetLabel || this.label("Reset"),
                click: function () {
-                    self.onClear(this);
+                  self.onClear(this);
                },
                on: {
                   onAfterRender: function () {
@@ -67,11 +67,11 @@ module.exports = class ABViewFormButton extends ABViewFormItemComponent {
                         "data-cy",
                         `button reset ${form.id}`
                      );
-                  },
-               },
+                  }
+               }
             },
             {
-               width: 10,
+               width: 10
             }
          );
       }
@@ -93,8 +93,8 @@ module.exports = class ABViewFormButton extends ABViewFormItemComponent {
                      "data-cy",
                      `button save ${form.id}`
                   );
-               },
-            },
+               }
+            }
          });
       }
 

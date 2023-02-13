@@ -1,7 +1,4 @@
 const ABViewLabelCore = require("../../core/views/ABViewLabelCore");
-
-const ABViewLabelPropertyComponentDefaults = ABViewLabelCore.defaultValues();
-
 const ABViewLabelComponent = require("./viewComponent/ABViewLabelComponent");
 
 module.exports = class ABViewLabel extends ABViewLabelCore {
@@ -35,6 +32,4 @@ module.exports = class ABViewLabel extends ABViewLabelCore {
 
       return component;
    }
-
-   componentOld() {}
 };

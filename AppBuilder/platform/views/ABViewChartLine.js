@@ -1,8 +1,6 @@
 const ABViewChartLineCore = require("../../core/views/ABViewChartLineCore");
 const ABViewChartLineComponent = require("./viewComponent/ABViewChartLineComponent");
 
-let L = (...params) => AB.Multilingual.label(...params);
-
 module.exports = class ABViewChartLine extends ABViewChartLineCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);

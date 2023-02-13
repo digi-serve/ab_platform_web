@@ -1,8 +1,6 @@
 const ABViewChartAreaCore = require("../../core/views/ABViewChartAreaCore");
 const ABViewChartAreaComponent = require("./viewComponent/ABViewChartAreaComponent");
 
-let L = (...params) => AB.Multilingual.label(...params);
-
 module.exports = class ABViewChartArea extends ABViewChartAreaCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -34,6 +32,4 @@ module.exports = class ABViewChartArea extends ABViewChartAreaCore {
 
       return component;
    }
-
-   componentOld() {}
 };

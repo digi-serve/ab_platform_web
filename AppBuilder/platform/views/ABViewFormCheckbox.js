@@ -28,21 +28,4 @@ module.exports = class ABViewFormCheckbox extends ABViewFormCheckboxCore {
 
       return component;
    }
-
-   componentOld(App) {
-      // var component = super.component(App);
-
-      // var idBase = this.parentFormUniqueID(`ABViewFormCheckbox_${this.id}_f_`);
-      // var ids = {
-      //    component: App.unique(`${idBase}_component`),
-      // };
-
-      // component.ui.id = ids.component;
-      // component.ui.view = "checkbox";
-
-      // // make sure each of our child views get .init() called
-      // component.init = (options) => {};
-
-      // return component;
-   }
 };
