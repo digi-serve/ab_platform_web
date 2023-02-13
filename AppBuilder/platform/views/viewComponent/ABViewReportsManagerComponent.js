@@ -459,21 +459,6 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
 
                      return result;
                   }
-
-                  async getOptions(fields) {
-                     // TODO
-                     // [
-                     //    {"id":"1","value":"South"},
-                     //    {"id":"2","value":"North"},
-                     //    // other options
-                     //  ]
-                     return [];
-                  }
-
-                  async getFieldData(fieldId) {
-                     // TODO
-                     return [];
-                  }
                },
             ],
             [
@@ -518,12 +503,6 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
       delete _ui.type;
 
       return _ui;
-   }
-
-   async init(AB) {
-      AB.componentId = AB.componentId || this.ids.component;
-
-      await super.init(AB);
    }
 
    getReportFields(dc) {

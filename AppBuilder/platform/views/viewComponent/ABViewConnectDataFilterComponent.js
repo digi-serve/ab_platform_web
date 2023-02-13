@@ -60,6 +60,8 @@ export default class ABViewConnectDataFilterComponent extends ABViewComponent {
    }
 
    async init(AB) {
+      await super.init(AB);
+
       const dv = this.datacollection;
 
       if (!dv) return;

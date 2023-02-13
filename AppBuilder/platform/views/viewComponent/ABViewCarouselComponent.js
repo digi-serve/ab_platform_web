@@ -5,14 +5,20 @@ export default class ABViewCarouselComponent extends ABViewComponent {
       super(
          baseView,
          idBase || `ABViewCarousel_${baseView.id}`,
-         Object.assign({
-            carousel: "",
-         }),
-         ids
+         Object.assign(
+            {
+               carousel: "",
+            },
+            ids
+         )
       );
 
       this._handler_doOnShow = () => {
          this.onShow();
+      };
+
+      this._handler_doReload = () => {
+         this.datacollection?.reloadData();
       };
 
       this._handler_doFilter = (fnFilter, filterRules) => {
@@ -20,6 +26,8 @@ export default class ABViewCarouselComponent extends ABViewComponent {
 
          // this.onShow(filterRules);
          const dv = this.datacollection;
+
+         if (!dv) return;
 
          dv.filterCondition(filterRules);
          dv.reloadData();
@@ -93,25 +101,31 @@ export default class ABViewCarouselComponent extends ABViewComponent {
    }
 
    // make sure each of our child views get .init() called
-   async init(AB, accessLevel = 0) {
+   async init(AB) {
       await super.init(AB);
 
       const dv = this.datacollection;
 
-      if (!dv) return;
+      if (!dv) {
+         AB.notify.builder(`Datacollection is ${dv}`, {
+            message: "This is an invalid datacollection",
+         });
+
+         return;
+      }
 
       const object = dv.datasource;
 
-      if (!object) return;
+      if (!object) {
+         AB.notify.developer(`Object is ${dv}`, {
+            message: "This is an invalid object",
+         });
+
+         return;
+      }
 
       dv.removeListener("loadData", this._handler_doOnShow);
       dv.on("loadData", this._handler_doOnShow);
-
-      if (!this._handler_doReload) {
-         this._handler_doReload = () => {
-            dv.reloadData();
-         };
-      }
 
       dv.removeListener("update", this._handler_doReload);
       dv.on("update", this._handler_doReload);
@@ -140,7 +154,7 @@ export default class ABViewCarouselComponent extends ABViewComponent {
       baseView.filterHelper.viewLoad(this);
 
       this.filterUI.init(this.AB);
-      this.filterUI.removeListener("filter.data", this._handler_doOnShow);
+      this.filterUI.removeListener("filter.data", this._handler_doFilter);
       this.filterUI.on("filter.data", this._handler_doFilter);
 
       // link page helper

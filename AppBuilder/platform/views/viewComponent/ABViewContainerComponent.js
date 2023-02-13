@@ -60,11 +60,8 @@ module.exports = class ABViewContainerComponent extends ABViewComponent {
          if (
             !viewComponents[key] ??
             !this.view.views((v) => v.id === key).length
-         ) {
-            !viewComponents[key];
-
+         )
             continue;
-         }
 
          // Initial component along with options in case there are callbacks we need to listen for
          if (accessLevel) {

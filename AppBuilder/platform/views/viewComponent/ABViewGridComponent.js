@@ -33,6 +33,14 @@ export default class ABViewGridComponent extends ABViewComponent {
          this.callbackFilterData(fnFilter, filterRules); // be notified when there is a change in the filter
       };
 
+      this.handler_select = (...params) => {
+         this.selectRow(...params);
+      };
+      // {fn} .handler_select
+      // the callback fn for our selectRow()
+      // We want this called when the .datacollection we are linked to
+      // emits an "onChange" event.
+
       this.detatch();
       baseView.filterHelper.on("filter.data", this._handler_filterData);
 
@@ -120,14 +128,6 @@ export default class ABViewGridComponent extends ABViewComponent {
       // // The webix.$node where the ABField Header is that our PopupHeader
       // // should be displayed at.
 
-      this.handler_select = (...params) => {
-         this.selectRow(...params);
-      };
-      // {fn} .handler_select
-      // the callback fn for our selectRow()
-      // We want this called when the .datacollection we are linked to
-      // emits an "onChange" event.
-
       this.ignoreLocalSettings = false;
       // {bool}
       // should we ignore our local settings in our current context?
@@ -153,6 +153,7 @@ export default class ABViewGridComponent extends ABViewComponent {
          "filter.data",
          this._handler_filterData
       );
+      this.datacollection?.removeListener("changeCursor", this.handler_select);
    }
 
    /**
@@ -240,12 +241,7 @@ export default class ABViewGridComponent extends ABViewComponent {
                      }),
                      rowData = this.getItem(data.row);
 
-                  console.error("TODO: field.customEdit() remove App param!");
-                  return selectField.customEdit(
-                     rowData,
-                     self.AB._App,
-                     cellNode
-                  );
+                  return selectField.customEdit(rowData, null, cellNode);
                } else if (!settings.detailsPage && !settings.editPage)
                   return false;
             },
@@ -381,18 +377,14 @@ export default class ABViewGridComponent extends ABViewComponent {
                // before we saved the row height in the record.
                // this.onRowResize(rowId);
             },
-            onBeforeColumnDrag: (sourceId, event) => {
-               if (this.skippableColumns.indexOf(sourceId) != -1) return false;
-               else return true;
-            },
-            onBeforeColumnDrop: (sourceId, targetId, event) => {
+            onBeforeColumnDrag: (sourceId, event) =>
+               !(this.skippableColumns.indexOf(sourceId) !== -1),
+            onBeforeColumnDrop: (sourceId, targetId, event) =>
                // Make sure we are not trying to drop onto one of our special
                // columns ...
-               if (this.skippableColumns.indexOf(targetId) != -1) return false;
-            },
-            onAfterColumnDrop: (sourceId, targetId, event) => {
-               this.onAfterColumnDrop(sourceId, targetId, event);
-            },
+               !(this.skippableColumns.indexOf(targetId) !== -1),
+            onAfterColumnDrop: (sourceId, targetId, event) =>
+               this.onAfterColumnDrop(sourceId, targetId, event),
             // onAfterColumnShow: function (id) {
             //    // console.warn("!! ToDo: onAfterColumnShow()");
             //    // $$(self.webixUiId.visibleFieldsPopup).showField(id);
@@ -860,11 +852,7 @@ export default class ABViewGridComponent extends ABViewComponent {
       if ($ButtonFilter) {
          const onlyFilterRules = this.view.filterHelper.filterRules();
 
-         let badge = null;
-
-         if (onlyFilterRules?.rules?.length) badge = 1;
-
-         $ButtonFilter.define("badge", badge);
+         $ButtonFilter.define("badge", onlyFilterRules?.rules?.length ?? 0);
          $ButtonFilter.refresh();
       }
 
@@ -919,7 +907,6 @@ export default class ABViewGridComponent extends ABViewComponent {
       if (dv) dv.setCursor(rowId);
 
       // Pass settings to link page module
-      // console.error("!!!! TODO: implement linkPageHelper() !!!!");
       if (this.linkPage) this.linkPage.changePage(page, rowId);
 
       super.changePage(page);
@@ -1528,7 +1515,7 @@ export default class ABViewGridComponent extends ABViewComponent {
 
          ab.Webix.message({
             type: "info",
-            text: ab.Multilingual.label("minimum column width is {0}", [30]),
+            text: this.label("minimum column width is {0}", [30]),
             expire: 1000,
          });
       }
@@ -1548,7 +1535,7 @@ export default class ABViewGridComponent extends ABViewComponent {
       this.localSettings(localSettings);
 
       if (this.settings.saveLocal) {
-         this.localSettingsSave();
+         await this.localSettingsSave();
          // for (const item in GridSettings) {
          //    GridSettings[item].forEach((item) => {
          //       // we cannot include field info because of the cicular structure
@@ -1651,8 +1638,10 @@ export default class ABViewGridComponent extends ABViewComponent {
       let rowHeight = 0;
 
       CurrentObject.imageFields().forEach((image) => {
-         if (image.settings.useHeight && image.settings.imageHeight > rowHeight)
-            rowHeight = image.settings.imageHeight;
+         const settings = image.getSettings();
+
+         if (settings.useHeight && settings.imageHeight > rowHeight)
+            rowHeight = settings.imageHeight;
       });
 
       if (rowHeight) $DataTable.define("rowHeight", rowHeight);

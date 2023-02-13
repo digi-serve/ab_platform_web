@@ -1,7 +1,5 @@
 const ABViewComponent = require("./ABViewComponent").default;
 
-const L = (...params) => AB.Multilingual.label(...params);
-
 module.exports = class ABViewTabComponent extends ABViewComponent {
    constructor(baseView, idBase, ids) {
       // get a UI component for each of our child views
@@ -540,7 +538,7 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
             setTimeout(() => {
                // $$(v.view.id).adjust();
 
-               if ($tab?.hideProgress) $tab.hideProgress();
+               $tab?.hideProgress?.();
             }, 10);
          }
 

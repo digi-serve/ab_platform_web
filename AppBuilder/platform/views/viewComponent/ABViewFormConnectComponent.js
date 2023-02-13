@@ -498,12 +498,9 @@ module.exports = class ABViewFormConnectComponent extends (
             $node.define("disabled", true);
             $node.define(
                "placeholder",
-               this.label(
-                  `Must select item from ${parentFields
-                     .map((e, i) => `'{${i}}'`)
-                     .join(", ")} first.`,
-                  parentFields.map((e) => e.label)
-               )
+               this.label(`Must select item from '{0}' first.`, [
+                  parentFields.map((e) => e.label).join(", "),
+               ])
             );
          } else {
             $node.define("disabled", false);

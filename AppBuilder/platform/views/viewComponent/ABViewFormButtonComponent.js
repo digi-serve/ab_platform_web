@@ -1,6 +1,4 @@
-/* eslint-disable prettier/prettier */
 const ABViewFormItemComponent = require("./ABViewFormItemComponent");
-
 
 module.exports = class ABViewFormButton extends ABViewFormItemComponent {
    constructor(baseView, idBase, ids) {
@@ -14,8 +12,7 @@ module.exports = class ABViewFormButton extends ABViewFormItemComponent {
       const settings = baseView.settings ?? {};
 
       const alignment =
-         settings.alignment ||
-         baseView.constructor.defaultValues().alignment;
+         settings.alignment || baseView.constructor.defaultValues().alignment;
 
       const _ui = {
          cols: [],
@@ -42,11 +39,11 @@ module.exports = class ABViewFormButton extends ABViewFormItemComponent {
                         "data-cy",
                         `button cancel ${form.id}`
                      );
-                  }
-               }
+                  },
+               },
             },
             {
-               width: 10
+               width: 10,
             }
          );
       }
@@ -67,11 +64,11 @@ module.exports = class ABViewFormButton extends ABViewFormItemComponent {
                         "data-cy",
                         `button reset ${form.id}`
                      );
-                  }
-               }
+                  },
+               },
             },
             {
-               width: 10
+               width: 10,
             }
          );
       }
@@ -93,14 +90,13 @@ module.exports = class ABViewFormButton extends ABViewFormItemComponent {
                      "data-cy",
                      `button save ${form.id}`
                   );
-               }
-            }
+               },
+            },
          });
       }
 
       // spacer
-      if (alignment === "center" || alignment === "left")
-         _ui.cols.push({});
+      if (alignment === "center" || alignment === "left") _ui.cols.push({});
 
       return super.ui(_ui);
    }

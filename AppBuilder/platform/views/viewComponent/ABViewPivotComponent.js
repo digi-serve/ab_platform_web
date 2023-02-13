@@ -45,8 +45,6 @@ module.exports = class ABViewPivotComponent extends ABViewComponent {
 
       const ids = this.ids;
 
-      AB.componentId = AB.componentId || ids.component;
-
       const dc = this.datacollection;
 
       if (!dc) return;

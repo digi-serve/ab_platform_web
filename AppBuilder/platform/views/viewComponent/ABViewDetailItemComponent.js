@@ -65,9 +65,9 @@ module.exports = class ABViewDetailItemComponent extends ABViewComponent {
       return _ui;
    }
 
-   async init(AB) {
-      await super.init(AB);
-   }
+   // async init(AB) {
+   //    await super.init(AB);
+   // }
 
    setValue(val, detailId) {
       const $detailItem = $$(detailId ?? this.ids.detailItem);

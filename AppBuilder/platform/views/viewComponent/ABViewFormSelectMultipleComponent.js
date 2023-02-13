@@ -36,10 +36,9 @@ module.exports = class ABViewFormSelectMultipleComponentComponent extends (
             _ui.css = "hideWebixMulticomboTag";
             _ui.tagTemplate = (values) => {
                const selectedOptions = [];
+               const $formItem = $$(ids.formItem) ?? $$(_ui.id);
 
                values.forEach((val) => {
-                  const $formItem = $$(ids.formItem) ?? $$(_ui.id);
-
                   selectedOptions.push($formItem.getList().getItem(val));
                });
 

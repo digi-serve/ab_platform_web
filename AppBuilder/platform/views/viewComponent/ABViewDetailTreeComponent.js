@@ -11,10 +11,6 @@ module.exports = class ABViewDetailTreeComponent extends (
       return "ab-detail-tree";
    }
 
-   ui() {
-      return super.ui();
-   }
-
    async init(AB) {
       await super.init(AB);
 

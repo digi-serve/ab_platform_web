@@ -98,8 +98,4 @@ module.exports = class ABViewFormItemComponent extends ABViewComponent {
 
       return _ui;
    }
-
-   async init(AB) {
-      await super.init(AB);
-   }
 };

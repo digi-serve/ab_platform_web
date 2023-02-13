@@ -36,10 +36,6 @@ module.exports = class ABViewTextComponent extends ABViewComponent {
       return _ui;
    }
 
-   async init(AB) {
-      await super.init(AB);
-   }
-
    displayText(value) {
       const ids = this.ids;
       const result = this.view.displayText(value, ids.text);

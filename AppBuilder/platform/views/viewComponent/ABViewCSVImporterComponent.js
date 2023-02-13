@@ -763,19 +763,17 @@ module.exports = class ABViewCSVImporterComponent extends ABViewComponent {
 
          // Add connected field options
          if (f.isConnection) {
-            const linkFieldOptions = [];
+            let linkFieldOptions = [];
 
             if (f.datasourceLink) {
-               linkFieldOptions.push(
-                  ...f.datasourceLink
-                     .fields((fld) => !fld.isConnection)
-                     .map((fld) => {
-                        return {
-                           id: fld.id,
-                           value: fld.label,
-                        };
-                     })
-               );
+               linkFieldOptions = f.datasourceLink
+                  .fields((fld) => !fld.isConnection)
+                  .map((fld) => {
+                     return {
+                        id: fld.id,
+                        value: fld.label,
+                     };
+                  });
             }
 
             columnOptUI = {

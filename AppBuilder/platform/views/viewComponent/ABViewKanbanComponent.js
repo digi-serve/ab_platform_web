@@ -148,7 +148,7 @@ module.exports = class ABViewKanbanComponent extends ABViewComponent {
    }
 
    get $kb() {
-      return (this._kb = this._kb = $$(this.ids.kanban));
+      return (this._kb = this._kb || $$(this.ids.kanban));
    }
 
    kanbanListTemplate() {
@@ -447,8 +447,6 @@ module.exports = class ABViewKanbanComponent extends ABViewComponent {
             rowId,
             patch,
          });
-
-         this.ready();
       }
    }
 

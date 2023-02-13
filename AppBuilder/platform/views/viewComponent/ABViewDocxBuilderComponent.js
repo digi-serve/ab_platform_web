@@ -207,7 +207,7 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
       const isDcLabelAdded = datacollections.length > 1;
 
       datacollections
-         .filter((dc) => dc.datasource)
+         .filter((dc) => dc?.datasource)
          .forEach((dc) => {
             const obj = dc.datasource;
             const dcCursor = dc.getCursor();

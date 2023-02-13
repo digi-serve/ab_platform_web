@@ -173,7 +173,7 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
             if ($form) {
                $form.disable();
 
-               if ($form.showProgress) $form.showProgress({ type: "icon" });
+               $form.showProgress?.({ type: "icon" });
             }
          },
       });
@@ -187,7 +187,7 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
             if ($form) {
                $form.enable();
 
-               if ($form.hideProgress) $form.hideProgress();
+               $form.hideProgress?.();
             }
          },
       });
