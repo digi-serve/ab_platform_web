@@ -16,7 +16,7 @@ module.exports = class ABViewFormButton extends ABViewComponent {
       const self = this;
       const _ui = {
          id: this.ids.component,
-         cols: [],
+         cols: []
       };
 
       const form = this.view.parentFormComponent();
@@ -39,7 +39,7 @@ module.exports = class ABViewFormButton extends ABViewComponent {
                autowidth: true,
                value: settings.cancelLabel || L("Cancel"),
                click: function () {
-                    self.onCancel(this);
+                  self.onCancel(this);
                },
                on: {
                   onAfterRender: function () {
@@ -47,11 +47,11 @@ module.exports = class ABViewFormButton extends ABViewComponent {
                         "data-cy",
                         `button cancel ${form.id}`
                      );
-                  },
-               },
+                  }
+               }
             },
             {
-               width: 10,
+               width: 10
             }
          );
       }
@@ -64,7 +64,7 @@ module.exports = class ABViewFormButton extends ABViewComponent {
                autowidth: true,
                value: settings.resetLabel || L("Reset"),
                click: function () {
-                    self.onClear(this);
+                  self.onClear(this);
                },
                on: {
                   onAfterRender: function () {
@@ -72,11 +72,11 @@ module.exports = class ABViewFormButton extends ABViewComponent {
                         "data-cy",
                         `button reset ${form.id}`
                      );
-                  },
-               },
+                  }
+               }
             },
             {
-               width: 10,
+               width: 10
             }
          );
       }
@@ -98,8 +98,8 @@ module.exports = class ABViewFormButton extends ABViewComponent {
                      "data-cy",
                      `button save ${form.id}`
                   );
-               },
-            },
+               }
+            }
          });
       }
 

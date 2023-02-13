@@ -48,10 +48,14 @@ export default class ABViewPropertyEditPage extends ABViewPropertyAddPage {
             onSave: function () {
                console.warn("NO onSave()!");
             },
+            clearOnLoad: () => {
+               return false; // always false, we're trying to edit data
+            },
          },
 
          setSettings: (view, settings = {}) => {
             if (view == null) return;
+            settings.clearOnLoad = false; // doesn't work
 
             // Set the options of the possible edit forms
             let editForms = [
@@ -124,8 +128,16 @@ export default class ABViewPropertyEditPage extends ABViewPropertyAddPage {
    }
 
    component(App, idBase) {
-      idBase = `${idBase}_popup_edit_form`;
+      // Overwrite the popup-lookup function
+      function getIds(idBase, App) {
+         return {
+            popup: App._App.unique(`${idBase}_popup_edit_form`),
+            field: idBase.split("_")[1],
+         };
+      }
+      this.getIds = getIds;
 
+      // call to addpage
       let comp = super.component(App, idBase);
 
       comp.onClick = () => {

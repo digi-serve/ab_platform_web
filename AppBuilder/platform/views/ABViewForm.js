@@ -1483,6 +1483,23 @@ module.exports = class ABViewForm extends ABViewFormCore {
       // show progress icon
       $formView.showProgress?.({ type: "icon" });
 
+      let newFormVals;
+      // {obj}
+      // The fully populated values returned back from service call
+      // We use this in our post processing Rules
+
+      try {
+         // is this an update or create?
+         if (formVals.id) {
+            newFormVals = await model.update(formVals.id, formVals);
+         } else {
+            newFormVals = await model.create(formVals);
+         }
+      } catch (err) {
+         formError(err.data);
+         throw err;
+      }
+
       // form ready function
       const formReady = (newFormVals) => {
          // clear cursor after saving.
@@ -1539,23 +1556,6 @@ module.exports = class ABViewForm extends ABViewFormCore {
 
          $formView?.hideProgress?.();
       };
-
-      let newFormVals;
-      // {obj}
-      // The fully populated values returned back from service call
-      // We use this in our post processing Rules
-
-      try {
-         // is this an update or create?
-         if (formVals.id) {
-            newFormVals = await model.update(formVals.id, formVals);
-         } else {
-            newFormVals = await model.create(formVals);
-         }
-      } catch (err) {
-         formError(err.data);
-         throw err;
-      }
 
       try {
          await this.doRecordRules(newFormVals);
