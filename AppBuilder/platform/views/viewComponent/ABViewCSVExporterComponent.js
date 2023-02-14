@@ -75,11 +75,6 @@ module.exports = class ABViewCSVExporterComponent extends ABViewComponent {
          if (dc) {
             const obj = dc.datasource;
 
-            if (!obj)
-               AB.notify.developer(Error(`Object is ${obj}`), {
-                  message: "This is an invalid object",
-               });
-
             clientFilter.fieldsLoad(obj?.fields?.() ?? []);
          }
 
