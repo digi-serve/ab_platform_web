@@ -29,6 +29,4 @@ module.exports = class ABViewText extends ABViewTextCore {
 
       return component;
    }
-
-   componentOld() {}
 };

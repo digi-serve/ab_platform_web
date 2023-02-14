@@ -1,93 +1,84 @@
-const ABViewCSVImporterCore = require("../../../core/views/ABViewCSVImporterCore");
-const ClassUI = require("../../../../ui/ClassUI").default;
+const ABViewComponent = require("./ABViewComponent").default;
 const CSVImporter = require("../../CSVImporter");
 
-const ABViewCSVImporterPropertyComponentDefaults =
-   ABViewCSVImporterCore.defaultValues();
+module.exports = class ABViewCSVImporterComponent extends ABViewComponent {
+   constructor(baseView, idBase, ids) {
+      super(
+         baseView,
+         idBase || `ABCSVImporter_${baseView.id}`,
+         Object.assign(
+            {
+               button: "",
+               popup: "",
 
-module.exports = class ABViewCSVImporterComponent extends ClassUI {
-   constructor(viewCSVImporter, idBase) {
-      idBase = idBase || `ABCSVImporter_${viewCSVImporter.id}`;
+               form: "",
+               uploader: "",
+               uploadFileList: "",
+               separatedBy: "",
+               headerOnFirstLine: "",
+               columnList: "",
 
-      super(idBase, {
-         button: "",
-         popup: "",
+               search: "",
+               datatable: "",
 
-         form: "",
-         uploader: "",
-         uploadFileList: "",
-         separatedBy: "",
-         headerOnFirstLine: "",
-         columnList: "",
+               statusMessage: "",
+               progressBar: "",
 
-         search: "",
-         datatable: "",
-
-         statusMessage: "",
-         progressBar: "",
-
-         importButton: "",
-         rules: "",
-      });
-
-      this.view = viewCSVImporter;
-      // {ABViewCSVImporter}
-      // The ABView that has created this CSVImporter.
-
-      this.settings = this.view.settings;
-      // {json}
-      // a local copy of the settings for our ABView
+               importButton: "",
+               rules: "",
+            },
+            ids
+         )
+      );
 
       this.csvImporter = new CSVImporter((...args) => this.label(...args));
       // {CSVImporter}
       // An instance of the object that imports the CSV data.
 
-      this._dataRows = null;
-
-      this.CurrentObjectID = null;
-      // {string}
-      // the ABObject.id of the object we are working with.
-
-      this._csvFileInfo = null;
-
       this.validationError = false;
+
+      this._dataRows = null;
+      this._csvFileInfo = null;
    }
 
    ui() {
-      return {
-         // TODO: We have to refactor becuase we need "id" on the very top level for each viewComponent.
-         id: `${this.ids.component}_temp`,
-         cols: [
-            {
-               view: "button",
-               css: "webix_primary",
-               type: "icon",
-               icon: "fa fa-upload",
-               label: this.label(
-                  this.settings.buttonLabel ||
-                     ABViewCSVImporterPropertyComponentDefaults.buttonLabel
-               ),
-               width:
-                  this.settings.width ||
-                  ABViewCSVImporterPropertyComponentDefaults.width,
-               click: () => {
-                  this.showPopup();
+      const settings = this.settings;
+      const defaultSettings = this.view.constructor.defaultValues();
+      const _ui = super.ui([
+         {
+            cols: [
+               {
+                  view: "button",
+                  css: "webix_primary",
+                  type: "icon",
+                  icon: "fa fa-upload",
+                  label: this.label(
+                     settings.buttonLabel || defaultSettings.buttonLabel
+                  ),
+                  width: settings.width || defaultSettings.width,
+                  click: () => {
+                     this.showPopup();
+                  },
                },
-            },
-            {
-               fillspace: true,
-            },
-         ],
-      };
+               {
+                  fillspace: true,
+               },
+            ],
+         },
+      ]);
+
+      delete _ui.type;
+
+      return _ui;
    }
 
    uiConfig() {
       const ids = this.ids;
 
       return {
+         id: ids.form,
          view: "form",
          type: "clean",
-         id: ids.form,
          borderless: true,
          minWidth: 400,
          gravity: 1,
@@ -107,6 +98,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
                      on: {
                         onBeforeFileAdd: (fileInfo) => {
                            this._csvFileInfo = fileInfo;
+
                            return this.loadCsvFile();
                         },
                      },
@@ -179,6 +171,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
 
    uiRecordsView() {
       const ids = this.ids;
+
       return {
          gravity: 2,
          rows: [
@@ -196,8 +189,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
                      keyPressTimeout: 200,
                      on: {
                         onTimedKeyPress: () => {
-                           let text = $$(ids.search).getValue();
-                           this.search(text);
+                           this.search($$(ids.search).getValue());
                         },
                      },
                   },
@@ -221,26 +213,31 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
                minWidth: 650,
                columns: [],
                on: {
-                  onValidationError: function (id, obj, details) {
+                  onValidationError: (id, obj, details) => {
                      // console.log(`item ${id} invalid`);
                      let errors = "";
+
                      Object.keys(details).forEach((key) => {
                         this.$view.complexValidations[key].forEach((err) => {
                            errors += err.invalidMessage + "</br>";
                         });
                      });
+
                      const $dt = $$(ids.datatable);
+
                      $dt.blockEvent();
                      $dt.updateItem(id, {
                         _status: "invalid",
                         _errorMsg: errors,
                      });
                      $dt.unblockEvent();
+
                      this.validationError = true;
                   },
-                  onValidationSuccess: function (id, obj, details) {
+                  onValidationSuccess: (id, obj, details) => {
                      // console.log(`item ${id} valid`);
                      const $dt = $$(ids.datatable);
+
                      $dt.blockEvent();
                      $dt.updateItem(id, {
                         _status: "valid",
@@ -253,12 +250,12 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
                      const selected = $$(ids.datatable).find({
                         _included: true,
                      });
-                     $$(ids.importButton).setValue(this.labelImport(selected));
-                     if (this.overLimitAlert(selected)) {
-                        $$(ids.importButton).disable();
-                     } else {
-                        $$(ids.importButton).enable();
-                     }
+                     const $importButton = $$(ids.importButton);
+
+                     $importButton.setValue(this.labelImport(selected));
+
+                     if (this.overLimitAlert(selected)) $importButton.disable();
+                     else $importButton.enable();
                   },
                },
             },
@@ -368,45 +365,39 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
       };
    }
 
-   /**
-    * @method CurrentObject()
-    * A helper to return the current ABObject we are working with.
-    * @return {ABObject}
-    */
-   get CurrentObject() {
-      return this.AB.objectByID(this.CurrentObjectID);
-   }
+   async init(AB) {
+      await super.init(AB);
 
-   objectLoad(object) {
-      this.CurrentObjectID = object?.id;
-   }
-
-   init(AB) {
-      this.AB = AB;
       const ids = this.ids;
 
       // Populate values to rules
 
-      let selectedDv = this.view.datacollection;
+      const dc = this.datacollection;
 
-      if (selectedDv) {
-         this.CurrentObjectID = selectedDv.datasource.id;
-      }
+      if (dc) this.objectLoad(dc.datasource);
 
-      webix.ui(this.uiPopup());
+      const abWebix = AB.Webix;
 
-      if ($$(ids.form)) webix.extend($$(ids.form), webix.ProgressBar);
-      if ($$(ids.progressBar))
-         webix.extend($$(ids.progressBar), webix.ProgressBar);
+      abWebix.ui(this.uiPopup());
+
+      const $form = $$(ids.form);
+
+      if ($form) abWebix.extend($form, abWebix.ProgressBar);
+
+      const $progressBar = $$(ids.progressBar);
+
+      if ($progressBar) abWebix.extend($progressBar, abWebix.ProgressBar);
    }
 
    showPopup() {
-      $$(this.ids.popup)?.show();
+      const ids = this.ids;
+
+      $$(ids.popup)?.show();
 
       this.formClear();
 
       // open file dialog to upload
-      $$(this.ids.uploader).fileDialog();
+      $$(ids.uploader).fileDialog();
    }
 
    hide() {
@@ -415,14 +406,18 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
 
    formClear() {
       const ids = this.ids;
+
       this._dataRows = null;
       this._csvFileInfo = null;
 
-      $$(ids.form).clearValidation();
-      $$(ids.form).clear();
+      const $form = $$(ids.form);
+
+      $form.clearValidation();
+      $form.clear();
+
       $$(ids.separatedBy).setValue(",");
 
-      webix.ui([], $$(ids.columnList));
+      this.AB.Webix.ui([], $$(ids.columnList));
 
       $$(ids.headerOnFirstLine).disable();
       $$(ids.importButton).disable();
@@ -431,17 +426,20 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
       $$(ids.uploadFileList).clearAll();
       $$(ids.datatable).clearAll();
 
-      $$(ids.statusMessage).setValue("");
-      $$(ids.statusMessage).hide();
+      const $statusMessage = $$(ids.statusMessage);
+
+      $statusMessage.setValue("");
+      $statusMessage.hide();
    }
 
    search(searchText) {
-      let $datatable = $$(this.ids.datatable);
+      const $datatable = $$(this.ids.datatable);
+
       if (!$datatable) return;
 
       searchText = (searchText || "").toLowerCase();
 
-      let matchFields = this.getMatchFields();
+      const matchFields = this.getMatchFields();
 
       $datatable.filter((row) => {
          let exists = false;
@@ -487,10 +485,14 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
    }
 
    async loadCsvFile() {
-      if (!this._csvFileInfo) return false;
+      const _csvFileInfo = this._csvFileInfo;
 
-      if (!this.csvImporter.validateFile(this._csvFileInfo)) {
-         webix.alert({
+      if (!_csvFileInfo) return false;
+
+      const csvImporter = this.csvImporter;
+
+      if (!csvImporter.validateFile(_csvFileInfo)) {
+         this.AB.Webix.alert({
             title: this.label("This file extension is not allowed"),
             text: this.label("Please only upload CSV files"),
             ok: this.label("Ok"),
@@ -502,26 +504,31 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
       const ids = this.ids;
 
       // show loading cursor
-      $$(ids.form)?.showProgress?.({ type: "icon" });
+      const $form = $$(ids.form);
+
+      $form?.showProgress?.({ type: "icon" });
 
       // read CSV file
-      let separatedBy = $$(ids.separatedBy).getValue();
-      this._dataRows = await this.csvImporter.getDataRows(
-         this._csvFileInfo,
-         separatedBy
+      const $headerOnFirstLine = $$(ids.headerOnFirstLine);
+      const $importButton = $$(ids.importButton);
+
+      $headerOnFirstLine.enable();
+      $importButton.enable();
+
+      this._dataRows = await csvImporter.getDataRows(
+         _csvFileInfo,
+         $$(ids.separatedBy).getValue()
       );
 
-      $$(ids.headerOnFirstLine).enable();
-      $$(ids.importButton).enable();
-      let length = this._dataRows.length;
-      if ($$(ids.headerOnFirstLine).getValue()) {
-         length = this._dataRows.length - 1;
-      }
-      $$(ids.importButton).setValue(this.labelImport(length));
+      const _dataRows = this._dataRows;
 
+      let length = _dataRows.length;
+
+      if ($headerOnFirstLine.getValue()) length = _dataRows.length - 1;
+
+      $importButton.setValue(this.labelImport(length));
       this.populateColumnList();
-
-      $$(ids.form)?.hideProgress?.();
+      $form?.hideProgress?.();
 
       return true;
    }
@@ -529,27 +536,36 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
    removeCsvFile(fileId) {
       $$(this.ids.uploadFileList).remove(fileId);
       this.formClear();
+
       return true;
    }
 
    populateColumnList() {
-      const ids = this.ids;
       const self = this;
+      const ids = this.ids;
+      const abWebix = this.AB.Webix;
 
       // clear list
-      webix.ui([], $$(ids.columnList));
+      const $columnList = $$(ids.columnList);
 
-      if (this._dataRows == null) return;
+      abWebix.ui([], $columnList);
+
+      const _dataRows = this._dataRows;
+
+      if (!_dataRows) return;
 
       // check first line of CSV
-      let firstLine = this._dataRows[0];
-      if (firstLine == null) return;
+      const firstLine = _dataRows[0];
 
-      let csvColumnList = [];
-      let fieldList = [];
-      if (this.CurrentObject) {
-         fieldList =
-            this.CurrentObject.fields((f) => {
+      if (!firstLine) return;
+
+      const csvColumnList = [];
+      const fieldList = [];
+      const currentObject = this.CurrentObject;
+
+      if (currentObject)
+         fieldList.push(
+            ...currentObject.fields((f) => {
                // available fields
                if (
                   this.settings.availableFieldIds?.length &&
@@ -559,33 +575,39 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
                }
 
                // filter editable fields
-               let formComp = f.formComponent();
+               const formComp = f.formComponent();
+
                if (!formComp) return true;
 
-               let formConfig = formComp.common();
+               const formConfig = formComp.common();
+
                if (!formConfig) return true;
 
                return formConfig.key != "fieldreadonly";
-            }) || [];
-      }
+            })
+         );
+
+      const csvImporter = this.csvImporter;
+
       // check first line be header columns
-      if ($$(ids.headerOnFirstLine).getValue()) {
-         csvColumnList = firstLine.map((colName, index) => {
-            return {
-               id: index + 1, // webix .options list disallow value 0
-               value: colName,
-               key: this.csvImporter.getGuessDataType(this._dataRows, index),
-            };
-         });
-      } else {
-         for (let i = 0; i < firstLine.length; i++) {
+      if ($$(ids.headerOnFirstLine).getValue())
+         csvColumnList.push(
+            ...firstLine.map((colName, index) => {
+               return {
+                  id: index + 1, // webix .options list disallow value 0
+                  value: colName,
+                  key: csvImporter.getGuessDataType(_dataRows, index),
+               };
+            })
+         );
+      else
+         firstLine.forEach((e, i) => {
             csvColumnList.push({
                id: i + 1, // webix .options list disallow value 0
                value: this.label("Column {0}", [i + 1]),
-               key: this.csvImporter.getGuessDataType(this._dataRows, i),
+               key: csvImporter.getGuessDataType(_dataRows, i),
             });
-         }
-      }
+         });
 
       // Add unselect item
       csvColumnList.unshift({
@@ -594,15 +616,17 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
       });
 
       // populate columns to UI
-      let uiColumns = [];
-      let selectedCsvCols = [];
-      fieldList.forEach((f) => {
-         let selectVal = "none";
+      const uiColumns = [];
+      const selectedCsvCols = [];
 
+      fieldList.forEach((f) => {
          // match up by data type
-         let matchCol = csvColumnList.filter(
+         const matchCol = csvColumnList.filter(
             (c) => c.key == f.key && selectedCsvCols.indexOf(c.id) < 0
          )[0];
+
+         let selectVal = "none";
+
          if (matchCol) {
             selectVal = matchCol.id;
 
@@ -626,21 +650,21 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
          };
 
          // Add date format options
-         if (f.key == "date") {
-            let dateSeparatorOptions = ["/", "-", ".", ",", " "];
-            let dayFormatOptions = [
+         if (f.key === "date") {
+            const dateSeparatorOptions = ["/", "-", ".", ",", " "];
+            const dayFormatOptions = [
                { value: this.label("1 to 31"), id: "D" },
                { value: this.label("01 to 31"), id: "DD" },
             ];
-            let monthFormatOptions = [
+            const monthFormatOptions = [
                { value: this.label("1 to 12"), id: "M" },
                { value: this.label("01 to 12"), id: "MM" },
             ];
-            let yearFormatOptions = [
+            const yearFormatOptions = [
                { value: this.label("00 to 99"), id: "YY" },
                { value: this.label("2000 to 2099"), id: "YYYY" },
             ];
-            let dateOrderOptions = [
+            const dateOrderOptions = [
                {
                   value: this.label("D-M-Y"),
                   id: 1,
@@ -784,7 +808,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
             ],
          });
       });
-      webix.ui(uiColumns, $$(ids.columnList));
+      abWebix.ui(uiColumns, $columnList);
 
       this.loadDataToGrid();
    }
@@ -792,51 +816,53 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
    toggleLinkFields($columnOption) {
       if (!$columnOption) return;
 
-      let $optionPanel = $columnOption.getParentView();
-      let $linkFieldOption = $optionPanel.queryView(
+      const $optionPanel = $columnOption.getParentView();
+      const $linkFieldOption = $optionPanel.queryView(
          { abName: "columnLinkData" },
          "all"
       )[0];
+
       if (!$linkFieldOption) return;
 
-      if ($columnOption.getValue() == "none") {
-         $linkFieldOption.hide();
-      } else {
-         $linkFieldOption.show();
-      }
+      if ($columnOption.getValue() === "none") $linkFieldOption.hide();
+      else $linkFieldOption.show();
    }
 
    overLimitAlert(data) {
       const limit = 1000;
+
       if (data.length > limit) {
          // we only allow 1000 record imports
-         webix.alert({
+         this.AB.Webix.alert({
             title: this.label("Too many records"),
             ok: this.label("Ok"),
-            text: L(
+            text: this.label(
                "Due to browser limitations we only allow imports of {0} records. Please upload a new CSV or deselect records to import.",
                [limit]
             ),
          });
+
          return true;
       }
+
       return false;
    }
 
    loadDataToGrid() {
       const ids = this.ids;
-      let $datatable = $$(ids.datatable);
+      const $datatable = $$(ids.datatable);
+      const ab = this.AB;
+
       if (!$datatable) return;
 
       $datatable.clearAll();
 
       // show loading cursor
-      $datatable?.showProgress?.({ type: "icon" });
+      $datatable.showProgress?.({ type: "icon" });
 
       /** Prepare Columns */
-      let matchFields = this.getMatchFields();
-
-      let columns = [];
+      const matchFields = this.getMatchFields();
+      const columns = [];
 
       // add "status" column
       columns.push({
@@ -855,22 +881,23 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
       });
 
       const fieldValidations = [];
-      let rulePops = [];
+      const rulePops = [];
+
       // populate columns
       (matchFields || []).forEach((f) => {
          let validationRules = f.field.settings.validationRules;
          // parse the rules because they were stored as a string
          // check if rules are still a string...if so lets parse them
-         if (validationRules && typeof validationRules === "string") {
+         if (validationRules && typeof validationRules === "string")
             validationRules = JSON.parse(validationRules);
-         }
 
-         if (validationRules && validationRules.length) {
+         if (validationRules?.length) {
             const validationUI = [];
+
             // there could be more than one so lets loop through and build the UI
             validationRules.forEach((rule) => {
-               const Filter = this.AB.filterComplexNew(
-                  `${f.field.id}_${webix.uid()}`
+               const Filter = ab.filterComplexNew(
+                  `${f.field.id}_${ab.Webix.uid()}`
                );
                // add the new ui to an array so we can add them all at the same time
                validationUI.push(Filter.ui);
@@ -884,12 +911,14 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
                   columnIndex: f.columnIndex,
                });
             });
+
             // create a unique view id for popup
-            const popUpId = `${ids.rules}_${f.field.id}_${webix.uid()}`;
+            const popUpId = `${ids.rules}_${f.field.id}_${ab.Webix.uid()}`;
+
             // store the popup ids so we can remove the later
             rulePops.push(popUpId);
             // add the popup to the UI but don't show it
-            webix.ui({
+            ab.Webix.ui({
                view: "popup",
                css: "ab-rules-popup",
                id: popUpId,
@@ -905,9 +934,8 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
             id: f.columnIndex,
             header: f.field.label,
             editor: editor,
-            template: function (obj, common, value /*, col, ind */) {
-               return value.replace(/[<]/g, "&lt;");
-            },
+            template: (obj, common, value /*, col, ind */) =>
+               value.replace(/[<]/g, "&lt;"),
             minWidth: 150,
             fillspace: true,
          });
@@ -916,6 +944,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
       if (fieldValidations.length) {
          // we need to store the rules for use later so lets build a container array
          const complexValidations = [];
+
          fieldValidations.forEach((f) => {
             // init each ui to have the properties (app and fields) of the object we are editing
             // f.filter.applicationLoad(App);
@@ -930,96 +959,107 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
             // now we can push the rules into the hash
             complexValidations[f.columnName].push({
                filters: $$(f.view).getFilterHelper(),
-               values: $$(ids.datatable).getSelectedItem(),
+               values: $datatable.getSelectedItem(),
                invalidMessage: f.invalidMessage,
                columnIndex: f.columnIndex,
             });
          });
+
          const rules = {};
-         const dataTable = $$(ids.datatable);
+
          // store the rules in a data param to be used later
-         dataTable.$view.complexValidations = complexValidations;
+         $datatable.$view.complexValidations = complexValidations;
+
          // use the lookup to build the validation rules
-         Object.keys(complexValidations).forEach(function (key) {
-            rules[key] = function (value, data) {
+         Object.keys(complexValidations).forEach((key) => {
+            rules[key] = (value, data) => {
                // default valid is true
                let isValid = true;
-               dataTable.$view.complexValidations[key].forEach((filter) => {
-                  let rowValue = {};
+
+               $datatable.$view.complexValidations[key].forEach((filter) => {
+                  const rowValue = {};
                   // use helper funtion to check if valid
                   // map the column names to the index numbers of data
                   // reformat data to display
+
                   (matchFields || []).forEach((f) => {
-                     let record = data[f.columnIndex];
+                     const record = data[f.columnIndex];
+
                      if (
-                        f.field.key == "date" &&
+                        f.field.key === "date" &&
                         record.includes("Invalid date")
-                     ) {
+                     )
                         isValid = false;
-                     }
+
                      rowValue[f.field.id] = record;
                   });
+
                   const ruleValid = filter.filters(rowValue);
+
                   // if invalid we need to tell the field
-                  if (ruleValid == false) {
+                  if (!ruleValid) {
                      isValid = false;
-                     // webix.message({
+                     // this.AB.Webix.message({
                      //    type: "error",
                      //    text: invalidMessage
                      // });
                   }
                });
+
                return isValid;
             };
          });
          // define validation rules
-         dataTable.define("rules", rules);
+         $datatable.define("rules", rules);
          // store the array of view ids on the webix object so we can get it later
-         dataTable.config.rulePops = rulePops;
-         dataTable.refresh();
+         $datatable.config.rulePops = rulePops;
+         $datatable.refresh();
       } else {
-         dataTable = $$(ids.datatable);
          // check if the previous datatable had rule popups and remove them
-         if (dataTable.config.rulePops) {
-            dataTable.config.rulePops.forEach((popup) => {
-               if ($$(popup)) $$(popup).destructor();
+         if ($datatable.config.rulePops) {
+            $datatable.config.rulePops.forEach((popup) => {
+               const $popup = $$(popup);
+
+               if (!$popup) return;
+
+               $popup.destructor();
             });
          }
+
          // remove any validation rules from the previous table
-         dataTable.define("rules", {});
-         dataTable.refresh();
+         $datatable.define("rules", {});
+         $datatable.refresh();
       }
 
       /** Prepare Data */
-      let parsedData = [];
+      const parsedData = [];
 
       (this._dataRows || []).forEach((row, index) => {
-         let rowValue = {
+         const rowValue = {
             id: index + 1,
          };
 
          // reformat data to display
          (matchFields || []).forEach((f) => {
-            let data = row[f.columnIndex - 1];
+            const data = row[f.columnIndex - 1];
 
-            if (f.field.key == "date") {
+            if (f.field.key === "date") {
                // let dateFormat = moment(data, f.format).format(
                //    "YYYY-MM-DD"
                // );
                // debugger;
-               let dateFormat = this.AB.rules.toDate(data, {
+               let dateFormat = ab.rules.toDate(data, {
                   format: f.format,
                });
-               dateFormat = this.AB.rules.toDateFormat(dateFormat, {
+               dateFormat = ab.rules.toDateFormat(dateFormat, {
                   format: "YYYY-MM-DD",
                });
-               if (dateFormat == "Invalid date") {
+
+               if (dateFormat === "Invalid date")
                   dateFormat = dateFormat + " - " + data;
-               }
+
                rowValue[f.columnIndex] = dateFormat;
-            } else {
-               rowValue[f.columnIndex] = data; // array to object
-            }
+            } else rowValue[f.columnIndex] = data; // array to object
          });
 
          // insert "true" value of checkbox
@@ -1029,44 +1069,40 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
       });
 
       // skip the first line
-      let isSkipFirstLine = $$(ids.headerOnFirstLine).getValue();
-      if (isSkipFirstLine && parsedData.length > 1) {
-         parsedData = parsedData.slice(1);
-      }
+      const isSkipFirstLine = $$(ids.headerOnFirstLine).getValue();
 
-      $$(ids.importButton).setValue(this.labelImport(parsedData));
+      if (isSkipFirstLine && parsedData.length > 1) parsedData.shift();
 
+      const $importButton = $$(ids.importButton);
+
+      $importButton.setValue(this.labelImport(parsedData));
       $datatable.refreshColumns(columns);
-
       $datatable.parse(parsedData);
 
-      if (this.overLimitAlert(parsedData)) {
-         $$(ids.importButton).disable();
-      } else {
-         $$(ids.importButton).enable();
-      }
+      if (this.overLimitAlert(parsedData)) $importButton.disable();
+      else $importButton.enable();
 
       // hide loading cursor
-      $datatable?.hideProgress?.();
+      $datatable.hideProgress?.();
    }
 
    refreshRemainingTimeText(startUpdateTime, total, index) {
       const ids = this.ids;
 
       // Calculate remaining time
-      let spentTime = new Date() - startUpdateTime; // milliseconds that has passed since last completed record since start
+      const spentTime = new Date() - startUpdateTime; // milliseconds that has passed since last completed record since start
 
-      let averageRenderTime = spentTime / index; // average milliseconds per single render at this point
+      const averageRenderTime = spentTime / index; // average milliseconds per single render at this point
 
-      let remainTime = averageRenderTime * (total - index);
+      const remainTime = averageRenderTime * (total - index);
 
       let result = "";
 
       // Convert milliseconds to a readable string
-      let days = (remainTime / 86400000).toFixed(0);
-      let hours = (remainTime / 3600000).toFixed(0);
-      let minutes = (remainTime / 60000).toFixed(0);
-      let seconds = (remainTime / 1000).toFixed(0);
+      const days = (remainTime / 86400000).toFixed(0);
+      const hours = (remainTime / 3600000).toFixed(0);
+      const minutes = (remainTime / 60000).toFixed(0);
+      const seconds = (remainTime / 1000).toFixed(0);
 
       if (seconds < 1) result = "";
       else if (seconds < 60)
@@ -1112,27 +1148,29 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
       const ids = this.ids;
 
       // get richselect components
-      let $selectorViews = $$(ids.columnList)
+      const $selectorViews = $$(ids.columnList)
          .queryView({ abName: "columnIndex" }, "all")
          .filter((selector) => selector.getValue() != "none");
 
       ($selectorViews || []).forEach(($selector) => {
-         if (!this.CurrentObject) return;
+         const currentObject = this.CurrentObject;
+
+         if (!currentObject) return;
 
          // webix .options list disallow value 0
-         let colIndex = $selector.getValue();
+         const field = currentObject.fieldByID($selector.config.fieldId);
 
-         let field = this.CurrentObject.fieldByID($selector.config.fieldId);
          if (!field) return;
 
-         let fieldData = {
+         const colIndex = $selector.getValue();
+         const fieldData = {
             columnIndex: colIndex,
             field: field,
          };
 
-         if (field.key == "date") {
-            let $optionPanel = $selector.getParentView();
-            let $dateFormatSelectors = $optionPanel.queryView(
+         if (field.key === "date") {
+            const $optionPanel = $selector.getParentView();
+            const $dateFormatSelectors = $optionPanel.queryView(
                { abName: "columnDateFormat" },
                "all"
             );
@@ -1145,6 +1183,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
 
                // convert all dates into mysql date format YYYY-DD-MM
                let format;
+
                switch (fieldData.order) {
                   case "1":
                      format =
@@ -1178,22 +1217,24 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
                         fieldData.separator +
                         fieldData.month;
                }
+
                fieldData.format = format;
             }
          }
 
          if (field.isConnection) {
-            let $optionPanel = $selector.getParentView();
-            let $linkDataSelector = $optionPanel.queryView(
+            const $optionPanel = $selector.getParentView();
+            const $linkDataSelector = $optionPanel.queryView(
                { abName: "columnLinkData" },
                "all"
             )[0];
 
             // define the column to compare data to search .id
             if ($linkDataSelector) {
-               let searchField = field.datasourceLink.fieldByID(
+               const searchField = field.datasourceLink.fieldByID(
                   $linkDataSelector.getValue()
                );
+
                fieldData.searchField = searchField;
             }
          }
@@ -1206,6 +1247,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
 
    labelImport(selected) {
       let length = selected;
+
       if (Array.isArray(selected)) length = selected.length;
 
       return this.label("Import {0} Records", [length]);
@@ -1216,51 +1258,56 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
     *
     * @return {Promise}
     */
-   import() {
+   async import() {
       // get ABDatacollection
-      let dv = this.view.datacollection;
+      const dc = this.datacollection;
       // if (dv == null) return Promise.resolve();
 
       // // get ABObject
       // let obj = dv.datasource;
 
       // Make sure we are connected to an Object
-      let obj = this.CurrentObject;
-      if (obj == null) return Promise.resolve();
+      const currentObject = this.CurrentObject;
+
+      if (!currentObject) return;
 
       // get ABModel
       // let model = dv.model;
       // if (model == null) return Promise.resolve();
 
       const ids = this.ids;
-      $$(ids.importButton).disable();
+      const $importButton = $$(ids.importButton);
+
+      $importButton.disable();
 
       // Show loading cursor
-      $$(ids.form).showProgress({ type: "icon" });
-      $$(ids.progressBar).showProgress({
+      const $form = $$(ids.form);
+      const $progressBar = $$(ids.progressBar);
+
+      $form.showProgress({ type: "icon" });
+      $progressBar.showProgress({
          type: "top",
          position: 0.0001,
       });
 
       // get richselect components
-      let matchFields = this.getMatchFields();
+      const matchFields = this.getMatchFields();
 
       // Get object's model
-      let objModel = this.CurrentObject.model();
-
-      let selectedRows = $$(ids.datatable).find({ _included: true });
+      const objModel = currentObject.model();
+      const $datatable = $$(ids.datatable);
+      const selectedRows = $datatable.find({ _included: true });
 
       let _currProgress = 0;
-      let increaseProgressing = () => {
+
+      const increaseProgressing = () => {
          _currProgress += 1;
-         $$(ids.progressBar).showProgress({
+         $progressBar.showProgress({
             type: "bottom",
             position: _currProgress / selectedRows.length,
          });
       };
-
-      let itemFailed = (itemId, errMessage) => {
-         let $datatable = $$(ids.datatable);
+      const itemFailed = (itemId, errMessage) => {
          if ($datatable) {
             // set "fail" status
             $datatable.addRowCss(itemId, "row-fail");
@@ -1271,43 +1318,44 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
             });
             $datatable.unblockEvent();
          }
+
          increaseProgressing();
 
          console.error(errMessage);
       };
-
-      let itemInvalid = (itemId, errors = []) => {
-         let $datatable = $$(ids.datatable);
+      const abWebix = this.AB.Webix;
+      const itemInvalid = (itemId, errors = []) => {
          if ($datatable) {
             // combine all error messages to display in tooltip
-            let errorMsg = [];
+            const errorMsg = [];
             // mark which column are invalid
             errors.forEach((err) => {
-               if (!err || !err.name) return;
-               let fieldInfo = matchFields.filter(
+               if (!err?.name) return;
+
+               const fieldInfo = matchFields.filter(
                   (f) => f.field && f.field.columnName == err.name
                )[0];
+
                errorMsg.push(err.name + ": " + err.message);
                // we also need to define an error message
-               // webix.message({
+               // abWebix.message({
                //    type: "error",
                //    text: err.name + ": " + err.message
                // });
             });
+
             // set "fail" status
-            $$(ids.datatable).blockEvent();
-            $$(ids.datatable).updateItem(itemId, {
+            $datatable.blockEvent();
+            $datatable.updateItem(itemId, {
                _status: "invalid",
                _errorMsg: errorMsg.join("</br>"),
             });
-            $$(ids.datatable).unblockEvent();
+            $datatable.unblockEvent();
             $datatable.addRowCss(itemId, "webix_invalid");
          }
          // increaseProgressing();
       };
-
-      let itemPass = (itemId) => {
-         let $datatable = $$(ids.datatable);
+      const itemPass = (itemId) => {
          if ($datatable) {
             // set "done" status
             $datatable.removeRowCss(itemId, "row-fail");
@@ -1319,11 +1367,10 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
             });
             $datatable.unblockEvent();
          }
+
          increaseProgressing();
       };
-
-      let itemValid = (itemId) => {
-         let $datatable = $$(ids.datatable);
+      const itemValid = (itemId) => {
          if ($datatable) {
             // mark all columns valid (just in case they were invalid before)
             // matchFields.forEach((f) => {
@@ -1344,53 +1391,61 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
             // $datatable.addRowCss(itemId, "row-pass");
          }
       };
-
-      let uiCleanUp = () => {
+      const $statusMessage = $$(ids.statusMessage);
+      const uiCleanUp = () => {
          // To Do anyUI updates
          // console.log("ui clean up now");
-         $$(ids.importButton).enable();
+         $importButton.enable();
 
          // Hide loading cursor
-         $$(ids.form).hideProgress();
-         $$(ids.progressBar).hideProgress();
-         $$(ids.statusMessage).setValue("");
-         $$(ids.statusMessage).hide();
+         $form.hideProgress();
+         $progressBar.hideProgress();
 
-         const selected = $$(ids.datatable).find({ _included: true });
-         $$(ids.importButton).setValue(this.labelImport(selected));
+         $statusMessage.setValue("");
+         $statusMessage.hide();
 
+         const selected = $datatable.find({ _included: true });
+
+         $importButton.setValue(this.labelImport(selected));
          this.emit("done");
       };
 
       // Set parent's data collection cursor
-      let dcLink = dv?.datacollectionLink;
+      const dcLink = dc?.datacollectionLink;
+      const linkConnectFields = [];
+
       let objectLink;
-      let linkConnectFields = [];
       let linkValues;
-      if (dcLink && dcLink.getCursor()) {
+
+      if (dcLink?.getCursor()) {
          objectLink = dcLink.datasource;
 
-         linkConnectFields = this.CurrentObject.fields(
-            (f) => f.isConnection && f.settings.linkObject == objectLink.id
+         linkConnectFields.push(
+            ...currentObject.fields(
+               (f) => f.isConnection && f.settings.linkObject === objectLink.id
+            )
          );
 
          linkValues = dcLink.getCursor();
       }
 
+      const validRows = [];
+
       let allValid = true;
-      let validRows = [];
+
       // Pre Check Validations of whole CSV import
       // update row to green if valid
       // update row to red if !valid
       (selectedRows || []).forEach((data, index) => {
-         let newRowData = {};
+         const newRowData = {};
 
          // Set parent's data collection cursor
          if (objectLink && linkConnectFields.length && linkValues) {
             linkConnectFields.forEach((f) => {
-               let linkColName = f.indexField
+               const linkColName = f.indexField
                   ? f.indexField.columnName
                   : objectLink.PK();
+
                newRowData[f.columnName] = {};
                newRowData[f.columnName][linkColName] =
                   linkValues[linkColName] || linkValues.id;
@@ -1398,23 +1453,28 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
          }
 
          matchFields.forEach((f) => {
-            if (!f.field || !f.field.key) return;
+            if (!f.field?.key) return;
 
             switch (f.field.key) {
                // case "connectObject":
                //    // skip
                //    break;
                case "number":
-                  if (typeof data[f.columnIndex] != "number") {
+                  if (typeof data[f.columnIndex] !== "number") {
                      newRowData[f.field.columnName] = (
                         data[f.columnIndex] || ""
                      ).replace(/[^-0-9.]/gi, "");
-                  } else {
-                     newRowData[f.field.columnName] = data[f.columnIndex];
+
+                     break;
                   }
+
+                  newRowData[f.field.columnName] = data[f.columnIndex];
+
                   break;
+
                default:
                   newRowData[f.field.columnName] = data[f.columnIndex];
+
                   break;
             }
          });
@@ -1423,35 +1483,37 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
          let errorMsg = "";
 
          // first check legacy and server side validation
-         let validator = this.CurrentObject.isValidData(newRowData);
+         const validator = currentObject.isValidData(newRowData);
+
          isValid = validator.pass();
          errorMsg = validator.errors;
 
-         if (isValid) {
+         if (isValid)
             // now check complex field validation rules
-            isValid = $$(ids.datatable).validate(data.id);
-         } else {
+            isValid = $datatable.validate(data.id);
+         else {
             allValid = false;
+
             itemInvalid(data.id, errorMsg);
          }
+
          if (isValid) {
             itemValid(data.id);
             validRows.push({ id: data.id, data: newRowData });
-         } else {
-            allValid = false;
-         }
-         // $$(ids.datatable).unblockEvent();
+         } else allValid = false;
+
+         // $datatable.unblockEvent();
       });
 
       if (!allValid) {
          // To Do anyUI updates
-         // $$(ids.importButton).enable();
+         // $importButton.enable();
          //
          // // Hide loading cursor
-         // $$(ids.form).hideProgress();
-         // $$(ids.progressBar).hideProgress();
-         // $$(ids.statusMessage).setValue("");
-         // $$(ids.statusMessage).hide();
+         // $form.hideProgress();
+         // $progressBar.hideProgress();
+         // $statusMessage.setValue("");
+         // $statusMessage.hide();
          //
          // // _logic.hide();
          //
@@ -1459,7 +1521,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
          //    _logic.callbacks.onDone();
          uiCleanUp();
 
-         webix.alert({
+         abWebix.alert({
             title: this.label("Invalid Data"),
             ok: this.label("Ok"),
             text: this.label(
@@ -1467,7 +1529,7 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
             ),
          });
 
-         return Promise.resolve();
+         return;
       }
 
       // if pass, then continue to process each row
@@ -1479,207 +1541,224 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
       // connected entries
 
       const connectedFields = matchFields.filter(
-         (f) => f && f.field && f.field.isConnection && f.searchField
+         (f) => f && f.field?.isConnection && f.searchField
       );
 
       let startUpdateTime;
       let numDone = 0;
-      return Promise.resolve()
-         .then(() => {
-            // forEach connectedFields in csv
 
-            const allLookups = [];
+      try {
+         // forEach connectedFields in csv
+         const allLookups = [];
 
-            (connectedFields || []).forEach((f) => {
-               let connectField = f.field;
-               let searchField = f.searchField;
-               // let searchWord = newRowData[f.columnIndex];
+         (connectedFields || []).forEach((f) => {
+            const connectField = f.field;
+            // const searchWord = newRowData[f.columnIndex];
+            const connectObject = connectField.datasourceLink;
 
-               let connectObject = connectField.datasourceLink;
-               if (!connectObject) return;
+            if (!connectObject) return;
 
-               let connectModel = connectObject.model();
-               if (!connectModel) return;
+            const connectModel = connectObject.model();
 
-               let linkIdKey = connectField.indexField
-                  ? connectField.indexField.columnName
-                  : connectField.object.PK();
+            if (!connectModel) return;
 
-               // prepare default hash entry:
-               hashLookups[connectField.id] = {};
+            const linkIdKey = connectField.indexField
+               ? connectField.indexField.columnName
+               : connectField.object.PK();
 
-               // load all values of connectedField entries
+            // prepare default hash entry:
+            hashLookups[connectField.id] = {};
 
-               allLookups.push(
-                  connectModel
-                     .findAll({
-                        where: {}, // !!!
-                        populate: false,
-                     })
-                     .then((list) => {
-                        if (list.data) {
-                           list = list.data;
-                        }
-                        (list || []).forEach((row) => {
-                           // store in hash[field.id] = { 'searchKey' : "uuid" }
+            // load all values of connectedField entries
+            const gethashLookup = async () => {
+               try {
+                  const list = await connectModel.findAll({
+                     where: {}, // !!!
+                     populate: false,
+                  });
+                  const data = list.data || list;
 
-                           hashLookups[connectField.id][
-                              row[searchField.columnName]
-                           ] = row[linkIdKey];
-                        });
-                     })
-                     .catch((errMessage) => {
-                        console.error(errMessage);
-                     })
-               );
-            });
+                  (data || []).forEach((row) => {
+                     // store in hash[field.id] = { 'searchKey' : "uuid" }
 
-            return Promise.all(allLookups);
-         })
-         .then(() => {
-            // forEach validRow
-            validRows.forEach((data) => {
-               let newRowData = data.data;
-
-               // update the datagrid row to in-progress
-               $$(ids.datatable).blockEvent();
-               $$(ids.datatable).updateItem(data.id, {
-                  _status: "in-progress",
-                  _errorMsg: "",
-               });
-               $$(ids.datatable).unblockEvent();
-
-               // forEach ConnectedField
-               (connectedFields || []).forEach((f) => {
-                  // find newRowData[field.columnName] = { field.PK : hash[field.id][searchWord] }
-                  const connectField = f.field;
-                  const linkIdKey = connectField.indexField
-                     ? connectField.indexField.columnName
-                     : connectField.object.PK();
-                  const uuid =
                      hashLookups[connectField.id][
-                        newRowData[connectField.columnName]
-                     ];
-
-                  if (!uuid) {
-                     itemInvalid(data.id, [{ name: connectField.columnName }]);
-                     allValid = false;
-                  }
-
-                  newRowData[connectField.columnName] = {};
-                  newRowData[connectField.columnName][linkIdKey] = uuid;
-               });
-            });
-         })
-         .then(() => {
-            if (!allValid) {
-               webix.alert({
-                  title: this.label("Invalid Data"),
-                  ok: this.label("Ok"),
-                  text: this.label(
-                     "The highlighted row has invalid data. Please edit in the window or update the CSV and try again."
-                  ),
-               });
-               uiCleanUp();
-
-               return Promise.resolve();
-            }
-            // NOTE: Parallel exectuion of all these:
-            const allSaves = [];
-
-            const createRecord = (objModel, newRowsData, element, total) => {
-               return new Promise((resolve, reject) => {
-                  element.doRecordRulesPre(newRowsData);
-
-                  objModel
-                     .batchCreate({ batch: newRowsData })
-                     .then((result) => {
-                        const recordRules = [];
-
-                        // Show errors of each row
-                        Object.keys(result.errors).forEach((rowIndex) => {
-                           let error = result.errors[rowIndex];
-                           if (error) {
-                              itemFailed(
-                                 rowIndex,
-                                 error.message || error.sqlMessage || error
-                              );
-                           }
-                        });
-
-                        Object.keys(result.data).forEach((rowIndex) => {
-                           let rowData = result.data[rowIndex];
-                           recordRules.push(
-                              new Promise((next, err) => {
-                                 // Process Record Rule
-                                 element
-                                    .doRecordRules(rowData)
-                                    .then(() => {
-                                       itemPass(rowIndex);
-                                       next();
-                                    })
-                                    .catch((errMessage) => {
-                                       itemFailed(rowIndex, errMessage);
-                                       err("that didn't work");
-                                    });
-                              })
-                           );
-                        });
-                        Promise.all(recordRules)
-                           .then(() => {
-                              newRowsData.forEach((row) => {
-                                 // itemPass(row.id);
-                                 numDone++;
-                                 if (numDone % 50 == 0) {
-                                    this.refreshRemainingTimeText(
-                                       startUpdateTime,
-                                       validRows.length,
-                                       numDone
-                                    );
-                                 }
-                              });
-                              if (numDone == total) {
-                                 uiCleanUp();
-                                 $$(ids.importButton).disable();
-                              }
-                              resolve();
-                           })
-                           .catch((err) => {
-                              // newRowsData.forEach((row) => {
-                              //    itemFailed(row.id, err);
-                              // });
-                              reject(err);
-                           });
-                     })
-                     .catch((errMessage) => {
-                        console.error(errMessage);
-                        reject(errMessage);
-                     });
-               });
+                        row[f.searchField.columnName]
+                     ] = row[linkIdKey];
+                  });
+               } catch (err) {
+                  console.error(err);
+               }
             };
 
-            validRows.forEach((data) => {
-               let newRowData = data.data;
-               allSaves.push({ id: data.id, data: newRowData });
+            allLookups.push(gethashLookup());
+         });
+
+         await Promise.all(allLookups);
+
+         // forEach validRow
+         validRows.forEach((data) => {
+            const newRowData = data.data;
+
+            // update the datagrid row to in-progress
+            $datatable.blockEvent();
+            $datatable.updateItem(data.id, {
+               _status: "in-progress",
+               _errorMsg: "",
+            });
+            $datatable.unblockEvent();
+
+            // forEach ConnectedField
+            (connectedFields || []).forEach((f) => {
+               // find newRowData[field.columnName] = { field.PK : hash[field.id][searchWord] }
+               const connectField = f.field;
+               const linkIdKey = connectField.indexField
+                  ? connectField.indexField.columnName
+                  : connectField.object.PK();
+               const uuid =
+                  hashLookups[connectField.id][
+                     newRowData[connectField.columnName]
+                  ];
+
+               if (!uuid) {
+                  itemInvalid(data.id, [{ name: connectField.columnName }]);
+                  allValid = false;
+               }
+
+               newRowData[connectField.columnName] = {};
+               newRowData[connectField.columnName][linkIdKey] = uuid;
+            });
+         });
+
+         if (!allValid) {
+            abWebix.alert({
+               title: this.label("Invalid Data"),
+               ok: this.label("Ok"),
+               text: this.label(
+                  "The highlighted row has invalid data. Please edit in the window or update the CSV and try again."
+               ),
+            });
+            uiCleanUp();
+
+            return;
+         }
+
+         // NOTE: Parallel exectuion of all these:
+         const allSaves = [];
+         const createRecord = (objModel, newRowsData, element, total) =>
+            new Promise((resolve, reject) => {
+               element.doRecordRulesPre(newRowsData);
+
+               const processResult = async () => {
+                  try {
+                     const result = await objModel.batchCreate({
+                        batch: newRowsData,
+                     });
+                     const resultErrors = result.errors;
+
+                     // Show errors of each row
+                     Object.keys(resultErrors).forEach((rowIndex) => {
+                        const error = resultErrors[rowIndex];
+
+                        if (error) {
+                           itemFailed(
+                              rowIndex,
+                              error.message || error.sqlMessage || error
+                           );
+                        }
+                     });
+
+                     const resultData = result.data;
+                     const penddingRecordRules = [];
+
+                     Object.keys(resultData).forEach((rowIndex) => {
+                        penddingRecordRules.push(
+                           new Promise((resolve, reject) => {
+                              // Process Record Rule
+                              const processRowData = async () => {
+                                 try {
+                                    await element.doRecordRules(
+                                       resultData[rowIndex]
+                                    );
+
+                                    itemPass(rowIndex);
+                                    resolve();
+                                 } catch (err) {
+                                    itemFailed(rowIndex, err);
+                                    reject("that didn't work");
+                                 }
+                              };
+
+                              processRowData();
+                           })
+                        );
+                     });
+
+                     const waitPenddingRecordRules = async () => {
+                        try {
+                           await Promise.all(penddingRecordRules);
+
+                           newRowsData.forEach((row) => {
+                              // itemPass(row.id);
+                              numDone++;
+                              if (numDone % 50 == 0) {
+                                 this.refreshRemainingTimeText(
+                                    startUpdateTime,
+                                    validRows.length,
+                                    numDone
+                                 );
+                              }
+                           });
+
+                           if (numDone === total) {
+                              uiCleanUp();
+                              $importButton.disable();
+                           }
+
+                           resolve();
+                        } catch (err) {
+                           // newRowsData.forEach((row) => {
+                           //    itemFailed(row.id, err);
+                           // });
+                           // throw err;
+                           reject(err);
+                        }
+                     };
+
+                     await waitPenddingRecordRules();
+                  } catch (err) {
+                     console.error(err);
+                     reject(err);
+                  }
+               };
+
+               processResult();
             });
 
-            // we are going to store these promises in an array of
-            // arrays with 50 in each sub array
-            const throttledSaves = [];
-            const total = allSaves.length;
-            let index = 0;
-            while (allSaves.length) {
-               throttledSaves[index] = allSaves.splice(0, 50);
-               index++;
-            }
+         validRows.forEach((data) => {
+            allSaves.push({ id: data.id, data: data.data });
+         });
 
-            // execute the array of array of 100 promises one at at time
-            function performThrottledSaves(
-               currentRecords,
-               remainingRecords,
-               importer,
-               total
-            ) {
+         // we are going to store these promises in an array of
+         // arrays with 50 in each sub array
+         const throttledSaves = [];
+         const total = allSaves.length;
+
+         let index = 0;
+
+         while (allSaves.length) {
+            throttledSaves[index] = allSaves.splice(0, 50);
+
+            index++;
+         }
+
+         // execute the array of array of 100 promises one at at time
+         const performThrottledSaves = (
+            currentRecords,
+            remainingRecords,
+            importer,
+            total
+         ) =>
+            new Promise((resolve, reject) => {
                // execute the next 100
                // const requests = currentRecords.map((data) => {
                //    return createRecord(
@@ -1689,19 +1768,22 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
                //       importer
                //    );
                // });
-               const requests = createRecord(
-                  objModel,
-                  currentRecords,
-                  importer,
-                  total
-               );
-               requests
-                  .then(() => {
+
+               const processRequest = async () => {
+                  try {
+                     await createRecord(
+                        objModel,
+                        currentRecords,
+                        importer,
+                        total
+                     );
+
                      // when done get the next 10
                      const nextRecords = remainingRecords.shift();
+
                      // if there are any remaining in the group call performThrottledSaves
                      if (nextRecords?.length) {
-                        return performThrottledSaves(
+                        await performThrottledSaves(
                            nextRecords,
                            remainingRecords,
                            importer,
@@ -1709,39 +1791,36 @@ module.exports = class ABViewCSVImporterComponent extends ClassUI {
                         );
                      } else {
                         // uiCleanUp();
-                        return Promise.resolve();
+                        resolve();
                      }
-                  })
-                  .catch((err) => {
+                  } catch (err) {
                      // Handle errors here
-                     return Promise.reject(err);
-                  });
-            }
+                     reject(err);
+                  }
+               };
 
-            // now we are going to processes these new containers one at a time
-            // $$(ids.datatable).blockEvent();
-            // this is when the real work starts so lets begin our countdown timer now
-            startUpdateTime = new Date();
-            // get the first group of Promises out of the collection
-            const next = throttledSaves.shift();
-            // execute our Promise iterator
-            return performThrottledSaves(
-               next,
-               throttledSaves,
-               this.view,
-               total
-            );
-         })
-         .catch((err) => {
-            // resolve Error UI
-            webix.alert({
-               title: this.label("Error Creating Records"),
-               ok: this.label("Ok"),
-               text: this.label("One or more records failed upon creation."),
+               processRequest();
             });
-            // $$(ids.datatable).unblockEvent();
-            uiCleanUp();
-            console.error(err);
+
+         // now we are going to processes these new containers one at a time
+         // $datatable.blockEvent();
+         // this is when the real work starts so lets begin our countdown timer now
+         startUpdateTime = new Date();
+         // get the first group of Promises out of the collection
+         const next = throttledSaves.shift();
+
+         // execute our Promise iterator
+         await performThrottledSaves(next, throttledSaves, this.view, total);
+      } catch (err) {
+         // resolve Error UI
+         abWebix.alert({
+            title: this.label("Error Creating Records"),
+            ok: this.label("Ok"),
+            text: this.label("One or more records failed upon creation."),
          });
+         // $datatable.unblockEvent();
+         uiCleanUp();
+         console.error(err);
+      }
    }
 };

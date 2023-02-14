@@ -1,33 +1,25 @@
-/* eslint-disable prettier/prettier */
-const ABViewComponent = require("./ABViewComponent").default;
-const ABViewFormButtonCore = require("../../../core/views/ABViewFormButtonCore");
+const ABViewFormItemComponent = require("./ABViewFormItemComponent");
 
-const L = (...params) => AB.Multilingual.label(...params);
-const ABViewFormButtonPropertyComponentDefaults =
-   ABViewFormButtonCore.defaultValues();
-
-module.exports = class ABViewFormButton extends ABViewComponent {
-   constructor(baseView, idBase) {
-      idBase = idBase ?? `ABViewFormButton_${baseView.id}`;
-      super(baseView, idBase, {});
+module.exports = class ABViewFormButton extends ABViewFormItemComponent {
+   constructor(baseView, idBase, ids) {
+      super(baseView, idBase || `ABViewFormButton_${baseView.id}`, ids);
    }
 
    ui() {
       const self = this;
-      const _ui = {
-         id: this.ids.component,
-         cols: []
-      };
-
-      const form = this.view.parentFormComponent();
-      const settings = this.view.settings ?? {};
+      const baseView = this.view;
+      const form = baseView.parentFormComponent();
+      const settings = baseView.settings ?? {};
 
       const alignment =
-         settings.alignment ??
-         ABViewFormButtonPropertyComponentDefaults.alignment;
+         settings.alignment || baseView.constructor.defaultValues().alignment;
+
+      const _ui = {
+         cols: [],
+      };
 
       // spacer
-      if (alignment == "center" || alignment == "right") {
+      if (alignment === "center" || alignment === "right") {
          _ui.cols.push({});
       }
 
@@ -37,7 +29,7 @@ module.exports = class ABViewFormButton extends ABViewComponent {
             {
                view: "button",
                autowidth: true,
-               value: settings.cancelLabel || L("Cancel"),
+               value: settings.cancelLabel || this.label("Cancel"),
                click: function () {
                   self.onCancel(this);
                },
@@ -47,11 +39,11 @@ module.exports = class ABViewFormButton extends ABViewComponent {
                         "data-cy",
                         `button cancel ${form.id}`
                      );
-                  }
-               }
+                  },
+               },
             },
             {
-               width: 10
+               width: 10,
             }
          );
       }
@@ -62,7 +54,7 @@ module.exports = class ABViewFormButton extends ABViewComponent {
             {
                view: "button",
                autowidth: true,
-               value: settings.resetLabel || L("Reset"),
+               value: settings.resetLabel || this.label("Reset"),
                click: function () {
                   self.onClear(this);
                },
@@ -72,11 +64,11 @@ module.exports = class ABViewFormButton extends ABViewComponent {
                         "data-cy",
                         `button reset ${form.id}`
                      );
-                  }
-               }
+                  },
+               },
             },
             {
-               width: 10
+               width: 10,
             }
          );
       }
@@ -88,7 +80,7 @@ module.exports = class ABViewFormButton extends ABViewComponent {
             type: "form",
             css: "webix_primary",
             autowidth: true,
-            value: settings.saveLabel || L("Save"),
+            value: settings.saveLabel || this.label("Save"),
             click: function () {
                self.onSave(this);
             },
@@ -98,24 +90,23 @@ module.exports = class ABViewFormButton extends ABViewComponent {
                      "data-cy",
                      `button save ${form.id}`
                   );
-               }
-            }
+               },
+            },
          });
       }
 
       // spacer
-      if (alignment == "center" || alignment == "left") {
-         _ui.cols.push({});
-      }
+      if (alignment === "center" || alignment === "left") _ui.cols.push({});
 
-      return _ui;
+      return super.ui(_ui);
    }
 
    onCancel(cancelButton) {
-      const settings = this.view.settings ?? {};
+      const baseView = this.view;
+      const settings = baseView.settings ?? {};
 
       // get form component
-      const form = this.view.parentFormComponent();
+      const form = baseView.parentFormComponent();
 
       // get ABDatacollection
       const dc = form.datacollection;

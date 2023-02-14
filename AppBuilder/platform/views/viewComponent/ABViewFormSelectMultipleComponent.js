@@ -1,42 +1,34 @@
 const ABViewFormItemComponent = require("./ABViewFormItemComponent");
-const ABViewFormSelectMultipleCore = require("../../../core/views/ABViewFormSelectMultipleCore");
-
-const ABViewFormSelectMultiplePropertyComponentDefaults =
-   ABViewFormSelectMultipleCore.defaultValues();
-
-const L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABViewFormSelectMultipleComponentComponent extends (
    ABViewFormItemComponent
 ) {
-   constructor(baseView, idBase) {
-      idBase = idBase ?? `ABViewFormSelectMultipleComponent_${baseView.id}`;
-      super(baseView, idBase, {});
+   constructor(baseView, idBase, ids) {
+      super(baseView, idBase || `ABViewFormSelectMultiple_${baseView.id}`, ids);
    }
 
    ui() {
-      const _ui = super.ui(),
-         field = this.view.field(),
-         settings = this.view.settings;
+      const baseView = this.view;
+      const field = baseView.field(),
+         settings = this.settings;
+      const options = [];
 
-      _ui.view =
-         settings.type ??
-         ABViewFormSelectMultiplePropertyComponentDefaults.type;
-
-      let options = [];
-
-      if (field?.key == "user") options = field.getUsers();
+      if (field?.key === "user") options.push(...field.getUsers());
       else if (field)
-         options = field.settings.options ?? settings.options ?? [];
+         options.push(...(field.settings.options ?? settings.options ?? []));
 
-      _ui.id = this.ids.component;
-      _ui.options = options.map((opt) => {
-         return {
-            id: opt.id,
-            value: opt.text,
-            hex: opt.hex,
-         };
-      });
+      const ids = this.ids;
+      const _ui = {
+         id: ids.formItem,
+         view: settings.type || baseView.constructor.defaultValues().type,
+         options: options.map((opt) => {
+            return {
+               id: opt.id,
+               value: opt.text,
+               hex: opt.hex,
+            };
+         }),
+      };
 
       switch (_ui.view) {
          case "multicombo":
@@ -44,47 +36,57 @@ module.exports = class ABViewFormSelectMultipleComponentComponent extends (
             _ui.css = "hideWebixMulticomboTag";
             _ui.tagTemplate = (values) => {
                const selectedOptions = [];
+               const $formItem = $$(ids.formItem) ?? $$(_ui.id);
+
                values.forEach((val) => {
-                  const $component = $$(this.ids.component) ?? $$(_ui.id);
-                  selectedOptions.push($component.getList().getItem(val));
+                  selectedOptions.push($formItem.getList().getItem(val));
                });
+
                let vals = selectedOptions;
-               if (field.getSelectedOptions) {
+
+               if (field.getSelectedOptions)
                   vals = field.getSelectedOptions(field, selectedOptions);
-               }
 
                const items = [];
+
                vals.forEach((val) => {
                   let hasCustomColor = "";
                   let optionHex = "";
+
                   if (field.settings.hasColors && val.hex) {
                      hasCustomColor = "hascustomcolor";
                      optionHex = `background: ${val.hex};`;
                   }
+
                   const text = val.text ? val.text : val.value;
+
                   items.push(
                      `<span class="webix_multicombo_value ${hasCustomColor}" style="${optionHex}" optvalue="${val.id}"><span>${text}</span><span class="webix_multicombo_delete" role="button" aria-label="Remove item"></span></span>`
                   );
                });
+
                return items.join("");
             };
+
             break;
+
          case "checkbox":
             // radio element could not be empty options
             _ui.options.push({
                id: "temp",
-               value: L("Option"),
+               value: this.label("Option"),
             });
+
             break;
       }
 
-      return _ui;
+      return super.ui(_ui);
    }
 
    getValue(rowData) {
       const field = this.view.field(),
-         $elem = $$(this.ids.component);
+         $formItem = $$(this.ids.formItem);
 
-      return field.getValue($elem, rowData);
+      return field.getValue($formItem, rowData);
    }
 };

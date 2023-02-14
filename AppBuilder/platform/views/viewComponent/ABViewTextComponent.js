@@ -1,66 +1,59 @@
 const ABViewComponent = require("./ABViewComponent").default;
 
-const L = (...params) => AB.Multilingual.label(...params);
-
 module.exports = class ABViewTextComponent extends ABViewComponent {
-   constructor(baseView, idBase) {
-      idBase = idBase ?? `ABViewText_${baseView.id}`;
-
-      super(baseView, idBase, {});
-
-      this.view = baseView;
-
-      this.AB = this.view.AB;
+   constructor(baseView, idBase, ids) {
+      super(
+         baseView,
+         idBase || `ABViewText_${baseView.id}`,
+         Object.assign(
+            {
+               text: "",
+            },
+            ids
+         )
+      );
    }
 
    ui() {
       const ids = this.ids;
-      const baseView = this.view;
+      const settings = this.settings;
 
-      const _ui = {
-         id: ids.component,
+      const _uiText = {
+         id: ids.text,
          view: "template",
          minHeight: 10,
          css: "ab-custom-template",
          borderless: true,
       };
 
-      if (baseView.settings.height) _ui.height = baseView.settings.height;
-      else _ui.autoheight = true;
+      if (settings.height) _uiText.height = settings.height;
+      else _uiText.autoheight = true;
+
+      const _ui = super.ui([_uiText]);
+
+      delete _ui.type;
 
       return _ui;
    }
 
-   async init(AB) {
-      this.AB = AB;
-
-      const ids = this.ids;
-
-      const $component = $$(ids.component);
-   }
-
    displayText(value) {
       const ids = this.ids;
-      const baseView = this.view;
-      const result = baseView.displayText(value, ids.component);
+      const result = this.view.displayText(value, ids.text);
 
-      const $component = $$(ids.component) ?? null;
+      const $text = $$(ids.text);
 
-      if (!$component) return;
+      if (!$text) return;
 
-      $component.define("template", result);
-      $component.refresh();
+      $text.define("template", result);
+      $text.refresh();
    }
 
-   onShow(viewId) {
-      const ids = this.ids;
-
-      const baseView = this.view;
-
-      super.onShow(viewId);
+   onShow() {
+      super.onShow();
 
       // listen DC events
-      const dataview = baseView.datacollection ?? null;
+      const dataview = this.datacollection;
+      const baseView = this.view;
 
       if (dataview && baseView.parent.key !== "dataview")
          baseView.eventAdd({

@@ -1,47 +1,7 @@
 const ABViewDetailImageCore = require("../../core/views/ABViewDetailImageCore");
 const ABViewDetailImageComponent = require("./viewComponent/ABViewDetailImageComponent");
 
-const ABViewDetailImagePropertyComponentDefaults = ABViewDetailImageCore.defaultValues();
-
-let L = (...params) => AB.Multilingual.label(...params);
-
 module.exports = class ABViewDetailImage extends ABViewDetailImageCore {
-   //
-   //	Editor Related
-   //
-
-   /**
-    * @method editorComponent
-    * return the Editor for this UI component.
-    * the editor should display either a "block" view or "preview" of
-    * the current layout of the view.
-    * @param {string} mode what mode are we in ['block', 'preview']
-    * @return {Component}
-    */
-   // editorComponent(App, mode) {
-   //    var idBase = "ABViewDetailImageEditorComponent";
-   //    var ids = {
-   //       component: App.unique(`${idBase}_component`),
-   //    };
-
-   //    var elem = this.component(App).ui;
-   //    elem.id = ids.component;
-
-   //    var _ui = {
-   //       rows: [elem, {}],
-   //    };
-
-   //    var _init = (options) => {};
-
-   //    var _logic = {};
-
-   //    return {
-   //       ui: _ui,
-   //       init: _init,
-   //       logic: _logic,
-   //    };
-   // }
-
    /**
     * @method component()
     * return a UI component based upon this view.

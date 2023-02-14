@@ -1,60 +1,63 @@
 const ABViewComponent = require("./ABViewComponent").default;
 
-const L = (...params) => AB.Multilingual.label(...params);
-
 module.exports = class ABViewCommentComponent extends ABViewComponent {
-   constructor(baseView, idBase) {
-      idBase = idBase ?? `ABViewComment_${baseView.id}`;
-
-      super(baseView, idBase, {});
-
-      this.view = baseView;
-      this.AB = this.view.AB;
+   constructor(baseView, idBase, ids) {
+      super(
+         baseView,
+         idBase || `ABViewComment_${baseView.id}`,
+         Object.assign(
+            {
+               comment: "",
+            },
+            ids
+         )
+      );
    }
 
    ui() {
-      const ids = this.ids;
       const baseView = this.view;
-      const userList = baseView.getUserData();
-      const userId = baseView.getCurrentUserId();
-      const _ui = {
-         id: ids.component,
-         view: "comments",
-         users: userList,
-         currentUser: userId,
-         height: baseView.settings.height,
-         data: this.getCommentData(),
-         on: {
-            onBeforeAdd: (id, obj, index) => {
-               this.addComment(obj.text, new Date());
-            },
-            // NOTE: no update event of comment widget !!
-            // Updating event handles in .init function
-            // https://docs.webix.com/api__ui.comments_onbeforeeditstart_event.html#comment-4509366150
+      const _ui = super.ui([
+         {
+            id: this.ids.comment,
+            view: "comments",
+            users: baseView.getUserData(),
+            currentUser: baseView.getCurrentUserId(),
+            height: this.settings.height,
+            data: this.getCommentData(),
+            on: {
+               onBeforeAdd: (id, obj, index) => {
+                  this.addComment(obj.text, new Date());
+               },
+               // NOTE: no update event of comment widget !!
+               // Updating event handles in .init function
+               // https://docs.webix.com/api__ui.comments_onbeforeeditstart_event.html#comment-4509366150
 
-            // onAfterEditStart: function (rowId) {
-            // 	let item = this.getItem(rowId);
+               // onAfterEditStart: function (rowId) {
+               // 	let item = this.getItem(rowId);
 
-            // 	_logic.updateComment(rowId, item);
-            // },
-            onAfterDelete: (rowId) => {
-               this.deleteComment(rowId);
+               // 	_logic.updateComment(rowId, item);
+               // },
+               onAfterDelete: (rowId) => {
+                  this.deleteComment(rowId);
+               },
             },
          },
-      };
+      ]);
+
+      delete _ui.type;
 
       return _ui;
    }
 
    async init(AB) {
-      this.AB = AB;
+      await super.init(AB);
 
       const baseView = this.view;
 
       baseView.__dvEvents = baseView.__dvEvents || {};
 
       const ids = this.ids;
-      const $comment = $$(ids.component);
+      const $comment = $$(ids.comment);
 
       if ($comment) {
          const $commentList = $comment.queryView({ view: "list" });
@@ -62,26 +65,27 @@ module.exports = class ABViewCommentComponent extends ABViewComponent {
          if ($commentList) {
             // Updating comment event
             if (!baseView.__dvEvents.onStoreUpdated)
-               baseView.__dvEvents.onStoreUpdated = $commentList.data.attachEvent(
-                  "onStoreUpdated",
-                  (rowId, data, operate) => {
-                     if (operate == "update") {
-                        this.updateComment(rowId, (data || {}).text);
+               baseView.__dvEvents.onStoreUpdated =
+                  $commentList.data.attachEvent(
+                     "onStoreUpdated",
+                     (rowId, data, operate) => {
+                        if (operate === "update") {
+                           this.updateComment(rowId, (data || {}).text);
+                        }
                      }
-                  }
-               );
+                  );
 
             // Implement progress bar
             webix.extend($commentList, webix.ProgressBar);
          }
       }
 
-      const dv = baseView.datacollection;
+      const dv = this.datacollection;
 
       if (!dv) return;
 
       // bind dc to component
-      // dv.bind($$(ids.component));
+      // dv.bind($$(ids.comment));
 
       if (!baseView.__dvEvents.create)
          baseView.__dvEvents.create = dv.on("create", () =>
@@ -106,7 +110,7 @@ module.exports = class ABViewCommentComponent extends ABViewComponent {
 
    getCommentData() {
       const baseView = this.view;
-      const dv = baseView.datacollection;
+      const dv = this.datacollection;
 
       if (!dv) return null;
 
@@ -125,7 +129,7 @@ module.exports = class ABViewCommentComponent extends ABViewComponent {
       dataObject.forEach((item, index) => {
          if (item[commentColName]) {
             const user = baseView.getUserData().find((user) => {
-               return user.value == item[userColName];
+               return user.value === item[userColName];
             });
             const data = {
                id: item.id,
@@ -140,14 +144,13 @@ module.exports = class ABViewCommentComponent extends ABViewComponent {
       });
 
       dataList.sort(function (a, b) {
-         if (dateColName) {
+         if (dateColName)
             return new Date(a.date).getTime() - new Date(b.date).getTime();
-         } else {
+         else
             return (
                new Date(a.default_date).getTime() -
                new Date(b.default_date).getTime()
             );
-         }
       });
 
       return dataList;
@@ -163,12 +166,12 @@ module.exports = class ABViewCommentComponent extends ABViewComponent {
       const ids = this.ids;
 
       baseView.__refreshTimeout = setTimeout(() => {
-         const $component = $$(ids.component) ?? null;
+         const $comment = $$(ids.comment);
 
-         if (!$component) return;
+         if (!$comment) return;
 
          // clear comments
-         const $commentList = $component.queryView({ view: "list" }) ?? null;
+         const $commentList = $comment.queryView({ view: "list" });
 
          if ($commentList) $commentList.clearAll();
 
@@ -176,7 +179,7 @@ module.exports = class ABViewCommentComponent extends ABViewComponent {
          const commentData = this.getCommentData();
 
          if (commentData) {
-            $component.parse(commentData);
+            $comment.parse(commentData);
          }
 
          // scroll to the last item
@@ -194,24 +197,24 @@ module.exports = class ABViewCommentComponent extends ABViewComponent {
 
    async updateComment(rowId, commentText) {
       const baseView = this.view;
-      const model = baseView.model() ?? null;
+      const model = baseView.model();
 
       if (!model) return; // already notified
 
       const commentField = baseView.getCommentField();
 
-      if (!commentField); // already notified
+      if (!commentField) return; // already notified
 
       const values = {};
 
-      values[commentField.columnName] = commentText || "";
+      values[commentField.columnName] = commentText ?? "";
 
       return await model.update(rowId, values);
    }
 
    async deleteComment(rowId) {
       const baseView = this.view;
-      const model = baseView.model() ?? null;
+      const model = baseView.model();
 
       if (!model) return;
 
@@ -220,11 +223,11 @@ module.exports = class ABViewCommentComponent extends ABViewComponent {
 
    busy() {
       const ids = this.ids;
-      const $component = $$(ids.component) ?? null;
+      const $comment = $$(ids.comment);
 
-      if (!$component) return;
+      if (!$comment) return;
 
-      const $commentList = $component.queryView({ view: "list" }) ?? null;
+      const $commentList = $comment.queryView({ view: "list" });
 
       if (!$commentList) return;
 
@@ -236,11 +239,11 @@ module.exports = class ABViewCommentComponent extends ABViewComponent {
 
    ready() {
       const ids = this.ids;
-      const $component = $$(ids.component) ?? null;
+      const $comment = $$(ids.comment);
 
-      if (!$component) return;
+      if (!$comment) return;
 
-      const $commentList = $component.queryView({ view: "list" }) ?? null;
+      const $commentList = $comment.queryView({ view: "list" });
 
       if (!$commentList) return;
 
@@ -252,15 +255,16 @@ module.exports = class ABViewCommentComponent extends ABViewComponent {
    async saveData(commentText, dateTime) {
       if (!commentText) return;
 
-      const baseView = this.view;
-      const dv = baseView.datacollection;
+      const dv = this.datacollection;
 
       if (!dv) return;
 
+      const baseView = this.view;
       const model = baseView.model();
+      const ab = this.AB;
 
       if (!model) {
-         this.AB.notify.builder(
+         ab.notify.builder(
             {},
             {
                message:
@@ -275,7 +279,7 @@ module.exports = class ABViewCommentComponent extends ABViewComponent {
       const comment = {};
       const userField = baseView.getUserField();
 
-      if (userField) comment[userField.columnName] = this.AB.Account.username();
+      if (userField) comment[userField.columnName] = ab.Account.username();
 
       const commentField = baseView.getCommentField();
 
@@ -288,15 +292,14 @@ module.exports = class ABViewCommentComponent extends ABViewComponent {
       // add parent cursor to default
       const dvLink = dv.datacollectionLink;
 
-      if (dvLink && dvLink.getCursor()) {
+      if (dvLink?.getCursor()) {
          const objectLink = dvLink.datasource;
          const fieldLink = dv.fieldLink;
 
          if (objectLink && fieldLink) {
             comment[fieldLink.columnName] = {};
-            comment[fieldLink.columnName][
-               objectLink.PK()
-            ] = dvLink.getCursor().id;
+            comment[fieldLink.columnName][objectLink.PK()] =
+               dvLink.getCursor().id;
          }
       }
 
@@ -304,10 +307,6 @@ module.exports = class ABViewCommentComponent extends ABViewComponent {
    }
 
    onShow(viewId) {
-      const ids = this.ids;
-
-      const baseView = this.view;
-
       super.onShow(viewId);
    }
 };

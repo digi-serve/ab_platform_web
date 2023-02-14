@@ -1,44 +1,24 @@
 const ABViewContainerComponent = require("./ABViewContainerComponent");
 
 module.exports = class ABViewChartComponent extends ABViewContainerComponent {
-   constructor(baseView, idBase) {
-      idBase = idBase ?? `ABViewChart_${baseView.id}`;
-
-      super(baseView, idBase);
-
-      this.view = baseView;
-      this.AB = this.view.AB;
+   constructor(baseView, idBase, ids) {
+      super(baseView, idBase || `ABViewChart_${baseView.id}`, ids);
    }
 
    ui() {
-      return {
-         // TODO: We have to refactor becuase we need "id" on the very top level for each viewComponent.
-         id: `${this.ids.component}_temp`,
-         type: "form",
-         borderless: true,
-         rows: [
-            {
-               // view: "scrollview",
-               body: super.ui(),
-            },
-         ],
-      };
+      return super.ui();
    }
 
-   async init(AB) {
-      this.AB = AB;
-
-      // get webix.dashboard
-      await super.init(AB, 2);
+   async init(AB, accessLevel) {
+      await super.init(AB, accessLevel);
 
       const $component = $$(this.ids.component);
+      const abWebix = this.AB.Webix;
 
-      if ($component) {
-         webix.extend($component, webix.ProgressBar);
-      }
+      if ($component) abWebix.extend($component, abWebix.ProgressBar);
 
       const baseView = this.view;
-      const dc = baseView.datacollection;
+      const dc = this.datacollection;
 
       if (dc) {
          const eventNames = [
@@ -51,7 +31,7 @@ module.exports = class ABViewChartComponent extends ABViewContainerComponent {
 
          if (
             dc.datacollectionLink &&
-            !("changeCursor" in dc.datacollectionLink._events)
+            !("changeCursor" in (dc.datacollectionLink._events ?? []))
          )
             baseView.eventAdd({
                emitter: dc.datacollectionLink,
@@ -61,13 +41,10 @@ module.exports = class ABViewChartComponent extends ABViewContainerComponent {
                },
             });
 
-         eventNames.forEach((e) => {
-            // Do we need this ? .eventAdd should check exists listener below
-            // if (e in dc._events) return;
-
+         eventNames.forEach((evtName) => {
             baseView.eventAdd({
                emitter: dc,
-               eventName: e,
+               eventName: evtName,
                listener: () => {
                   baseView.refreshData();
                },

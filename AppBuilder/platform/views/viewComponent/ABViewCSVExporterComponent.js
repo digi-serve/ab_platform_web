@@ -1,91 +1,100 @@
-const ABViewCSVExporterCore = require("../../../core/views/ABViewCSVExporterCore");
-const ClassUI = require("../../../../ui/ClassUI").default;
+const ABViewComponent = require("./ABViewComponent").default;
 
-const ABViewCSVExporterPropertyComponentDefaults =
-   ABViewCSVExporterCore.defaultValues();
+module.exports = class ABViewCSVExporterComponent extends ABViewComponent {
+   constructor(baseView, idBase, ids) {
+      super(
+         baseView,
+         idBase || `ABCSVExporter_${baseView.id}`,
+         Object.assign(
+            {
+               button: "",
+               buttonFilter: "",
+               filterComplex: "",
+            },
+            ids
+         )
+      );
 
-module.exports = class ABViewCSVExporterComponent extends ClassUI {
-   constructor(viewCSVExporter, idBase) {
-      idBase = idBase || `ABCSVExporter_${viewCSVExporter.id}`;
-
-      super(idBase, {
-         button: "",
-         buttonFilter: "",
-         popupFilter: "",
-      });
-
-      this.idBase = idBase;
-      this.view = viewCSVExporter;
+      this.clientFilter = null;
    }
 
    ui() {
       const ids = this.ids;
+      const settings = this.settings;
+      const defaultSettings = this.view.constructor.defaultValues();
+      const _ui = super.ui([
+         {
+            view: "layout",
+            type: "clean",
+            borderless: true,
+            cols: [
+               {
+                  id: ids.buttonFilter,
+                  view: "button",
+                  css: "webix_transparent",
+                  type: "icon",
+                  icon: "fa fa-filter",
+                  borderless: true,
+                  width: 50,
+                  label: "",
+                  click: () => {
+                     this.showFilterPopup();
+                  },
+               },
+               {
+                  id: ids.button,
+                  view: "button",
+                  css: "webix_primary",
+                  type: "icon",
+                  icon: "fa fa-download",
+                  borderless: true,
+                  width: settings.width || defaultSettings.width,
+                  label: settings.buttonLabel ?? defaultSettings.buttonLabel,
+                  click: () => {
+                     this.downloadCsvFile();
+                  },
+               },
+               { fillspace: true },
+            ],
+         },
+      ]);
 
-      return {
-         // TODO: We have to refactor becuase we need "id" on the very top level for each viewComponent.
-         id: `${this.ids.component}_temp`,
-         view: "layout",
-         type: "clean",
-         borderless: true,
-         cols: [
-            {
-               id: ids.buttonFilter,
-               view: "button",
-               css: "webix_transparent",
-               type: "icon",
-               icon: "fa fa-filter",
-               borderless: true,
-               width: 50,
-               label: "",
-               click: () => {
-                  this.showFilterPopup();
-               },
-            },
-            {
-               id: ids.button,
-               view: "button",
-               css: "webix_primary",
-               type: "icon",
-               icon: "fa fa-download",
-               borderless: true,
-               width:
-                  this.view?.settings?.width ||
-                  ABViewCSVExporterPropertyComponentDefaults.width,
-               label:
-                  this.view?.settings?.buttonLabel ??
-                  ABViewCSVExporterPropertyComponentDefaults.buttonLabel,
-               click: () => {
-                  this.downloadCsvFile();
-               },
-            },
-            { fillspace: true },
-         ],
-      };
+      delete _ui.type;
+
+      return _ui;
    }
 
-   init(AB) {
-      this.AB = AB;
-      this.clientFilter = this.AB.filterComplexNew(`${this.idBase}_filter`);
+   async init(AB) {
+      await super.init(AB);
 
-      const dc = this.view.datacollection;
-      if (dc) {
-         const obj = dc.datasource;
+      if (!this.clientFilter) {
+         const clientFilter = AB.filterComplexNew(this.ids.filterComplex);
 
-         this.clientFilter.fieldsLoad(obj?.fields?.() ?? []);
+         const dc = this.datacollection;
+
+         if (dc) {
+            const obj = dc.datasource;
+
+            clientFilter.fieldsLoad(obj?.fields?.() ?? []);
+         }
+
+         clientFilter.init();
+         clientFilter.on("change", (val) => {
+            this.onFilterChange(val);
+         });
+
+         this.clientFilter = clientFilter;
       }
-
-      this.clientFilter.init();
-      this.clientFilter.on("change", (val) => {
-         this.onFilterChange(val);
-      });
    }
 
    downloadCsvFile() {
       let url = `/appbuilder/csv-export/${this.view.id}`;
+
       const where = this.clientFilter.getValue();
 
-      if (where && (where.rules || []).length) {
+      if ((where?.rules || []).length) {
          let qsWhere = JSON.stringify(where);
+
          qsWhere = encodeURIComponent(qsWhere);
          url = `${url}?where=${qsWhere}`;
       }
@@ -95,14 +104,17 @@ module.exports = class ABViewCSVExporterComponent extends ClassUI {
 
    showFilterPopup() {
       const $buttonFilter = $$(this.ids.buttonFilter);
+
       this.clientFilter.popUp($buttonFilter ? $buttonFilter.$view : null);
    }
 
    onFilterChange() {
       const $buttonFilter = $$(this.ids.buttonFilter);
+
       if (!$buttonFilter) return;
 
       const where = this.clientFilter.getValue();
+
       $buttonFilter.define("badge", (where.rules || []).length || null);
       $buttonFilter.refresh();
    }

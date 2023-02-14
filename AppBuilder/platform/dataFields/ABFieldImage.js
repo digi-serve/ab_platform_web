@@ -36,8 +36,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
                      // TODO: a reminder that you still got alot on the server to do!
                      webix.alert({
                         title: "!! TODO !!",
-                        text:
-                           "ABFieldImage.destroy(): Tell a Developer to actually pay attention to this!",
+                        text: "ABFieldImage.destroy(): Tell a Developer to actually pay attention to this!",
                      });
 
                      await super.destroy();
@@ -303,9 +302,8 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
                            $$(node).updateItem(row.id, values);
                         } else {
                            // if you scroll the table the connection to the datatable is lost so we need to find it again
-                           const dataTable = document.querySelector(
-                              ".webix_dtable"
-                           );
+                           const dataTable =
+                              document.querySelector(".webix_dtable");
                            if ($$(dataTable) && $$(dataTable).getItem(row.id))
                               $$(dataTable).updateItem(row.id, values);
                         }

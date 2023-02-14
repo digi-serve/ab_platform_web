@@ -1,21 +1,14 @@
 const ABViewComponent = require("./ABViewComponent").default;
-const ABViewLayoutCore = require("../../../core/views/ABViewLayoutCore");
-
-const ABViewLayoutPropertyComponentDefaults = ABViewLayoutCore.defaultValues();
-
-const L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABViewLayoutComponent extends ABViewComponent {
-   constructor(baseView, idBase) {
-      idBase = idBase ?? `ABViewLayout_${baseView.id}`;
-      super(baseView, idBase, {
-         component: "",
-      });
+   constructor(baseView, idBase, ids) {
+      super(baseView, idBase || `ABViewLayout_${baseView.id}`, ids);
 
-      this.viewComponents = this.viewComponents ?? {}; // { viewId: viewComponent, ..., viewIdn: viewComponent }
-      this.view.views().forEach((v) => {
+      const viewComponents = this.viewComponents ?? {}; // { viewId: viewComponent, ..., viewIdn: viewComponent }
+
+      baseView.views().forEach((v) => {
          try {
-            this.viewComponents[v.id] = v.component();
+            viewComponents[v.id] = v.component();
          } catch (err) {
             // NOTE: The 'Layout' component supports only view component v2
             console.error(
@@ -24,34 +17,45 @@ module.exports = class ABViewLayoutComponent extends ABViewComponent {
             );
          }
       });
+
+      this.viewComponents = viewComponents;
    }
 
    ui() {
-      const uiComponents = Object.keys(this.viewComponents ?? {})
-         .map((vId) => this.viewComponents[vId].ui())
+      const viewComponents = this.viewComponents;
+      const uiComponents = Object.keys(viewComponents)
+         .map((vId) => viewComponents[vId].ui())
          .filter((ui) => ui);
+      const _ui = super.ui([
+         {
+            view: "layout",
+            cols: uiComponents,
+         },
+      ]);
 
-      return {
-         id: this.ids.component,
-         view: "layout",
-         cols: uiComponents,
-      };
+      delete _ui.type;
+
+      return _ui;
    }
 
-   init(options, accessLevel) {
+   async init(AB, accessLevel) {
+      await super.init(AB);
+
+      const baseView = this.view;
+
       // make sure each of our child views get .init() called
-      this.view.views().forEach((v) => {
+      baseView.views().forEach((v) => {
          const component = this.viewComponents[v.id];
 
          // initial sub-component
-         component?.init(options, accessLevel);
+         component?.init(AB, accessLevel);
 
          // Trigger 'changePage' event to parent
-         this.view.eventAdd({
+         baseView.eventAdd({
             emitter: v,
             eventName: "changePage",
             listener: (pageId) => {
-               this.view.changePage(pageId);
+               baseView.changePage(pageId);
             },
          });
       });

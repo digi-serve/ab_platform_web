@@ -1,23 +1,31 @@
 const ABViewComponent = require("./ABViewComponent").default;
 
 module.exports = class ABViewChartContainerComponent extends ABViewComponent {
-   constructor(baseView, idBase) {
-      idBase = idBase ?? `ABViewChartContainer_${baseView.id}`;
-
-      super(baseView, idBase);
-
-      this.view = baseView;
-      this.AB = this.view.AB;
+   constructor(baseView, idBase, ids) {
+      super(
+         baseView,
+         idBase || `ABViewChartContainer_${baseView.id}`,
+         Object.assign(
+            {
+               chartContainer: "",
+            },
+            ids
+         )
+      );
    }
 
-   ui() {
-      return {};
+   ui(uiChartComponent) {
+      const _ui = super.ui([
+         Object.assign({ id: this.ids.chartContainer }, uiChartComponent ?? {}),
+      ]);
+
+      delete _ui.type;
+
+      return _ui;
    }
 
    async init(AB) {
-      super.init(AB);
-
-      this.datacollection = this.view.parent.datacollection;
+      await super.init(AB);
    }
 
    onShow() {
@@ -29,15 +37,13 @@ module.exports = class ABViewChartContainerComponent extends ABViewComponent {
 
       baseView._isShow = true;
 
-      const parentView = baseView.parent;
-
-      this.refreshData(parentView.getDCChart());
+      this.refreshData(baseView.parent.getDCChart());
       // }
    }
 
    refreshData(dcChart) {
-      const $component = $$(this.ids.component);
+      const $chartContainer = $$(this.ids.chartContainer);
 
-      if ($component && $component.data) $component.data.sync(dcChart);
+      if ($chartContainer?.data) $chartContainer.data.sync(dcChart);
    }
 };
