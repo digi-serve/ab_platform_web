@@ -1,85 +1,78 @@
-let L = (...params) => AB.Multilingual.label(...params);
-
 const ABViewComponent = require("./ABViewComponent").default;
 
 module.exports = class ABViewFormItemComponent extends ABViewComponent {
    constructor(baseView, idBase, ids) {
-      var base = idBase || `ABViewFormComponent_${baseView.id}`;
-      super(baseView, base, ids);
-
-      this.view = baseView;
-      this.settings = baseView.settings;
-      this.AB = baseView.AB;
+      super(
+         baseView,
+         idBase || `ABViewFormItem_${baseView.id}`,
+         Object.assign({ formItem: "" }, ids)
+      );
    }
 
-   ui() {
+   ui(uiFormItemComponent = {}) {
       // setup 'label' of the element
-
-      var form = this.view.parentFormComponent(),
-         field = this.view.field(),
+      const baseView = this.view;
+      const form = baseView.parentFormComponent(),
+         field = baseView.field?.() || null,
          label = "";
-
-      var settings = {};
-      if (form) settings = form.settings;
-
-      var _ui = {
-         // TODO: We have to refactor becuase we need "id" on the very top level for each viewComponent.
-         id: `${this.ids.component}_temp`,
+      const settings = form?.settings || {};
+      const _uiFormItem = {
+         id: this.ids.formItem,
          labelPosition: settings.labelPosition,
          labelWidth: settings.labelWidth,
-         label: label,
+         label,
       };
 
-      if (field != null) {
-         _ui.name = field.columnName;
+      if (field) {
+         _uiFormItem.name = field.columnName;
 
          // default value
-         var data = {};
+         const data = {};
+
          field.defaultValue(data);
-         if (data[field.columnName]) _ui.value = data[field.columnName];
 
-         if (settings.showLabel == true) {
-            _ui.label = field.label;
-         }
+         if (data[field.columnName]) _uiFormItem.value = data[field.columnName];
 
-         if (
-            field.settings.required == true ||
-            this.settings.required == true
-         ) {
-            _ui.required = 1;
-         }
+         if (settings.showLabel) _uiFormItem.label = field.label;
 
-         if (this.settings.disable == 1) {
-            _ui.disabled = true;
-         }
+         if (field.settings.required || settings.required)
+            _uiFormItem.required = 1;
+
+         if (settings.disable === 1) _uiFormItem.disabled = true;
 
          // add data-cy to form element for better testing code
-         _ui.on = {
+         _uiFormItem.on = {
             onAfterRender() {
                if (this.getList) {
-                  var popup = this.getPopup();
+                  const popup = this.getPopup();
+
                   if (!popup) return;
+
                   this.getList().data.each((option) => {
                      if (!option) return;
+
                      // our option.ids are based on builder input and can include the ' character
-                     var node = popup.$view.querySelector(
+                     const node = popup.$view.querySelector(
                         `[webix_l_id='${(option?.id ?? "")
                            .toString()
                            .replaceAll("'", "\\'")}']`
                      );
+
                      if (!node) return;
+
                      node.setAttribute(
                         "data-cy",
                         `${field.key} options ${option.id} ${field.id} ${
-                           form ? form.id : "nf"
+                           form?.id || "nf"
                         }`
                      );
                   });
                }
+
                this.getInputNode?.().setAttribute?.(
                   "data-cy",
                   `${field.key} ${field.columnName} ${field.id} ${
-                     form ? form.id : "nf"
+                     form.id || "nf"
                   }`
                );
             },
@@ -88,19 +81,21 @@ module.exports = class ABViewFormItemComponent extends ABViewComponent {
          // this may be needed if we want to format data at this point
          // if (field.format) data = field.format(data);
 
-         _ui.validate = (val, data, colName) => {
-            let validator = this.AB.Validation.validator();
+         _uiFormItem.validate = (val, data, colName) => {
+            const validator = this.AB.Validation.validator();
 
             field.isValidData(data, validator);
 
             return validator.pass();
          };
       }
-      return _ui;
-   }
 
-   init(AB) {
-      this.AB = AB;
-      return Promise.resolve();
+      const _ui = super.ui([
+         Object.assign({}, _uiFormItem, uiFormItemComponent),
+      ]);
+
+      delete _ui.type;
+
+      return _ui;
    }
 };

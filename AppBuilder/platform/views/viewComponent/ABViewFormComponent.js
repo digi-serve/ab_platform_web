@@ -10,25 +10,44 @@ async function timeout(ms) {
 const fieldValidations = [];
 
 module.exports = class ABViewFormComponent extends ABViewComponent {
-   constructor(baseView, idBase) {
-      idBase = idBase || `ABViewForm_${baseView.id}`;
-      super(baseView, idBase, {
-         layout: "",
-         filterComplex: "",
-      });
+   constructor(baseView, idBase, ids) {
+      super(
+         baseView,
+         idBase || `ABViewForm_${baseView.id}`,
+         Object.assign(
+            {
+               form: "",
+
+               layout: "",
+               filterComplex: "",
+               reloadView: "",
+            },
+            ids
+         )
+      );
+
+      this.timerId = null;
+
+      this._showed = false;
    }
 
    ui() {
-      const superComponent = this.view.superComponent();
+      const baseView = this.view;
+      const superComponent = baseView.superComponent();
       const rows = superComponent.ui().rows ?? [];
       const fieldValidationsHolder = this.uiValidationHolder();
+      const _ui = super.ui([
+         {
+            id: this.ids.form,
+            view: "form",
+            abid: baseView.id,
+            rows: rows.concat(fieldValidationsHolder),
+         },
+      ]);
 
-      return {
-         id: this.ids.component,
-         view: "form",
-         abid: this.view.id,
-         rows: rows.concat(fieldValidationsHolder),
-      };
+      delete _ui.type;
+
+      return _ui;
    }
 
    uiValidationHolder() {
@@ -38,20 +57,22 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
             rows: [],
          },
       ];
+
       // NOTE: this._currentObject can be set in the KanBan Side Panel
-      const object =
-         this.view.datacollection?.datasource ?? this.view._currentObject;
+      const baseView = this.view;
+      const object = this.datacollection?.datasource ?? baseView._currentObject;
+
       if (!object) return result;
 
       const validationUI = [];
-      const existsFields = this.view.fieldComponents();
+      const existsFields = baseView.fieldComponents();
 
       object
          // Pull fields that have validation rules
          .fields((f) => f?.settings?.validationRules)
          .forEach((f) => {
             const view = existsFields.find(
-               (com) => f.id == com.settings.fieldId
+               (com) => f.id === com.settings.fieldId
             );
             if (!view) return;
 
@@ -69,7 +90,7 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
                   `${f.columnName}_${indx}`
                );
                // add the new ui to an array so we can add them all at the same time
-               if (typeof Filter.ui == "function") {
+               if (typeof Filter.ui === "function") {
                   validationUI.push(Filter.ui());
                } else {
                   // Legacy v1 method:
@@ -92,8 +113,9 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
       return result;
    }
 
-   init(AB, accessLevel, options = {}) {
-      this.AB = AB;
+   async init(AB, accessLevel, options = {}) {
+      await super.init(AB);
+
       this.view.superComponent().init(AB, accessLevel, options);
 
       this.initCallbacks(options);
@@ -101,29 +123,36 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
       this.initValidationRules();
       this.loadDcDataOfRecordRules();
 
-      const $Form = $$(this.ids.component);
-      if ($Form) {
-         webix.extend($Form, this.AB.Webix.ProgressBar);
+      const abWebix = this.AB.Webix;
+      const $form = $$(this.ids.form);
+
+      if ($form) {
+         abWebix.extend($form, abWebix.ProgressBar);
       }
 
-      if (accessLevel < 2) {
-         $Form.disable();
-      }
+      if (accessLevel < 2) $form.disable();
    }
 
    initCallbacks(options = {}) {
-      // Q: Should we use emit the event instead ?
-      if (options.onBeforeSaveData) {
-         this.view._callbacks.onBeforeSaveData = options.onBeforeSaveData;
-      } else {
-         this.view._callbacks.onBeforeSaveData = () => true;
+      // ? We need to determine from these options whether to clear on load?
+      if (options?.clearOnLoad) {
+         // does this need to be a function?
+         this.view.settings.clearOnLoad = options.clearOnLoad();
       }
+      // Q: Should we use emit the event instead ?
+      const baseView = this.view;
+
+      if (options.onBeforeSaveData)
+         baseView._callbacks.onBeforeSaveData = options.onBeforeSaveData;
+      else baseView._callbacks.onBeforeSaveData = () => true;
    }
 
    initEvents() {
       // bind a data collection to form component
-      const dc = this.view.datacollection;
+      const dc = this.datacollection;
+
       if (!dc) return;
+
       // listen DC events
       this.eventAdd({
          emitter: dc,
@@ -133,14 +162,18 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
          },
       });
 
+      const ids = this.ids;
+
       this.eventAdd({
          emitter: dc,
          eventName: "initializingData",
          listener: () => {
-            const $Form = $$(this.ids.component);
-            if ($Form) {
-               $Form.disable();
-               if ($Form.showProgress) $Form.showProgress({ type: "icon" });
+            const $form = $$(ids.form);
+
+            if ($form) {
+               $form.disable();
+
+               $form.showProgress?.({ type: "icon" });
             }
          },
       });
@@ -149,10 +182,12 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
          emitter: dc,
          eventName: "initializedData",
          listener: () => {
-            const $Form = $$(this.ids.component);
-            if ($Form) {
-               $Form.enable();
-               if ($Form.hideProgress) $Form.hideProgress();
+            const $form = $$(ids.form);
+
+            if ($form) {
+               $form.enable();
+
+               $form.hideProgress?.();
             }
          },
       });
@@ -161,17 +196,19 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
          emitter: dc,
          eventName: "ab.datacollection.update",
          listener: (msg, data) => {
-            if (!data || !data.objectId) return;
+            if (!data?.objectId) return;
 
             const object = dc.datasource;
+
             if (!object) return;
 
             if (
-               object.id == data.objectId ||
-               object.fields((f) => f.settings.linkObject == data.objectId)
+               object.id === data.objectId ||
+               object.fields((f) => f.settings.linkObject === data.objectId)
                   .length > 0
             ) {
                const currData = dc.getCursor();
+
                if (currData) this.displayData(currData);
             }
          },
@@ -179,7 +216,8 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
 
       // bind the cursor event of the parent DC
       const linkDv = dc.datacollectionLink;
-      if (linkDv) {
+
+      if (linkDv)
          // update the value of link field when data of the parent dc is changed
          this.eventAdd({
             emitter: linkDv,
@@ -188,23 +226,25 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
                this.displayParentData(rowData);
             },
          });
-      }
    }
 
    initValidationRules() {
-      const dc = this.view.datacollection;
+      const dc = this.datacollection;
+
       if (!dc) return;
 
       if (!fieldValidations.length) return;
 
       // we need to store the rules for use later so lets build a container array
       const complexValidations = [];
+
       fieldValidations.forEach((f) => {
          // init each ui to have the properties (app and fields) of the object we are editing
          f.filter.applicationLoad(dc.datasource.application);
          f.filter.fieldsLoad(dc.datasource.fields());
          // now we can set the value because the fields are properly initialized
          f.filter.setValue(f.validationRules);
+
          // if there are validation rules present we need to store them in a lookup hash
          // so multiple rules can be stored on a single field
          if (!Array.isArray(complexValidations[f.columnName]))
@@ -213,45 +253,52 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
          // now we can push the rules into the hash
          complexValidations[f.columnName].push({
             filters: $$(f.view).getFilterHelper(),
-            // values: $$(ids.component).getValues(),
+            // values: $$(ids.form).getValues(),
             invalidMessage: f.invalidMessage,
          });
       });
 
+      const ids = this.ids;
+
       // use the lookup to build the validation rules
-      Object.keys(complexValidations).forEach(function (key) {
+      Object.keys(complexValidations).forEach((key) => {
          // get our field that has validation rules
-         const formField = $$(this.ids.component).queryView({
+         const formField = $$(ids.form).queryView({
             name: key,
          });
+
          // store the rules in a data param to be used later
          formField.$view.complexValidations = complexValidations[key];
          // define validation rules
          formField.define("validate", function (nval, oval, field) {
             // get field now that we are validating
-            const fieldValidating = $$(this.ids.component).queryView({
+            const fieldValidating = $$(ids.form).queryView({
                name: field,
             });
+
             // default valid is true
             let isValid = true;
+
             // check each rule that was stored previously on the element
             fieldValidating.$view.complexValidations.forEach((filter) => {
-               let object = dc.datasource;
-               let data = this.getValues();
+               const object = dc.datasource;
+               const data = this.getValues();
+
                // convert rowData from { colName : data } to { id : data }
                const newData = {};
+
                (object.fields() || []).forEach((field) => {
                   newData[field.id] = data[field.columnName];
                });
+
                // for the case of "this_object" conditions:
-               if (data.uuid) {
-                  newData["this_object"] = data.uuid;
-               }
+               if (data.uuid) newData["this_object"] = data.uuid;
 
                // use helper funtion to check if valid
                const ruleValid = filter.filters(newData);
+
                // if invalid we need to tell the field
-               if (ruleValid == false) {
+               if (!ruleValid) {
                   isValid = false;
                   // we also need to define an error message
                   fieldValidating.define(
@@ -260,28 +307,29 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
                   );
                }
             });
+
             return isValid;
          });
+
          formField.refresh();
       });
    }
 
    loadDcDataOfRecordRules() {
-      (this.view?.settings?.recordRules ?? []).forEach((rule) => {
+      (this.settings?.recordRules ?? []).forEach((rule) => {
          (rule?.actionSettings?.valueRules?.fieldOperations ?? []).forEach(
             (op) => {
-               if (op.valueType != "exist") return;
+               if (op.valueType !== "exist") return;
 
                const pullDataDC = this.AB.datacollections(
-                  (dc) => dc.id == op.value
+                  (dc) => dc.id === op.value
                )[0];
 
                if (
-                  pullDataDC != null &&
-                  pullDataDC.dataStatus == pullDataDC.dataStatusFlag.notInitial
-               ) {
+                  pullDataDC &&
+                  pullDataDC.dataStatus === pullDataDC.dataStatusFlag.notInitial
+               )
                   pullDataDC.loadData();
-               }
             }
          );
       });
@@ -290,39 +338,42 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
    onShow(data) {
       this._showed = true;
 
-      const view = this.view;
+      const baseView = this.view;
 
       // call .onShow in the base component
-      const superComponent = view.superComponent();
+      const superComponent = baseView.superComponent();
+
       superComponent.onShow();
 
-      const $form = $$(this.ids.component);
-      const dc = view.datacollection;
+      const ids = this.ids;
+      const $form = $$(this.ids.form);
+      const dc = this.datacollection;
+
       if (dc) {
          if ($form) dc.bind($form);
 
          // clear current cursor on load
          // if (this.settings.clearOnLoad || _logic.callbacks.clearOnLoad() ) {
-         if (view.settings.clearOnLoad) {
+         const settings = this.settings;
+
+         if (settings.clearOnLoad) {
             dc.setCursor(null);
             this.displayData(null);
          }
+
          // if the cursor is cleared before or after we need to make
          // sure the reload view button does not appear
-         if (view.settings.clearOnLoad || view.settings.clearOnSave) {
-            const reloadViewId = `${this.ids.component}_reloadView`;
-            $$(reloadViewId)?.getParentView()?.removeView(reloadViewId);
-         }
+         if (settings.clearOnLoad || settings.clearOnSave)
+            $$(ids.reloadView)?.getParentView()?.removeView(ids.reloadView);
 
          // pull data of current cursor
          const rowData = dc.getCursor();
 
          // do this for the initial form display so we can see defaults
          this.displayData(rowData);
-      } else {
-         // show blank data in the form
-         this.displayData(data ?? {});
       }
+      // show blank data in the form
+      else this.displayData(data ?? {});
 
       //Focus on first focusable component
       this.focusOnFirst();
@@ -332,117 +383,131 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
 
    async displayData(rowData) {
       // If setTimeout is already scheduled, no need to do anything
-      if (this.timerId) {
-         return;
-      } else {
-         this.timerId = await timeout(80);
-      }
+      if (this.timerId) return;
+      else this.timerId = await timeout(80);
 
-      const customFields = this.view.fieldComponents(
+      const baseView = this.view;
+      const customFields = baseView.fieldComponents(
          (comp) =>
             comp instanceof ABViewFormCustom ||
             // rich text
-            (comp instanceof ABViewFormTextbox && comp.settings.type == "rich")
+            (comp instanceof ABViewFormTextbox && comp.settings.type === "rich")
       );
 
       // Set default values
-      if (rowData == null) {
+      if (!rowData) {
          customFields.forEach((f) => {
             const field = f.field();
+
             if (!field) return;
 
-            const comp = this.view.viewComponents[f.id];
-            if (comp == null) return;
+            const comp = baseView.viewComponents[f.id];
+
+            if (!comp) return;
 
             // var colName = field.columnName;
             if (this._showed) comp?.onShow?.();
 
             // set value to each components
             const defaultRowData = {};
+
             field.defaultValue(defaultRowData);
-            field.setValue($$(comp.ids.component), defaultRowData);
+            field.setValue($$(comp.ids.formItem), defaultRowData);
 
             comp?.refresh?.(defaultRowData);
          });
-         const normalFields = this.view.fieldComponents(
+
+         const normalFields = baseView.fieldComponents(
             (comp) =>
                comp instanceof ABViewFormItem &&
                !(comp instanceof ABViewFormCustom)
          );
+
          normalFields.forEach((f) => {
             const field = f.field();
+
             if (!field) return;
 
-            const comp = this.view.viewComponents[f.id];
-            if (comp == null) return;
+            const comp = baseView.viewComponents[f.id];
 
-            if (f.key == "button") return;
+            if (!comp) return;
+
+            if (f.key === "button") return;
 
             const colName = field.columnName;
 
             // set value to each components
             const values = {};
+
             field.defaultValue(values);
-            $$(comp.ids.component)?.setValue(values[colName] ?? "");
+            $$(comp.ids.formItem)?.setValue(values[colName] ?? "");
          });
 
          // select parent data to default value
-         const dc = this.view.datacollection;
+         const dc = this.datacollection;
          const linkDv = dc.datacollectionLink;
+
          if (linkDv) {
             const parentData = linkDv.getCursor();
+
             this.displayParentData(parentData);
          }
       }
 
       // Populate value to custom fields
-      else {
+      else
          customFields.forEach((f) => {
-            var comp = this.view.viewComponents[f.id];
-            if (comp == null) return;
+            const comp = baseView.viewComponents[f.id];
+
+            if (!comp) return;
 
             if (this._showed) comp?.onShow?.();
 
             // set value to each components
-            f?.field()?.setValue($$(comp.ids.component), rowData);
+            f?.field()?.setValue($$(comp.ids.formItem), rowData);
 
             comp?.refresh?.(rowData);
          });
-      }
 
-      this.timerId = undefined;
+      this.timerId = null;
    }
 
    displayParentData(rowData) {
-      const dc = this.view.datacollection;
+      const dc = this.datacollection;
 
       // If the cursor is selected, then it will not update value of the parent field
       const currCursor = dc.getCursor();
-      if (currCursor != null) return;
+
+      if (currCursor) return;
 
       const relationField = dc.fieldLink;
-      if (relationField == null) return;
 
+      if (!relationField) return;
+
+      const baseView = this.view;
       // Pull a component of relation field
-      const relationFieldCom = this.view.fieldComponents((comp) => {
+      const relationFieldCom = baseView.fieldComponents((comp) => {
          if (!(comp instanceof ABViewFormItem)) return false;
 
-         return comp.field() && comp.field().id == relationField.id;
+         return comp.field() && comp.field().id === relationField.id;
       })[0];
-      if (relationFieldCom == null) return;
 
-      const relationFieldView = this.view.viewComponents[relationFieldCom.id];
-      if (relationFieldView == null) return;
+      if (!relationFieldCom) return;
 
-      const relationElem = $$(relationFieldView.ids.component),
+      const relationFieldView = baseView.viewComponents[relationFieldCom.id];
+
+      if (!relationFieldView) return;
+
+      const $relationFieldView = $$(relationFieldView.ids.formItem),
          relationName = relationField.relationName();
 
       // pull data of parent's dc
       const formData = {};
+
       formData[relationName] = rowData;
 
       // set data of parent to default value
-      relationField.setValue(relationElem, formData);
+      relationField.setValue($relationFieldView, formData);
    }
 
    detatch() {
@@ -450,19 +515,22 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
    }
 
    focusOnFirst() {
+      const baseView = this.view;
+
       let topPosition = 0;
       let topPositionId = "";
-      this.view.views().forEach((item) => {
-         if (item.key == "textbox" || item.key == "numberbox") {
-            if (item.position.y == topPosition) {
+
+      baseView.views().forEach((item) => {
+         if (item.key === "textbox" || item.key === "numberbox")
+            if (item.position.y === topPosition) {
                topPosition = item.position.y;
                topPositionId = item.id;
             }
-         }
       });
-      const childComponent = this.view.viewComponents[topPositionId];
-      if (childComponent && $$(childComponent.ids.component)) {
-         $$(childComponent.ids.component).focus();
-      }
+
+      const childComponent = baseView.viewComponents[topPositionId];
+
+      if (childComponent && $$(childComponent.ids.formItem))
+         $$(childComponent.ids.formItem).focus();
    }
 };

@@ -1,47 +1,34 @@
-const ABViewConditionalContainerCore = require("../../../core/views/ABViewConditionalContainerCore");
 const ABViewContainerComponent = require("./ABViewContainerComponent");
-
-const ABViewPropertyDefaults = ABViewConditionalContainerCore.defaultValues();
 
 module.exports = class ABViewConditionalContainerComponent extends (
    ABViewContainerComponent
 ) {
    constructor(baseView, idBase, ids) {
-      idBase = idBase ?? `ABViewConditionalContainerComponent_${baseView.id}`;
-      super(baseView, idBase, {
-         component: "",
-      });
+      super(
+         baseView,
+         idBase || `ABViewConditionalContainer_${baseView.id}`,
+         Object.assign(
+            {
+               batch: "",
+            },
+            ids
+         )
+      );
+
+      this._ifComponent = null;
+      this._elseComponent = null;
 
       // Set filter value
-      this.__filterComponent = this.view.AB.filterComplexNew(
-         `${this.view.id}_filterComponent`
+      this.__filterComponent = baseView.AB.filterComplexNew(
+         `${baseView.id}_filterComponent`
       );
       // this.__filterComponent.applicationLoad(application);
       this.populateFilterComponent();
    }
 
    ui() {
-      // NOTE: call this to listen "changePage" event !!!
-      super.ui();
-
-      const ifComp = this.ifComponent;
-      const elseComp = this.elseComponent;
-
-      let uiIf = { fillspace: true };
-      let uiElse = { fillspace: true };
-
-      if (ifComp) {
-         uiIf = ifComp.ui();
-         uiIf.batch = "if";
-      }
-
-      if (elseComp) {
-         uiElse = elseComp.ui();
-         uiElse.batch = "else";
-      }
-
-      return {
-         id: this.ids.component,
+      const _uiConditionalContainer = {
+         id: this.ids.batch,
          view: "multiview",
          cells: [
             {
@@ -54,31 +41,43 @@ module.exports = class ABViewConditionalContainerComponent extends (
                   },
                ],
             },
-            uiIf,
-            uiElse,
          ],
       };
+      const _ui = super.ui([_uiConditionalContainer]);
+
+      _uiConditionalContainer.cells.push(
+         Object.assign({ batch: "if" }, this.ifComponent.ui()),
+         Object.assign({ batch: "else" }, this.elseComponent.ui())
+      );
+
+      delete _ui.type;
+
+      return _ui;
    }
 
-   init(options, accessLevel) {
-      const view = this.view;
+   async init(AB, accessLevel) {
+      await super.init(AB, accessLevel);
 
-      super.init(view.AB, accessLevel);
-      this.ifComponent?.init(view.AB, accessLevel);
-      this.elseComponent?.init(view.AB, accessLevel);
+      await Promise.all([
+         this.ifComponent.init(AB, accessLevel),
+         this.elseComponent.init(AB, accessLevel),
+      ]);
 
       this.populateFilterComponent();
 
-      const dc = view.datacollection;
+      const dc = this.datacollection;
+
       if (dc) {
+         const baseView = this.view;
+
          // listen DC events
-         view.eventAdd({
+         baseView.eventAdd({
             emitter: dc,
             eventName: "loadData",
             listener: () => this.displayView(), // Q? does this need to remain empty param?
          });
 
-         view.eventAdd({
+         baseView.eventAdd({
             emitter: dc,
             eventName: "changeCursor",
             listener: (...p) => this.displayView(...p),
@@ -88,63 +87,73 @@ module.exports = class ABViewConditionalContainerComponent extends (
       this.displayView();
    }
 
-   async onShow() {
+   onShow() {
+      super.onShow();
+
       this.populateFilterComponent();
       this.displayView();
    }
 
    get ifComponent() {
-      if (!this._ifComponent)
-         this._ifComponent = this.view.views()[0]?.component();
-
-      return this._ifComponent;
+      return (this._ifComponent =
+         this._ifComponent ||
+         this.view
+            .views()
+            .find((v) => v?.name === "If")
+            .component());
    }
 
    get elseComponent() {
-      if (!this._elseComponent)
-         this._elseComponent = this.view.views()[1]?.component();
-
-      return this._elseComponent;
+      return (this._elseComponent =
+         this._elseComponent ||
+         this.view
+            .views()
+            .find((v) => v?.name === "Else")
+            .component());
    }
 
    displayView(currData) {
-      const dc = this.view.datacollection;
+      const dc = this.datacollection;
+      const ids = this.ids;
+      const $batch = $$(ids.batch);
+
       if (dc) {
-         if (currData == null) {
-            currData = dc.getCursor();
-         }
+         if (!currData) currData = dc.getCursor();
 
          // show 'waiting' panel
          if (
             !currData &&
-            (dc.dataStatus == dc.dataStatusFlag.notInitial ||
-               dc.dataStatus == dc.dataStatusFlag.initializing)
+            (dc.dataStatus === dc.dataStatusFlag.notInitial ||
+               dc.dataStatus === dc.dataStatusFlag.initializing)
          ) {
-            $$(this.ids.component)?.showBatch("wait");
+            $batch.showBatch("wait");
+
             return;
          }
       }
 
       const isValid = this.__filterComponent.isValid(currData);
+
       if (isValid) {
          // if (isValid && currData) {
-         $$(this.ids.component).showBatch("if");
+         $batch.showBatch("if");
          this.ifComponent?.onShow?.();
       } else {
-         $$(this.ids.component).showBatch("else");
+         $batch.showBatch("else");
          this.elseComponent?.onShow?.();
       }
    }
 
    populateFilterComponent() {
-      const dc = this.view.datacollection;
-      if (dc?.datasource)
-         this.__filterComponent.fieldsLoad(dc.datasource.fields());
-      else this.__filterComponent.fieldsLoad([]);
+      const dc = this.datacollection;
+      const __filterComponent = this.__filterComponent;
 
-      this.__filterComponent.setValue(
-         this.view.settings.filterConditions ??
-            ABViewPropertyDefaults.filterConditions
+      if (dc?.datasource) __filterComponent.fieldsLoad(dc.datasource.fields());
+      else __filterComponent.fieldsLoad([]);
+
+      __filterComponent.setValue(
+         this.settings.filterConditions ??
+            this.view.constructor.defaultValues().filterConditions
       );
    }
 };

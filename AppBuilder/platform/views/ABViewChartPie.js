@@ -1,8 +1,6 @@
 const ABViewChartPieCore = require("../../core/views/ABViewChartPieCore");
 const ABViewChartPieComponent = require("./viewComponent/ABViewChartPieComponent");
 
-let L = (...params) => AB.Multilingual.label(...params);
-
 module.exports = class ABViewChartPie extends ABViewChartPieCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
@@ -34,6 +32,4 @@ module.exports = class ABViewChartPie extends ABViewChartPieCore {
 
       return component;
    }
-
-   componentOld() {}
 };

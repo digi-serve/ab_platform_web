@@ -1,10 +1,5 @@
 const ABViewCommentCore = require("../../core/views/ABViewCommentCore");
-
 const ABViewCommentComponent = require("./viewComponent/ABViewCommentComponent");
-
-const ABViewCommentPropertyComponentDefaults = ABViewCommentCore.defaultValues();
-
-let L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABViewComment extends ABViewCommentCore {
    // constructor(values, application, parent, defaultValues) {
@@ -37,6 +32,4 @@ module.exports = class ABViewComment extends ABViewCommentCore {
 
       return component;
    }
-
-   componentOld() {}
 };

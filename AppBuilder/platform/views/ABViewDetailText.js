@@ -1,10 +1,6 @@
 const ABViewDetailTextCore = require("../../core/views/ABViewDetailTextCore");
 const ABViewDetailTextComponent = require("./viewComponent/ABViewDetailTextComponent");
 
-// const ABViewDetailTextPropertyComponentDefaults = ABViewDetailTextCore.defaultValues();
-
-// let L = (...params) => AB.Multilingual.label(...params);
-
 module.exports = class ABViewDetailText extends ABViewDetailTextCore {
    /**
     * @param {obj} values  key=>value hash of ABView values
@@ -14,46 +10,6 @@ module.exports = class ABViewDetailText extends ABViewDetailTextCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
    // }
-
-   //
-   //	Editor Related
-   //
-
-   /**
-    * @method editorComponent
-    * return the Editor for this UI component.
-    * the editor should display either a "block" view or "preview" of
-    * the current layout of the view.
-    * @param {string} mode what mode are we in ['block', 'preview']
-    * @return {Component}
-    */
-   // editorComponent(App, mode) {
-   //    var idBase = "ABViewDetailTextEditorComponent";
-   //    var ids = {
-   //       component: App.unique(`${idBase}_component`),
-   //    };
-
-   //    var textElem = this.component(App).ui;
-   //    textElem.id = ids.component;
-
-   //    var _ui = {
-   //       rows: [textElem, {}],
-   //    };
-
-   //    var _init = (options) => {};
-
-   //    var _logic = {};
-
-   //    return {
-   //       ui: _ui,
-   //       init: _init,
-   //       logic: _logic,
-   //    };
-   // }
-
-   //
-   // Property Editor
-   //
 
    /**
     * @method component()
@@ -80,40 +36,5 @@ module.exports = class ABViewDetailText extends ABViewDetailTextCore {
       }
 
       return component;
-   }
-
-   componentOld(App, idPrefix) {
-      var component = super.component(App);
-      var field = this.field();
-      var idBase = "ABViewDetailText_" + (idPrefix || "") + this.id;
-      var ids = {
-         component: App.unique(`${idBase}_component`),
-         detail: this.parentDetailComponent()?.id || this.parent.id,
-      };
-
-      component.ui.id = ids.component;
-
-      component.ui.css = "ab-text";
-
-      if (this.settings.height) component.ui.height = this.settings.height;
-
-      component.ui.on = {
-         //Add data-cy attribute for Cypress Testing
-         onAfterRender: () => {
-            const dataCy = `detail text ${field?.columnName} ${field?.id} ${ids.detail}`;
-            $$(ids.component)?.$view.setAttribute("data-cy", dataCy);
-         },
-      };
-
-      return {
-         ui: component.ui,
-         init: component.init,
-
-         logic: {
-            setValue: (val) => {
-               component.logic.setValue(ids.component, val);
-            },
-         },
-      };
    }
 };

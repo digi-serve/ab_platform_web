@@ -55,6 +55,7 @@ module.exports = {
       tinymce: true,
       Selectivity: true,
       webix: true, // webix
+      gantt: true,
       $$: true, // webix element
    },
 };

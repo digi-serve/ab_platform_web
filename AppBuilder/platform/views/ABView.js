@@ -1,8 +1,6 @@
 const ABViewCore = require("../../core/views/ABViewCore.js");
 const ABViewComponent = require("./viewComponent/ABViewComponent").default;
 
-let L = (...params) => AB.Multilingual.label(...params);
-
 module.exports = class ABView extends ABViewCore {
    // constructor(attributes, application, parent) {
    //    super(attributes, application, parent);

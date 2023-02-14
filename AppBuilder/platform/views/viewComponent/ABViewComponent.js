@@ -6,12 +6,12 @@ import ClassUI from "../../../../ui/ClassUI";
 
 export default class ABViewComponent extends ClassUI {
    constructor(baseView, idBase, ids) {
-      idBase = idBase || `ABViewContainer_${baseView.id}`;
-      super(idBase, ids);
+      super(idBase || `ABView_${baseView.id}`, ids);
 
       this.view = baseView;
       this.settings = baseView.settings;
       this.AB = baseView.AB;
+      this.datacollection = baseView.datacollection;
 
       this.__events = [];
       // {array}
@@ -48,27 +48,25 @@ export default class ABViewComponent extends ClassUI {
       return this.AB.datacollectionByID(this.CurrentDatacollectionID);
    }
 
-   ui() {
+   ui(uiComponents = []) {
       // an ABView is a collection of rows:
-      this._ui = this._ui ?? {
+      const _ui = {
          id: this.ids.component,
          view: "layout",
          type: "space",
-         rows: [],
+         rows: uiComponents,
       };
 
       // if this form is empty, then force a minimal row height
       // so the component isn't completely hidden on the screen.
       // (important in the editor so we don't loose the ability to edit the
       // component)
-      if (this._ui.rows.length == 0) {
-         this._ui.height = 30;
-      }
+      if (!_ui.rows.length) _ui.height = 30;
 
-      return this._ui;
+      return _ui;
    }
 
-   init(AB) {
+   async init(AB) {
       this.AB = AB;
    }
 
@@ -78,11 +76,11 @@ export default class ABViewComponent extends ClassUI {
     * @param datacollection {ABDatacollection}
     */
    datacollectionLoad(datacollection) {
-      this.CurrentDatacollectionID = datacollection.id;
+      this.CurrentDatacollectionID = datacollection?.id;
    }
 
    objectLoad(object) {
-      this.CurrentObjectID = object.id;
+      this.CurrentObjectID = object?.id;
    }
 
    /**
@@ -101,14 +99,15 @@ export default class ABViewComponent extends ClassUI {
       if (!evt || !evt.emitter || !evt.listener) return;
 
       // make sure we haven't done this before:
-      var exists = this.__events.find((e) => {
-         return e.emitter == evt.emitter && e.eventName == evt.eventName;
-         // && e.listener == evt.listener;
-      });
+      const __events = this.__events;
+      const exists = __events.filter(
+         (e) => e.emitter === evt.emitter && e.eventName === evt.eventName
+         // && e.listener === evt.listener
+      );
 
-      if (!exists || exists.length < 1) {
+      if (!exists.length) {
          // add to array
-         this.__events.push({
+         __events.push({
             emitter: evt.emitter,
             eventName: evt.eventName,
             listener: evt.listener,
@@ -124,9 +123,10 @@ export default class ABViewComponent extends ClassUI {
     * Remove all the attached event listeners and reset our tracking.
     */
    eventsClear() {
-      (this.__events || []).forEach((e) => {
-         e.emitter.removeListener(e.eventName, e.listener);
+      this.__events.forEach((evt) => {
+         evt.emitter.removeListener(evt.eventName, evt.listener);
       });
+
       this.__events = [];
    }
 
@@ -137,10 +137,12 @@ export default class ABViewComponent extends ClassUI {
    onShow() {
       // if we manage a datacollection, then make sure it has started
       // loading it's data when we are showing our component.
-      const dv = this.datacollection ?? this.view.datacollection;
-      if (dv && dv.dataStatus == dv.dataStatusFlag.notInitial) {
+      const dc = this.datacollection;
+
+      if (!dc) return;
+
+      if (dc.dataStatus === dc.dataStatusFlag.notInitial)
          // load data when a widget is showing
-         dv.loadData();
-      }
+         dc.loadData();
    }
 }
