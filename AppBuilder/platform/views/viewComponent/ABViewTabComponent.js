@@ -2,18 +2,6 @@ const ABViewComponent = require("./ABViewComponent").default;
 
 module.exports = class ABViewTabComponent extends ABViewComponent {
    constructor(baseView, idBase, ids) {
-      // get a UI component for each of our child views
-      baseView._viewComponents =
-         baseView._viewComponents ||
-         baseView
-            .views((v) => v.getUserAccess())
-            .map((v) => {
-               return {
-                  view: v,
-                  // component: v.component(App)
-               };
-            });
-
       super(
          baseView,
          idBase || `ABViewTab_${baseView.id}`,
@@ -32,6 +20,17 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
             ids
          )
       );
+
+      this.viewComponents =
+         this.viewComponents ||
+         baseView
+            .views((v) => v.getUserAccess())
+            .map((v) => {
+               return {
+                  view: v,
+                  // component: v.component(App)
+               };
+            });
    }
 
    ui() {
@@ -63,13 +62,13 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
          },
       });
 
-      const _viewComponents = baseView._viewComponents;
+      const viewComponents = this.viewComponents;
       const settings = this.settings;
 
-      if (_viewComponents.length > 0) {
+      if (viewComponents.length > 0) {
          if (settings.stackTabs) {
             // define your menu items from the view components
-            const menuItems = _viewComponents.map((vc) => {
+            const menuItems = viewComponents.map((vc) => {
                const view = vc.view;
 
                return {
@@ -96,7 +95,7 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
                };
 
                // find out what the first option is so we can set it later
-               let selectedItem = `${_viewComponents[0].view.id}_menu`;
+               let selectedItem = `${viewComponents[0].view.id}_menu`;
 
                const abStorage = ab.Storage;
                const sidebar = {
@@ -208,7 +207,7 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
                   id: ids.tab,
                   keepViews: true,
                   minWidth: settings.minWidth,
-                  cells: _viewComponents.map((view) => {
+                  cells: viewComponents.map((view) => {
                      const tabUi = {
                         id: view.view.id,
                         // ui will be loaded when its tab is opened
@@ -357,9 +356,9 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
       if ($tab) abWebix.extend($tab, abWebix.ProgressBar);
 
       const baseView = this.view;
-      const _viewComponents = baseView._viewComponents;
+      const viewComponents = this.viewComponents;
 
-      _viewComponents.forEach((vc) => {
+      viewComponents.forEach((vc) => {
          // vc.component.init(AB);
 
          // Trigger 'changePage' event to parent
@@ -470,9 +469,9 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
          viewId = $sidebar.getSelectedId().replace("_menu", "");
 
       const baseView = this.view;
-      const _viewComponents = baseView._viewComponents;
+      const viewComponents = this.viewComponents;
 
-      _viewComponents.forEach((vc) => {
+      viewComponents.forEach((vc) => {
          // set default view id
          const currView = baseView.views((view) => {
             return view.id === vc.view.id;
