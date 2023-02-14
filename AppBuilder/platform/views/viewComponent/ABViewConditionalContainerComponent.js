@@ -99,7 +99,7 @@ module.exports = class ABViewConditionalContainerComponent extends (
          this._ifComponent ||
          this.view
             .views()
-            .find((v) => v.name === "If")
+            .find((v) => v?.name === "If")
             .component());
    }
 
@@ -108,7 +108,7 @@ module.exports = class ABViewConditionalContainerComponent extends (
          this._elseComponent ||
          this.view
             .views()
-            .find((v) => v.name === "Else")
+            .find((v) => v?.name === "Else")
             .component());
    }
 
