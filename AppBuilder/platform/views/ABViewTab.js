@@ -29,6 +29,4 @@ module.exports = class ABViewTab extends ABViewTabCore {
 
       return component;
    }
-
-   componentOld() {}
 };

@@ -1,8 +1,5 @@
 const ABViewPivotCore = require("../../core/views/ABViewPivotCore");
-const ABFieldCalculate = require("../dataFields/ABFieldCalculate");
-const ABFieldFormula = require("../dataFields/ABFieldFormula");
-const ABFieldNumber = require("../dataFields/ABFieldNumber");
-const ABObjectQuery = require("../ABObjectQuery");
+const ABViewPivotComponent = require("./viewComponent/ABViewPivotComponent");
 
 let L = (...params) => AB.Multilingual.label(...params);
 
@@ -161,123 +158,30 @@ module.exports = class ABViewPivot extends ABViewPivotCore {
       view.settings.height = $$(ids.height).getValue();
    }
 
-   /*
-    * @component()
+   /**
+    * @method component()
     * return a UI component based upon this view.
     * @param {obj} App
     * @return {obj} UI component
     */
-   component(App) {
-      let baseCom = super.component(App);
+   component(v1App = false) {
+      let component = new ABViewPivotComponent(this);
 
-      var idBase = `ABViewPivot_${this.id}`;
-      var ids = {
-         component: App.unique(`${idBase}_component`),
-      };
+      // if this is our v1Interface
+      if (v1App) {
+         const newComponent = component;
 
-      // an ABViewLabel is a simple Label
-      var _ui = {
-         id: ids.component,
-         view: "pivot",
-         readonly: true,
-         removeMissed: this.settings.removeMissed,
-         totalColumn: this.settings.totalColumn,
-         separateLabel: this.settings.separateLabel,
-         min: this.settings.min,
-         max: this.settings.max,
-         format: (value) => {
-            let decimalPlaces = this.settings.decimalPlaces || 2;
-            return value && value != "0"
-               ? parseFloat(value).toFixed(decimalPlaces || 0)
-               : value;
-         },
-      };
-
-      // make sure each of our child views get .init() called
-      var _init = (options) => {
-         options = options || {};
-         options.componentId = options.componentId || ids.component;
-
-         let dc = this.datacollection;
-         if (!dc) return Promise.resolve();
-
-         let object = dc.datasource;
-         if (!object) return Promise.resolve();
-
-         let $pivotComp = $$(ids.component);
-         if ($pivotComp && object instanceof ABObjectQuery) {
-            let customLabels = {};
-            object.fields().forEach((f) => {
-               customLabels[f.columnName] = f.label;
-            });
-
-            $pivotComp.define("fieldMap", customLabels);
-         }
-
-         let populateData = () => {
-            let data = dc.getData();
-            let dataMapped = data.map((d) => {
-               let result = {};
-
-               object.fields().forEach((f) => {
-                  if (
-                     f instanceof ABFieldCalculate ||
-                     f instanceof ABFieldFormula ||
-                     f instanceof ABFieldNumber
-                  )
-                     result[f.columnName] = d[f.columnName];
-                  else result[f.columnName] = f.format(d);
-               });
-
-               return result;
-            });
-
-            $$(options.componentId).parse(dataMapped);
-
-            // set pivot configuration
-            if (this.settings.structure)
-               $$(options.componentId).setStructure(this.settings.structure);
-         };
-
-         this.eventAdd({
-            emitter: dc,
-            eventName: "initializedData",
-            listener: () => {
-               populateData();
+         component = {
+            ui: newComponent.ui(),
+            init: (options, accessLevel) => {
+               return newComponent.init(this.AB);
             },
-         });
+            onShow: (...params) => {
+               return newComponent.onShow?.(...params);
+            },
+         };
+      }
 
-         return (
-            Promise.resolve()
-               // get data
-               .then(() => {
-                  return new Promise((next, err) => {
-                     switch (dc.dataStatus) {
-                        case dc.dataStatusFlag.notInitial:
-                           dc.loadData();
-                           break;
-                        case dc.dataStatusFlag.initialized:
-                           next();
-                           break;
-                     }
-                  });
-               })
-
-               // populate data into pivot
-               .then(() => {
-                  return new Promise((next, err) => {
-                     populateData();
-                     next();
-                  });
-               })
-         );
-      };
-
-      return {
-         ui: _ui,
-         init: _init,
-
-         onShow: baseCom.onShow,
-      };
+      return component;
    }
 };

@@ -3,58 +3,63 @@ const ABViewDetailItemComponent = require("./ABViewDetailItemComponent");
 module.exports = class ABViewDetailImageComponent extends (
    ABViewDetailItemComponent
 ) {
-   constructor(baseView, idBase) {
-      idBase = idBase ?? `ABViewDetailImageComponent_${baseView.id}`;
-      super(baseView, idBase);
+   constructor(baseView, idBase, ids) {
+      super(baseView, idBase || `ABViewDetailImage_${baseView.id}`, ids);
    }
 
    ui() {
-      let _ui = super.ui();
-      let field = this.view.field();
+      const baseView = this.view;
+      const field = baseView.field();
+      const _ui = {
+         on: {
+            //Add data-cy attribute for Cypress Testing
+            onAfterRender: () => {
+               const dataCy = `detail image ${field?.columnName} ${field?.id} ${
+                  baseView.parentDetailComponent()?.id || baseView.parent.id
+               }`;
 
-      _ui.id = this.ids.component;
-
-      if (this.settings.height) _ui.height = this.settings.height;
-
-      _ui.on = {
-         //Add data-cy attribute for Cypress Testing
-         onAfterRender: () => {
-            const dataCy = `detail image ${field?.columnName} ${field?.id} ${
-               this.view.parentDetailComponent()?.id || this.view.parent.id
-            }`;
-            $$(this.ids.component)?.$view.setAttribute("data-cy", dataCy);
+               $$(this.ids.detailItem)?.$view.setAttribute("data-cy", dataCy);
+            },
          },
       };
+      const settings = this.settings;
 
-      return _ui;
+      if (settings.height) _ui.height = settings.height;
+
+      return super.ui(_ui);
    }
 
    setValue(val) {
-      let field = this.view.field();
-      let imageTemplate = "";
-      let defaultImageUrl = field ? field.settings.defaultImageUrl : "";
+      const field = this.view.field();
 
-      if (val || (!val && defaultImageUrl)) {
-         let imageUrl = field.urlImage(val || defaultImageUrl);
-         let width =
-            field && field.settings.imageWidth
-               ? `${field.settings.imageWidth}px`
-               : "200px";
-         let height =
-            field && field.settings.imageHeight
-               ? `${field.settings.imageHeight}px`
-               : "100%";
+      if (!field) {
+         super.setValue("");
 
-         if (this.settings.height) height = `${this.settings.height}px`;
-
-         if (this.settings.width) width = `${this.settings.width}px`;
-
-         imageTemplate =
-            `<div class="ab-image-data-field">` +
-            `<div style="float: left; background-size: cover; background-position: center center; background-image:url('${imageUrl}');  width: ${width}; height: ${height}; position:relative;">` +
-            `<a href="${imageUrl}" target="_blank" title="" class="fa fa-download ab-image-data-field-download"></a>` +
-            `</div></div>`;
+         return;
       }
+
+      const parsedImageUrl = val || field.settings.defaultImageUrl;
+
+      if (!parsedImageUrl) {
+         super.setValue("");
+
+         return;
+      }
+
+      const imageUrl = field.urlImage(parsedImageUrl);
+      const settings = this.settings;
+      const width = settings.width || field.settings.imageWidth || 200;
+      const height = settings.height
+         ? `${settings.height}px`
+         : field.settings.imageHeight
+         ? `${field.settings.imageHeight}px`
+         : "100%";
+      const imageTemplate = [
+         `<div class="ab-image-data-field">`,
+         `<div style="float: left; background-size: cover; background-position: center center; background-image:url('${imageUrl}');  width: ${width}px; height: ${height}; position:relative;">`,
+         `<a href="${imageUrl}" target="_blank" title="" class="fa fa-download ab-image-data-field-download"></a>`,
+         `</div></div>`,
+      ].join("");
 
       super.setValue(imageTemplate);
    }

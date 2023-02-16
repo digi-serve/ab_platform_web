@@ -3,48 +3,42 @@ const ABViewChartContainerComponent = require("./ABViewChartContainerComponent")
 module.exports = class ABViewChartLineComponent extends (
    ABViewChartContainerComponent
 ) {
-   constructor(baseView, idBase) {
-      idBase = idBase ?? `ABViewChartLine_${baseView.id}`;
-
-      super(baseView, idBase);
-
-      this.view = baseView;
-      this.AB = this.view.AB;
+   constructor(baseView, idBase, ids) {
+      super(baseView, idBase || `ABViewChartLine_${baseView.id}`, ids);
    }
 
    ui() {
-      const baseView = this.view;
+      const settings = this.settings;
 
-      return {
-         id: this.ids.component,
+      return super.ui({
          view: "chart",
-         type: baseView.settings.lineType,
-         preset: baseView.settings.linePreset,
+         type: settings.lineType,
+         preset: settings.linePreset,
          value: "#value#",
          color: "#color#",
          yAxis: {
             start: 0,
-            step: baseView.settings.stepValue,
-            end: baseView.settings.maxValue, //"#maxValue#"
+            step: settings.stepValue,
+            end: settings.maxValue, //"#maxValue#"
          },
          xAxis: {
-            template: baseView.settings.isLegend
-               ? `<div style='font-size:${baseView.settings.labelFontSize}px;'>#label#</div>`
+            template: settings.isLegend
+               ? `<div style='font-size:${settings.labelFontSize}px;'>#label#</div>`
                : "",
          },
-         legend: baseView.settings.isLegend
+         legend: settings.isLegend
             ? {
-                 template: `<div style='font-size:${baseView.settings.labelFontSize}px;'>#label#</div>`,
+                 template: `<div style='font-size:${settings.labelFontSize}px;'>#label#</div>`,
                  values: [], // TODO : bug in webix 5.1.7
               }
             : null,
-         height: baseView.settings.chartHeight,
-         // width: baseView.settings.chartWidth,
-      };
+         height: settings.chartHeight,
+         // width: settings.chartWidth,
+      });
    }
 
    async init(AB) {
-      super.init(AB);
+      await super.init(AB);
    }
 
    onShow() {

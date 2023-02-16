@@ -4,25 +4,22 @@ const NumberTextInput = require("../../../../webix_custom_components/numbertext"
 module.exports = class ABViewFormNumberComponent extends (
    ABViewFormItemComponent
 ) {
-   constructor(baseView, idBase) {
-      idBase = idBase ?? `ABViewFormNumber_${baseView.id}`;
-      super(baseView, idBase, {});
+   constructor(baseView, idBase, ids) {
+      super(baseView, idBase || `ABViewFormNumber_${baseView.id}`, ids);
+
+      this._numberTextInputKey = null;
+   }
+
+   get numberTextInputKey() {
+      return (this._numberTextInputKey =
+         this._numberTextInputKey || new NumberTextInput(this.AB._App).key);
    }
 
    ui() {
-      const _ui = super.ui();
-
-      const viewType = this.view.settings.isStepper
-         ? "counter"
-         : new NumberTextInput(this.AB._App).key;
-
-      _ui.id = this.ids.component;
-      _ui.view = viewType;
-      _ui.type = "number";
-      _ui.validate = (val) => {
-         return !isNaN(val * 1);
-      };
-
-      return _ui;
+      return super.ui({
+         view: this.settings.isStepper ? "counter" : this.numberTextInputKey,
+         type: "number",
+         validate: (val) => !isNaN(val * 1),
+      });
    }
 };

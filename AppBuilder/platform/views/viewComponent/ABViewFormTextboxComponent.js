@@ -1,24 +1,18 @@
 const ABViewFormItemComponent = require("./ABViewFormItemComponent");
-const ABViewFormTextboxCore = require("../../../core/views/ABViewFormTextboxCore");
-
-const ABViewFormTextboxPropertyComponentDefaults =
-   ABViewFormTextboxCore.defaultValues();
 
 module.exports = class ABViewFormTextboxComponent extends (
    ABViewFormItemComponent
 ) {
-   constructor(baseView, idBase) {
-      idBase = idBase ?? `ABViewFormTextbox_${baseView.id}`;
-      super(baseView, idBase, {});
+   constructor(baseView, idBase, ids) {
+      super(baseView, idBase || `ABViewFormTextbox_${baseView.id}`, ids);
    }
 
    ui() {
-      const _ui = super.ui();
-      _ui.id = this.ids.component;
+      const _ui = {};
 
       switch (
-         this.view.settings.type ??
-         ABViewFormTextboxPropertyComponentDefaults.type
+         this.settings.type ||
+         this.view.constructor.defaultValues().type
       ) {
          case "single":
             _ui.view = "text";
@@ -45,28 +39,33 @@ module.exports = class ABViewFormTextboxComponent extends (
             break;
       }
 
-      return _ui;
+      return super.ui(_ui);
    }
 
    onShow() {
       const settings = this.view.settings ?? {};
       const _ui = this.ui();
-      let $elem = $$(_ui.id);
+      const $formItem = $$(_ui.id);
 
       // WORKAROUND : to fix breaks TinyMCE when switch pages/tabs
       // https://forum.webix.com/discussion/6772/switching-tabs-breaks-tinymce
-      if (settings.type == "rich" && $elem) {
+      if (settings.type === "rich" && $formItem) {
          // recreate rich editor
-         $elem = webix.ui(_ui, $elem);
+         this.AB.Webix.ui(_ui, $formItem);
+
          // Add dataCy to TinyMCE text editor
-         $elem
+         const baseView = this.view;
+
+         $formItem
             .getChildViews()[0]
             .getEditor(true)
             .then((editor) => {
-               const dataCy = `${this.view.key} rich ${_ui.name} ${this.view?.id ?? ""} ${this.view?.parent?.id ?? ""}`;
+               const dataCy = `${baseView.key} rich ${_ui.name} ${
+                  baseView.id ?? ""
+               } ${baseView.parent.id ?? ""}`;
+
                editor.contentAreaContainer.setAttribute("data-cy", dataCy);
             });
       }
    }
 };
-

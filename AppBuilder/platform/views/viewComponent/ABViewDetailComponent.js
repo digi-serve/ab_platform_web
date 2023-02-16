@@ -2,45 +2,32 @@ const ABObjectQuery = require("../../ABObjectQuery");
 const ABViewContainerComponent = require("./ABViewContainerComponent");
 
 module.exports = class ABViewDetailComponent extends ABViewContainerComponent {
-   constructor(baseView, idBase) {
-      idBase = idBase ?? `ABViewDetailComponent_${baseView.id}`;
-      super(baseView, idBase);
+   constructor(baseView, idBase, ids) {
+      super(baseView, idBase || `ABViewDetail_${baseView.id}`, ids);
    }
 
    ui() {
-      let _ui = super.ui();
-
-      return {
-         id: `ABViewDetail_${this.view.id}`,
-         type: "form",
-         borderless: true,
-         // height: this.settings.height || ABViewDetailPropertyComponentDefaults.height,
-         rows: [
-            {
-               // view: "scrollview",
-               body: _ui,
-            },
-         ],
-      };
+      return super.ui();
    }
 
    onShow() {
+      const baseView = this.view;
+
       try {
-         const dataCy = `Detail ${this.view.name?.split(".")[0]} ${
-            this.view.id
-         }`;
-         $$(this.ui().id).$view.setAttribute("data-cy", dataCy);
+         const dataCy = `Detail ${baseView.name?.split(".")[0]} ${baseView.id}`;
+
+         $$(this.ids.component).$view.setAttribute("data-cy", dataCy);
       } catch (e) {
          console.warn("Problem setting data-cy", e);
       }
 
       // listen DC events
-      let dv = this.view.datacollection;
+      const dv = this.datacollection;
+
       if (dv) {
-         let currData = dv.getCursor();
-         if (currData) {
-            this.displayData(currData);
-         }
+         const currData = dv.getCursor();
+
+         if (currData) this.displayData(currData);
 
          this.eventAdd({
             emitter: dv,
@@ -52,8 +39,9 @@ module.exports = class ABViewDetailComponent extends ABViewContainerComponent {
             emitter: dv,
             eventName: "create",
             listener: (createdRow) => {
-               let currCursor = dv.getCursor();
-               if (currCursor && currCursor.id == createdRow.id)
+               const currCursor = dv.getCursor();
+
+               if (currCursor?.id === createdRow.id)
                   this.displayData(createdRow);
             },
          });
@@ -62,8 +50,9 @@ module.exports = class ABViewDetailComponent extends ABViewContainerComponent {
             emitter: dv,
             eventName: "update",
             listener: (updatedRow) => {
-               let currCursor = dv.getCursor();
-               if (currCursor && currCursor.id == updatedRow.id)
+               const currCursor = dv.getCursor();
+
+               if (currCursor?.id === updatedRow.id)
                   this.displayData(updatedRow);
             },
          });
@@ -72,100 +61,115 @@ module.exports = class ABViewDetailComponent extends ABViewContainerComponent {
       super.onShow();
    }
 
-   displayData(rowData) {
-      rowData = rowData || {};
-
-      let views = this.view.views() || [];
-      views = views.sort((a, b) => {
-         if (!a || !b || !a.field || !b.field) return 0;
+   displayData(rowData = {}) {
+      const views = (this.view.views() || []).sort((a, b) => {
+         if (!a?.field || !b?.field) return 0;
 
          // NOTE: sort order of calculated fields.
          // FORMULA field type should be calculated before CALCULATE field type
-         if (a.field.key == "formula" && b.field.key == "calculate") {
+         if (a.field.key === "formula" && b.field.key === "calculate")
             return -1;
-         } else if (a.field.key == "calculate" && b.field.key == "formula") {
+         else if (a.field.key === "calculate" && b.field.key === "formula")
             return 1;
-         } else {
-            return 0;
-         }
+
+         return 0;
       });
 
       views.forEach((f) => {
          let val;
 
          if (f.field) {
-            let field = f.field();
+            const field = f.field();
 
-            if (!field || !rowData) return;
+            if (!field) return;
 
             // get value of relation when field is a connect field
             switch (field.key) {
                case "connectObject":
                   val = field.pullRelationValues(rowData);
+
                   break;
+
                case "list":
                   val = rowData[field.columnName];
+
                   if (!val) {
                      val = "";
+
                      break;
                   }
 
-                  if (field.settings.isMultiple == 0) {
+                  if (field.settings.isMultiple === 0) {
                      let myVal = "";
 
-                     field.settings.options.forEach(function (options) {
-                        if (options.id == val) myVal = options.text;
+                     field.settings.options.forEach((options) => {
+                        if (options.id === val) myVal = options.text;
                      });
 
                      if (field.settings.hasColors) {
                         let myHex = "#66666";
                         let hasCustomColor = "";
-                        field.settings.options.forEach(function (h) {
-                           if (h.text == myVal) {
+
+                        field.settings.options.forEach((h) => {
+                           if (h.text === myVal) {
                               myHex = h.hex;
                               hasCustomColor = "hascustomcolor";
                            }
                         });
+
                         myVal = `<span class="webix_multicombo_value ${hasCustomColor}" style="background-color: ${myHex} !important;"><span>${myVal}</span></span>`;
                      }
 
                      val = myVal;
                   } else {
-                     let items = [];
+                     const items = [];
+
                      let myVal = "";
+
                      val.forEach((value) => {
-                        var hasCustomColor = "";
-                        var optionHex = "";
+                        let hasCustomColor = "";
+                        let optionHex = "";
+
                         if (field.settings.hasColors && value.hex) {
                            hasCustomColor = "hascustomcolor";
                            optionHex = `background: ${value.hex};`;
                         }
-                        field.settings.options.forEach(function (options) {
-                           if (options.id == value.id) myVal = options.text;
+
+                        field.settings.options.forEach((options) => {
+                           if (options.id === value.id) myVal = options.text;
                         });
                         items.push(
                            `<span class="webix_multicombo_value ${hasCustomColor}" style="${optionHex}" optvalue="${value.id}"><span>${myVal}</span></span>`
                         );
                      });
+
                      val = items.join("");
                   }
+
                   break;
+
                case "user":
                   val = field.pullRelationValues(rowData);
+
                   break;
+
                case "file":
                   val = rowData[field.columnName];
+
                   break;
+
                case "formula":
                   if (rowData) {
-                     let dv = this.datacollection;
-                     let ds = dv ? dv.datasource : null;
-                     let needRecalculate =
+                     const dv = this.datacollection;
+                     const ds = dv ? dv.datasource : null;
+                     const needRecalculate =
                         !ds || ds instanceof ABObjectQuery ? false : true;
 
                      val = field.format(rowData, needRecalculate);
                   }
+
                   break;
+
                default:
                   val = field.format(rowData);
                // break;
@@ -173,12 +177,11 @@ module.exports = class ABViewDetailComponent extends ABViewContainerComponent {
          }
 
          // set value to each components
-         let vComponent = f.component(null, this.idBase);
+         const vComponent = f.component(null, this.ids.detailItem);
 
          // vComponent?.onShow();
 
          vComponent?.setValue?.(val);
-
          vComponent?.displayText?.(rowData);
       });
    }

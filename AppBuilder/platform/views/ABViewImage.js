@@ -1,4 +1,5 @@
 const ABViewImageCore = require("../../core/views/ABViewImageCore");
+const ABViewImageComponent = require("./viewComponent/ABViewImageComponent");
 
 let L = (...params) => AB.Multilingual.label(...params);
 
@@ -147,50 +148,30 @@ module.exports = class ABViewImage extends ABViewImageCore {
       view.settings.height = $$(ids.height).getValue();
    }
 
-   /*
-    * @component()
+   /**
+    * @method component()
     * return a UI component based upon this view.
     * @param {obj} App
     * @return {obj} UI component
     */
-   component(App) {
-      var idBase = `ABViewImage_${this.id}`;
-      var ids = {
-         component: App.unique(`${idBase}_component`),
-      };
+   component(v1App = false) {
+      let component = new ABViewImageComponent(this);
 
-      // an ABViewLabel is a simple Label
-      var _ui = {
-         cols: [
-            {
-               id: ids.component,
-               view: "template",
-               template: "",
-               height: this.settings.height,
-               width: this.settings.width,
+      // if this is our v1Interface
+      if (v1App) {
+         let newComponent = component;
+
+         component = {
+            ui: component.ui(),
+            init: (options, accessLevel) => {
+               return newComponent.init(this.AB, accessLevel);
             },
-            {},
-         ],
-      };
+            onShow: (...params) => {
+               return newComponent.onShow?.(...params);
+            },
+         };
+      }
 
-      // make sure each of our child views get .init() called
-      var _init = (options) => {
-         if (!$$(ids.component)) return;
-
-         if (this.settings.filename) {
-            let imgTag = `<img src="/file/${this.settings.filename}" height="${this.settings.height}" width="${this.settings.width}">`;
-
-            $$(ids.component).define("template", imgTag);
-         } else {
-            $$(ids.component).define("template", "");
-         }
-
-         $$(ids.component).refresh();
-      };
-
-      return {
-         ui: _ui,
-         init: _init,
-      };
+      return component;
    }
 };

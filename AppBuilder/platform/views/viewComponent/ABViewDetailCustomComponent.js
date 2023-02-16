@@ -3,22 +3,19 @@ const ABViewDetailItemComponent = require("./ABViewDetailItemComponent");
 module.exports = class ABViewDetailCustomComponent extends (
    ABViewDetailItemComponent
 ) {
-   constructor(baseView, idBase) {
-      idBase = idBase ?? `ABViewDetailCustomComponent_${baseView.id}`;
-      super(baseView, idBase);
+   constructor(baseView, idBase, ids) {
+      super(baseView, idBase || `ABViewDetailCustom_${baseView.id}`, ids);
    }
 
    ui() {
-      let _ui = super.ui();
-
-      _ui.id = this.ids.component;
-
-      let field = this.view.field();
-      let detailView = this.view.detailComponent();
+      const baseView = this.view;
+      const field = baseView.field();
+      const detailView = baseView.detailComponent();
 
       let templateLabel = "";
-      if (detailView?.settings?.showLabel == true) {
-         if (detailView.settings.labelPosition == "top")
+
+      if (detailView?.settings?.showLabel) {
+         if (detailView.settings.labelPosition === "top")
             templateLabel =
                "<label style='display:block; text-align: left;' class='webix_inp_top_label'>#label#</label>";
          else
@@ -26,42 +23,44 @@ module.exports = class ABViewDetailCustomComponent extends (
                "<label style='width: #width#px; display: inline-block; float: left; line-height: 32px;'>#label#</label>";
       }
 
-      let template = (templateLabel + "#result#")
+      const template = (templateLabel + "#result#")
          // let template = (templateLabel)
          .replace(/#width#/g, detailView.settings.labelWidth)
          .replace(/#label#/g, field ? field.label : "")
          .replace(/#result#/g, field ? field.columnHeader().template({}) : "");
 
-      _ui.id = this.ids.component;
-      _ui.view = "template";
-      _ui.minHeight = 45;
-      _ui.height = 60;
-      _ui.borderless = true;
-      _ui.template = template;
+      return super.ui({
+         minHeight: 45,
+         height: 60,
+         template,
+         on: {
+            //Add data-cy attribute for Cypress Testing
+            onAfterRender: () => {
+               const dataCy = `detail custom ${field?.columnName} ${
+                  field?.id
+               } ${baseView.parentDetailComponent()?.id || baseView.parent.id}`;
 
-      _ui.on = {
-         //Add data-cy attribute for Cypress Testing
-         onAfterRender: () => {
-            const dataCy = `detail custom ${field?.columnName} ${field?.id} ${
-               this.view.parentDetailComponent()?.id || this.view.parent.id
-            }`;
-            $$(_ui.id)?.$view.setAttribute("data-cy", dataCy);
+               $$(this.ids.detailItem)?.$view.setAttribute("data-cy", dataCy);
+            },
          },
-      };
-
-      return _ui;
+      });
    }
 
    onShow() {
-      let field = this.view.field();
+      super.onShow;
+
+      const baseView = this.view;
+      const field = baseView.field();
+
       if (!field) return;
 
-      let elem = $$(this.ids.component);
-      if (!elem) return;
+      const $detailItem = $$(this.ids.detailItem);
 
-      let detailCom = this.view.detailComponent(),
+      if (!$detailItem) return;
+
+      const detailCom = baseView.detailComponent(),
          rowData = detailCom.datacollection.getCursor() || {},
-         node = elem.$view;
+         node = $detailItem.$view;
 
       field.customDisplay(rowData, null, node, {
          editable: false,
@@ -69,15 +68,18 @@ module.exports = class ABViewDetailCustomComponent extends (
    }
 
    setValue(val) {
-      let field = this.view.field();
+      const field = this.view.field();
+
       if (!field) return;
 
-      let elem = $$(this.ids.component);
-      if (!elem) return;
+      const $detailItem = $$(this.ids.detailItem);
 
-      let rowData = {};
+      if (!$detailItem) return;
+
+      const rowData = {};
+
       rowData[field.columnName] = val;
 
-      field.setValue(elem, rowData);
+      field.setValue($detailItem, rowData);
    }
 };

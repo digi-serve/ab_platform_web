@@ -731,4 +731,13 @@ module.exports = class ABField extends ABFieldCore {
          },
       };
    }
+
+   /**
+    * @method getSettings()
+    * return a copy of this.settings.
+    * @return {object}
+    */
+   getSettings() {
+      return Object.assign({}, this.settings);
+   }
 };
