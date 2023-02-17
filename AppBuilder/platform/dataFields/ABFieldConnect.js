@@ -369,11 +369,14 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                };
 
                // we also need to get selected values of xxx->one connections
+               // if we are looking at a field in a form we look at linkViaOneValues
+               // if we are looking at a grid we are editing we look at theEditor?.config?.value
                if (
                   this?.settings?.linkViaType == "one" &&
                   (this?.linkViaOneValues || theEditor?.config?.value)
                ) {
                   let values = "";
+                  // determine if we are looking in a grid or at a form field
                   if (
                      (theEditor?.config?.view == "multicombo" ||
                         theEditor?.config?.view == "combo") &&
