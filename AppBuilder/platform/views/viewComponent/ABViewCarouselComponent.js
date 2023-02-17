@@ -18,7 +18,7 @@ export default class ABViewCarouselComponent extends ABViewComponent {
       };
 
       this._handler_doReload = () => {
-         this.datacollection?.reloadData();
+         // this.datacollection?.reloadData();
       };
 
       this._handler_doFilter = (fnFilter, filterRules) => {
