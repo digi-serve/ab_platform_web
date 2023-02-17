@@ -168,7 +168,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
    openOptions($suggest) {
       // PREVENT repeatedly pull data:
-      // If the options list was populated, then skip
+      // If not a x->1 relation and the options list was populated, then skip
       const $list = $suggest.getList();
       if (this.settings.linkViaType != "one") {
          if (($list?.find({}) ?? []).length) return;
