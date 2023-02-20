@@ -13,7 +13,6 @@ module.exports = class ABViewDetailComponent extends ABViewContainerComponent {
       // card appearance as well as enables the edit and
       // details functions to work when clicked
       return {
-         id: `ABViewDetail_${this.view.id}`,
          type: "form",
          borderless: true,
          rows: [
