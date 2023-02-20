@@ -12,6 +12,7 @@ module.exports = class ABViewFormTextboxComponent extends (
 
       switch (
          this.settings.type ||
+         this.view.settings.type ||
          this.view.constructor.defaultValues().type
       ) {
          case "single":
@@ -45,13 +46,14 @@ module.exports = class ABViewFormTextboxComponent extends (
    onShow() {
       const settings = this.view.settings ?? {};
       const _ui = this.ui();
-      const $formItem = $$(_ui.id);
+      const _uiFormItem = _ui.rows[0];
+      let $formItem = $$(_uiFormItem.id);
 
       // WORKAROUND : to fix breaks TinyMCE when switch pages/tabs
       // https://forum.webix.com/discussion/6772/switching-tabs-breaks-tinymce
       if (settings.type === "rich" && $formItem) {
          // recreate rich editor
-         this.AB.Webix.ui(_ui, $formItem);
+         $formItem = this.AB.Webix.ui(_uiFormItem, $formItem);
 
          // Add dataCy to TinyMCE text editor
          const baseView = this.view;
@@ -60,9 +62,9 @@ module.exports = class ABViewFormTextboxComponent extends (
             .getChildViews()[0]
             .getEditor(true)
             .then((editor) => {
-               const dataCy = `${baseView.key} rich ${_ui.name} ${
+               const dataCy = `${baseView.key} rich ${_uiFormItem.name} ${
                   baseView.id ?? ""
-               } ${baseView.parent.id ?? ""}`;
+               } ${baseView.parent?.id ?? ""}`;
 
                editor.contentAreaContainer.setAttribute("data-cy", dataCy);
             });
