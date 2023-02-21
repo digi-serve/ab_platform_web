@@ -340,10 +340,16 @@ module.exports = class ABViewFormConnectComponent extends (
       if (!$node) return;
 
       const settings = this.settings;
-      const filterConditions = settings.objectWorkspace.filterConditions ?? {
+      let filterConditions = {
          glue: "and",
          rules: [],
       };
+
+      if (this.view.settings?.filterConditions?.rules?.length) {
+         filterConditions = this.view.settings.filterConditions;
+      } else if (settings?.objectWorkspace?.filterConditions?.rules?.length) {
+         filterConditions = settings.objectWorkspace.filterConditions;
+      }
 
       const getFilterByConnectValues = (conditions, depth = 0) => {
          return [
