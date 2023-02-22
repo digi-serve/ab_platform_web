@@ -117,7 +117,7 @@ const ABQLManager = {
 
          let selector = views.shift();
 
-         while (!selector.getValue) selector = views.shift();
+         while (!selector?.getValue) selector = views.shift();
 
          const value = selector.getValue();
 

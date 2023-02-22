@@ -327,7 +327,11 @@ class ABQL extends ABQLCore {
 
       const uiNextRow = this.uiNextRow(id);
 
-      webix.ui(uiNextRow.cols[1], $select);
+      const uiNextCol =
+         uiNextRow.cols.filter((c) => c.id == $select.config.id)[0] ??
+         uiNextRow.cols[1];
+
+      if (uiNextCol) AB.Webix.ui(uiNextCol, $select);
    }
 
    /**
