@@ -30,8 +30,18 @@ function _onShow(App, compId, instance, component) {
 
    if (!$node) return;
 
-   const filterConditions = instance.settings.objectWorkspace
-      .filterConditions || { glue: "and", rules: [] };
+   let filterConditions = {
+      glue: "and",
+      rules: [],
+   };
+
+   if (instance.settings?.filterConditions?.rules?.length) {
+      filterConditions = instance.settings.filterConditions;
+   } else if (
+      instance.settings?.objectWorkspace?.filterConditions?.rules?.length
+   ) {
+      filterConditions = instance.settings.objectWorkspace.filterConditions;
+   }
 
    const getFilterByConnectValues = (conditions, depth = 0) => {
       return [
