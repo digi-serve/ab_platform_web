@@ -259,17 +259,4 @@ module.exports = class ABProcessElement extends ABProcessElementCore {
       super.warningsEval();
       this.onProcessReady();
    }
-
-   /**
-    * @method warningMessage(message)
-    * Save a warning message in a common format for our ProcessTasks.
-    */
-   warningMessage(message) {
-      this.emit(
-         "warning",
-         `${this.defaults.key}[${
-            this.label ? this.label : this.name
-         }]: ${message}`
-      );
-   }
 };
