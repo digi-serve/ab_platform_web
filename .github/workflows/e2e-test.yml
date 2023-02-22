@@ -13,6 +13,10 @@ jobs:
    e2etests:
       name: Test
       runs-on: ubuntu-latest
+      env:
+         CYPRESS_RESPONSE_TIMEOUT: 200000
+         CYPRESS_DEFAULT_COMMAND_TIMEOUT: 30000
+         CYPRESS_RETRIES: 2
       strategy:
          fail-fast: true
          matrix:
@@ -23,10 +27,6 @@ jobs:
                  webpack: update
       steps:
          - uses: actions/checkout@v3
-           env:
-              CYPRESS_RESPONSE_TIMEOUT: 200000
-              CYPRESS_DEFAULT_COMMAND_TIMEOUT: 30000
-              CYPRESS_RETRIES: 2
            with:
               path: ab_platform_web
               submodules: true

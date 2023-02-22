@@ -20,7 +20,9 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
 
                layout: "",
                filterComplex: "",
-               reloadView: "",
+               reloadView: `${
+                  idBase || `ABViewForm_${baseView.id}`
+               }_form_reloadView`,
             },
             ids
          )

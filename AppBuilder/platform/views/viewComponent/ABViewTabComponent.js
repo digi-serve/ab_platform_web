@@ -392,7 +392,7 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
 
       if (!$sidebar) return;
 
-      const state = ab.Storage.get(`${ids.tab}-state`);
+      const state = await ab.Storage.get(`${ids.tab}-state`);
 
       if (!state) return;
 
