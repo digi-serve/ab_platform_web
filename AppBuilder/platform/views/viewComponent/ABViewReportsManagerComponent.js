@@ -498,9 +498,10 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
          ]),
       };
 
-      const _ui = super.ui(_uiReportManager);
+      const _ui = super.ui([_uiReportManager]);
 
       delete _ui.type;
+      delete _ui.height;
 
       return _ui;
    }
