@@ -258,5 +258,30 @@ module.exports = class ABProcessElement extends ABProcessElementCore {
    warningsEval() {
       super.warningsEval();
       this.onProcessReady();
+
+      // if this isn't an end type of task, then there must be
+      // > 0 next tasks
+      if (!this.isEndTask()) {
+         const myOutgoingConnections = this.process.connectionsOutgoing(
+            this.diagramID
+         );
+         if (myOutgoingConnections.length < 1) {
+            this.warningMessage("should have another task after this one");
+         }
+      }
+   }
+
+   /**
+    * @method warningMessage(message)
+    * Save a warning message in a common format for our ProcessTasks.
+    */
+   warningMessage(message, data = {}) {
+      this.emit(
+         "warning",
+         `${this.defaults.key}[${
+            this.label ? this.label : this.name
+         }]: ${message}`,
+         data
+      );
    }
 };

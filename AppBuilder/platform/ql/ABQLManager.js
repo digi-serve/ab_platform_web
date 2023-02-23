@@ -55,7 +55,7 @@ const ABQLManager = {
     */
    builder: (rootOP, task, AB) => {
       // const rootOP = this.fromAttributes(attributes, task, AB);
-      const L = (...params) => AB.Multilingual.label(...params);
+      // const L = (...params) => AB.Multilingual.label(...params);
 
       return {
          ui: (id) => {

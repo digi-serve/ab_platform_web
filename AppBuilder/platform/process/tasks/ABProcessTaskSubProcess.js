@@ -176,4 +176,15 @@ module.exports = class SubProcess extends SubProcessCore {
       }
       return task;
    }
+
+   warningsEval() {
+      super.warningsEval();
+
+      (this._unknownElementIDs || []).forEach((eID) => {
+         this.warningMessage(
+            `is referencing an unknown process element id[${eID}]`,
+            { process: this.id, eID }
+         );
+      });
+   }
 };

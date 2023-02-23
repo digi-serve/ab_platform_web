@@ -802,7 +802,7 @@ class ABQL extends ABQLCore {
       let myWarnings = this._warnings || [];
       if (this.next)
          myWarnings = myWarnings.concat(this.next.warnings()).filter((w) => w);
-      return myWarnings;
+      return this.AB.uniq(myWarnings);
    }
 
    warningsEval() {

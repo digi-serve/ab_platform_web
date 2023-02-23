@@ -13,16 +13,6 @@ module.exports = class ABProcessTaskServiceQuery extends (
       return ABQLManager;
    }
 
-   fromValues(attributes) {
-      super.fromValues(attributes);
-
-      if (!this.name) {
-         this.warningMessage("does not have a name.", {
-            attributes,
-         });
-      }
-   }
-
    warnings() {
       // first get all our embedded QL Command warnings
       let qlWarnings = [];
@@ -42,6 +32,29 @@ module.exports = class ABProcessTaskServiceQuery extends (
       super.warningsEval();
       if (this.qlObj) {
          this.qlObj.warningsEval();
+      } else {
+         this.warningMessage(`has no Query defined.`);
+      }
+
+      if (!this.name) {
+         this.warningMessage("does not have a name.", {
+            attributes,
+         });
+      }
+
+      let hasSave = false;
+      let curr = this.qlObj;
+      while (curr) {
+         if (curr.key === "row_save" || curr.key === "set_save") {
+            hasSave = true;
+            curr = null; // just stop here.
+         } else {
+            curr = curr.next;
+         }
+      }
+
+      if (!hasSave) {
+         this.warningMessage("requires at least one Save operation.");
       }
    }
 };

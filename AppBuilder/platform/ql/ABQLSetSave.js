@@ -40,6 +40,13 @@ class ABQLSetSave extends ABQLSetSaveCore {
          this.registered = true;
       }
    }
+
+   warningsEval() {
+      super.warningsEval();
+      if (!this.taskParam || this.taskParam === "") {
+         this.warningMessage("requires a name to save our data as.");
+      }
+   }
 }
 
 module.exports = ABQLSetSave;
