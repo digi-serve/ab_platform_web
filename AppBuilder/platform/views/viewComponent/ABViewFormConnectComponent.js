@@ -86,9 +86,22 @@ module.exports = class ABViewFormConnectComponent extends (
                      selectedValues = data;
                   }
                }
+
                // We can now set the new value but we need to block event listening
                // so it doesn't trigger onChange again
                const $formItem = $$(ids.formItem);
+
+               // for xxx->one connections we need to populate again before setting
+               // values because we need to use the selected values to add options
+               // to the UI
+               if (this?.field?.settings?.linkViaType == "one") {
+                  field.getAndPopulateOptions(
+                     $formItem,
+                     baseView.options,
+                     field,
+                     baseView.parentFormComponent()
+                  );
+               }
 
                if ($formItem) {
                   $formItem.blockEvent();

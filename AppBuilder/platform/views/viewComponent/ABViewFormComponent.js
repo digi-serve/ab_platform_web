@@ -1,5 +1,6 @@
 const ABViewComponent = require("./ABViewComponent").default;
 const ABViewFormItem = require("../ABViewFormItem");
+const ABViewFormConnect = require("../ABViewFormConnect");
 const ABViewFormCustom = require("../ABViewFormCustom");
 const ABViewFormTextbox = require("../ABViewFormTextbox");
 
@@ -160,6 +161,33 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
          emitter: dc,
          eventName: "changeCursor",
          listener: (rowData) => {
+            const baseView = this.view;
+            const linkViaOneConnection = baseView.fieldComponents(
+               (comp) => comp instanceof ABViewFormConnect
+            );
+            // clear previous xxx->one selections and add new from
+            // cursor change
+            linkViaOneConnection.forEach((f) => {
+               const field = f.field();
+               if (
+                  field?.settings?.linkViaType == "one" &&
+                  field?.linkViaOneValues
+               ) {
+                  delete field.linkViaOneValues;
+                  if (rowData[field.columnName]) {
+                     if (Array.isArray(rowData[field.columnName])) {
+                        let valArray = [];
+                        rowData[field.columnName].forEach((v) => {
+                           valArray.push(v[field.object.PK()]);
+                        });
+                        field.linkViaOneValues = valArray.join();
+                     } else {
+                        field.linkViaOneValues = rowData[field.columnName];
+                     }
+                  }
+               }
+            });
+
             this.displayData(rowData);
          },
       });

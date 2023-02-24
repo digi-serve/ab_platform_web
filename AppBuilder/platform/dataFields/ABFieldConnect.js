@@ -113,7 +113,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          return this.editParse(value);
       };
       config.template = (row) => {
-         var selectedData = this.pullRelationValues(row);
+         var selectedData = field.pullRelationValues(row);
          var values = [];
          values.push('<div class="badgeContainer">');
          if (
@@ -168,9 +168,11 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
    openOptions($suggest) {
       // PREVENT repeatedly pull data:
-      // If the options list was populated, then skip
+      // If not a x->1 relation and the options list was populated, then skip
       const $list = $suggest.getList();
-      if (($list?.find({}) ?? []).length) return;
+      if (this.settings.linkViaType != "one") {
+         if (($list?.find({}) ?? []).length) return;
+      }
 
       // Listen create/update events of the linked object, then clear data list to re-populate
       ["create", "update"].forEach((key) => {
@@ -184,7 +186,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          );
       });
 
-      this.getAndPopulateOptions($suggest);
+      this.getAndPopulateOptions($suggest, null, this);
    }
 
    /*
@@ -192,7 +194,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
     *
     * @param {object} row is the {name=>value} hash of the current row of data.
     * @param {App} App the shared ui App object useful more making globally
-    *					unique id references.
+    *             unique id references.
     * @param {HtmlDOM} node  the HTML Dom object for this field's display.
     */
 
@@ -235,7 +237,8 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
     *
     * @return {Promise}
     */
-   getOptions(where, term, sort) {
+   getOptions(where, term, sort, editor) {
+      const theEditor = editor;
       return new Promise((resolve, reject) => {
          let haveResolved = false;
          // {bool}
@@ -294,12 +297,10 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             this.settings.linkType == "many" &&
             this.settings.linkViaType == "one"
          ) {
-            // Mar 8, 2022 I (James) removed this because we need these options
-            // to appear so we can put a checkbox next to them with the new UI
-            // where.rules.push({
-            //    key: linkedCol.id,
-            //    rule: "is_null",
-            // });
+            where.rules.push({
+               key: linkedCol.id,
+               rule: "is_null",
+            });
             // where[linkedCol.columnName] = null;
          }
          // 1:1
@@ -331,30 +332,88 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          const storageID = `${this.id}-${JSON.stringify(where)}`;
 
          Promise.resolve()
-            // TODO: debug the cached data + response so the droplist can display
-            // updated data.
             .then(async () => {
-               // Get Local Storage
-
-               // We store the .findAll() results locally and return that for a
-               // quick response:
-               const storedOptions = await this.AB.Storage.get(storageID);
+               // Get Local Storage unless xxx->one connected field
+               if (this?.settings?.linkViaType != "one") {
+                  // We store the .findAll() results locally and return that for a
+                  // quick response:
+                  return await this.AB.Storage.get(storageID);
+               }
+            })
+            .then(async (storedOptions) => {
                if (storedOptions) {
                   // immediately respond with our stored options.
                   this._options = storedOptions;
                   return respond(this._options);
                }
-            })
-            .then(async () => {
-               try {
-                  // Pull linked object data
-                  const result = await linkedModel.findAll({
+               // Pull linked object data
+               let options = function () {
+                  return linkedModel.findAll({
                      where: where,
                      sort: sort,
                      populate: false,
                   });
+               };
 
-                  // cache linked object data
+               // placeholder for selected options
+               let selected = function () {
+                  return new Promise((resolve, reject) => {
+                     // empty data array to pass to all()
+                     resolve({ data: [] });
+                  });
+               };
+
+               // we also need to get selected values of xxx->one connections
+               // if we are looking at a field in a form we look at linkViaOneValues
+               // if we are looking at a grid we are editing we look at theEditor?.config?.value
+               if (
+                  this?.settings?.linkViaType == "one" &&
+                  (this?.linkViaOneValues || theEditor?.config?.value)
+               ) {
+                  let values = "";
+                  // determine if we are looking in a grid or at a form field
+                  if (
+                     (theEditor?.config?.view == "multicombo" ||
+                        theEditor?.config?.view == "combo") &&
+                     this?.linkViaOneValues
+                  ) {
+                     values = this?.linkViaOneValues;
+                  } else if (theEditor?.config?.value) {
+                     if (Array.isArray(theEditor.config.value)) {
+                        values = theEditor?.config?.value.join();
+                     } else {
+                        values = theEditor?.config?.value;
+                     }
+                  }
+                  let whereRels = {};
+                  let sortRels = [];
+
+                  whereRels.glue = "or";
+                  whereRels.rules = [];
+
+                  values.split(",").forEach((v) => {
+                     whereRels.rules.push({
+                        key: "uuid",
+                        rule: "equals",
+                        value: v,
+                     });
+                  });
+                  selected = function () {
+                     return linkedModel.findAll({
+                        where: whereRels,
+                        sort: sortRels,
+                        populate: false,
+                     });
+                  };
+               }
+               try {
+                  const results = await Promise.all([options(), selected()]);
+
+                  // combine options and selected items and
+                  // put the selected options at the top of the list
+                  const result = results[1].data.concat(results[0].data);
+
+                  // store results in _options
                   this._options = result.data || result || [];
 
                   // populate display text
@@ -363,7 +422,10 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                      opt.value = opt.text;
                   });
 
-                  this.AB.Storage.set(storageID, this._options);
+                  // cache options if not a xxx->one connection
+                  if (this?.settings?.linkViaType != "one") {
+                     this.AB.Storage.set(storageID, this._options);
+                  }
                   return respond(this._options);
                } catch (err) {
                   this.AB.notify.developer(err, {
@@ -426,6 +488,14 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
    getAndPopulateOptions(editor, options, field, form) {
       const theEditor = editor;
+      // if editor has options and is xxx->one store the options on the field
+      if (
+         this?.settings?.linkViaType == "one" &&
+         theEditor.getValue() &&
+         !field.linkViaOneValues
+      ) {
+         field.linkViaOneValues = theEditor.getValue();
+      }
 
       // if we are filtering based off another selectivity's value we
       // need to do it on fetch each time because the value can change
@@ -515,8 +585,8 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       );
 
       return new Promise((resolve, reject) => {
-         this.getOptions(combineFilters, "").then((data) => {
-            this.populateOptions(theEditor, data, field, form, false);
+         this.getOptions(combineFilters, "", "", theEditor).then((data) => {
+            this.populateOptions(theEditor, data, field, form, true);
             resolve();
          });
       });
@@ -579,7 +649,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                item = options[i];
                break;
             } else {
-               if (options[i].id == val) {
+               if (options[i].id == val || options[i].value == val) {
                   item = options[i];
                   break;
                }
