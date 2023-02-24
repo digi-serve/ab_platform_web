@@ -379,7 +379,11 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                   ) {
                      values = this?.linkViaOneValues;
                   } else if (theEditor?.config?.value) {
-                     values = theEditor?.config?.value;
+                     if (Array.isArray(theEditor.config.value)) {
+                        values = theEditor?.config?.value.join();
+                     } else {
+                        values = theEditor?.config?.value;
+                     }
                   }
                   let whereRels = {};
                   let sortRels = [];
@@ -645,7 +649,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                item = options[i];
                break;
             } else {
-               if (options[i].id == val) {
+               if (options[i].id == val || options[i].value == val) {
                   item = options[i];
                   break;
                }
