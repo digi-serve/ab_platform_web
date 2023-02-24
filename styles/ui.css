@@ -71,6 +71,14 @@
 label {
    font-weight: 500;
 }
+/* Custom Webix Badge */
+.webix_badge {
+   font-size: 8pt;
+   height: 18px;
+   line-height: 18px;
+   min-width: 18px;
+   right: 0;
+}
 /* Custom selectivity */
 .webix_checksuggest_select_all .webix_el_box {
    height: auto !important;
@@ -1703,21 +1711,20 @@ div.webix_dataview_item.webix_transparent {
    font-weight: normal;
 }
 
-
 .switcheroo .webix_win_head .webix_layout_line {
-  background: #657584; 
-  color: #fff;
+   background: #657584;
+   color: #fff;
 }
 .switcheroo .webix_win_head .webix_view .webix_template {
-  background: #657584; 
-  color: #fff;
+   background: #657584;
+   color: #fff;
 }
-  
+
 .portal_work_switcheroo_user_switched .webix_view {
-  background: #E64B2A;
-  color: #fff;
+   background: #e64b2a;
+   color: #fff;
 }
 
 .portal_work_switcheroo_user_switched .webix_el_box {
-  color: #fff;
+   color: #fff;
 }

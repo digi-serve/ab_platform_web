@@ -39,6 +39,7 @@ export default class AB_Work_Object_Workspace_PopupSortFields extends ClassUI {
    }
 
    uiForm() {
+      const compId = this.ids.component;
       return {
          view: "form",
          id: this.ids.form,
@@ -54,6 +55,12 @@ export default class AB_Work_Object_Workspace_PopupSortFields extends ClassUI {
                   onItemClick: (/* id, e, node */) => {
                      this.clickAddNewSort();
                      this.triggerOnChange();
+                  },
+                  onAfterRender: function () {
+                     this.getInputNode().setAttribute(
+                        "data-cy",
+                        `${compId} add sort button`
+                     );
                   },
                },
             },
@@ -82,7 +89,8 @@ export default class AB_Work_Object_Workspace_PopupSortFields extends ClassUI {
          this.AB = AB;
       }
 
-      webix.ui(this.ui());
+      // if popup does not already exist add it
+      if (!$$(this.ids.component)) webix.ui(this.ui());
    }
 
    /**

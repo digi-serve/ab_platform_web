@@ -295,7 +295,8 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          // M:1 - get data that's only empty relation value
          if (
             this.settings.linkType == "many" &&
-            this.settings.linkViaType == "one"
+            this.settings.linkViaType == "one" &&
+            editor?.config?.showAllOptions != true
          ) {
             where.rules.push({
                key: linkedCol.id,
@@ -306,7 +307,8 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          // 1:1
          else if (
             this.settings.linkType == "one" &&
-            this.settings.linkViaType == "one"
+            this.settings.linkViaType == "one" &&
+            editor?.config?.showAllOptions != true
          ) {
             // 1:1 - get data is not match link id that we have
             if (this.settings.isSource == true) {

@@ -875,23 +875,29 @@ module.exports = class FilterComplex extends FilterComplexCore {
             body: this.ui,
          };
 
-         this.myPopup = webix.ui(ui);
-         this.init();
+         if (!$$(this.ids.popup)) {
+            this.myPopup = webix.ui(ui);
+            this.init();
+            if (this._Fields) {
+               this.fieldsLoad(this._Fields, this._Object);
+            }
+
+            // NOTE: do this, before the .setValue() operation, as we need to have
+            // our fields and filters defined BEFORE a setValue() is performed.
+            // this.uiInit();
+
+            if (condition) {
+               this.setValue(condition);
+            }
+
+            this.myPopup.show(...options);
+         } else {
+            debugger;
+            $$(this.ids.popup).show(...options);
+         }
+      } else {
+         this.myPopup.show(...options);
       }
-
-      if (this._Fields) {
-         this.fieldsLoad(this._Fields, this._Object);
-      }
-
-      // NOTE: do this, before the .setValue() operation, as we need to have
-      // our fields and filters defined BEFORE a setValue() is performed.
-      // this.uiInit();
-
-      if (condition) {
-         this.setValue(condition);
-      }
-
-      this.myPopup.show(...options);
    }
 
    /**
