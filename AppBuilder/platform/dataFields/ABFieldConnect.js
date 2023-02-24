@@ -342,11 +342,6 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             })
             .then(async (storedOptions) => {
                if (storedOptions) {
-                  console.log(
-                     "got options from local storage",
-                     storageID,
-                     storedOptions
-                  );
                   // immediately respond with our stored options.
                   this._options = storedOptions;
                   return respond(this._options);
