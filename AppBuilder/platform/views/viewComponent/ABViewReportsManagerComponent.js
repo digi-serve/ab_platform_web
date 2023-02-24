@@ -91,7 +91,7 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
 
                         if (!obj) return;
 
-                        const reportFields = this.getReportFields(dc);
+                        const reportFields = self.getReportFields(dc);
 
                         // get connected data collections
                         // let linkedFields = [];
@@ -230,7 +230,7 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
                         if (!dataCol) return;
 
                         reportFields = reportFields.concat(
-                           this.getReportFields(dataCol).map((f) => {
+                           self.getReportFields(dataCol).map((f) => {
                               // change format of id to match the report widget
                               f.id = `${dcId}.${f.id}`; // dc_id.field_id
                               return f;
@@ -458,6 +458,12 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
                      }
 
                      return result;
+                  }
+                  getOptions(fields) {
+                     return Promise.resolve([]);
+                  }
+                  getFieldData(fieldId) {
+                     return Promise.resolve([]);
                   }
                },
             ],
