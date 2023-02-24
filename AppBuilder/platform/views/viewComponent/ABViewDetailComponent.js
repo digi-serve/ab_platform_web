@@ -7,7 +7,20 @@ module.exports = class ABViewDetailComponent extends ABViewContainerComponent {
    }
 
    ui() {
-      return super.ui();
+      let _ui = super.ui();
+
+      // this wrapper allows the detail view to have a
+      // card appearance as well as enables the edit and
+      // details functions to work when clicked
+      return {
+         type: "form",
+         borderless: true,
+         rows: [
+            {
+               body: _ui,
+            },
+         ],
+      };
    }
 
    onShow() {

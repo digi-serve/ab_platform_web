@@ -13,6 +13,10 @@ jobs:
    e2etests:
       name: Test
       runs-on: ubuntu-latest
+      env:
+         CYPRESS_RESPONSE_TIMEOUT: 200000
+         CYPRESS_DEFAULT_COMMAND_TIMEOUT: 30000
+         CYPRESS_RETRIES: 2
       strategy:
          fail-fast: true
          matrix:
@@ -54,7 +58,7 @@ jobs:
            uses: actions/checkout@v2
            with:
               repository: digi-serve/kitchensink_app
-              path: ab/test/e2e/cypress/integration/kitchensink_app
+              path: ab/test/e2e/cypress/e2e/kitchensink_app
 
          # These next steps are to save our ablogs to file
          - run: npm install pm2@latest -g
@@ -62,17 +66,16 @@ jobs:
            run: pm2 start ./logs.js -- --toFile logs/ABServices.log
            working-directory: ./ab
 
-         - name: Run Cypress Tests
-           uses: cypress-io/github-action@v2
+         #Run test
+         - name: Wait for AB
+           uses: ifaxity/wait-on-action@v1
            with:
-              working-directory: ./ab
-              project: ./test/e2e
-              config: baseUrl=http://localhost:8080,responseTimeout=120000,defaultCommandTimeout=24000,retries=2
-              config-file: ./cypress.app.json
-              wait-on: "http://localhost:8080"
-              wait-on-timeout: 300
-              env: stack=ab
-              install: false
+              resource: http://localhost:8080
+              timeout: 300000
+
+         - name: Run Cypress Tests
+           run: npm run test:e2e:app -- --browser chrome
+           working-directory: ./ab
 
          - uses: actions/upload-artifact@v2
            if: failure()
