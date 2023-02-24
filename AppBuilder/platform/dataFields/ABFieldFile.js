@@ -48,8 +48,7 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
                   // TODO: a reminder that you still got alot on the server to do!
                   webix.alert({
                      title: "!! TODO !!",
-                     text:
-                        "Tell a Developer to actually pay attention to this!",
+                     text: "Tell a Developer to actually pay attention to this!",
                   });
 
                   // now the default .destroy()
@@ -448,5 +447,15 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
     */
    urlUpload(isWebix = true) {
       return `/file/upload/${this.object.id}/${this.id}/${isWebix ? "1" : "0"}`;
+   }
+
+   /**
+    * @method urlFile
+    * return the url to use to reference the file by it's id.
+    * @param {string} id uuid reference of this file.
+    * @return {string}
+    */
+   urlFile(id) {
+      return `/file/${id}`;
    }
 };
