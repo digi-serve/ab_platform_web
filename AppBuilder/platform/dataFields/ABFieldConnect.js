@@ -586,7 +586,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
       return new Promise((resolve, reject) => {
          this.getOptions(combineFilters, "", "", theEditor).then((data) => {
-            this.populateOptions(theEditor, data, field, form, false);
+            this.populateOptions(theEditor, data, field, form, true);
             resolve();
          });
       });
