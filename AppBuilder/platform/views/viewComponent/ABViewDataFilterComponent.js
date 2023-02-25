@@ -69,9 +69,8 @@ export default class ABViewDataFilterComponent extends ABViewComponent {
                         type: "icon",
                         icon: "fa fa-filter",
                         width: 40,
-                        filterButton: true,
                         id: this.ids.filterButton,
-                        css: "webix_primary",
+                        css: "webix_primary abFilterButton",
                         click: (id, event) => {
                            this.toolbarFilter($$(this.ids.filterButton).$view);
                         },
@@ -89,9 +88,8 @@ export default class ABViewDataFilterComponent extends ABViewComponent {
                         type: "icon",
                         icon: "fa fa-sort",
                         width: 40,
-                        sortButton: true,
                         id: this.ids.sortButton,
-                        css: "webix_primary",
+                        css: "webix_primary abSortButton",
                         click: (id, event) => {
                            this.openSort($$(this.ids.sortButton).$view);
                         },
@@ -275,6 +273,11 @@ export default class ABViewDataFilterComponent extends ABViewComponent {
       }
    }
 
+   onShow() {
+      super.onShow();
+      this.updateBadges();
+   }
+
    applyConnectFilter(connectId) {
       let filterRule = [];
       if (connectId) {
@@ -306,20 +309,12 @@ export default class ABViewDataFilterComponent extends ABViewComponent {
     *        Any Sort Rules added by the user.
     */
    async callbackSortData(sortRules = []) {
-      var buttons = $$(this.ids.component)
-         .getTopParentView()
-         .queryView({ view: "button", sortButton: true }, "all");
-
-      buttons.forEach((b) => {
-         b.define("badge", sortRules?.length || null);
-         b.refresh();
-      });
-
       const dc = this.datacollection;
       if (!_.isEqual(dc?.settings?.objectWorkspace?.sortFields, sortRules)) {
          dc.settings.objectWorkspace.sortFields = sortRules;
          await this.datacollection.reloadData();
       }
+      this.updateBadges();
    }
 
    /**
@@ -332,25 +327,35 @@ export default class ABViewDataFilterComponent extends ABViewComponent {
     *        Any Filter Rules added by the user.
     */
    callbackFilterData(fnFilter, filterRules = []) {
-      var buttons = $$(this.ids.component)
-         .getTopParentView()
-         .queryView({ view: "button", filterButton: true }, "all");
-
-      const onlyFilterRules = this.filterHelper.filterRules();
-      buttons.forEach((b) => {
-         b.define("badge", onlyFilterRules?.rules?.length ?? null);
-         b.refresh();
-      });
-
       const dc = this.datacollection;
       if (!_.isEqual(dc?.__filterCond, filterRules)) {
          dc.filterCondition(filterRules);
          dc.reloadData();
       }
+      this.updateBadges();
    }
 
    toolbarFilter($view) {
       this.filterHelper.showPopup($view);
+   }
+
+   updateBadges() {
+      const dc = this.datacollection;
+      var filterButtons = document.getElementsByClassName("abFilterButton");
+
+      const onlyFilterRules = this.filterHelper.filterRules();
+      for (let b of filterButtons) {
+         $$(b).define("badge", onlyFilterRules?.rules?.length ?? null);
+         $$(b).refresh();
+      }
+
+      var sortButtons = document.getElementsByClassName("abSortButton");
+
+      const onlySortRules = dc.settings.objectWorkspace.sortFields;
+      for (let b of sortButtons) {
+         $$(b).define("badge", onlySortRules?.length || null);
+         $$(b).refresh();
+      }
    }
 
    detatch() {
