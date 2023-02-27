@@ -892,7 +892,6 @@ module.exports = class FilterComplex extends FilterComplexCore {
 
             this.myPopup.show(...options);
          } else {
-            debugger;
             $$(this.ids.popup).show(...options);
          }
       } else {

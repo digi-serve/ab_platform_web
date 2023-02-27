@@ -333,8 +333,8 @@ export default class ABViewDataFilterComponent extends ABViewComponent {
       if (!_.isEqual(dc?.__filterCond, filterRules)) {
          dc.filterCondition(filterRules);
          dc.reloadData();
+         this.updateUI();
       }
-      this.updateUI();
    }
 
    toolbarFilter($view) {
@@ -351,8 +351,12 @@ export default class ABViewDataFilterComponent extends ABViewComponent {
       );
 
       const onlyFilterRules = this.filterHelper.filterRules();
+      let filterBadge =
+         onlyFilterRules?.rules?.length > 0
+            ? onlyFilterRules?.rules?.length
+            : null;
       for (let b of filterButtons) {
-         $$(b).define("badge", onlyFilterRules?.rules?.length ?? null);
+         $$(b).define("badge", filterBadge);
          $$(b).refresh();
       }
 
@@ -361,8 +365,10 @@ export default class ABViewDataFilterComponent extends ABViewComponent {
       );
 
       const onlySortRules = dc.settings.objectWorkspace.sortFields;
+      let sortBadge = onlySortRules?.length > 0 ? onlySortRules?.length : null;
+
       for (let b of sortButtons) {
-         $$(b).define("badge", onlySortRules?.length || null);
+         $$(b).define("badge", sortBadge);
          $$(b).refresh();
       }
 
@@ -381,7 +387,6 @@ export default class ABViewDataFilterComponent extends ABViewComponent {
       //          activeElement == s.getElementsByTagName("input")[0]
       //       ) {
       //          // skip the already selected input
-      //          debugger;
       //       } else {
       //          $$(s).blockEvent();
       //          $$(s).setValue(searchText);
