@@ -247,4 +247,41 @@ module.exports = class ABProcessElement extends ABProcessElementCore {
 
       this.emit("switchTo", child);
    }
+
+   /**
+    * @method warningsEval()
+    * re-evaluate our warnings for this Process Task.
+    * Most of our ProcessTasks need to also verify data related to
+    * other available tasks, so we need to call the onProcessReady()
+    * so we can access those values.
+    */
+   warningsEval() {
+      super.warningsEval();
+      this.onProcessReady();
+
+      // if this isn't an end type of task, then there must be
+      // > 0 next tasks
+      if (!this.isEndTask()) {
+         const myOutgoingConnections = this.process.connectionsOutgoing(
+            this.diagramID
+         );
+         if (myOutgoingConnections.length < 1) {
+            this.warningMessage("should have another task after this one");
+         }
+      }
+   }
+
+   /**
+    * @method warningMessage(message)
+    * Save a warning message in a common format for our ProcessTasks.
+    */
+   warningMessage(message, data = {}) {
+      this.emit(
+         "warning",
+         `${this.defaults.key}[${
+            this.label ? this.label : this.name
+         }]: ${message}`,
+         data
+      );
+   }
 };
