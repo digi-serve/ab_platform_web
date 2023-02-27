@@ -70,7 +70,7 @@ export default class ABViewDataFilterComponent extends ABViewComponent {
                         icon: "fa fa-filter",
                         width: 40,
                         id: this.ids.filterButton,
-                        css: "webix_primary abFilterButton",
+                        css: `webix_primary abFilterButton${this.settings.dataviewID}`,
                         click: (id, event) => {
                            this.toolbarFilter($$(this.ids.filterButton).$view);
                         },
@@ -89,7 +89,7 @@ export default class ABViewDataFilterComponent extends ABViewComponent {
                         icon: "fa fa-sort",
                         width: 40,
                         id: this.ids.sortButton,
-                        css: "webix_primary abSortButton",
+                        css: `webix_primary abSortButton${this.settings.dataviewID}`,
                         click: (id, event) => {
                            this.openSort($$(this.ids.sortButton).$view);
                         },
@@ -105,10 +105,12 @@ export default class ABViewDataFilterComponent extends ABViewComponent {
                      {
                         id: this.ids.globalSearchToolbar,
                         view: "search",
-                        placeholder: "Search..",
+                        placeholder: this.label("Search.."),
+                        css: `abGlobalSearchField${this.settings.dataviewID}`,
                         width: 0,
                         attributes: {
                            "data-cy": `${this.ids.component} global search`,
+                           datacollection: this.settings.dataviewID,
                         },
                         on: {
                            onTimedKeyPress: () => {
@@ -275,7 +277,7 @@ export default class ABViewDataFilterComponent extends ABViewComponent {
 
    onShow() {
       super.onShow();
-      this.updateBadges();
+      this.updateUI();
    }
 
    applyConnectFilter(connectId) {
@@ -314,7 +316,7 @@ export default class ABViewDataFilterComponent extends ABViewComponent {
          dc.settings.objectWorkspace.sortFields = sortRules;
          await this.datacollection.reloadData();
       }
-      this.updateBadges();
+      this.updateUI();
    }
 
    /**
@@ -332,16 +334,21 @@ export default class ABViewDataFilterComponent extends ABViewComponent {
          dc.filterCondition(filterRules);
          dc.reloadData();
       }
-      this.updateBadges();
+      this.updateUI();
    }
 
    toolbarFilter($view) {
       this.filterHelper.showPopup($view);
    }
 
-   updateBadges() {
+   updateUI() {
       const dc = this.datacollection;
-      var filterButtons = document.getElementsByClassName("abFilterButton");
+
+      if (!dc) return;
+
+      var filterButtons = document.getElementsByClassName(
+         `abFilterButton${this.settings.dataviewID}`
+      );
 
       const onlyFilterRules = this.filterHelper.filterRules();
       for (let b of filterButtons) {
@@ -349,13 +356,39 @@ export default class ABViewDataFilterComponent extends ABViewComponent {
          $$(b).refresh();
       }
 
-      var sortButtons = document.getElementsByClassName("abSortButton");
+      var sortButtons = document.getElementsByClassName(
+         `abSortButton${this.settings.dataviewID}`
+      );
 
       const onlySortRules = dc.settings.objectWorkspace.sortFields;
       for (let b of sortButtons) {
          $$(b).define("badge", onlySortRules?.length || null);
          $$(b).refresh();
       }
+
+      // var searchFields = document.getElementsByClassName(
+      //    `abGlobalSearchField${this.settings.dataviewID}`
+      // );
+
+      // const searchText = this.filterHelper.__externalSearchText;
+      // if (searchText != null) {
+      //    for (let s of searchFields) {
+      //       let search = $$(s);
+      //       var activeElement = document.activeElement;
+      //       if (
+      //          activeElement?.attributes?.datacollection?.value ==
+      //             this.settings.dataviewID &&
+      //          activeElement == s.getElementsByTagName("input")[0]
+      //       ) {
+      //          // skip the already selected input
+      //          debugger;
+      //       } else {
+      //          $$(s).blockEvent();
+      //          $$(s).setValue(searchText);
+      //          $$(s).unblockEvent();
+      //       }
+      //    }
+      // }
    }
 
    detatch() {
