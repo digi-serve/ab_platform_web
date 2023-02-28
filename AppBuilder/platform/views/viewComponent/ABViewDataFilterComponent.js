@@ -113,6 +113,12 @@ export default class ABViewDataFilterComponent extends ABViewComponent {
                            datacollection: this.settings.dataviewID,
                         },
                         on: {
+                           onChange: () => {
+                              // assign external search text but do not trigger event to filter
+                              this.filterHelper.__externalSearchText = $$(
+                                 this.ids.globalSearchToolbar
+                              ).getValue();
+                           },
                            onTimedKeyPress: () => {
                               const searchText = $$(
                                  this.ids.globalSearchToolbar
@@ -372,28 +378,26 @@ export default class ABViewDataFilterComponent extends ABViewComponent {
          $$(b).refresh();
       }
 
-      // var searchFields = document.getElementsByClassName(
-      //    `abGlobalSearchField${this.settings.dataviewID}`
-      // );
+      var searchFields = document.getElementsByClassName(
+         `abGlobalSearchField${this.settings.dataviewID}`
+      );
 
-      // const searchText = this.filterHelper.__externalSearchText;
-      // if (searchText != null) {
-      //    for (let s of searchFields) {
-      //       let search = $$(s);
-      //       var activeElement = document.activeElement;
-      //       if (
-      //          activeElement?.attributes?.datacollection?.value ==
-      //             this.settings.dataviewID &&
-      //          activeElement == s.getElementsByTagName("input")[0]
-      //       ) {
-      //          // skip the already selected input
-      //       } else {
-      //          $$(s).blockEvent();
-      //          $$(s).setValue(searchText);
-      //          $$(s).unblockEvent();
-      //       }
-      //    }
-      // }
+      let searchText = this.filterHelper.__externalSearchText;
+      if (searchText != null) {
+         for (let s of searchFields) {
+            let search = $$(s);
+            var activeElement = document.activeElement;
+            if (
+               activeElement?.attributes?.datacollection?.value ==
+                  this.settings.dataviewID &&
+               activeElement == s.getElementsByTagName("input")[0]
+            ) {
+               // skip the already selected input
+            } else {
+               $$(s).setValue(searchText);
+            }
+         }
+      }
    }
 
    detatch() {
