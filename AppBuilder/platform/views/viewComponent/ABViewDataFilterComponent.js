@@ -227,6 +227,10 @@ export default class ABViewDataFilterComponent extends ABViewComponent {
       if (this.settings.viewType == "advanced") {
          if (this.settings.showSort) {
             this.PopupSortComponent.objectLoad(object);
+            // if there are some preset sorts show them to user
+            this.PopupSortComponent.setSettings(
+               dv?.settings?.objectWorkspace?.sortFields
+            );
          } else {
             $$(this.ids.sortButton).hide();
          }
