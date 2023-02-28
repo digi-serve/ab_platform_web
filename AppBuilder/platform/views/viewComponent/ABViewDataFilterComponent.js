@@ -113,16 +113,15 @@ export default class ABViewDataFilterComponent extends ABViewComponent {
                            datacollection: this.settings.dataviewID,
                         },
                         on: {
-                           onChange: () => {
-                              // assign external search text but do not trigger event to filter
-                              this.filterHelper.__externalSearchText = $$(
-                                 this.ids.globalSearchToolbar
-                              ).getValue();
-                           },
                            onTimedKeyPress: () => {
                               const searchText = $$(
                                  this.ids.globalSearchToolbar
                               ).getValue();
+                              // store search text in datacollection because
+                              // it is shared amoung the similar filterHelpers
+                              const dc = this.datacollection;
+                              dc.settings.objectWorkspace.searchText =
+                                 searchText;
 
                               this.filterHelper.externalSearchText(searchText);
                            },
@@ -382,7 +381,8 @@ export default class ABViewDataFilterComponent extends ABViewComponent {
          `abGlobalSearchField${this.settings.dataviewID}`
       );
 
-      let searchText = this.filterHelper.__externalSearchText;
+      // let searchText = this.filterHelper.__externalSearchText;
+      const searchText = dc.settings.objectWorkspace.searchText;
       if (searchText != null) {
          for (let s of searchFields) {
             let search = $$(s);
