@@ -54,10 +54,10 @@ class PreloadUI extends ClassUI {
       };
    }
    preloadMessage(text) {
-      $$("preload-text").setValues({ text });
+      $$("preload-text")?.setValues({ text });
    }
    destroy() {
-      $$("preloader").destructor();
+      $$("preloader")?.destructor();
    }
 }
 

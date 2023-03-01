@@ -1,7 +1,7 @@
 /*
  * ABQLSetPluck
  *
- * An ABQLSetPluck can process a set (array) of data and puck out a specified
+ * An ABQLSetPluck can process a set (array) of data and pluck out a specified
  * field from each row to then make an array of values that only contain that 
  * field.
  * 

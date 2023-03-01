@@ -65,6 +65,15 @@ class ABQLObject extends ABQLRootObjectCore {
          this.object = this.objectLookup(this.params.name);
       }
    }
+
+   warningsEval() {
+      super.warningsEval();
+      if (!this.object) {
+         this.warningMessage("has no object set.", {
+            objectID: this.objectID,
+         });
+      }
+   }
 }
 
 module.exports = ABQLObject;

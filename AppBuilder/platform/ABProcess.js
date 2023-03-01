@@ -195,6 +195,7 @@ module.exports = class ABProcess extends ABProcessCore {
       // report both OUR warnings, and any warnings from any of our fields
       var allWarnings = [].concat(this._warnings);
       this.elements().forEach((e) => {
+         e.warningsEval();
          allWarnings = allWarnings.concat(e.warnings());
       });
 

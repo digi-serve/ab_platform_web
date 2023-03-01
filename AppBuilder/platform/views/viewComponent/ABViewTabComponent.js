@@ -156,7 +156,18 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
                            selectedItem = id;
                            // if the menu item is a regular menu item
                            // call the onShow with the view id to load the view
-                           $$(id.replace("_menu", "")).show(false, false);
+
+                           id = id.replace("_menu", "");
+                           let node = $$(id);
+                           if (node) {
+                              node.show(false, false);
+                           } else {
+                              // How often does this occure?
+                              let msg = `ABViewTabComponent[${this.name}][${this.id}] could not resolve UI panel for provided menu [${selectedItem}].`;
+                              this.AB.notify("developer", msg, {});
+                           }
+                           // $$(id).show(false, false);
+
                            // onShow(id);
                         }
                      },
