@@ -66,7 +66,6 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
       // {string}
       // External sources of text filters are stored here. This is most likely
       // from the global search toolbar entry.
-
       this.rowFilter = this.AB.filterComplexNew(`${this.ids.component}_filter`);
       // {RowFilter}
       // When .userFilterPosition == "toolbar" we use this RowFilter to
@@ -479,6 +478,7 @@ export default class ABViewPropertyFilterData extends ABViewProperty {
          allFields.forEach((f) => {
             if (f.fieldIsFilterable()) {
                switch (f.key) {
+                  case "number":
                   case "string":
                   case "LongText":
                   case "email":
