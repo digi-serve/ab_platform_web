@@ -24,9 +24,7 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
    ///
 
    idCustomContainer(obj) {
-      return "#columnName#-#id#-tree"
-         .replace("#id#", obj.id)
-         .replace("#columnName#", this.columnName.replace(/ /g, "_"));
+      return `${this.columnName.replace(/ /g, "_")}-${obj.id}-tree`;
    }
 
    // return the grid column header definition for this instance of ABFieldTree
@@ -239,25 +237,26 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
       function populateTree(field, vals) {
          values = getValues(field, vals);
 
-         $$(idTree).blockEvent(); // prevents endless loop
+         const $Tree = $$(idTree);
+         $Tree.blockEvent(); // prevents endless loop
 
          const options = field.AB.cloneDeep(field.settings.options);
-         $$(idTree).clearAll();
-         $$(idTree).parse(options);
-         $$(idTree).refresh();
-         $$(idTree).uncheckAll();
-         $$(idTree).openAll();
+         $Tree.clearAll();
+         $Tree.parse(options);
+         $Tree.refresh();
+         $Tree.uncheckAll();
+         $Tree.openAll();
 
          if (values != null && values.length) {
             values.forEach(function (id) {
-               if ($$(idTree).exists(id)) {
-                  $$(idTree).checkItem(id);
-                  const dom = $$(idTree).getItemNode(id);
+               if ($Tree.exists(id)) {
+                  $Tree.checkItem(id);
+                  const dom = $Tree.getItemNode(id);
                   dom.classList.add("selected");
                }
             });
          }
-         $$(idTree).unblockEvent();
+         $Tree.unblockEvent();
       }
 
       if ($$(idPopup)) {

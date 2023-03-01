@@ -127,7 +127,7 @@ module.exports = class ABFieldUser extends ABFieldUserCore {
          if (!this.settings.isShowProfileImage) return "";
 
          if (opt.image_id)
-            return `<img src='/opsportal/image/UserProfile/${opt.image_id}' style='border-radius:100%; object-fit: cover; margin: 0 5px 0 -10px;' width='28' height='28' />`;
+            return `<img src='/file/${opt.image_id}' style='border-radius:100%; object-fit: cover; margin: 0 5px 0 -10px;' width='28' height='28' />`;
          else return '<i style="opacity: 0.6;" class="fa fa-user"></i> ';
       };
 

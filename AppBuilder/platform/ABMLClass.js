@@ -48,9 +48,6 @@ module.exports = class ABMLClass extends ABMLClassCore {
    }
 
    warningsAll() {
-      // console.warn(
-      //    `ABML Object [${this.label}] has not overwritten .warningsAll()`
-      // );
       return this.warnings();
    }
 

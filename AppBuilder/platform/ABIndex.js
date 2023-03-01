@@ -39,6 +39,33 @@ module.exports = class ABIndex extends ABIndexCore {
       });
    }
 
+   warningsEval() {
+      super.warningsEval();
+
+      (this._unknownFieldIDs || []).forEach((id) => {
+         this.warningsMessage(`is referencing an unknown field id[${id}]`);
+      });
+
+      if (this.fields.length == 0) {
+         this.warningsMessage(`is not referencing any fields`);
+      }
+   }
+
+   /**
+    * @method warningsMessage()
+    * generate a commonly formatted warning message for this ABField.
+    * This is expected to be called from within a .warningsEval()
+    * method when generating warnings.
+    * @param {string} msg
+    *        the warning string to display
+    * @param {json} data
+    *        any relevant additional information for a developer to refer to.
+    */
+   warningsMessage(msg, data = {}) {
+      let message = `Index[${this.label}]: ${msg}`;
+      this._warnings.push({ message, data });
+   }
+
    ///
    /// DB Migrations
    ///
