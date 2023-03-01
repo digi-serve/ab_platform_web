@@ -200,8 +200,6 @@ export default class ABViewDataFilterComponent extends ABViewComponent {
             return { height: 1 };
       }
 
-      const ids = this.ids;
-
       const ui =
          this.settings.viewType == "advanced"
             ? this.advancedUI()
@@ -385,11 +383,9 @@ export default class ABViewDataFilterComponent extends ABViewComponent {
          `abGlobalSearchField${this.settings.dataviewID}`
       );
 
-      // let searchText = this.filterHelper.__externalSearchText;
       const searchText = dc.settings.objectWorkspace.searchText;
       if (searchText != null) {
          for (let s of searchFields) {
-            let search = $$(s);
             var activeElement = document.activeElement;
             if (
                activeElement?.attributes?.datacollection?.value ==
