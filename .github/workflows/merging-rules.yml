@@ -17,7 +17,7 @@ jobs:
       if: ${{ github.actor == 'dependabot[bot]' }}
       strategy:
          matrix:
-            package: ["@digiserve/ab-utils"]
+            package: ["ab-utils"]
       steps:
          - name: Dependabot metadata
            id: metadata
