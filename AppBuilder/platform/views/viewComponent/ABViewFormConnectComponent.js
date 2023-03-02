@@ -123,11 +123,26 @@ module.exports = class ABViewFormConnectComponent extends (
          _ui.labelPosition = formSettings.labelPosition;
       }
 
-      let editForm = "";
+      // generate UI for add/edit page tools
+      let addFormID = this.ids?.popup || this.view?.settings?.formView || null;
+      if (addFormID) {
+         this.addPageComponent = this.view.addPageTool.component(
+            this.AB,
+            addFormID
+         );
+      }
 
-      if (formSettings.editForm && formSettings.editForm != "")
+      let editFormID =
+         this.ids?.editpopup || this.view?.settings?.editForm || null;
+      let editForm = "";
+      if (editFormID) {
+         this.editPageComponent = this.view.editPageTool.component(
+            this.AB,
+            editFormID
+         );
          editForm =
             '<i data-item-id="#id#" class="fa fa-cog editConnectedPage"></i>';
+      }
 
       _ui.suggest = {
          button: true,
@@ -163,8 +178,7 @@ module.exports = class ABViewFormConnectComponent extends (
          },
       };
 
-      let apcUI = null; // this.addPageComponent.ui();
-
+      let apcUI = this.addPageComponent?.ui || null;
       if (apcUI) {
          // reset some component vals to make room for button
          _ui.label = "";
@@ -220,7 +234,7 @@ module.exports = class ABViewFormConnectComponent extends (
 
       console.error("TODO: ABViewFormConnect.addPageComponent()");
       // this.addPageComponent = this.view.addPageTool.component(/*App, idBase */);
-      // this.addPageComponent.applicationLoad(this.view.application);
+      this.addPageComponent.applicationLoad(this.view.application);
       // this.addPageComponent.init({
       //    onSaveData: component.logic.callbackSaveData,
       //    onCancelClick: component.logic.callbackCancel,
@@ -229,7 +243,7 @@ module.exports = class ABViewFormConnectComponent extends (
 
       console.error("TODO: ABViewFormConnect.editPageComponent()");
       // this.editPageComponent = this.view.editPageTool.component(/*App, idBase*/);
-      // this.editPageComponent.applicationLoad(this.view.application);
+      this.editPageComponent.applicationLoad(this.view.application);
       // this.editPageComponent.init({
       //    onSaveData: component.logic.callbackSaveData,
       //    onCancelClick: component.logic.callbackCancel,
