@@ -7,6 +7,8 @@ module.exports = class ABProcessTaskServiceQuery extends (
 ) {
    constructor(attributes, process, AB) {
       super(attributes, process, AB);
+
+      this.attributes = attributes;
    }
 
    ABQLManager() {
@@ -38,7 +40,7 @@ module.exports = class ABProcessTaskServiceQuery extends (
 
       if (!this.name) {
          this.warningMessage("does not have a name.", {
-            attributes,
+            attributes: this.attributes,
          });
       }
 
