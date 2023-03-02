@@ -358,7 +358,7 @@ module.exports = class ABViewFormConnectComponent extends (
          rules: [],
       };
 
-      if (this.view.settings?.filterConditions?.rules?.length) {
+      if (settings?.filterConditions?.rules?.length) {
          filterConditions = this.view.settings.filterConditions;
       } else if (settings?.objectWorkspace?.filterConditions?.rules?.length) {
          filterConditions = settings.objectWorkspace.filterConditions;
