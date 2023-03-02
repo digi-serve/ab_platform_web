@@ -15,9 +15,9 @@ module.exports = class ABViewDetailConnectComponent extends (
          on: {
             //Add data-cy attribute for Cypress Testing
             onAfterRender: () => {
-               const columnName = baseView.field(
-                  (fld) => fld.id === settings.fieldId
-               ).columnName;
+               const columnName =
+                  baseView.field((fld) => fld.id === settings.fieldId)
+                     ?.columnName ?? "";
                const dataCy = `detail connected ${columnName} ${
                   settings.fieldId
                } ${baseView.parentDetailComponent()?.id || baseView.parent.id}`;

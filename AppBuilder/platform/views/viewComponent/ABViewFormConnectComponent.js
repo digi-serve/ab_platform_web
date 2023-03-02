@@ -124,22 +124,23 @@ module.exports = class ABViewFormConnectComponent extends (
       }
 
       // generate UI for add/edit page tools
-      let addFormID = this.ids?.popup || this.view?.settings?.formView || null;
-      if (addFormID) {
-         this.addPageComponent = this.view.addPageTool.component(
+      let addFormID = this.ids?.popup || baseView?.settings?.formView;
+      if (addFormID && baseView) {
+         this.addPageComponent = baseView.addPageTool.component(
             this.AB,
             addFormID
          );
+         this.addPageComponent.applicationLoad(baseView.application);
       }
 
-      let editFormID =
-         this.ids?.editpopup || this.view?.settings?.editForm || null;
+      let editFormID = this.ids?.editpopup || baseView?.settings?.editForm;
       let editForm = "";
-      if (editFormID) {
-         this.editPageComponent = this.view.editPageTool.component(
+      if (editFormID && baseView) {
+         this.editPageComponent = baseView.editPageTool.component(
             this.AB,
             editFormID
          );
+         this.editPageComponent.applicationLoad(baseView.application);
          editForm =
             '<i data-item-id="#id#" class="fa fa-cog editConnectedPage"></i>';
       }
@@ -188,7 +189,7 @@ module.exports = class ABViewFormConnectComponent extends (
          apcUI.on = {
             onItemClick: (/*id, evt*/) => {
                // let $form = $$(id).getFormView();
-               this.addPageComponent.onClick(form.datacollection);
+               this.addPageComponent?.onClick(form.datacollection);
 
                return false;
             },
@@ -232,18 +233,18 @@ module.exports = class ABViewFormConnectComponent extends (
 
       // this._options = options;
 
-      console.error("TODO: ABViewFormConnect.addPageComponent()");
+      // console.error("TODO: ABViewFormConnect.addPageComponent()");
       // this.addPageComponent = this.view.addPageTool.component(/*App, idBase */);
-      this.addPageComponent.applicationLoad(this.view.application);
+      // this.addPageComponent.applicationLoad(this.view.application);
       // this.addPageComponent.init({
       //    onSaveData: component.logic.callbackSaveData,
       //    onCancelClick: component.logic.callbackCancel,
       //    clearOnLoad: component.logic.callbackClearOnLoad,
       // });
 
-      console.error("TODO: ABViewFormConnect.editPageComponent()");
+      // console.error("TODO: ABViewFormConnect.editPageComponent()");
       // this.editPageComponent = this.view.editPageTool.component(/*App, idBase*/);
-      this.editPageComponent.applicationLoad(this.view.application);
+      // this.editPageComponent.applicationLoad(this.view.application);
       // this.editPageComponent.init({
       //    onSaveData: component.logic.callbackSaveData,
       //    onCancelClick: component.logic.callbackCancel,
