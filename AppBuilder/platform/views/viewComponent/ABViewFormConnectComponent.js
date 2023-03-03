@@ -152,6 +152,9 @@ module.exports = class ABViewFormConnectComponent extends (
          //       );
          //    },
          // },
+         // Support partial matches
+         filter: ({ value }, search) =>
+            value.toLowerCase().includes(search.toLowerCase()),
       };
 
       _ui.onClick = {
