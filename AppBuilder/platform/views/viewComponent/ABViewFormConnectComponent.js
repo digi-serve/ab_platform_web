@@ -123,34 +123,18 @@ module.exports = class ABViewFormConnectComponent extends (
          _ui.labelPosition = formSettings.labelPosition;
       }
 
-      // generate UI for add/edit page tools
-      let addFormID = this.ids?.popup || baseView?.settings?.formView;
-      if (addFormID && baseView) {
-         this.addPageComponent = baseView.addPageTool.component(
-            this.AB,
-            addFormID
-         );
-         this.addPageComponent.applicationLoad(baseView.application);
-      }
-
-      let editFormID = this.ids?.editpopup || baseView?.settings?.editForm;
-      let editForm = "";
-      if (editFormID && baseView) {
-         this.editPageComponent = baseView.editPageTool.component(
-            this.AB,
-            editFormID
-         );
-         this.editPageComponent.applicationLoad(baseView.application);
-         editForm =
-            '<i data-item-id="#id#" class="fa fa-cog editConnectedPage"></i>';
-      }
+      this.initAddEditTool();
 
       _ui.suggest = {
          button: true,
          selectAll: multiselect ? true : false,
          body: {
             data: [],
-            template: editForm + "#value#",
+            template: `${
+               baseView?.settings?.editForm
+                  ? '<i data-item-id="#id#" class="fa fa-cog editConnectedPage"></i>'
+                  : ""
+            }#value#`,
          },
          on: {
             onShow: async () => {
@@ -179,7 +163,7 @@ module.exports = class ABViewFormConnectComponent extends (
          },
       };
 
-      let apcUI = this.addPageComponent?.ui || null;
+      let apcUI = this.addPageComponent?.ui;
       if (apcUI) {
          // reset some component vals to make room for button
          _ui.label = "";
@@ -231,71 +215,90 @@ module.exports = class ABViewFormConnectComponent extends (
    async init(AB, options) {
       await super.init(AB);
 
-      // this._options = options;
+      this.initAddEditTool();
+   }
 
-      // console.error("TODO: ABViewFormConnect.addPageComponent()");
-      // this.addPageComponent = this.view.addPageTool.component(/*App, idBase */);
-      // this.addPageComponent.applicationLoad(this.view.application);
-      // this.addPageComponent.init({
-      //    onSaveData: component.logic.callbackSaveData,
-      //    onCancelClick: component.logic.callbackCancel,
-      //    clearOnLoad: component.logic.callbackClearOnLoad,
-      // });
+   initAddEditTool() {
+      const baseView = this.view;
 
-      // console.error("TODO: ABViewFormConnect.editPageComponent()");
-      // this.editPageComponent = this.view.editPageTool.component(/*App, idBase*/);
-      // this.editPageComponent.applicationLoad(this.view.application);
-      // this.editPageComponent.init({
-      //    onSaveData: component.logic.callbackSaveData,
-      //    onCancelClick: component.logic.callbackCancel,
-      //    clearOnLoad: component.logic.callbackClearOnLoad,
-      // });
+      // Initial add/edit page tools
+      const addFormID = baseView?.settings?.formView;
+      if (addFormID && baseView && !this.addPageComponent) {
+         this.addPageComponent = baseView.addPageTool.component(
+            this.AB,
+            `${baseView.id}_${addFormID}`
+         );
+         this.addPageComponent.applicationLoad(baseView.application);
+         this.addPageComponent.init({
+            onSaveData: this.callbackSaveData.bind(this),
+            onCancelClick: this.callbackCancel.bind(this),
+            clearOnLoad: this.callbackClearOnLoad.bind(this),
+         });
+      }
+
+      const editFormID = baseView?.settings?.editForm;
+      if (editFormID && baseView && !this.editPageComponent) {
+         this.editPageComponent = baseView.editPageTool.component(
+            this.AB,
+            `${baseView.id}_${editFormID}`
+         );
+         this.editPageComponent.applicationLoad(baseView.application);
+         this.editPageComponent.init({
+            onSaveData: this.callbackSaveData.bind(this),
+            onCancelClick: this.callbackCancel.bind(this),
+            clearOnLoad: this.callbackClearOnLoad.bind(this),
+         });
+      }
    }
 
    callbackSaveData(saveData) {
-      const ids = this.ids;
-
-      // find the select component
-      const $formItem = $$(ids.formItem);
-
-      if (!$formItem) return;
-
+      // Clear cache to re-pull options from server
       const field = this.field;
+      field.clearStorage(this.view.settings.filterConditions);
 
-      field.once("option.data", (data) => {
-         data.forEach((item) => {
-            item.value = item.text;
-         });
+      // const ids = this.ids;
 
-         $formItem.getList().clearAll();
-         $formItem.getList().define("data", data);
+      // // find the select component
+      // const $formItem = $$(ids.formItem);
 
-         if (field.settings.linkType === "many") {
-            const currentVals = $formItem.getValue();
+      // if (!$formItem) return;
 
-            if (currentVals.indexOf(saveData.id) === -1) {
-               $formItem.setValue(
-                  currentVals ? `${currentVals},${saveData.id}` : saveData.id
-               );
-            }
-         } else {
-            $formItem.setValue(saveData.id);
-         }
-         // close the popup when we are finished
-         $$(ids.popup)?.close();
-         $$(ids.editpopup)?.close();
-      });
+      // const field = this.field;
 
-      field
-         .getOptions(this.settings.filterConditions, "")
-         .then(function (data) {
-            // we need new option that will be returned from server (above)
-            // so we will not set this and then just reset it.
-         });
+      // field.once("option.data", (data) => {
+      //    data.forEach((item) => {
+      //       item.value = item.text;
+      //    });
+
+      //    $formItem.getList().clearAll();
+      //    $formItem.getList().define("data", data);
+
+      //    if (field.settings.linkType === "many") {
+      //       const currentVals = $formItem.getValue();
+
+      //       if (currentVals.indexOf(saveData.id) === -1) {
+      //          $formItem.setValue(
+      //             currentVals ? `${currentVals},${saveData.id}` : saveData.id
+      //          );
+      //       }
+      //    } else {
+      //       $formItem.setValue(saveData.id);
+      //    }
+      //    // close the popup when we are finished
+      //    $$(ids.popup)?.close();
+      //    $$(ids.editpopup)?.close();
+      // });
+
+      // field
+      //    .getOptions(this.settings.filterConditions, "")
+      //    .then(function (data) {
+      //       // we need new option that will be returned from server (above)
+      //       // so we will not set this and then just reset it.
+      //    });
    }
 
    callbackCancel() {
-      $$(this.ids.popup).close();
+      $$(this.ids?.popup)?.close?.();
 
       return false;
    }
