@@ -138,15 +138,20 @@ module.exports = class ABViewFormConnectComponent extends (
             }#value#`,
          },
          on: {
-            onShow: async () => {
-               await field.getAndPopulateOptions(
-                  $$(ids.formItem),
-                  baseView.options,
-                  field,
-                  form
-               );
+            onShow: () => {
+               field.populateOptionsDataCy($$(ids.formItem), field, form);
             },
          },
+         // on: {
+         //    onShow: async () => {
+         //       await field.getAndPopulateOptions(
+         //          $$(ids.formItem),
+         //          baseView.options,
+         //          field,
+         //          form
+         //       );
+         //    },
+         // },
       };
 
       _ui.onClick = {
@@ -552,7 +557,8 @@ module.exports = class ABViewFormConnectComponent extends (
       $node.refresh();
 
       field.getAndPopulateOptions(
-         $node,
+         // $node,
+         $$(ids.formItem),
          baseView.options,
          field,
          baseView.parentFormComponent()
