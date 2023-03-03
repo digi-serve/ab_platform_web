@@ -142,16 +142,6 @@ module.exports = class ABViewFormConnectComponent extends (
                field.populateOptionsDataCy($$(ids.formItem), field, form);
             },
          },
-         // on: {
-         //    onShow: async () => {
-         //       await field.getAndPopulateOptions(
-         //          $$(ids.formItem),
-         //          baseView.options,
-         //          field,
-         //          form
-         //       );
-         //    },
-         // },
          // Support partial matches
          filter: ({ value }, search) =>
             value.toLowerCase().includes(search.toLowerCase()),
