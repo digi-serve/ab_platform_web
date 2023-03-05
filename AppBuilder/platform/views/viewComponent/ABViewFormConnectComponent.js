@@ -253,7 +253,14 @@ module.exports = class ABViewFormConnectComponent extends (
    callbackSaveData(saveData) {
       // Clear cache to re-pull options from server
       const field = this.field;
+      // Refresh option list
       field.clearStorage(this.view.settings.filterConditions);
+      field.getAndPopulateOptions(
+         $$(this.ids.formItem),
+         this.view.options,
+         field,
+         this.view.parentFormComponent()
+      );
 
       // const ids = this.ids;
 
