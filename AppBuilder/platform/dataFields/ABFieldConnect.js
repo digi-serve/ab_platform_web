@@ -598,7 +598,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       return new Promise((resolve, reject) => {
          this.getOptions(combineFilters, "", "", theEditor).then((data) => {
             this.populateOptions(theEditor, data, field, form, true);
-            resolve();
+            resolve(data);
          });
       });
    }
@@ -621,7 +621,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
    }
 
    populateOptionsDataCy(theEditor, field, form) {
-      if (theEditor.$destructed) return;
+      if (theEditor?.$destructed) return;
 
       // Add data-cy attributes
       if (theEditor?.getList) {

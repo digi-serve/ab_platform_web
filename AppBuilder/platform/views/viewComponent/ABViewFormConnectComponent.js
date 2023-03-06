@@ -250,57 +250,52 @@ module.exports = class ABViewFormConnectComponent extends (
       }
    }
 
-   callbackSaveData(saveData) {
-      // Clear cache to re-pull options from server
+   async callbackSaveData(saveData) {
+      const ids = this.ids;
       const field = this.field;
+
+      // find the select component
+      const $formItem = $$(ids.formItem);
+      if (!$formItem) return;
+
       // Refresh option list
       field.clearStorage(this.view.settings.filterConditions);
-      field.getAndPopulateOptions(
-         $$(this.ids.formItem),
+      const data = await field.getAndPopulateOptions(
+         $formItem,
          this.view.options,
          field,
          this.view.parentFormComponent()
       );
 
-      // const ids = this.ids;
-
-      // // find the select component
-      // const $formItem = $$(ids.formItem);
-
-      // if (!$formItem) return;
-
-      // const field = this.field;
-
       // field.once("option.data", (data) => {
-      //    data.forEach((item) => {
-      //       item.value = item.text;
-      //    });
+      data.forEach((item) => {
+         item.value = item.text;
+      });
 
-      //    $formItem.getList().clearAll();
-      //    $formItem.getList().define("data", data);
+      $formItem.getList().clearAll();
+      $formItem.getList().define("data", data);
 
-      //    if (field.settings.linkType === "many") {
-      //       const currentVals = $formItem.getValue();
+      if (field.settings.linkType === "many") {
+         const currentVals = $formItem.getValue();
 
-      //       if (currentVals.indexOf(saveData.id) === -1) {
-      //          $formItem.setValue(
-      //             currentVals ? `${currentVals},${saveData.id}` : saveData.id
-      //          );
-      //       }
-      //    } else {
-      //       $formItem.setValue(saveData.id);
-      //    }
-      //    // close the popup when we are finished
-      //    $$(ids.popup)?.close();
-      //    $$(ids.editpopup)?.close();
+         let selectedItems;
+         if (currentVals.indexOf(saveData.id) === -1)
+            selectedItems = (currentVals ? `${currentVals},${saveData.id}` : saveData.id);
+
+         $formItem.setValue(selectedItems);
+      } else {
+         $formItem.setValue(saveData.id);
+      }
+      // close the popup when we are finished
+      // $$(ids.popup)?.close();
+      // $$(ids.editpopup)?.close();
       // });
 
-      // field
-      //    .getOptions(this.settings.filterConditions, "")
-      //    .then(function (data) {
-      //       // we need new option that will be returned from server (above)
-      //       // so we will not set this and then just reset it.
-      //    });
+      // field.getOptions(this.settings.filterConditions, "");
+      // .then(function (data) {
+      //    // we need new option that will be returned from server (above)
+      //    // so we will not set this and then just reset it.
+      // });
    }
 
    callbackCancel() {
