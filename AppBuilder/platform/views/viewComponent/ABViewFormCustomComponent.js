@@ -68,7 +68,10 @@ module.exports = class ABViewFormCustomComponent extends (
       const template =
          `<div class="customField ${formSettings.labelPosition}">${templateLabel}#template#</div>`
             .replace(/#width#/g, formSettings.labelWidth)
-            .replace(/#label#/g, field.label)
+            .replace(
+               /#label#/g,
+               `${formSettings.labelPosition == "top" ? "" : field.label}`
+            )
             .replace(
                /#template#/g,
                field
