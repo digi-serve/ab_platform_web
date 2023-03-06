@@ -17,36 +17,42 @@ module.exports = class ABMLClass extends ABMLClassCore {
       this._warnings = [];
       // {array}
       // an array of warning messages for this object.
-
-      this.on("warning", (message, data) => {
-         this._warnings.push({ message, data });
-      });
+      // each warning entry should be in the format:
+      // WarningMessage: {
+      //    message: {string} "message to display"
+      //    data: {json} additional debugging information
+      // }
    }
 
    // fromValues(attributes) {
    //    super.fromValues(attributes);
    // }
 
+   /**
+    * @method warnings()
+    * returns the stored warnings for this ONE object.
+    * @return {array} WarningMessage
+    */
    warnings() {
       return this._warnings;
    }
 
+   /**
+    * @method warningsEval()
+    * This method causes an object to re-evaluate it's settings to see if there
+    * are any potential errors.
+    */
    warningsEval() {
       this._warnings = [];
-      // if (
-      //    ["datacollection", "object", "query", "process"].indexOf(this.type) >
-      //    -1
-      // ) {
-      //    console.warn(
-      //       `ABML Object [${this.type}][${this.label}] has not overwritten .warningsEval()`
-      //    );
-      // }
-
-      // many of our warnings are generated during the .fromValues() method
-      // when we initialize our Objects.  So, cause this process to repeat.
-      this.fromValues(this.toObj());
    }
 
+   /**
+    * @method warningsAll()
+    * returns all relevant warnings for the current Object. This includes any
+    * sub fields, links, views, etc...
+    * @return {array} warning structures
+    *          [ {WarningMessage}, ... ]
+    */
    warningsAll() {
       return this.warnings();
    }
