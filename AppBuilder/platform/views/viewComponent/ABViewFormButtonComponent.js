@@ -146,25 +146,29 @@ module.exports = class ABViewFormButton extends ABViewFormItemComponent {
    }
 
    onSave(saveButton) {
+      if (!saveButton) {
+         console.error("Require the button element");
+         return;
+      }
       // get form component
       const form = this.view.parentFormComponent();
       const formView = saveButton.getFormView();
 
       // disable the save button
-      saveButton.disable();
+      saveButton.disable?.();
 
       // save data
       form
          .saveData(formView)
          .then(() => {
-            saveButton?.enable();
+            saveButton.enable?.();
 
             //Focus on first focusable component
             form.focusOnFirst();
          })
          .catch((err) => {
             console.error(err);
-            saveButton?.enable();
+            saveButton.enable?.();
          });
    }
 };

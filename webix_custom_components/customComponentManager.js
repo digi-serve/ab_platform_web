@@ -13,7 +13,6 @@ var componentList = [
    require("./edittree"),
    require("./editunitlist"),
    require("./focusableTemplate"),
-   require("./formioBuilder"),
    require("./formioPreview"),
    require("./numbertext"),
    require("./timepicker"),

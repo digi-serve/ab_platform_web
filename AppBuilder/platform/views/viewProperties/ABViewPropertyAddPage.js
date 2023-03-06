@@ -209,8 +209,8 @@ export default class ABViewPropertyAddPage extends ABViewProperty {
                let pageClone = page.clone(null, null, { ignoreSubPages: true });
                pageClone.id = this._application.AB.uuid(); // lets take the stored id can create a new dynamic one so our views don't duplicate
                // pageClone.id = pageClone.id + "-" + webix.uid(); // lets take the stored id can create a new dynamic one so our views don't duplicate
-               let popUpComp = pageClone.component(App);
-               let ui = popUpComp.ui;
+               let popUpComp = pageClone.component();
+               let ui = popUpComp.ui();
 
                // Listen 'saved' event of the form widget
                const button = pageClone.views(
@@ -278,20 +278,21 @@ export default class ABViewPropertyAddPage extends ABViewProperty {
                webix.ui(popupTemplate).show();
 
                // Initial UI components
-               setTimeout(() => {
-                  popUpComp.init({
-                     onSaveData: _logic.callbacks.onSaveData,
-                     onCancelClick: _logic.callbacks.onCancel,
-                     clearOnLoad: _logic.callbacks.clearOnLoad,
-                     onClearOnLoad: _logic.callbacks.onClearOnLoad,
-                  });
+               const accessLevel = 3; // TODO: Is it correct
+               popUpComp.init(this._application.AB, accessLevel, {
+                  onSaveData: _logic.callbacks.onSaveData,
+                  onCancelClick: _logic.callbacks.onCancel,
+                  clearOnLoad: _logic.callbacks.clearOnLoad,
+                  onClearOnLoad: _logic.callbacks.onClearOnLoad,
+               });
 
-                  popUpComp.onShow();
+               popUpComp.onShow();
 
+               setTimeout(async () => {
                   _logic.setDefaultValue(dc, pageClone);
 
                   resolve();
-               }, 50);
+               }, 100);
             });
          },
 
@@ -345,7 +346,10 @@ export default class ABViewPropertyAddPage extends ABViewProperty {
                   let comp = v.viewComponents[fView.id];
                   if (!comp) return;
 
-                  field.setValue($$(comp.ui.inputId), data);
+                  const ui = typeof comp.ui == "function" ? comp.ui() : comp.ui;
+                  const inputId = ui?.inputId || ui?.rows?.[0]?.inputId;
+
+                  if (inputId) field.setValue($$(inputId), data);
                });
             });
          },

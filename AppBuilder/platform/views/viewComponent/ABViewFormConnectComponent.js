@@ -66,12 +66,13 @@ module.exports = class ABViewFormConnectComponent extends (
                if (Array.isArray(data)) {
                   selectedValues = [];
                   data.forEach((record) => {
-                     let recordObj = record;
-                     if (typeof record != "object") {
-                        // we need to convert either index or uuid to full data object
-                        recordObj = field.getItemFromVal(record);
-                     }
-                     if (recordObj?.id) selectedValues.push(recordObj.id);
+                     selectedValues.push(record.id || record);
+                     // let recordObj = record;
+                     // if (typeof record != "object") {
+                     //    // we need to convert either index or uuid to full data object
+                     //    recordObj = field.getItemFromVal(record);
+                     // }
+                     // if (recordObj?.id) selectedValues.push(recordObj.id);
                   });
                } else {
                   selectedValues = data;
@@ -123,29 +124,27 @@ module.exports = class ABViewFormConnectComponent extends (
          _ui.labelPosition = formSettings.labelPosition;
       }
 
-      let editForm = "";
-
-      if (formSettings.editForm && formSettings.editForm != "")
-         editForm =
-            '<i data-item-id="#id#" class="fa fa-cog editConnectedPage"></i>';
+      this.initAddEditTool();
 
       _ui.suggest = {
          button: true,
          selectAll: multiselect ? true : false,
          body: {
             data: [],
-            template: editForm + "#value#",
+            template: `${
+               baseView?.settings?.editForm
+                  ? '<i data-item-id="#id#" class="fa fa-cog editConnectedPage"></i>'
+                  : ""
+            }#value#`,
          },
          on: {
-            onShow: async () => {
-               await field.getAndPopulateOptions(
-                  $$(ids.formItem),
-                  baseView.options,
-                  field,
-                  form
-               );
+            onShow: () => {
+               field.populateOptionsDataCy($$(ids.formItem), field, form);
             },
          },
+         // Support partial matches
+         filter: ({ value }, search) =>
+            value.toLowerCase().includes(search.toLowerCase()),
       };
 
       _ui.onClick = {
@@ -163,8 +162,7 @@ module.exports = class ABViewFormConnectComponent extends (
          },
       };
 
-      let apcUI = null; // this.addPageComponent.ui();
-
+      let apcUI = this.addPageComponent?.ui;
       if (apcUI) {
          // reset some component vals to make room for button
          _ui.label = "";
@@ -174,7 +172,7 @@ module.exports = class ABViewFormConnectComponent extends (
          apcUI.on = {
             onItemClick: (/*id, evt*/) => {
                // let $form = $$(id).getFormView();
-               this.addPageComponent.onClick(form.datacollection);
+               this.addPageComponent?.onClick(form.datacollection);
 
                return false;
             },
@@ -216,71 +214,92 @@ module.exports = class ABViewFormConnectComponent extends (
    async init(AB, options) {
       await super.init(AB);
 
-      // this._options = options;
-
-      console.error("TODO: ABViewFormConnect.addPageComponent()");
-      // this.addPageComponent = this.view.addPageTool.component(/*App, idBase */);
-      // this.addPageComponent.applicationLoad(this.view.application);
-      // this.addPageComponent.init({
-      //    onSaveData: component.logic.callbackSaveData,
-      //    onCancelClick: component.logic.callbackCancel,
-      //    clearOnLoad: component.logic.callbackClearOnLoad,
-      // });
-
-      console.error("TODO: ABViewFormConnect.editPageComponent()");
-      // this.editPageComponent = this.view.editPageTool.component(/*App, idBase*/);
-      // this.editPageComponent.applicationLoad(this.view.application);
-      // this.editPageComponent.init({
-      //    onSaveData: component.logic.callbackSaveData,
-      //    onCancelClick: component.logic.callbackCancel,
-      //    clearOnLoad: component.logic.callbackClearOnLoad,
-      // });
+      this.initAddEditTool();
    }
 
-   callbackSaveData(saveData) {
+   initAddEditTool() {
+      const baseView = this.view;
+
+      // Initial add/edit page tools
+      const addFormID = baseView?.settings?.formView;
+      if (addFormID && baseView && !this.addPageComponent) {
+         this.addPageComponent = baseView.addPageTool.component(
+            this.AB,
+            `${baseView.id}_${addFormID}`
+         );
+         this.addPageComponent.applicationLoad(baseView.application);
+         this.addPageComponent.init({
+            onSaveData: this.callbackSaveData.bind(this),
+            onCancelClick: this.callbackCancel.bind(this),
+            clearOnLoad: this.callbackClearOnLoad.bind(this),
+         });
+      }
+
+      const editFormID = baseView?.settings?.editForm;
+      if (editFormID && baseView && !this.editPageComponent) {
+         this.editPageComponent = baseView.editPageTool.component(
+            this.AB,
+            `${baseView.id}_${editFormID}`
+         );
+         this.editPageComponent.applicationLoad(baseView.application);
+         this.editPageComponent.init({
+            onSaveData: this.callbackSaveData.bind(this),
+            onCancelClick: this.callbackCancel.bind(this),
+            clearOnLoad: this.callbackClearOnLoad.bind(this),
+         });
+      }
+   }
+
+   async callbackSaveData(saveData) {
       const ids = this.ids;
+      const field = this.field;
 
       // find the select component
       const $formItem = $$(ids.formItem);
-
       if (!$formItem) return;
 
-      const field = this.field;
+      // Refresh option list
+      field.clearStorage(this.view.settings.filterConditions);
+      const data = await field.getAndPopulateOptions(
+         $formItem,
+         this.view.options,
+         field,
+         this.view.parentFormComponent()
+      );
 
-      field.once("option.data", (data) => {
-         data.forEach((item) => {
-            item.value = item.text;
-         });
-
-         $formItem.getList().clearAll();
-         $formItem.getList().define("data", data);
-
-         if (field.settings.linkType === "many") {
-            const currentVals = $formItem.getValue();
-
-            if (currentVals.indexOf(saveData.id) === -1) {
-               $formItem.setValue(
-                  currentVals ? `${currentVals},${saveData.id}` : saveData.id
-               );
-            }
-         } else {
-            $formItem.setValue(saveData.id);
-         }
-         // close the popup when we are finished
-         $$(ids.popup)?.close();
-         $$(ids.editpopup)?.close();
+      // field.once("option.data", (data) => {
+      data.forEach((item) => {
+         item.value = item.text;
       });
 
-      field
-         .getOptions(this.settings.filterConditions, "")
-         .then(function (data) {
-            // we need new option that will be returned from server (above)
-            // so we will not set this and then just reset it.
-         });
+      $formItem.getList().clearAll();
+      $formItem.getList().define("data", data);
+
+      if (field.settings.linkType === "many") {
+         const currentVals = $formItem.getValue();
+
+         let selectedItems;
+         if (currentVals.indexOf(saveData.id) === -1)
+            selectedItems = (currentVals ? `${currentVals},${saveData.id}` : saveData.id);
+
+         $formItem.setValue(selectedItems);
+      } else {
+         $formItem.setValue(saveData.id);
+      }
+      // close the popup when we are finished
+      // $$(ids.popup)?.close();
+      // $$(ids.editpopup)?.close();
+      // });
+
+      // field.getOptions(this.settings.filterConditions, "");
+      // .then(function (data) {
+      //    // we need new option that will be returned from server (above)
+      //    // so we will not set this and then just reset it.
+      // });
    }
 
    callbackCancel() {
-      $$(this.ids.popup).close();
+      $$(this.ids?.popup)?.close?.();
 
       return false;
    }
@@ -358,7 +377,7 @@ module.exports = class ABViewFormConnectComponent extends (
          rules: [],
       };
 
-      if (this.view.settings?.filterConditions?.rules?.length) {
+      if (settings?.filterConditions?.rules?.length) {
          filterConditions = this.view.settings.filterConditions;
       } else if (settings?.objectWorkspace?.filterConditions?.rules?.length) {
          filterConditions = settings.objectWorkspace.filterConditions;
@@ -533,7 +552,8 @@ module.exports = class ABViewFormConnectComponent extends (
       $node.refresh();
 
       field.getAndPopulateOptions(
-         $node,
+         // $node,
+         $$(ids.formItem),
          baseView.options,
          field,
          baseView.parentFormComponent()

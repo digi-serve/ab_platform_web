@@ -237,7 +237,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
     *
     * @return {Promise}
     */
-   getOptions(where, term, sort, editor) {
+   getOptions(whereClause, term, sort, editor) {
       const theEditor = editor;
       return new Promise((resolve, reject) => {
          let haveResolved = false;
@@ -264,7 +264,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
          // Prepare Where clause
 
-         where = where || {};
+         const where = this.AB.cloneDeep(whereClause || {});
          sort = sort || [];
 
          if (!where.glue) where.glue = "and";
@@ -295,7 +295,8 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          // M:1 - get data that's only empty relation value
          if (
             this.settings.linkType == "many" &&
-            this.settings.linkViaType == "one"
+            this.settings.linkViaType == "one" &&
+            editor?.config?.showAllOptions != true
          ) {
             where.rules.push({
                key: linkedCol.id,
@@ -306,7 +307,8 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          // 1:1
          else if (
             this.settings.linkType == "one" &&
-            this.settings.linkViaType == "one"
+            this.settings.linkViaType == "one" &&
+            editor?.config?.showAllOptions != true
          ) {
             // 1:1 - get data is not match link id that we have
             if (this.settings.isSource == true) {
@@ -329,7 +331,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             }
          }
 
-         const storageID = `${this.id}-${JSON.stringify(where)}`;
+         const storageID = this.getStorageID(where);
 
          Promise.resolve()
             .then(async () => {
@@ -440,6 +442,15 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                }
             });
       });
+   }
+
+   getStorageID(where) {
+      return `${this.id}-${JSON.stringify(where)}`;
+   }
+
+   async clearStorage(where) {
+      const storageID = this.getStorageID(where);
+      await this.AB.Storage.set(storageID, null);
    }
 
    editFormat(value) {
@@ -587,7 +598,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       return new Promise((resolve, reject) => {
          this.getOptions(combineFilters, "", "", theEditor).then((data) => {
             this.populateOptions(theEditor, data, field, form, true);
-            resolve();
+            resolve(data);
          });
       });
    }
@@ -610,7 +621,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
    }
 
    populateOptionsDataCy(theEditor, field, form) {
-      if (theEditor.$destructed) return;
+      if (theEditor?.$destructed) return;
 
       // Add data-cy attributes
       if (theEditor?.getList) {

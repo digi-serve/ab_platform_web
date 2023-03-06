@@ -35,7 +35,7 @@ module.exports = class ABViewFormItemComponent extends ABViewComponent {
 
          if (settings.showLabel) _uiFormItem.label = field.label;
 
-         if (field.settings.required || settings.required)
+         if (field.settings.required || baseView.settings.required)
             _uiFormItem.required = 1;
 
          if (settings.disable === 1) _uiFormItem.disabled = true;
@@ -72,7 +72,7 @@ module.exports = class ABViewFormItemComponent extends ABViewComponent {
                this.getInputNode?.().setAttribute?.(
                   "data-cy",
                   `${field.key} ${field.columnName} ${field.id} ${
-                     form.id || "nf"
+                     form?.id || "nf"
                   }`
                );
             },
