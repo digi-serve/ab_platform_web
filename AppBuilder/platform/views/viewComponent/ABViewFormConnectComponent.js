@@ -62,58 +62,7 @@ module.exports = class ABViewFormConnectComponent extends (
                }
             },
             onChange: (data) => {
-               let selectedValues;
-               if (Array.isArray(data)) {
-                  selectedValues = [];
-                  data.forEach((record) => {
-                     selectedValues.push(record.id || record);
-                     // let recordObj = record;
-                     // if (typeof record != "object") {
-                     //    // we need to convert either index or uuid to full data object
-                     //    recordObj = field.getItemFromVal(record);
-                     // }
-                     // if (recordObj?.id) selectedValues.push(recordObj.id);
-                  });
-               } else {
-                  selectedValues = data;
-                  if (typeof data != "object") {
-                     // we need to convert either index or uuid to full data object
-                     selectedValues = field.getItemFromVal(data);
-                  }
-                  // selectedValues = field.pullRecordRelationValues(selectedValues);
-                  if (selectedValues?.id) {
-                     selectedValues = selectedValues.id;
-                  } else {
-                     selectedValues = data;
-                  }
-               }
-
-               // We can now set the new value but we need to block event listening
-               // so it doesn't trigger onChange again
-               const $formItem = $$(ids.formItem);
-
-               // for xxx->one connections we need to populate again before setting
-               // values because we need to use the selected values to add options
-               // to the UI
-               if (this?.field?.settings?.linkViaType == "one") {
-                  field.getAndPopulateOptions(
-                     $formItem,
-                     baseView.options,
-                     field,
-                     baseView.parentFormComponent()
-                  );
-               }
-
-               if ($formItem) {
-                  $formItem.blockEvent();
-
-                  const prepedVals = selectedValues.join
-                     ? selectedValues.join()
-                     : selectedValues;
-
-                  $formItem.setValue(prepedVals);
-                  $formItem.unblockEvent();
-               }
+               this._onChange(data);
             },
          },
       };
@@ -211,6 +160,65 @@ module.exports = class ABViewFormConnectComponent extends (
       return _ui;
    }
 
+   _onChange(data) {
+      const ids = this.ids;
+      const field = this.field;
+      const baseView = this.view;
+
+      let selectedValues;
+      if (Array.isArray(data)) {
+         selectedValues = [];
+         data.forEach((record) => {
+            selectedValues.push(record.id || record);
+            // let recordObj = record;
+            // if (typeof record != "object") {
+            //    // we need to convert either index or uuid to full data object
+            //    recordObj = field.getItemFromVal(record);
+            // }
+            // if (recordObj?.id) selectedValues.push(recordObj.id);
+         });
+      } else {
+         selectedValues = data;
+         if (typeof data != "object") {
+            // we need to convert either index or uuid to full data object
+            selectedValues = field.getItemFromVal(data);
+         }
+         // selectedValues = field.pullRecordRelationValues(selectedValues);
+         if (selectedValues?.id) {
+            selectedValues = selectedValues.id;
+         } else {
+            selectedValues = data;
+         }
+      }
+
+      // We can now set the new value but we need to block event listening
+      // so it doesn't trigger onChange again
+      const $formItem = $$(ids.formItem);
+
+      // for xxx->one connections we need to populate again before setting
+      // values because we need to use the selected values to add options
+      // to the UI
+      if (this?.field?.settings?.linkViaType == "one") {
+         field.getAndPopulateOptions(
+            $formItem,
+            baseView.options,
+            field,
+            baseView.parentFormComponent()
+         );
+      }
+
+      if ($formItem) {
+         $formItem.blockEvent();
+
+         const prepedVals = selectedValues.join
+            ? selectedValues.join()
+            : selectedValues;
+
+         $formItem.setValue(prepedVals);
+         $formItem.unblockEvent();
+      }
+   }
+
    async init(AB, options) {
       await super.init(AB);
 
@@ -280,7 +288,9 @@ module.exports = class ABViewFormConnectComponent extends (
 
          let selectedItems;
          if (currentVals.indexOf(saveData.id) === -1)
-            selectedItems = (currentVals ? `${currentVals},${saveData.id}` : saveData.id);
+            selectedItems = currentVals
+               ? `${currentVals},${saveData.id}`
+               : saveData.id;
 
          $formItem.setValue(selectedItems);
       } else {
@@ -353,7 +363,7 @@ module.exports = class ABViewFormConnectComponent extends (
       });
    }
 
-   onShow() {
+   async onShow() {
       const ids = this.ids;
       const $formItem = $$(ids.formItem);
 
@@ -551,9 +561,9 @@ module.exports = class ABViewFormConnectComponent extends (
 
       $node.refresh();
 
-      field.getAndPopulateOptions(
+      await field.getAndPopulateOptions(
          // $node,
-         $$(ids.formItem),
+         $formItem,
          baseView.options,
          field,
          baseView.parentFormComponent()
@@ -561,7 +571,9 @@ module.exports = class ABViewFormConnectComponent extends (
 
       // Add data-cy attributes
       const dataCy = `${field.key} ${field.columnName} ${field.id} ${baseView.parent.id}`;
-
       node.setAttribute("data-cy", dataCy);
+
+      // Need to refresh selected values when they are custom index
+      this._onChange($formItem.getValue());
    }
 };
