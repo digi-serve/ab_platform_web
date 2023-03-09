@@ -34,7 +34,9 @@ module.exports = class ABViewFormCustomComponent extends (
       const settings = field?.settings ?? baseView.settings ?? {};
 
       const requiredClass =
-         field?.settings?.required || settings.required ? "webix_required" : "";
+         field?.settings?.required || this.settings.required
+            ? "webix_required"
+            : "";
 
       let templateLabel = "";
 
@@ -65,23 +67,23 @@ module.exports = class ABViewFormCustomComponent extends (
       } else if (formSettings.showLabel && formSettings.labelPosition === "top")
          height = DEFAULT_HEIGHT;
 
-      const template =
-         `<div class="customField ${formSettings.labelPosition}">${templateLabel}#template#</div>`
-            .replace(/#width#/g, formSettings.labelWidth)
-            .replace(
-               /#label#/g,
-               `${formSettings.labelPosition == "top" ? "" : field.label}`
-            )
-            .replace(
-               /#template#/g,
-               field
-                  ?.columnHeader({
-                     width: this.new_width,
-                     height: height,
-                     editable: true,
-                  })
-                  .template({}) ?? ""
-            );
+      const template = `<div class="customField ${
+         formSettings.labelPosition
+      }">${
+         formSettings.labelPosition == "top" ? "" : templateLabel
+      }#template#</div>`
+         .replace(/#width#/g, formSettings.labelWidth)
+         .replace(/#label#/g, field.label)
+         .replace(
+            /#template#/g,
+            field
+               ?.columnHeader({
+                  width: this.new_width,
+                  height: height,
+                  editable: true,
+               })
+               .template({}) ?? ""
+         );
 
       return super.ui({
          view: "forminput",

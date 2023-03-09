@@ -365,7 +365,7 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
       });
    }
 
-   onShow(data) {
+   async onShow(data) {
       this._showed = true;
 
       const baseView = this.view;
@@ -373,22 +373,19 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
       // call .onShow in the base component
       const superComponent = baseView.superComponent();
 
-      superComponent.onShow();
+      await superComponent.onShow();
 
       const ids = this.ids;
       const $form = $$(this.ids.form);
       const dc = this.datacollection;
 
       if (dc) {
-         if ($form) dc.bind($form);
-
          // clear current cursor on load
          // if (this.settings.clearOnLoad || _logic.callbacks.clearOnLoad() ) {
          const settings = this.settings;
 
          if (settings.clearOnLoad) {
             dc.setCursor(null);
-            this.displayData(null);
          }
 
          // if the cursor is cleared before or after we need to make
@@ -400,10 +397,12 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
          const rowData = dc.getCursor();
 
          // do this for the initial form display so we can see defaults
-         this.displayData(rowData);
+         await this.displayData(rowData);
+
+         if ($form) dc.bind($form);
       }
       // show blank data in the form
-      else this.displayData(data ?? {});
+      else await this.displayData(data ?? {});
 
       //Focus on first focusable component
       this.focusOnFirst();
@@ -564,3 +563,4 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
          $$(childComponent.ids.formItem).focus();
    }
 };
+

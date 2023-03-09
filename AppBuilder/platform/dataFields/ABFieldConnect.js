@@ -660,7 +660,12 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                item = options[i];
                break;
             } else {
-               if (options[i].id == val || options[i].value == val) {
+               if (
+                  options[i].id == val ||
+                  options[i].value == val ||
+                  options[i][this.indexField?.columnName ?? ""] == val ||
+                  options[i][this.indexField2?.columnName ?? ""] == val
+               ) {
                   item = options[i];
                   break;
                }
