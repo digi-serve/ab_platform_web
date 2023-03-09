@@ -35,7 +35,19 @@ module.exports = class ABFieldJson extends ABFieldJsonCore {
     */
    formComponent() {
       // read-only for now
-      return super.formComponent("fieldreadonly");
+      const formComponentSetting = super.formComponent();
+
+      // .common() is used to create the display in the list
+      formComponentSetting.common = () => {
+         return {
+            key: "json",
+            settings: {
+               type: "string",
+            },
+         };
+      };
+
+      return formComponentSetting;
    }
 
    detailComponent() {
@@ -48,5 +60,10 @@ module.exports = class ABFieldJson extends ABFieldJsonCore {
       };
 
       return detailComponentSetting;
+   }
+
+   setValue(item, rowData) {
+      super.setValue(item, rowData, "");
+      item.config.value = rowData[this.columnName];
    }
 };

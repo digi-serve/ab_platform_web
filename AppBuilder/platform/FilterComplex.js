@@ -223,7 +223,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
             {
                view: "layout",
                type: "clean",
-               borderless: true,
+               borderless: this._options.borderless ?? true,
                rows: [
                   {
                      id: ids.querybuilder,
