@@ -258,8 +258,7 @@ module.exports = class ABObjectQuery extends ABObjectQueryCore {
       // 1) we need to have any key as one of our fields.
       let field = this.fieldByID(rule.key);
       if (!field && rule.key != "this_object") {
-         this.emit(
-            "warning",
+         this.warningsMessage(
             "condition does not reference one of our fields",
             {
                rule,
@@ -276,25 +275,80 @@ module.exports = class ABObjectQuery extends ABObjectQueryCore {
          // has our .isConditionComplete() method.
       }
       if (!this._conditionCheck.isConditionComplete(rule)) {
-         this.emit("warning", "incomplete condition definition", {
+         this.warningsMessage("incomplete condition definition", {
             rule,
          });
       }
    }
 
-   /**
-    * @method warningsAll()
-    * Compile any warnings from this Query, or any of it's fields.
-    * @return {array}
-    *         An array of warning objects.
-    *         .message {string} message to display
-    *         .data {obj} associated debug info for this warning.
-    */
-   // warningsAll() {
-   //    // report both OUR warnings, and any warnings from any of our fields
-   //    // NOTE: this will get
-   //    var allWarnings = super.warningsAll();
+   warningsEval() {
+      super.warningsEval();
 
-   //    return allWarnings;
-   // }
+      this.conditionScan(this.where);
+
+      /// include importFields() warnings:
+      this.__missingObject.forEach((f) => {
+         this.warningsMessage(
+            `IMPORT FIELDS: could not resolve object[${
+               f.objectID
+            }] for fieldSetting ${JSON.stringify(f)}`,
+            {
+               fieldInfo: f,
+            }
+         );
+      });
+
+      this.__missingFields.forEach((f) => {
+         this.warningsMessage(
+            `IMPORT FIELDS: Object[${f.objID}] could not find field[${
+               f.fieldID
+            }] for fieldSetting ${JSON.stringify(f.fieldInfo)}`,
+            {
+               object: f.objID,
+               fieldInfo: f.fieldInfo,
+            }
+         );
+      });
+
+      this.__cantFilter.forEach((f) => {
+         this.warningsMessage(
+            `Field[${f.field.id}] referenced in fieldSetting[${JSON.stringify(
+               f.fieldInfo
+            )}] did not pass .canFilterField`,
+            {
+               field: f.field.toObj(),
+               fieldInfo: f.fieldInfo,
+            }
+         );
+      });
+
+      this.__duplicateFields.forEach((f) => {
+         this.warningsMessage(
+            `Field[${
+               f.fieldInfo.fieldID
+            }] referenced in fieldSetting[${JSON.stringify(
+               f.fieldInfo
+            )}] is a duplicate`,
+            {
+               fieldInfo: f.fieldInfo,
+            }
+         );
+      });
+
+      this.__linkProblems.forEach((f) => {
+         this.warningsMessage(f.message, f.data);
+      });
+   }
+
+   warningsMessage(msg, data = {}) {
+      let message = `Query[${this.label}]: ${msg}`;
+      this._warnings.push({ message, data });
+   }
+
+   isUuid(text) {
+      console.error(
+         "ABObject.isUuid(): is depreciated.  directly reference AB.Rules.isUUID() instead."
+      );
+      return this.AB.isUUID(text);
+   }
 };

@@ -51,282 +51,6 @@ module.exports = class ABField extends ABFieldCore {
    /// on the instance values of the Application.
    ///
 
-   static clearEditor(ids) {
-      this._CurrentField = null;
-
-      const defaultValues = {
-         label: "",
-         columnName: "",
-         showIcon: 1,
-         required: 0,
-         unique: 0,
-         validationRules: "",
-      };
-
-      for (const f in defaultValues) {
-         const component = $$(ids[f]);
-         if (component) component.setValue(defaultValues[f]);
-      }
-
-      // reset the validation rules UI
-      const filterViews = $$(ids.filterComplex).queryView(
-         {
-            view: "form",
-            css: "abValidationForm",
-         },
-         "all"
-      );
-      if (filterViews.length) {
-         filterViews.forEach((v) => {
-            $$(ids.filterComplex).removeView(v);
-         });
-      }
-
-      $$(ids.addValidation).hide();
-
-      // hide warning message of null data
-      $$(ids.numberOfNull).hide();
-   }
-
-   /**
-    * @function editorPopulate
-    *
-    * populate the form with the given ABField instance provided.
-    *
-    * @param {object} ids
-    * @param {ABField} field
-    */
-   static editorPopulate(ids, field) {
-      this._CurrentField = field;
-
-      $$(ids.label).setValue(field.label);
-      $$(ids.columnName).setValue(field.columnName);
-      $$(ids.showIcon).setValue(field.settings.showIcon);
-      $$(ids.required).setValue(field.settings.required);
-      $$(ids.unique).setValue(field.settings.unique);
-
-      if (this._CurrentField) {
-         $$(ids.addValidation).show();
-      }
-
-      if (field.settings && field.settings.validationRules) {
-         let rules = field.settings.validationRules;
-         if (typeof rules == "string") {
-            try {
-               rules = JSON.parse(rules);
-            } catch (e) {
-               // continue regardless of error
-            }
-         }
-         (rules || []).forEach((settings) => {
-            field.addValidation(ids, settings);
-         });
-      }
-   }
-
-   /**
-    * @function definitionEditor
-    *
-    * Many DataFields share some base information for their usage
-    * in the AppBuilder.  The UI Editors have a common header
-    * and footer format, and this function allows child DataFields
-    * to not have to define those over and over.
-    *
-    * The common layout header contains:
-    *		[Menu Label]
-    *		[textBox: labelName]
-    *		[text:    description]
-    *
-    * The defined DataField UI will be added at the end of this.
-    *
-    * This routine actually updated the live DataField definition
-    * with the common header info.
-    *
-    * @param {DataField} field  The DataField object to work with.
-    */
-   static definitionEditor(App, ids, _logic, Field) {
-      /// TODO: maybe just pass in onChange instead of _logic
-      /// if not onChange, then use our default:
-
-      // setup our default labelOnChange functionality:
-      let labelOnChange = function (newVal, oldVal) {
-         oldVal = oldVal || "";
-
-         if (
-            newVal != oldVal &&
-            oldVal == $$(ids.columnName).getValue() &&
-            $$(ids.columnName).isEnabled()
-         ) {
-            $$(ids.columnName).setValue(newVal);
-         }
-      };
-
-      // if they provided a labelOnChange() override, use that:
-      if (_logic.labelOnChange) {
-         labelOnChange = _logic.labelOnChange;
-      }
-
-      let requiredOnChange = function (newVal, oldVal, ids) {
-         console.warn(
-            "Field has not implemented .requiredOnChange() is that okay?"
-         );
-      };
-
-      const addValidation = (ids) => {
-         return this._CurrentField.addValidation(ids);
-      };
-
-      // if the provided a requriedOnChange() override, use that:
-      if (_logic.requiredOnChange) {
-         requiredOnChange = _logic.requiredOnChange;
-      }
-
-      const getNumberOfNullValue = async (isRequired) => {
-         if (
-            isRequired &&
-            this._CurrentField &&
-            this._CurrentField.id &&
-            this._CurrentField.settings.required != isRequired
-         ) {
-            // TODO: disable save button
-
-            // get count number
-            const data = await this._CurrentField.object.model().count({
-               where: {
-                  glue: "and",
-                  rules: [
-                     {
-                        key: this._CurrentField.id,
-                        rule: "is_null",
-                     },
-                  ],
-               },
-            });
-
-            if (data.count > 0) {
-               const messageTemplate = L(
-                  "** There are {0} rows that will be updated to default value",
-                  [data.count]
-               );
-
-               $$(ids.numberOfNull).setValue(messageTemplate);
-               $$(ids.numberOfNull).show();
-            } else {
-               $$(ids.numberOfNull).hide();
-            }
-
-            // TODO: enable save button
-         } else {
-            $$(ids.numberOfNull).hide();
-         }
-      };
-
-      const _ui = {
-         // id: ids.component,
-         rows: [
-            // {
-            // 	view: "label",
-            // 	label: "<span class='webix_icon fa fa-{0}'></span>{1}".replace('{0}', Field.icon).replace('{1}', Field.menuName)
-            // },
-            {
-               view: "text",
-               id: ids.label,
-               name: "label",
-               label: L("Label"),
-               placeholder: L("Label"),
-               labelWidth: this.AB.UISettings.config().labelWidthLarge,
-               css: "ab-new-label-name",
-               on: {
-                  onChange: function (newVal, oldVal) {
-                     labelOnChange(newVal, oldVal);
-                  },
-               },
-            },
-            {
-               view: "text",
-               id: ids.columnName,
-               name: "columnName",
-               disallowEdit: true,
-               label: L("Field Name"),
-               labelWidth: this.AB.UISettings.config().labelWidthLarge,
-               placeholder: L("Database field name"),
-            },
-            {
-               view: "label",
-               id: ids.fieldDescription,
-               label: L("Description"),
-               align: "right",
-            },
-            {
-               view: "checkbox",
-               id: ids.showIcon,
-               name: "showIcon",
-               labelRight: App.labels.dataFieldShowIcon, // 'Show icon',
-               labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
-               value: true,
-            },
-            {
-               view: "checkbox",
-               id: ids.required,
-               name: "required",
-               hidden: !Field.supportRequire,
-               labelRight: App.labels.required,
-               // disallowEdit: true,
-               labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
-               on: {
-                  onChange: async (newVal, oldVal) => {
-                     requiredOnChange(newVal, oldVal, ids);
-
-                     // If check require on edit field, then show warning message
-                     await getNumberOfNullValue(newVal);
-                  },
-               },
-            },
-            // warning message: number of null value rows
-            {
-               view: "label",
-               id: ids.numberOfNull,
-               css: { color: "#f00" },
-               label: "",
-               hidden: true,
-            },
-
-            {
-               view: "checkbox",
-               id: ids.unique,
-               name: "unique",
-               hidden: !Field.supportUnique,
-               labelRight: App.labels.unique,
-               disallowEdit: true,
-               labelWidth: this.AB.UISettings.config().labelWidthCheckbox,
-            },
-            {
-               id: ids.filterComplex,
-               rows: [],
-            },
-            {
-               id: ids.addValidation,
-               view: "button",
-               label: L("Add Field Validation"),
-               css: "webix_primary",
-               click: () => {
-                  addValidation(ids);
-               },
-            },
-            // have a hidden field to contain the validationRules
-            // value we will parse out later
-            {
-               id: ids.validationRules,
-               view: "text",
-               hidden: true,
-               name: "validationRules",
-            },
-         ],
-      };
-
-      return _ui;
-   }
-
    static editorValues(settings) {
       const obj = {
          label: settings.label,
@@ -405,7 +129,7 @@ module.exports = class ABField extends ABFieldCore {
          validator.addError(
             "columnName",
             L(
-               "Field columnName must be unique ({0} already used in this Application)",
+               "Field columnName must be unique ({0} already used in this Object)",
                [this.columnName]
             )
          );
@@ -739,5 +463,20 @@ module.exports = class ABField extends ABFieldCore {
     */
    getSettings() {
       return Object.assign({}, this.settings);
+   }
+
+   /**
+    * @method warningsMessage()
+    * generate a commonly formatted warning message for this ABField.
+    * This is expected to be called from within a .warningsEval()
+    * method when generating warnings.
+    * @param {string} msg
+    *        the warning string to display
+    * @param {json} data
+    *        any relevant additional information for a developer to refer to.
+    */
+   warningsMessage(msg, data = {}) {
+      let message = `${this.fieldKey()}[${this.label}]: ${msg}`;
+      this._warnings.push({ message, data });
    }
 };

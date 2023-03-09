@@ -759,4 +759,28 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
       return selectedData;
    }
+
+   warningsEval() {
+      super.warningsEval();
+
+      var linkField = this.fieldLink;
+      if (!linkField) {
+         this.warningsMessage(
+            `is unable to find linked field[${this.settings.linkColumn}]`,
+            {
+               linkColumn: this.settings.linkColumn,
+            }
+         );
+      }
+
+      let linkObj = this.datasourceLink;
+      if (!linkObj) {
+         this.warningsMessage(
+            `is unable to find linked object[${this.settings.linkObject}]`,
+            {
+               linkObject: this.settings.linkObject,
+            }
+         );
+      }
+   }
 };
