@@ -252,7 +252,9 @@ class RowUpdater extends ClassUI {
 
             if (!fieldId) return;
 
-            const $customValueElem = $viewItem.getChildViews()[4];
+            let $customValueElem = $viewItem.getChildViews()[4];
+            $customValueElem = this._pullInputElement($customValueElem);
+
             const $processValueElem = $viewItem.getChildViews()[5];
 
             if (!$customValueElem && !$processValueElem) return;
@@ -521,7 +523,8 @@ class RowUpdater extends ClassUI {
          }
 
          // Set custom value
-         const $customValueElem = $viewItem.getChildViews()[4];
+         let $customValueElem = $viewItem.getChildViews()[4];
+         $customValueElem = this._pullInputElement($customValueElem);
          const rowData = {};
 
          rowData[fieldInfo.columnName] = item.value?.value ?? item.value;
@@ -579,6 +582,18 @@ class RowUpdater extends ClassUI {
    ready() {
       $$(this.ids.addNew).enable();
       $$(this.ids.form).hideProgress();
+   }
+
+   _pullInputElement($elem) {
+      if (!$elem?.getValue && $elem?.getChildViews) {
+         return (
+            $elem
+               .getChildViews()
+               .filter((childView) => childView.getValue)[0] ?? $elem
+         );
+      } else {
+         return $elem;
+      }
    }
 }
 
