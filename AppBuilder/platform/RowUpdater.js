@@ -403,7 +403,7 @@ class RowUpdater extends ClassUI {
       switch (field.key) {
          case "connectObject":
          case "user":
-            inputView = inputView.rows[0];
+            inputView = inputView.rows[0].rows[0];
             inputView.suggest.body.data =
                (await field.getOptions()).map((e) => {
                   return { id: e.text, value: e.text };
