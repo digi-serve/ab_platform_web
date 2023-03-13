@@ -34,4 +34,18 @@ module.exports = class ABViewContainer extends ABViewContainerCore {
 
       return component;
    }
+
+   warningsEval() {
+      super.warningsEval();
+
+      let allViews = this.views();
+
+      if (allViews.length == 0) {
+         this.warningsMessage("has no content");
+      }
+
+      (allViews || []).forEach((v) => {
+         v.warningsEval();
+      });
+   }
 };

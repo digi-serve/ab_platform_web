@@ -151,6 +151,14 @@ class ClassUI extends EventEmitter {
          $$(this.ids.component)?.show();
       }
    }
+
+   get WARNING_ICON() {
+      return `<span class="webix_sidebar_dir_icon webix_icon fa fa-warning pulseLight smalltext"></span>`;
+   }
+
+   get WARNING_ICON_DARK() {
+      return this.WARNING_ICOIN.replace("pulseLight", "pulseDark");
+   }
 }
 
 export default ClassUI;

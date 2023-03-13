@@ -47,30 +47,18 @@ module.exports = class ABViewPage extends ABViewPageCore {
 
       return component;
    }
-   /*
-   componentV1(App) {
-      var comp = super.component(App);
-      var _ui = {
-         view: "scrollview",
-         borderless: true,
-         css:
-            this.settings.pageBackground ||
-            ABPropertyComponentDefaults.pageBackground,
-         body: comp.ui,
-      };
 
-      var _init = (options) => {
-         var accessLevel = this.getUserAccess();
-         comp.init(options, accessLevel);
-      };
+   warningsEval() {
+      super.warningsEval();
 
-      return {
-         ui: _ui,
-         init: _init,
-         logic: comp.logic,
+      let allViews = this.views();
 
-         onShow: comp.onShow,
-      };
+      if (allViews.length == 0) {
+         this.warningsMessage("has no sub views");
+      }
+
+      (this.pages() || []).forEach((p) => {
+         p.warningsEval();
+      });
    }
-   */
 };

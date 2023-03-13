@@ -29,4 +29,18 @@ module.exports = class ABViewTab extends ABViewTabCore {
 
       return component;
    }
+
+   warningsEval() {
+      super.warningsEval();
+
+      let allViews = this.views();
+
+      if (allViews.length == 0) {
+         this.warningsMessage("has no tabs set");
+      }
+
+      (this.views() || []).forEach((v) => {
+         v.warningsEval();
+      });
+   }
 };
