@@ -724,26 +724,49 @@ module.exports = class ABObject extends ABObjectCore {
 
    warningsAll() {
       // report both OUR warnings, and any warnings from any of our fields
-      var allWarnings = [].concat(this._warnings);
+      var allWarnings = super.warningsAll();
       this.fields().forEach((f) => {
          allWarnings = allWarnings.concat(f.warnings());
       });
-
-      if (this.fields().length == 0) {
-         allWarnings.push({ message: "I got no fields.", data: {} });
-      }
 
       this.indexes().forEach((i) => {
          allWarnings = allWarnings.concat(i.warnings());
       });
 
-      return allWarnings;
+      return allWarnings.filter((w) => w);
    }
 
-   // warningsEval() {
-   //    // our .fromValues() has already registered any missing fields.
-   //    // those should get reported from warnings()
-   // }
+   warningsEval() {
+      super.warningsEval();
+
+      let allFields = this.fields();
+
+      if (allFields.length == 0) {
+         this.warningsMessage("has no fields");
+      }
+
+      (this._unknownFieldIDs || []).forEach((id) => {
+         this.warningsMessage(`is referencing an unknown field id[${id}]`);
+      });
+
+      (this._unknownIndex || []).forEach((id) => {
+         this.warningsMessage(`is referencing an unknown index id[${id}]`);
+      });
+
+      allFields.forEach((f) => {
+         f.warningsEval();
+      });
+
+      this.indexes().forEach((i) => {
+         i.warningsEval();
+      });
+   }
+
+   warningsMessage(msg, data = {}) {
+      let message = `Object[${this.label}]: ${msg}`;
+      this._warnings.push({ message, data });
+      // this.emit("warning", warnMsg, data);
+   }
 
    isUuid(text) {
       console.error(

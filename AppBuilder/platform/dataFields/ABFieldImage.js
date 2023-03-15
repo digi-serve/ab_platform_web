@@ -563,7 +563,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
     * }
     */
    toBase64(rowData) {
-      const promise = new Promise((resolve, reject) => {
+      return new Promise((resolve, reject) => {
          if (!rowData[this.columnName]) return resolve(null);
 
          const img = new Image();
@@ -588,7 +588,6 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
 
          img.src = this.urlImage(rowData[this.columnName]);
       });
-      return promise;
    }
 
    /**

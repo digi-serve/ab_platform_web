@@ -63,4 +63,18 @@ module.exports = class ABFieldCombine extends ABFieldCombineCore {
 
       return detailComponentSetting;
    }
+
+   warningsEval() {
+      super.warningsEval();
+
+      (this.settings.combinedFields.split(",") || []).forEach((id) => {
+         var field = this.object.fieldByID(id);
+         if (!field) {
+            this.warningsMessage(`dependent field[${id}] not found.`, {
+               fieldID: id,
+               combinedFields: this.settings.combinedFields,
+            });
+         }
+      });
+   }
 };

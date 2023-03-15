@@ -35,10 +35,10 @@ module.exports = class ABViewFormItemComponent extends ABViewComponent {
 
          if (settings.showLabel) _uiFormItem.label = field.label;
 
-         if (field.settings.required || baseView.settings.required)
+         if (field.settings.required || baseView.settings?.required)
             _uiFormItem.required = 1;
 
-         if (settings.disable === 1) _uiFormItem.disabled = true;
+         if (baseView.settings?.disable === 1) _uiFormItem.disabled = true;
 
          // add data-cy to form element for better testing code
          _uiFormItem.on = {

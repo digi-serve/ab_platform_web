@@ -590,31 +590,24 @@ module.exports = class ABDataCollection extends ABDataCollectionCore {
       });
    }
 
-   warningsAll() {
-      // report both OUR warnings, and any warnings from any of our fields
-      const allWarnings = [].concat(this._warnings);
+   warningsEval() {
+      super.warningsEval();
 
       if (!this.datasource) {
-         allWarnings.push({
-            message: `Datacollection[${this.label}][${this.id}] doesn't have a datasource.`,
-            data: {},
-         });
+         this.warningsMessage(`doesn't have a datasource.`);
       } else if (this.linkDatacollectionID) {
          const linkDC = this.AB.datacollectionById(this.linkDatacollectionID);
 
-         if (linkDC)
-            allWarnings.push({
-               message: `Datacollection[${this.label}][${this.id}] can't resolve linkDatacollectionID[${this.linkDatacollectionID}]`,
-               data: {},
-            });
+         if (!linkDC)
+            this.warningsMessage(
+               `can't resolve linkDatacollectionID[${this.linkDatacollectionID}]`
+            );
       }
-
-      return allWarnings;
    }
 
-   warningsEval() {
-      // our .fromValues() has already registered any missing fields.
-      // those should get reported from warnings()
+   warningsMessage(msg, data = {}) {
+      let message = `Datacollection[${this.label}]: ${msg}`;
+      this._warnings.push({ message, data });
    }
 
    get userScopes() {
