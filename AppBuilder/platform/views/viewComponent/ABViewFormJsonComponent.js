@@ -10,6 +10,7 @@ module.exports = class ABViewFormJsonComponent extends ABViewFormItemComponent {
                isSaveHidden: true,
                height: 300,
                borderless: false,
+               showObjectName: true,
             }
          );
       }
@@ -17,8 +18,14 @@ module.exports = class ABViewFormJsonComponent extends ABViewFormItemComponent {
 
    getFilterField(instance) {
       if (instance.settings.filterField) {
-         let filterField =
-            instance.view.parent.viewComponents[instance.settings.filterField];
+         let filterField = "";
+         for (const [key, value] of Object.entries(
+            instance.view.parent.viewComponents
+         )) {
+            if (value.settings.fieldId == instance.settings.filterField) {
+               filterField = value;
+            }
+         }
 
          if (filterField?.ids?.formItem) {
             return filterField.ids.formItem;
@@ -55,9 +62,7 @@ module.exports = class ABViewFormJsonComponent extends ABViewFormItemComponent {
                });
             }
          });
-         // this.rowFilter.applicationLoad(this.AB._App);
          this.rowFilter.fieldsLoad(fieldDefs);
-         // debugger;
          if ($$(this.ids.formItem).config.value)
             this.rowFilter.setValue($$(this.ids.formItem).config.value);
       } else {
@@ -68,7 +73,6 @@ module.exports = class ABViewFormJsonComponent extends ABViewFormItemComponent {
    }
 
    getValue() {
-      debugger;
       return this.rowFilter.getValue();
    }
 
@@ -111,19 +115,8 @@ module.exports = class ABViewFormJsonComponent extends ABViewFormItemComponent {
    }
 
    init() {
-      // const settings = this.view.settings ?? {};
-      // const _ui = this.ui();
       // if (this.settings.type == "filter") {
-      //    let filterField = this.getFilterField(this);
-      //    if (!$$(filterField)) return;
-      //    $$(filterField).detachEvent("onChange");
-      //    $$(filterField).attachEvent("onChange", (values) => {
-      //       this.refreshFilter(values);
-      //    });
-      //    this.rowFilter.init();
-      //    this.rowFilter.on("changed", (val) => {
-      //       this.setValue(val);
-      //    });
+      //    this.rowFilter.init({ showObjectName: true });
       // }
    }
 
@@ -137,15 +130,15 @@ module.exports = class ABViewFormJsonComponent extends ABViewFormItemComponent {
          $$(filterField).attachEvent("onChange", (values) => {
             this.refreshFilter(values);
          });
-         this.rowFilter.init();
+         this.rowFilter.init({ showObjectName: true });
          this.rowFilter.on("changed", (val) => {
             this.setValue(val);
          });
          if ($$(this.ids.formItem).config.value) {
             this.rowFilter.setValue($$(this.ids.formItem).config.value);
+         } else {
+            this.rowFilter.setValue("");
          }
       }
-      // const _uiFormItem = _ui.rows[0];
-      // let $formItem = $$(_uiFormItem.id);
    }
 };
