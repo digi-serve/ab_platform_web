@@ -90,7 +90,29 @@ module.exports = class ABViewFormJsonComponent extends ABViewFormItemComponent {
       ) {
          case "string":
             _ui.view = "textarea";
+            _ui.disabled = true;
             _ui.height = 200;
+            _ui.format = {
+               parse: function (a) {
+                  let parsed = a;
+                  try {
+                     parsed = JSON.parse(a);
+                  } catch (err) {
+                     parsed = a;
+                  }
+                  _ui.parsed++;
+                  return parsed;
+               },
+               edit: function (a) {
+                  let stringify = a;
+                  try {
+                     stringify = JSON.stringify(a);
+                  } catch (err) {
+                     stringify = a;
+                  }
+                  return stringify;
+               },
+            };
             break;
          case "systemObject":
             _ui.view = "multicombo";
