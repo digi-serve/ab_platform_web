@@ -14,7 +14,7 @@ module.exports = class ABDataCollection extends ABDataCollectionCore {
     *
     *
     * @return {Promise}
-    *			.resolve( {this} )
+    *       .resolve( {this} )
     */
    async save() {
       if (!this.id) {
@@ -148,13 +148,18 @@ module.exports = class ABDataCollection extends ABDataCollectionCore {
                wheres.rules = wheres.rules.filter((r) => r);
             }
 
+            let cursorUpdated = false;
+            // check if the current cursor was updated
+            if (this?.datacollectionLink?.getCursor().id == value) {
+               cursorUpdated = true;
+            }
+
             // this is the same item that was already bound...don't reload data
             if (
-               JSON.stringify(this.__reloadWheres) == JSON.stringify(wheres) ||
-               (wheres.rules && wheres.rules.length == 0)
+               cursorUpdated ||
+               JSON.stringify(this.__reloadWheres) != JSON.stringify(wheres) ||
+               wheres?.rules?.length > 0
             ) {
-               return;
-            } else {
                // now that we have the modified wheres the dataCollections wheres
                // need to be modified for subsequent loads on scroll so lets set them
                this.reloadWheres(wheres);
