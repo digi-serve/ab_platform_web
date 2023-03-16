@@ -1,7 +1,6 @@
 name: E2E Tests
 on:
    workflow_call:
-
 jobs:
    e2e-tests:
       name: E2E Tests
@@ -37,7 +36,7 @@ jobs:
            run: npm run build:${{ matrix.webpack }}
            working-directory: ./ab_platform_web
 
-        # webpack expects the folder to be called "web" ab-install action expects "ab_service_web"
+         # webpack expects the folder to be called "web" ab-install action expects "ab_service_web"
          - run: mv web ab_service_web
 
          - uses: digi-serve/ab-install-action@v1
