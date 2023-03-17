@@ -15,7 +15,7 @@ if (!window.webix) {
    window.webix = Webix;
 }
 
-import("../js/webix/locales/th-TH.js");
+import "../js/webix/locales/th-TH.js";
 
 import events from "events";
 
