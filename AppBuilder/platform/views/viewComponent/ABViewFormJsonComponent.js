@@ -93,22 +93,19 @@ module.exports = class ABViewFormJsonComponent extends ABViewFormItemComponent {
             _ui.disabled = true;
             _ui.height = 200;
             _ui.format = {
-               parse: function (a) {
-                  let parsed = a;
+               parse: function (parsed) {
                   try {
-                     parsed = JSON.parse(a);
+                     parsed = JSON.parse(parsed);
                   } catch (err) {
-                     parsed = a;
+                     // already parsed
                   }
-                  _ui.parsed++;
                   return parsed;
                },
-               edit: function (a) {
-                  let stringify = a;
+               edit: function (stringify) {
                   try {
-                     stringify = JSON.stringify(a);
+                     stringify = JSON.stringify(stringify);
                   } catch (err) {
-                     stringify = a;
+                     // already a string
                   }
                   return stringify;
                },
@@ -143,9 +140,8 @@ module.exports = class ABViewFormJsonComponent extends ABViewFormItemComponent {
    }
 
    onShow() {
-      const settings = this.view.settings ?? {};
       const _ui = this.ui();
-      if (this.settings.type == "filter") {
+      if (this?.settings?.type == "filter") {
          let filterField = this.getFilterField(this);
          if (!$$(filterField)) return;
          $$(filterField).detachEvent("onChange");
