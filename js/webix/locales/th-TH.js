@@ -80,3 +80,5 @@ window.webix.i18n.locales["th-TH"] = {
       dayShort: ["อา.", "จ.", "อ.", "พ.", "พฤ.", "ศ.", "ส."],
    },
 };
+
+export default this;

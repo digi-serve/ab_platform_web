@@ -7,7 +7,7 @@
 
 import * as Webix from "../js/webix/webix.js";
 // NOTE: changed to require() so switching to webix_debug.js will work.
-// var Webix = require("../js/webix/webix-debug.js");
+// const Webix = require("../js/webix/webix-debug.js");
 
 import webixCSS from "../js/webix/webix.css";
 // Make sure webix is global object
@@ -15,9 +15,11 @@ if (!window.webix) {
    window.webix = Webix;
 }
 
-import "../js/webix/locales/th-TH.js";
+import("../js/webix/locales/th-TH.js");
 
-var EventEmitter = require("events").EventEmitter;
+import events from "events";
+
+const EventEmitter = events.EventEmitter;
 
 import BootstrapCSS from "../node_modules/bootstrap/dist/css/bootstrap.min.css";
 
@@ -126,11 +128,12 @@ class Bootstrap extends EventEmitter {
 
                // Make sure the BootStrap Object is available globally
                window.__ABBS = this;
-               var allPluginsLoaded = [];
 
-               var tenantInfo = Config.tenantConfig();
+               const allPluginsLoaded = [];
+               const tenantInfo = Config.tenantConfig();
+
                if (tenantInfo) {
-                  var plugins = Config.plugins() || [];
+                  const plugins = Config.plugins() || [];
 
                   // Short Term Fix: Don't load ABDesigner for non builders (need a way to assign plugins to users/roles);
                   const designerIndex = plugins.indexOf("ABDesigner.js");
@@ -164,7 +167,9 @@ class Bootstrap extends EventEmitter {
                //    {ABFactory} that drives the rest of the AppBuilder objects
                preloadMessage("Starting AppBuilder");
                const { default: ABFactory } = await loadABFactory;
-               var definitions = Config.definitions() || null;
+
+               let definitions = Config.definitions() || null;
+
                if (definitions) {
                   // NOTE: when loading up an unauthorized user,
                   // definitions will be null: we can skip the plugins
@@ -178,6 +183,7 @@ class Bootstrap extends EventEmitter {
                // NOTE: special case: User has no Roles defined.
                // direct them to our special ErrorNoDefsUI
                const userConfig = this.AB.Config.userConfig();
+
                if (userConfig && userConfig.roles.length == 0) {
                   await this.AB.init();
                   ErrorNoDefsUI.init(this.AB);
@@ -204,7 +210,7 @@ class Bootstrap extends EventEmitter {
                   // 3.5  prepare the plugins
                   this._plugins.forEach((p) => {
                      p.apply(this.AB);
-                     var labels = p.labels(
+                     const labels = p.labels(
                         this.AB.Multilingual.currentLanguage()
                      );
                      this.AB.Multilingual.pluginLoadLabels(p.key, labels);
@@ -217,7 +223,7 @@ class Bootstrap extends EventEmitter {
                return Promise.resolve().then(() => {
                   // webix recommends wrapping any webix code in the .ready()
                   // function that executes after page loading.
-                  webix.ready(() => {
+                  Webix.ready(() => {
                      const locales = {
                         en: "en-US",
                         "zh-hans": "zh-CN",
@@ -227,8 +233,14 @@ class Bootstrap extends EventEmitter {
                      const { languageCode } = AB.Config.userConfig() ?? {};
                      // save the webix locale used to set locale in ClassUIPage.renderPage()
                      window.webixLocale =
-                        locales.hasOwnProperty(languageCode) &&
-                        webix.i18n.locales.hasOwnProperty(locales[languageCode])
+                        Object.prototype.hasOwnProperty.call(
+                           locales,
+                           languageCode
+                        ) &&
+                        Object.prototype.hasOwnProperty.call(
+                           Webix.i18n.locales,
+                           locales[languageCode]
+                        )
                            ? locales[languageCode]
                            : false;
 
@@ -237,10 +249,10 @@ class Bootstrap extends EventEmitter {
                      // UI. The experience becomes more like a touch interface
                      // with the exception that scroll bars appear when user
                      // hovers over a scrollable area
-                     /* if (!webix.env.touch  && webix.env.scrollSize ) */
-                     webix.CustomScroll.init();
+                     /* if (!Webix.env.touch  && Webix.env.scrollSize ) */
+                     Webix.CustomScroll.init();
 
-                     var div = this.div();
+                     const div = this.div();
 
                      UI.attach(div.id);
                      this.ui().destroy(); // remove the preloading screen
@@ -289,11 +301,11 @@ export default new Bootstrap();
 
 function loadScript(tenant, p) {
    return new Promise((resolve, reject) => {
-      var cb = () => resolve();
+      const cb = () => resolve();
 
       // Adding the script tag to the head as suggested before
-      var head = document.head;
-      var script = document.createElement("script");
+      const head = document.head;
+      const script = document.createElement("script");
       script.type = "text/javascript";
       script.src = `/plugin/${tenant || "??"}/${p}`;
 
