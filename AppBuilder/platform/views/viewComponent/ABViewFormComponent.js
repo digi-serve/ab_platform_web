@@ -3,6 +3,7 @@ const ABViewFormItem = require("../ABViewFormItem");
 const ABViewFormConnect = require("../ABViewFormConnect");
 const ABViewFormCustom = require("../ABViewFormCustom");
 const ABViewFormTextbox = require("../ABViewFormTextbox");
+const ABViewFormJson = require("../ABViewFormJson");
 
 async function timeout(ms) {
    return new Promise((resolve) => setTimeout(resolve, ms));
@@ -420,7 +421,9 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
          (comp) =>
             comp instanceof ABViewFormCustom ||
             // rich text
-            (comp instanceof ABViewFormTextbox && comp.settings.type === "rich")
+            (comp instanceof ABViewFormTextbox &&
+               comp.settings.type === "rich") ||
+            (comp instanceof ABViewFormJson && comp.settings.type === "filter")
       );
 
       // Set default values

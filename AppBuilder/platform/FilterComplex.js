@@ -223,7 +223,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
             {
                view: "layout",
                type: "clean",
-               borderless: true,
+               borderless: this._options.borderless ?? true,
                rows: [
                   {
                      id: ids.querybuilder,
@@ -231,6 +231,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
                      data: () => [],
                      // data: async (field) => await this.pullOptions(field),
                      fields: [],
+                     disabled: true,
                      height: this._options.height,
                   },
                ],
@@ -445,6 +446,12 @@ module.exports = class FilterComplex extends FilterComplexCore {
          (this.fieldsToQB() ?? []).forEach((f) => {
             el.config.fields.push(f);
          });
+         if (el.config.fields.length) {
+            el.enable();
+         } else {
+            this.setValue("");
+            el.disable();
+         }
       }
    }
 

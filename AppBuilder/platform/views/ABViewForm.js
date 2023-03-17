@@ -5,6 +5,7 @@ const ABViewFormCustom = require("./ABViewFormCustom");
 const ABViewFormConnect = require("./ABViewFormConnect");
 const ABViewFormSelectMultiple = require("./ABViewFormSelectMultiple");
 const ABViewFormTextbox = require("./ABViewFormTextbox");
+const ABViewFormJson = require("./ABViewFormJson");
 
 const L = (...params) => AB.Multilingual.label(...params);
 
@@ -121,7 +122,8 @@ module.exports = class ABViewForm extends ABViewFormCore {
          (comp) =>
             comp instanceof ABViewFormCustom ||
             comp instanceof ABViewFormConnect ||
-            comp instanceof ABViewFormSelectMultiple
+            comp instanceof ABViewFormSelectMultiple ||
+            (comp instanceof ABViewFormJson && comp.settings.type == "filter")
       ).forEach((f) => {
          const vComponent = this.viewComponents[f.id];
          if (vComponent == null) return;
@@ -334,38 +336,6 @@ module.exports = class ABViewForm extends ABViewFormCore {
          dv.datacollectionLink
       );
 
-      // wait for our Record Rules to be ready before we continue.
-      await this.recordRulesReady();
-
-      // update value from the record rule (pre-update)
-      this.doRecordRulesPre(formVals);
-
-      // validate data
-      if (!this.validateData($formView, obj, formVals)) {
-         console.warn("Data is invalid.");
-         return;
-      }
-
-      // show progress icon
-      $formView.showProgress?.({ type: "icon" });
-
-      let newFormVals;
-      // {obj}
-      // The fully populated values returned back from service call
-      // We use this in our post processing Rules
-
-      try {
-         // is this an update or create?
-         if (formVals.id) {
-            newFormVals = await model.update(formVals.id, formVals);
-         } else {
-            newFormVals = await model.create(formVals);
-         }
-      } catch (err) {
-         formError(err.data);
-         throw err;
-      }
-
       // form ready function
       const formReady = (newFormVals) => {
          // clear cursor after saving.
@@ -422,6 +392,38 @@ module.exports = class ABViewForm extends ABViewFormCore {
 
          $formView?.hideProgress?.();
       };
+
+      // wait for our Record Rules to be ready before we continue.
+      await this.recordRulesReady();
+
+      // update value from the record rule (pre-update)
+      this.doRecordRulesPre(formVals);
+
+      // validate data
+      if (!this.validateData($formView, obj, formVals)) {
+         console.warn("Data is invalid.");
+         return;
+      }
+
+      // show progress icon
+      $formView.showProgress?.({ type: "icon" });
+
+      let newFormVals;
+      // {obj}
+      // The fully populated values returned back from service call
+      // We use this in our post processing Rules
+
+      try {
+         // is this an update or create?
+         if (formVals.id) {
+            newFormVals = await model.update(formVals.id, formVals);
+         } else {
+            newFormVals = await model.create(formVals);
+         }
+      } catch (err) {
+         formError(err.data);
+         throw err;
+      }
 
       try {
          await this.doRecordRules(newFormVals);

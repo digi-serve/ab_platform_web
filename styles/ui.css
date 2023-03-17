@@ -370,7 +370,7 @@ input[type="text"].selectivity-multiple-input {
    margin-right: 1px;
    font-size: 18px;
    text-align: center;
-   line-height: 33px;
+   line-height: 33px !important;
    background: #4caf50;
    color: white;
    top: -2px;
@@ -1727,4 +1727,8 @@ div.webix_dataview_item.webix_transparent {
 
 .portal_work_switcheroo_user_switched .webix_el_box {
    color: #fff;
+}
+/* Query Override */
+.wbq-field-box {
+   max-width: 95% !important;
 }
