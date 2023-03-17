@@ -51,6 +51,7 @@
   },
   "sideEffects": [
     "*.css",
-    "./js/webix/extras/tinymce.js"
+    "./js/webix/extras/tinymce.js",
+    "./js/webix/locales/*"
   ]
 }
