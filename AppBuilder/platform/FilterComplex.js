@@ -215,7 +215,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
       // Set current username
       this.Account.username = this.AB.Account.username();
 
-      this._recordRuleFieldOptions = [];
+      this._settings.recordRuleFieldOptions = [];
 
       // webix UI definition:
       this.ui = {
@@ -257,10 +257,8 @@ module.exports = class FilterComplex extends FilterComplexCore {
 
       super.init(options);
 
-      this._isRecordRule = options?.isRecordRule ?? false;
-      this._recordRuleFieldOptions = options?.fieldOptions ?? [];
-
       const el = $$(this.ids.querybuilder);
+
       if (el) {
          if (!this.observing) {
             this.__blockOnChange = true;
@@ -574,7 +572,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
          result = this.uiContextValue(null, fieldColumnName);
       }
 
-      if (this._isRecordRule) {
+      if (this._settings.isRecordRule) {
          result = (result ?? []).concat(this.uiRecordRuleValue(field));
       }
 
@@ -738,7 +736,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
          {
             batch: "recordRule",
             view: "select",
-            options: this._recordRuleFieldOptions ?? [],
+            options: this._settings.recordRuleFieldOptions ?? [],
          },
       ];
    }
@@ -884,7 +882,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
 
          if (!$$(this.ids.popup)) {
             this.myPopup = webix.ui(ui);
-            this.init();
+            this.init(this._settings);
             if (this._Fields) {
                this.fieldsLoad(this._Fields, this._Object);
             }
