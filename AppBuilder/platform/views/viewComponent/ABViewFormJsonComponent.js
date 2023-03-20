@@ -17,7 +17,10 @@ module.exports = class ABViewFormJsonComponent extends ABViewFormItemComponent {
    }
 
    getFilterField(instance) {
-      if (instance.settings.filterField) {
+      if (
+         instance?.settings?.filterField &&
+         instance?.view?.parent?.viewComponents
+      ) {
          let filterField = "";
          for (const [key, value] of Object.entries(
             instance.view.parent.viewComponents
