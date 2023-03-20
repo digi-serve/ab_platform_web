@@ -39,6 +39,11 @@ module.exports = class ABViewChart extends ABViewChartCore {
       return component;
    }
 
+   fromValues(values) {
+      super.fromValues(values);
+      this.refreshData();
+   }
+
    getDCChart() {
       if (!this._dcChart) this._dcChart = new webix.DataCollection();
 
@@ -205,5 +210,30 @@ module.exports = class ABViewChart extends ABViewChartCore {
 
       dcChart.clearAll();
       dcChart.parse(results);
+   }
+
+   warningsEval() {
+      super.warningsEval();
+
+      let labelField = this.labelField();
+      if (!labelField) {
+         this.warningsMessage(
+            `can't resolve label field[${this.settings.columnLabel}]`
+         );
+      }
+
+      let valueField = this.valueField();
+      if (!valueField) {
+         this.warningsMessage(
+            `can't resolve value field[${this.settings.columnValue}]`
+         );
+      }
+
+      let valueField2 = this.valueField2();
+      if (!valueField2) {
+         this.warningsMessage(
+            `can't resolve value2 field[${this.settings.columnValue2}]`
+         );
+      }
    }
 };

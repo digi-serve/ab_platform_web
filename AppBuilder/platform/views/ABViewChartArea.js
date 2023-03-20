@@ -12,24 +12,25 @@ module.exports = class ABViewChartArea extends ABViewChartAreaCore {
     * @param {obj} App
     * @return {obj} UI component
     */
-   component(v1App = false) {
-      let component = new ABViewChartAreaComponent(this);
+   component(/* v1App = false*/) {
+      return new ABViewChartAreaComponent(this);
+      // let component = new ABViewChartAreaComponent(this);
 
-      // if this is our v1Interface
-      if (v1App) {
-         const newComponent = component;
+      // // if this is our v1Interface
+      // if (v1App) {
+      //    const newComponent = component;
 
-         component = {
-            ui: newComponent.ui(),
-            init: (options, accessLevel) => {
-               return newComponent.init(this.AB);
-            },
-            onShow: (...params) => {
-               return newComponent.onShow?.(...params);
-            },
-         };
-      }
+      //    component = {
+      //       ui: newComponent.ui(),
+      //       init: (options, accessLevel) => {
+      //          return newComponent.init(this.AB);
+      //       },
+      //       onShow: (...params) => {
+      //          return newComponent.onShow?.(...params);
+      //       },
+      //    };
+      // }
 
-      return component;
+      // return component;
    }
 };

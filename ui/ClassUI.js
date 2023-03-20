@@ -157,7 +157,7 @@ class ClassUI extends EventEmitter {
    }
 
    get WARNING_ICON_DARK() {
-      return this.WARNING_ICOIN.replace("pulseLight", "pulseDark");
+      return this.WARNING_ICON.replace("pulseLight", "pulseDark");
    }
 }
 

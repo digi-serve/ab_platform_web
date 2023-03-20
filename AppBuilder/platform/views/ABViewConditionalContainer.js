@@ -43,4 +43,19 @@ module.exports = class ABViewConditionalContainer extends (
 
       await super.save();
    }
+
+   warningsEval() {
+      super.warningsEval();
+
+      let DC = this.datacollection;
+      if (!DC) {
+         this.warningsMessage(
+            `can't resolve it's datacollection[${this.settings.dataviewID}]`
+         );
+      }
+
+      if (!this.settings.filterConditions) {
+         this.warningsMessage("has no filter conditions set");
+      }
+   }
 };

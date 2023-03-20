@@ -37,11 +37,5 @@ module.exports = class ABViewChartLineComponent extends (
       });
    }
 
-   async init(AB) {
-      await super.init(AB);
-   }
 
-   onShow() {
-      super.onShow();
-   }
 };

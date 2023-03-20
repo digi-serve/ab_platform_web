@@ -106,6 +106,16 @@ module.exports = class ABView extends ABViewCore {
       allViews.forEach((v) => {
          v.warningsEval();
       });
+
+      // if a datacollection is specified, verify it can be accessed.
+      if (this.settings.dataviewID) {
+         let dc = this.datacollection;
+         if (!dc) {
+            this.warningsMessage(
+               `references unknown dataviewID[${this.settings.dataviewID}]`
+            );
+         }
+      }
    }
 
    warningsMessage(msg, data = {}) {

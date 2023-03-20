@@ -83,4 +83,15 @@ export default class ABViewCarousel extends ABViewCarouselCore {
 
       return this.__linkPageHelper;
    }
+
+   warningsEval() {
+      super.warningsEval();
+
+      let field = this.imageField;
+      if (!field) {
+         this.warningsMessage(
+            `can't resolve image field[${this.settings.field}]`
+         );
+      }
+   }
 }

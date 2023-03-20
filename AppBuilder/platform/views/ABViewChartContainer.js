@@ -2,34 +2,15 @@ const ABViewWidget = require("./ABViewWidget");
 const ABViewChartContainerComponent = require("./viewComponent/ABViewChartContainerComponent");
 
 module.exports = class ABViewChartContainer extends ABViewWidget {
-   editorComponent(App, mode, options) {
-      let component = this.component(App);
-      let _ui = component.ui;
-      _ui.id = options.componentId;
-
-      let _init = () => {
-         component.init({
-            componentId: _ui.id,
-         });
-      };
-      let _logic = component.logic;
-      let _onShow = component.onShow;
-
-      return {
-         ui: _ui,
-         init: _init,
-         logic: _logic,
-         onShow: _onShow,
-      };
-   }
-
    /**
     * @method component()
     * return a UI component based upon this view.
     * @param {obj} App
     * @return {obj} UI component
     */
-   component(v1App) {
+   component(/* v1App */) {
+      return new ABViewChartContainerComponent(this);
+      /*
       let component = new ABViewChartContainerComponent(this);
 
       // if this is our v1Interface
@@ -48,6 +29,7 @@ module.exports = class ABViewChartContainer extends ABViewWidget {
       }
 
       return component;
+      */
    }
 
    get datacollection() {

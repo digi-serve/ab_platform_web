@@ -32,4 +32,29 @@ module.exports = class ABViewComment extends ABViewCommentCore {
 
       return component;
    }
+
+   warningsEval() {
+      super.warningsEval();
+
+      let field = this.getUserField();
+      if (!field) {
+         this.warningsMessage(
+            `can't resolve user field[${this.settings.columnUser}]`
+         );
+      }
+
+      field = this.getCommentField();
+      if (!field) {
+         this.warningsMessage(
+            `can't resolve comment field[${this.settings.columnComment}]`
+         );
+      }
+
+      field = this.getDateField();
+      if (!field) {
+         this.warningsMessage(
+            `can't resolve date field[${this.settings.columnDate}]`
+         );
+      }
+   }
 };
