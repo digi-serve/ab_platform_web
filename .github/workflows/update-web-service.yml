@@ -9,7 +9,7 @@ on:
 
 jobs:
    e2e-tests:
-      uses: ./.github/workflows/e2e-test.yml
+      uses: ./.github/workflows/e2e-tests.yml
    # if its a push event and tests passed update ab_service_web
    update-ab-service-web:
       name: Update ab_service_web
