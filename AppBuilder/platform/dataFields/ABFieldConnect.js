@@ -335,6 +335,8 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
          Promise.resolve()
             .then(async () => {
+               // disabling local storage of options
+               return false;
                // Get Local Storage unless xxx->one connected field
                if (this?.settings?.linkViaType != "one") {
                   // We store the .findAll() results locally and return that for a
