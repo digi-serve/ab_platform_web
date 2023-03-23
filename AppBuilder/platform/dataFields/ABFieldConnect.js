@@ -335,7 +335,9 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
          Promise.resolve()
             .then(async () => {
-               // disabling local storage of options
+               // Mar 23, 2023 disabling local storage of options because users
+               // were reporting not seeing the correct options list with either
+               // new, updated or deleted records that should or should not appear
                return false;
                // Get Local Storage unless xxx->one connected field
                if (this?.settings?.linkViaType != "one") {
