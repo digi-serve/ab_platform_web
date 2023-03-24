@@ -1732,3 +1732,6 @@ div.webix_dataview_item.webix_transparent {
 .wbq-field-box {
    max-width: 95% !important;
 }
+.findDataCy [data-cy]:hover {
+   background: rgba(28, 161, 193, 0.4) !important;
+}

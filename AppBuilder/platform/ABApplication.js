@@ -198,6 +198,11 @@ module.exports = class ABClassApplication extends ABApplicationCore {
          o.exportIDs(ids);
       });
 
+      // get all Hints
+      this.hintsIncluded().forEach((h) => {
+         h.exportIDs(ids);
+      });
+
       // Queries
       this.queriesIncluded().forEach((q) => {
          q.exportIDs(ids);
