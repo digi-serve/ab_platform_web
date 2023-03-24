@@ -275,12 +275,14 @@ class RowUpdater extends ClassUI {
                   fieldInfo.key === "date" ||
                   fieldInfo.key === "datetime"
                ) {
-                  const currDateCheckbox = $customValueElem.getChildViews()[0];
+                  const currDateCheckbox =
+                     $customValueElem.getChildViews()[0] ?? $customValueElem;
 
                   if (currDateCheckbox.getValue() == true)
                      val.value = "ab-current-date";
                   else {
-                     const datePicker = $customValueElem.getChildViews()[1];
+                     const datePicker =
+                        $customValueElem.getChildViews()[1] ?? $customValueElem;
 
                      val.value = fieldInfo.getValue(datePicker);
                   }
@@ -529,6 +531,15 @@ class RowUpdater extends ClassUI {
 
          rowData[fieldInfo.columnName] = item.value?.value ?? item.value;
          fieldInfo.setValue($customValueElem, rowData);
+
+         // Set "Current Date/Time" check box
+         if (
+            (fieldInfo.key == "date" || fieldInfo.key == "datetime") &&
+            rowData[fieldInfo.columnName] == "ab-current-date" &&
+            $customValueElem.config.view == "checkbox"
+         ) {
+            $customValueElem.setValue(true);
+         }
       });
 
       this.toggleForm();
