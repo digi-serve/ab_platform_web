@@ -31,10 +31,8 @@ function _toInternal(cond, fields = []) {
       //       },
       //    ],
       // }
-      const field = fields.filter(
-         (f) => f.id == cond.key || f.columnName == cond.key
-      )[0];
-      cond.field = field?.columnName ?? field?.id;
+      const field = fields.filter((f) => f.id == cond.key)[0];
+      cond.field = field?.id;
 
       cond.condition = {
          type: cond.rule,
@@ -82,7 +80,7 @@ function _toInternal(cond, fields = []) {
 function _toExternal(cond, fields = []) {
    if (!cond) return;
    if (cond.field) {
-      let field = fields.filter((f) => f.columnName == cond.field)[0];
+      let field = fields.filter((f) => f.id == cond.field)[0];
       // cond.alias = alias || undefined;
       cond.key = field?.id ?? cond.field;
       cond.condition = cond.condition ?? {};
@@ -513,7 +511,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
       }
 
       let field = (this._Fields ?? []).filter(
-         (f) => f.columnName == fieldColumnName
+         (f) => f.id == fieldColumnName
       )[0];
 
       switch (field?.key) {
