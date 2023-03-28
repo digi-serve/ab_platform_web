@@ -94,8 +94,7 @@ class PortalWorkInbox extends ClassUI {
                         view: "label",
                         align: "center",
                         height: 200,
-                        label:
-                           "<div style='display: block; font-size: 180px; background-color: #666; color: transparent; text-shadow: 0px 1px 1px rgba(255,255,255,0.5); -webkit-background-clip: text; -moz-background-clip: text; background-clip: text;' class='fa fa-thumbs-up'></div>",
+                        label: "<div style='display: block; font-size: 180px; background-color: #666; color: transparent; text-shadow: 0px 1px 1px rgba(255,255,255,0.5); -webkit-background-clip: text; -moz-background-clip: text; background-clip: text;' class='fa fa-thumbs-up'></div>",
                      },
                      {
                         view: "label",
@@ -190,6 +189,16 @@ class PortalWorkInbox extends ClassUI {
                accordion.show();
             }
             this.emit("updated");
+         });
+
+         this.AB.on("ab.inbox.update", (item) => {
+            const appId = this.appLookupHash[item.definition];
+            const accordion = this.allAppAccordions[appId];
+
+            accordion.AB.Network.emit("inbox.update", {
+               uuid: item.uuid,
+               unitID: item.definition,
+            });
          });
 
          // Now Register for RT Updates to our Inbox
