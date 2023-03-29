@@ -150,7 +150,7 @@ module.exports = class ABDataCollection extends ABDataCollectionCore {
 
             let cursorUpdated = false;
             // check if the current cursor was updated
-            if (this?.datacollectionLink?.getCursor().id == value) {
+            if (this?.datacollectionLink?.getCursor()?.id == value) {
                cursorUpdated = true;
             }
 
