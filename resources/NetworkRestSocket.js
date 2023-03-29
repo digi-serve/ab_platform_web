@@ -17,6 +17,7 @@ const listSocketEvents = [
    "ab.datacollection.stale",
    "ab.datacollection.delete",
    "ab.inbox.create",
+   "ab.inbox.update",
    // "ab.object.update",
 ];
 // {array}
