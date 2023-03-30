@@ -408,7 +408,10 @@ class RowUpdater extends ClassUI {
             inputView = inputView.rows[0].rows[0];
             inputView.suggest.body.data =
                (await field.getOptions()).map((e) => {
-                  return { id: e.text, value: e.text };
+                  return {
+                     id: field.getRelationValue(e),
+                     value: e.text,
+                  };
                }) ?? [];
 
             if (field.key === "user")
