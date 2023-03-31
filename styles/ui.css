@@ -142,6 +142,9 @@ label {
    line-height: 26px;
    margin: 4px 1.5px;
 }
+.webix_el_combo .webix_progress_state {
+   font-size: 35px !important;
+}
 .webix_list_item .editConnectedPage {
    display: none;
 }

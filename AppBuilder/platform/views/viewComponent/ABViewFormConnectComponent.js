@@ -161,7 +161,7 @@ module.exports = class ABViewFormConnectComponent extends (
       return _ui;
    }
 
-   _onChange(data) {
+   async _onChange(data) {
       const ids = this.ids;
       const field = this.field;
       const baseView = this.view;
@@ -200,12 +200,14 @@ module.exports = class ABViewFormConnectComponent extends (
       // values because we need to use the selected values to add options
       // to the UI
       if (this?.field?.settings?.linkViaType == "one") {
-         field.getAndPopulateOptions(
+         this.busy();
+         await field.getAndPopulateOptions(
             $formItem,
             baseView.options,
             field,
             baseView.parentFormComponent()
          );
+         this.ready();
       }
 
       if ($formItem) {
@@ -222,6 +224,9 @@ module.exports = class ABViewFormConnectComponent extends (
 
    async init(AB, options) {
       await super.init(AB);
+
+      const $formItem = $$(this.ids.formItem);
+      if ($formItem) webix.extend($formItem, webix.ProgressBar);
 
       this.initAddEditTool();
    }
@@ -268,6 +273,7 @@ module.exports = class ABViewFormConnectComponent extends (
       if (!$formItem) return;
 
       // Refresh option list
+      this.busy();
       field.clearStorage(this.view.settings.filterConditions);
       const data = await field.getAndPopulateOptions(
          $formItem,
@@ -275,6 +281,7 @@ module.exports = class ABViewFormConnectComponent extends (
          field,
          this.view.parentFormComponent()
       );
+      this.ready();
 
       // field.once("option.data", (data) => {
       data.forEach((item) => {
@@ -503,7 +510,7 @@ module.exports = class ABViewFormConnectComponent extends (
 
                   $filterValueConfig.attachEvent(
                      "onChange",
-                     (e) => {
+                     async (e) => {
                         const parentVal = $filterValueConfig.getValue();
 
                         if (parentVal) {
@@ -512,12 +519,14 @@ module.exports = class ABViewFormConnectComponent extends (
                               "placeholder",
                               this.label("Select items")
                            );
-                           field.getAndPopulateOptions(
+                           this.busy();
+                           await field.getAndPopulateOptions(
                               $node,
                               baseView.options,
                               field,
                               baseView.parentFormComponent()
                            );
+                           this.ready();
                         } else {
                            $node.define("disabled", true);
                            $node.define(
@@ -562,6 +571,7 @@ module.exports = class ABViewFormConnectComponent extends (
 
       $node.refresh();
 
+      this.busy();
       await field.getAndPopulateOptions(
          // $node,
          $formItem,
@@ -569,6 +579,7 @@ module.exports = class ABViewFormConnectComponent extends (
          field,
          baseView.parentFormComponent()
       );
+      this.ready();
 
       // Add data-cy attributes
       const dataCy = `${field.key} ${field.columnName} ${field.id} ${baseView.parent.id}`;
@@ -576,5 +587,19 @@ module.exports = class ABViewFormConnectComponent extends (
 
       // Need to refresh selected values when they are custom index
       this._onChange($formItem.getValue());
+   }
+
+   busy() {
+      const $formItem = $$(this.ids.formItem);
+
+      $formItem?.disable();
+      $formItem?.showProgress?.({ type: "icon" });
+   }
+
+   ready() {
+      const $formItem = $$(this.ids.formItem);
+
+      $formItem?.enable();
+      $formItem?.hideProgress?.();
    }
 };
