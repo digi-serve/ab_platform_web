@@ -537,7 +537,8 @@ module.exports = class ABViewFormConnectComponent extends (
                            );
                         }
 
-                        $node.setValue("");
+                        // TODO: Do we need to clear selected value?
+                        // $node.setValue("");
                         $node.refresh();
                      },
                      false
