@@ -86,21 +86,27 @@ function _toExternal(cond, fields = []) {
       cond.condition = cond.condition ?? {};
       cond.rule = cond.condition.type;
 
+      let values =
+         cond.includes.map((v) => (v instanceof Date ? v.toISOString() : v)) ??
+         [];
+
       // Convert multi-values to a string
-      let values = cond.includes ?? [];
-      if (cond.condition.filter && values.indexOf(cond.condition.filter) < 0)
-         values.push(cond.condition.filter);
+      if (cond.condition.filter) {
+         if (cond.condition.filter instanceof Date) {
+            if (values.indexOf(cond.condition.filter.toISOString()) < 0) {
+               values.push(cond.condition.filter);
+            }
+         } else if (values.indexOf(cond.condition.filter) < 0)
+            values.push(cond.condition.filter);
+      }
 
       cond.value = values
          .map((v) => {
             // Convert date format
-            if (field && (field.key == "date" || field.key == "datetime")) {
-               return field.exportValue(v);
-            } else if (v instanceof Date) {
-               return v.toISOString();
-            } else {
-               return v;
-            }
+            if (field && (field.key == "date" || field.key == "datetime"))
+               return field.exportValue(new Date(v));
+
+            return v;
          })
          .join(",");
 
