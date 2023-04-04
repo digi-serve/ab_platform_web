@@ -521,7 +521,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
       if (options?.filterByConnectValues) {
          const parseFilterByConnectValues = (conditions, values, depth = 0) => {
-            const valuesByDepth = values.filter((e) => e.depth === depth);
+            const valuesByDepth = values.filter((e) => e?.depth === depth);
 
             return [
                ...conditions.rules.map((e) => {

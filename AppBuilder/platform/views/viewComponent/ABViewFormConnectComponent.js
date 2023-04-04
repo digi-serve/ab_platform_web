@@ -396,9 +396,23 @@ module.exports = class ABViewFormConnectComponent extends (
       };
 
       if (settings?.filterConditions?.rules?.length) {
-         filterConditions = this.view.settings.filterConditions;
+         filterConditions = this.AB.cloneDeep(
+            this.view.settings.filterConditions
+         );
       } else if (settings?.objectWorkspace?.filterConditions?.rules?.length) {
-         filterConditions = settings.objectWorkspace.filterConditions;
+         filterConditions = this.AB.cloneDeep(
+            settings.objectWorkspace.filterConditions
+         );
+      }
+
+      // Add the filter connected value
+      if (settings.filterConnectedValue) {
+         const values = settings.filterConnectedValue.split(":");
+         filterConditions.rules.push({
+            key: values[1],
+            rule: "filterByConnectValue",
+            value: values[0],
+         });
       }
 
       const getFilterByConnectValues = (conditions, depth = 0) => {
@@ -454,7 +468,7 @@ module.exports = class ABViewFormConnectComponent extends (
          const linkedObject = ab.objectByID(field.settings.linkObject);
          const linkedField = linkedObject.fieldByID(e.key);
 
-         if (linkedField.settings.isCustomFK) {
+         if (linkedField?.settings?.isCustomFK) {
             // finally if this is a custom foreign key we need the stored columnName by
             // default uuid is passed for all non CFK
             e.filterColumn = ab
