@@ -399,20 +399,27 @@ module.exports = class ABViewFormConnectComponent extends (
          filterConditions = this.AB.cloneDeep(
             this.view.settings.filterConditions
          );
-      } else if (settings?.objectWorkspace?.filterConditions?.rules?.length) {
-         filterConditions = this.AB.cloneDeep(
-            settings.objectWorkspace.filterConditions
-         );
       }
+      // else if (settings?.objectWorkspace?.filterConditions?.rules?.length) {
+      //    filterConditions = this.AB.cloneDeep(
+      //       settings.objectWorkspace.filterConditions
+      //    );
+      // }
 
       // Add the filter connected value
-      if (settings.filterConnectedValue) {
+      if ((settings?.filterConnectedValue ?? "").indexOf(":") > -1) {
          const values = settings.filterConnectedValue.split(":");
-         filterConditions.rules.push({
-            key: values[1],
-            rule: "filterByConnectValue",
-            value: values[0],
-         });
+         filterConditions = {
+            glue: "and", // NOTE: has to wrap with 'and' glue because  filterCondtions may be 'or' glue
+            rules: [
+               filterConditions,
+               {
+                  key: values[1],
+                  rule: "filterByConnectValue",
+                  value: values[0],
+               },
+            ],
+         };
       }
 
       const getFilterByConnectValues = (conditions, depth = 0) => {
