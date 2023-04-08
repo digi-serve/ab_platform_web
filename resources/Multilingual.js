@@ -26,6 +26,7 @@ class Multilingual extends MLClass {
       this.AB = AB;
 
       this.labels = this.AB.Config.labelConfig();
+      this._languages = this.AB.Config.languageConfig();
 
       this.pluginLabels = {};
 
@@ -106,10 +107,12 @@ class Multilingual extends MLClass {
    }
 
    languages() {
-      console.error(
-         "Multilingual:languages(): Implement Language Storage/Retrieval."
-      );
-      return [];
+      return this._languages;
+
+      // console.error(
+      //    "Multilingual:languages(): Implement Language Storage/Retrieval."
+      // );
+      // return [];
    }
 
    pluginLoadLabels(key, labels) {

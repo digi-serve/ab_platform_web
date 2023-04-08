@@ -39,8 +39,9 @@ module.exports = class ABViewTab extends ABViewTabCore {
          this.warningsMessage("has no tabs set");
       }
 
-      (this.views() || []).forEach((v) => {
-         v.warningsEval();
-      });
+      // NOTE: this is done in ABView:
+      // (this.views() || []).forEach((v) => {
+      //    v.warningsEval();
+      // });
    }
 };

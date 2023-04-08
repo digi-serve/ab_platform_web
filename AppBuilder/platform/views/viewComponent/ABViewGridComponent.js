@@ -149,10 +149,7 @@ export default class ABViewGridComponent extends ABViewComponent {
    }
 
    detatch() {
-      this.view.filterHelper.removeListener(
-         "filter.data",
-         this._handler_filterData
-      );
+      this.view.filterHelper.removeAllListeners("filter.data");
       this.datacollection?.removeListener("changeCursor", this.handler_select);
    }
 

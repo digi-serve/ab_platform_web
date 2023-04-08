@@ -7,27 +7,10 @@ module.exports = class ABViewConditionalContainer extends (
    /**
     * @function component()
     * return a UI component based upon this view.
-    * @param {obj} v1App
     * @return {obj} UI component
     */
-   component(v1App) {
-      let component = new ABViewConditionalContainerComponent(this);
-
-      // if this is our v1Interface
-      if (v1App) {
-         const newComponent = component;
-         component = {
-            ui: component.ui(),
-            init: (options, accessLevel) => {
-               return newComponent.init(this.AB, accessLevel);
-            },
-            onShow: (...params) => {
-               return newComponent.onShow?.(...params);
-            },
-         };
-      }
-
-      return component;
+   component() {
+      return new ABViewConditionalContainerComponent(this);
    }
 
    async save() {
@@ -54,7 +37,10 @@ module.exports = class ABViewConditionalContainer extends (
          );
       }
 
-      if (!this.settings.filterConditions) {
+      if (
+         !this.settings.filterConditions ||
+         this.settings.filterConditions?.rules?.length == 0
+      ) {
          this.warningsMessage("has no filter conditions set");
       }
    }

@@ -352,9 +352,7 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
             (op) => {
                if (op.valueType !== "exist") return;
 
-               const pullDataDC = this.AB.datacollections(
-                  (dc) => dc.id === op.value
-               )[0];
+               const pullDataDC = this.AB.datacollectionByID(op.value);
 
                if (
                   pullDataDC &&
@@ -373,7 +371,6 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
 
       // call .onShow in the base component
       const superComponent = baseView.superComponent();
-
       await superComponent.onShow();
 
       const ids = this.ids;
@@ -430,11 +427,9 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
       if (!rowData) {
          customFields.forEach((f) => {
             const field = f.field();
-
             if (!field) return;
 
             const comp = baseView.viewComponents[f.id];
-
             if (!comp) return;
 
             // var colName = field.columnName;
@@ -457,11 +452,9 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
 
          normalFields.forEach((f) => {
             const field = f.field();
-
             if (!field) return;
 
             const comp = baseView.viewComponents[f.id];
-
             if (!comp) return;
 
             if (f.key === "button") return;
@@ -490,7 +483,6 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
       else
          customFields.forEach((f) => {
             const comp = baseView.viewComponents[f.id];
-
             if (!comp) return;
 
             if (this._showed) comp?.onShow?.();
@@ -509,11 +501,9 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
 
       // If the cursor is selected, then it will not update value of the parent field
       const currCursor = dc.getCursor();
-
       if (currCursor) return;
 
       const relationField = dc.fieldLink;
-
       if (!relationField) return;
 
       const baseView = this.view;
@@ -521,13 +511,11 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
       const relationFieldCom = baseView.fieldComponents((comp) => {
          if (!(comp instanceof ABViewFormItem)) return false;
 
-         return comp.field() && comp.field().id === relationField.id;
+         return comp.field()?.id === relationField.id;
       })[0];
-
       if (!relationFieldCom) return;
 
       const relationFieldView = baseView.viewComponents[relationFieldCom.id];
-
       if (!relationFieldView) return;
 
       const $relationFieldView = $$(relationFieldView.ids.formItem),
@@ -566,4 +554,3 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
          $$(childComponent.ids.formItem).focus();
    }
 };
-

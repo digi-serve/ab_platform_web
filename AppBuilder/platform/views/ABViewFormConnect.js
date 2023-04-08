@@ -32,26 +32,27 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
          this.datasource ? this.datasource : null
       );
 
-      if (
-         !this.settings.objectWorkspace ||
-         !this.settings.objectWorkspace.filterConditions
-      ) {
-         this.AB.error("Error: filter conditions do not exist", {
-            error: "filterConditions do not exist",
-            viewLocation: {
-               application: this.application.name,
-               id: this.id,
-               name: this.label,
-            },
-            view: this,
-         });
-         // manually place an empty filter
-         this.settings["objectWorkspace"] = {};
-         this.settings["objectWorkspace"]["filterConditions"] = { glue: "and" };
-      }
+      // NOTE: .objectWorkspace is a v1 setting
+      // if (
+      //    !this.settings.objectWorkspace ||
+      //    !this.settings.objectWorkspace.filterConditions
+      // ) {
+      //    this.AB.error("Error: filter conditions do not exist", {
+      //       error: "filterConditions do not exist",
+      //       viewLocation: {
+      //          application: this.application.name,
+      //          id: this.id,
+      //          name: this.label,
+      //       },
+      //       view: this,
+      //    });
+      //    // manually place an empty filter
+      //    this.settings["objectWorkspace"] = {};
+      //    this.settings["objectWorkspace"]["filterConditions"] = { glue: "and" };
+      // }
 
       this.__filterComponent.setValue(
-         this.settings.objectWorkspace.filterConditions ??
+         this.settings.filterConditions ??
             ABViewFormConnectPropertyComponentDefaults.filterConditions
       );
    }
@@ -84,27 +85,10 @@ module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
    /**
     * @method component()
     * return a UI component based upon this view.
-    * @param {obj} App
     * @return {obj} UI component
     */
-   component(v1App) {
-      let component = new ABViewFormConnectComponent(this);
-
-      // if this is our v1Interface
-      if (v1App) {
-         const newComponent = component;
-         component = {
-            ui: component.ui(),
-            init: (options, accessLevel) => {
-               return newComponent.init(this.AB, accessLevel);
-            },
-            onShow: (...params) => {
-               return newComponent.onShow?.(...params);
-            },
-         };
-      }
-
-      return component;
+   component() {
+      return new ABViewFormConnectComponent(this);
    }
 
    get addPageTool() {

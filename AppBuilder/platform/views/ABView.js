@@ -9,13 +9,10 @@ module.exports = class ABView extends ABViewCore {
    /**
     * @method component()
     * return a UI component based upon this view.
-    *
     * @return {obj} UI component
     */
    component() {
-      const component = new ABViewComponent(this);
-
-      return component;
+      return new ABViewComponent(this);
    }
 
    /*
@@ -25,10 +22,6 @@ module.exports = class ABView extends ABViewCore {
     * @return {array} of ABView objects.
     */
    componentList(isEdited) {
-      // if (this.parent) {
-      //  return this.parent.componentList(false);
-      // } else {
-
       // views not allowed to drop onto this View:
       var viewsToIgnore = [
          "view",
@@ -72,8 +65,6 @@ module.exports = class ABView extends ABViewCore {
       });
 
       return allowedComponents;
-
-      // }
    }
 
    changePage(pageId) {

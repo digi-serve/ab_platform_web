@@ -51,28 +51,10 @@ export default class ABViewGrid extends ABViewGridCore {
    /**
     * @method component()
     * return a UI component based upon this view.
-    * @param {obj} App
     * @return {obj} UI component
     */
-
-   component(v1App = false) {
-      var component = new ABViewGridComponent(this);
-
-      // if this is our v1Interface
-      if (v1App) {
-         var newComponent = component;
-         component = {
-            ui: component.ui(),
-            init: (options, accessLevel) => {
-               return newComponent.init(this.AB, accessLevel);
-            },
-            onShow: (...params) => {
-               return newComponent.onShow?.(...params);
-            },
-         };
-      }
-
-      return component;
+   component() {
+      return new ABViewGridComponent(this);
    }
 
    get filterHelper() {
@@ -91,5 +73,18 @@ export default class ABViewGrid extends ABViewGridCore {
          this.__linkPageHelper = new ABViewPropertyLinkPage();
 
       return this.__linkPageHelper;
+   }
+
+   warningsEval() {
+      super.warningsEval();
+      let origWS = this.warningsSilent;
+      this.warningsSilent = true;
+      let DC = this.datacollection;
+      this.warningsSilent = origWS;
+      if (!DC) {
+         this.warningsMessage(
+            `can't resolve it's datacollection[${this.settings.dataviewID}]`
+         );
+      }
    }
 }

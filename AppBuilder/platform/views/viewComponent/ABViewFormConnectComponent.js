@@ -493,7 +493,7 @@ module.exports = class ABViewFormConnectComponent extends (
       baseView.options = {
          formView: settings.formView,
          filters: filterConditions,
-         sort: settings.objectWorkspace.sortFields,
+         sort: settings.sortFields,
          editable: settings.disable === 1 ? false : true,
          editPage:
             !settings.editForm || settings.editForm === "none" ? false : true,

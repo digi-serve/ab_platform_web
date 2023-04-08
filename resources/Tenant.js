@@ -42,11 +42,13 @@ class Tenant extends EventEmitter {
    }
 
    setting(key, value) {
-      if (value) {
-         this._config.options[key] = value;
-         return;
+      if (this._config) {
+         if (value) {
+            this._config.options[key] = value;
+            return;
+         }
+         return this._config.options[key];
       }
-      return this._config.options[key];
    }
 }
 

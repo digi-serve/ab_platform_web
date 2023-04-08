@@ -54,8 +54,4 @@ module.exports = class ABViewLabelComponent extends ABViewComponent {
 
       return ui;
    }
-
-   async init(AB) {
-      await super.init(AB);
-   }
 };
