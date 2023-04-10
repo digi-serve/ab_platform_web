@@ -872,7 +872,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
    }
 
    getUpdateObjectField(fieldID) {
-      return this.updateObject ? this.updateObject.fieldByID(fieldID) : null;
+      return this.currentForm.AB.definitionByID(fieldID);
    }
 
    /**
