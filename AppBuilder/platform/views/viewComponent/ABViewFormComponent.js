@@ -566,4 +566,3 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
          $$(childComponent.ids.formItem).focus();
    }
 };
-

@@ -408,18 +408,15 @@ module.exports = class ABViewFormConnectComponent extends (
 
       // Add the filter connected value
       if ((settings?.filterConnectedValue ?? "").indexOf(":") > -1) {
-         const values = settings.filterConnectedValue.split(":");
-         filterConditions = {
-            glue: "and", // NOTE: has to wrap with 'and' glue because  filterCondtions may be 'or' glue
-            rules: [
-               filterConditions,
-               {
-                  key: values[1],
-                  rule: "filterByConnectValue",
-                  value: values[0],
-               },
-            ],
-         };
+         const values = settings.filterConnectedValue.split(":"),
+            uiConfigName = values[0],
+            connectFieldId = values[1];
+
+         filterConditions.rules.push({
+            key: connectFieldId,
+            rule: "filterByConnectValue",
+            value: uiConfigName,
+         });
       }
 
       const getFilterByConnectValues = (conditions, depth = 0) => {
