@@ -603,7 +603,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          this.getOptions(
             combineFilters,
             "",
-            options.sort ?? "",
+            options?.sort ?? "",
             theEditor
          ).then((data) => {
             this.populateOptions(theEditor, data, field, form, true);
