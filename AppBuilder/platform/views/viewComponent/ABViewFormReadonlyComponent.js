@@ -55,7 +55,6 @@ module.exports = class ABViewFormReadonlyComponent extends (
       await super.init(AB);
 
       const $formItem = $$(this.ids.formItem);
-
       if (!$formItem) return;
 
       const $form = $formItem.getFormView();
@@ -71,7 +70,6 @@ module.exports = class ABViewFormReadonlyComponent extends (
 
    onShow() {
       const $formItem = $$(this.ids.formItem);
-
       if (!$formItem) return;
 
       const $form = $formItem.getFormView();
@@ -82,7 +80,6 @@ module.exports = class ABViewFormReadonlyComponent extends (
 
    getValue(rowData) {
       const field = this.view.field();
-
       if (!field) return null;
 
       return rowData[field.columnName];

@@ -93,6 +93,8 @@ module.exports = class ABViewContainerComponent extends ABViewComponent {
 
          try {
             component = v.component();
+            // make sure any existing handlers for changePage are removed.
+            v.removeAllListeners("changePage");
          } catch (err) {
             component = v.component(this.AB._App);
 
@@ -164,7 +166,7 @@ module.exports = class ABViewContainerComponent extends ABViewComponent {
          this.eventAdd({
             emitter: v,
             eventName: "changePage",
-            listener: this._handlerChangePage.bind(this),
+            listener: this._handlerChangePage,
          });
 
          curColIndex++;

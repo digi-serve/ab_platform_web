@@ -35,7 +35,6 @@ module.exports = class ABViewImageComponent extends ABViewComponent {
       await super.init(AB);
 
       const $image = $$(this.ids.image);
-
       if (!$image) return;
 
       const settings = this.settings;

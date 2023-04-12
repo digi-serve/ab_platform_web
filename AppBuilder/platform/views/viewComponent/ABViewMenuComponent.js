@@ -42,7 +42,7 @@ module.exports = class ABViewMenuComponent extends ABViewComponent {
          css: css,
          layout: settings.orientation || defaultSettings.orientation,
          on: {
-            onMenuItemClick: (id, e, node) => {
+            onMenuItemClick: (id /*, e, node */) => {
                this.onClick(id);
             },
             onAfterRender: () => {

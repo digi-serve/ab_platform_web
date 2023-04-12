@@ -10,26 +10,33 @@ export default class ABViewGantt extends ABViewGanttCore {
    /**
     * @method component()
     * return a UI component based upon this view.
-    * @param {obj} App
     * @return {obj} UI component
     */
-   component(v1App = false) {
-      let component = new ABViewGanttComponent(this);
+   component() {
+      return new ABViewGanttComponent(this);
+   }
 
-      // if this is our v1Interface
-      if (v1App) {
-         const newComponent = component;
-         component = {
-            ui: component.ui(),
-            init: (/* options, accessLevel*/) => {
-               return newComponent.init(this.AB);
-            },
-            onShow: (...params) => {
-               return newComponent.onShow?.(...params);
-            },
-         };
+   warningsEval() {
+      super.warningsEval();
+
+      let DC = this.datacollection;
+      if (!DC) {
+         this.warningsMessage(
+            `can't resolve it's datacollection[${this.settings.dataviewID}]`
+         );
+      } else {
+         if (!this.settings.startDateFieldID) {
+            this.warningsMessage(`doesn't have a start date field set.`);
+         } else {
+            let field = DC.datasource?.fieldByID(
+               this.settings.startDateFieldID
+            );
+            if (!field) {
+               this.warningsMessage(
+                  `can't lookup field: startDate[${this.settings.startDateFieldID}]`
+               );
+            }
+         }
       }
-
-      return component;
    }
 }

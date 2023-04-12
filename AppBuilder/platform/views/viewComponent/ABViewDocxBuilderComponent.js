@@ -88,7 +88,7 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
                   on: {
                      // Add data-cy attribute for cypress tests
                      onAfterRender: () => {
-                        const name = baseView.name.replace(".docxBuilder", "");
+                        const name = baseView.name?.replace(".docxBuilder", "");
                         const dataCy = `docx download ${name} ${baseView.id}`;
                         $$(ids.downloadButton)
                            ?.$view.querySelector("button")
@@ -175,7 +175,7 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
 
       const reportValues = this.getReportData();
 
-      console.log("DOCX data: ", reportValues);
+      // console.log("DOCX data: ", reportValues);
 
       // Download images
       const images = await this.downloadImages();
@@ -271,7 +271,7 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
                      mlFields
                   );
 
-                  // Keep id of ABObject into .scope of DOCX templater
+                  // Keep ABObject into .scope of DOCX templater
                   resultData._object = obj;
                });
 

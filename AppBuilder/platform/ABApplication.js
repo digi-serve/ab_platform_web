@@ -316,7 +316,7 @@ module.exports = class ABClassApplication extends ABApplicationCore {
    }
 
    warningsEval() {
-      this._warnings = [];
+      super.warningsEval();
 
       //
       // check for valid object references:
@@ -331,14 +331,10 @@ module.exports = class ABClassApplication extends ABApplicationCore {
          this[k].forEach((id) => {
             var def = this.AB.definitionByID(id);
             if (!def) {
-               this.emit(
-                  "warning",
-                  `Application is referencing a missing ${checks[k]}`,
-                  {
-                     appID: this.id,
-                     id,
-                  }
-               );
+               this.warningsMessage(` is referencing a missing ${checks[k]}`, {
+                  appID: this.id,
+                  id,
+               });
             }
          });
       });
@@ -347,22 +343,23 @@ module.exports = class ABClassApplication extends ABApplicationCore {
       // Make sure there is some way to access this Application:
       //
       if (this.roleAccess.length == 0 && !this.isAccessManaged) {
-         this.emit(
-            "warning",
-            "Application has no Role assigned, and is unaccessible."
-         );
+         this.warningsMessage(" has no Role assigned, and is unaccessible.");
       }
 
       // do our Role references exist?
       var allRoles = this.AB.Account.rolesAll().map((r) => r.id);
       this.roleAccess.forEach((r) => {
          if (allRoles.indexOf(r) == -1) {
-            this.emit(
-               "warning",
+            this.warningsMessage(
                `Specified Role Access [${r}] does not exist in this system`,
                { role: r }
             );
          }
+      });
+
+      // Make sure all our Pages perform a new warningsEval();
+      this.pages().forEach((p) => {
+         p.warningsEval();
       });
    }
 
@@ -382,6 +379,11 @@ module.exports = class ABClassApplication extends ABApplicationCore {
       });
 
       return warnings;
+   }
+
+   warningsMessage(msg, data = {}) {
+      let message = `Application[${this.label}]: ${msg}`;
+      this._warnings.push({ message, data });
    }
 
    /**

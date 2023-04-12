@@ -120,6 +120,14 @@ class Config {
       return {};
    }
 
+   languageConfig() {
+      if (this._config && this._config.languages) {
+         return this._config.languages;
+      }
+      console.error("No Language config found.");
+      return {};
+   }
+
    metaConfig() {
       if (this._config && this._config.meta) {
          return this._config.meta;

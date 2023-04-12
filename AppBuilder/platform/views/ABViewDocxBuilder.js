@@ -5,27 +5,10 @@ module.exports = class ABViewDocxBuilder extends ABViewDocxBuilderCore {
    /**
     * @function component()
     * return a UI component based upon this view.
-    * @param {obj} v1App
     * @return {obj} UI component
     */
-   component(v1App) {
-      let component = new ABViewDocxBuilderComponent(this);
-
-      // if this is our v1Interface
-      if (v1App) {
-         const newComponent = component;
-         component = {
-            ui: component.ui(),
-            init: (options, accessLevel) => {
-               return newComponent.init(this.AB, accessLevel);
-            },
-            onShow: (...params) => {
-               return newComponent.onShow?.(...params);
-            },
-         };
-      }
-
-      return component;
+   component() {
+      return new ABViewDocxBuilderComponent(this);
    }
 
    letUserDownload(blob, filename) {
@@ -39,5 +22,24 @@ module.exports = class ABViewDocxBuilder extends ABViewDocxBuilderCore {
       a.remove(); //afterwards we remove the element again
 
       window.URL.revokeObjectURL(url);
+   }
+
+   warningsEval() {
+      super.warningsEval();
+
+      let DC = this.datacollection;
+      if (!DC) {
+         this.warningsMessage(
+            `can't resolve it's datacollection[${this.settings.dataviewID}]`
+         );
+      }
+
+      if (!this.settings.filename) {
+         this.warningsMessage("is missing a DOCX template file");
+      } else {
+         // TODO: should we check for the existance of the file?
+         // this isn't currently an async friendly fn, so how?
+         // let url = this.downloadUrl();
+      }
    }
 };

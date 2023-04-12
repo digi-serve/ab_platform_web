@@ -490,6 +490,8 @@ module.exports = class ABViewFormConnectComponent extends (
       baseView.options = {
          formView: settings.formView,
          filters: filterConditions,
+         // NOTE: settings.objectWorkspace.xxx is a depreciated setting.
+         // We will be phasing this out.
          sort: settings.sortFields ?? settings.objectWorkspace.sortFields,
          editable: settings.disable === 1 ? false : true,
          editPage:

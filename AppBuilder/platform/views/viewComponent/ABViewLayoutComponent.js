@@ -7,15 +7,7 @@ module.exports = class ABViewLayoutComponent extends ABViewComponent {
       const viewComponents = this.viewComponents ?? {}; // { viewId: viewComponent, ..., viewIdn: viewComponent }
 
       baseView.views().forEach((v) => {
-         try {
-            viewComponents[v.id] = v.component();
-         } catch (err) {
-            // NOTE: The 'Layout' component supports only view component v2
-            console.error(
-               `View: [${v.key}] might need to be updated to new version`,
-               err
-            );
-         }
+         viewComponents[v.id] = v.component();
       });
 
       this.viewComponents = viewComponents;
@@ -26,6 +18,16 @@ module.exports = class ABViewLayoutComponent extends ABViewComponent {
       const uiComponents = Object.keys(viewComponents)
          .map((vId) => viewComponents[vId].ui())
          .filter((ui) => ui);
+
+      if (uiComponents.length == 0) {
+         uiComponents.push({});
+         uiComponents.push({
+            view: "label",
+            label: this.label("no content"),
+         });
+         uiComponents.push({});
+      }
+
       const _ui = super.ui([
          {
             view: "layout",

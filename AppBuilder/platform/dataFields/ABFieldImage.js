@@ -227,7 +227,6 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
          if (!options.editable) {
             const domNode = parentContainer.querySelector(".delete-image");
             if (domNode) domNode.style.display = "none";
-
             return;
          }
 

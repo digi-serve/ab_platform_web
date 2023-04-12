@@ -14,7 +14,7 @@ var L = null;
 
 module.exports = class ABWorkObjectKanBan extends ABViewComponent {
    constructor(comKanBan, idBase, editFields) {
-      idBase = idBase || `${comKanBan.id}_formSidePanel`;
+      idBase = idBase || `${comKanBan.view?.id}_formSidePanel`;
       super(idBase, {
          form: "",
       });

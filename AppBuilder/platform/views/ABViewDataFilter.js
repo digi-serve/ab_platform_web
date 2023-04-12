@@ -8,22 +8,28 @@ export default class ABViewDataFilter extends ABViewDataFilterCore {
     * @param {obj} App
     * @return {obj} UI component
     */
-   component(v1App = false) {
-      let component = new ABViewDataFilterComponent(this);
+   component() {
+      return new ABViewDataFilterComponent(this);
+   }
 
-      // if this is our v1Interface
-      if (v1App) {
-         var newComponent = component;
-         component = {
-            ui: newComponent.ui(),
-            init: (options, accessLevel) => {
-               return newComponent.init(this.AB, accessLevel);
-            },
-            onShow: (...params) => {
-               return newComponent.onShow?.(...params);
-            },
-         };
+   warningsEval() {
+      super.warningsEval();
+
+      let DC = this.datacollection;
+      if (!DC) {
+         this.warningsMessage(
+            `can't resolve it's datacollection[${this.settings.dataviewID}]`
+         );
+      } else {
+         if (this.settings.viewType == "connected") {
+            const object = DC.datasource;
+            const [field] = object.fields(
+               (f) => f.columnName === this.settings.field
+            );
+            if (!field) {
+               this.warningsMessage(`can't resolve field reference`);
+            }
+         }
       }
-      return component;
    }
 }

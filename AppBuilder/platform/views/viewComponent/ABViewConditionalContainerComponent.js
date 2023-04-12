@@ -132,7 +132,7 @@ module.exports = class ABViewConditionalContainerComponent extends (
             (dc.dataStatus === dc.dataStatusFlag.notInitial ||
                dc.dataStatus === dc.dataStatusFlag.initializing)
          ) {
-            $batch.showBatch("wait");
+            $batch?.showBatch("wait");
 
             return;
          }
@@ -142,10 +142,10 @@ module.exports = class ABViewConditionalContainerComponent extends (
 
       if (isValid) {
          // if (isValid && currData) {
-         $batch.showBatch("if");
+         $batch?.showBatch("if");
          this.ifComponent?.onShow?.();
       } else {
-         $batch.showBatch("else");
+         $batch?.showBatch("else");
          this.elseComponent?.onShow?.();
       }
    }

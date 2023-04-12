@@ -34,33 +34,16 @@ export default class ABViewCarousel extends ABViewCarouselCore {
    /**
     * @method component()
     * return a UI component based upon this view.
-    * @param {obj} App
     * @return {obj} UI component
     */
-   component(v1App = false) {
+   component() {
       var dv = this.datacollection;
       if (dv) {
          this.filterHelper.objectLoad(dv.datasource);
          this.filterHelper.fromSettings(this.settings.filter);
       }
 
-      let component = new ABViewCarouselComponent(this);
-
-      // if this is our v1Interface
-      if (v1App) {
-         var newComponent = component;
-         component = {
-            ui: newComponent.ui(),
-            init: (options, accessLevel) => {
-               return newComponent.init(this.AB, accessLevel);
-            },
-            onShow: (...params) => {
-               return newComponent.onShow?.(...params);
-            },
-         };
-      }
-
-      return component;
+      return new ABViewCarouselComponent(this);
    }
 
    get idBase() {
@@ -82,5 +65,16 @@ export default class ABViewCarousel extends ABViewCarouselCore {
          this.__linkPageHelper = new ABViewPropertyLinkPage();
 
       return this.__linkPageHelper;
+   }
+
+   warningsEval() {
+      super.warningsEval();
+
+      let field = this.imageField;
+      if (!field) {
+         this.warningsMessage(
+            `can't resolve image field[${this.settings.field}]`
+         );
+      }
    }
 }

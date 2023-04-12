@@ -9,58 +9,6 @@ module.exports = class ABViewWidget extends ABViewWidgetCore {
    //    super(values, application, parent, defaultValues);
    // }
 
-   //
-   // Property Editor
-   //
-
-   static propertyEditorDefaultElements(App, ids, _logic, ObjectDefaults) {
-      var commonUI = super.propertyEditorDefaultElements(
-         App,
-         ids,
-         _logic,
-         ObjectDefaults
-      );
-
-      // in addition to the common .label  values, we
-      // ask for:
-      return commonUI.concat([
-         {
-            name: "columnSpan",
-            view: "counter",
-            min: 1,
-            label: L("Column Span"),
-
-            hidden: true, // TODO
-         },
-         {
-            name: "rowSpan",
-            view: "counter",
-            min: 1,
-            label: L("Row Span"),
-
-            hidden: true, // TODO
-         },
-      ]);
-   }
-
-   static propertyEditorPopulate(App, ids, view) {
-      super.propertyEditorPopulate(App, ids, view);
-
-      $$(ids.columnSpan).setValue(
-         view.position.dx || ABPropertyComponentDefaults.columnSpan
-      );
-      $$(ids.rowSpan).setValue(
-         view.position.dy || ABPropertyComponentDefaults.rowSpan
-      );
-   }
-
-   static propertyEditorValues(ids, view) {
-      super.propertyEditorValues(ids, view);
-
-      view.position.dx = $$(ids.columnSpan).getValue();
-      view.position.dy = $$(ids.rowSpan).getValue();
-   }
-
    /**
     * @function component()
     * return a UI component based upon this view.

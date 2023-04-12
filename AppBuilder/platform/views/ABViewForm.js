@@ -39,27 +39,10 @@ module.exports = class ABViewForm extends ABViewFormCore {
    /**
     * @method component()
     * return a UI component based upon this view.
-    * @param {obj} App
     * @return {obj} UI component
     */
-   component(v1App = false) {
-      let component = new ABViewFormComponent(this);
-
-      // if this is our v1Interface
-      if (v1App) {
-         const newComponent = component;
-         component = {
-            ui: newComponent.ui(),
-            init: (options, accessLevel) => {
-               return newComponent.init(this.AB, accessLevel);
-            },
-            onShow: (...params) => {
-               return newComponent.onShow?.(...params);
-            },
-         };
-      }
-
-      return component;
+   component() {
+      return new ABViewFormComponent(this);
    }
 
    refreshDefaultButton(ids) {
@@ -378,7 +361,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
                });
             } else {
                webix.message({
-                  text: "System could not save your data",
+                  text: L("System could not save your data"),
                   type: "error",
                });
                this.AB.notify.developer(err, {
@@ -401,7 +384,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
 
       // validate data
       if (!this.validateData($formView, obj, formVals)) {
-         console.warn("Data is invalid.");
+         // console.warn("Data is invalid.");
          return;
       }
 
@@ -425,6 +408,8 @@ module.exports = class ABViewForm extends ABViewFormCore {
          throw err;
       }
 
+      /*
+      // OLD CODE:
       try {
          await this.doRecordRules(newFormVals);
          // make sure any updates from RecordRules get passed along here.
@@ -443,6 +428,31 @@ module.exports = class ABViewForm extends ABViewFormCore {
          formReady(newFormVals);
          return;
       }
+      */
+
+      try {
+         await this.doRecordRules(newFormVals);
+      } catch (err) {
+         this.AB.notify.developer(err, {
+            message: "Error processing Record Rules.",
+            view: this.toObj(),
+            newFormVals: newFormVals,
+         });
+      }
+
+      // make sure any updates from RecordRules get passed along here.
+      try {
+         this.doSubmitRules(newFormVals);
+      } catch (errs) {
+         this.AB.notify.developer(err, {
+            message: "Error processing Submit Rules.",
+            view: this.toObj(),
+            newFormVals: newFormVals,
+         });
+      }
+
+      formReady(newFormVals);
+      return newFormVals;
    }
 
    focusOnFirst() {
@@ -451,7 +461,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
       this.views().forEach((item) => {
          if (item.key == "textbox" || item.key == "numberbox") {
             if (item.position.y == topPosition) {
-               topPosition = item.position.y;
+               // topPosition = item.position.y;
                topPositionId = item.id;
             }
          }
@@ -465,5 +475,24 @@ module.exports = class ABViewForm extends ABViewFormCore {
    get viewComponents() {
       const superComponent = this.superComponent();
       return superComponent.viewComponents;
+   }
+
+   warningsEval() {
+      super.warningsEval();
+
+      let DC = this.datacollection;
+      if (!DC) {
+         this.warningsMessage(
+            `can't resolve it's datacollection[${this.settings.dataviewID}]`
+         );
+      }
+
+      if (this.settings.recordRules) {
+         // TODO: scan recordRules for warnings
+      }
+
+      if (this.settings.submitRules) {
+         // TODO: scan submitRules for warnings.
+      }
    }
 };
