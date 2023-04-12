@@ -8,6 +8,7 @@ module.exports = class ABViewDetailItemComponent extends ABViewComponent {
          Object.assign(
             {
                detailItem: "",
+               detailItemLabel: "",
             },
             ids
          )
@@ -19,46 +20,59 @@ module.exports = class ABViewDetailItemComponent extends ABViewComponent {
 
       // setup 'label' of the element
       const settings = baseView.detailComponent()?.settings ?? {};
-
-      let templateLabel = "";
-
-      if (settings.showLabel) {
-         if (settings.labelPosition === "top")
-            templateLabel =
-               "<label style='display:block; text-align: left;' class='webix_inp_top_label'>#label#</label>#display#";
-         else
-            templateLabel =
-               "<label style='width: #width#px; display: inline-block; float: left; line-height: 32px;'>#label#</label><div class='ab-detail-component-holder' style='margin-left: #width#px;'>#display#</div>";
-      }
-      // no label
-      else templateLabel = "#display#";
-
       const field = baseView.field();
-      const template = templateLabel
-         .replace(/#width#/g, settings.labelWidth)
-         .replace(/#label#/g, field?.label ?? "");
 
-      let height = 38;
+      const isLabelTop = settings.labelPosition == "top";
 
-      if (settings.labelPosition === "top") height = height * 2;
+      const group = [];
+      /** @const group will be used later as rows or cols depending on label position */
+      if (settings.showLabel) {
+         const templateLabel = isLabelTop
+            ? "<label style='display:block; text-align: left; line-height: 32px;' class='webix_inp_top_label'>#label#</label>"
+            : "<label style='display: inline-block; float: left; line-height: 32px; width:#width#px;'>#label#</label>";
 
+         const labelUi = {
+            id: this.ids.detailItemLabel,
+            view: "template",
+            borderless: true,
+            height: 38,
+            template: templateLabel,
+            data: { label: field?.label ?? "" },
+         };
+         if (!isLabelTop) labelUi.width = settings.labelWidth + 24; // Add 24px to compensate for webix padding
+         group.push(labelUi);
+      }
+
+      let height;
       if (field?.settings?.useHeight === 1)
          height = parseInt(field.settings.imageHeight) || height;
 
-      const _ui = super.ui([
-         Object.assign(
-            {
-               id: this.ids.detailItem,
-               view: "template",
-               borderless: true,
-               height: height,
-               isUsers: field?.key === "user",
-               template: template,
-               data: { display: "" }, // show empty data in template
-            },
-            uiDetailItemComponent
-         ),
-      ]);
+      const valueUi = Object.assign(
+         {
+            id: this.ids.detailItem,
+            view: "template",
+            borderless: true,
+            autowidth: true,
+            height,
+            isUsers: field?.key === "user",
+            template: isLabelTop
+               ? "<div style='min-height: 38px'>#display#</div>"
+               : "<div class='ab-detail-component-holder'>#display#</div>",
+            data: { display: "" }, // show empty data in template
+         },
+         uiDetailItemComponent
+      );
+      // height = 0 behaves a bit differently then autoheight here.
+      if (!valueUi.height || valueUi.height == 0) {
+         delete valueUi.height;
+         valueUi.autoheight = true;
+      }
+      group.push(valueUi);
+      const itemUi = {};
+      settings.labelPosition == "top"
+         ? (itemUi.rows = group)
+         : (itemUi.cols = group);
+      const _ui = super.ui([itemUi]);
 
       delete _ui.type;
 
