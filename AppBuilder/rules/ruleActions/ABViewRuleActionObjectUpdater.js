@@ -4,6 +4,7 @@
 //
 //
 const ABViewRuleAction = require("../ABViewRuleAction");
+const ABField = require("../../platform/dataFields/ABField");
 
 let L = (...params) => AB.Multilingual.label(...params);
 
@@ -872,7 +873,11 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
    }
 
    getUpdateObjectField(fieldID) {
-      return this.currentForm.AB.definitionByID(fieldID);
+      return (
+         this.queryObject?.fieldByID(fieldID) ??
+         this.updateObject?.fieldByID(fieldID) ??
+         new ABField(this.currentForm.AB.definitionByID(fieldID) ?? {})
+      );
    }
 
    /**
