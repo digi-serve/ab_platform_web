@@ -400,11 +400,15 @@ module.exports = class ABViewFormConnectComponent extends (
             this.view.settings.filterConditions
          );
       }
-      // else if (settings?.objectWorkspace?.filterConditions?.rules?.length) {
-      //    filterConditions = this.AB.cloneDeep(
-      //       settings.objectWorkspace.filterConditions
-      //    );
-      // }
+
+      if (
+         !filterConditions?.rules?.length &&
+         settings?.objectWorkspace?.filterConditions?.rules?.length
+      ) {
+         filterConditions = this.AB.cloneDeep(
+            settings.objectWorkspace.filterConditions
+         );
+      }
 
       // Add the filter connected value
       if ((settings?.filterConnectedValue ?? "").indexOf(":") > -1) {
