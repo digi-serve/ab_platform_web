@@ -12,6 +12,6 @@ module.exports = class ABViewChartBar extends ABViewChartBarCore {
     * @return {obj} UI component
     */
    component() {
-      let component = new ABViewChartBarComponent(this);
+      return new ABViewChartBarComponent(this);
    }
 };
