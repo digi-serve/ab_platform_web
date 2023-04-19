@@ -25,10 +25,11 @@ module.exports = class ABViewPivotComponent extends ABViewComponent {
             separateLabel: settings.separateLabel,
             min: settings.min,
             max: settings.max,
+            height: settings.height,
             format: (value) => {
-               const decimalPlaces = settings.decimalPlaces || 2;
+               const decimalPlaces = settings.decimalPlaces ?? 2;
 
-               return value !== "0"
+               return value && value != "0"
                   ? parseFloat(value).toFixed(decimalPlaces || 0)
                   : value;
             },
