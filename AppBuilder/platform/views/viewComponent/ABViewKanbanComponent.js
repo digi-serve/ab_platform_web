@@ -178,7 +178,8 @@ module.exports = class ABViewKanbanComponent extends ABViewComponent {
          // template for item body
          // show item image and text
          templateBody: (data) => {
-            if (!this.settings.template)
+            // if (!this.settings.template)
+            if (!this.TextTemplate.text)
                return this.CurrentObject?.displayData(data);
 
             // return our default text template
