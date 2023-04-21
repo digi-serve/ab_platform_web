@@ -55,6 +55,8 @@ module.exports = class ABViewKanbanComponent extends ABViewComponent {
    ui() {
       const ids = this.ids;
       const self = this;
+      this.linkPage = this.view.linkPageHelper.component();
+
       const _ui = super.ui([
          {
             id: ids.kanbanView,
@@ -90,19 +92,14 @@ module.exports = class ABViewKanbanComponent extends ABViewComponent {
                         this.CurrentDatacollection?.setCursor(itemId);
                         this.emit("select", itemId);
 
-                        const $resizer = $$(ids.resizer);
+                        // link pages events
+                        const editPage = this.settings.editPage;
+                        if (editPage)
+                           this.linkPage.changePage(editPage, itemId);
 
-                        if (itemId) {
-                           const data = $$(ids.kanban).getItem(itemId);
-
-                           this.FormSide.show(data);
-
-                           $resizer?.show();
-                        } else {
-                           this.FormSide.hide();
-
-                           $resizer?.hide();
-                        }
+                        const detailsPage = this.settings.detailsPage;
+                        if (detailsPage)
+                           this.linkPage.changePage(detailsPage, itemId);
                      },
                      onAfterStatusChange: (rowId, status /*, list */) => {
                         this.updateStatus(rowId, status);
@@ -148,6 +145,11 @@ module.exports = class ABViewKanbanComponent extends ABViewComponent {
       let dc = this.view.datacollection;
       if (dc) this.datacollectionLoad(dc);
 
+      this.linkPage.init({
+         view: this.view,
+         datacollection: dc,
+      });
+
       this.show();
    }
 
@@ -178,7 +180,8 @@ module.exports = class ABViewKanbanComponent extends ABViewComponent {
          // template for item body
          // show item image and text
          templateBody: (data) => {
-            if (!this.settings.template)
+            // if (!this.settings.template)
+            if (!this.TextTemplate.text)
                return this.CurrentObject?.displayData(data);
 
             // return our default text template

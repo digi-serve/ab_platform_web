@@ -191,10 +191,12 @@ module.exports = class ABWorkObjectKanBan extends ABViewComponent {
       let formCom = form.component(this.AB._App);
 
       // Rebuild form
-      webix.ui(formCom.ui.rows.concat({}), $formView);
+      webix.ui(formCom.ui().rows.concat({}), $formView);
       webix.extend($formView, webix.ProgressBar);
 
       formCom.init(
+         this.AB,
+         2,
          {
             onBeforeSaveData: () => {
                // get update data
