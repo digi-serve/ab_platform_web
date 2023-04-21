@@ -377,7 +377,10 @@ class RowUpdater extends ClassUI {
          );
       const childViews = $viewItem.getChildViews();
 
-      let inputView = formFieldComponent.ui;
+      let inputView =
+         typeof formFieldComponent.ui == "function"
+            ? formFieldComponent.ui()
+            : formFieldComponent.ui;
 
       // Add extended value options
       $viewItem.removeView(childViews[5]);
