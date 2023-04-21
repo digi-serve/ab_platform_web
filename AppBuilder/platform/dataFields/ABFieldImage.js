@@ -170,11 +170,8 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
       if (!node) {
          return;
       }
-      const L = App.Label;
 
       options = options || {};
-
-      const idBase = App.unique(this.idCustomContainer(row, options.formId));
 
       // safety check:
       // webix seems to crash if you specify a .container that doesn't exists:
