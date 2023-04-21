@@ -875,7 +875,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
       return (
          this.queryObject?.fieldByID(fieldID) ??
          this.updateObject?.fieldByID(fieldID) ??
-         this.AB.fieldNew(
+         this.currentForm.AB.fieldNew(
             this.currentForm.AB.definitionByID(fieldID) ?? {},
             this.AB.objectNew({})
          )
