@@ -21,46 +21,48 @@ module.exports = class ABHint extends ABHintCore {
     *
     * @return {Promise}
     */
-   destroy() {
-      debugger;
-
+   destroy(App) {
+      // debugger;
       // remove all my Elements
-      // var allElements = this.elements();
-      // var allDestroy = [];
-      // allElements.forEach((e) => {
-      //    allDestroy.push(e.destroy());
-      // });
+      var allSteps = this.steps();
+      var allDestroy = [];
+      allSteps.forEach((e) => {
+         allDestroy.push(e.destroy());
+      });
+      // remove reference on App and View
+      let hintIndex = App.hintIDs.indexOf(this.id);
+      if (hintIndex > -1) {
+         App.hintIDs.splice(hintIndex, 1);
+         App.save();
+      }
 
-      // return Promise.all(allDestroy).then(() => {
-      //    // now remove myself
-      //    return new Promise((resolve, reject) => {
-      //       this.toDefinition()
-      //          .destroy()
-      //          .then(() => {
-      //             // allow normal processing to contine now:
-      //             resolve();
-      //          })
-      //          .then(() => {
-      //             // in the background
-      //             // remove this reference from ALL Applications that link
-      //             // to me:
-      //             console.error(
-      //                "TODO: ABProcess.destroy(): refactor to .emit('destroyed') and let containing Apps self remove."
-      //             );
-      //             var appsWithProcess = this.AB.applications().find((a) => {
-      //                return a.hasProcess(this);
-      //             });
-      //             if (appsWithProcess.length > 0) {
-      //                appsWithProcess.forEach((a) => {
-      //                   a.processRemove(this);
-      //                });
-      //             }
-      //          })
-      //          .catch((err) => {
-      //             reject(err);
-      //          });
-      //    });
-      // });
+      let view = App.views((v) => {
+         return v.id == this.settings.view;
+      })[0];
+
+      if (view) {
+         delete view.settings.hintID;
+         view.save();
+      }
+
+      return Promise.all(allDestroy).then(() => {
+         // now remove myself
+         return new Promise((resolve, reject) => {
+            this.toDefinition()
+               .destroy()
+               .then(() => {
+                  webix.message({
+                     text: L("Tutorial Deleted"),
+                     type: "success",
+                     expire: 3000,
+                  });
+                  resolve();
+               })
+               .catch((err) => {
+                  reject(err);
+               });
+         });
+      });
    }
 
    /**
@@ -73,61 +75,21 @@ module.exports = class ABHint extends ABHintCore {
     *                .resolve( {this} )
     */
    save() {
-      debugger;
-      // if this is an update:
-      // if (this.id) {
-      //    return ABDefinition.update(this.id, this.toDefinition());
-      // } else {
+      return this.toDefinition()
+         .save()
+         .then((data) => {
+            // if I didn't have an .id then this was a create()
+            // and I need to update my data with the generated .id
 
-      //    return ABDefinition.create(this.toDefinition());
-      // }
-
-      // make sure all our tasks have save()ed.
-      // var allSaves = [];
-      // var allTasks = this.elements();
-      // allTasks.forEach((t) => {
-      //    allSaves.push(t.save());
-      // });
-      // return Promise.all(allSaves).then(() => {
-      //    // now we can save our Process definition
-      //    return this.toDefinition()
-      //       .save()
-      //       .then((data) => {
-      //          // if I didn't have an .id then this was a create()
-      //          // and I need to update my data with the generated .id
-
-      //          if (!this.id) {
-      //             this.id = data.id;
-      //          }
-
-      //          // Also, our embedded elements now all have .ids
-      //          // where they might not have before.  So now
-      //          // rebuild our this._elements hash with all id
-      //          var _new = {};
-      //          let _old = this._elements;
-      //          Object.keys(this._elements).forEach((k) => {
-      //             _new[this._elements[k].id] = this._elements[k];
-      //          });
-      //          this._elements = _new;
-
-      //          // check to see if an update happened and then make
-      //          // sure we have that saved.
-      //          let needSave = false;
-      //          Object.keys(_new).forEach((k) => {
-      //             if (!_old[k]) {
-      //                needSave = true;
-      //             }
-      //          });
-
-      //          if (needSave) {
-      //             return this.save();
-      //          }
-      //       });
-      // });
+            if (!this.id) {
+               this.id = data.id;
+            }
+            return this;
+         });
    }
 
    isValid() {
-      debugger;
+      // debugger;
       return true;
       // var validator = this.AB.Validation.validator();
 
@@ -153,18 +115,16 @@ module.exports = class ABHint extends ABHintCore {
     * @return {array} [ { message: "warning message", data:{} } ]
     */
    warningsAll() {
-      debugger;
+      // debugger;
       // report both OUR warnings, and any warnings from any of our fields
       // var allWarnings = [].concat(this._warnings);
       // this.elements().forEach((e) => {
       //    e.warningsEval();
       //    allWarnings = allWarnings.concat(e.warnings());
       // });
-
       // if (this.elements().length == 0) {
       //    allWarnings.push({ message: "No process Tasks defined.", data: {} });
       // }
-
       // // perform a check of our xml document to see if we have any unknown
       // // shapes
       // if (!this._DOMParser) {
@@ -190,7 +150,6 @@ module.exports = class ABHint extends ABHintCore {
       //       throw new Error("No XML parser found");
       //    }
       // }
-
       // // find any references to our generic shapes
       // let xml = this._DOMParser(this.xmlDefinition);
       // const genericShapes = [
@@ -209,7 +168,6 @@ module.exports = class ABHint extends ABHintCore {
       //       }
       //    }
       // });
-
       // // if any unknown shapes have been reported:
       // if (this._unknownShapes.length) {
       //    allWarnings.push({
@@ -224,24 +182,57 @@ module.exports = class ABHint extends ABHintCore {
    createHintUI() {
       // if already loaded skip
       if ($$(this.id)) return;
-      debugger;
 
       let steps = [];
-      for (const [key, value] of Object.entries(this._steps)) {
+      let next = 0;
+      this.stepIDs.forEach((step) => {
+         next++;
          let newStep = {};
-         newStep.el = value.settings.el;
-         newStep.event = value.settings.event;
-         newStep.title = value.title;
-         newStep.text = value.text;
-         steps.push(newStep);
-      }
+         newStep.id = this._steps[step].id;
+         newStep.el = this._steps[step].settings.el;
+         newStep.event = this._steps[step].settings.event;
+         newStep.title = this._steps[step].name;
+         newStep.text = this._steps[step].text;
+         if (this.stepIDs[next]) {
+            newStep.nextEl = this._steps[this.stepIDs[next]].settings.el;
+            if (newStep.nextEl) {
+               newStep.hintId = this.id;
+               newStep.eventEl = "button"; // added this so we do not trigger a second advance on the hint when triggering the click below
+               newStep.next = function (event) {
+                  let nextEl = this.nextEl;
+                  let theNextEl = document.querySelector(nextEl);
+                  if (theNextEl && theNextEl.checkVisibility()) {
+                     return false;
+                  } else {
+                     document.querySelector(this.el).click();
+                     return false;
+                  }
+               };
+            }
+         }
+         if (newStep.el) steps.push(newStep);
+      });
 
-      webix.ui({
+      let ui = {
          view: "hint",
          id: this.id,
          steps: steps,
-      });
+      };
 
-      $$(this.id).start();
+      // taking this out because it was not what we wanted
+      // if (this?.settings?.transition) {
+      //    ui.stepTimeout = parseInt(this.settings.transition) * 1000;
+      // }
+
+      webix.delay(
+         () => {
+            webix.ui(ui).start();
+         },
+         null,
+         null,
+         2000
+      );
+
+      // $$(this.id);
    }
 };

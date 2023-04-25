@@ -238,7 +238,7 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
 
                      node.setAttribute(
                         "data-cy",
-                        `tab-${view.label.replace(" ", "")}-${view.id}-${
+                        `tab-${view.name.replace(" ", "")}-${view.id}-${
                            baseView.id
                         }`
                      );
@@ -560,11 +560,11 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
 
                $tab?.hideProgress?.();
                // check if tab has a hint
-               if (vc?.view?.settings?.hintID) {
-                  // fetch the steps for the hint
-                  let hint = ab.hintID(vc.view.settings.hintID);
-                  hint.createHintUI();
-               }
+               // if (vc?.view?.settings?.hintID) {
+               //    // fetch the steps for the hint
+               //    let hint = ab.hintID(vc.view.settings.hintID);
+               //    hint.createHintUI();
+               // }
             }, 10);
          }
 

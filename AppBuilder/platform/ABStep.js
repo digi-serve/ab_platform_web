@@ -22,7 +22,18 @@ module.exports = class ABStep extends ABStepCore {
     * @return {Promise}
     */
    destroy() {
-      debugger;
+      // debugger;
+
+      return new Promise((resolve, reject) => {
+         this.toDefinition()
+            .destroy()
+            .then(() => {
+               resolve();
+            })
+            .catch((err) => {
+               reject(err);
+            });
+      });
 
       // remove all my Elements
       // var allElements = this.elements();
@@ -73,57 +84,18 @@ module.exports = class ABStep extends ABStepCore {
     *                .resolve( {this} )
     */
    save() {
-      debugger;
-      // if this is an update:
-      // if (this.id) {
-      //    return ABDefinition.update(this.id, this.toDefinition());
-      // } else {
+      // debugger;
+      return this.toDefinition()
+         .save()
+         .then((data) => {
+            // if I didn't have an .id then this was a create()
+            // and I need to update my data with the generated .id
 
-      //    return ABDefinition.create(this.toDefinition());
-      // }
-
-      // make sure all our tasks have save()ed.
-      // var allSaves = [];
-      // var allTasks = this.elements();
-      // allTasks.forEach((t) => {
-      //    allSaves.push(t.save());
-      // });
-      // return Promise.all(allSaves).then(() => {
-      //    // now we can save our Process definition
-      //    return this.toDefinition()
-      //       .save()
-      //       .then((data) => {
-      //          // if I didn't have an .id then this was a create()
-      //          // and I need to update my data with the generated .id
-
-      //          if (!this.id) {
-      //             this.id = data.id;
-      //          }
-
-      //          // Also, our embedded elements now all have .ids
-      //          // where they might not have before.  So now
-      //          // rebuild our this._elements hash with all id
-      //          var _new = {};
-      //          let _old = this._elements;
-      //          Object.keys(this._elements).forEach((k) => {
-      //             _new[this._elements[k].id] = this._elements[k];
-      //          });
-      //          this._elements = _new;
-
-      //          // check to see if an update happened and then make
-      //          // sure we have that saved.
-      //          let needSave = false;
-      //          Object.keys(_new).forEach((k) => {
-      //             if (!_old[k]) {
-      //                needSave = true;
-      //             }
-      //          });
-
-      //          if (needSave) {
-      //             return this.save();
-      //          }
-      //       });
-      // });
+            if (!this.id) {
+               this.id = data.id;
+            }
+            return this;
+         });
    }
 
    isValid() {

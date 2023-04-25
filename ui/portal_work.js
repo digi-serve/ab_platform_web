@@ -8,6 +8,7 @@ import PortalWorkUserSwitcheroo from "./portal_work_user_switcheroo.js";
 import PortalWorkUserQRWindow from "./portal_work_user_qr_window.js";
 import PortalAccessLevelManager from "./portal_access_level_manager.js";
 import TranslationTool from "./portal_translation_tool.js";
+import TutorialManager from "./portal_tutorial_manager.js";
 
 class PortalWork extends ClassUI {
    constructor() {
@@ -856,6 +857,29 @@ class PortalWork extends ClassUI {
             });
          }
       }
+      if (application.isTutorialManaged) {
+         let isManager = false;
+         if (
+            application.tutorialManagers.useAccount == "1" &&
+            application.tutorialManagers.account.indexOf(uuid) > -1
+         ) {
+            isManager = true;
+         }
+         if (!isManager && application.tutorialManagers.useRole == "1") {
+            roles.forEach((role) => {
+               if (application.tutorialManagers.role.indexOf(role.uuid) > -1) {
+                  isManager = true;
+               }
+            });
+         }
+         if (isManager) {
+            settingsMenuOptions.push({
+               id: "tutorial",
+               label: this.label("Tutorial Manager"),
+               icon: "info-circle",
+            });
+         }
+      }
 
       if (settingsMenuOptions.length < 1) return $$("settings_icon").hide();
 
@@ -881,6 +905,10 @@ class PortalWork extends ClassUI {
                      case "translation":
                         TranslationTool.init(this);
                         TranslationTool.show();
+                        break;
+                     case "tutorial":
+                        TutorialManager.init(this);
+                        TutorialManager.show();
                         break;
                      default:
                         //eslint-disable-next-line
