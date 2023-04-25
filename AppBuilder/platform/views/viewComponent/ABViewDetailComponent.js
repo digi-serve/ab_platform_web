@@ -169,6 +169,12 @@ module.exports = class ABViewDetailComponent extends ABViewContainerComponent {
                case "file":
                   val = rowData?.[field.columnName];
 
+                  if (!val) {
+                     val = "";
+
+                     break;
+                  }
+
                   break;
 
                case "formula":
