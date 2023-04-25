@@ -104,7 +104,7 @@ module.exports = class ABViewDetailComponent extends ABViewContainerComponent {
                   break;
 
                case "list":
-                  val = rowData[field.columnName];
+                  val = rowData?.[field.columnName];
 
                   if (!val) {
                      val = "";
@@ -167,7 +167,13 @@ module.exports = class ABViewDetailComponent extends ABViewContainerComponent {
                   break;
 
                case "file":
-                  val = rowData[field.columnName];
+                  val = rowData?.[field.columnName];
+
+                  if (!val) {
+                     val = "";
+
+                     break;
+                  }
 
                   break;
 
