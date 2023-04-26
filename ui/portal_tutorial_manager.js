@@ -514,7 +514,6 @@ class PortalTutorialManager extends ClassUI {
       this.portal = portal;
       this.appId = portal.AppState.lastSelectedApp;
 
-      const languageCode = this.AB.Config.userConfig().languageCode;
       this.application = this.AB.applicationByID(this.appId);
       const pages = this.application.pages();
       this.options = this.getViewOptions(pages);
@@ -979,8 +978,6 @@ class PortalTutorialManager extends ClassUI {
 
    // this builds the list of page/tab options that a hint can be added to
    getViewOptions(views) {
-      var completed = 0;
-      var total = 0;
       // this so it looks right/indented in a tree view:
       // var tree = new webix.TreeCollection();
       var options = [];

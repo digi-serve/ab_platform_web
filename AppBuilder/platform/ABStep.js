@@ -1,6 +1,6 @@
 const ABStepCore = require("../core/ABStepCore");
 
-let L = (...params) => AB.Multilingual.label(...params);
+// let L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABStep extends ABStepCore {
    constructor(attributes, AB) {
@@ -99,7 +99,7 @@ module.exports = class ABStep extends ABStepCore {
    }
 
    isValid() {
-      debugger;
+      // debugger;
       return true;
       // var validator = this.AB.Validation.validator();
 
@@ -125,18 +125,16 @@ module.exports = class ABStep extends ABStepCore {
     * @return {array} [ { message: "warning message", data:{} } ]
     */
    warningsAll() {
-      debugger;
+      // debugger;
       // report both OUR warnings, and any warnings from any of our fields
       // var allWarnings = [].concat(this._warnings);
       // this.elements().forEach((e) => {
       //    e.warningsEval();
       //    allWarnings = allWarnings.concat(e.warnings());
       // });
-
       // if (this.elements().length == 0) {
       //    allWarnings.push({ message: "No process Tasks defined.", data: {} });
       // }
-
       // // perform a check of our xml document to see if we have any unknown
       // // shapes
       // if (!this._DOMParser) {
@@ -162,7 +160,6 @@ module.exports = class ABStep extends ABStepCore {
       //       throw new Error("No XML parser found");
       //    }
       // }
-
       // // find any references to our generic shapes
       // let xml = this._DOMParser(this.xmlDefinition);
       // const genericShapes = [
@@ -181,7 +178,6 @@ module.exports = class ABStep extends ABStepCore {
       //       }
       //    }
       // });
-
       // // if any unknown shapes have been reported:
       // if (this._unknownShapes.length) {
       //    allWarnings.push({

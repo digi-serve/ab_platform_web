@@ -1,5 +1,4 @@
 const ABViewComponent = require("./ABViewComponent").default;
-const ABHint = require("../../ABHint");
 
 module.exports = class ABViewTabComponent extends ABViewComponent {
    constructor(baseView, idBase, ids) {
