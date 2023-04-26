@@ -185,6 +185,14 @@ module.exports = class ABHint extends ABHintCore {
 
       let steps = [];
       let next = 0;
+      let display = webix.storage.cookie.get(this.id);
+      if (display?.hide) return;
+      let dontShow = `<label class="dontShow">
+                        <input onclick="webix.storage.cookie.put(this.dataset.hintId, {'hide': this.checked});" data-hint-id="${
+                           this.id
+                        }" type="checkbox"> 
+                        ${L("Don't show this again.")}
+                     </label>`;
       this.stepIDs.forEach((step) => {
          next++;
          let newStep = {};
@@ -192,7 +200,7 @@ module.exports = class ABHint extends ABHintCore {
          newStep.el = this._steps[step].settings.el;
          newStep.event = this._steps[step].settings.event;
          newStep.title = this._steps[step].name;
-         newStep.text = this._steps[step].text;
+         newStep.text = this._steps[step].text + dontShow;
          if (this.stepIDs[next]) {
             newStep.nextEl = this._steps[this.stepIDs[next]].settings.el;
             if (newStep.nextEl) {
@@ -217,12 +225,31 @@ module.exports = class ABHint extends ABHintCore {
          view: "hint",
          id: this.id,
          steps: steps,
+         on: {
+            onNext: (step) => {
+               setTimeout(() => {
+                  const boxes = document.querySelectorAll(
+                     "input[data-hint-id='" + this.id + "']"
+                  );
+                  let display = webix.storage.cookie.get(this.id);
+                  boxes.forEach((b) => {
+                     b.checked = display?.hide || false;
+                  });
+               }, 100);
+            },
+            onPrevious: (step) => {
+               setTimeout(() => {
+                  const boxes = document.querySelectorAll(
+                     "input[data-hint-id='" + this.id + "']"
+                  );
+                  let display = webix.storage.cookie.get(this.id);
+                  boxes.forEach((b) => {
+                     b.checked = display?.hide || false;
+                  });
+               }, 100);
+            },
+         },
       };
-
-      // taking this out because it was not what we wanted
-      // if (this?.settings?.transition) {
-      //    ui.stepTimeout = parseInt(this.settings.transition) * 1000;
-      // }
 
       webix.delay(
          () => {

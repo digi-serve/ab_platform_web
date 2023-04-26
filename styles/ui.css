@@ -1834,3 +1834,17 @@ button.highlightMe,
    overflow: hidden;
    text-overflow: ellipsis;
 }
+.webix_hint {
+   padding-bottom: 60px !important;
+}
+.dontShow {
+   font-size: 12px;
+   font-weight: normal;
+   font-style: italic;
+   display: block;
+   padding: 0;
+   margin: 15px 0 0 0;
+}
+.dontShow input {
+   vertical-align: text-top;
+}
