@@ -290,8 +290,12 @@ module.exports = class FilterComplex extends FilterComplexCore {
     * validate the row data is valid filter condition
     *
     * @param rowData {Object} - data row
+    * @param condition {Object} - [Optional] {
+    *                                           glue: "and" | "or",
+    *                                           rules: []
+    *                                        }
     */
-   isValid(rowData) {
+   isValid(rowData, condition = this.condition) {
       let helper = () => true;
 
       let $query = $$(this.ids.querybuilder);
@@ -299,7 +303,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
          helper = $query.getFilterFunction();
          return helper(rowData);
       } else {
-         return super.isValid(rowData);
+         return super.isValid(rowData, condition);
       }
    }
 
