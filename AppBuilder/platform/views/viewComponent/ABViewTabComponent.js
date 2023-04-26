@@ -438,16 +438,14 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
    }
 
    changePage(pageId) {
-      const ids = this.ids;
-      const $tab = $$(ids.tab);
+      const $tab = $$(this.ids.tab);
 
-      $tab.blockEvent();
+      $tab?.blockEvent();
       this.view.changePage(pageId);
-      $tab.unblockEvent();
+      $tab?.unblockEvent();
    }
 
    changeTab(tabViewId) {
-      const ids = this.ids;
       const baseView = this.view;
       const $tabViewId = $$(tabViewId);
 
@@ -461,17 +459,14 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
 
                $tabViewId.show(false, false);
             }, 200);
-         } else $$(ids.tab).setValue(tabViewId);
+         } else $$(this.ids.tab).setValue(tabViewId);
    }
 
    toggleParent(view) {
       const $viewID = $$(view.id);
 
-      if (
-         (view.key === "tab" || view.key === "viewcontainer") &&
-         $viewID?.show
-      ) {
-         $viewID.show(false, false);
+      if (view.key === "tab" || view.key === "viewcontainer") {
+         $viewID?.show(false, false);
       }
       if (view.parent) {
          this.toggleParent(view.parent);

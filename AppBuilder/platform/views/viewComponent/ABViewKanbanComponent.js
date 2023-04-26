@@ -55,6 +55,8 @@ module.exports = class ABViewKanbanComponent extends ABViewComponent {
    ui() {
       const ids = this.ids;
       const self = this;
+      this.linkPage = this.view.linkPageHelper.component();
+
       const _ui = super.ui([
          {
             id: ids.kanbanView,
@@ -70,12 +72,11 @@ module.exports = class ABViewKanbanComponent extends ABViewComponent {
                      template: '<i class="fa fa-user"></i> #value#',
                      width: 150,
                      on: {
-                        onSelectChange: () => {
+                        onSelectChange: function () {
                            // get this row id from onAvatarClick event
                            if (!self._updatingOwnerRowId) return;
 
                            const userId = this.getSelectedId(false);
-
                            if (!userId) return;
 
                            self.updateOwner(self._updatingOwnerRowId, userId);
@@ -91,19 +92,14 @@ module.exports = class ABViewKanbanComponent extends ABViewComponent {
                         this.CurrentDatacollection?.setCursor(itemId);
                         this.emit("select", itemId);
 
-                        const $resizer = $$(ids.resizer);
+                        // link pages events
+                        const editPage = this.settings.editPage;
+                        if (editPage)
+                           this.linkPage.changePage(editPage, itemId);
 
-                        if (itemId) {
-                           const data = $$(ids.kanban).getItem(itemId);
-
-                           this.FormSide.show(data);
-
-                           $resizer?.show();
-                        } else {
-                           this.FormSide.hide();
-
-                           $resizer?.hide();
-                        }
+                        const detailsPage = this.settings.detailsPage;
+                        if (detailsPage)
+                           this.linkPage.changePage(detailsPage, itemId);
                      },
                      onAfterStatusChange: (rowId, status /*, list */) => {
                         this.updateStatus(rowId, status);
@@ -145,6 +141,16 @@ module.exports = class ABViewKanbanComponent extends ABViewComponent {
       this.FormSide.on("update", (updateVals) => {
          this.saveData(updateVals);
       });
+
+      let dc = this.view.datacollection;
+      if (dc) this.datacollectionLoad(dc);
+
+      this.linkPage.init({
+         view: this.view,
+         datacollection: dc,
+      });
+
+      this.show();
    }
 
    get $kb() {
@@ -174,7 +180,8 @@ module.exports = class ABViewKanbanComponent extends ABViewComponent {
          // template for item body
          // show item image and text
          templateBody: (data) => {
-            if (!this.settings.template)
+            // if (!this.settings.template)
+            if (!this.TextTemplate.text)
                return this.CurrentObject?.displayData(data);
 
             // return our default text template
@@ -205,8 +212,10 @@ module.exports = class ABViewKanbanComponent extends ABViewComponent {
 
       $$(ids.resizer)?.hide();
 
-      const CurrentObject = this.CurrentObject;
-
+      var CurrentObject = this.CurrentObject;
+      if (!CurrentObject) {
+         CurrentObject = this.datacollection?.datasource;
+      }
       if (!CurrentObject) return;
 
       // Get vertical grouping field and populate to kanban list
@@ -214,7 +223,6 @@ module.exports = class ABViewKanbanComponent extends ABViewComponent {
       const CurrentVerticalField = CurrentObject.fieldByID(
          this.settings.verticalGroupingField
       );
-
       if (!CurrentVerticalField) return;
 
       this.CurrentVerticalField = CurrentVerticalField;
@@ -229,7 +237,7 @@ module.exports = class ABViewKanbanComponent extends ABViewComponent {
 
       if (
          CurrentHorizontalField &&
-         CurrentHorizontalField instanceof this._ABFieldConnect
+         CurrentHorizontalField instanceof this.ABFieldConnect
       )
          // Pull horizontal options
          horizontalOptions = await CurrentHorizontalField.getOptions();
@@ -247,12 +255,12 @@ module.exports = class ABViewKanbanComponent extends ABViewComponent {
                   horizontalVals = [];
 
                // pull options of the Horizontal field
-               if (CurrentHorizontalField instanceof this._ABFieldList) {
+               if (CurrentHorizontalField instanceof this.ABFieldList) {
                   // make a copy of the settings.
                   horizontalVals = (
                      CurrentHorizontalField.settings.options || []
                   ).map((o) => o);
-               } else if (CurrentHorizontalField instanceof this._ABFieldUser) {
+               } else if (CurrentHorizontalField instanceof this.ABFieldUser) {
                   horizontalVals = CurrentHorizontalField.getUsers().map(
                      (u) => {
                         return {
@@ -261,9 +269,7 @@ module.exports = class ABViewKanbanComponent extends ABViewComponent {
                         };
                      }
                   );
-               } else if (
-                  CurrentHorizontalField instanceof this._ABFieldConnect
-               )
+               } else if (CurrentHorizontalField instanceof this.ABFieldConnect)
                   horizontalVals = horizontalOptions.map(({ id, text }) => ({
                      id,
                      text,
@@ -341,7 +347,7 @@ module.exports = class ABViewKanbanComponent extends ABViewComponent {
 
          $menuUser.clearAll();
 
-         if (CurrentOwnerField instanceof this._ABFieldUser) {
+         if (CurrentOwnerField instanceof this.ABFieldUser) {
             const users = ab.Account.userList().map((u) => {
                return {
                   id: u.username,
@@ -350,17 +356,24 @@ module.exports = class ABViewKanbanComponent extends ABViewComponent {
             });
 
             $menuUser.parse(users);
-         } else if (CurrentOwnerField instanceof this._ABFieldConnect) {
+         } else if (CurrentOwnerField instanceof this.ABFieldConnect) {
             const options = await CurrentOwnerField.getOptions();
 
-            $menuUser.parse(
-               options.map((opt) => {
-                  return {
-                     id: opt.id,
-                     value: opt.text,
-                  };
-               })
-            );
+            try {
+               $menuUser.parse(
+                  options.map((opt) => {
+                     return {
+                        id: opt.id,
+                        value: opt.text,
+                     };
+                  })
+               );
+            } catch (e) {
+               // TODO: remove this.  Trying to catch a random webix error:
+               // Cannot read properties of null (reading 'driver')
+               console.error(e);
+               console.warn(options);
+            }
          }
       }
    }

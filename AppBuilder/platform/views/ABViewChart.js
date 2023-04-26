@@ -15,28 +15,15 @@ module.exports = class ABViewChart extends ABViewChartCore {
    /**
     * @method component()
     * return a UI component based upon this view.
-    * @param {obj} App
     * @return {obj} UI component
     */
-   component(v1App = false) {
-      let component = new ABViewChartComponent(this);
+   component() {
+      return new ABViewChartComponent(this);
+   }
 
-      // if this is our v1Interface
-      if (v1App) {
-         const newComponent = component;
-
-         component = {
-            ui: newComponent.ui(),
-            init: (options, accessLevel) => {
-               return newComponent.init(this.AB);
-            },
-            onShow: (...params) => {
-               return newComponent.onShow?.(...params);
-            },
-         };
-      }
-
-      return component;
+   fromValues(values) {
+      super.fromValues(values);
+      this.refreshData();
    }
 
    getDCChart() {
@@ -205,5 +192,30 @@ module.exports = class ABViewChart extends ABViewChartCore {
 
       dcChart.clearAll();
       dcChart.parse(results);
+   }
+
+   warningsEval() {
+      super.warningsEval();
+
+      let labelField = this.labelField();
+      if (!labelField) {
+         this.warningsMessage(
+            `can't resolve label field[${this.settings.columnLabel}]`
+         );
+      }
+
+      let valueField = this.valueField();
+      if (!valueField) {
+         this.warningsMessage(
+            `can't resolve value field[${this.settings.columnValue}]`
+         );
+      }
+
+      let valueField2 = this.valueField2();
+      if (!valueField2) {
+         this.warningsMessage(
+            `can't resolve value2 field[${this.settings.columnValue2}]`
+         );
+      }
    }
 };

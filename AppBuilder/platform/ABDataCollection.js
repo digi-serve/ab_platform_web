@@ -117,52 +117,18 @@ module.exports = class ABDataCollection extends ABDataCollectionCore {
          dc.bind(dataCollectionLink.__dataCollection, fieldLink.id);
          // defining dataFeed allows us to query the database when the table is scrolled
          dc.define("dataFeed", (value, params) => {
-            // copy current wheres
-            var wheres = this.AB.cloneDeep(
-               this.settings.objectWorkspace.filterConditions
-            );
-            // add bind items data as a filter to wheres
-            if (value) {
-               // don't include an empty where condition in our .rules
-               // start by replacing it with null
-               if (!wheres.rules) {
-                  wheres = null;
-               }
-
-               wheres = {
-                  glue: "and",
-                  rules: [
-                     wheres,
-                     {
-                        alias: fieldLink.alias, // ABObjectQuery
-                        key: Object.keys(params)[0],
-                        rule: fieldLink.alias ? "contains" : "equals", // NOTE: If object is query, then use "contains" because ABOBjectQuery return JSON
-                        value: fieldLink.getRelationValue(
-                           dataCollectionLink.__dataCollection.getItem(value)
-                        ),
-                     },
-                  ],
-               };
-
-               // remove any null in the .rules
-               wheres.rules = wheres.rules.filter((r) => r);
-            }
-
             let cursorUpdated = false;
             // check if the current cursor was updated
-            if (this?.datacollectionLink?.getCursor().id == value) {
+            if (this?.datacollectionLink?.getCursor()?.id == value) {
                cursorUpdated = true;
             }
 
             // this is the same item that was already bound...don't reload data
-            if (
-               cursorUpdated ||
-               JSON.stringify(this.__reloadWheres) != JSON.stringify(wheres) ||
-               wheres?.rules?.length > 0
-            ) {
+            if (cursorUpdated) {
                // now that we have the modified wheres the dataCollections wheres
                // need to be modified for subsequent loads on scroll so lets set them
-               this.reloadWheres(wheres);
+               // this.reloadWheres(wheres);
+
                // reload data
                this.reloadData(0, 20);
             }

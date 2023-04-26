@@ -45,7 +45,6 @@ export default class ABViewGanttComponent extends ABViewComponent {
             if (!localService) return false;
 
             const tasksData = localService.tasks();
-
             if (!tasksData || !tasksData.exists) return false;
 
             return tasksData.exists(taskId);
@@ -54,7 +53,6 @@ export default class ABViewGanttComponent extends ABViewComponent {
             if (!this.ganttElement.isExistsTask(taskId)) return;
 
             const opsService = $$(idGantt).getService("operations");
-
             if (!opsService) return;
 
             return opsService.removeTask(taskId);
@@ -273,7 +271,7 @@ export default class ABViewGanttComponent extends ABViewComponent {
    objectLoad(object) {
       super.objectLoad(object);
 
-      const baseView = this.view;
+      // const baseView = this.view;
       const settings = this.settings;
 
       if (object) {
@@ -294,7 +292,6 @@ export default class ABViewGanttComponent extends ABViewComponent {
       super.datacollectionLoad(datacollection);
 
       const dc = this.CurrentDatacollection || datacollection;
-
       if (!dc) return;
 
       // NOTE: this can happen in the ABDesigner object workspace.
@@ -351,15 +348,12 @@ export default class ABViewGanttComponent extends ABViewComponent {
 
    initData() {
       const ganttElem = $$(this.ids.gantt);
-
       if (!ganttElem) return;
 
       const dataService = ganttElem.getService("local");
-
       if (!dataService) return;
 
       const dcTasks = dataService.tasks();
-
       if (!dcTasks) return;
 
       // gantt v 8.1.1
@@ -428,11 +422,9 @@ export default class ABViewGanttComponent extends ABViewComponent {
 
    setScale(scale) {
       const ganttElem = $$(this.ids.gantt);
-
       if (!ganttElem) return;
 
       const ganttData = ganttElem.getService("local");
-
       if (!ganttData) return;
 
       const newScales = [];
@@ -442,19 +434,18 @@ export default class ABViewGanttComponent extends ABViewComponent {
       switch (scale) {
          case "day":
             newScales.push(YEAR_SCALE, MONTH_SCALE, DAY_SCALE);
-
             break;
+
          case "week":
             newScales.push(YEAR_SCALE, MONTH_SCALE, WEEK_SCALE);
-
             break;
+
          case "month":
             newScales.push(YEAR_SCALE, MONTH_SCALE);
-
             break;
+
          case "year":
             newScales.push(YEAR_SCALE);
-
             break;
       }
 

@@ -18,7 +18,7 @@ module.exports = class ABViewDetailTextComponent extends (
                   this.view.parentDetailComponent()?.id || this.view.parent.id
                }`;
 
-               $$(this.ids.detailItem)?.$view.setAttribute("data-cy", dataCy);
+               $$(this.ids.component)?.$view.setAttribute("data-cy", dataCy);
             },
          },
       };

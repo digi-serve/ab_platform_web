@@ -12,22 +12,7 @@ module.exports = class ABViewDetailCustomComponent extends (
       const field = baseView.field();
       const detailView = baseView.detailComponent();
 
-      let templateLabel = "";
-
-      if (detailView?.settings?.showLabel) {
-         if (detailView.settings.labelPosition === "top")
-            templateLabel =
-               "<label style='display:block; text-align: left;' class='webix_inp_top_label'>#label#</label>";
-         else
-            templateLabel =
-               "<label style='width: #width#px; display: inline-block; float: left; line-height: 32px;'>#label#</label>";
-      }
-
-      const template = (templateLabel + "#result#")
-         // let template = (templateLabel)
-         .replace(/#width#/g, detailView.settings.labelWidth)
-         .replace(/#label#/g, field ? field.label : "")
-         .replace(/#result#/g, field ? field.columnHeader().template({}) : "");
+      let template = field ? field.columnHeader().template({}) : "";
 
       return super.ui({
          minHeight: 45,
@@ -65,6 +50,9 @@ module.exports = class ABViewDetailCustomComponent extends (
       field.customDisplay(rowData, null, node, {
          editable: false,
       });
+      // Hack: remove the extra webix_template class here, which adds padding so
+      // the item is not alligned with the others
+      node.getElementsByClassName("webix_template")[1].removeAttribute("class");
    }
 
    setValue(val) {

@@ -86,9 +86,10 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
                   async getModels() {
                      const reportModels = {};
 
-                     (ab.datacollections() || []).forEach((dc) => {
+                     (
+                        baseView.application.datacollectionsIncluded() || []
+                     ).forEach((dc) => {
                         const obj = dc.datasource;
-
                         if (!obj) return;
 
                         const reportFields = self.getReportFields(dc);
@@ -246,24 +247,19 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
                      if (config.joins?.length)
                         (config.joins || []).forEach((j) => {
                            const sourceDc = ab.datacollectionByID(j.sid);
-
                            if (!sourceDc) return;
 
                            const sourceObj = sourceDc.datasource;
-
                            if (!sourceObj) return;
 
                            const targetDc = ab.datacollectionByID(j.tid);
-
                            if (!targetDc) return;
 
                            const targetObj = targetDc.datasource;
-
                            if (!targetObj) return;
 
                            const sourceLinkField = sourceObj.fieldByID(j.sf);
                            const targetLinkField = targetObj.fieldByID(j.tf);
-
                            if (!sourceLinkField && !targetLinkField) return;
 
                            const sourceData = dcData[j.sid] || [];
@@ -516,7 +512,6 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
       if (!dc) return [];
 
       const object = dc.datasource;
-
       if (!object) return [];
 
       const fields = [];
@@ -561,11 +556,9 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
 
    async getData(datacollectionId) {
       const datacollection = this.AB.datacollectionByID(datacollectionId);
-
       if (!datacollection) return [];
 
       const object = datacollection.datasource;
-
       if (!object) return [];
 
       if (
@@ -590,34 +583,31 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
 
             // FK value of the connect field
             if (field && field.isConnection) {
+               let $pk = field.datasourceLink.PK();
                if (Array.isArray(row[columnName]))
                   reportRow[`${col}.id`] = row[columnName].map(
-                     (link) =>
-                        link[field.datasourceLink.PK()] || link.id || link
+                     (link) => link[$pk] || link.id || link
                   );
                else if (row[columnName])
                   reportRow[`${col}.id`] =
-                     row[columnName][field.datasourceLink.PK()] ||
+                     row[columnName][$pk] ||
                      row[columnName].id ||
                      row[columnName];
             }
 
             const rField = reportFields.filter((f) => f.id === columnName)[0];
-
             if (!rField) return;
 
             switch (rField.type) {
                case "text":
                case "reference":
                   reportRow[col] = (reportRow[col] || "").toString();
-
                   break;
 
                case "number":
                   reportRow[col] = parseFloat(
                      (reportRow[col] || 0).toString().replace(/[^\d.-]/g, "")
                   );
-
                   break;
 
                case "date":
@@ -627,7 +617,6 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
                      if (!(reportRow[col] instanceof Date))
                         reportRow[col] = this.AB.rules.toDate(row[columnName]);
                   } else reportRow[col] = "";
-
                   break;
             }
          });

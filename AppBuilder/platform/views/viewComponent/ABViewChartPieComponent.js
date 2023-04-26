@@ -28,11 +28,5 @@ module.exports = class ABViewChartPieComponent extends (
       });
    }
 
-   async init(AB) {
-      await super.init(AB);
-   }
 
-   onShow() {
-      super.onShow();
-   }
 };

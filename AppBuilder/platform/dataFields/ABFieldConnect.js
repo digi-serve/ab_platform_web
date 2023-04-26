@@ -335,6 +335,10 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
          Promise.resolve()
             .then(async () => {
+               // Mar 23, 2023 disabling local storage of options because users
+               // were reporting not seeing the correct options list with either
+               // new, updated or deleted records that should or should not appear
+               return false;
                // Get Local Storage unless xxx->one connected field
                if (this?.settings?.linkViaType != "one") {
                   // We store the .findAll() results locally and return that for a
@@ -517,7 +521,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
       if (options?.filterByConnectValues) {
          const parseFilterByConnectValues = (conditions, values, depth = 0) => {
-            const valuesByDepth = values.filter((e) => e.depth === depth);
+            const valuesByDepth = values.filter((e) => e?.depth === depth);
 
             return [
                ...conditions.rules.map((e) => {
@@ -596,7 +600,12 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       );
 
       return new Promise((resolve, reject) => {
-         this.getOptions(combineFilters, "", "", theEditor).then((data) => {
+         this.getOptions(
+            combineFilters,
+            "",
+            options?.sort ?? "",
+            theEditor
+         ).then((data) => {
             this.populateOptions(theEditor, data, field, form, true);
             resolve(data);
          });

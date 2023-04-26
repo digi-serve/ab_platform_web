@@ -25,10 +25,11 @@ module.exports = class ABViewPivotComponent extends ABViewComponent {
             separateLabel: settings.separateLabel,
             min: settings.min,
             max: settings.max,
+            height: settings.height,
             format: (value) => {
-               const decimalPlaces = settings.decimalPlaces || 2;
+               const decimalPlaces = settings.decimalPlaces ?? 2;
 
-               return value !== "0"
+               return value && value != "0"
                   ? parseFloat(value).toFixed(decimalPlaces || 0)
                   : value;
             },
@@ -46,11 +47,9 @@ module.exports = class ABViewPivotComponent extends ABViewComponent {
       const ids = this.ids;
 
       const dc = this.datacollection;
-
       if (!dc) return;
 
       const object = dc.datasource;
-
       if (!object) return;
 
       const $pivot = $$(ids.pivot);
@@ -102,12 +101,10 @@ module.exports = class ABViewPivotComponent extends ABViewComponent {
       switch (dc.dataStatus) {
          case dc.dataStatusFlag.notInitial:
             dc.loadData();
-
             break;
 
          case dc.dataStatusFlag.initialized:
             populateData();
-
             break;
       }
    }

@@ -306,7 +306,4 @@ module.exports = class ABViewCommentComponent extends ABViewComponent {
       return await model.create(comment);
    }
 
-   onShow(viewId) {
-      super.onShow(viewId);
-   }
 };
