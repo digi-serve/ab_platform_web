@@ -54,6 +54,9 @@ import "tinymce/skins/ui/oxide/skin.min.css";
 import "tinymce/skins/ui/oxide/content.css"; // content.min.css ?
 import "tinymce/skins/content/default/content.min.css";
 
+import("../js/webix/components/hint/hint.js");
+import "../js/webix/components/hint/hint.css";
+
 import UI from "../ui/ui.js";
 import PreloadUI from "../ui/loading.js";
 import ErrorNoDefsUI from "../ui/error_noDefs.js";

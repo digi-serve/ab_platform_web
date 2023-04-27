@@ -135,6 +135,14 @@ export default class ABViewComponent extends ClassUI {
     * perform any preparations necessary when showing this component.
     */
    onShow() {
+      // check if tab has a hint
+      if (this?.view?.settings?.hintID) {
+         // fetch the steps for the hint
+         let hint = this.AB.hintID(this.view.settings.hintID);
+         if (hint.settings.active) {
+            hint.createHintUI();
+         }
+      }
       // if we manage a datacollection, then make sure it has started
       // loading it's data when we are showing our component.
       const dc = this.datacollection;

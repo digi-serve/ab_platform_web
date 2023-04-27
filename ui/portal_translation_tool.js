@@ -120,7 +120,8 @@ class PortalTranslationTool extends ClassUI {
                               if (newVal != oldVal) {
                                  this.buildTranslationAccordion(
                                     this.application.objectsIncluded(),
-                                    this.application.pages()
+                                    this.application.pages(),
+                                    this.application.hintsIncluded()
                                  );
                               }
                            },
@@ -139,7 +140,8 @@ class PortalTranslationTool extends ClassUI {
                               if (newVal != oldVal) {
                                  this.buildTranslationAccordion(
                                     this.application.objectsIncluded(),
-                                    this.application.pages()
+                                    this.application.pages(),
+                                    this.application.hintsIncluded()
                                  );
                               }
                            },
@@ -190,7 +192,8 @@ class PortalTranslationTool extends ClassUI {
             ).refresh();
             this.buildTranslationAccordion(
                this.application.objectsIncluded(),
-               this.application.pages()
+               this.application.pages(),
+               this.application.hintsIncluded()
             );
          });
 
@@ -233,12 +236,19 @@ class PortalTranslationTool extends ClassUI {
       return this.AB.applicationByID(this.appId).views(f);
    }
 
-   buildTranslationAccordion(objects, views) {
+   tutorials(f) {
+      return this.AB.applicationByID(this.appId).hints(f);
+   }
+
+   buildTranslationAccordion(objects, views, tutorials) {
       $$(`qtt_accordion_${this.containerDomID}`).removeView(
          `qtt_accordionitem_${this.containerDomID}_objects`
       );
       $$(`qtt_accordion_${this.containerDomID}`).removeView(
          `qtt_accordionitem_${this.containerDomID}_views`
+      );
+      $$(`qtt_accordion_${this.containerDomID}`).removeView(
+         `qtt_accordionitem_${this.containerDomID}_tutorials`
       );
 
       var toggleParent = (element) => {
@@ -489,7 +499,6 @@ class PortalTranslationTool extends ClassUI {
                         }, 200);
                      }
                   } else if (item.type == "page") {
-                     debugger;
                      var pageView = this.application.views(
                         (v) => v.id == item.id
                      )[0];
@@ -630,6 +639,162 @@ class PortalTranslationTool extends ClassUI {
          },
       ];
 
+      var tutorialTree = [
+         {
+            id: `qtt_tutorials_progress${this.containerDomID}`,
+            height: 7,
+         },
+         {
+            id: `linetree_${this.containerDomID}_tutorials`,
+            view: "edittree",
+            type: "lineTree",
+            editable: true,
+            tooltip: "#hint#",
+            // role: role,
+            editor: "text",
+            editValue: "value",
+            template: (obj, common) => {
+               let language = $$(
+                  `qtt_accordion_${this.containerDomID}_translateTo`
+               ).getValue();
+               var color = "gray";
+               if (obj.value.indexOf(`[${language}]`) > -1) {
+                  color = "#ff5c4c";
+               }
+               if (!obj.icon) {
+                  obj.icon = "minus";
+               }
+               var icon = `<span class="fa-stack" style="margin: 0 5px 0 4px;">
+                                             <i style="color: ${color};" class="fa fa-circle fa-stack-2x"></i>
+                                             <i class="fa fa-${obj.icon} fa-stack-1x fa-inverse"></i>
+                                          </span>`;
+               return (
+                  `<span>` +
+                  icon +
+                  common.icon(obj, common) +
+                  `<span>${obj.value}</span>`
+               );
+            },
+            data: [],
+            on: {
+               onAfterLoad: (id) => {
+                  if (
+                     !$$(`qtt_tutorials_progress${this.containerDomID}`)
+                        .showProgress
+                  ) {
+                     webix.extend(
+                        $$(`qtt_tutorials_progress${this.containerDomID}`),
+                        webix.ProgressBar
+                     );
+                  }
+                  $$(`linetree_${this.containerDomID}_tutorials`).parse(
+                     this.getTranslationToolTutorialsTree(
+                        tutorials,
+                        this.containerDomID
+                     )
+                  );
+                  $$(`linetree_${this.containerDomID}_tutorials`).openAll();
+               },
+               onAfterEditStop: (state, editor, ignoreUpdate) => {
+                  /// need to work here next week james
+                  if (state.old == state.value) return false;
+                  let language = $$(
+                     `qtt_accordion_${this.containerDomID}_translateTo`
+                  ).getValue();
+                  let branch = $$(
+                     `linetree_${this.containerDomID}_tutorials`
+                  ).data.getItem(editor.id);
+                  let propName = branch.field;
+                  if (branch.type == "tutorial") {
+                     let hint = this.AB.hints((h) => {
+                        return h.id == branch.viewId;
+                     })[0];
+                     let hasLang = false;
+                     if (hint.languageDefault() == language) {
+                        hasLang = true;
+                        hint[propName] = state.value;
+                     } else {
+                        hint.translations.forEach((t) => {
+                           if (t.language_code == language) {
+                              hasLang = true;
+                              t[propName] = state.value;
+                           }
+                        });
+                     }
+                     if (!hasLang) {
+                        let trans = {};
+                        for (const [key, value] of Object.entries(
+                           hint.translations[0]
+                        )) {
+                           trans[key] = `[${language}] ${value}`;
+                        }
+                        trans.language_code = language;
+                        trans[propName] = state.value;
+                        hint.translations.push(trans);
+                     }
+                     hint.save();
+                  } else if (branch.type == "step") {
+                     let hint = this.AB.hints((h) => {
+                        return h.id == branch.hintId;
+                     })[0];
+                     let step = hint._steps[branch.viewId];
+                     let hasLang = false;
+                     if (step.languageDefault() == language) {
+                        hasLang = true;
+                        step[propName] = state.value;
+                     } else {
+                        step.translations.forEach((t) => {
+                           if (t.language_code == language) {
+                              hasLang = true;
+                              t[propName] = state.value;
+                           }
+                        });
+                     }
+                     if (!hasLang) {
+                        let trans = {};
+                        for (const [key, value] of Object.entries(
+                           step.translations[0]
+                        )) {
+                           trans[key] = `[${language}] ${value}`;
+                        }
+                        trans.language_code = language;
+                        trans[propName] = state.value;
+                        step.translations.push(trans);
+                     }
+                     step.save();
+                  }
+                  let progressBar = $$(
+                     `qtt_tutorials_progress${this.containerDomID}`
+                  );
+                  let total = progressBar.config.total;
+                  let completed = progressBar.config.completed;
+                  if (
+                     state.old.indexOf(`[${language}]`) == -1 &&
+                     state.value.indexOf(`[${language}]`) > -1
+                  ) {
+                     completed--;
+                  } else if (
+                     state.old.indexOf(`[${language}]`) > -1 &&
+                     state.value.indexOf(`[${language}]`) > -1
+                  ) {
+                     // no change to completed count
+                  } else {
+                     completed++;
+                  }
+                  let position = completed / total + 0.00001;
+                  progressBar.define({
+                     total: total,
+                     completed: completed,
+                  });
+                  progressBar.showProgress({
+                     type: "top",
+                     position: position,
+                  });
+               },
+            },
+         },
+      ];
+
       var objectsAccordionItem = {
          view: "accordionitem",
          id: `qtt_accordionitem_${this.containerDomID}_objects`,
@@ -652,6 +817,17 @@ class PortalTranslationTool extends ClassUI {
          },
       };
 
+      var hintsAccordionItem = {
+         view: "accordionitem",
+         id: `qtt_accordionitem_${this.containerDomID}_tutorials`,
+         header: "Tutorials",
+         collapsed: true,
+         body: {
+            type: "clean",
+            rows: tutorialTree,
+         },
+      };
+
       $$(`qtt_accordion_${this.containerDomID}`).addView(
          objectsAccordionItem,
          -1
@@ -660,12 +836,18 @@ class PortalTranslationTool extends ClassUI {
          viewsAccordionItem,
          -1
       );
+      $$(`qtt_accordion_${this.containerDomID}`).addView(
+         hintsAccordionItem,
+         -1
+      );
       $$(`qtt_accordion_${this.containerDomID}`).show();
       $$(`qtt_accordionitem_${this.containerDomID}_views`).collapse();
+      $$(`qtt_accordionitem_${this.containerDomID}_tutorials`).collapse();
       $$(`qtt_accordion_noSelection_${this.containerDomID}`).hide();
 
       $$(`linetree_${this.containerDomID}_objects`).openAll();
       $$(`linetree_${this.containerDomID}_views`).openAll();
+      $$(`linetree_${this.containerDomID}_tutorials`).openAll();
    }
 
    getTranslations(translations, domId, field, completed, total) {
@@ -714,7 +896,7 @@ class PortalTranslationTool extends ClassUI {
          translatePrefix = `[${translateLang}] `;
       }
       if (
-         (valueLabel || "").indexOf(`[${translateLang}]` == -1) &&
+         (valueLabel || "").indexOf(`[${translateLang}]`) == -1 &&
          !missingTranslate
       ) {
          completed++;
@@ -894,6 +1076,8 @@ class PortalTranslationTool extends ClassUI {
          objectId
       ) => {
          var translations = object.translations;
+         // we were missing translationson the Roles object
+         if (!translations) return;
          var labels = this.getTranslations(
             translations,
             domId,
@@ -949,6 +1133,95 @@ class PortalTranslationTool extends ClassUI {
 
       // there is a webix bug that will not allow you to se the value of a progress bar to 0
       let progressBar = $$(`qtt_object_progress${domId}`);
+      let position = completed / total + 0.0001;
+      progressBar.showProgress({
+         type: "top",
+         position: position,
+      });
+      progressBar.define({
+         total: total,
+         completed: completed,
+      });
+
+      return tree;
+   }
+
+   getTranslationToolTutorialsTree(tutorials, domId) {
+      var completed = 0;
+      var total = 0;
+      // this so it looks right/indented in a tree view:
+      var tree = new webix.TreeCollection();
+
+      /**
+       * @method addBranch
+       *
+       * @param {ABView} page
+       * @param {uuid} parentId
+       * @param {string} type
+       */
+      var addBranch = (
+         object,
+         parentId,
+         type,
+         field = ["label"],
+         hintId = null
+      ) => {
+         var translations = object.translations;
+         // we were missing translationson the Roles object
+         if (!translations) return;
+         let lastField = "";
+         let firstField = "";
+         field.forEach((f) => {
+            if (firstField == "") firstField = f;
+            lastField = f;
+            var labels = this.getTranslations(
+               translations,
+               domId,
+               f,
+               completed,
+               total
+            );
+            completed = labels.completed;
+            total = labels.total;
+
+            // add to tree collection
+            var branch = {
+               id: object.id + f,
+               viewId: object.id,
+               value: labels.value,
+               hint: labels.hint,
+               translations: object.translations,
+               field: f,
+               type: type,
+               hintId: hintId,
+               icon:
+                  type == "tutorial"
+                     ? "info-circle"
+                     : object.icon
+                     ? object.icon
+                     : "minus-circle",
+            };
+            tree.add(branch, null, parentId);
+            parentId = object.id + firstField;
+         });
+
+         var steps = object.stepIDs || [];
+         steps.forEach((step) => {
+            addBranch(
+               object._steps[step],
+               parentId,
+               "step",
+               ["name", "text"],
+               object.id
+            );
+         });
+      };
+      tutorials.forEach((p, index) => {
+         addBranch(p, null, "tutorial", ["name", "description"]);
+      });
+
+      // there is a webix bug that will not allow you to se the value of a progress bar to 0
+      let progressBar = $$(`qtt_tutorials_progress${domId}`);
       let position = completed / total + 0.0001;
       progressBar.showProgress({
          type: "top",

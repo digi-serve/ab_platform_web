@@ -171,44 +171,11 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
                            // onShow(id);
                         }
                      },
+                     onSelectChange: () => {
+                        addDataCy();
+                     },
                      onAfterRender: () => {
-                        const $sidebar = $$(ids.sidebar);
-
-                        // set ids of controller buttons
-                        const collapseNode = $sidebar.$view.querySelector(
-                           `[webix_tm_id="${ids.collapseMenu}"]`
-                        );
-
-                        if (collapseNode)
-                           collapseNode.setAttribute(
-                              "data-cy",
-                              `tab-collapseMenu-${ids.collapseMenu}`
-                           );
-
-                        const expandNode = $sidebar.$view.querySelector(
-                           `[webix_tm_id="${ids.expandMenu}"]`
-                        );
-
-                        if (expandNode)
-                           expandNode.setAttribute(
-                              "data-cy",
-                              `tab-expandMenu-${ids.expandMenu}`
-                           );
-
-                        baseView.views((view) => {
-                           const node = $sidebar.$view.querySelector(
-                              `[webix_tm_id="${view.id}_menu"]`
-                           );
-
-                           if (!node) return;
-
-                           node.setAttribute(
-                              "data-cy",
-                              `tab-${view.label.replace(" ", "")}-${view.id}-${
-                                 baseView.id
-                              }`
-                           );
-                        });
+                        addDataCy();
                      },
                   },
                };
@@ -233,6 +200,48 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
                         this.onShow(nextId);
                      },
                   },
+               };
+
+               const addDataCy = function () {
+                  const $sidebar = $$(ids.sidebar);
+
+                  // set ids of controller buttons
+                  const collapseNode = $sidebar.$view.querySelector(
+                     `[webix_tm_id="${ids.collapseMenu}"]`
+                  );
+
+                  if (collapseNode)
+                     collapseNode.setAttribute(
+                        "data-cy",
+                        `tab-collapseMenu-${ids.collapseMenu}`
+                     );
+
+                  const expandNode = $sidebar.$view.querySelector(
+                     `[webix_tm_id="${ids.expandMenu}"]`
+                  );
+
+                  if (expandNode)
+                     expandNode.setAttribute(
+                        "data-cy",
+                        `tab-expandMenu-${ids.expandMenu}`
+                     );
+
+                  baseView.views((view) => {
+                     const node = $sidebar.$view.querySelector(
+                        `[webix_tm_id="${view.id}_menu"]`
+                     );
+
+                     if (!node) {
+                        return;
+                     }
+
+                     node.setAttribute(
+                        "data-cy",
+                        `tab-${view.name.replace(" ", "")}-${view.id}-${
+                           baseView.id
+                        }`
+                     );
+                  });
                };
 
                let columns = [sidebar, multiview];
@@ -544,6 +553,12 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
                // $$(v.view.id).adjust();
 
                $tab?.hideProgress?.();
+               // check if tab has a hint
+               // if (vc?.view?.settings?.hintID) {
+               //    // fetch the steps for the hint
+               //    let hint = ab.hintID(vc.view.settings.hintID);
+               //    hint.createHintUI();
+               // }
             }, 10);
          }
 
