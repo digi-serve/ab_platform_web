@@ -1722,9 +1722,15 @@ div.webix_dataview_item.webix_transparent {
    background: #657584;
    color: #fff;
 }
-
-.portal_work_switcheroo_user_switched .webix_view {
+.portal_work_no_network_detected {
    background: #e64b2a;
+   color: #fff;
+}
+.portal_work_no_network_detected .webix_el_box {
+   color: #fff;
+}
+.portal_work_switcheroo_user_switched {
+   background: #2196f3;
    color: #fff;
 }
 

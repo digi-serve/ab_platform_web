@@ -20,8 +20,27 @@ class PortalWork extends ClassUI {
          id: "portal_work",
          rows: [
             {
+               id: "portal_work_no_network_detected",
+               height: 30,
+               css: "portal_work_no_network_detected",
+               hidden: true,
+               cols: [
+                  {
+                     width: 5,
+                  },
+                  {
+                     id: "portal_work_no_network_detected_label",
+                     view: "label",
+                     align: "center",
+                  },
+                  {
+                     width: 5,
+                  },
+               ],
+            },
+            {
                id: "portal_work_switcheroo_user_switched",
-               height: 23,
+               height: 30,
                css: "portal_work_switcheroo_user_switched",
                hidden: true,
                cols: [
@@ -51,11 +70,10 @@ class PortalWork extends ClassUI {
                   },
                ],
             },
-
             {
                view: "toolbar",
                id: "mainToolbar",
-               borderless: true,
+               // borderless: true,
                css: "webix_dark mainToolbar",
                padding: 10,
                cols: [
@@ -282,12 +300,48 @@ class PortalWork extends ClassUI {
 
       if (this.AB.Account.isSwitcherood()) {
          $$("portal_work_switcheroo_user_switched_label").setValue(
-            L('*You are viewing this site as "{0}"*', [
+            `<i class="fa-fw fa fa-user-secret"></i> 
+            ${L('You are viewing this site as "{0}"', [
                this.AB.Account.username(),
-            ])
+            ])}`
          );
          $$("portal_work_switcheroo_user_switched").show();
       }
+
+      $$("portal_work_no_network_detected_label").setValue(
+         `<i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 
+            ${L("No network detected. Work will not be saved.")}`
+      );
+
+      if (navigator.onLine) {
+         $$("portal_work_no_network_detected").hide();
+      } else {
+         $$("portal_work_no_network_detected").show();
+      }
+
+      navigator.connection.addEventListener("change", function () {
+         if (navigator.onLine) {
+            $$("portal_work_no_network_detected").hide();
+         } else {
+            $$("portal_work_no_network_detected").show();
+         }
+      });
+      // document.body.addEventListener(
+      //    "offline",
+      //    function () {
+      //       debugger;
+      //       $$("portal_work_no_network_detected").show();
+      //    },
+      //    false
+      // );
+      // document.body.addEventListener(
+      //    "online",
+      //    function () {
+      //       debugger;
+      //       $$("portal_work_no_network_detected").hide();
+      //    },
+      //    false
+      // );
 
       // Only add the QR Code option if the relay service is enabled
       const { relay } = this.AB.Config.siteConfig();
