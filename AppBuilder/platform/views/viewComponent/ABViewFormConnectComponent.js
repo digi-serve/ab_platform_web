@@ -401,6 +401,7 @@ module.exports = class ABViewFormConnectComponent extends (
          );
       }
 
+      // NOTE: compatible with version 1. This code should not be here too long.
       if (
          !filterConditions?.rules?.length &&
          settings?.objectWorkspace?.filterConditions?.rules?.length
