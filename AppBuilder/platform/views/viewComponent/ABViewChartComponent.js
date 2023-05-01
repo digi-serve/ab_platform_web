@@ -5,10 +5,6 @@ module.exports = class ABViewChartComponent extends ABViewContainerComponent {
       super(baseView, idBase || `ABViewChart_${baseView.id}`, ids);
    }
 
-   ui() {
-      return super.ui();
-   }
-
    async init(AB, accessLevel) {
       await super.init(AB, accessLevel);
 
