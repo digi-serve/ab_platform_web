@@ -43,7 +43,13 @@ module.exports = class ABViewChartContainerComponent extends ABViewComponent {
 
    refreshData(dcChart) {
       const $chartContainer = $$(this.ids.chartContainer);
+      const $chartComponent = $$(this.ids.component);
 
       if ($chartContainer?.data) $chartContainer.data.sync(dcChart);
+
+      setTimeout(() => {
+         $chartComponent?.adjust();
+         $chartContainer?.adjust();
+      }, 160);
    }
 };
