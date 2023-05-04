@@ -319,7 +319,7 @@ class PortalWork extends ClassUI {
          $$("portal_work_no_network_detected").show();
       }
 
-      navigator.connection.addEventListener("change", function () {
+      navigator?.connection?.addEventListener("change", function () {
          if (navigator.onLine) {
             $$("portal_work_no_network_detected").hide();
          } else {
