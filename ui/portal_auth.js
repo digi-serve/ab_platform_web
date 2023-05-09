@@ -30,14 +30,6 @@ class PortalAuth extends ClassUI {
       var authType = this.AB.Tenant.setting("authType") || "login";
       switch (authType) {
          case "login":
-            // We cannot properly store the session id if users navigate directly to /home
-            // so when they navigate to /home and it was not a redirect we send them back to /
-            if (
-               window?.location?.pathname == "/home" &&
-               !window?.performance?.navigation?.redirectCount
-            )
-               window.location.replace(window.location.origin);
-
             this.ActivePortal = PortalAuthLogin;
             break;
 
@@ -57,6 +49,14 @@ class PortalAuth extends ClassUI {
    }
 
    show(defaultView) {
+      // We cannot properly store the session id if users navigate directly to /home
+      // so when they navigate to /home and it was not a redirect we send them back to /
+      if (
+         window?.location?.pathname == "/home" &&
+         !window?.performance?.navigation?.redirectCount
+      )
+         window.location.replace(window.location.origin);
+
       $$("portal_auth").show();
       this.ActivePortal.show(defaultView);
    }
