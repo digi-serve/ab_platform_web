@@ -383,74 +383,88 @@ module.exports = class ABViewRule {
    }
 
    isValid(data = {}) {
-      var id = "hiddenQB_" + webix.uid();
+      const currentAction = this.currentAction(),
+            QBCondition = currentAction.condition(),
+            query = QBCondition[0] ?? {};
 
-      // if our data passes the QueryRules then tell Action to process
-      var ui = {
-         id: id,
-         hidden: true,
-         view: "querybuilder",
-      };
-      var hiddenQB = webix.ui(ui);
+      const hiddenFilter = (this.AB ?? AB).filterComplexNew(`${this.idBase}_filter_complex`);
+      hiddenFilter.fieldsLoad(
+         this.currentObject.fields(),
+         this.currentObject
+      );
+      hiddenFilter.setValue(query);
+      hiddenFilter.init();
 
-      let currentAction = this.currentAction();
-      var QBCondition = currentAction.condition();
+      return hiddenFilter.isValid(data);
 
-      if (this.objectQB) {
-         this.objectQB.cleanRules(QBCondition[0], QBCondition[1], false);
-      }
+      // var id = "hiddenQB_" + webix.uid();
 
-      let query = QBCondition[0] || {},
-         fields = QBCondition[1] || [];
+      // // if our data passes the QueryRules then tell Action to process
+      // var ui = {
+      //    id: id,
+      //    hidden: true,
+      //    view: "querybuilder",
+      // };
+      // var hiddenQB = webix.ui(ui);
 
-      let convertToNumber = (text = "") => {
-         // if we have multiple rules we need to check if value is already a number before converting.
-         if (typeof text == "number") return text;
+      // let currentAction = this.currentAction();
+      // var QBCondition = currentAction.condition();
 
-         return parseFloat(text.replace(/[^-0-9.]/g, ""));
-      };
+      // if (this.objectQB) {
+      //    this.objectQB.cleanRules(QBCondition[0], QBCondition[1], false);
+      // }
 
-      // Fix string data in number type
-      // NOTE: "1000" > "99" = false    >_<!
-      fields
-         .filter(
-            (f) =>
-               f.type == "number" ||
-               f.type == "calculate" ||
-               f.type == "formula"
-         )
-         .forEach((f) => {
-            try {
-               // filter conditions
-               if (query && query.rules && Array.isArray(query.rules)) {
-                  query.rules.forEach((r) => {
-                     if (r.key != f.id) return;
+      // let query = QBCondition[0] || {},
+      //    fields = QBCondition[1] || [];
 
-                     r.value = convertToNumber(r.value);
-                  });
-               }
+      // let convertToNumber = (text = "") => {
+      //    // if we have multiple rules we need to check if value is already a number before converting.
+      //    if (typeof text == "number") return text;
 
-               // row data
-               if (data[f.id] && typeof data[f.id] === "string") {
-                  data[f.id] = convertToNumber(data[f.id]);
-               }
-            } catch (e) {
-               // continue regardless of error
-            }
-         });
+      //    return parseFloat(text.replace(/[^-0-9.]/g, ""));
+      // };
 
-      // hiddenQB.setValue(QBCondition);
-      hiddenQB.setValue({
-         query: query,
-         fields: fields,
-      });
+      // // Fix string data in number type
+      // // NOTE: "1000" > "99" = false    >_<!
+      // fields
+      //    .filter(
+      //       (f) =>
+      //          f.type == "number" ||
+      //          f.type == "calculate" ||
+      //          f.type == "formula"
+      //    )
+      //    .forEach((f) => {
+      //       try {
+      //          // filter conditions
+      //          if (query && query.rules && Array.isArray(query.rules)) {
+      //             query.rules.forEach((r) => {
+      //                if (r.key != f.id) return;
 
-      var QBHelper = hiddenQB.getFilterHelper();
-      var isValid = QBHelper(data);
+      //                r.value = convertToNumber(r.value);
+      //             });
+      //          }
 
-      hiddenQB.destructor(); // remove the QB
+      //          // row data
+      //          if (data[f.id] && typeof data[f.id] === "string") {
+      //             data[f.id] = convertToNumber(data[f.id]);
+      //          }
+      //       } catch (e) {
+      //          // continue regardless of error
+      //       }
+      //    });
 
-      return isValid;
+      // // hiddenQB.setValue(QBCondition);
+      // hiddenQB.setValue({
+      //    query: query,
+      //    fields: fields,
+      // });
+
+      // var QBHelper = hiddenQB.getFilterHelper();
+      // var isValid = QBHelper(data);
+
+      // hiddenQB.destructor(); // remove the QB
+
+      // return isValid;
    }
 
    get isPreProcess() {
