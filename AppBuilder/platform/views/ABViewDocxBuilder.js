@@ -27,7 +27,7 @@ module.exports = class ABViewDocxBuilder extends ABViewDocxBuilderCore {
    warningsEval() {
       super.warningsEval();
 
-      let DC = this.datacollection;
+      let DC = this.datacollections || this.datacollection;
       if (!DC) {
          this.warningsMessage(
             `can't resolve it's datacollection[${this.settings.dataviewID}]`
