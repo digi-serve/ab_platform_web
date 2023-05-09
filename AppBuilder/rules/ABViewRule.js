@@ -407,6 +407,7 @@ module.exports = class ABViewRule {
                // filter conditions
                if (Array.isArray(query?.rules)) {
                   query.rules.forEach((r) => {
+                     // NOTE: compatible with old settings
                      if (r.key == f.id || r.key == f.columnName)
                         r.value = convertToNumber(r.value);
                   });
