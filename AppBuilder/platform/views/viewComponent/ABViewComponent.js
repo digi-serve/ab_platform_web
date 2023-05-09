@@ -11,7 +11,7 @@ export default class ABViewComponent extends ClassUI {
       this.view = baseView;
       this.settings = baseView.settings;
       this.AB = baseView.AB;
-      this.datacollection = baseView.datacollection;
+      this.datacollection = baseView.datacollections || baseView.datacollection;
 
       this.__events = [];
       // {array}

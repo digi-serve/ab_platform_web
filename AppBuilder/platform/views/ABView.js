@@ -100,7 +100,7 @@ module.exports = class ABView extends ABViewCore {
 
       // if a datacollection is specified, verify it can be accessed.
       if (this.settings.dataviewID) {
-         let dc = this.datacollection;
+         let dc = this.datacollections || this.datacollection;
          if (!dc) {
             this.warningsMessage(
                `references unknown dataviewID[${this.settings.dataviewID}]`
