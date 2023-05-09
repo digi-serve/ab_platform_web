@@ -383,15 +383,51 @@ module.exports = class ABViewRule {
    }
 
    isValid(data = {}) {
-      const currentAction = this.currentAction(),
-            QBCondition = currentAction.condition(),
-            query = QBCondition[0] ?? {};
+      const fields = this.currentObject.fields(),
+         currentAction = this.currentAction(),
+         QBCondition = currentAction.condition(),
+         query = QBCondition[0] ?? {};
 
-      const hiddenFilter = (this.AB ?? AB).filterComplexNew(`${this.idBase}_filter_complex`);
-      hiddenFilter.fieldsLoad(
-         this.currentObject.fields(),
-         this.currentObject
+      const convertToNumber = (text = "") => {
+         // if we have multiple rules we need to check if value is already a number before converting.
+         if (typeof text == "number") return text;
+
+         return parseFloat(text.replace(/[^-0-9.]/g, ""));
+      };
+
+      // Fix string data in number type
+      // NOTE: "1000" > "99" = false    >_<!
+      fields
+         .filter(
+            (f) =>
+               f.key == "number" || f.key == "calculate" || f.key == "formula"
+         )
+         .forEach((f) => {
+            try {
+               // filter conditions
+               if (Array.isArray(query?.rules)) {
+                  query.rules.forEach((r) => {
+                     if (r.key == f.id || r.key == f.columnName)
+                        r.value = convertToNumber(r.value);
+                  });
+               }
+
+               // row data
+               if (
+                  data[f.columnName] &&
+                  typeof data[f.columnName] === "string"
+               ) {
+                  data[f.columnName] = convertToNumber(data[f.columnName]);
+               }
+            } catch (e) {
+               // continue regardless of error
+            }
+         });
+
+      const hiddenFilter = (this.AB ?? AB).filterComplexNew(
+         `${this.idBase}_filter_complex`
       );
+      hiddenFilter.fieldsLoad(fields, this.currentObject);
       hiddenFilter.setValue(query);
       hiddenFilter.init();
 
@@ -416,42 +452,6 @@ module.exports = class ABViewRule {
 
       // let query = QBCondition[0] || {},
       //    fields = QBCondition[1] || [];
-
-      // let convertToNumber = (text = "") => {
-      //    // if we have multiple rules we need to check if value is already a number before converting.
-      //    if (typeof text == "number") return text;
-
-      //    return parseFloat(text.replace(/[^-0-9.]/g, ""));
-      // };
-
-      // // Fix string data in number type
-      // // NOTE: "1000" > "99" = false    >_<!
-      // fields
-      //    .filter(
-      //       (f) =>
-      //          f.type == "number" ||
-      //          f.type == "calculate" ||
-      //          f.type == "formula"
-      //    )
-      //    .forEach((f) => {
-      //       try {
-      //          // filter conditions
-      //          if (query && query.rules && Array.isArray(query.rules)) {
-      //             query.rules.forEach((r) => {
-      //                if (r.key != f.id) return;
-
-      //                r.value = convertToNumber(r.value);
-      //             });
-      //          }
-
-      //          // row data
-      //          if (data[f.id] && typeof data[f.id] === "string") {
-      //             data[f.id] = convertToNumber(data[f.id]);
-      //          }
-      //       } catch (e) {
-      //          // continue regardless of error
-      //       }
-      //    });
 
       // // hiddenQB.setValue(QBCondition);
       // hiddenQB.setValue({
