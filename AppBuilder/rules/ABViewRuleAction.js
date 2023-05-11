@@ -228,8 +228,8 @@ module.exports = class ABViewRuleAction {
       // settings: {
       //	valueRules:{}
       // }
-      settings = settings || {};
-      this.valueRules = settings.valueRules || {};
+      settings = settings ?? {};
+      this.valueRules = settings.valueRules ?? settings;
    }
 
    // toSettings
