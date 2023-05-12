@@ -122,7 +122,7 @@ export default class ABViewConnectDataFilterComponent extends ABViewComponent {
       $filter.blockEvent();
       $filter.setValue();
       $filter.unblockEvent();
-      $filter.disable();
+      $$(ids.reset).disable();
    }
 
    applyConnectFilter(connectId) {
