@@ -102,6 +102,7 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
                   view: "sidebar",
                   type: "customIcons", // define the sidebar type with the new template created above
                   id: ids.sidebar,
+                  height: settings.height,
                   width: settings.sidebarWidth ? settings.sidebarWidth : 0,
                   scroll: true,
                   position: settings.sidebarPos ? settings.sidebarPos : "left",
@@ -312,6 +313,7 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
                         view: "tabview",
                         id: ids.tab,
                         minWidth: settings.minWidth,
+                        height: settings.height,
                         tabbar: {
                            height: 60,
                            type: "bottom",
