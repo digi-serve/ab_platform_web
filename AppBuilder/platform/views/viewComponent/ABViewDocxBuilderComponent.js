@@ -264,11 +264,9 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
                      fieldLabels.push(tran.label);
                   });
 
-                  resultData = this.setReportValues(
-                     data,
-                     f,
-                     fieldLabels,
-                     mlFields
+                  resultData = Object.assign(
+                     resultData ?? {},
+                     this.setReportValues(data, f, fieldLabels, mlFields) ?? {}
                   );
 
                   // Keep ABObject into .scope of DOCX templater
@@ -319,7 +317,7 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
       if (field instanceof ABFieldConnect) {
          // If field is connected field, then
          // {
-         //		fieldName: {Object} or [Array]
+         //    fieldName: {Object} or [Array]
          // }
          val = data[field.columnName];
 
@@ -449,8 +447,8 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
          centered: false,
          getImage: (tagValue, tagName) => {
             // NOTE: .getImage of version 3.0.2 does not support async
-            //			we can buy newer version to support it
-            //			https://docxtemplater.com/modules/image/
+            //       we can buy newer version to support it
+            //       https://docxtemplater.com/modules/image/
 
             return images[tagValue] || "";
          },
@@ -542,26 +540,26 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
             }
          },
          // getSize: function (imgBuffer, tagValue, tagName) {
-         // 	if (imgBuffer) {
-         // 		var maxWidth = 300;
-         // 		var maxHeight = 160;
+         //    if (imgBuffer) {
+         //       var maxWidth = 300;
+         //       var maxHeight = 160;
 
-         // 		// Find aspect ratio image dimensions
-         // 		try {
-         // 			var image = sizeOf(imgBuffer);
-         // 			var ratio = Math.min(maxWidth / image.width, maxHeight / image.height);
+         //       // Find aspect ratio image dimensions
+         //       try {
+         //          var image = sizeOf(imgBuffer);
+         //          var ratio = Math.min(maxWidth / image.width, maxHeight / image.height);
 
-         // 			return [image.width * ratio, image.height * ratio];
-         // 		}
-         // 		// if invalid image, then should return 0, 0 sizes
-         // 		catch (err) {
-         // 			return [0, 0];
-         // 		}
+         //          return [image.width * ratio, image.height * ratio];
+         //       }
+         //       // if invalid image, then should return 0, 0 sizes
+         //       catch (err) {
+         //          return [0, 0];
+         //       }
 
-         // 	}
-         // 	else {
-         // 		return [0, 0];
-         // 	}
+         //    }
+         //    else {
+         //       return [0, 0];
+         //    }
          // }
       });
 
