@@ -935,20 +935,11 @@ export default class ABViewGridComponent extends ABViewComponent {
 
             this.__handler_dc_ready = () => {
                this.ready();
+               this.populateGroupData();
             };
 
             this.__handler_dc_loadData = () => {
-               if (
-                  $DataTable.config.view === "treetable" &&
-                  CurrentObject &&
-                  !CurrentObject.isGroup
-               ) {
-                  $DataTable.clearAll();
-                  $DataTable.parse(dc.getData() || []);
-
-                  this.grouping();
-                  this.ready();
-               }
+               this.populateGroupData();
             };
          }
 
@@ -1604,6 +1595,13 @@ export default class ABViewGridComponent extends ABViewComponent {
     * Indicate that our datatable is currently ready for operation.
     */
    ready() {
+      const dc = this.datacollection;
+      if (
+         this.isCustomGroup &&
+         dc?.dataStatus != dc?.dataStatusFlag.initialized
+      )
+         return;
+
       this.getDataTable()?.hideProgress?.();
    }
 
@@ -2297,5 +2295,30 @@ export default class ABViewGridComponent extends ABViewComponent {
             node.style.visibility = "visible";
          }, 250);
       } else node.style.visibility = "visible";
+   }
+
+   get isCustomGroup() {
+      const dc = this.datacollection;
+      const CurrentObject = dc?.datasource;
+      const $DataTable = this.getDataTable();
+
+      return (
+         $DataTable?.config?.view === "treetable" && !CurrentObject?.isGroup
+      );
+   }
+
+   populateGroupData() {
+      if (!this.isCustomGroup) return;
+
+      this.busy();
+
+      const dc = this.datacollection;
+      const $DataTable = this.getDataTable();
+
+      $DataTable.clearAll();
+      $DataTable.parse(dc.getData() || []);
+
+      this.grouping();
+      this.ready();
    }
 }
