@@ -39,6 +39,41 @@ class PortalWork extends ClassUI {
                ],
             },
             {
+               id: "portal_work_server_comunication_disabled_detected",
+               height: 30,
+               css: "portal_work_server_comunication_disabled_detected",
+               hidden: true,
+               cols: [
+                  {
+                     width: 5,
+                  },
+                  {
+                     id: "portal_work_server_comunication_disabled_detected_label",
+                     view: "label",
+                     align: "center",
+                  },
+                  {
+                     id: "portal_work_server_comunication_disabled_detected_queue",
+                     view: "button",
+                     align: "center",
+                     hidden: true,
+                     width: 40,
+                     css: "webix_transparent",
+                     on: {
+                        onItemClick: () => {
+                           // test out network going offline:
+                           // this.AB.Network._testingHack = !this.AB.Network
+                           //    ._testingHack;
+                           this.AB.Network._connectionCheck();
+                        },
+                     },
+                  },
+                  {
+                     width: 5,
+                  },
+               ],
+            },
+            {
                id: "portal_work_switcheroo_user_switched",
                height: 30,
                css: "portal_work_switcheroo_user_switched",
@@ -128,19 +163,6 @@ class PortalWork extends ClassUI {
                      },
                   },
                   {},
-                  {
-                     id: "network_icon",
-                     view: "button",
-                     type: "icon",
-                     icon: "fa fa-wifi no-margin",
-                     width: 40,
-                     click: () => {
-                        // test out network going offline:
-                        // this.AB.Network._testingHack = !this.AB.Network
-                        //    ._testingHack;
-                        this.AB.Network._connectionCheck();
-                     },
-                  },
                   {
                      id: "inbox_icon",
                      view: "button",
@@ -326,6 +348,14 @@ class PortalWork extends ClassUI {
             $$("portal_work_no_network_detected").show();
          }
       });
+
+      $$("portal_work_server_comunication_disabled_detected_label").setValue(
+         `<i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 
+            ${L(
+               "Uh oh...we cannot communicate with our servers, please wait before saving data."
+            )}`
+      );
+
       // document.body.addEventListener(
       //    "offline",
       //    function () {
@@ -603,22 +633,30 @@ class PortalWork extends ClassUI {
       allInits.push(PortalWorkInboxTaskWindow.init(this.AB));
 
       // Network and Queued operations Alert
-      $$("network_icon").hide();
+      const $portalWorkServerComunicationDisabledDetected = $$(
+         "portal_work_server_comunication_disabled_detected"
+      );
+      const $portalWorkServerComunicationDisabledDetectedQueue = $$(
+         "portal_work_server_comunication_disabled_detected_queue"
+      );
+
       this.AB.Network.on("queued", () => {
          const count = this.AB.Network.queueCount();
-         $$("network_icon").define({ badge: count ? count : false });
-         $$("network_icon").refresh();
          if (count > 0) {
-            $$("network_icon").show();
+            $portalWorkServerComunicationDisabledDetectedQueue.show();
+            $portalWorkServerComunicationDisabledDetectedQueue.setValue(
+               `<div style="text-align: center; font-size: 12px; color:#FFFFFF">(${count})</div>`
+            );
+            $portalWorkServerComunicationDisabledDetected.show();
          } else {
-            $$("network_icon").hide();
+            $portalWorkServerComunicationDisabledDetectedQueue.hide();
+            $portalWorkServerComunicationDisabledDetected.hide();
          }
       });
-
       this.AB.Network.on("queue.synced", () => {
-         $$("network_icon").define({ badge: false });
-         $$("network_icon").refresh();
-         $$("network_icon").hide();
+         $portalWorkServerComunicationDisabledDetectedQueue.setValue("");
+         $portalWorkServerComunicationDisabledDetectedQueue.hide();
+         $portalWorkServerComunicationDisabledDetected.hide();
       });
 
       this.emit("ready");
