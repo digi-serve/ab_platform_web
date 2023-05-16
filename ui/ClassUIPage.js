@@ -75,7 +75,7 @@ class ClassUIPage extends ClassUI {
       };
    }
 
-   init(AB, render = false) {
+   init(AB, render = false, showPage = true) {
       if (AB) {
          this.AB = AB;
       }
@@ -108,6 +108,11 @@ class ClassUIPage extends ClassUI {
 
          // 4) Make sure our Root Page is "shown"
          this.showPage();
+
+         if (!showPage) {
+            let parView = $$(this.containerID).getParentView();
+            parView.showBatch(parView.getValue(), false);
+         }
 
          resolve();
       });
@@ -152,7 +157,7 @@ class ClassUIPage extends ClassUI {
          this.initialized = false;
 
          // begin the process of reloading the page
-         this.init(this.AB, true);
+         this.init(this.AB, true, false);
       };
 
       if (!this.updatePageEventId && page.isRoot()) {
