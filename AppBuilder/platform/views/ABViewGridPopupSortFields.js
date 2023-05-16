@@ -75,11 +75,6 @@ export default class AB_Work_Object_Workspace_PopupSortFields extends ClassUI {
          // autoheight:true,
          width: 600,
          body: this.uiForm(),
-         on: {
-            onShow: () => {
-               this.onShow();
-            },
-         },
       };
    }
 
@@ -335,7 +330,7 @@ export default class AB_Work_Object_Workspace_PopupSortFields extends ClassUI {
     * @function onShow
     * Rebuild the form when an onShow() is called.
     */
-   onShow() {
+   onShow(view, options) {
       var sort_form = $$(this.ids.form);
 
       // clear field options in the form
@@ -351,6 +346,7 @@ export default class AB_Work_Object_Workspace_PopupSortFields extends ClassUI {
       if (sorts == null || sorts.length == 0) {
          this.clickAddNewSort();
       }
+      $$(this.ids.component).show(view, options);
    }
 
    /**
@@ -467,7 +463,7 @@ export default class AB_Work_Object_Workspace_PopupSortFields extends ClassUI {
    show($view, fieldId, options) {
       this.blockOnChange();
 
-      $$(this.ids.component).show($view, options || null);
+      this.onShow($view, options || null);
 
       if (fieldId) {
          this.clickAddNewSort(fieldId);
