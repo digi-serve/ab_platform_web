@@ -8,7 +8,7 @@ module.exports = class ABViewText extends ABViewTextCore {
     * return a UI component based upon this view.
     * @return {obj} UI component
     */
-   component() {
-      return new ABViewTextComponent(this);
+   component(parentId) {
+      return new ABViewTextComponent(this, parentId);
    }
 };
