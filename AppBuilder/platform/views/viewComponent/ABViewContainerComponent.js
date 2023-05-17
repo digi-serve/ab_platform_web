@@ -4,6 +4,7 @@ module.exports = class ABViewContainerComponent extends ABViewComponent {
    constructor(baseView, idBase, ids) {
       super(baseView, idBase || `ABViewContainer_${baseView.id}`, ids);
 
+      this.idBase = idBase;
       this.options = null;
 
       this.viewComponents = {
@@ -92,11 +93,11 @@ module.exports = class ABViewContainerComponent extends ABViewComponent {
          let component;
 
          try {
-            component = v.component();
+            component = v.component(this.idBase);
             // make sure any existing handlers for changePage are removed.
             v.removeAllListeners("changePage");
          } catch (err) {
-            component = v.component(this.AB._App);
+            component = v.component(this.idBase);
 
             const ui = component.ui;
 

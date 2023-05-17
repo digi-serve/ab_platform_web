@@ -4,6 +4,7 @@ const ABViewContainerComponent = require("./ABViewContainerComponent");
 module.exports = class ABViewDetailComponent extends ABViewContainerComponent {
    constructor(baseView, idBase, ids) {
       super(baseView, idBase || `ABViewDetail_${baseView.id}`, ids);
+      this.idBase = idBase;
    }
 
    ui() {
@@ -196,7 +197,7 @@ module.exports = class ABViewDetailComponent extends ABViewContainerComponent {
          }
 
          // set value to each components
-         const vComponent = f.component(null, this.ids.detailItem);
+         const vComponent = f.component(this.idBase);
 
          // vComponent?.onShow();
 
