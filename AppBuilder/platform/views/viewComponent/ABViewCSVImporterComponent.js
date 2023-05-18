@@ -1544,6 +1544,7 @@ module.exports = class ABViewCSVImporterComponent extends ABViewComponent {
          (f) => f && f.field?.isConnection && f.searchField
       );
 
+      const throttledSize = 10;
       let startUpdateTime;
       let numDone = 0;
 
@@ -1700,7 +1701,7 @@ module.exports = class ABViewCSVImporterComponent extends ABViewComponent {
                            newRowsData.forEach((row) => {
                               // itemPass(row.id);
                               numDone++;
-                              if (numDone % 50 == 0) {
+                              if (numDone % throttledSize == 0) {
                                  this.refreshRemainingTimeText(
                                     startUpdateTime,
                                     validRows.length,
@@ -1746,7 +1747,7 @@ module.exports = class ABViewCSVImporterComponent extends ABViewComponent {
          let index = 0;
 
          while (allSaves.length) {
-            throttledSaves[index] = allSaves.splice(0, 50);
+            throttledSaves[index] = allSaves.splice(0, throttledSize);
 
             index++;
          }
