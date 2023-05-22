@@ -250,15 +250,11 @@ module.exports = class ABDataCollection extends ABDataCollectionCore {
       var dc = this.__dataCollection;
 
       // prevent bind many times
-      if (
-         this.__bindComponentIds.indexOf(component.config.id) > -1 &&
-         $$(component.config.id).data &&
-         $$(component.config.id).data.find &&
-         $$(component.config.id).data.find({}).length > 0
-      )
-         return;
       // keep component id to an array
-      else this.__bindComponentIds.push(component.config.id);
+      if (this.__bindComponentIds.indexOf(component.config.id) === -1)
+         this.__bindComponentIds.push(component.config.id);
+
+      if ($$(component.config.id).data?.find?.({}).length > 0) return;
 
       if (
          component.config.view == "datatable" ||
