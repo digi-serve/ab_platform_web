@@ -195,6 +195,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
     */
    validateData($formView, object, formVals) {
       let isValid = true;
+      let list = "";
 
       // validate required fields
       const requiredFields = this.fieldComponents(
@@ -220,6 +221,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
          const fieldVal = formVals[f.columnName];
          if (fieldVal == "" || fieldVal == null || fieldVal.length < 1) {
             $formView.markInvalid(f.columnName, L("This is a required field."));
+            list += `<li>${L("Missing Required Field")} ${f.columnName}</li>`;
             isValid = false;
 
             // Fix position of invalid message
@@ -258,12 +260,22 @@ module.exports = class ABViewForm extends ABViewFormCore {
          if (validator?.errors?.length) {
             validator.errors.forEach((err) => {
                $formView.markInvalid(err.name, err.message);
+               list += `<li>${err.name}: ${err.message}</li>`;
             });
 
             saveButton?.disable();
          } else {
             saveButton?.enable();
          }
+      }
+
+      if (list) {
+         webix.alert({
+            type: "alert-error",
+            title: "Problems Saving",
+            width: 400,
+            text: `<ul style='text-align:left'>${list}</ul>`,
+         });
       }
 
       return isValid;
