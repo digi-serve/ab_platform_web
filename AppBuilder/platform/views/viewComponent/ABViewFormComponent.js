@@ -384,10 +384,10 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
          // pull data of current cursor
          const rowData = dc.getCursor();
 
+         if ($form) dc.bind($form);
+
          // do this for the initial form display so we can see defaults
          await this.displayData(rowData);
-
-         if ($form) dc.bind($form);
       }
       // show blank data in the form
       else await this.displayData(data ?? {});
