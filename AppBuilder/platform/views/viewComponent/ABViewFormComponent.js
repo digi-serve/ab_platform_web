@@ -22,16 +22,12 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
 
                layout: "",
                filterComplex: "",
-               reloadView: `${
-                  idBase || `ABViewForm_${baseView.id}`
-               }_form_reloadView`,
             },
             ids
          )
       );
 
       this.timerId = null;
-
       this._showed = false;
    }
 
@@ -373,7 +369,6 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
       const superComponent = baseView.superComponent();
       await superComponent.onShow();
 
-      const ids = this.ids;
       const $form = $$(this.ids.form);
       const dc = this.datacollection;
 
@@ -386,18 +381,13 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
             dc.setCursor(null);
          }
 
-         // if the cursor is cleared before or after we need to make
-         // sure the reload view button does not appear
-         if (settings.clearOnLoad || settings.clearOnSave)
-            $$(ids.reloadView)?.getParentView()?.removeView(ids.reloadView);
-
          // pull data of current cursor
          const rowData = dc.getCursor();
 
+         if ($form) dc.bind($form);
+
          // do this for the initial form display so we can see defaults
          await this.displayData(rowData);
-
-         if ($form) dc.bind($form);
       }
       // show blank data in the form
       else await this.displayData(data ?? {});
