@@ -365,7 +365,7 @@ module.exports = class ABViewRuleActionFormRecordRuleUpdateConnected extends (
                   glue: "and",
                   rules: [
                      {
-                        key: connObj.PK(),
+                        key: `${connObj.dbTableName()}.${connObj.PK()}`,
                         rule: "in",
                         value: ids,
                      },
