@@ -107,7 +107,7 @@ module.exports = class ABDataCollection extends ABDataCollectionCore {
 
    bindParentDc() {
       // if we pass the master datacollection and the field it is linked to
-      // we want to bind it witht hat field as second param so dataFeed is
+      // we want to bind it with that field as second param so dataFeed is
       // used on the slave datacollection
       let dataCollectionLink = this.datacollectionLink;
       let fieldLink = this.fieldLink;

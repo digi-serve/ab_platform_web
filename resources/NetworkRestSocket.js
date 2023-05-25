@@ -46,8 +46,18 @@ class NetworkRestSocket extends NetworkRest {
                   let obj = this.AB.objectByID(data.objectId);
                   if (obj) {
                      let model = obj.model();
-                     if (ev != "ab.datacollection.delete")
+                     if (ev != "ab.datacollection.delete") {
+                        let jobID = this.AB.jobID();
+                        console.log(`${jobID} : ${ev}:normalization begin`);
+                        let timeFrom = performance.now();
                         model.normalizeData(data.data);
+                        let timeTo = performance.now();
+                        console.log(
+                           `${jobID} : ${ev}:normalization end:  ${
+                              timeTo - timeFrom
+                           }ms`
+                        );
+                     }
                   }
                }
             }
