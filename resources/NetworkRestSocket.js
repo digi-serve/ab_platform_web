@@ -54,8 +54,8 @@ class NetworkRestSocket extends NetworkRest {
                         let timeTo = performance.now();
                         console.log(
                            `${jobID} : ${ev}:normalization end:  ${
-                              (timeTo - timeFrom) / 1000
-                           }s`
+                              timeTo - timeFrom
+                           }ms`
                         );
                      }
                   }
