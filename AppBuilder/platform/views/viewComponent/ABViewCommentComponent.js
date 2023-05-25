@@ -33,9 +33,9 @@ module.exports = class ABViewCommentComponent extends ABViewComponent {
                // https://docs.webix.com/api__ui.comments_onbeforeeditstart_event.html#comment-4509366150
 
                // onAfterEditStart: function (rowId) {
-               // 	let item = this.getItem(rowId);
+               //    let item = this.getItem(rowId);
 
-               // 	_logic.updateComment(rowId, item);
+               //    _logic.updateComment(rowId, item);
                // },
                onAfterDelete: (rowId) => {
                   this.deleteComment(rowId);
@@ -106,6 +106,8 @@ module.exports = class ABViewCommentComponent extends ABViewComponent {
          baseView.__dvEvents.loadData = dv.on("loadData", () =>
             this.refreshComment()
          );
+
+      $comment.refresh();
    }
 
    getCommentData() {
@@ -305,5 +307,4 @@ module.exports = class ABViewCommentComponent extends ABViewComponent {
 
       return await model.create(comment);
    }
-
 };
