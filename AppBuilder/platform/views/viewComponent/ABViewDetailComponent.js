@@ -77,13 +77,13 @@ module.exports = class ABViewDetailComponent extends ABViewContainerComponent {
 
    displayData(rowData = {}) {
       const views = (this.view.views() || []).sort((a, b) => {
-         if (!a?.field || !b?.field) return 0;
+         if (!a?.field?.() || !b?.field?.()) return 0;
 
          // NOTE: sort order of calculated fields.
          // FORMULA field type should be calculated before CALCULATE field type
-         if (a.field.key === "formula" && b.field.key === "calculate")
+         if (a.field().key === "formula" && b.field().key === "calculate")
             return -1;
-         else if (a.field.key === "calculate" && b.field.key === "formula")
+         else if (a.field().key === "calculate" && b.field().key === "formula")
             return 1;
 
          return 0;
@@ -180,10 +180,21 @@ module.exports = class ABViewDetailComponent extends ABViewContainerComponent {
 
                case "formula":
                   if (rowData) {
-                     const dv = this.datacollection;
-                     const ds = dv ? dv.datasource : null;
-                     const needRecalculate =
-                        !ds || ds instanceof ABObjectQuery ? false : true;
+                     // const dv = this.datacollection;
+                     // const ds = dv ? dv.datasource : null;
+                     // const needRecalculate =
+                     //    !ds || ds instanceof ABObjectQuery ? false : true;
+
+                     // NOTE: Could not to re-calculate because `__relation` data is extracted from full data at the moment
+                     // rowData.__relation format
+                     // {
+                     //    id: "string"
+                     //    text: "string"
+                     //    translations: []
+                     //    uuid:  "0cb52669-d626-4c9d-85ea-2d931751d0ce"
+                     //    value: "LABEL"
+                     // }
+                     const needRecalculate = false;
 
                      val = field.format(rowData, needRecalculate);
                   }
