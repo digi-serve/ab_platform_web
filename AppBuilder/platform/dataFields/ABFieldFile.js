@@ -279,13 +279,14 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
          // Ask the user if they really want to delete the photo
          webix.confirm({
             title: "",
-            message: L("Are you sure you want to remove this file?"),
+            text: L("Are you sure you want to remove this file?"),
             callback: async (result) => {
                const confirmDelete = result ? 1 : 0;
                if (confirmDelete) {
                   // update just this value on our current object.model
                   const values = {};
-                  values[this.columnName] = "";
+
+                  values[this.columnName] = {};
 
                   if (row.id) {
                      try {
