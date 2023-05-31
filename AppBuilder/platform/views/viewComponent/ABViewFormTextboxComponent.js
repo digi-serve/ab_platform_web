@@ -44,6 +44,7 @@ module.exports = class ABViewFormTextboxComponent extends (
    }
 
    onShow() {
+      // this is a usless comment that we really don't need
       const settings = this.view.settings ?? {};
       const _ui = this.ui();
       const _uiFormItem = _ui.rows[0];
