@@ -268,11 +268,11 @@ module.exports = class ABViewForm extends ABViewFormCore {
             saveButton?.enable();
          }
       }
-
+      // debugger;
       if (list) {
          webix.alert({
             type: "alert-error",
-            title: "Problems Saving",
+            title: L("Problems Saving"),
             width: 400,
             text: `<ul style='text-align:left'>${list}</ul>`,
          });
