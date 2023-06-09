@@ -1,6 +1,6 @@
 /*
 @license
-Webix Query v.8.1.1
+Webix Query v.10.1.0
 This software is covered by Webix Commercial License.
 Usage without proper license is prohibited.
 (c) XB Software Ltd.
@@ -2103,7 +2103,10 @@ Usage without proper license is prohibited.
                 type: {
                     template: function (obj) {
                         if (obj.group) {
-                            return "<div class='wbq-filter_join wbq-filter_join_" + obj.glue + "'>" + GLUE(obj) + "</div>";
+                            var editCss = _this.DisableSwitch
+                                ? "wbq-filter_join_disabled"
+                                : "";
+                            return "<div class='wbq-filter_join wbq-filter_join_" + obj.glue + " " + editCss + "'>" + GLUE(obj) + "</div>";
                         }
                         return (_this.Template(obj, _this.app.config.fields, icon, _) +
                             ("<div class='wbq-filter_join wbq-filter_join_" + obj.glue + "'>" + GLUE(obj) + "</div>"));
@@ -2121,7 +2124,9 @@ Usage without proper license is prohibited.
                     },
                 },
                 on: {
-                    onItemDblClick: function (id) { return _this.EditStart(id); },
+                    onItemDblClick: function (id) {
+                        _this.EditStart(id);
+                    },
                 },
             };
             return list;
@@ -2147,6 +2152,7 @@ Usage without proper license is prohibited.
             this.State = this.getParam("state");
             this.on(this.State.$changes, "value", function (v) {
                 _this.LastValue = JSON.stringify(v);
+                _this.EditStop();
                 _this.$$("list").clearAll();
                 if (v) {
                     _this.$$("list").parse(_this.ConvertTo(v));
@@ -2194,6 +2200,7 @@ Usage without proper license is prohibited.
             this.CreateMode = true;
         };
         BaseView.prototype.SwitchGlue = function (id) {
+            this.EditStop();
             var list = this.$$("list");
             var branch = list.data.getBranch(list.getParentId(id));
             for (var i = 0; i < branch.length; i++) {
@@ -2213,9 +2220,11 @@ Usage without proper license is prohibited.
             var glue = after ? list.getItem(after).glue : list.config.glue;
             node.glue = glue;
             obj.glue = node.glue == "and" ? "or" : "and";
+            this.DisableSwitch = true;
             list.add(node, index, parent);
             var id = list.add(obj, null, node.id);
             this.EditStart(id);
+            this.DisableSwitch = false;
             this.CreateMode = true;
         };
         BaseView.prototype.Delete = function (id) {
@@ -2225,6 +2234,8 @@ Usage without proper license is prohibited.
         };
         BaseView.prototype.DeleteSilent = function (id) {
             var list = this.$$("list");
+            if (!list.exists(id))
+                return null;
             var parent = list.getParentId(id);
             list.remove(id);
             var branch = list.data.branch[parent];
@@ -2264,6 +2275,7 @@ Usage without proper license is prohibited.
             }
             var t = this.Active;
             this.Active = null;
+            this.ActiveId = null;
             t.destructor();
             this.Save();
         };
@@ -2374,11 +2386,6 @@ Usage without proper license is prohibited.
                         str = parser(str);
                     return str;
                 },
-                inputs: [
-                    { view:"text", batch:"string" },
-                    { view:"rangeslider", max:100, min:0, step:1, moveTitle:false, batch:"rangeslider"},
-                    { template:"some average value e.g. 50", batch:"template", borderless:true, css:{"line-height":"28px"} },
-                ],
                 margin: 6,
             };
             var filter = webix.ui(ui, place);
@@ -2454,6 +2461,8 @@ Usage without proper license is prohibited.
                 padding = 4;
                 height = 50;
             }
+            if (list.scroll)
+                height += webix.env.scrollSize;
             return {
                 view: "toolbar",
                 paddingX: padding * 2,
@@ -2615,7 +2624,7 @@ Usage without proper license is prohibited.
             if (rule.includes && rule.includes.length) {
                 return rule.includes.findIndex(function (a) { return a === test; }) !== -1;
             }
-            if (test) {
+            if (!webix.isUndefined(test)) {
                 var con = rule.condition.type;
                 var filter = ops[con] || ops[types[rule.field]][con];
                 return filter(test, rule.condition.filter);
@@ -2633,7 +2642,7 @@ Usage without proper license is prohibited.
             });
             var defaults = {
                 router: EmptyRouter,
-                version: "8.1.1",
+                version: "10.1.0",
                 debug: true,
             };
             _this = _super.call(this, __assign(__assign({}, defaults), config)) || this;

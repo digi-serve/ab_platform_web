@@ -1,6 +1,6 @@
 /*
 @license
-Webix Reports v.8.1.1
+Webix Reports v.10.1.0
 This software is covered by Webix Commercial License.
 Usage without proper license is prohibited.
 (c) XB Software Ltd.
@@ -2041,6 +2041,103 @@ Usage without proper license is prohibited.
         });
     }
 
+    var BaseExportView = (function (_super) {
+        __extends(BaseExportView, _super);
+        function BaseExportView() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        BaseExportView.prototype.config = function () {
+            var _this = this;
+            return {
+                view: "popup",
+                padding: 0,
+                point: false,
+                body: {
+                    view: "menu",
+                    subMenuPos: "right",
+                    layout: "y",
+                    borderless: true,
+                    type: {
+                        subsign: true,
+                    },
+                    css: "webix_rpt_popup_menu",
+                    template: function (obj) { return _this.GetTemplate(obj); },
+                    width: 160,
+                    submenuConfig: {
+                        point: false,
+                        width: 190,
+                        padding: 0,
+                        template: function (obj) { return _this.GetTemplate(obj); },
+                    },
+                    autowidth: true,
+                    autoheight: true,
+                    data: this.GetData(),
+                    on: {
+                        onMenuItemClick: function (id, e) { return _this.PopupAction(id, e); },
+                    },
+                },
+            };
+        };
+        BaseExportView.prototype.GetData = function () {
+            var _ = this.app.getService("locale")._;
+            return [
+                { value: _("To PNG"), id: "png" },
+                { value: _("To PDF"), id: "pdf" },
+            ];
+        };
+        BaseExportView.prototype.PopupAction = function (id) {
+            this.app.callEvent("exportModule", [id]);
+            this.getRoot().hide();
+        };
+        BaseExportView.prototype.GetTemplate = function (obj) {
+            return "<span class='webix_icon " + obj.icon + "'></span>" + obj.value;
+        };
+        BaseExportView.prototype.Show = function (node) {
+            var _this = this;
+            if (this.getRoot().isVisible())
+                return;
+            this.webix.delay(function () { return _this.getRoot().show(node); });
+        };
+        return BaseExportView;
+    }(JetView));
+
+    var BaseToolbarView = (function (_super) {
+        __extends(BaseToolbarView, _super);
+        function BaseToolbarView() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        BaseToolbarView.prototype.config = function () {
+            var _this = this;
+            var _ = this.app.getService("locale")._;
+            return {
+                view: "form",
+                localId: "toolbar",
+                height: webix.skin.$active.barHeight + 6,
+                hidden: true,
+                padding: { left: 10, right: 10, top: 6, bottom: 6 },
+                margin: 10,
+                cols: [
+                    {
+                        view: "button",
+                        type: "icon",
+                        width: 140,
+                        label: _("Export"),
+                        icon: "rpi-export",
+                        click: function (id) { return _this.ShowExportPopup(id); },
+                    },
+                    {},
+                ],
+            };
+        };
+        BaseToolbarView.prototype.ShowExportPopup = function (viewId) {
+            if (!this.ExportMenu || !this.ExportMenu.$view)
+                this.ExportMenu = this.ui(BaseExportView);
+            var node = webix.$$(viewId);
+            this.ExportMenu.Show(node.$view);
+        };
+        return BaseToolbarView;
+    }(JetView));
+
     var ChartView = (function (_super) {
         __extends(ChartView, _super);
         function ChartView() {
@@ -2052,17 +2149,20 @@ Usage without proper license is prohibited.
                 margin: 5,
                 cols: [{}],
             };
-            return page;
+            return { rows: [BaseToolbarView, page] };
         };
         ChartView.prototype.init = function () {
             this.State = this.getParam("state", true);
-            this.Charts = this.app.getService("charts");
             this.Local = this.app.getService("local");
+            this.Charts = this.app.getService("charts");
         };
         ChartView.prototype.ready = function () {
             var _this = this;
-            this.Host = this.getRoot();
+            var parts = this.getRoot().getChildViews();
+            this.Bar = parts[0];
+            this.Host = parts[1];
             this.on(this.State.$changes, "module", function (mod) { return _this.Show(mod); });
+            this.on(this.app, "exportModule", function (mode) { return _this.Export(mode); });
         };
         ChartView.prototype.Show = function (mod) {
             var _this = this;
@@ -2071,8 +2171,10 @@ Usage without proper license is prohibited.
                 var config_1 = this.GetChartConfig(mod);
                 if (!config_1.view)
                     return;
+                this.Bar.show();
                 this.GetChartData(mod).then(function (_a) {
                     var data = _a[0], options = _a[1];
+                    data = webix.copy(data);
                     if (mod.meta.chart.seriesFrom == "rows")
                         data = _this.ConvertDataBySeries(data);
                     config_1.data = _this.FormatLabels(data.slice(0, _this.Charts.numLimit), options);
@@ -2082,6 +2184,7 @@ Usage without proper license is prohibited.
             }
             else {
                 webix.ui([{ template: " " }], host);
+                this.Bar.hide();
                 this.Chart = null;
             }
         };
@@ -2254,6 +2357,16 @@ Usage without proper license is prohibited.
                     res.className += " webix_rpt_chart_label0";
             }
         };
+        ChartView.prototype.Export = function (mode) {
+            if (this.Chart) {
+                if (mode == "png")
+                    webix.toPNG(this.Chart);
+                else if (mode == "pdf") {
+                    var params = { autowidth: true, display: "image" };
+                    webix.toPDF(this.Chart, params);
+                }
+            }
+        };
         return ChartView;
     }(JetView));
 
@@ -2332,6 +2445,10 @@ Usage without proper license is prohibited.
         table: "<span class='rpi-table'></span>",
         chart: "<span class='rpi-poll'></span>",
         heatmap: "<span class='rpi-chart-tree'></span>",
+    };
+    var empty$1 = {
+        main: "<svg  xmlns='http://www.w3.org/2000/svg' viewBox='0 0 390 320'><path class='webix_rpt_cls1' d='M369.51,182.77c-23.18-52.39,32-103.23,13.74-148.28s-77.61-39.42-162.07-20S78.47-6.35,34.66,14.46c-29.39,14-27.27,58.82-5,107,38.95,84.29-51.86,117.32-24.38,166s118.91-.95,183.37,4.22c37.62.59,62.88,6.26,109.52,21.27C387.63,341.7,412.41,279.75,369.51,182.77Z'/><rect class='webix_rpt_cls2' x='111.53' y='226.04' width='212.47' height='0.91'/><rect class='webix_rpt_cls3' x='97' y='89.51' width='212' height='151.96'/><rect class='webix_rpt_cls4' x='67' y='159.96' width='136.33' height='81.98' rx='2'/><polygon class='webix_rpt_cls5' points='199.32 235.55 72.61 235.55 72.61 165.28 71.01 165.28 71.01 235.55 71.01 237.68 71.01 237.68 72.61 237.68 72.61 237.68 199.32 237.68 199.32 235.55'/><rect class='webix_rpt_cls6' x='84.64' y='165.28' width='0.8' height='68.14'/><rect class='webix_rpt_cls6' x='97.47' y='165.28' width='0.8' height='68.14'/><rect class='webix_rpt_cls6' x='110.3' y='165.28' width='0.8' height='68.14'/><rect class='webix_rpt_cls6' x='123.14' y='165.28' width='0.8' height='68.14'/><rect class='webix_rpt_cls6' x='135.97' y='165.28' width='0.8' height='68.14'/><rect class='webix_rpt_cls7' x='148.8' y='165.28' width='0.8' height='68.14'/><rect class='webix_rpt_cls6' x='161.63' y='165.28' width='0.8' height='68.14'/><rect class='webix_rpt_cls6' x='174.46' y='165.28' width='0.8' height='68.14'/><rect class='webix_rpt_cls6' x='187.29' y='165.28' width='0.8' height='68.14'/><rect class='webix_rpt_cls7' x='111.53' y='94.41' width='212.47' height='132.54'/><rect class='webix_rpt_cls8' x='111.53' y='109.85' width='212.47' height='0.91'/><path class='webix_rpt_cls9' d='M111.53,94.41H324v15.44H111.53Z'/><path class='webix_rpt_cls7' d='M111.53,79H324V94.41H111.53Z'/><path class='webix_rpt_cls2' d='M324,125.28v-.91H287.68V109.84h-.91v14.53H250.45V109.84h-.91v14.53H213.22V109.84h-.9v14.53H176V109.85h-.91v14.52H111.53v.91h63.56v13.61H111.53v.91h63.56v13.62H111.53v.91h63.56v13.61H111.53v.91h63.56v13.62H111.53v.91h63.56V197H111.53v.91h63.56v13.62H111.53v.9h63.56V227H176V212.42h36.32V227h.9V212.42h36.32V227h.91V212.42h36.32V227h.91V212.42H324v-.9H287.68V197.9H324V197H287.68V183.38H324v-.91H287.68V168.85H324v-.91H287.68V154.33H324v-.91H287.68V139.8H324v-.91H287.68V125.28Zm-74.46,0v13.61H213.22V125.28Zm-36.32,57.19V168.85h36.32v13.62Zm36.32.91V197H213.22V183.38Zm-36.32-15.44V154.33h36.32v13.61Zm0-14.52V139.8h36.32v13.62ZM176,125.28h36.32v13.61H176Zm0,14.52h36.32v13.62H176Zm0,14.53h36.32v13.61H176Zm0,14.52h36.32v13.62H176Zm0,14.53h36.32V197H176Zm0,28.14V197.9h36.32v13.62Zm37.22,0V197.9h36.32v13.62Zm73.55,0H250.45V197.9h36.32Zm0-14.53H250.45V183.38h36.32Zm0-14.52H250.45V168.85h36.32Zm0-14.53H250.45V154.33h36.32Zm0-14.52H250.45V139.8h36.32Zm0-14.53H250.45V125.28h36.32Z'/><rect class='webix_rpt_cls2' x='175.09' y='94.41' width='0.91' height='15.43'/><rect class='webix_rpt_cls2' x='212.32' y='94.41' width='0.91' height='15.43'/><rect class='webix_rpt_cls2' x='249.54' y='94.41' width='0.91' height='15.43'/><rect class='webix_rpt_cls2' x='286.77' y='94.41' width='0.91' height='15.43'/><rect class='webix_rpt_cls9' x='118.79' y='84.43' width='21.79' height='5.45'/><rect class='webix_rpt_cls9' x='250.45' y='84.43' width='66.28' height='5.45'/></svg>",
+        alt: "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 390 320' fill='none'><g clip-path='url(#clip0_4706_8889)'><path d='M369.502 182.763C346.322 130.373 401.502 79.5332 383.242 34.4832C364.982 -10.5668 305.632 -4.93676 221.172 14.4832C136.712 33.9032 78.4622 -6.35676 34.6522 14.4532C5.26223 28.4532 7.38222 73.2732 29.6522 121.453C68.6022 205.743 -22.2078 238.773 5.27222 287.453C32.7522 336.133 124.182 286.503 188.642 291.673C226.262 292.263 251.522 297.933 298.162 312.943C387.622 341.693 412.402 279.743 369.502 182.763Z' class='webix_rpt_cls1'/><path d='M112.545 76.0479C112.545 74.9421 113.475 74.0457 114.622 74.0457H215.368L256.913 114.09V251.238C256.913 252.344 255.983 253.241 254.836 253.241H114.622C113.475 253.241 112.545 252.344 112.545 251.238V76.0479Z' class='webix_rpt_cls6'/><path d='M128.322 60.5902C128.322 59.4844 129.252 58.588 130.399 58.588H231.145L272.69 98.6313V235.781C272.69 236.887 271.76 237.783 270.612 237.783H130.399C129.252 237.783 128.322 236.887 128.322 235.781V60.5902Z' class='webix_rpt_cls4'/><path fill-rule='evenodd' clip-rule='evenodd' d='M130.399 59.588C129.769 59.588 129.322 60.0708 129.322 60.5902V235.781C129.322 236.3 129.769 236.783 130.399 236.783H270.612C271.243 236.783 271.69 236.299 271.69 235.781V99.0563L230.742 59.588H130.399ZM231.145 58.588H130.399C129.252 58.588 128.322 59.4844 128.322 60.5902V235.781C128.322 236.887 129.252 237.783 130.399 237.783H270.612C271.76 237.783 272.69 236.887 272.69 235.781V98.6313L231.145 58.588Z' class='webix_rpt_cls3'/><path d='M231.146 96.6297V58.588L272.69 98.6313H233.222C232.075 98.6313 231.146 97.7353 231.146 96.6297Z' class='webix_rpt_cls3'/><path d='M184.729 74.0457H143.184C142.323 74.0457 141.626 74.718 141.626 75.5473V75.5473C141.626 76.3766 142.323 77.0489 143.184 77.0489H184.729C185.589 77.0489 186.287 76.3766 186.287 75.5473C186.287 74.718 185.589 74.0457 184.729 74.0457Z' class='webix_rpt_cls2'/><path d='M184.729 87.0457H143.184C142.323 87.0457 141.626 87.718 141.626 88.5473V88.5473C141.626 89.3766 142.323 90.0489 143.184 90.0489H184.729C185.589 90.0489 186.287 89.3766 186.287 88.5473C186.287 87.718 185.589 87.0457 184.729 87.0457Z' class='webix_rpt_cls2'/><path d='M222.443 101H143.557C142.697 101 142 101.672 142 102.5C142 103.328 142.697 104 143.557 104H222.443C223.303 104 224 103.328 224 102.5C224 101.672 223.303 101 222.443 101Z' class='webix_rpt_cls2'/><path d='M222.443 115H143.557C142.697 115 142 115.672 142 116.5V116.5C142 117.328 142.697 118 143.557 118H222.443C223.303 118 224 117.328 224 116.5C224 115.672 223.303 115 222.443 115Z' class='webix_rpt_cls2'/><path fill-rule='evenodd' clip-rule='evenodd' d='M218 223C240.644 223 259 204.644 259 182C259 159.356 240.644 141 218 141C195.356 141 177 159.356 177 182C177 204.644 195.356 223 218 223ZM218 227C242.853 227 263 206.853 263 182C263 157.147 242.853 137 218 137C193.147 137 173 157.147 173 182C173 206.853 193.147 227 218 227Z' class='webix_rpt_cls4'/><path d='M219.686 134C231.802 134 243.423 138.813 251.99 147.381C260.558 155.949 265.371 167.569 265.371 179.686C265.371 191.002 261.225 201.404 254.407 209.417L256.305 211.314H261.857L297 246.457L286.457 257L251.314 221.857V216.305L249.417 214.407C241.404 221.225 231.002 225.371 219.686 225.371C207.569 225.371 195.949 220.558 187.381 211.99C178.813 203.423 174 191.802 174 179.686C174 167.569 178.813 155.949 187.381 147.381C195.949 138.813 207.569 134 219.686 134ZM219.686 148.057C202.114 148.057 188.057 162.114 188.057 179.686C188.057 197.257 202.114 211.314 219.686 211.314C237.257 211.314 251.314 197.257 251.314 179.686C251.314 162.114 237.257 148.057 219.686 148.057Z' class='webix_rpt_cls5'/><path fill-rule='evenodd' clip-rule='evenodd' d='M253.047 209.471L253.645 208.769C260.316 200.928 264.371 190.754 264.371 179.686C264.371 167.834 259.663 156.468 251.283 148.088C242.903 139.708 231.537 135 219.686 135C207.834 135 196.468 139.708 188.088 148.088C179.708 156.468 175 167.834 175 179.686C175 191.537 179.708 202.903 188.088 211.283C196.468 219.663 207.834 224.371 219.686 224.371C230.754 224.371 240.928 220.316 248.769 213.645L249.471 213.047L252.314 215.89V221.443L286.457 255.586L295.586 246.457L261.443 212.314H255.89L253.047 209.471ZM261.857 211.314L297 246.457L286.457 257L251.314 221.857V216.305L249.417 214.407C241.404 221.225 231.002 225.371 219.686 225.371C207.569 225.371 195.949 220.558 187.381 211.99C178.813 203.423 174 191.802 174 179.686C174 167.569 178.813 155.949 187.381 147.381C195.949 138.813 207.569 134 219.686 134C231.802 134 243.423 138.813 251.99 147.381C260.558 155.949 265.371 167.569 265.371 179.686C265.371 191.002 261.225 201.404 254.407 209.417L256.305 211.314H261.857ZM187.057 179.686C187.057 161.562 201.562 147.057 219.686 147.057C237.809 147.057 252.314 161.562 252.314 179.686C252.314 197.809 237.809 212.314 219.686 212.314C201.562 212.314 187.057 197.809 187.057 179.686ZM188.057 179.686C188.057 162.114 202.114 148.057 219.686 148.057C237.257 148.057 251.314 162.114 251.314 179.686C251.314 197.257 237.257 211.314 219.686 211.314C202.114 211.314 188.057 197.257 188.057 179.686Z' class='webix_rpt_cls3'/><path d='M236.083 167.231L232.852 164L220.042 176.81L207.231 164L204 167.231L216.81 180.042L204 192.852L207.231 196.083L220.042 183.273L232.852 196.083L236.083 192.852L223.273 180.042L236.083 167.231Z' class='webix_rpt_cls3'/></g><defs><clipPath id='clip0_4706_8889'><rect width='390' height='320' class='webix_rpt_cls4'/></clipPath></defs></svg>",
     };
 
     var CommonView = (function (_super) {
@@ -2455,9 +2572,15 @@ Usage without proper license is prohibited.
                 this.State.$batch(next);
             else {
                 if (next.block.filter)
-                    webix.alert(this._("Please delete the related query filter first"));
+                    webix.alert({
+                        container: this.app.getRoot().$view,
+                        text: this._("Please delete the related query filter first"),
+                    });
                 if (next.block.group)
-                    webix.alert(this._("Please delete the related group rule first"));
+                    webix.alert({
+                        container: this.app.getRoot().$view,
+                        text: this._("Please delete the related group rule first"),
+                    });
             }
         };
         CommonView.prototype.JoinTemplate = function (obj) {
@@ -2472,6 +2595,8 @@ Usage without proper license is prohibited.
         };
         CommonView.prototype.ShowJoins = function () {
             var data = this.Local.getLinkedModels([this.State.data].concat(this.State.joins.map(function (a) { return a.tid; })), true);
+            if (!data.length)
+                return;
             var list = this.SourcesList.getBody();
             list.clearAll();
             list.parse(data);
@@ -2486,17 +2611,32 @@ Usage without proper license is prohibited.
         return CommonView;
     }(JetView));
 
-    function prompt(config) {
+    function prompt(config, app) {
         var result = new webix.promise.defer();
-        var p = webix.ui({
-            view: "popup",
-            head: false,
-            position: config.master ? "" : "center",
+        webix
+            .ui(app.getService("jet-win").updateConfig({
+            view: "window",
+            head: {
+                view: "toolbar",
+                padding: { left: 12, right: 4 },
+                borderless: true,
+                elements: [
+                    { view: "label", label: config.text },
+                    {
+                        view: "icon",
+                        icon: "wxi-close",
+                        hotkey: "esc",
+                        click: function () {
+                            result.reject("prompt cancelled");
+                            this.getTopParentView().close();
+                        },
+                    },
+                ],
+            },
             body: {
                 view: "form",
                 padding: { top: 5, left: 20, right: 20, bottom: 20 },
                 rows: [
-                    { view: "label", label: config.text },
                     {
                         margin: 10,
                         cols: [
@@ -2532,14 +2672,9 @@ Usage without proper license is prohibited.
                     else
                         input.select();
                 },
-                onHide: function () {
-                    result.reject("prompt cancelled");
-                    this.destructor();
-                },
             },
-        });
-        var position = config.master ? { x: 50 } : null;
-        webix.delay(function () { return p.show(config.master, position); });
+        }))
+            .show();
         return result;
     }
 
@@ -4638,7 +4773,10 @@ Usage without proper license is prohibited.
                     type: {
                         template: function (obj) {
                             if (obj.group) {
-                                return "<div class='wbq-filter_join wbq-filter_join_" + obj.glue + "'>" + GLUE(obj) + "</div>";
+                                var editCss = _this.DisableSwitch
+                                    ? "wbq-filter_join_disabled"
+                                    : "";
+                                return "<div class='wbq-filter_join wbq-filter_join_" + obj.glue + " " + editCss + "'>" + GLUE(obj) + "</div>";
                             }
                             return (_this.Template(obj, _this.app.config.fields, icon, _) +
                                 ("<div class='wbq-filter_join wbq-filter_join_" + obj.glue + "'>" + GLUE(obj) + "</div>"));
@@ -4656,7 +4794,9 @@ Usage without proper license is prohibited.
                         },
                     },
                     on: {
-                        onItemDblClick: function (id) { return _this.EditStart(id); },
+                        onItemDblClick: function (id) {
+                            _this.EditStart(id);
+                        },
                     },
                 };
                 return list;
@@ -4682,6 +4822,7 @@ Usage without proper license is prohibited.
                 this.State = this.getParam("state");
                 this.on(this.State.$changes, "value", function (v) {
                     _this.LastValue = JSON.stringify(v);
+                    _this.EditStop();
                     _this.$$("list").clearAll();
                     if (v) {
                         _this.$$("list").parse(_this.ConvertTo(v));
@@ -4729,6 +4870,7 @@ Usage without proper license is prohibited.
                 this.CreateMode = true;
             };
             BaseView.prototype.SwitchGlue = function (id) {
+                this.EditStop();
                 var list = this.$$("list");
                 var branch = list.data.getBranch(list.getParentId(id));
                 for (var i = 0; i < branch.length; i++) {
@@ -4748,9 +4890,11 @@ Usage without proper license is prohibited.
                 var glue = after ? list.getItem(after).glue : list.config.glue;
                 node.glue = glue;
                 obj.glue = node.glue == "and" ? "or" : "and";
+                this.DisableSwitch = true;
                 list.add(node, index, parent);
                 var id = list.add(obj, null, node.id);
                 this.EditStart(id);
+                this.DisableSwitch = false;
                 this.CreateMode = true;
             };
             BaseView.prototype.Delete = function (id) {
@@ -4760,6 +4904,8 @@ Usage without proper license is prohibited.
             };
             BaseView.prototype.DeleteSilent = function (id) {
                 var list = this.$$("list");
+                if (!list.exists(id))
+                    return null;
                 var parent = list.getParentId(id);
                 list.remove(id);
                 var branch = list.data.branch[parent];
@@ -4799,6 +4945,7 @@ Usage without proper license is prohibited.
                 }
                 var t = this.Active;
                 this.Active = null;
+                this.ActiveId = null;
                 t.destructor();
                 this.Save();
             };
@@ -4981,6 +5128,8 @@ Usage without proper license is prohibited.
                     padding = 4;
                     height = 50;
                 }
+                if (list.scroll)
+                    height += webix.env.scrollSize;
                 return {
                     view: "toolbar",
                     paddingX: padding * 2,
@@ -5137,7 +5286,7 @@ Usage without proper license is prohibited.
                 if (rule.includes && rule.includes.length) {
                     return rule.includes.findIndex(function (a) { return a === test; }) !== -1;
                 }
-                if (test) {
+                if (!webix.isUndefined(test)) {
                     var con = rule.condition.type;
                     var filter = ops[con] || ops[types[rule.field]][con];
                     return filter(test, rule.condition.filter);
@@ -5154,7 +5303,7 @@ Usage without proper license is prohibited.
                 });
                 var defaults = {
                     router: EmptyRouter,
-                    version: "8.1.1",
+                    version: "10.0.9",
                     debug: true,
                 };
                 _this = _super.call(this, __assign(__assign({}, defaults), config)) || this;
@@ -5386,6 +5535,7 @@ Usage without proper license is prohibited.
         QueryBuilderView.prototype.init = function () {
             var _this = this;
             this.Local = this.app.getService("local");
+            this.Operations = this.app.getService("operations");
             var state = (this.State = this.getParam("state", true));
             var qData = (this.Queries = this.Local.getQueries());
             this.LocalState = createState({ id: "", saved: true });
@@ -5446,7 +5596,7 @@ Usage without proper license is prohibited.
             if (id) {
                 if (name === null)
                     name = this.Queries.getItem(id).name;
-                this.Local.saveQuery(id, { name: name, text: text }).then(function () {
+                this.Operations.updateQuery(id, { name: name, text: text }).then(function () {
                     _this.$$("qselect").setValue(id);
                     _this.LocalState.saved = true;
                 });
@@ -5456,9 +5606,9 @@ Usage without proper license is prohibited.
                 text: this._("Enter query name"),
                 button: this._("Save"),
                 value: "",
-            }).then(function (name) {
+            }, this.app).then(function (name) {
                 if (name) {
-                    _this.Local.saveQuery(null, { name: name, text: text }).then(function (id) {
+                    _this.Operations.addQuery({ name: name, text: text }).then(function (id) {
                         _this.LocalState.saved = true;
                         _this.LocalState.id = id;
                     });
@@ -5473,7 +5623,7 @@ Usage without proper license is prohibited.
                 text: this._("Enter query name"),
                 value: name,
                 button: this._("Save"),
-            }).then(function (name) {
+            }, this.app).then(function (name) {
                 if (!name)
                     return;
                 _this.SaveQuery(name);
@@ -5484,7 +5634,7 @@ Usage without proper license is prohibited.
             var _ = this.app.getService("locale")._;
             var _a = this.Queries.getItem(this.LocalState.id), name = _a.name, text = _a.text;
             name = _("Copy of") + " " + name;
-            this.Local.saveQuery(null, { name: name, text: text }).then(function (id) {
+            this.Operations.addQuery({ name: name, text: text }).then(function (id) {
                 _this.LocalState.id = id;
             });
         };
@@ -5493,6 +5643,7 @@ Usage without proper license is prohibited.
             var _ = this.app.getService("locale")._;
             webix
                 .confirm({
+                container: this.app.getRoot().$view,
                 title: _("Delete"),
                 ok: _("Delete"),
                 cancel: _("Cancel"),
@@ -5500,34 +5651,11 @@ Usage without proper license is prohibited.
             })
                 .then(function () {
                 var id = _this.LocalState.id;
-                _this.Local.deleteQuery(id).then(function () {
+                _this.Operations.deleteQuery(id).then(function () {
                     _this.LocalState.$batch({ saved: true, id: null });
                     _this.State.query = null;
                 });
             });
-        };
-        QueryBuilderView.prototype.ShowMenu = function (trg) {
-            var _this = this;
-            if (!this.QueryMenu || !this.QueryMenu.$view)
-                this.QueryMenu = this.ui({
-                    view: "popup",
-                    body: {
-                        view: "list",
-                        borderless: true,
-                        css: "webix_rpt_popup_menu",
-                        template: function (obj) { return _this.GetMenuTemplate(obj); },
-                        width: 160,
-                        autoheight: true,
-                        click: function (id) { return _this.ApplyQueryAction(id); },
-                        data: this.GetMenuOptions(),
-                    },
-                });
-            var list = this.QueryMenu.getBody();
-            list.data.each(function (item) {
-                item.disabled = !_this.LocalState.id;
-            });
-            list.refresh();
-            this.QueryMenu.show(trg);
         };
         QueryBuilderView.prototype.GetMenuOptions = function () {
             return [
@@ -5559,10 +5687,1075 @@ Usage without proper license is prohibited.
         return QueryBuilderView;
     }(JetView));
 
+    var TopView = (function (_super) {
+        __extends(TopView, _super);
+        function TopView() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        TopView.prototype.config = function () {
+            var _this = this;
+            var _ = this.app.getService("locale")._;
+            var tabbar = {
+                optionWidth: 102,
+                tabMinWidth: 102,
+                view: "tabbar",
+                localId: "tabbar",
+                css: "webix_rpt_editor_tabbar",
+                borderless: true,
+                options: [
+                    { id: "common", value: _("Common") },
+                    { id: "data", value: _("Query") },
+                    { id: "other", value: _("Data") },
+                    { id: "structure", value: _("View") },
+                ],
+                on: {
+                    onChange: function (v) { return _this.ShowView(v); },
+                },
+            };
+            var skin = webix.skin.$name;
+            if (skin == "flat" || skin == "compact" || skin == "contrast")
+                tabbar.type = "bottom";
+            var toolbar = {
+                view: "toolbar",
+                padding: { left: 13, top: 0, bottom: 0 },
+                height: webix.skin.$active.barHeight + 6,
+                scroll: false,
+                cols: [
+                    tabbar,
+                    {
+                        view: "icon",
+                        width: 40,
+                        localId: "closeBtn",
+                        icon: "rpi-close",
+                        click: function () { return _this.Hide(); },
+                    },
+                ],
+            };
+            var ui = {
+                width: 490,
+                hidden: false,
+                localId: "settings",
+                rows: [toolbar, { $subview: true }],
+            };
+            this.Operations = this.app.getService("operations");
+            this.Local = this.app.getService("local");
+            return this.Local.ready(ui);
+        };
+        TopView.prototype.init = function () {
+            var _this = this;
+            this.AppState = this.app.getParam("state");
+            var initial = this.Local.newModule();
+            initial.id = -1;
+            var state = (this.State = createState(initial));
+            this.setParam("state", this.State);
+            this.on(this.AppState.$changes, "moduleId", function (v) { return _this.ChangeModule(v); });
+            this.on(this.State.$changes, "data", function (id, o, k, ctx) {
+                if (id && (!ctx || !ctx.load))
+                    _this.ChangeModel(id);
+            });
+            this.on(this.AppState.$changes, "toolbar", function (v) { return _this.ShowHideButton(v); });
+            this.on(this.State.$changes, "*", debounce(function () {
+                if (_this.State.id === -1)
+                    return;
+                _this.TrackChanges();
+                _this.AppState.module = Object.assign({}, _this.State);
+            }));
+            this.on(state.$changes, "group", function (v, old, _key, ctx) {
+                if (!v && old) {
+                    var columns = state.oldColumns ||
+                        _this.Local.getFields(state.data, state.joins, true);
+                    var numColumns = webix
+                        .copy(columns)
+                        .filter(function (a) { return a.type == "number" && !a.key; });
+                    var meta = _this.UpdateMeta(numColumns, columns);
+                    state.$batch({
+                        publicFields: null,
+                        columns: columns,
+                        meta: meta,
+                    });
+                }
+                else if (v) {
+                    var prev_1 = [];
+                    if (!ctx || !ctx.load) {
+                        if (!old)
+                            state.oldColumns = state.columns;
+                        else {
+                            if (JSON.stringify(v) == JSON.stringify(old))
+                                return;
+                            prev_1 = __spreadArrays(_this.State.columns);
+                        }
+                    }
+                    else {
+                        prev_1 = __spreadArrays(_this.State.columns);
+                    }
+                    var columns = v.columns.map(function (a) { return ({
+                        id: a.op + "." + a.id,
+                        name: a.name,
+                        type: "number",
+                        meta: {},
+                        model: "",
+                    }); });
+                    var groupColumns = webix.copy(columns);
+                    if (v.by)
+                        columns = columns.concat(v.by.map(function (a) {
+                            var base = _this.State.fields.find(function (b) { return b.id == a.id; });
+                            var id = a.mod ? a.mod + "." + a.id : a.id;
+                            var obj = __assign(__assign({}, base), { id: id });
+                            if (a.mod)
+                                obj.type = "text";
+                            return obj;
+                        }));
+                    var was_1 = {};
+                    (state.publicFields || state.columns).forEach(function (a) { return (was_1[a.id] = 1); });
+                    var now_1 = {};
+                    columns.forEach(function (a) {
+                        now_1[a.id] = 1;
+                        if (!was_1[a.id])
+                            prev_1.push(a);
+                        else {
+                            var column = prev_1.find(function (b) { return b.id == a.id; });
+                            if (column && column.name != a.name)
+                                column.name = a.name;
+                        }
+                    });
+                    prev_1 = prev_1.filter(function (a) { return now_1[a.id]; });
+                    var meta = _this.UpdateMeta(groupColumns, columns);
+                    if (meta.freeze && meta.freeze >= prev_1.length)
+                        delete meta.freeze;
+                    state.$batch({ publicFields: columns, columns: prev_1, meta: meta });
+                }
+            });
+            this.on(this.app, "saveModule", function () { return _this.Save(); });
+            this.on(this.app, "resetModule", function () { return _this.Reset(); });
+            this.on(this.app, "onColumnResize", function (id, width) {
+                var next = __spreadArrays(_this.State.columns);
+                next.find(function (a) { return a.id == id; }).width = width;
+                _this.State.columns = next;
+            });
+            this.on(this.AppState.$changes, "readonly", function (mod) {
+                if (mod)
+                    _this.Reset();
+            });
+            this.show("./editor.common");
+        };
+        TopView.prototype.Save = function () {
+            var _this = this;
+            var save = this.Operations.getModuleSaveData(this.State);
+            var data = {
+                name: this.State.name,
+                text: JSON.stringify(save),
+            };
+            if (this.AppState.moduleId)
+                this.Operations.updateModule(this.AppState.moduleId, data).then(function (id) {
+                    return _this.SaveCallback(id);
+                });
+            else
+                this.Operations.addModule(data).then(function (id) { return _this.SaveCallback(id); });
+        };
+        TopView.prototype.SaveCallback = function (id) {
+            this.AppState.$batch({
+                moduleId: id,
+                mode: "view",
+                module: Object.assign({}, this.AppState.module),
+                saved: true,
+            });
+        };
+        TopView.prototype.ShowView = function (v) {
+            this.$$("tabbar").setValue(v);
+            this.show("editor." + v);
+        };
+        TopView.prototype.Hide = function () {
+            this.Reset();
+        };
+        TopView.prototype.Reset = function () {
+            var _this = this;
+            var id = this.AppState.moduleId;
+            if (!id) {
+                this.AppState.$batch({ mode: "list", module: null, saved: true });
+            }
+            else
+                this.Local.getModule(id).then(function (mod) {
+                    _this.AppState.$batch({
+                        mode: "view",
+                        module: Object.assign({}, JSON.parse(mod.text)),
+                        saved: true,
+                    });
+                });
+        };
+        TopView.prototype.ChangeModel = function (id) {
+            if (id)
+                this.State.$batch(this.Local.setDataSource(id));
+        };
+        TopView.prototype.ChangeModule = function (id) {
+            var _this = this;
+            this.InitStateValue = "";
+            if (id) {
+                this.Local.getModule(id).then(function (item) {
+                    var obj = JSON.parse(item.text);
+                    _this.InitStateValue = item.text;
+                    _this.InitName = obj.name = item.name;
+                    obj.id = item.id;
+                    obj.saved = true;
+                    obj.fields = _this.Local.getFields(obj.data, obj.joins);
+                    withContext({ load: true }, function () { return _this.State.$batch(obj); });
+                    _this.AppState.saved = true;
+                });
+            }
+            else {
+                this.InitStateValue = null;
+                this.State.$batch(this.Local.newModule());
+                this.State.fields = this.Local.getFields(this.State.data, this.State.joins);
+                this.AppState.saved = false;
+            }
+        };
+        TopView.prototype.TrackChanges = function () {
+            this.AppState.saved =
+                JSON.stringify(this.Operations.getModuleSaveData(this.State)) ==
+                    this.InitStateValue && this.State.name == this.InitName;
+        };
+        TopView.prototype.ShowHideButton = function (v) {
+            if (v)
+                this.$$("closeBtn").show();
+            else
+                this.$$("closeBtn").hide();
+        };
+        TopView.prototype.UpdateMeta = function (numColumns, columns) {
+            var meta = this.State.meta;
+            var state = this.State;
+            if (numColumns.length) {
+                if (state.type == "chart") {
+                    numColumns = numColumns.map(function (a) {
+                        var c = __assign(__assign({}, a), { value: a.name });
+                        delete c.name;
+                        return c;
+                    });
+                    meta.chart.series = this.app
+                        .getService("charts")
+                        .getSeries(numColumns, state.chartType);
+                }
+                else if (state.type == "heatmap") {
+                    meta.value = numColumns[0].id;
+                    meta.label = state.publicFields
+                        ? columns[columns.length - 1].id
+                        : columns[0].id;
+                    if (meta.color && !numColumns.find(function (a) { return a.id == meta.color; }))
+                        meta.color = numColumns[0].id;
+                }
+            }
+            return meta;
+        };
+        return TopView;
+    }(JetView));
+
+    var SummaryPopupView = (function (_super) {
+        __extends(SummaryPopupView, _super);
+        function SummaryPopupView(app, masterName) {
+            var _this = _super.call(this, app) || this;
+            _this.Name = masterName;
+            return _this;
+        }
+        SummaryPopupView.prototype.config = function () {
+            var _this = this;
+            return {
+                view: "popup",
+                body: {
+                    view: "list",
+                    css: "webix_rpt_popup_menu",
+                    width: 160,
+                    autoheight: true,
+                    template: function (obj) { return _this.GetTemplate(obj); },
+                    click: function (id) {
+                        _this.ClickHandler(id);
+                        _this.getRoot().close();
+                    },
+                    data: this.GetOptions(),
+                },
+            };
+        };
+        SummaryPopupView.prototype.ClickHandler = function (id) {
+            this.getParentView().ApplyAction(id);
+        };
+        SummaryPopupView.prototype.Show = function (node, data, index) {
+            this.SetActionStates(data, index);
+            this.getRoot().show(node);
+        };
+        SummaryPopupView.prototype.GetOptions = function () {
+            var _ = this.app.getService("locale")._;
+            return [{ id: "delete", value: _("Delete"), icon: "rpi-delete" }];
+        };
+        SummaryPopupView.prototype.SetActionStates = function (data) {
+            var popup = this.getRoot();
+            var list = popup.getBody();
+            list.data.each(function (action) {
+                if (data.length == 1)
+                    list.disableItem(action.id);
+                else
+                    list.enableItem(action.id);
+            });
+        };
+        SummaryPopupView.prototype.GetTemplate = function (obj) {
+            return "<span class='webix_icon " + obj.icon + "'></span> " + obj.value;
+        };
+        return SummaryPopupView;
+    }(JetView));
+
+    var BucketView = (function (_super) {
+        __extends(BucketView, _super);
+        function BucketView(app, state, pstate) {
+            var _this = _super.call(this, app) || this;
+            _this.State = state;
+            _this.ParentState = pstate;
+            return _this;
+        }
+        BucketView.prototype.config = function () {
+            var _this = this;
+            var _ = (this._ = this.app.getService("locale")._);
+            this.ValueSeparator = ",";
+            var inputs = {
+                margin: webix.skin.$active.layoutMargin.form,
+                padding: { top: 0, bottom: 0, left: 0, right: 0 },
+                localId: "forms",
+                view: "form",
+                type: "clean",
+                elements: [],
+            };
+            var other = {
+                localId: "other",
+                view: "form",
+                type: "clean",
+                borderless: true,
+                margin: webix.skin.$active.layoutMargin.form,
+                cols: [
+                    {
+                        view: "text",
+                        name: "name",
+                        width: 150,
+                        placeholder: _("Bucket name"),
+                        value: _("Other"),
+                        on: {
+                            onChange: function (v) { return _this.Changed("other", "name", v); },
+                        },
+                    },
+                    {
+                        view: "label",
+                        css: "webix_rpt_subtitle",
+                        label: _("Other values"),
+                    },
+                ],
+                rules: {
+                    name: webix.rules.isNotEmpty,
+                },
+            };
+            var padding = webix.skin.$active.layoutPadding.form;
+            return {
+                borderless: true,
+                type: "clean",
+                padding: { top: padding, bottom: padding, left: 0, right: 0 },
+                css: "webix_rpt_subview",
+                rows: [
+                    inputs,
+                    {
+                        height: webix.skin.$active.layoutMargin.form,
+                    },
+                    other,
+                    {
+                        height: webix.skin.$active.layoutMargin.form,
+                    },
+                    {
+                        view: "button",
+                        icon: "wxi-plus",
+                        type: "icon",
+                        label: _("Add bucket"),
+                        inputWidth: 210,
+                        align: "left",
+                        click: function () { return _this.AddNewBucket(); },
+                    },
+                ],
+            };
+        };
+        BucketView.prototype.init = function () {
+            var _this = this;
+            this.Local = this.app.getService("local");
+            this.Forms = this.$$("forms");
+            this.GetRowKeys(this.State.id).then(function (data) {
+                _this.Data = data.sort(function (a, b) { return _this.Sort(a, b); });
+                _this.CreateForm();
+            });
+            this.on(this.app, "onAction", function (name, action, id) {
+                if (name == "bucket" && action == "focus" && id == _this.State.id)
+                    _this.Focus(0);
+            });
+        };
+        BucketView.prototype.GetRowKeys = function (base) {
+            if (base && this.ParentState.columns.length) {
+                var keys_1 = [];
+                return this.GetColumnData(base).then(function (_a) {
+                    var data = _a[0], baseOptions = _a[1];
+                    data.forEach(function (row) {
+                        var key = row[base];
+                        if (keys_1.indexOf(key) == -1)
+                            keys_1.push(key);
+                    });
+                    if (baseOptions)
+                        return keys_1.map(function (key) {
+                            var keyOption = baseOptions.data.find(function (option) { return option.id == key; }) || null;
+                            return { id: key, value: keyOption ? keyOption.value : key };
+                        });
+                    return keys_1.map(function (key) { return ({ id: key, value: key }); });
+                });
+            }
+            else
+                return Promise.resolve([]);
+        };
+        BucketView.prototype.GetColumnData = function (baseColumn) {
+            var appState = this.app.getParam("state");
+            var moduleConfig = this.Local.getDataConfig(appState.module);
+            moduleConfig.columns = [baseColumn];
+            delete moduleConfig.buckets;
+            delete moduleConfig.group;
+            var waitData = [
+                this.Local.getData(moduleConfig),
+                this.Local.getOptionsList(baseColumn),
+            ];
+            return Promise.all(waitData);
+        };
+        BucketView.prototype.CreateForm = function () {
+            var _this = this;
+            var options = this.State.options;
+            if (options && options.length)
+                this.LoadBuckets(options);
+            else
+                this.AddNewBucket();
+            webix.delay(function () {
+                _this.app.callEvent("onAction", ["bucket", "resize", _this.State.id]);
+                _this.Focus(0);
+            });
+        };
+        BucketView.prototype.AddNewBucket = function () {
+            this.AddBucket();
+            this.Changed();
+            this.Focus();
+        };
+        BucketView.prototype.LoadBuckets = function (data) {
+            var _this = this;
+            data.forEach(function (bucket) {
+                if (!bucket.values)
+                    _this.LoadOther(bucket);
+                else
+                    _this.AddBucket(bucket);
+            });
+            this.Changed();
+        };
+        BucketView.prototype.LoadOther = function (b) {
+            var other = this.$$("other");
+            other.setValues({ name: b.id });
+        };
+        BucketView.prototype.AddBucket = function (bucket) {
+            bucket = bucket || {};
+            this.Forms.addView(this.GetRowForm(webix.uid(), bucket));
+        };
+        BucketView.prototype.GetRowForm = function (id, data) {
+            var _this = this;
+            var cols = [
+                {
+                    rows: [
+                        {
+                            width: 150,
+                            view: "text",
+                            name: "name",
+                            value: data.id || null,
+                            placeholder: this._("Bucket name"),
+                            on: {
+                                onChange: function (v) { return _this.Changed(id, "name", v); },
+                            },
+                        },
+                    ],
+                },
+                {
+                    view: "multicombo",
+                    name: "values",
+                    placeholder: this._("Bucket values"),
+                    css: "webix_multilist webix_rpt_multicombo",
+                    separator: this.ValueSeparator,
+                    suggest: {
+                        body: {
+                            css: "webix_multilist webix_rpt_bucket_values",
+                            data: this.Data,
+                            template: function (obj) { return _this.OptionTemplate(id, obj); },
+                        },
+                        on: {
+                            onBeforeShow: function () {
+                                this.getList().refresh();
+                            },
+                        },
+                    },
+                    value: data.values || null,
+                    on: {
+                        onChange: function (v) { return _this.Changed(id, "values", v); },
+                    },
+                },
+                {
+                    rows: [
+                        {
+                            view: "icon",
+                            icon: "wxi-dots",
+                            click: function (id, ev) { return _this.ShowPopup(id, ev); },
+                        },
+                    ],
+                },
+            ];
+            return {
+                view: "form",
+                localId: id,
+                type: "clean",
+                borderless: true,
+                margin: webix.skin.$active.layoutMargin.form,
+                rules: {
+                    name: webix.rules.isNotEmpty,
+                    values: webix.rules.isNotEmpty,
+                },
+                cols: cols,
+            };
+        };
+        BucketView.prototype.ShowPopup = function (id, ev) {
+            if (!this.Popup || !this.Popup.$view)
+                this.Popup = this.ui(new SummaryPopupView(this.app, "bucket"));
+            var form = webix
+                .$$(id)
+                .getParentView()
+                .getParentView();
+            this.ActiveForm = form;
+            this.Popup.Show(ev.target, this.GetValues(), form.getParentView().index(form));
+        };
+        BucketView.prototype.GetValidBuckets = function () {
+            var _this = this;
+            var otherForm = this.$$("other");
+            var otherName = otherForm.elements.name.getValue();
+            otherForm.validate();
+            var names = {};
+            if (otherName)
+                names[otherName] = [otherForm];
+            var options = [];
+            this.ForEachFormRow(function (form) {
+                form.validate();
+                var values = form.getValues();
+                var n = values.name;
+                if (n) {
+                    if (names[n]) {
+                        _this.$$(names[n]).forEach(function (f) { return f.markInvalid("name", true); });
+                        form.markInvalid("name", true);
+                    }
+                    else if (values.values.length)
+                        options.push({ id: n, values: values.values.split(",") });
+                    if (!names[n])
+                        names[n] = [];
+                    names[n].push(form);
+                }
+            });
+            if (options.length && otherName)
+                options.push({ id: otherName });
+            return options;
+        };
+        BucketView.prototype.Changed = function (id, name, value) {
+            if (name == "values")
+                this.CorrectValues(id, value);
+            var options = this.GetValidBuckets();
+            this.State.options = options;
+        };
+        BucketView.prototype.OptionTemplate = function (id, obj) {
+            var selected = !obj.$checked &&
+                this.GetValues().find(function (bucket) { return bucket.id != id && bucket.values.indexOf(obj.value) > -1; });
+            var css = "webix_rpt_bucket_value" +
+                (selected ? " webix_rpt_bucket_value_selected" : "");
+            return ("<div class='" +
+                css +
+                "'>" +
+                obj.value +
+                "</div>" +
+                (selected
+                    ? "<span class='webix_rpt_bucket_icon webix_icon rpi-pail-outline'></span>"
+                    : ""));
+        };
+        BucketView.prototype.GetValues = function () {
+            var data = [];
+            this.ForEachFormRow(function (form) {
+                var v = form.getValues();
+                v.id = form.config.localId;
+                data.push(v);
+            });
+            return data;
+        };
+        BucketView.prototype.ForEachFormRow = function (handler) {
+            this.Forms.getChildViews().forEach(function (form) {
+                if (form && form.elements) {
+                    handler(form);
+                }
+            });
+        };
+        BucketView.prototype.CorrectValues = function (id, v) {
+            this.ForEachFormRow(function (form) {
+                if (form.config.localId != id) {
+                    var values = form.getValues().values.split(",");
+                    values = values.filter(function (a) { return v.indexOf(a) == -1; });
+                    form.elements.values.setValue(values);
+                }
+            });
+        };
+        BucketView.prototype.ApplyAction = function (id) {
+            if (id == "delete")
+                this.DeleteBucket(this.ActiveForm);
+        };
+        BucketView.prototype.DeleteBucket = function (form) {
+            this.Forms.removeView(form);
+            this.Changed();
+        };
+        BucketView.prototype.Sort = function (a, b) {
+            var _this = this;
+            var type = this.ParentState.fields.find(function (c) { return c.id == _this.State.id; }).type;
+            a = a.value;
+            b = b.value;
+            if (type == "number") {
+                a = a * 1;
+                b = b * 1;
+                if (isNaN(b))
+                    return 1;
+                if (isNaN(a))
+                    return -1;
+            }
+            else {
+                if (!b)
+                    return 1;
+                if (!a)
+                    return -1;
+                a = a.toString().toLowerCase();
+                b = b.toString().toLowerCase();
+            }
+            return a > b ? 1 : a < b ? -1 : 0;
+        };
+        BucketView.prototype.Focus = function (index) {
+            var _this = this;
+            webix.delay(function () {
+                var forms = _this.Forms.getChildViews();
+                if (typeof index == "undefined")
+                    index = forms.length - 1;
+                var form = forms[index];
+                if (form)
+                    form.elements.name.focus();
+            }, null, null, 100);
+        };
+        return BucketView;
+    }(JetView));
+
+    var SummaryPopupView$1 = (function (_super) {
+        __extends(SummaryPopupView, _super);
+        function SummaryPopupView(app, master) {
+            var _this = _super.call(this, app) || this;
+            _this.Master = master;
+            return _this;
+        }
+        SummaryPopupView.prototype.config = function () {
+            var _this = this;
+            var _ = this.app.getService("locale")._;
+            return {
+                view: "popup",
+                autoheight: true,
+                fitMaster: true,
+                body: {
+                    rows: [
+                        {
+                            padding: { top: 5, bottom: 5, left: 10, right: 10 },
+                            cols: [
+                                {
+                                    view: "text",
+                                    localId: "search",
+                                    placeholder: _("Search"),
+                                },
+                            ],
+                        },
+                        {
+                            view: "list",
+                            scroll: true,
+                            yCount: 5,
+                            autoheight: true,
+                            select: true,
+                            type: {
+                                template: function (obj) { return _this.GetTemplate(obj); },
+                            },
+                            on: {
+                                onItemClick: function (id) {
+                                    var item = _this.List.getItem(id);
+                                    _this.AddColumn(item);
+                                    _this.View.hide();
+                                },
+                                onEnter: function () {
+                                    var item = _this.List.getSelectedItem();
+                                    if (item) {
+                                        _this.AddColumn(item);
+                                        webix.delay(function () { return _this.View.hide(); });
+                                    }
+                                },
+                            },
+                        },
+                    ],
+                },
+            };
+        };
+        SummaryPopupView.prototype.init = function () {
+            var _this = this;
+            this.View = this.getRoot();
+            var views = this.View.getBody().getChildViews();
+            this.State = this.getParam("state", true);
+            this.BucketState = this.getParam("buckets", true);
+            this.Text = views[0].getChildViews()[0];
+            this.List = views[1];
+            this.Text.attachEvent("onTimedKeyPress", function () {
+                _this.Find(_this.Text.getValue());
+            });
+        };
+        SummaryPopupView.prototype.AddColumn = function (column) {
+            var t = __spreadArrays(this.BucketState.buckets);
+            t.push({ column: column.id, options: [] });
+            this.BucketState.buckets = t;
+        };
+        SummaryPopupView.prototype.Show = function (node) {
+            node = node.firstChild.firstChild;
+            this.View.config.width = node.offsetWidth - 2;
+            this.View.adjust();
+            this.View.show(node);
+            this.Text.focus();
+            this.List.clearAll();
+            this.List.parse(this.GetColumns());
+        };
+        SummaryPopupView.prototype.GetColumns = function () {
+            var _this = this;
+            var columns = this.State.fields;
+            if (this.State.publicFields)
+                columns = columns.filter(function (a) {
+                    return _this.State.publicFields.find(function (b) { return b.id == a.id; });
+                });
+            return columns.map(function (a) { return ({
+                id: a.id,
+                value: a.name,
+                type: a.type,
+                model: a.model,
+                disabled: _this.BucketState.buckets &&
+                    _this.BucketState.buckets.find(function (b) { return b.column == a.id; }),
+            }); });
+        };
+        SummaryPopupView.prototype.GetTemplate = function (obj) {
+            return (obj.value +
+                (obj.model
+                    ? "<span class='webix_rpt_sources_path'>" + obj.model + "</span>"
+                    : ""));
+        };
+        SummaryPopupView.prototype.Find = function (value) {
+            value = value.toLowerCase();
+            if (value)
+                this.List.filter(function (item) { return item.value.toLowerCase().indexOf(value) > -1; });
+            else
+                this.List.filter("");
+        };
+        return SummaryPopupView;
+    }(JetView));
+
+    webix.protoUI({
+        name: "groupselect",
+        $cssName: "text webix_rpt_groupselect",
+        defaults: {
+            selectIcon: true,
+            modifiers: {},
+        },
+        renderModifier: function (id) {
+            var mid = this._modifiers[id];
+            if (mid) {
+                var option = this.config.modifiers.find(function (a) { return a.id === mid; });
+                return ("<div class='webix_rpt_date_selector'>" +
+                    (option ? option.value : "") +
+                    (this.config.selectIcon
+                        ? "<span class='webix_icon wxi-angle-down'></span>"
+                        : "") +
+                    "</div> <span class='webix_rpt_groupselect_sep'> | </span> ");
+            }
+            return "";
+        },
+        $renderTag: function (text, width, height, value) {
+            var content = this.renderModifier(value);
+            content +=
+                "<span>" +
+                    text +
+                    "</span><span class='webix_multicombo_delete webix_rpt_groupselect_delete' role='button' aria-label='" +
+                    webix.i18n.aria.removeItem +
+                    "'></span>";
+            return ("<li class='webix_multicombo_value' style='line-height:" +
+                height +
+                "px;' optvalue='" +
+                webix.template.escape(value) +
+                "'>" +
+                content +
+                "</li>");
+        },
+        $init: function () {
+            this._modifiers = {};
+            webix.extend(this.on_click, {
+                webix_rpt_date_selector: function (e, id, node) {
+                    var value = webix.html.locate(e, "optvalue");
+                    this.callEvent("onModifierClick", [value, e, node]);
+                    return false;
+                },
+            });
+        },
+        setValue: function (value) {
+            var _this = this;
+            if (value) {
+                if (typeof value !== "string" && typeof value[0] !== "string") {
+                    this._modifiers = {};
+                    value = value.map(function (a) {
+                        _this._modifiers[a.id] = a.mod || null;
+                        return a.id;
+                    });
+                }
+                webix.ui.multicombo.prototype.setValue.call(this, value);
+            }
+            else {
+                this._modifiers = {};
+            }
+            return webix.ui.multicombo.prototype.setValue.call(this, value);
+        },
+        getModifier: function (id) {
+            return this._modifiers[id];
+        },
+        setModifier: function (id, value, silent) {
+            this._modifiers[id] = value;
+            if (!silent)
+                this.callEvent("onChange", []);
+            this.refresh();
+        },
+        $setSize: function (x, y) {
+            var config = this.config;
+            var _a = this._custom_last_size || [0, 0], px = _a[0], py = _a[1];
+            if (x == px && y == py)
+                return;
+            this._custom_last_size = [x, y];
+            if (webix.ui.view.prototype.$setSize.call(this, x, y)) {
+                if (!x || !y)
+                    return;
+                if (config.labelPosition == "top") {
+                    config.labelWidth = 0;
+                }
+                this.render();
+            }
+        },
+    }, webix.ui.multicombo);
+
+    var BucketSettingsView = (function (_super) {
+        __extends(BucketSettingsView, _super);
+        function BucketSettingsView() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        BucketSettingsView.prototype.config = function () {
+            var _this = this;
+            var _ = (this._ = this.app.getService("locale")._);
+            this.Views = {};
+            var columns = {
+                margin: 5,
+                rows: [
+                    {
+                        autoheight: true,
+                        borderless: true,
+                        template: _("Specify columns and their data buckets"),
+                        css: "webix_rpt_description",
+                    },
+                    {
+                        view: "button",
+                        icon: "wxi-plus",
+                        localId: "addColumn",
+                        label: _("Add column"),
+                        click: function () { return _this.ShowColumns(); },
+                    },
+                ],
+            };
+            var buckets = {
+                view: "datatable",
+                css: "webix_rpt_columns_list webix_rpt_bcols",
+                localId: "table",
+                borderless: true,
+                autoheight: true,
+                header: false,
+                select: false,
+                subview: function (obj, target) {
+                    var buckets = createState({
+                        id: obj.id,
+                        options: obj.options,
+                    });
+                    _this.on(buckets.$changes, "*", ignoreInitial(function () {
+                        _this.Update(obj.id, buckets);
+                    }));
+                    var sub = (_this.Views[obj.id] = new BucketView(_this.app, buckets, _this.State));
+                    _this.ui(sub, { container: target });
+                    return sub.getRoot();
+                },
+                columns: [
+                    {
+                        fillspace: true,
+                        template: function (item, common) { return _this.RowTemplate(item, common); },
+                    },
+                ],
+                on: {
+                    onItemClick: function (id) { return _this.ToggleSub(id); },
+                    onAfterRender: function () {
+                        if (_this._hasFocus) {
+                            var el = _this._hasFocus;
+                            _this._hasFocus = null;
+                            if (el && document.contains(el) && el !== document.activeElement)
+                                el.focus();
+                        }
+                    },
+                    onSubViewOpen: function (id) { return _this.HideAllEditors(id); },
+                    onSubViewClose: function () { return _this.ResetEditor(); },
+                },
+                onClick: {
+                    webix_rpt_bucket_delete: function (e, id) {
+                        webix
+                            .confirm({
+                            title: _("Delete"),
+                            ok: _("Delete"),
+                            cancel: _("Cancel"),
+                            text: _("Are you sure to delete?"),
+                        })
+                            .then(function () { return _this.RemoveColumn(id); });
+                        return false;
+                    },
+                },
+            };
+            return {
+                view: "form",
+                borderless: true,
+                padding: 0,
+                elements: [
+                    {
+                        margin: webix.skin.$active.layoutMargin.form,
+                        rows: [columns, buckets],
+                    },
+                ],
+            };
+        };
+        BucketSettingsView.prototype.init = function () {
+            var _this = this;
+            this.State = this.getParam("state", true);
+            this.Table = this.$$("table");
+            var buckets = this.State.buckets || [];
+            this.BucketState = createState({ buckets: buckets, newColumn: null });
+            this.LoadBuckets();
+            this.setParam("buckets", this.BucketState);
+            this.on(this.BucketState.$changes, "*", ignoreInitial(function (v, o) { return _this.Changed(v, o); }));
+            this.on(this.app, "onAction", function (name, action, id) {
+                if (_this.getRoot() && name == "bucket" && action == "resize")
+                    _this.Table.refresh(id);
+            });
+        };
+        BucketSettingsView.prototype.ShowColumns = function () {
+            if (!this.ColumnList || !this.ColumnList.$view)
+                this.ColumnList = this.ui(SummaryPopupView$1, this.State);
+            this.ColumnList.Show(this.$$("addColumn").$view);
+        };
+        BucketSettingsView.prototype.LoadBuckets = function () {
+            var _this = this;
+            var tableData = this.BucketState.buckets
+                ? this.BucketState.buckets.map(function (a) {
+                    var field = _this.State.fields.find(function (f) { return f.id == a.column; });
+                    return {
+                        id: a.column,
+                        name: field.name,
+                        model: field.model || null,
+                        options: a.options,
+                    };
+                })
+                : [];
+            this.Table.clearAll();
+            this.Table.parse(tableData);
+            if (!tableData.length)
+                this.Table.hide();
+        };
+        BucketSettingsView.prototype.AddColumn = function (id) {
+            if (this.Table.config.hidden)
+                this.Table.show();
+            var field = this.State.fields.find(function (f) { return f.id == id; });
+            this.Table.add({
+                id: id,
+                name: field.name,
+                model: field.model || null,
+                options: [],
+            });
+        };
+        BucketSettingsView.prototype.RemoveColumn = function (id) {
+            this.Table.remove(id);
+            var buckets = __spreadArrays(this.BucketState.buckets);
+            var i = buckets.findIndex(function (a) { return a.column == id; });
+            buckets.splice(i, 1);
+            this.BucketState.buckets = buckets;
+            if (!buckets.length)
+                this.Table.hide();
+            if (this._ActiveEditor && String(id) == String(this._ActiveEditor))
+                this.ResetEditor();
+            this.Views[id].destructor();
+        };
+        BucketSettingsView.prototype.ListTemplate = function (obj) {
+            return (obj.value +
+                (obj.model
+                    ? "<span class='webix_rpt_sources_path'>" + obj.model + "</span>"
+                    : ""));
+        };
+        BucketSettingsView.prototype.Changed = function (newV, oldV) {
+            if (newV.length > oldV.length) {
+                var id = newV[newV.length - 1].column;
+                this.AddColumn(id);
+                this.Table.openSub(id);
+            }
+            var buckets = this.BucketState.buckets.filter(function (b) { return b.options.length; });
+            this.State.buckets = buckets;
+        };
+        BucketSettingsView.prototype.RowTemplate = function (item, common) {
+            var html = "<div class='webix_rpt_config_row'>\n\t\t\t<span class='webix_rpt_buckets_num'>\n\t\t\t\t<span class='webix_rpt_bucket_sublabel'>" + this._("buckets") + ": </span>\n\t\t\t\t\t" + item.options.length + "\n\t\t\t\t</span>\n\t\t\t\t<div class='webix_rpt_config_row_name'>\n\t\t\t\t\t<span class='webix_rpt_bucket_sublabel'>" + this._("column") + ": </span>\n\t\t\t\t\t" + item.name + (item.model
+                ? "<span class='webix_rpt_sources_path'>" + item.model + "</span>"
+                : "") + "\n\t\t\t\t</div>\n\t\t\t\t<span class='webix_icon rpi-delete webix_rpt_bucket_delete'></span>\n\t\t\t\t" + common.subrow(item, common) + "\n\t\t\n\t\t</div>";
+            return html;
+        };
+        BucketSettingsView.prototype.HideAllEditors = function (id) {
+            var prevId = this._ActiveEditor;
+            if (prevId && this.Table.getItem(prevId))
+                this.Table.closeSub(prevId);
+            this._ActiveEditor = id;
+            if (id)
+                this.FocusEditor();
+        };
+        BucketSettingsView.prototype.FocusEditor = function () {
+            this.app.callEvent("onAction", ["bucket", "focus", this._ActiveEditor]);
+        };
+        BucketSettingsView.prototype.ResetEditor = function () {
+            this._ActiveEditor = null;
+        };
+        BucketSettingsView.prototype.ToggleSub = function (id) {
+            var row = this.Table.getItem(id);
+            if (row.$subopen)
+                this.Table.closeSub(id);
+            else
+                this.Table.openSub(id);
+        };
+        BucketSettingsView.prototype.Update = function (id, data) {
+            this._hasFocus = document.activeElement;
+            var buckets = __spreadArrays(this.BucketState.buckets);
+            var column = this.BucketState.buckets.find(function (b) { return b.column == id; });
+            column.options = data.options;
+            this.BucketState.buckets = buckets;
+            this.Table.updateItem(id, { options: column.options });
+        };
+        return BucketSettingsView;
+    }(JetView));
+
     var DateView = (function (_super) {
         __extends(DateView, _super);
-        function DateView(app, name, master) {
-            var _this = _super.call(this, app, name) || this;
+        function DateView(app, master) {
+            var _this = _super.call(this, app) || this;
             _this.Master = master;
             return _this;
         }
@@ -5599,55 +6792,6 @@ Usage without proper license is prohibited.
                 .refresh();
         };
         return DateView;
-    }(JetView));
-
-    var SummaryPopupView = (function (_super) {
-        __extends(SummaryPopupView, _super);
-        function SummaryPopupView(app, name, master) {
-            var _this = _super.call(this, app, name) || this;
-            _this.Master = master;
-            return _this;
-        }
-        SummaryPopupView.prototype.config = function () {
-            var _this = this;
-            return {
-                view: "popup",
-                body: {
-                    view: "list",
-                    css: "webix_rpt_popup_menu",
-                    width: 160,
-                    autoheight: true,
-                    template: function (obj) { return _this.GetTemplate(obj); },
-                    click: function (id) {
-                        _this.app.callEvent("summaryAction", [id]);
-                        _this.getRoot().close();
-                    },
-                    data: this.GetOptions(),
-                },
-            };
-        };
-        SummaryPopupView.prototype.Show = function (node, data, index) {
-            this.SetActionStates(data, index);
-            this.getRoot().show(node);
-        };
-        SummaryPopupView.prototype.GetOptions = function () {
-            var _ = this.app.getService("locale")._;
-            return [{ id: "delete", value: _("Delete"), icon: "rpi-delete" }];
-        };
-        SummaryPopupView.prototype.SetActionStates = function (data) {
-            var popup = this.getRoot();
-            var list = popup.getBody();
-            list.data.each(function (action) {
-                if (data.length == 1)
-                    list.disableItem(action.id);
-                else
-                    list.enableItem(action.id);
-            });
-        };
-        SummaryPopupView.prototype.GetTemplate = function (obj) {
-            return "<span class='webix_icon " + obj.icon + "'></span> " + obj.value;
-        };
-        return SummaryPopupView;
     }(JetView));
 
     var Summaries = (function (_super) {
@@ -5725,7 +6869,6 @@ Usage without proper license is prohibited.
                 .sort(function (a, b) { return (a.type < b.type ? 1 : -1); })
                 .map(function (a) { return ({ id: a.id, value: a.name, type: a.type }); });
             this.CreateForm();
-            this.on(this.app, "summaryAction", function (id) { return _this.ApplyAction(id); });
             this.on(this.GroupState.$changes, "by", function () { return _this.ValidateFormData(); });
         };
         Summaries.prototype.CreateForm = function () {
@@ -5859,7 +7002,7 @@ Usage without proper license is prohibited.
         };
         Summaries.prototype.ShowPopup = function (id, ev) {
             if (!this.Popup || !this.Popup.$view)
-                this.Popup = this.ui(SummaryPopupView);
+                this.Popup = this.ui(new SummaryPopupView(this.app, "summary"));
             var form = webix.$$(id).getParentView();
             this.ActiveForm = form;
             this.Popup.Show(ev.target, this.GetData(), form.getParentView().index(form));
@@ -5941,94 +7084,6 @@ Usage without proper license is prohibited.
         };
         return Summaries;
     }(JetView));
-
-    webix.protoUI({
-        name: "groupselect",
-        $cssName: "text",
-        defaults: {
-            selectIcon: true,
-            modifiers: {},
-        },
-        renderModifier: function (id) {
-            var mid = this._modifiers[id];
-            if (mid) {
-                var option = this.config.modifiers.find(function (a) { return a.id === mid; });
-                return ("<div class='webix_rpt_date_selector'>" +
-                    (option ? option.value : "") +
-                    (this.config.selectIcon
-                        ? "<span class='webix_icon wxi-angle-down'></span>"
-                        : "") +
-                    "</div> | ");
-            }
-            return "";
-        },
-        $renderTag: function (text, height, value) {
-            var content = this.renderModifier(value);
-            content +=
-                "<span>" +
-                    text +
-                    "</span><span class='webix_multicombo_delete' role='button' aria-label='" +
-                    webix.i18n.aria.removeItem +
-                    "'>x</span>";
-            return ("<li class='webix_multicombo_value' style='line-height:" +
-                height +
-                "px;' optvalue='" +
-                webix.template.escape(value) +
-                "'>" +
-                content +
-                "</li>");
-        },
-        $init: function () {
-            this._modifiers = {};
-            webix.extend(this.on_click, {
-                webix_rpt_date_selector: function (e, id, node) {
-                    var value = webix.html.locate(e, "optvalue");
-                    this.callEvent("onModifierClick", [value, e, node]);
-                    return false;
-                },
-            });
-        },
-        setValue: function (value) {
-            var _this = this;
-            if (value) {
-                if (typeof value !== "string" && typeof value[0] !== "string") {
-                    this._modifiers = {};
-                    value = value.map(function (a) {
-                        _this._modifiers[a.id] = a.mod || null;
-                        return a.id;
-                    });
-                }
-            }
-            else {
-                this._modifiers = {};
-            }
-            return webix.ui.multicombo.prototype.setValue.call(this, value);
-        },
-        getModifier: function (id) {
-            return this._modifiers[id];
-        },
-        setModifier: function (id, value, silent) {
-            this._modifiers[id] = value;
-            if (!silent)
-                this.callEvent("onChange", []);
-            this.refresh();
-        },
-        $setSize: function (x, y) {
-            var config = this.config;
-            var _a = this._custom_last_size || [0, 0], px = _a[0], py = _a[1];
-            if (x == px && y == py)
-                return;
-            this._custom_last_size = [x, y];
-            if (webix.ui.view.prototype.$setSize.call(this, x, y)) {
-                if (!x || !y)
-                    return;
-                if (config.labelPosition == "top") {
-                    config.labelWidth = 0;
-                }
-                this.render();
-            }
-        },
-    }, webix.ui.multicombo);
 
     var OtherSettingsView = (function (_super) {
         __extends(OtherSettingsView, _super);
@@ -6129,7 +7184,7 @@ Usage without proper license is prohibited.
         OtherSettingsView.prototype.ShowModifierPopup = function (id, e, node) {
             var _this = this;
             if (!this.DatePopup)
-                this.DatePopup = this.ui(new DateView(this.app, "", this.$$("groupBy")));
+                this.DatePopup = this.ui(new DateView(this.app, this.$$("groupBy")));
             webix.delay(function () { return _this.DatePopup.Show(node, id); });
         };
         OtherSettingsView.prototype.GetDateOptions = function () {
@@ -6153,221 +7208,6 @@ Usage without proper license is prohibited.
             };
         };
         return OtherSettingsView;
-    }(JetView));
-
-    var TopView = (function (_super) {
-        __extends(TopView, _super);
-        function TopView() {
-            return _super !== null && _super.apply(this, arguments) || this;
-        }
-        TopView.prototype.config = function () {
-            var _this = this;
-            var _ = this.app.getService("locale")._;
-            var tabbar = {
-                optionWidth: 102,
-                tabMinWidth: 102,
-                view: "tabbar",
-                localId: "tabbar",
-                css: "webix_rpt_editor_tabbar",
-                type: "bottom",
-                borderless: true,
-                options: [
-                    { id: "common", value: _("Common") },
-                    { id: "data", value: _("Query") },
-                    { id: "other", value: _("Data") },
-                    { id: "structure", value: _("View") },
-                ],
-                on: {
-                    onChange: function (v) { return _this.ShowView(v); },
-                },
-            };
-            var toolbar = {
-                view: "toolbar",
-                padding: { left: 13, top: 0, bottom: 0 },
-                height: webix.skin.$active.barHeight + 6,
-                scroll: false,
-                cols: [
-                    tabbar,
-                    {
-                        view: "icon",
-                        width: 40,
-                        localId: "closeBtn",
-                        icon: "rpi-close",
-                        click: function () { return _this.Hide(); },
-                    },
-                ],
-            };
-            var ui = {
-                width: 490,
-                hidden: false,
-                localId: "settings",
-                rows: [toolbar, { $subview: true }],
-            };
-            this.Local = this.app.getService("local");
-            return this.Local.ready(ui);
-        };
-        TopView.prototype.init = function () {
-            var _this = this;
-            this.AppState = this.app.getParam("state");
-            var initial = this.Local.newModule();
-            initial.id = -1;
-            var state = (this.State = createState(initial));
-            this.setParam("state", this.State);
-            this.on(this.AppState.$changes, "moduleId", function (v) { return _this.ChangeModule(v); });
-            this.on(this.State.$changes, "data", function (id, o, k, ctx) {
-                if (id && (!ctx || !ctx.load))
-                    _this.ChangeModel(id);
-            });
-            this.on(this.AppState.$changes, "toolbar", function (v) { return _this.ShowHideButton(v); });
-            this.on(this.State.$changes, "*", debounce(function () {
-                if (_this.State.id === -1)
-                    return;
-                _this.TrackChanges();
-                _this.AppState.module = Object.assign({}, _this.State);
-            }));
-            this.on(state.$changes, "group", function (v, old, _key, ctx) {
-                if (!v && old) {
-                    state.$batch({
-                        publicFields: null,
-                        columns: state.oldColumns ||
-                            _this.Local.getFields(state.data, state.joins, true),
-                    });
-                }
-                else if (v) {
-                    var prev_1 = [];
-                    if (!ctx || !ctx.load) {
-                        if (!old)
-                            state.oldColumns = state.columns;
-                        else {
-                            if (JSON.stringify(v) == JSON.stringify(old))
-                                return;
-                            prev_1 = __spreadArrays(_this.State.columns);
-                        }
-                    }
-                    else {
-                        prev_1 = __spreadArrays(_this.State.columns);
-                    }
-                    var columns = v.columns.map(function (a) { return ({
-                        id: a.op + "." + a.id,
-                        name: a.name,
-                        type: "number",
-                        meta: {},
-                        model: "",
-                    }); });
-                    if (v.by)
-                        columns = columns.concat(v.by.map(function (a) {
-                            var base = _this.State.fields.find(function (b) { return b.id == a.id; });
-                            var id = a.mod ? a.mod + "." + a.id : a.id;
-                            var obj = __assign(__assign({}, base), { id: id });
-                            if (a.mod)
-                                obj.type = "text";
-                            return obj;
-                        }));
-                    var was_1 = {};
-                    (state.publicFields || state.columns).forEach(function (a) { return (was_1[a.id] = 1); });
-                    var now_1 = {};
-                    columns.forEach(function (a) {
-                        now_1[a.id] = 1;
-                        if (!was_1[a.id])
-                            prev_1.push(a);
-                    });
-                    prev_1 = prev_1.filter(function (a) { return now_1[a.id]; });
-                    if (state.meta.freeze && state.meta.freeze >= prev_1.length)
-                        delete state.meta.freeze;
-                    state.$batch({ publicFields: columns, columns: prev_1 });
-                }
-            });
-            this.on(this.app, "saveModule", function () {
-                var save = _this.SaveData();
-                var text = JSON.stringify(save);
-                _this.Local.saveModule(_this.AppState.moduleId, {
-                    name: _this.State.name,
-                    text: text,
-                }).then(function (id) {
-                    _this.AppState.$batch({
-                        moduleId: id,
-                        mode: "view",
-                        module: Object.assign({}, _this.AppState.module),
-                        saved: true,
-                    });
-                });
-            });
-            this.on(this.app, "resetModule", function () { return _this.Reset(); });
-            this.on(this.app, "onColumnResize", function (id, width) {
-                var next = __spreadArrays(_this.State.columns);
-                next.find(function (a) { return a.id == id; }).width = width;
-                _this.State.columns = next;
-            });
-            this.on(this.AppState.$changes, "readonly", function (mod) {
-                if (mod)
-                    _this.Reset();
-            });
-            this.show("./editor.common");
-        };
-        TopView.prototype.ShowView = function (v) {
-            this.$$("tabbar").setValue(v);
-            this.show("editor." + v);
-        };
-        TopView.prototype.Hide = function () {
-            this.Reset();
-        };
-        TopView.prototype.Reset = function () {
-            var _this = this;
-            var id = this.AppState.moduleId;
-            if (!id) {
-                this.AppState.$batch({ mode: "list", module: null, saved: true });
-            }
-            else
-                this.Local.getModule(id).then(function (mod) {
-                    _this.AppState.$batch({
-                        mode: "view",
-                        module: Object.assign({}, JSON.parse(mod.text)),
-                        saved: true,
-                    });
-                });
-        };
-        TopView.prototype.ChangeModel = function (id) {
-            if (id)
-                this.State.$batch(this.Local.setDataSource(id));
-        };
-        TopView.prototype.ChangeModule = function (id) {
-            var _this = this;
-            this.InitStateValue = "";
-            if (id) {
-                this.Local.getModule(id).then(function (item) {
-                    var obj = JSON.parse(item.text);
-                    _this.InitStateValue = item.text;
-                    _this.InitName = obj.name = item.name;
-                    obj.id = item.id;
-                    obj.saved = true;
-                    obj.fields = _this.Local.getFields(obj.data, obj.joins);
-                    withContext({ load: true }, function () { return _this.State.$batch(obj); });
-                    _this.AppState.saved = true;
-                });
-            }
-            else {
-                this.InitStateValue = null;
-                this.State.$batch(this.Local.newModule());
-                this.State.fields = this.Local.getFields(this.State.data, this.State.joins);
-                this.AppState.saved = false;
-            }
-        };
-        TopView.prototype.TrackChanges = function () {
-            this.AppState.saved =
-                JSON.stringify(this.SaveData()) == this.InitStateValue &&
-                    this.State.name == this.InitName;
-        };
-        TopView.prototype.SaveData = function () {
-            var _a = this.State, desc = _a.desc, data = _a.data, joins = _a.joins, query = _a.query, columns = _a.columns, group = _a.group, meta = _a.meta, sort = _a.sort, type = _a.type;
-            return { desc: desc, data: data, joins: joins, query: query, columns: columns, group: group, meta: meta, sort: sort, type: type };
-        };
-        TopView.prototype.ShowHideButton = function (v) {
-            if (v)
-                this.$$("closeBtn").show();
-            else
-                this.$$("closeBtn").hide();
-        };
-        return TopView;
     }(JetView));
 
     var OtherSettingsView$1 = (function (_super) {
@@ -6395,6 +7235,23 @@ Usage without proper license is prohibited.
                     },
                 ],
             };
+            var buckets = {
+                cols: [
+                    {
+                        view: "switch",
+                        localId: "bucketsSwitch",
+                        css: "webix_rpt_title",
+                        width: 65,
+                        on: {
+                            onChange: function (v) { return _this.ToggleBuckets(v); },
+                        },
+                    },
+                    {
+                        view: "label",
+                        label: _("Data buckets"),
+                    },
+                ],
+            };
             var sortByMode = {
                 cols: [
                     {
@@ -6413,24 +7270,30 @@ Usage without proper license is prohibited.
                 ],
             };
             return {
-                type: "form",
-                rows: [
-                    groupByMode,
-                    { $subview: "_hidden", name: "group" },
-                    sortByMode,
-                    { $subview: "_hidden", name: "sort" },
-                    { gravity: 0.000001 },
-                ],
+                view: "scrollview",
+                body: {
+                    type: "form",
+                    rows: [
+                        groupByMode,
+                        { $subview: "_hidden", name: "group" },
+                        buckets,
+                        { $subview: "_hidden", name: "buckets" },
+                        sortByMode,
+                        { $subview: "_hidden", name: "sort" },
+                        { gravity: 0.000001 },
+                    ],
+                },
             };
         };
         OtherSettingsView.prototype.init = function () {
             this.State = this.getParam("state", true);
             this.$$("groupBySwitch").setValue(!!this.State.group);
             this.$$("sortBySwitch").setValue(!!this.State.sort);
+            this.$$("bucketsSwitch").setValue(!!this.State.buckets);
         };
         OtherSettingsView.prototype.ToggleGroupBy = function (v) {
             if (v) {
-                this.show("./editor.groups", { target: "group" });
+                this.show("./editor.other.groups", { target: "group" });
             }
             else {
                 this.State.group = null;
@@ -6439,11 +7302,20 @@ Usage without proper license is prohibited.
         };
         OtherSettingsView.prototype.ToggleSortBy = function (v) {
             if (v) {
-                this.show("./editor.sorts", { target: "sort" });
+                this.show("./editor.other.sorts", { target: "sort" });
             }
             else {
                 this.State.sort = null;
                 this.show("_hidden", { target: "sort" });
+            }
+        };
+        OtherSettingsView.prototype.ToggleBuckets = function (v) {
+            if (v) {
+                this.show("./editor.other.buckets", { target: "buckets" });
+            }
+            else {
+                this.State.buckets = null;
+                this.show("_hidden", { target: "buckets" });
             }
         };
         return OtherSettingsView;
@@ -6545,8 +7417,8 @@ Usage without proper license is prohibited.
 
     var AxisPropertiesView = (function (_super) {
         __extends(AxisPropertiesView, _super);
-        function AxisPropertiesView(app, name, data, chartState) {
-            var _this = _super.call(this, app, name) || this;
+        function AxisPropertiesView(app, data, chartState) {
+            var _this = _super.call(this, app) || this;
             _this.Axis = data;
             _this.ChartState = chartState;
             return _this;
@@ -6668,9 +7540,9 @@ Usage without proper license is prohibited.
             this._ActiveEditor[name] = id;
             if (id) {
                 webix.delay(function () {
-                    return _this.$$(name)
-                        .getSubView(id)
-                        .focus();
+                    var subView = _this.$$(name).getSubView(id);
+                    if (subView)
+                        subView.focus();
                 }, null, null, 100);
             }
         };
@@ -6691,8 +7563,8 @@ Usage without proper license is prohibited.
 
     var ColorPopupView = (function (_super) {
         __extends(ColorPopupView, _super);
-        function ColorPopupView(app, name, state) {
-            var _this = _super.call(this, app, name) || this;
+        function ColorPopupView(app, state) {
+            var _this = _super.call(this, app) || this;
             _this.State = state;
             _this.Id = null;
             return _this;
@@ -6796,8 +7668,8 @@ Usage without proper license is prohibited.
 
     var SeriesPropertiesView = (function (_super) {
         __extends(SeriesPropertiesView, _super);
-        function SeriesPropertiesView(app, name, data, chartState) {
-            var _this = _super.call(this, app, name) || this;
+        function SeriesPropertiesView(app, data, chartState) {
+            var _this = _super.call(this, app) || this;
             _this.Series = data;
             _this.ChartState = chartState;
             return _this;
@@ -6862,9 +7734,15 @@ Usage without proper license is prohibited.
             };
         };
         SeriesPropertiesView.prototype.init = function () {
+            var _this = this;
             bind(this.Series, "*", this.getRoot());
             if (this.Charts.itemSupport.indexOf(this.ChartState.chartType) > -1)
                 this.getRoot().showBatch("marker");
+            this.on(this.Series.$changes, "color", function () {
+                var markerType = _this.getRoot().elements["markerType"];
+                markerType.refresh();
+                markerType.getList().refresh();
+            });
         };
         SeriesPropertiesView.prototype.ItemListTemplate = function (item) {
             return "<div class=\"webix_rpt_config_row\">" + item.value + " <span class='webix_icon " + item.icon + "' style='color:" + this.Series.color + "'></span></div>";
@@ -6931,7 +7809,7 @@ Usage without proper license is prohibited.
                     _this.on(series.$changes, "*", ignoreInitial(function () {
                         _this.UpdateSeries(obj.id, series);
                     }));
-                    var sub = new SeriesPropertiesView(_this.app, "", series, _this.ChartState);
+                    var sub = new SeriesPropertiesView(_this.app, series, _this.ChartState);
                     _this.ui(sub, { container: target });
                     return sub.getRoot();
                 },
@@ -6956,6 +7834,7 @@ Usage without proper license is prohibited.
                     },
                     onAfterDrop: function () { return _this.SaveOrder(); },
                     onSubViewOpen: function (id) { return _this.HideAllEditors(id); },
+                    "data->onClearAll": function () { return _this.ResetEditor(); },
                     onSubViewClose: function () { return _this.ResetEditor(); },
                 },
                 onClick: {
@@ -6981,7 +7860,7 @@ Usage without proper license is prohibited.
                             _this.on(axis.$changes, "*", ignoreInitial(function () {
                                 _this.UpdateAxis(obj.id, axis);
                             }));
-                            var sub = new AxisPropertiesView(_this.app, "", axis, _this.ChartState);
+                            var sub = new AxisPropertiesView(_this.app, axis, _this.ChartState);
                             _this.ui(sub, { container: target });
                             return sub.getRoot();
                         },
@@ -7248,27 +8127,7 @@ Usage without proper license is prohibited.
             ];
         };
         ChartView.prototype.ApplySeriesKeys = function (sourceArray) {
-            var _this = this;
-            var data = [];
-            var colorIndex = 0;
-            sourceArray.forEach(function (field) {
-                var series = {
-                    id: field.id,
-                    name: field.value,
-                    model: field.model || null,
-                    show: true,
-                    meta: {
-                        name: field.value,
-                        color: _this.Charts.colors[colorIndex] || _this.Charts.colors[0],
-                    },
-                };
-                colorIndex++;
-                if (_this.Charts.itemSupport.indexOf(_this.ChartState.type) != -1) {
-                    series.meta.markerType = "r";
-                    series.meta.fillMarker = false;
-                }
-                data.push(series);
-            });
+            var data = this.Charts.getSeries(sourceArray, this.ChartState.type);
             this.ChartState.series = data;
             this.LoadSeries(data);
         };
@@ -7372,7 +8231,7 @@ Usage without proper license is prohibited.
         };
         ChartView.prototype.ShowColorPopup = function (e, id) {
             if (!this.ColorPopup || !this.ColorPopup.$view)
-                this.ColorPopup = this.ui(new ColorPopupView(this.app, "", this.ChartState));
+                this.ColorPopup = this.ui(new ColorPopupView(this.app, this.ChartState));
             this.ActiveSeries = id;
             this.ColorPopup.Show(e.target, id);
         };
@@ -7426,8 +8285,8 @@ Usage without proper license is prohibited.
 
     var ColumnPropertiesView = (function (_super) {
         __extends(ColumnPropertiesView, _super);
-        function ColumnPropertiesView(app, name, data) {
-            var _this = _super.call(this, app, name) || this;
+        function ColumnPropertiesView(app, data) {
+            var _this = _super.call(this, app) || this;
             _this.Column = data;
             return _this;
         }
@@ -7446,9 +8305,9 @@ Usage without proper license is prohibited.
                     view: "richselect",
                     name: "header",
                     options: [
-                        { id: "none", value: "None" },
-                        { id: "text", value: "Text" },
-                        { id: "select", value: "Select" },
+                        { id: "none", value: _("No filter") },
+                        { id: "text", value: _("Text") },
+                        { id: "select", value: _("Select") },
                     ],
                 },
             ];
@@ -7516,7 +8375,9 @@ Usage without proper license is prohibited.
             this.State = this.getParam("state", true);
             this.Local = this.app.getService("local");
             var fields = (this.Fields = (this.State.publicFields || this.State.fields).map(function (a) { return (__assign({}, a)); }));
-            var valueFields = fields.filter(function (field) { return field.type == "number"; });
+            var valueFields = fields.filter(function (field) { return field.type == "number" && !field.key; });
+            if (!valueFields.length)
+                valueFields = fields.filter(function (field) { return field.type == "number"; });
             var els = this.getRoot().elements;
             var lc = els.label;
             lc.getList().parse(fields);
@@ -7659,7 +8520,7 @@ Usage without proper license is prohibited.
                     _this.on(column.$changes, "*", ignoreInitial(function () {
                         _this.Update(obj.id, column);
                     }));
-                    var sub = new ColumnPropertiesView(_this.app, "", column);
+                    var sub = new ColumnPropertiesView(_this.app, column);
                     _this.ui(sub, { container: target });
                     return sub.getRoot();
                 },
@@ -7829,7 +8690,9 @@ Usage without proper license is prohibited.
                 : _("Click 'New' button to add a new report");
         };
         EmptyView.prototype.GetSVG = function () {
-            return "<svg  xmlns='http://www.w3.org/2000/svg' viewBox='0 0 390 320'><defs><style>.cls-1{fill:#9dbabf;fill-opacity:0.25;}.cls-2{fill:#edeff0;}.cls-3{fill:#b4dfea;}.cls-4{fill:#fafbff;}.cls-5{fill:#dedede;}.cls-6{fill:#f2f2f2;}.cls-7{fill:#fff;}.cls-8{fill:#00d1eb;}.cls-9{fill:#f4f5f9;}</style></defs><path class='cls-1' d='M369.51,182.77c-23.18-52.39,32-103.23,13.74-148.28s-77.61-39.42-162.07-20S78.47-6.35,34.66,14.46c-29.39,14-27.27,58.82-5,107,38.95,84.29-51.86,117.32-24.38,166s118.91-.95,183.37,4.22c37.62.59,62.88,6.26,109.52,21.27C387.63,341.7,412.41,279.75,369.51,182.77Z'/><rect class='cls-2' x='111.53' y='226.04' width='212.47' height='0.91'/><rect class='cls-3' x='97' y='89.51' width='212' height='151.96'/><rect class='cls-4' x='67' y='159.96' width='136.33' height='81.98' rx='2'/><polygon class='cls-5' points='199.32 235.55 72.61 235.55 72.61 165.28 71.01 165.28 71.01 235.55 71.01 237.68 71.01 237.68 72.61 237.68 72.61 237.68 199.32 237.68 199.32 235.55'/><rect class='cls-6' x='84.64' y='165.28' width='0.8' height='68.14'/><rect class='cls-6' x='97.47' y='165.28' width='0.8' height='68.14'/><rect class='cls-6' x='110.3' y='165.28' width='0.8' height='68.14'/><rect class='cls-6' x='123.14' y='165.28' width='0.8' height='68.14'/><rect class='cls-6' x='135.97' y='165.28' width='0.8' height='68.14'/><rect class='cls-6' x='148.8' y='165.28' width='0.8' height='68.14'/><rect class='cls-6' x='161.63' y='165.28' width='0.8' height='68.14'/><rect class='cls-6' x='174.46' y='165.28' width='0.8' height='68.14'/><rect class='cls-6' x='187.29' y='165.28' width='0.8' height='68.14'/><rect class='cls-7' x='111.53' y='94.41' width='212.47' height='132.54'/><rect class='cls-8' x='111.53' y='109.85' width='212.47' height='0.91'/><path class='cls-9' d='M111.53,94.41H324v15.44H111.53Z'/><path class='cls-7' d='M111.53,79H324V94.41H111.53Z'/><path class='cls-2' d='M324,125.28v-.91H287.68V109.84h-.91v14.53H250.45V109.84h-.91v14.53H213.22V109.84h-.9v14.53H176V109.85h-.91v14.52H111.53v.91h63.56v13.61H111.53v.91h63.56v13.62H111.53v.91h63.56v13.61H111.53v.91h63.56v13.62H111.53v.91h63.56V197H111.53v.91h63.56v13.62H111.53v.9h63.56V227H176V212.42h36.32V227h.9V212.42h36.32V227h.91V212.42h36.32V227h.91V212.42H324v-.9H287.68V197.9H324V197H287.68V183.38H324v-.91H287.68V168.85H324v-.91H287.68V154.33H324v-.91H287.68V139.8H324v-.91H287.68V125.28Zm-74.46,0v13.61H213.22V125.28Zm-36.32,57.19V168.85h36.32v13.62Zm36.32.91V197H213.22V183.38Zm-36.32-15.44V154.33h36.32v13.61Zm0-14.52V139.8h36.32v13.62ZM176,125.28h36.32v13.61H176Zm0,14.52h36.32v13.62H176Zm0,14.53h36.32v13.61H176Zm0,14.52h36.32v13.62H176Zm0,14.53h36.32V197H176Zm0,28.14V197.9h36.32v13.62Zm37.22,0V197.9h36.32v13.62Zm73.55,0H250.45V197.9h36.32Zm0-14.53H250.45V183.38h36.32Zm0-14.52H250.45V168.85h36.32Zm0-14.53H250.45V154.33h36.32Zm0-14.52H250.45V139.8h36.32Zm0-14.53H250.45V125.28h36.32Z'/><rect class='cls-2' x='175.09' y='94.41' width='0.91' height='15.43'/><rect class='cls-2' x='212.32' y='94.41' width='0.91' height='15.43'/><rect class='cls-2' x='249.54' y='94.41' width='0.91' height='15.43'/><rect class='cls-2' x='286.77' y='94.41' width='0.91' height='15.43'/><rect class='cls-9' x='118.79' y='84.43' width='21.79' height='5.45'/><rect class='cls-9' x='250.45' y='84.43' width='66.28' height='5.45'/></svg>";
+            var skin = webix.skin.$name;
+            var icon = skin == "willow" || skin == "dark" ? "alt" : "main";
+            return empty$1[icon];
         };
         EmptyView.prototype.GetTemplate = function (value) {
             var text = "<div class='webix_rpt_empty_placeholder'>" +
@@ -7840,39 +8703,42 @@ Usage without proper license is prohibited.
         return EmptyView;
     }(JetView));
 
-    var ChartView$3 = (function (_super) {
-        __extends(ChartView, _super);
-        function ChartView() {
+    var TableView = (function (_super) {
+        __extends(TableView, _super);
+        function TableView() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
-        ChartView.prototype.config = function () {
+        TableView.prototype.config = function () {
             var page = {
                 type: "wide",
                 margin: 5,
                 cols: [{}],
             };
-            return page;
+            return { rows: [BaseToolbarView, page] };
         };
-        ChartView.prototype.init = function () {
+        TableView.prototype.init = function () {
             this.State = this.getParam("state", true);
-            this.Charts = this.app.getService("charts");
             this.Local = this.app.getService("local");
         };
-        ChartView.prototype.ready = function () {
+        TableView.prototype.ready = function () {
             var _this = this;
-            this.Host = this.getRoot();
+            var parts = this.getRoot().getChildViews();
+            this.Bar = parts[0];
+            this.Host = parts[1];
             this.on(this.State.$changes, "module", function (mod) { return _this.Show(mod); });
+            this.on(this.app, "exportModule", function (mode) { return _this.Export(mode); });
         };
-        ChartView.prototype.Show = function (mod) {
+        TableView.prototype.Show = function (mod) {
             var _this = this;
             var host = this.Host;
             if (mod && mod.meta.value && mod.type === "heatmap") {
                 var config_1 = this.GetChartConfig(mod);
                 if (!config_1.view)
                     return;
+                this.Bar.show();
                 this.GetChartData(mod).then(function (_a) {
-                    var data = _a[0];
-                    config_1.data = data;
+                    var data = _a[0], options = _a[1];
+                    config_1.data = _this.FormatLabels(webix.copy(data), options);
                     if (data.length && mod.meta.color)
                         config_1.type.cssClass = _this.CssFactory(data, mod.meta.color);
                     webix.ui([config_1], host);
@@ -7881,10 +8747,11 @@ Usage without proper license is prohibited.
             }
             else {
                 webix.ui([{ template: " " }], host);
+                this.Bar.hide();
                 this.Chart = null;
             }
         };
-        ChartView.prototype.GetChartConfig = function (mod) {
+        TableView.prototype.GetChartConfig = function (mod) {
             var meta = mod.meta, columns = mod.columns;
             var obj = {
                 view: "treemap",
@@ -7897,13 +8764,13 @@ Usage without proper license is prohibited.
                 obj.type.template = function (obj) { return obj[meta.label]; };
             return obj;
         };
-        ChartView.prototype.GetChartData = function (mod) {
+        TableView.prototype.GetChartData = function (mod) {
             return Promise.all([
                 this.Local.getData(this.Local.getDataConfig(mod), this.State.mode == "edit"),
                 this.Local.getOptions(mod.columns),
             ]);
         };
-        ChartView.prototype.CssFactory = function (data, prop) {
+        TableView.prototype.CssFactory = function (data, prop) {
             var min = Infinity;
             var max = -Infinity;
             for (var i = 0; i < data.length; i++) {
@@ -7922,7 +8789,7 @@ Usage without proper license is prohibited.
                         return "l" + i;
             };
         };
-        ChartView.prototype.TooltipFactory = function (obj, columns) {
+        TableView.prototype.TooltipFactory = function (obj, columns) {
             var valueColumn = columns.find(function (a) { return a.id === obj.value; });
             var colorColumn = columns.find(function (a) { return a.id === obj.color; });
             if (!valueColumn || !colorColumn)
@@ -7938,7 +8805,37 @@ Usage without proper license is prohibited.
                 return out;
             };
         };
-        return ChartView;
+        TableView.prototype.Export = function (mode) {
+            if (this.Chart) {
+                if (mode == "png")
+                    webix.toPNG(this.Chart);
+                else if (mode == "pdf") {
+                    var params = { autowidth: true, display: "image" };
+                    webix.toPDF(this.Chart, params);
+                }
+            }
+        };
+        TableView.prototype.FormatLabels = function (data, options) {
+            var labelColumn = this.State.module.meta.label;
+            var labelOptions = labelColumn && options.length
+                ? options.find(function (op) { return op.field == labelColumn; })
+                : null;
+            if (labelOptions)
+                data.forEach(function (item) {
+                    var option = labelOptions.data.find(function (o) { return o.id == item[labelColumn]; });
+                    item[labelColumn] = option ? option.value : item[labelColumn];
+                });
+            else {
+                var field = this.State.module.fields.find(function (field) { return field.id == labelColumn; });
+                if (field && field.type == "date") {
+                    data.forEach(function (item) {
+                        item[labelColumn] = webix.i18n.dateFormatStr(new Date(item[labelColumn]));
+                    });
+                }
+            }
+            return data;
+        };
+        return TableView;
     }(JetView));
 
     var MenuPopup = (function (_super) {
@@ -8028,6 +8925,7 @@ Usage without proper license is prohibited.
                         },
                         click: function () { return _this.Sort("name"); },
                     },
+                    { width: 4 },
                     {
                         view: "icon",
                         localId: "updatedSorting",
@@ -8174,46 +9072,15 @@ Usage without proper license is prohibited.
         function ExportView() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
-        ExportView.prototype.config = function () {
-            var _this = this;
-            return {
-                view: "popup",
-                padding: 0,
-                point: false,
-                body: {
-                    view: "list",
-                    borderless: true,
-                    css: "webix_rpt_popup_menu",
-                    template: function (obj) { return _this.GetTemplate(obj); },
-                    width: 160,
-                    autoheight: true,
-                    data: this.GetPopupOptions(),
-                    click: function (id, e) { return _this.PopupAction(id, e); },
-                },
-            };
-        };
-        ExportView.prototype.GetPopupOptions = function () {
+        ExportView.prototype.GetData = function () {
             var _ = this.app.getService("locale")._;
             return [
                 { value: _("To Excel"), id: "excel" },
                 { value: _("To CSV"), id: "csv" },
             ];
         };
-        ExportView.prototype.PopupAction = function (id) {
-            this.app.callEvent("exportModule", [id]);
-            this.getRoot().hide();
-        };
-        ExportView.prototype.GetTemplate = function (obj) {
-            return "<span class='webix_icon " + obj.icon + "'></span>" + obj.value;
-        };
-        ExportView.prototype.Show = function (node) {
-            var _this = this;
-            if (this.getRoot().isVisible())
-                return;
-            this.webix.delay(function () { return _this.getRoot().show(node); });
-        };
         return ExportView;
-    }(JetView));
+    }(BaseExportView));
 
     var ToolbarView = (function (_super) {
         __extends(ToolbarView, _super);
@@ -8237,7 +9104,7 @@ Usage without proper license is prohibited.
                         width: 140,
                         label: _("Export"),
                         icon: "rpi-export",
-                        click: function (e) { return _this.ShowExportPopup(e); },
+                        click: function (viewId) { return _this.ShowExportPopup(viewId); },
                     },
                     {},
                     {
@@ -8262,10 +9129,10 @@ Usage without proper license is prohibited.
                     _this.$$("search").setBadge(null);
             });
         };
-        ToolbarView.prototype.ShowExportPopup = function (e) {
+        ToolbarView.prototype.ShowExportPopup = function (viewId) {
             if (!this.ExportMenu || !this.ExportMenu.$view)
                 this.ExportMenu = this.ui(ExportView);
-            var node = webix.$$(e);
+            var node = webix.$$(viewId);
             this.ExportMenu.Show(node.$view);
         };
         return ToolbarView;
@@ -8279,7 +9146,7 @@ Usage without proper license is prohibited.
         picklist: "text",
         reference: "text",
     };
-    var TableView = (function (_super) {
+    var TableView$1 = (function (_super) {
         __extends(TableView, _super);
         function TableView() {
             return _super !== null && _super.apply(this, arguments) || this;
@@ -8321,6 +9188,7 @@ Usage without proper license is prohibited.
             }
         };
         TableView.prototype.Show = function (mod) {
+            var _this = this;
             var host = this.Host;
             if (mod && mod.columns.length && mod.type === "table") {
                 var config = this.GetTableConfig(mod);
@@ -8335,7 +9203,8 @@ Usage without proper license is prohibited.
                         return;
                     options.forEach(function (_a) {
                         var field = _a.field, data = _a.data;
-                        table_1.getColumnConfig(field).collection.parse(data);
+                        if (!_this.IsBucketColumn(field))
+                            table_1.getColumnConfig(field).collection.parse(data);
                     });
                     table_1.parse(data);
                 });
@@ -8345,6 +9214,10 @@ Usage without proper license is prohibited.
                 this.Table = null;
                 this.Bar.hide();
             }
+        };
+        TableView.prototype.IsBucketColumn = function (field, module) {
+            module = module || this.State.module;
+            return module.buckets && module.buckets.find(function (b) { return b.column == field; });
         };
         TableView.prototype.GetTableConfig = function (mod) {
             var _this = this;
@@ -8386,7 +9259,7 @@ Usage without proper license is prohibited.
                     : [
                         a.meta.name || a.name,
                         {
-                            content: a.header === "text" ? "textFilter" : "richSelectFilter",
+                            content: a.meta.header === "text" ? "textFilter" : "richSelectFilter",
                         },
                     ],
                 type: a.type,
@@ -8399,7 +9272,8 @@ Usage without proper license is prohibited.
                 var _1 = this.app.getService("locale")._;
                 column.template = function (obj) { return (obj[a.id] == 1 ? _1("True") : _1("False")); };
             }
-            if (a.type === "reference" || a.type === "picklist")
+            if ((a.type === "reference" || a.type === "picklist") &&
+                !this.IsBucketColumn(a.id))
                 column.options = [];
             return column;
         };
@@ -8437,7 +9311,7 @@ Usage without proper license is prohibited.
                 });
                 var matchers_1 = [];
                 var _loop_1 = function (i) {
-                    var type = fields[i].type;
+                    var type = fields[i].type || "text";
                     var colId = fields[i].id;
                     if (type === "text" || type === "number") {
                         matchers_1.push(function (o) { return regexp_1.test(o[colId]); });
@@ -8749,6 +9623,7 @@ Usage without proper license is prohibited.
                 else if (action === "delete") {
                     webix
                         .confirm({
+                        container: _this.app.getRoot().$view,
                         title: _("Delete report"),
                         ok: _("Delete"),
                         cancel: _("Cancel"),
@@ -8756,7 +9631,7 @@ Usage without proper license is prohibited.
                     })
                         .then(function () {
                         _this.app
-                            .getService("local")
+                            .getService("operations")
                             .deleteModule(id)
                             .then(function () {
                             if (id == _this.State.moduleId)
@@ -8766,7 +9641,7 @@ Usage without proper license is prohibited.
                 }
                 else if (action === "copy") {
                     _this.app
-                        .getService("local")
+                        .getService("operations")
                         .copyModule(id)
                         .then(function (id) {
                         _this.State.$batch({ moduleId: id, mode: "edit" });
@@ -8792,14 +9667,21 @@ Usage without proper license is prohibited.
 
     var views = { JetView: JetView };
     views["chart"] = ChartView;
+    views["common/export"] = BaseExportView;
+    views["common/toolbar"] = BaseToolbarView;
     views["editor/common"] = CommonView;
     views["editor/data"] = QueryBuilderView;
-    views["editor/datepopup"] = DateView;
-    views["editor/groups"] = OtherSettingsView;
     views["editor"] = TopView;
+    views["editor/other/bucket"] = BucketView;
+    views["editor/other/bucketpopup"] = SummaryPopupView$1;
+    views["editor/other/buckets"] = BucketSettingsView;
+    views["editor/other/datepopup"] = DateView;
+    views["editor/other/groups"] = OtherSettingsView;
     views["editor/other"] = OtherSettingsView$1;
+    views["editor/other/sorts"] = OtherSettingsView$2;
+    views["editor/other/summary"] = Summaries;
+    views["editor/other/summarypopup"] = SummaryPopupView;
     views["editor/query"] = QueryView;
-    views["editor/sorts"] = OtherSettingsView$2;
     views["editor/structure/axis"] = AxisPropertiesView;
     views["editor/structure/baseview"] = BaseStructureView;
     views["editor/structure/chart"] = ChartView$1;
@@ -8809,14 +9691,12 @@ Usage without proper license is prohibited.
     views["editor/structure/heatmap"] = ChartView$2;
     views["editor/structure"] = StructureView;
     views["editor/structure/table"] = ColumnsView;
-    views["editor/summary"] = Summaries;
-    views["editor/summarypopup"] = SummaryPopupView;
     views["empty"] = EmptyView;
-    views["heatmap"] = ChartView$3;
+    views["heatmap"] = TableView;
     views["menu"] = MenuPopup;
     views["modules"] = GridsView;
     views["table/export"] = ExportView;
-    views["table"] = TableView;
+    views["table"] = TableView$1;
     views["table/toolbar"] = ToolbarView;
     views["toolbar"] = TopBarView;
     views["top"] = TopView$1;
@@ -8831,6 +9711,7 @@ Usage without proper license is prohibited.
         Chart: "Chart",
         Column: "Column",
         Columns: "Columns",
+        column: "column",
         "Color column": "Color column",
         Common: "Common",
         "Copy of": "Copy of",
@@ -8848,6 +9729,8 @@ Usage without proper license is prohibited.
         Export: "Export",
         "To Excel": "To Excel",
         "To CSV": "To CSV",
+        "To PNG": "To PNG",
+        "To PDF": "To PDF",
         Filter: "Filter",
         "Filtering query": "Filtering query",
         "Frozen columns above": "Frozen columns above",
@@ -8911,8 +9794,6 @@ Usage without proper license is prohibited.
         Bar: "Bar",
         "Stacked bar": "Stacked bar",
         Radar: "Radar",
-        Pie: "Pie",
-        Donut: "Donut",
         "Create copy": "Create copy",
         circle: "circle",
         square: "square",
@@ -8924,7 +9805,102 @@ Usage without proper license is prohibited.
         True: "True",
         False: "False",
         "Save filter to use it in other reports": "Save filter to use it in other reports",
+        "No filter": "No filter",
+        Text: "Text",
+        Select: "Select",
+        buckets: "buckets",
+        "Data buckets": "Data buckets",
+        "Bucket name": "Bucket name",
+        "Bucket values": "Bucket values",
+        "Add bucket": "Add bucket",
+        "Specify columns and their data buckets": "Specify columns and their data buckets",
+        Search: "Search",
+        Other: "Other",
+        "Other values": "Other values",
+        "Are you sure to delete?": "Are you sure to delete?",
     };
+
+    function initJetWin(app) {
+        var appId;
+        var service = {
+            updateConfig: function (config) {
+                var appView = app.getRoot();
+                var appNode = appView.$view;
+                if (!appId) {
+                    if (appNode.id)
+                        appId = appNode.id;
+                    else
+                        appNode.id = appId = "webix_" + webix.uid();
+                    webix.html.addStyle(".webix_win_inside *:not(.webix_modal_box):not(.webix_modal_cover){ z-index: 0; }");
+                    webix.html.addStyle("#" + appId + "{ position: relative; }");
+                    webix.html.addStyle("#" + appId + " .webix_window{ z-index:2 !important; }");
+                    webix.html.addStyle("#" + appId + " .webix_disabled{ z-index:1 !important; }");
+                }
+                else if (appId && !appNode.id)
+                    appNode.id = appId;
+                config.container = appId;
+                if (config.fullscreen) {
+                    config._fillApp = true;
+                    delete config.fullscreen;
+                }
+                if (!config.on)
+                    config.on = {};
+                var firstShow = true;
+                var defaultHandler = config.on.onShow;
+                config.on.onShow = function () {
+                    var _this = this;
+                    if (defaultHandler)
+                        defaultHandler.apply(this, arguments);
+                    if (firstShow) {
+                        this.$setSize = function (x, y) {
+                            setSize(_this, appView, true);
+                            webix.ui.window.prototype.$setSize.apply(_this, [x, y]);
+                        };
+                        setHandlers(this, app);
+                        firstShow = null;
+                    }
+                    webix.callEvent("onClick", []);
+                    webix.html.addCss(appNode, "webix_win_inside");
+                    appView.disable();
+                    setSize(this, appView);
+                };
+                return config;
+            }
+        };
+        app.setService("jet-win", service);
+    }
+    function setSize(win, appView, silent) {
+        var appWidth = appView.$width;
+        var appHeight = appView.$height;
+        if (win.config._fillApp)
+            win.define({
+                width: appWidth,
+                height: appHeight,
+            });
+        else {
+            win.define({
+                left: (appWidth - win.$width) / 2,
+                top: (appHeight - win.$height) / 2,
+            });
+        }
+        if (!silent)
+            win.resize();
+    }
+    function setHandlers(win, app) {
+        var appView = app.getRoot();
+        win.attachEvent("onHide", function () {
+            if (!appView.$destructed) {
+                webix.html.removeCss(appView.$view, "webix_win_inside");
+                appView.enable();
+            }
+        });
+        var resizeEv = app.attachEvent("view:resize", function () {
+            setSize(win, appView);
+        });
+        win.attachEvent("onDestruct", function () {
+            app.detachEvent(resizeEv);
+        });
+    }
 
     var Local = (function () {
         function Local(_app) {
@@ -8953,7 +9929,11 @@ Usage without proper license is prohibited.
                         },
                     },
                 });
-                this._modules.parse(this._app.getService("backend").getModules());
+                var modules = this._app
+                    .getService("backend")
+                    .getModules()
+                    .then(function (data) { return data.filter(function (a) { return a.text; }); });
+                this._modules.parse(modules);
             }
             return this._modules;
         };
@@ -8961,34 +9941,6 @@ Usage without proper license is prohibited.
             var _this = this;
             var mods = this.getModules();
             return mods.waitData.then(function () { return _this._modules.getItem(id); });
-        };
-        Local.prototype.deleteModule = function (id) {
-            var _this = this;
-            return this._app
-                .getService("backend")
-                .deleteModule(id)
-                .then(function () {
-                _this._modules.remove(id);
-            });
-        };
-        Local.prototype.copyModule = function (id) {
-            var mod = this._modules.getItem(id);
-            return this.saveModule(0, { name: "Copy of " + mod.name, text: mod.text });
-        };
-        Local.prototype.saveModule = function (id, data) {
-            var _this = this;
-            return this._app
-                .getService("backend")
-                .saveModule(id, data)
-                .then(function (res) {
-                if (id) {
-                    _this._modules.updateItem(id, data);
-                }
-                else {
-                    _this._modules.add(__assign({ id: res.id }, data));
-                }
-                return res.id;
-            });
         };
         Local.prototype.getModels = function (now) {
             var _this = this;
@@ -9066,19 +10018,20 @@ Usage without proper license is prohibited.
                 oldColumns: null,
                 group: null,
                 joins: [],
+                buckets: null,
             };
         };
-        Local.prototype.newField = function (model, a) {
+        Local.prototype.newField = function (model, col) {
             var obj = {
-                id: model.id + "." + a.id,
-                name: a.name,
-                type: a.type,
-                ref: a.ref,
+                id: model.id + "." + col.id,
+                name: col.name,
+                type: col.type,
+                ref: col.ref,
                 mid: model.id,
                 model: model.name,
                 meta: {},
             };
-            if (a.key)
+            if (col.key)
                 obj.key = true;
             return obj;
         };
@@ -9090,16 +10043,17 @@ Usage without proper license is prohibited.
                 id: 0,
                 name: name,
                 desc: desc,
-                data: Object.keys(this._models)[0],
                 joins: [],
                 query: "",
-                type: type || "table",
                 sort: null,
                 columns: [],
                 fields: [],
                 publicFields: null,
                 group: null,
+                buckets: null,
                 meta: {},
+                data: Object.keys(this._models)[0],
+                type: type || "table",
             };
         };
         Local.prototype.addJoin = function (id, config) {
@@ -9139,6 +10093,7 @@ Usage without proper license is prohibited.
                 group: module.group && module.group.by
                     ? module.group.by.map(function (a) { return (a.mod ? a.mod + "." : "") + a.id; })
                     : "",
+                buckets: module.buckets,
             };
         };
         Local.prototype.getOptions = function (columns) {
@@ -9223,35 +10178,11 @@ Usage without proper license is prohibited.
                 scheme: {
                     $change: function (obj) {
                         obj.value = obj.name;
-                        obj.models = collectTables(JSON.parse(obj.text));
+                        obj.models = obj.text ? collectTables(JSON.parse(obj.text)) : [];
                     },
                 },
                 data: this._app.getService("backend").getQueries(),
             }));
-        };
-        Local.prototype.saveQuery = function (id, data) {
-            var _this = this;
-            return this._app
-                .getService("backend")
-                .saveQuery(id, data)
-                .then(function (res) {
-                if (id) {
-                    _this._queries.updateItem(id, data);
-                }
-                else {
-                    _this._queries.add(__assign({ id: res.id }, data));
-                }
-                return res.id;
-            });
-        };
-        Local.prototype.deleteQuery = function (id) {
-            var _this = this;
-            return this._app
-                .getService("backend")
-                .deleteQuery(id)
-                .then(function () {
-                _this._queries.remove(id);
-            });
         };
         return Local;
     }());
@@ -9274,19 +10205,20 @@ Usage without proper license is prohibited.
             this.app = app;
             this._url = app.config.url;
         }
-        Backend.prototype.saveQuery = function (id, data) {
-            if (!id) {
-                return webix
-                    .ajax()
-                    .post(this._url + "api/queries", data)
-                    .then(function (a) { return a.json(); });
-            }
-            else {
-                return webix
-                    .ajax()
-                    .put(this._url + "api/queries/" + id, data)
-                    .then(function (a) { return a.json(); });
-            }
+        Backend.prototype.getQueries = function () {
+            return webix.ajax(this._url + "api/queries").then(function (a) { return a.json(); });
+        };
+        Backend.prototype.addQuery = function (data) {
+            return webix
+                .ajax()
+                .post(this._url + "api/queries", data)
+                .then(function (a) { return a.json(); });
+        };
+        Backend.prototype.updateQuery = function (id, data) {
+            return webix
+                .ajax()
+                .put(this._url + "api/queries/" + id, data)
+                .then(function (a) { return a.json(); });
         };
         Backend.prototype.deleteQuery = function (id) {
             return webix
@@ -9294,25 +10226,20 @@ Usage without proper license is prohibited.
                 .del(this._url + "api/queries/" + id)
                 .then(function (a) { return a.json(); });
         };
-        Backend.prototype.getQueries = function () {
-            return webix.ajax(this._url + "api/queries").then(function (a) { return a.json(); });
-        };
         Backend.prototype.getModules = function () {
             return webix.ajax(this._url + "api/modules").then(function (a) { return a.json(); });
         };
-        Backend.prototype.saveModule = function (id, data) {
-            if (id) {
-                return webix
-                    .ajax()
-                    .put(this._url + "api/modules/" + id, data)
-                    .then(function (a) { return a.json(); });
-            }
-            else {
-                return webix
-                    .ajax()
-                    .post(this._url + "api/modules", data)
-                    .then(function (a) { return a.json(); });
-            }
+        Backend.prototype.addModule = function (data) {
+            return webix
+                .ajax()
+                .post(this._url + "api/modules", data)
+                .then(function (a) { return a.json(); });
+        };
+        Backend.prototype.updateModule = function (id, data) {
+            return webix
+                .ajax()
+                .put(this._url + "api/modules/" + id, data)
+                .then(function (a) { return a.json(); });
         };
         Backend.prototype.deleteModule = function (id) {
             return webix
@@ -9324,7 +10251,7 @@ Usage without proper license is prohibited.
             return webix.ajax(this._url + "api/objects").then(function (a) { return a.json(); });
         };
         Backend.prototype.getData = function (config) {
-            var query = config.query, columns = config.columns, joins = config.joins, limit = config.limit, group = config.group, sort = config.sort;
+            var query = config.query, columns = config.columns, joins = config.joins, limit = config.limit, group = config.group, sort = config.sort, buckets = config.buckets;
             return webix
                 .ajax()
                 .post(this._url + "api/objects/" + config.data + "/data", {
@@ -9334,6 +10261,7 @@ Usage without proper license is prohibited.
                 limit: limit,
                 sort: sort,
                 group: group,
+                buckets: buckets,
             })
                 .then(function (a) { return a.json(); });
         };
@@ -9350,11 +10278,83 @@ Usage without proper license is prohibited.
         return Backend;
     }());
 
+    var Local$1 = (function () {
+        function Local(_app) {
+            this._app = _app;
+            this._local = _app.getService("local");
+            this._back = _app.getService("backend");
+        }
+        Local.prototype.deleteModule = function (id) {
+            var _this = this;
+            return this._back.deleteModule(id).then(function () {
+                _this._local.getModules().remove(id);
+            });
+        };
+        Local.prototype.copyModule = function (id) {
+            var mod = this._local.getModules().getItem(id);
+            var _ = this._app.getService("locale")._;
+            return this.addModule({
+                name: _("Copy of") + " " + mod.name,
+                text: mod.text,
+            });
+        };
+        Local.prototype.addModule = function (data) {
+            var _this = this;
+            return this._back.addModule(data).then(function (res) {
+                _this._local.getModules().add(__assign({ id: res.id }, data));
+                return res.id;
+            });
+        };
+        Local.prototype.updateModule = function (id, data) {
+            var _this = this;
+            return this._back.updateModule(id, data).then(function (res) {
+                _this._local.getModules().updateItem(id, data);
+                return res.id;
+            });
+        };
+        Local.prototype.getModuleSaveData = function (moduleProps) {
+            var desc = moduleProps.desc, data = moduleProps.data, joins = moduleProps.joins, query = moduleProps.query, columns = moduleProps.columns, group = moduleProps.group, buckets = moduleProps.buckets, meta = moduleProps.meta, sort = moduleProps.sort, type = moduleProps.type;
+            return {
+                desc: desc,
+                data: data,
+                joins: joins,
+                query: query,
+                columns: columns,
+                group: group,
+                buckets: buckets,
+                meta: meta,
+                sort: sort,
+                type: type,
+            };
+        };
+        Local.prototype.addQuery = function (data) {
+            var _this = this;
+            return this._back.addQuery(data).then(function (res) {
+                _this._local.getQueries().add(__assign({ id: res.id }, data));
+                return res.id;
+            });
+        };
+        Local.prototype.updateQuery = function (id, data) {
+            var _this = this;
+            return this._back.updateQuery(id, data).then(function (res) {
+                _this._local.getQueries().updateItem(id, data);
+                return res.id;
+            });
+        };
+        Local.prototype.deleteQuery = function (id) {
+            var _this = this;
+            return this._back.deleteQuery(id).then(function () {
+                _this._local.getQueries().remove(id);
+            });
+        };
+        return Local;
+    }());
+
     var Helpers = (function () {
         function Helpers() {
             this.replacements = [
                 { from: /(^ +)/g, to: "" },
-                { from: /(^\w+)/g, to: "^($&)" },
+                { from: /(\w+)/g, to: "($&)" },
                 { from: /^(\?)/g, to: "^\\S{1}" },
                 { from: /(\?)/g, to: "\\S{1}" },
                 { from: /(\*)/g, to: "\\S*" },
@@ -9483,6 +10483,30 @@ Usage without proper license is prohibited.
                 ];
             return this.itemTypes;
         };
+        Charts.prototype.getSeries = function (fiedls, type) {
+            var _this = this;
+            var data = [];
+            var colorIndex = 0;
+            fiedls.forEach(function (field) {
+                var series = {
+                    id: field.id,
+                    name: field.value,
+                    model: field.model || null,
+                    show: true,
+                    meta: {
+                        name: field.value,
+                        color: _this.colors[colorIndex] || _this.colors[0],
+                    },
+                };
+                colorIndex++;
+                if (_this.itemSupport.indexOf(type) != -1) {
+                    series.meta.markerType = "r";
+                    series.meta.fillMarker = false;
+                }
+                data.push(series);
+            });
+            return data;
+        };
         return Charts;
     }());
 
@@ -9499,13 +10523,10 @@ Usage without proper license is prohibited.
                 readonly: config.readonly || false,
             });
             var params = { state: state };
-            if (config.compaсt)
-                params.forceCompact = config.compact;
             var defaults = {
                 router: EmptyRouter,
                 debug: true,
                 start: "/top/empty",
-                compactWidth: 650,
                 params: params,
             };
             _this = _super.call(this, __assign(__assign({}, defaults), config)) || this;
@@ -9519,6 +10540,8 @@ Usage without proper license is prohibited.
             _this.setService("backend", new (dynamic(Backend))(_this));
             _this.setService("helpers", new (dynamic(Helpers))(_this));
             _this.setService("charts", new (dynamic(Charts))(_this));
+            _this.setService("operations", new (dynamic(Local$1))(_this));
+            initJetWin(_this);
             _this.use(plugins.Locale, _this.config.locale || {
                 lang: "en",
                 webix: {

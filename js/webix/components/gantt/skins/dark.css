@@ -1,0 +1,890 @@
+@charset "UTF-8";
+.webix_gantt_tree .wxi-plus,
+.webix_gantt_tree .wxi-plus-circle {
+  line-height: 42px;
+  font-size: 22px;
+}
+
+.webix_gantt_link {
+  top: 6px;
+  width: 16px;
+  height: 16px;
+}
+
+.webix_gantt_milestone .webix_gantt_link {
+  top: 2px;
+}
+.webix_gantt_milestone .webix_gantt_link_left.webix_gantt_link {
+  left: -24px;
+}
+.webix_gantt_milestone .webix_gantt_link_right.webix_gantt_link {
+  right: -24px;
+}
+
+.webix_gantt_scale .webix_template {
+  padding: 0;
+}
+
+.webix_gantt_scale_row {
+  display: flex;
+  box-sizing: border-box;
+}
+
+.webix_gantt_scale_row:not(:last-child) {
+  border-bottom: 1px solid #384047;
+}
+
+.webix_gantt_scale_cell {
+  display: flex;
+  flex: 0 0 auto;
+  justify-content: center;
+  align-items: center;
+  border-right: 1px solid #384047;
+  box-sizing: border-box;
+  background-color: #384047;
+}
+
+.webix_gantt_layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.webix_gantt_task_base {
+  position: absolute;
+  box-sizing: border-box;
+  border-radius: 2px;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.webix_gantt_project {
+  background-color: #3bc08e;
+}
+
+.webix_gantt_task {
+  background-color: #3982eb;
+}
+
+.webix_gantt_project:hover,
+.webix_gantt_task:hover {
+  z-index: 3;
+  box-shadow: none;
+}
+
+.webix_gantt_milestone {
+  background-color: transparent;
+}
+
+.webix_gantt_in_action .webix_gantt_task_base,
+.webix_gantt_task_in_action {
+  pointer-events: none;
+}
+
+.webix_drag_zone.webix_gantt_task_base {
+  box-shadow: none;
+}
+.webix_drag_zone.webix_gantt_task_base.webix_gantt_milestone {
+  box-shadow: none;
+}
+.webix_drag_zone.webix_gantt_task_base.webix_gantt_milestone .webix_gantt_content {
+  box-shadow: none;
+}
+
+.webix_gantt_progress {
+  height: 100%;
+  background-color: #1f6fe1;
+  border-radius: 2px 0px 0px 2px;
+}
+
+.webix_gantt_project .webix_gantt_progress {
+  background-color: #098f5d;
+}
+
+.webix_gantt_milestone .webix_gantt_content {
+  transform: rotate(45deg);
+  background-color: #9d46af;
+  border-radius: inherit;
+  padding: 0;
+  width: 100%;
+  text-overflow: clip;
+}
+.webix_gantt_milestone .webix_gantt_content span {
+  visibility: hidden;
+}
+.webix_gantt_milestone:hover .webix_gantt_content,
+.webix_gantt_milestone .webix_gantt_content:hover {
+  box-shadow: none;
+}
+.webix_gantt_progress_drag {
+  position: absolute;
+  z-index: 1;
+  cursor: ew-resize;
+  top: 100%;
+  border: 10px solid transparent;
+  border-bottom: 10px solid #384047;
+  margin-top: -19px;
+  margin-left: -10px;
+  visibility: hidden;
+}
+
+.webix_gantt_task_base:hover .webix_gantt_progress_drag,
+.webix_gantt_mode_progress .webix_gantt_progress_drag {
+  visibility: visible;
+}
+
+.webix_gantt_progress_drag::before {
+  content: "";
+  position: absolute;
+  border: 8px solid transparent;
+  border-bottom: 8px solid #2a2b2d;
+  top: -7px;
+  left: -8px;
+}
+
+.webix_gantt_progress_percent {
+  position: absolute;
+  left: -10px;
+  top: 9px;
+  display: inline-block;
+  line-height: 14px;
+  width: 20px;
+  border: 1px solid #384047;
+  border-top: none;
+  border-radius: 2px 2px 4px 4px;
+  box-sizing: border-box;
+  background: #2a2b2d;
+  color: #7a67eb;
+  text-align: center;
+  font-size: 10px;
+}
+
+.webix_gantt_content {
+  text-align: center;
+  line-height: 32px;
+  position: absolute;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  user-select: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0 12px;
+}
+
+.webix_gantt_link {
+  position: absolute;
+  z-index: 2;
+  border-radius: 50%;
+  border: 1px solid #384047;
+  background-color: #2a2b2d;
+  cursor: pointer;
+  user-select: none;
+  opacity: 0;
+}
+
+.webix_gantt_link_visible .webix_gantt_content:hover,
+.webix_gantt_task_base.webix_gantt_link_visible:hover,
+.webix_gantt_task_base.webix_gantt_link_visible:hover .webix_gantt_content {
+  box-shadow: none;
+}
+
+.webix_gantt_task,
+.webix_gantt_project {
+  box-shadow: #ffffff 1px 0px 0px;
+}
+
+.webix_gantt_milestone .webix_gantt_content {
+  box-shadow: #ffffff 1px -1px 0px;
+}
+
+.webix_gantt_task.webix_gantt_link_visible .webix_gantt_progress_drag {
+  visibility: hidden;
+}
+
+.webix_gantt_link_visible .webix_gantt_link {
+  opacity: 1;
+}
+
+.webix_gantt_link_left {
+  left: -9px;
+}
+
+.webix_gantt_link_right {
+  right: -9px;
+}
+
+.webix_gantt_task_base:hover .webix_gantt_link,
+.webix_gantt_link:hover {
+  opacity: 1;
+}
+
+.webix_gantt_readonly .webix_gantt_task_base .webix_gantt_link {
+  display: none;
+}
+
+.webix_gantt_group.webix_gantt_project {
+  cursor: default;
+}
+.webix_gantt_group.webix_gantt_project .webix_gantt_link {
+  display: none;
+}
+
+.webix_gantt_touch_bars .webix_gantt_task .webix_gantt_content {
+  padding: 0 32px;
+}
+.webix_gantt_touch_bars .webix_gantt_task::before,
+.webix_gantt_touch_bars .webix_gantt_task::after {
+  content: "";
+  font-size: 20px;
+  font-family: "Webix Material Icons";
+  position: absolute;
+  visibility: hidden;
+  top: 50%;
+  margin-top: -10px;
+}
+.webix_gantt_touch_bars .webix_gantt_task::before {
+  left: 12px;
+}
+.webix_gantt_touch_bars .webix_gantt_task::after {
+  right: 12px;
+}
+.webix_gantt_touch_bars .webix_gantt_task_base .webix_gantt_progress_drag {
+  visibility: hidden;
+}
+.webix_gantt_touch_bars .webix_gantt_mode_start::before,
+.webix_gantt_touch_bars .webix_gantt_mode_end::after,
+.webix_gantt_touch_bars .webix_gantt_task:hover::before,
+.webix_gantt_touch_bars .webix_gantt_task:hover::after {
+  visibility: visible;
+}
+
+.webix_gantt_task_base.webix_gantt_last::after {
+  content: "";
+  display: block;
+  height: 7px;
+}
+.webix_gantt_task_base.webix_gantt_last .webix_gantt_progress_drag {
+  transform: rotate(180deg);
+  top: unset;
+  bottom: 100%;
+  margin-bottom: -19px;
+}
+.webix_gantt_task_base.webix_gantt_last .webix_gantt_progress_percent {
+  transform: rotate(180deg);
+  top: 8.5px;
+  border-radius: 4px 4px 2px 2px;
+  border: 1px solid #384047;
+  border-bottom: none;
+}
+
+.webix_gantt_bars,
+.webix_gantt_touch_bars,
+.webix_gantt_links,
+.webix_gantt_holidays {
+  background: transparent;
+}
+
+.webix_gantt_bars,
+.webix_gantt_touch_bars {
+  border-color: #2a2b2d;
+}
+
+.webix_gantt_links .webix_template {
+  position: relative;
+  padding: 0;
+}
+
+.webix_gantt_links polyline {
+  stroke: orange;
+  fill: transparent;
+  stroke-width: 2;
+}
+
+.webix_gantt_temp_line {
+  pointer-events: none;
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+}
+
+.webix_gantt_bar_selection {
+  background-color: rgba(73, 109, 140, 0.2);
+  position: absolute;
+  top: -100px;
+  pointer-events: none;
+}
+
+.webix_gantt_markers {
+  pointer-events: none;
+  position: absolute;
+}
+
+.webix_gantt_marker {
+  position: absolute;
+  left: -100px;
+  top: 0;
+  width: 2px;
+  height: inherit;
+  margin-left: -1px;
+  background-color: #7a67eb;
+  opacity: 0.6;
+}
+
+.webix_gantt_marker_text {
+  display: inline-block;
+  padding: 4px 8px;
+  line-height: 16px;
+  white-space: nowrap;
+  border-bottom-right-radius: 4px;
+  background-color: inherit;
+  color: #ffffff;
+}
+
+.webix_gantt_marker.webix_gantt_today_marker {
+  background-color: #fe6158;
+}
+
+/* holidays */
+.webix_gantt_holidays .webix_template {
+  position: relative;
+  padding: 0;
+}
+
+.webix_gantt_bar_holidays,
+.webix_gantt_bar_resource_holidays {
+  position: absolute;
+  pointer-events: none;
+}
+
+.webix_gantt_holiday {
+  position: absolute;
+  background-color: rgba(97, 120, 151, 0.06);
+}
+
+.webix_gantt_bar_resource_holidays .webix_gantt_holiday {
+  background-color: rgba(97, 120, 151, 0.06);
+}
+
+.webix_gantt_bar_resource_holidays .webix_gantt_work_day {
+  position: absolute;
+  background-color: #2a2b2d;
+}
+
+.webix_gantt_bar_holidays .webix_gantt_holiday {
+  top: 0;
+  height: inherit;
+}
+
+.webix_gantt_scale_cell.webix_gantt_holiday_scale {
+  background-color: rgba(97, 120, 151, 0.06);
+}
+
+/* critical path */
+.webix_gantt_critical.webix_gantt_task {
+  background: #fe6158;
+}
+.webix_gantt_critical.webix_gantt_task .webix_gantt_progress {
+  background: #fe271b;
+}
+.webix_gantt_critical.webix_gantt_milestone {
+  background-color: transparent;
+}
+.webix_gantt_critical.webix_gantt_milestone .webix_gantt_content {
+  background: #fe6158;
+}
+.webix_gantt_critical.webix_gantt_project {
+  background-color: #fcba2e;
+}
+.webix_gantt_critical.webix_gantt_project .webix_gantt_progress {
+  background-color: #fe1407;
+}
+
+.webix_gantt_links polyline.webix_gantt_line_critical {
+  stroke: #fe6158;
+}
+
+.webix_gantt_split_selection {
+  position: absolute;
+  z-index: 2;
+  background-color: rgba(57, 130, 235, 0.2);
+  border: 1px solid #3982eb;
+  border-radius: 2px;
+}
+
+.webix_gantt_split_task .webix_tree_close {
+  visibility: hidden;
+}
+
+.webix_gantt_split_container {
+  position: absolute;
+  pointer-events: none;
+  background-image: linear-gradient(to right, #7a67eb 50%, rgba(255, 255, 255, 0) 0%);
+  background-position: bottom;
+  background-size: 14px 2px;
+  background-repeat: repeat-x;
+}
+
+.webix_gantt_baseline_task,
+.webix_gantt_baseline_project {
+  position: absolute;
+  height: 5px;
+  border-radius: 2px;
+}
+
+.webix_gantt_baseline_task {
+  background-color: rgba(24, 80, 111, 0.75);
+}
+
+.webix_gantt_baseline_project {
+  background-color: rgba(7, 80, 73, 0.8);
+}
+
+.webix_gantt_task_info ul {
+  margin: 0;
+  padding: 5px 0 0 15px;
+}
+.webix_gantt_task_info .webix_template {
+  overflow: auto;
+  padding: 0 0 0 2px;
+  line-height: 20px;
+}
+
+ul.webix_gantt_info_list_resources {
+  padding: 5px 0 0;
+}
+
+.webix_gantt_info_resource {
+  display: flex;
+  align-items: stretch;
+  padding: 0 0 1px;
+  line-height: normal;
+}
+
+.webix_gantt_info_list_text_row {
+  display: flex;
+  align-items: baseline;
+  padding-top: 4px;
+}
+
+.webix_gantt_info_list_text {
+  min-width: 130px;
+  margin-left: 8px;
+  margin-right: 8px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.webix_gantt_info_list_text.webix_gantt_resource_section {
+  padding-left: 0px;
+}
+
+.webix_gantt_task_title {
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.webix_gantt_task_text {
+  line-height: 20px;
+}
+
+.webix_gantt_info_list_planned {
+  padding-top: 5px;
+}
+
+.webix_gantt_form_tree .webix_gantt_title .webix_cell {
+  padding-left: 8px;
+}
+.webix_gantt_form_tree .webix_gantt_action .wxi-trash {
+  margin-left: -10px;
+  height: 20px;
+  font-size: 18px;
+}
+.webix_gantt_form_tree .webix_cell {
+  border-bottom-color: transparent;
+}
+.webix_gantt_form_tree .webix_gantt_type .webix_cell,
+.webix_gantt_form_tree .webix_gantt_value .webix_cell {
+  padding-right: 4px;
+  text-align: right;
+}
+.webix_gantt_form_tree .webix_dt_editor input {
+  text-align: right;
+}
+
+.webix_gantt_form_counter .webix_inp_counter_value {
+  width: calc(50% - 60px);
+}
+
+.webix_list .webix_gantt_resource_section {
+  float: right;
+  text-align: right;
+}
+
+.webix_gantt_resource_section {
+  padding-left: 5px;
+  color: #9fa1ae;
+  width: 80px;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.webix_gantt_resource_table .webix_gantt_title .webix_cell.webix_gantt_select_editor {
+  box-shadow: inset 0 0 0 1px #7a67eb;
+  border-radius: 2px;
+  padding-left: 8px;
+  background: #2a2b2d;
+}
+
+.webix_gantt_select_editor_popup .webix_selected {
+  box-shadow: none;
+}
+.webix_gantt_select_editor_popup .webix_list_item,
+.webix_gantt_select_editor_popup .webix_list_item.webix_selected {
+  padding: 0 8px;
+  line-height: 36px;
+}
+
+.webix_gantt_form_unit_title {
+  padding-right: 12px;
+}
+
+.webix_gantt_table_hover[aria-level="2"],
+.webix_gantt_link_table_hover[aria-level="2"] {
+  background: #2b343b;
+}
+
+.webix_gantt .webix_transparent .webix_button {
+  color: #7a67eb;
+}
+
+.webix_gantt .webix_transparent .webix_el_box:not(.webix_disabled_box) .webix_icon_btn {
+  color: #7a67eb;
+}
+
+.webix_gantt_select_editor_popup .webix_scroll_cont:empty:before {
+  content: attr(placeholder);
+  font-size: 12px;
+  font-style: italic;
+  color: #9fa1ae;
+  text-align: center;
+  display: inline-block;
+  width: 100%;
+  line-height: 28px;
+}
+
+.webix_gantt_datepicker .webix_cal_icon_clear {
+  display: none;
+}
+
+.webix_gantt_tree .webix_gantt_action .webix_icon {
+  cursor: pointer;
+}
+.webix_gantt_tree .webix_gantt_action .webix_icon:hover {
+  color: #7a67eb;
+}
+.webix_gantt_tree .webix_column.webix_gantt_action > div,
+.webix_gantt_tree .webix_hcell.webix_gantt_action {
+  padding: 0 11px;
+}
+.webix_gantt_tree .webix_gantt_title .webix_cell {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.webix_gantt_tree .webix_column > div.webix_row_select {
+  background-color: #384047;
+  color: rgba(255, 255, 255, 0.9);
+}
+.webix_gantt_tree .webix_ss_body .webix_column > div {
+  border-right-color: transparent;
+  border-left-color: transparent;
+}
+
+.webix_gantt_resizer {
+  background-color: #ebedf0;
+}
+.webix_gantt_resizer.webix_resizer_x {
+  z-index: 5;
+  position: relative;
+  overflow: visible;
+}
+.webix_gantt_resizer.webix_resizer_x:after {
+  position: absolute;
+  left: -4px;
+  height: 100%;
+  content: "";
+  width: 9px;
+}
+
+.webix_drag_zone .webix_dd_drag.webix_gantt_tree_no_icon .webix_tree_close {
+  visibility: hidden;
+}
+
+/**
+scheduler-webfont Webfont
+*/
+@font-face {
+  font-family: "gantt-webfont";
+  src: url("../fonts/gantt-webfont.woff2") format("woff2"), url("../fonts/gantt-webfont.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+[class^=gti-]:before,
+[class*=gti-]:before {
+  font-family: "gantt-webfont";
+  display: inline-block;
+  font-style: normal;
+  font-weight: normal;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transform: translate(0, 0);
+}
+
+/*
+Glyphs list
+*/
+.gti-menu:before {
+  content: "";
+}
+
+.webix_gantt_accordion .webix_accordionitem {
+  border-color: transparent;
+}
+.webix_gantt_accordion .webix_accordionitem_header {
+  border-color: transparent;
+  font-size: inherit;
+}
+.webix_gantt_accordion .webix_accordionitem_header .webix_accordionitem_button {
+  color: #9fa1ae;
+}
+.webix_gantt_accordion .webix_accordionitem.collapsed .webix_accordionitem_header .webix_accordionitem_button {
+  color: #9fa1ae;
+}
+.webix_gantt_accordion .webix_accordionitem .webix_accordionitem_header.collapsed .webix_accordionitem_button:before {
+  content: "";
+}
+.webix_gantt_accordion .webix_accordionitem .webix_accordionitem_header .webix_accordionitem_button {
+  margin: 0px 6px 0 1px;
+}
+.webix_gantt_accordion .webix_accordionitem .webix_accordionitem_header .webix_accordionitem_button:before {
+  content: "";
+}
+.webix_gantt_accordion .webix_accordionitem.collapsed .webix_accordionitem_header:hover,
+.webix_gantt_accordion .webix_accordionitem .webix_accordionitem_header:hover {
+  background-color: rgba(73, 109, 140, 0.2);
+}
+.webix_gantt_accordion .webix_accordionitem_label {
+  color: rgba(255, 255, 255, 0.7);
+}
+.webix_gantt_accordion .webix_accordionitem .webix_accordionitem_header {
+  background-color: #384047;
+}
+
+.webix_gantt_person_avatar,
+.webix_gantt_cell_remain_num {
+  vertical-align: middle;
+  margin: 4px 4px 4px 0;
+  height: 24px;
+  line-height: 24px;
+  flex-shrink: 0;
+  width: 24px;
+  font-size: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.webix_gantt_person_avatar_big {
+  height: 32px;
+  line-height: 32px;
+  width: 32px;
+  font-size: 14px;
+}
+
+.webix_gantt_person_avatar_0 {
+  background: #00a037;
+}
+
+.webix_gantt_person_avatar_1 {
+  background: #13a1aa;
+}
+
+.webix_gantt_person_avatar_2 {
+  background: #fd772c;
+}
+
+.webix_gantt_person_avatar_3 {
+  background: #b26bd3;
+}
+
+.webix_gantt_person_avatar_4 {
+  background: #c87095;
+}
+
+.webix_gantt_person_avatar_5 {
+  background: #eb2f89;
+}
+
+.webix_gantt_person_avatar_6 {
+  background: #9bb402;
+}
+
+.webix_gantt_person_avatar_7 {
+  background: #e7a90b;
+}
+
+.webix_gantt_person_avatar_8 {
+  background: #0bbed7;
+}
+
+.webix_gantt_person_avatar_9 {
+  background: #038cd9;
+}
+
+.webix_gantt_tree_column_resources .webix_cell {
+  padding: 0 8px;
+}
+
+.webix_gantt_cell_assigned_text {
+  font-size: 12px;
+}
+
+.webix_gantt_cell_assigned_last {
+  width: 24px;
+  display: inline-block;
+}
+
+.webix_gantt_cell_remain_num {
+  position: relative;
+  left: -28px;
+  z-index: 1;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.webix_gantt_avatar_box {
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+.webix_gantt_avatar_box .webix_icon {
+  flex-basis: 20px;
+}
+
+.webix_gantt_avatar_box_inline {
+  display: inline-flex;
+  align-items: center;
+}
+
+.webix_gantt_avatar_option_box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.webix_gantt_editor_avatar_name {
+  max-width: 170px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  padding-left: 2px;
+}
+
+.webix_popup .webix_gantt_editor_avatar_name {
+  max-width: 190px;
+}
+
+.webix_gantt_absbutton {
+  border-radius: 50%;
+  z-index: 91;
+}
+.webix_gantt_absbutton .webix_el_box {
+  background-color: #7a67eb;
+}
+.webix_gantt_absbutton .webix_el_box .webix_icon_button:hover:before {
+  background-color: #1992af;
+}
+.webix_gantt_absbutton .webix_el_box .webix_icon {
+  color: #ffffff;
+}
+
+.webix_gantt_resdiagram_tree .webix_tree_none,
+.webix_gantt_resdiagram_tree .webix_tree_folder_open {
+  cursor: default;
+}
+.webix_gantt_resdiagram_tree .webix_cell {
+  text-overflow: ellipsis;
+}
+.webix_gantt_resdiagram_tree .webix_ss_body .webix_column > div {
+  border-right-color: transparent;
+  border-left-color: transparent;
+}
+
+.webix_gantt_resdiagram_chart.webix_tree .webix_scroll_cont > .webix_tree_leaves {
+  padding: 0px;
+}
+.webix_gantt_resdiagram_chart.webix_tree .webix_scroll_cont > .webix_tree_leaves:last-child::after {
+  content: "";
+  display: block;
+  height: 2px;
+}
+
+.webix_gantt_diagram_marker {
+  display: inline-block;
+  position: absolute;
+  color: #ffffff;
+  text-align: center;
+  background-color: #55cd97;
+  border-radius: 32px;
+  width: 32px;
+  height: 32px;
+  line-height: 32px;
+}
+.webix_gantt_diagram_marker.webix_gantt_overload {
+  background-color: #ff5c4c;
+}
+
+.webix_gantt_diagram_line.webix_tree_item {
+  padding: 4px;
+}
+
+.webix_gantt .webix_progress_top {
+  z-index: 10000;
+}
+
+.webix_gantt_scale_cell {
+  background-color: #2a2b2d;
+}
+
+.webix_gantt_links polyline {
+  stroke: #9fa1ae;
+}
+
+.webix_gantt_link {
+  border-color: #4c5760;
+}
+
+.webix_gantt_resizer {
+  background-color: #2b343b;
+}
+
+.webix_gantt_task,
+.webix_gantt_project {
+  box-shadow: #20262b 1px 0px 0px;
+}
+
+.webix_gantt_milestone .webix_gantt_content {
+  box-shadow: #20262b 1px -1px 0px;
+}

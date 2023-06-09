@@ -76,6 +76,9 @@ span.webix_kanban_add_icon:hover {
 div.webix_kanban_drop_inner {
   border: 2px dashed #ff5aff;
 }
+.webix_kanban .webix_layout_line {
+  background: transparent;
+}
 .webix_kanban {
   background-color: #818181;
 }

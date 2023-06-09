@@ -1,6 +1,6 @@
 /**
  * @license
- * Webix Kanban v.8.1.1
+ * Webix Kanban v.10.1.0
  * This software is covered by Webix Commercial License.
  * Usage without proper license is prohibited.
  * (c) XB Software Ltd.
@@ -341,7 +341,9 @@
     },
     $dragCreate: function (a, e) {
       var text = webix.DragControl.$drag(a, e);
-      if (!text) return false;
+      if (!text) return false; // hide context menus
+
+      webix.callEvent("onClick", []);
       var drag_container = document.createElement("DIV");
       drag_container.innerHTML = text;
       drag_container.className = "webix_drag_zone webix_kanban_drag_zone";
@@ -1184,23 +1186,37 @@
     _applyOrder: function (id, data, mode) {
       if (!id) return this._syncData();
 
-      if (mode == "add") {
-        this._assignList(data);
+      switch (mode) {
+        case "add":
+          if (this._assignList(data) >= 0) {
+            this.getOwnerList(id).add(data);
+            data.$index = this._sublists[data.$list].count();
+          }
 
-        this.getOwnerList(id).add(data);
-        data.$index = this._sublists[data.$list].count();
-      } else if (mode === "delete") {
-        this._sublists[data.$list].remove(id);
-      } else if (mode === "update" || mode === "paint") {
-        var prevList = data.$list;
+          break;
 
-        this._assignList(data);
+        case "delete":
+          {
+            var subList = this._sublists[data.$list];
+            if (subList && subList.exists(id)) subList.remove(id);
+            break;
+          }
 
-        if (prevList === data.$list) this.getOwnerList(id).updateItem(id, data);else {
-          this._sublists[prevList].remove(id);
+        case "paint":
+        case "update":
+          {
+            if (this.getIndexById(id) === -1) break;
+            var prevList = data.$list;
 
-          this.getOwnerList(id).add(data);
-        }
+            var list = this._assignList(data);
+
+            if (prevList === list) {
+              if (list >= 0) this.getOwnerList(id).updateItem(id, data);
+            } else {
+              if (this._sublists[prevList]) this._sublists[prevList].remove(id);
+              if (list >= 0) this.getOwnerList(id).add(data);
+            }
+          }
       }
     },
     setListStatus: function (obj, list) {

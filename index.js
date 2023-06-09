@@ -11,8 +11,8 @@ io.sails.reconnection = true;
 // Include these .css and .js files as part of our bundle.
 import "./styles/loader.css";
 
-import webix from "./js/webix/webix.js";
-import "./js/webix/webix.css";
+import webix from "./js/webix/webix.min.js";
+import "./js/webix/webix.min.css";
 
 import "./styles/ui.css";
 
@@ -26,13 +26,13 @@ import Bootstrap from "./init/Bootstrap.js";
 
 // Import webix components
 import * as gantt from "./js/webix/components/gantt/gantt.min.js";
-import "./js/webix/components/gantt/gantt.css";
+import "./js/webix/components/gantt/gantt.min.css";
 
-import kanban from "./js/webix/components/kanban/kanban.js";
-import pivot from "./js/webix/components/pivot/pivot.js";
-import * as report from "./js/webix/components/reports/reports.js";
-import "./js/webix/components/query/query.css";
-import query from "./js/webix/components/query/query.js";
+import kanban from "./js/webix/components/kanban/kanban.min.js";
+import pivot from "./js/webix/components/pivot/pivot.min.js";
+import * as report from "./js/webix/components/reports/reports.min.js";
+import "./js/webix/components/query/query.min.css";
+import query from "./js/webix/components/query/query.min.js";
 
 // Make sure webix is global object
 if (!window.webix) {

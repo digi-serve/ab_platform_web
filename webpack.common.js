@@ -22,6 +22,10 @@ module.exports = {
             test: /\.(eot|woff|woff2|svg|ttf)([?]?.*)$/,
             use: ["url-loader?limit=10000000"],
          },
+         {
+            test: /webix\/(.*)(.min)*.js$/,
+            use: ["script-loader"],
+         },
       ],
    },
    plugins: [

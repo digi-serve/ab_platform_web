@@ -1,4 +1,4 @@
-import webix from "../webix.js";
+import webix from "../webix.min.js";
 import tinymce from "tinymce";
 webix.protoUI(
    {
