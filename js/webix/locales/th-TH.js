@@ -1,7 +1,7 @@
 /*Thai (Thailand) locale
  * modified to use Budhist Era Years
  */
-import * as Webix from "../webix.js";
+import * as Webix from "../webix.min.js";
 
 if (!window.webix) {
    window.webix = Webix;
