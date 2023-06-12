@@ -176,7 +176,16 @@ module.exports = class ABViewForm extends ABViewFormCore {
       obj.fields((f) => f.key == "calculate" || f.key == "formula").forEach(
          (f) => {
             if (formVals[f.columnName] == null) {
-               formVals[f.columnName] = f.format(cursorFormVals, true);
+               let reCalculate = true;
+
+               // WORKAROUND: If "Formula" field will have Filter conditions,
+               // Then it is not able to re-calculate on client side
+               // because relational data is not full data so FilterComplex will not have data to check
+               if (f.key == "formula" && f.settings?.where?.rules?.length > 0) {
+                  reCalculate = false;
+               }
+
+               formVals[f.columnName] = f.format(cursorFormVals, reCalculate);
             }
          }
       );
