@@ -211,11 +211,5 @@ module.exports = class ABViewChart extends ABViewChartCore {
          );
       }
 
-      let valueField2 = this.valueField2();
-      if (!valueField2) {
-         this.warningsMessage(
-            `can't resolve value2 field[${this.settings.columnValue2}]`
-         );
-      }
    }
 };
