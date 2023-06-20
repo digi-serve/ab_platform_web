@@ -1,4 +1,5 @@
-import webix from "../webix.js";
+// import webix from "../webix.js";
+const webix = require("../webix_debug.js");
 import tinymce from "tinymce";
 webix.protoUI(
    {

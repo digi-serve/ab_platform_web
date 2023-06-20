@@ -36,6 +36,14 @@ window.webix.i18n.locales["th-TH"] = {
       );
       return format(date);
    },
+   parseTimeFormatDate: (text) => {
+      let date = AB.rules.toDate(text);
+      date.setFullYear(date.getFullYear() - 543);
+   },
+   parseFormatDate: (text) => {
+      let date = AB.rules.toDate(text);
+      date.setFullYear(date.getFullYear() - 543);
+   },
    am: ["am", "AM"],
    pm: ["pm", "PM"],
    price: "฿{obj}",
@@ -84,5 +92,30 @@ window.webix.i18n.locales["th-TH"] = {
          "เสาร์",
       ],
       dayShort: ["อา.", "จ.", "อ.", "พ.", "พฤ.", "ศ.", "ส."],
+   },
+   aria: {
+      dateFormat: (date) => {
+         if (date == null) return "";
+         else if (typeof date == "string") return date;
+
+         const format = webix.Date.dateToStr(
+            `%d %F ${date.getFullYear() + 543}`
+         );
+         return format(date);
+      },
+      monthFormat: (date) => {
+         if (date == null) return "";
+         else if (typeof date == "string") return date;
+
+         const format = webix.Date.dateToStr(`%F ${date.getFullYear() + 543}`);
+         return format(date);
+      },
+      yearFormat: (date) => {
+         if (date == null) return "";
+         else if (typeof date == "string") return date;
+
+         const format = webix.Date.dateToStr(`${date.getFullYear() + 543}`);
+         return format(date);
+      },
    },
 };

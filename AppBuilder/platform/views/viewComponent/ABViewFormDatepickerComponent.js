@@ -12,6 +12,37 @@ module.exports = class ABViewFormDatepickerComponent extends (
 
       const _ui = {
          view: "datepicker",
+         on: {
+            onFocus: function () {
+               const value = this.getValue();
+               this.getPopup().getChildViews()[0].setValue(value);
+            },
+         },
+         suggest: {
+            body: {
+               view:
+                  this.AB.Account?._config?.languageCode == "th"
+                     ? "thaicalendar"
+                     : "calendar",
+               on: {
+                  onAfterDateSelect: function (date) {
+                     this.getParentView().setMasterValue({
+                        value: date,
+                     });
+                  },
+                  onTodaySet: function (date) {
+                     this.getParentView().setMasterValue({
+                        value: date,
+                     });
+                  },
+                  onDateClear: function (date) {
+                     this.getParentView().setMasterValue({
+                        value: date,
+                     });
+                  },
+               },
+            },
+         },
       };
 
       if (!field) return _ui;
