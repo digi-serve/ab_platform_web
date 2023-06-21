@@ -36,14 +36,6 @@ window.webix.i18n.locales["th-TH"] = {
       );
       return format(date);
    },
-   parseTimeFormatDate: (text) => {
-      let date = AB.rules.toDate(text);
-      date.setFullYear(date.getFullYear() - 543);
-   },
-   parseFormatDate: (text) => {
-      let date = AB.rules.toDate(text);
-      date.setFullYear(date.getFullYear() - 543);
-   },
    am: ["am", "AM"],
    pm: ["pm", "PM"],
    price: "฿{obj}",

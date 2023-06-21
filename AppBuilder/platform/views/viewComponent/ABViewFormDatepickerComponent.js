@@ -8,16 +8,11 @@ module.exports = class ABViewFormDatepickerComponent extends (
    }
 
    ui() {
+      const self = this;
       const field = this.view.field();
 
       const _ui = {
          view: "datepicker",
-         on: {
-            onFocus: function () {
-               const value = this.getValue();
-               this.getPopup().getChildViews()[0].setValue(value);
-            },
-         },
          suggest: {
             body: {
                view:
@@ -40,6 +35,20 @@ module.exports = class ABViewFormDatepickerComponent extends (
                         value: date,
                      });
                   },
+               },
+            },
+            on: {
+               onShow: function () {
+                  const text = this.getMasterValue();
+                  const field = this.view.field();
+                  if (!text || !field) return true;
+
+                  const vals = {};
+                  vals[field.columnName] = text;
+                  const date = self.getValue(vals);
+
+                  const $calendar = this.getChildViews()[0];
+                  $calendar.setValue(date);
                },
             },
          },
@@ -65,5 +74,18 @@ module.exports = class ABViewFormDatepickerComponent extends (
       if (field !== null && !window.webixLocale) _ui.format = field.getFormat();
 
       return super.ui(_ui);
+   }
+
+   getValue(rowData) {
+      const field = this.view.field();
+      const text = rowData[field.columnName];
+      if (!field || !text) return null;
+
+      const date = this.AB.Webix.Date.strToDate(field.getFormat())(text);
+
+      if (this.AB.Account?._config?.languageCode == "th")
+         date.setFullYear(date.getFullYear() - 543);
+
+      return date;
    }
 };
