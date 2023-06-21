@@ -5,9 +5,9 @@
  * well the main ABFactory object that will drive the rest of the applications.
  */
 
-// import * as Webix from "../js/webix/webix.js";
+import * as Webix from "../js/webix/webix.js";
 // NOTE: changed to require() so switching to webix_debug.js will work.
-const Webix = require("../js/webix/webix_debug.js");
+// const Webix = require("../js/webix/webix_debug.js");
 
 import webixCSS from "../js/webix/webix.css";
 // Make sure webix is global object
