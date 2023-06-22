@@ -40,7 +40,7 @@ module.exports = class ABViewFormDatepickerComponent extends (
             on: {
                onShow: function () {
                   const text = this.getMasterValue();
-                  const field = this.view.field();
+                  const field = self.view.field();
                   if (!text || !field) return true;
 
                   const vals = {};
