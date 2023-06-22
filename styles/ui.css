@@ -127,6 +127,7 @@ label {
    position: relative;
    right: 9px;
    transition: all 0.2s ease-in-out;
+   top: 13px;
 }
 .webix_multicombo_value {
    display: flex;
