@@ -16,9 +16,7 @@ class PortalAuthLoginForm extends ClassUI {
          };
       }
 
-      var L = (...params) => {
-         return this.AB.Multilingual.label(...params);
-      };
+      var L = this.AB.Label();
 
       return {
          id: "portal_auth_login_container",
@@ -238,7 +236,7 @@ class PortalAuthLoginForm extends ClassUI {
       if (siteConfig) {
          // replace options in tenant list with siteConfig.tenants:
          var newOptions = [];
-         siteConfig.tenants.forEach((t) => {
+         (siteConfig.tenants || []).forEach((t) => {
             var opt = {
                id: t.uuid,
                value: t.title || t.key,
