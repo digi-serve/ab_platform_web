@@ -12,6 +12,7 @@ io.sails.reconnection = true;
 import "./styles/loader.css";
 
 import webix from "./js/webix/webix.js";
+// const webix = require("./js/webix/webix_debug.js");
 import "./js/webix/webix.css";
 
 import "./styles/ui.css";

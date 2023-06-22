@@ -8,10 +8,50 @@ module.exports = class ABViewFormDatepickerComponent extends (
    }
 
    ui() {
+      const self = this;
       const field = this.view.field();
 
       const _ui = {
          view: "datepicker",
+         suggest: {
+            body: {
+               view:
+                  this.AB.Account?._config?.languageCode == "th"
+                     ? "thaicalendar"
+                     : "calendar",
+               on: {
+                  onAfterDateSelect: function (date) {
+                     this.getParentView().setMasterValue({
+                        value: date,
+                     });
+                  },
+                  onTodaySet: function (date) {
+                     this.getParentView().setMasterValue({
+                        value: date,
+                     });
+                  },
+                  onDateClear: function (date) {
+                     this.getParentView().setMasterValue({
+                        value: date,
+                     });
+                  },
+               },
+            },
+            on: {
+               onShow: function () {
+                  const text = this.getMasterValue();
+                  const field = this.view.field();
+                  if (!text || !field) return true;
+
+                  const vals = {};
+                  vals[field.columnName] = text;
+                  const date = self.getValue(vals);
+
+                  const $calendar = this.getChildViews()[0];
+                  $calendar.setValue(date);
+               },
+            },
+         },
       };
 
       if (!field) return _ui;
@@ -34,5 +74,18 @@ module.exports = class ABViewFormDatepickerComponent extends (
       if (field !== null && !window.webixLocale) _ui.format = field.getFormat();
 
       return super.ui(_ui);
+   }
+
+   getValue(rowData) {
+      const field = this.view.field();
+      const text = rowData[field.columnName];
+      if (!field || !text) return null;
+
+      const date = this.AB.Webix.Date.strToDate(field.getFormat())(text);
+
+      if (this.AB.Account?._config?.languageCode == "th")
+         date.setFullYear(date.getFullYear() - 543);
+
+      return date;
    }
 };

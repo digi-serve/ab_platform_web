@@ -41,7 +41,7 @@ import UISettings from "./uiSettings/config.js";
 import Webix from "../js/webix/webix.js";
 // NOTE: moved to require() because using import with webix_debug.js
 // really messed things up!
-// var Webix = require("../js/webix/webix-debug.js");
+// var Webix = require("../js/webix/webix_debug.js");
 
 class ABValidator {
    constructor(AB) {
