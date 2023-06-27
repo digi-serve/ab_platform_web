@@ -3,6 +3,7 @@ const ABViewFormComponent = require("./viewComponent/ABViewFormComponent");
 const ABViewFormButton = require("./ABViewFormButton");
 const ABViewFormCustom = require("./ABViewFormCustom");
 const ABViewFormConnect = require("./ABViewFormConnect");
+const ABViewFormDatepicker = require("./ABViewFormDatepicker");
 const ABViewFormSelectMultiple = require("./ABViewFormSelectMultiple");
 const ABViewFormTextbox = require("./ABViewFormTextbox");
 const ABViewFormJson = require("./ABViewFormJson");
@@ -105,6 +106,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
          (comp) =>
             comp instanceof ABViewFormCustom ||
             comp instanceof ABViewFormConnect ||
+            comp instanceof ABViewFormDatepicker ||
             comp instanceof ABViewFormSelectMultiple ||
             (comp instanceof ABViewFormJson && comp.settings.type == "filter")
       ).forEach((f) => {

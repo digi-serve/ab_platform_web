@@ -28,7 +28,8 @@ module.exports = class ABFieldDate extends ABFieldDateCore {
       // if (this.settings.includeTime)
       // config.editor = "datetime";
       // else
-      config.editor = "date";
+      config.editor =
+         this.AB.Account?._config?.languageCode == "th" ? "thaidate" : "date";
 
       // allows entering characters in datepicker input, false by default
       config.editable = true;
