@@ -28,8 +28,8 @@ import Bootstrap from "./init/Bootstrap.js";
 import * as gantt from "./js/webix/components/gantt/gantt.min.js";
 import "./js/webix/components/gantt/gantt.min.css";
 
-import kanban from "./js/webix/components/kanban/kanban.min.js";
-import pivot from "./js/webix/components/pivot/pivot.min.js";
+import * as kanban from "./js/webix/components/kanban/kanban.min.js";
+import * as pivot from "./js/webix/components/pivot/pivot.min.js";
 import * as report from "./js/webix/components/reports/reports.min.js";
 import "./js/webix/components/query/query.min.css";
 import query from "./js/webix/components/query/query.min.js";
@@ -40,6 +40,8 @@ if (!window.webix) {
 }
 
 window.gantt = gantt;
+window.kanban = kanban;
+window.pivot = pivot;
 window.reports = report;
 
 Bootstrap.init().catch((err) => {
