@@ -15,6 +15,7 @@ var componentList = [
    require("./focusableTemplate"),
    require("./formioPreview"),
    require("./numbertext"),
+   require("./thaicalendar"),
    require("./timepicker"),
    require("./totalfooter"),
    require("./treesuggest"),

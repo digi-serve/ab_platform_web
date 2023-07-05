@@ -85,4 +85,29 @@ window.webix.i18n.locales["th-TH"] = {
       ],
       dayShort: ["อา.", "จ.", "อ.", "พ.", "พฤ.", "ศ.", "ส."],
    },
+   aria: {
+      dateFormat: (date) => {
+         if (date == null) return "";
+         else if (typeof date == "string") return date;
+
+         const format = webix.Date.dateToStr(
+            `%d %F ${date.getFullYear() + 543}`
+         );
+         return format(date);
+      },
+      monthFormat: (date) => {
+         if (date == null) return "";
+         else if (typeof date == "string") return date;
+
+         const format = webix.Date.dateToStr(`%F ${date.getFullYear() + 543}`);
+         return format(date);
+      },
+      yearFormat: (date) => {
+         if (date == null) return "";
+         else if (typeof date == "string") return date;
+
+         const format = webix.Date.dateToStr(`${date.getFullYear() + 543}`);
+         return format(date);
+      },
+   },
 };
