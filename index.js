@@ -34,6 +34,8 @@ import pivot from "./js/webix/components/pivot/pivot.js";
 import * as report from "./js/webix/components/reports/reports.js";
 import "./js/webix/components/query/query.css";
 import query from "./js/webix/components/query/query.js";
+import * as scheduler from "./js/webix/components/scheduler/scheduler.js";
+import "./js/webix/components/scheduler/scheduler.css";
 
 // Make sure webix is global object
 if (!window.webix) {
@@ -42,6 +44,7 @@ if (!window.webix) {
 
 window.gantt = gantt;
 window.reports = report;
+window.scheduler = scheduler;
 
 Bootstrap.init().catch((err) => {
    // This is a known error that has already been handled.
