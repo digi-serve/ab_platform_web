@@ -101,18 +101,18 @@ class PortalAuthLoginResetRequest extends ClassUI {
                                                    autowidth: true,
                                                    hotkey: "enter",
                                                    click() {
-                                                      var email = $$(
-                                                         "reset-email"
-                                                      );
+                                                      var email =
+                                                         $$("reset-email");
                                                       if (email.validate()) {
-                                                         email = email.getValue();
-                                                         var tenant = $$(
-                                                            "reset_tenantList"
-                                                         ).getValue();
+                                                         email =
+                                                            email.getValue();
+                                                         var tenant =
+                                                            $$(
+                                                               "reset_tenantList"
+                                                            ).getValue();
                                                          self.AB.Network.post(
                                                             {
-                                                               url:
-                                                                  "/auth/login/reset",
+                                                               url: "/auth/login/reset",
                                                                data: {
                                                                   email,
                                                                   tenant,
@@ -126,8 +126,7 @@ class PortalAuthLoginResetRequest extends ClassUI {
                                                                },
                                                             },
                                                             {
-                                                               key:
-                                                                  "portal_auth_login_reset",
+                                                               key: "portal_auth_login_reset",
                                                                context: {
                                                                   email,
                                                                },
@@ -177,7 +176,7 @@ class PortalAuthLoginResetRequest extends ClassUI {
 
       var $tenant = $$("reset_tenantList");
       var siteConfig = this.AB.Config.siteConfig();
-      if (siteConfig) {
+      if (siteConfig?.tenants?.length) {
          // replace options in tenant list with siteConfig.tenants:
          var newOptions = [];
          siteConfig.tenants.forEach((t) => {
