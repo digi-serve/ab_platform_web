@@ -57,5 +57,6 @@ module.exports = {
       webix: true, // webix
       gantt: true,
       $$: true, // webix element
+      scheduler: true,
    },
 };

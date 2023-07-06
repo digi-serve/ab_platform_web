@@ -33,6 +33,8 @@ import * as pivot from "./js/webix/components/pivot/pivot.min.js";
 import * as report from "./js/webix/components/reports/reports.min.js";
 import "./js/webix/components/query/query.min.css";
 import query from "./js/webix/components/query/query.min.js";
+import * as scheduler from "./js/webix/components/scheduler/scheduler.min.js";
+import "./js/webix/components/scheduler/scheduler.css";
 
 // Make sure webix is global object
 if (!window.webix) {
@@ -43,6 +45,7 @@ window.gantt = gantt;
 window.kanban = kanban;
 window.pivot = pivot;
 window.reports = report;
+window.scheduler = scheduler;
 
 Bootstrap.init().catch((err) => {
    // This is a known error that has already been handled.
