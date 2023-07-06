@@ -124,7 +124,8 @@ class PortalAuthLoginForm extends ClassUI {
                                                       "portal_auth_login_form_submit_wait"
                                                    ).show();
 
-                                                   var values = form.getValues();
+                                                   var values =
+                                                      form.getValues();
                                                    self.error(); // hids the error message
 
                                                    // this.AB.Network.post()
@@ -245,6 +246,12 @@ class PortalAuthLoginForm extends ClassUI {
          });
 
          $$("portal_auth_login_form_tenantList").define("options", newOptions);
+         if (newOptions.length == 0) {
+            console.warn("no tenants returned");
+            $$("portal_auth_login_form_tenantList").hide();
+         } else {
+            $$("portal_auth_login_form_tenantList").show();
+         }
       }
 
       var tID = this.AB.Tenant.id();
