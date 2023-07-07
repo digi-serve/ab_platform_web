@@ -460,6 +460,10 @@ class PortalAccessLevelManager extends ClassUI {
             onDataUpdate: async (id, data, old) => {
                const tree = $$(`linetree_${role}`);
                if (data.access == "0") {
+                  // NOTE: Need to update "No Access" option here because It does not trigger `onAfterEditStop` event
+                  const view = this.views((v) => v.id == id)[0];
+                  await view.updateAccessLevels(tree.config.role, data.access);
+
                   tree.blockEvent();
                   await tree.data.eachSubItem(id, async (child) => {
                      const childData = tree.getItem(child.id);
