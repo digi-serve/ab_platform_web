@@ -44,6 +44,7 @@ module.exports = class ABCustomThaiCalendar {
          });
       }
 
+<<<<<<< HEAD
       if (webix.ui.calendar.$protoWait[0].Qd) {
          _ui.Qd = AB.cloneDeep(webix.ui.calendar.$protoWait[0].Qd);
          _ui.Qd[1] = Object.assign(_ui.Qd[1], {
@@ -53,6 +54,17 @@ module.exports = class ABCustomThaiCalendar {
             Jv: this._getYearRangeTitle,
             Zv: this._getYearContent,
             Xv: this._setYear,
+=======
+      if (webix.ui.calendar.$protoWait[0].jd) {
+         _ui.jd = AB.cloneDeep(webix.ui.calendar.$protoWait[0].jd);
+         _ui.jd[1] = Object.assign(_ui.jd[1], {
+            Ap: this._getYearTitle,
+         });
+         _ui.jd[2] = Object.assign(_ui.jd[2], {
+            Ap: this._getYearRangeTitle,
+            Tp: this._getYearContent,
+            Dp: this._setYear,
+>>>>>>> 6388b01 (New widget Scheduler)
          });
       }
 
