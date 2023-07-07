@@ -34,7 +34,7 @@ import * as report from "./js/webix/components/reports/reports.min.js";
 import "./js/webix/components/query/query.min.css";
 import query from "./js/webix/components/query/query.min.js";
 import * as scheduler from "./js/webix/components/scheduler/scheduler.min.js";
-import "./js/webix/components/scheduler/scheduler.css";
+import "./js/webix/components/scheduler/scheduler.min.css";
 
 // Make sure webix is global object
 if (!window.webix) {

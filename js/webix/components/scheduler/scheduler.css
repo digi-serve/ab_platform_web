@@ -47,6 +47,22 @@ Glyphs list
   content: "";
 }
 
+.shi-timeline:before {
+  content: "";
+}
+
+.shi-units:before {
+  content: "";
+}
+
+.shi-content-copy:before {
+  content: "";
+}
+
+.shi-year:before {
+  content: "";
+}
+
 /* Preview */
 .webix_scheduler_info .webix_template {
   overflow: auto;
@@ -63,13 +79,30 @@ Glyphs list
   margin-bottom: 20px;
   line-height: 20px;
 }
-.webix_scheduler_info .webix_template .webix_scheduler_event_details_title {
+.webix_scheduler_info .webix_template .webix_scheduler_event_details_title,
+.webix_scheduler_info .webix_template .webix_scheduler_event_units_title {
   color: #313131;
   font-weight: 500;
   margin-bottom: 10px;
 }
 .webix_scheduler_info .webix_template .webix_scheduler_event_text {
   line-height: 20px;
+}
+.webix_scheduler_info .webix_template .webix_scheduler_event_units {
+  margin-bottom: 10px;
+}
+.webix_scheduler_info .webix_template .webix_scheduler_event_units .webix_scheduler_event_unit_item {
+  display: inline-block;
+  margin-right: 6px;
+}
+
+.webix_scheduler_section_tpl {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+.webix_scheduler_section_tpl .webix_scheduler_section_title {
+  font-weight: 500;
+  color: #313131;
 }
 
 /* Form */
@@ -155,8 +188,6 @@ Glyphs list
   box-shadow: 3px 3px 7px rgba(0, 0, 0, 0.3), 2px 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.webix_resize_event,
-.webix_resize_event:hover,
 .webix_active_resize .webix_scheduler_day_event:hover,
 .webix_noselect .webix_scheduler_day_event:hover {
   box-shadow: none;
@@ -173,6 +204,7 @@ Glyphs list
 
 .webix_resize_event {
   border-radius: 2px;
+  box-shadow: 3px 3px 7px rgba(0, 0, 0, 0.3), 2px 2px 4px rgba(0, 0, 0, 0.2);
 }
 .webix_resize_event .webix_scheduler_resizer {
   visibility: visible;
@@ -219,7 +251,7 @@ Glyphs list
   box-shadow: none;
 }
 .webix_scheduler_multilist .webix_scheduler_multiday_event {
-  top: 1px;
+  top: 4px;
   left: 1px;
 }
 
@@ -300,6 +332,14 @@ Glyphs list
   height: 12px;
   margin-top: -5px;
   border-radius: 50%;
+}
+
+.webix_scheduler_multilist .webix_drag_event.webix_list_item {
+  box-shadow: none;
+  background: transparent;
+}
+.webix_scheduler_multilist .webix_drag_event.webix_list_item .webix_scheduler_multiday_event {
+  box-shadow: 3px 3px 7px rgba(0, 0, 0, 0.3), 2px 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .webix_scheduler_day_header .webix_dataview_item {
@@ -498,6 +538,10 @@ Glyphs list
   user-select: none;
   cursor: pointer;
 }
+.webix_scheduler_month_event.webix_scheduler_past_event,
+.webix_scheduler_month_event_single.webix_scheduler_past_event {
+  color: #8393a9;
+}
 
 .webix_scheduler_month_event {
   border-left: 3px solid;
@@ -549,6 +593,7 @@ Glyphs list
 }
 .webix_scheduler_more_list .webix_scheduler_month_event .webix_event_text {
   width: 100%;
+  padding: 0;
 }
 .webix_scheduler_more_list .webix_scheduler_month_event_single {
   padding: 4px 8px 4px 4px;
@@ -646,6 +691,20 @@ Glyphs list
 
 .webix_scheduler_dnd_n .webix_scheduler_event_break_right::after {
   border-right-color: #f4f5f9;
+}
+
+.webix_scheduler_year {
+  justify-content: space-evenly;
+}
+.webix_scheduler_year .webix_cal_month,
+.webix_scheduler_year .webix_cal_month .webix_cal_month_name {
+  cursor: pointer;
+}
+.webix_scheduler_year .webix_cal_month:hover .webix_cal_month_name {
+  color: #1ca1c1;
+}
+.webix_scheduler_year .webix_cal_outside {
+  visibility: hidden;
 }
 
 .webix_scheduler_absbutton {
@@ -760,6 +819,12 @@ Glyphs list
   display: flex;
   -webkit-align-items: center;
 }
+.webix_event_overall.webix_scheduler_past_event {
+  color: #8393a9;
+}
+.webix_event_overall.webix_scheduler_past_event .webix_event_time .end {
+  color: #8393a9;
+}
 
 .webix_event_overall .webix_event_time {
   flex-basis: 70px;
@@ -852,6 +917,9 @@ Glyphs list
 .webix_scheduler_agenda .webix_event_overall:hover {
   background-color: #f4f5f9;
 }
+.webix_scheduler_agenda .webix_event_overall.webix_scheduler_past_event {
+  color: #8393a9;
+}
 .webix_scheduler_agenda .webix_event_first {
   padding-top: 8px;
 }
@@ -884,6 +952,145 @@ Glyphs list
   font-size: 12px;
 }
 
+/* scale */
+.webix_scheduler_timeline_scale .webix_template {
+  padding: 0;
+}
+
+.webix_scheduler_timeline_scale_row {
+  display: flex;
+  box-sizing: border-box;
+}
+
+.webix_scheduler_timeline_scale_row:not(:last-child) {
+  border-bottom: 1px solid #dadee0;
+}
+
+.webix_scheduler_timeline_scale_cell {
+  display: flex;
+  flex: 0 0 auto;
+  justify-content: center;
+  align-items: center;
+  border-right: 1px solid #dadee0;
+  box-sizing: border-box;
+  background-color: #f4f5f9;
+}
+
+/* bars */
+.webix_scheduler_timeline_event {
+  position: absolute;
+  box-sizing: border-box;
+  border-radius: 2px;
+  color: #ffffff;
+  cursor: pointer;
+  border-left: 3px solid;
+  transition: box-shadow 0.15s;
+  overflow: hidden;
+}
+.webix_scheduler_timeline_event:hover {
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3), 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.webix_scheduler_timeline_content {
+  text-align: center;
+  line-height: 30px;
+  position: absolute;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  user-select: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0 12px;
+}
+
+.webix_scheduler_timeline_task .webix_scheduler_timeline_content {
+  padding: 0 32px;
+}
+
+.webix_scheduler_timeline_bars .webix_list_item,
+.webix_scheduler_timeline_sections .webix_cell {
+  border-color: #dadee0;
+  text-overflow: ellipsis;
+}
+
+.webix_scheduler_timeline_bars .webix_list_item {
+  cursor: default;
+}
+
+.webix_scheduler_timeline_sections .webix_c_scroll_y div {
+  color: transparent;
+  background-color: transparent;
+}
+
+.webix_scheduler_timeline_space {
+  background-color: #f4f5f9;
+}
+
+.webix_scheduler_timeline_event.webix_scheduler_multi_more {
+  transition: background-color 0.3s;
+  background-color: #f4f5f9;
+}
+.webix_scheduler_timeline_event.webix_scheduler_multi_more .webix_scheduler_timeline_content {
+  text-align: left;
+  color: #475466;
+}
+.webix_scheduler_timeline_event.webix_scheduler_multi_more:hover {
+  background-color: #e7e9f2;
+  box-shadow: none;
+}
+
+.webix_scheduler_timeline_event.webix_scheduler_event_break_left {
+  border-left-width: 0;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-left-width: 0;
+}
+.webix_scheduler_timeline_event.webix_scheduler_event_break_left:hover {
+  box-shadow: 6px 6px 5px -4px rgba(0, 0, 0, 0.2), 5px 5px 2px -4px rgba(0, 0, 0, 0.2);
+}
+
+.webix_scheduler_timeline_event.webix_scheduler_event_break_right:hover {
+  box-shadow: -1px 5px 5px -3px rgba(0, 0, 0, 0.3), -2px 4px 2px -3px rgba(0, 0, 0, 0.2);
+}
+
+.webix_scheduler_copy.webix_scheduler_day_event.webix_scheduler_event_selected, .webix_scheduler_copy.webix_scheduler_day_event, .webix_scheduler_copy.webix_scheduler_month_event.webix_scheduler_event_selected, .webix_scheduler_copy.webix_scheduler_month_event, .webix_scheduler_copy.webix_scheduler_multiday_event, .webix_scheduler_copy.webix_scheduler_timeline_event.webix_scheduler_event_selected, .webix_scheduler_copy.webix_scheduler_timeline_event {
+  box-shadow: 2px 2px 5px #1ca1c1, 1px 1px 2px #1ca1c1;
+}
+
+.webix_scheduler_copy.webix_scheduler_multiday_event.webix_scheduler_event_break_right, .webix_scheduler_copy.webix_scheduler_month_event.webix_scheduler_event_break_right, .webix_scheduler_copy.webix_scheduler_timeline_event.webix_scheduler_event_break_right {
+  box-shadow: 3px 9px 5px -7px #1ca1c1, -6px 9px 3px -7px #1ca1c1;
+}
+.webix_scheduler_copy.webix_scheduler_multiday_event.webix_scheduler_event_break_left, .webix_scheduler_copy.webix_scheduler_month_event.webix_scheduler_event_break_left, .webix_scheduler_copy.webix_scheduler_timeline_event.webix_scheduler_event_break_left {
+  box-shadow: 3px 9px 5px -7px #1ca1c1, 2px 8px 2px -7px #1ca1c1;
+}
+.webix_scheduler_copy .webix_scheduler_multiday_event.webix_scheduler_event_break_right {
+  box-shadow: 3px 9px 5px -7px #1ca1c1, -6px 9px 3px -7px #1ca1c1;
+}
+.webix_scheduler_copy .webix_scheduler_multiday_event.webix_scheduler_event_break_left {
+  box-shadow: 3px 9px 5px -7px #1ca1c1, 2px 8px 2px -7px #1ca1c1;
+}
+
+.webix_scheduler_cut {
+  opacity: 0.5;
+}
+
+.webix_scheduler_month_event_single.webix_scheduler_event_selected.webix_scheduler_copy,
+.webix_scheduler_month_event_single.webix_scheduler_copy {
+  background-color: rgba(28, 161, 193, 0.2);
+}
+
+.webix_scheduler_paste_target {
+  box-shadow: inset 0 2px 0 0 #1ca1c1, inset 0 -2px 0 0 #1ca1c1;
+}
+
+.webix_scheduler_clipboard_target.webix_scheduler_calendar .webix_cal_day, .webix_scheduler_clipboard_target.webix_scheduler_timeline_bars .webix_list_item, .webix_scheduler_clipboard_target.webix_scheduler_day_events .webix_list_item, .webix_scheduler_clipboard_target.webix_scheduler_multilist {
+  cursor: pointer;
+}
+
 .webix_scheduler .webix_progress_top {
   z-index: 10000;
 }
@@ -891,6 +1098,10 @@ Glyphs list
 /* action popup for dnd of recurring */
 .webix_scheduler_action_popup .webix_win_head {
   border-bottom-color: transparent;
+}
+
+.webix_scheduler_sidemenu {
+  z-index: 1 !important;
 }
 
 .webix_toolbar.webix_scheduler_toolbar .webix_view,

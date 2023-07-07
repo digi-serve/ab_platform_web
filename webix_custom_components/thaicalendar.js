@@ -44,15 +44,15 @@ module.exports = class ABCustomThaiCalendar {
          });
       }
 
-      if (webix.ui.calendar.$protoWait[0].Qd) {
-         _ui.Qd = AB.cloneDeep(webix.ui.calendar.$protoWait[0].Qd);
-         _ui.Qd[1] = Object.assign(_ui.Qd[1], {
-            Jv: this._getYearTitle,
+      if (webix.ui.calendar.$protoWait[0].jd) {
+         _ui.jd = AB.cloneDeep(webix.ui.calendar.$protoWait[0].jd);
+         _ui.jd[1] = Object.assign(_ui.jd[1], {
+            Ap: this._getYearTitle,
          });
-         _ui.Qd[2] = Object.assign(_ui.Qd[2], {
-            Jv: this._getYearRangeTitle,
-            Zv: this._getYearContent,
-            Xv: this._setYear,
+         _ui.jd[2] = Object.assign(_ui.jd[2], {
+            Ap: this._getYearRangeTitle,
+            Tp: this._getYearContent,
+            Dp: this._setYear,
          });
       }
 
