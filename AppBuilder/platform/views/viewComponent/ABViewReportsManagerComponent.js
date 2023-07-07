@@ -86,50 +86,58 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
                   async getModels() {
                      const reportModels = {};
 
-                     (
-                        baseView.application.datacollectionsIncluded() || []
-                     ).forEach((dc) => {
-                        const obj = dc.datasource;
-                        if (!obj) return;
+                     if (baseView.settings.datacollectionIDs === "")
+                        return reportModels;
 
-                        const reportFields = self.getReportFields(dc);
+                     baseView.settings.datacollectionIDs
+                        .split(", ")
+                        .forEach((dcID) => {
+                           const dc = ab.datacollectionByID(dcID);
 
-                        // get connected data collections
-                        // let linkedFields = [];
-                        // (obj.connectFields() || []).forEach((f, index) => {
-                        //    let connectedDcs = ab.datacollections(
-                        //       (dColl) =>
-                        //          dColl &&
-                        //          dColl.datasource &&
-                        //          dColl.datasource.id === f.settings.linkObject
-                        //    );
-                        //    (connectedDcs || []).forEach((linkedDc) => {
-                        //       linkedFields.push({
-                        //          id: index + 1,
-                        //          name: linkedDc.label,
-                        //          source: dc.id,
-                        //          target: linkedDc.id
-                        //       });
-                        //    });
-                        // });
+                           if (!dc) return;
 
-                        // // MOCK UP for testing
-                        // let linkedFields = [
-                        //    {
-                        //       id: "id",
-                        //       name: "id",
-                        //       source: "39378ee0-38f0-4b9d-a5aa-dddc61137fcd", // Player
-                        //       target: "0de82362-4ab5-4f0f-8cfa-d1288d173cba" // Team
-                        //    }
-                        // ];
+                           const obj = dc.datasource;
 
-                        reportModels[dc.id] = {
-                           id: dc.id,
-                           name: dc.label,
-                           data: reportFields,
-                           refs: [],
-                        };
-                     });
+                           if (!obj) return;
+
+                           const reportFields = self.getReportFields(dc);
+
+                           // get connected data collections
+                           // let linkedFields = [];
+                           // (obj.connectFields() || []).forEach((f, index) => {
+                           //    let connectedDcs = ab.datacollections(
+                           //       (dColl) =>
+                           //          dColl &&
+                           //          dColl.datasource &&
+                           //          dColl.datasource.id === f.settings.linkObject
+                           //    );
+                           //    (connectedDcs || []).forEach((linkedDc) => {
+                           //       linkedFields.push({
+                           //          id: index + 1,
+                           //          name: linkedDc.label,
+                           //          source: dc.id,
+                           //          target: linkedDc.id
+                           //       });
+                           //    });
+                           // });
+
+                           // // MOCK UP for testing
+                           // let linkedFields = [
+                           //    {
+                           //       id: "id",
+                           //       name: "id",
+                           //       source: "39378ee0-38f0-4b9d-a5aa-dddc61137fcd", // Player
+                           //       target: "0de82362-4ab5-4f0f-8cfa-d1288d173cba" // Team
+                           //    }
+                           // ];
+
+                           reportModels[dc.id] = {
+                              id: dc.id,
+                              name: dc.label,
+                              data: reportFields,
+                              refs: [],
+                           };
+                        });
 
                      return reportModels;
                   }
