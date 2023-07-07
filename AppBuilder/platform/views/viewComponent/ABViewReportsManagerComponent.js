@@ -542,7 +542,11 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
          });
 
          if (f.isConnection && f.settings.isSource) {
-            const linkedDcs = this.AB.datacollectionByID(f.settings.linkObject);
+            const linkedDcs = this.view.application.datacollectionsIncluded(
+               (dc) =>
+                  this.settings.datacollectionIDs.includes(dc.id) &&
+                  dc.settings.datasourceID === f.settings.linkObject
+            );
 
             (linkedDcs || []).forEach((linkDc) => {
                fields.push({
