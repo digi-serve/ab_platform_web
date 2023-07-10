@@ -15,72 +15,62 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
       const settings = this.settings;
       const ab = this.AB;
       const abWebix = ab.Webix;
-
+      const dc = this.datacollection;
+      const fieldName = dc?.datasource.fieldByID(
+         settings.dataviewFields.name
+      )?.columnName;
+      const fieldText = dc?.datasource.fieldByID(
+         settings.dataviewFields.text
+      )?.columnName;
+      const fieldQueries = dc?.datasource.fieldByID(
+         settings.dataviewFields.queries
+      )?.columnName;
+      const ids = this.ids;
+      const isEditMode = settings.editMode === 1;
       const _uiReportManager = {
-         id: this.ids.reportManager,
+         id: ids.reportManager,
          view: "reports",
          toolbar: true,
+         mode: isEditMode ? "edit" : "list",
+         readonly: settings.readonly === 1 || isEditMode,
          override: new Map([
             [
                reports.services.Backend,
                class MyBackend extends reports.services.Backend {
                   async getModules() {
-                     return settings.moduleList || [];
-                  }
+                     if (dc == null) return [];
 
-                  saveModule(id = abWebix.uid(), data) {
-                     settings.moduleList = settings.moduleList || [];
+                     await self.waitInitializingDCEvery(1000, dc);
 
-                     let indexOfModule = null;
-
-                     const module = settings.moduleList.filter((m, index) => {
-                        const isExists = m.id === id;
-
-                        if (isExists) indexOfModule = index;
-
-                        return isExists;
-                     })[0];
-
-                     // Update
-                     if (module) settings.moduleList[indexOfModule] = data;
-                     // Add
-                     else settings.moduleList.push(data);
-
-                     return new Promise((resolve, reject) => {
-                        const viewSave = async () => {
-                           try {
-                              await baseView.save();
-
-                              resolve({ id: id });
-                           } catch (err) {
-                              reject(err);
-                           }
+                     return dc.getData().map((e) => {
+                        return {
+                           id: e.id,
+                           name: e[fieldName],
+                           text: JSON.stringify(e[fieldText]),
+                           updated: e["updated_at"],
                         };
-
-                        viewSave();
                      });
                   }
 
-                  deleteModule(id) {
-                     settings.moduleList = settings.moduleList || [];
+                  async saveModule(id, data) {
+                     const parsedData = {};
 
-                     settings.moduleList = settings.moduleList.filter(
-                        (m) => m.id !== id
-                     );
+                     parsedData[fieldName] = data.name;
+                     parsedData[fieldText] = data.text;
 
-                     return new Promise((resolve, reject) => {
-                        const viewSave = async () => {
-                           try {
-                              await baseView.save();
+                     let response = {};
 
-                              resolve({ id: id });
-                           } catch (err) {
-                              reject(err);
-                           }
-                        };
+                     if (id == null)
+                        response = await dc.model.create(parsedData);
+                     else response = await dc.model.update(id, parsedData);
 
-                        viewSave();
-                     });
+                     return { id: response.id };
+                  }
+
+                  async deleteModule(id) {
+                     await dc.model.delete(id);
+
+                     return { id: id };
                   }
 
                   async getModels() {
@@ -143,61 +133,98 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
                   }
 
                   async getQueries() {
-                     return settings.queryList || [];
-                  }
+                     const moduleID =
+                        $$(ids.reportManager).getState().moduleId || "";
 
-                  saveQuery(id = abWebix.uid(), data) {
-                     settings.queryList = settings.queryList || [];
+                     if (moduleID === "") return [];
 
-                     let indexOfQuery = null;
-
-                     const query = settings.queryList.filter((m, index) => {
-                        const isExists = m.id === id;
-
-                        if (isExists) indexOfQuery = index;
-
-                        return isExists;
-                     })[0];
-
-                     // Update
-                     if (query) settings.queryList[indexOfQuery] = data;
-                     // Add
-                     else settings.queryList.push(data);
-
-                     return new Promise((resolve, reject) => {
-                        const viewSave = async () => {
-                           try {
-                              await baseView.save();
-
-                              resolve({ id: id });
-                           } catch (err) {
-                              reject(err);
-                           }
-                        };
-
-                        viewSave();
-                     });
-                  }
-
-                  deleteQuery(id) {
-                     settings.queryList = settings.queryList || [];
-                     settings.queryList = settings.queryList.filter(
-                        (m) => m.id !== id
+                     return (
+                        (
+                           await dc.model.findAll({
+                              where: {
+                                 uuid: moduleID,
+                              },
+                           })
+                        ).data[0][fieldQueries] || []
                      );
+                  }
 
-                     return new Promise((resolve, reject) => {
-                        const viewSave = async () => {
-                           try {
-                              await baseView.save();
+                  async saveQuery(id, data) {
+                     const moduleID =
+                        $$(ids.reportManager).getState().moduleId || "";
 
-                              resolve({ id: id });
-                           } catch (err) {
-                              reject(err);
-                           }
-                        };
+                     if (moduleID === "") return {};
 
-                        viewSave();
+                     const moduleData = (
+                        await dc.model.findAll({
+                           where: {
+                              uuid: moduleID,
+                           },
+                        })
+                     ).data[0];
+
+                     if (moduleData == null) return {};
+
+                     const queries = moduleData[fieldQueries] || [];
+                     const queryIndex = queries.findIndex((e) => e.id === id);
+                     const queryID =
+                        queries[queryIndex]?.id ?? id ?? abWebix.uid();
+
+                     // Add a new query
+                     if (queryIndex < 0)
+                        queries.push(Object.assign({ id: queryID }, data));
+
+                     const parsedData = {};
+
+                     parsedData[fieldQueries] = queries.sort((a, b) => {
+                        if (a.name < b.name) return -1;
+
+                        if (a.name > b.name) return 1;
+
+                        return 0;
                      });
+
+                     await dc.model.update(moduleID, parsedData);
+
+                     return { id: queryID };
+                  }
+
+                  async deleteQuery(id) {
+                     const moduleID =
+                        $$(ids.reportManager).getState().moduleId || "";
+
+                     if (moduleID === "") return {};
+
+                     const moduleData = (
+                        await dc.model.findAll({
+                           where: {
+                              uuid: moduleID,
+                           },
+                        })
+                     ).data[0];
+
+                     if (moduleData == null) return {};
+
+                     const queries = moduleData[fieldQueries] || [];
+                     const queryIndex = queries.findIndex((e) => e.id === id);
+
+                     if (queryIndex >= 0) {
+                        const parsedData = {};
+
+                        parsedData[fieldQueries] = queries
+                           .filter((e, i) => i !== queryIndex)
+                           .sort((a, b) => {
+                              if (a.name < b.name) return -1;
+
+                              if (a.name > b.name) return 1;
+
+                              return 0;
+                           });
+
+                        await dc.model.update(moduleID, parsedData);
+                     }
+
+                     return { id: id };
                   }
 
                   async getData(config) {
@@ -463,11 +490,33 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
 
                      return result;
                   }
-                  getOptions(fields) {
-                     return Promise.resolve([]);
+
+                  async getOptions(fields) {
+                     return [];
                   }
-                  getFieldData(fieldId) {
-                     return Promise.resolve([]);
+                  async getFieldData(fieldId) {
+                     return [];
+                  }
+               },
+            ],
+            [
+               reports.services.Local,
+               class MyLocal extends reports.services.Local {
+                  constructor(app) {
+                     super(app);
+
+                     this._currentModuleID = "";
+                  }
+                  getQueries() {
+                     const currentModuleID = $$(ids.reportManager).getState()
+                        .moduleId;
+
+                     if (this._currentModuleID !== currentModuleID) {
+                        this._currentModuleID = currentModuleID;
+                        this._queries = null;
+                     }
+
+                     return super.getQueries();
                   }
                },
             ],
@@ -637,5 +686,23 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
       });
 
       return reportData;
+   }
+
+   async waitInitializingDCEvery(milliSeconds, dc) {
+      if (dc == null) return;
+      // if we manage a datacollection, then make sure it has started
+      // loading it's data when we are showing our component.
+      // load data when a widget is showing
+      if (dc.dataStatus === dc.dataStatusFlag.notInitial) await dc.loadData();
+
+      return await new Promise((resolve) => {
+         const interval = setInterval(() => {
+            if (dc.dataStatus === dc.dataStatusFlag.initialized) {
+               clearInterval(interval);
+
+               resolve();
+            }
+         }, milliSeconds);
+      });
    }
 };
