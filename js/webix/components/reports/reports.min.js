@@ -1,6 +1,6 @@
 /*
 @license
-Webix Reports v.10.1.0
+Webix Reports v.10.1.2
 This software is covered by Webix Commercial License.
 Usage without proper license is prohibited.
 (c) XB Software Ltd.

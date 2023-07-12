@@ -52,7 +52,20 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
                      });
                   }
 
-                  async saveModule(id, data) {
+                  async addModule(data) {
+                     const parsedData = {};
+
+                     parsedData[fieldName] = data.name;
+                     parsedData[fieldText] = data.text;
+
+                     const response = await dc.model.create(parsedData);
+
+                     return {
+                        id: response.id,
+                     };
+                  }
+
+                  async updateModule(id, data) {
                      const parsedData = {};
 
                      parsedData[fieldName] = data.name;
@@ -60,9 +73,7 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
 
                      let response = {};
 
-                     if (id == null)
-                        response = await dc.model.create(parsedData);
-                     else response = await dc.model.update(id, parsedData);
+                     response = await dc.model.update(id, parsedData);
 
                      return { id: response.id };
                   }
@@ -149,7 +160,7 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
                      );
                   }
 
-                  async saveQuery(id, data) {
+                  async addQuery(data) {
                      const moduleID =
                         $$(ids.reportManager).getState().moduleId || "";
 
@@ -165,14 +176,10 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
 
                      if (moduleData == null) return {};
 
-                     const queries = moduleData[fieldQueries] || [];
-                     const queryIndex = queries.findIndex((e) => e.id === id);
-                     const queryID =
-                        queries[queryIndex]?.id ?? id ?? abWebix.uid();
+                     const queries = [...(moduleData[fieldQueries] || [])];
+                     const queryID = abWebix.uid();
 
-                     // Add a new query
-                     if (queryIndex < 0)
-                        queries.push(Object.assign({ id: queryID }, data));
+                     queries.push(Object.assign({ id: queryID }, data));
 
                      const parsedData = {};
 
@@ -187,6 +194,42 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
                      await dc.model.update(moduleID, parsedData);
 
                      return { id: queryID };
+                  }
+
+                  async updateQuery(id, data) {
+                     const moduleID =
+                        $$(ids.reportManager).getState().moduleId || "";
+
+                     if (moduleID === "") return {};
+
+                     const moduleData = (
+                        await dc.model.findAll({
+                           where: {
+                              uuid: moduleID,
+                           },
+                        })
+                     ).data[0];
+
+                     if (moduleData == null) return {};
+
+                     const queries = [...(moduleData[fieldQueries] || [])];
+                     const queryIndex = queries.findIndex((e) => e.id === id);
+
+                     queries[queryIndex] = Object.assign({ id }, data);
+
+                     const parsedData = {};
+
+                     parsedData[fieldQueries] = queries.sort((a, b) => {
+                        if (a.name < b.name) return -1;
+
+                        if (a.name > b.name) return 1;
+
+                        return 0;
+                     });
+
+                     await dc.model.update(moduleID, parsedData);
+
+                     return { id };
                   }
 
                   async deleteQuery(id) {
