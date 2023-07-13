@@ -31,6 +31,7 @@ import "./js/webix/components/gantt/gantt.min.css";
 import * as kanban from "./js/webix/components/kanban/kanban.min.js";
 import * as pivot from "./js/webix/components/pivot/pivot.min.js";
 import * as report from "./js/webix/components/reports/reports.min.js";
+import "./js/webix/components/reports/reports.min.css";
 import "./js/webix/components/query/query.min.css";
 import query from "./js/webix/components/query/query.min.js";
 import * as scheduler from "./js/webix/components/scheduler/scheduler.min.js";
