@@ -21,8 +21,6 @@ import events from "events";
 
 const EventEmitter = events.EventEmitter;
 
-import BootstrapCSS from "../node_modules/bootstrap/dist/css/bootstrap.min.css";
-
 import Config from "../config/Config.js";
 
 import FormIO from "../node_modules/formiojs/dist/formio.full.min.js";
