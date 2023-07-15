@@ -291,6 +291,10 @@ class PortalWorkInbox extends ClassUI {
          $$("inboxItems").show();
       }
       $$(this.id).show();
+
+      for (const appId in this.allAppAccordions) {
+         this.allAppAccordions[appId]?.show();
+      }
    }
 
    /**

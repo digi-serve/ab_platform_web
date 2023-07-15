@@ -94,7 +94,6 @@ class PortalWorkInboxAccordion extends ClassUI {
             },
             on: {
                onAfterRender() {
-                  $$(self.id).expand();
                   ClassUI.CYPRESS_REF(this);
                   this.data.each((a) => {
                      ClassUI.CYPRESS_REF(
@@ -190,6 +189,7 @@ class PortalWorkInboxAccordion extends ClassUI {
 
    show() {
       $$(this.id).show();
+      $$(this.id).expand();
    }
 }
 
