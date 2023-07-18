@@ -283,6 +283,9 @@ input[type="text"].selectivity-multiple-input {
    float: left;
    height: 100%;
 }
+.ab-tree-ui .webix_scroll_cont .webix_tree_leaves {
+   display: block !important;
+}
 .ab-app-list-edit,
 .ab-object-list-edit,
 .ab-page-list-edit {
