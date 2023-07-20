@@ -136,9 +136,12 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
       const tasks = [];
 
       this.view.datacollections.forEach((dc) => {
-         if (dc.dataStatus === dc.dataStatusFlag.notInitial)
+         if (dc.dataStatus === dc.dataStatusFlag.notInitial) {
             // load data when a widget is showing
-            tasks.push(dc.loadData());
+            // when loading data collections for reports we need all relational data
+            let cond = { disableMinifyRelation: true };
+            tasks.push(dc.loadData(cond));
+         }
       });
 
       // Show loading cursor
