@@ -7,8 +7,8 @@ module.exports = class ABViewCSVImporter extends ABViewCSVImporterCore {
     * return a UI component based upon this view.
     * @return {obj} UI component
     */
-   component() {
-      return new ABViewCSVImporterComponent(this);
+   component(idBase) {
+      return new ABViewCSVImporterComponent(this, idBase);
    }
 
    warningsEval() {
