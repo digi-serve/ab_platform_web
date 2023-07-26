@@ -5,8 +5,16 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
       super(
          baseView,
          idBase || `ABViewReportManager_${baseView.id}`,
-         Object.assign({ reportManager: "" }, ids)
+         Object.assign(
+            {
+               reportManager: "",
+               reports: "",
+            },
+            ids
+         )
       );
+
+      this.readonly = false;
    }
 
    ui() {
@@ -26,586 +34,694 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
          settings.dataviewFields.queries
       )?.columnName;
       const ids = this.ids;
-      const isEditMode = settings.editMode === 1;
-      const _uiReportManager = {
-         id: ids.reportManager,
-         view: "reports",
-         toolbar: true,
-         mode: isEditMode ? "edit" : "list",
-         readonly: settings.readonly === 1 || isEditMode,
-         override: new Map([
-            [
-               reports.services.Backend,
-               class MyBackend extends reports.services.Backend {
-                  async getModules() {
-                     if (dc == null) return [];
+      class MyBackend extends reports.services.Backend {
+         async getModules() {
+            if (dc == null) return [];
 
-                     await self.waitInitializingDCEvery(1000, dc);
+            await self.waitInitializingDCEvery(1000, dc);
 
-                     return dc.getData().map((e) => {
-                        return {
-                           id: e.id,
-                           name: e[fieldName],
-                           text: JSON.stringify(e[fieldText]),
-                           updated: e["updated_at"],
-                        };
-                     });
-                  }
+            return dc.getData().map((e) => {
+               return {
+                  id: e.id,
+                  name: e[fieldName],
+                  text: JSON.stringify(e[fieldText]),
+                  updated: e["updated_at"],
+               };
+            });
+         }
 
-                  async addModule(data) {
-                     const parsedData = {};
+         async addModule(data) {
+            const parsedData = {};
 
-                     parsedData[fieldName] = data.name;
-                     parsedData[fieldText] = data.text;
+            parsedData[fieldName] = data.name;
+            parsedData[fieldText] = data.text;
 
-                     const response = await dc.model.create(parsedData);
+            const response = await dc.model.create(parsedData);
 
-                     return {
-                        id: response.id,
+            return {
+               id: response.id,
+            };
+         }
+
+         async updateModule(id, data) {
+            const parsedData = {};
+
+            parsedData[fieldName] = data.name;
+            parsedData[fieldText] = data.text;
+
+            let response = {};
+
+            response = await dc.model.update(id, parsedData);
+
+            return { id: response.id };
+         }
+
+         async deleteModule(id) {
+            await dc.model.delete(id);
+
+            return { id: id };
+         }
+
+         async getModels() {
+            const reportModels = {};
+
+            if (baseView.settings.datacollectionIDs.length === 0)
+               return reportModels;
+
+            baseView.settings.datacollectionIDs.forEach((dcID) => {
+               const dc = ab.datacollectionByID(dcID);
+
+               if (!dc) return;
+
+               const obj = dc.datasource;
+
+               if (!obj) return;
+
+               const reportFields = self.getReportFields(dc);
+
+               // get connected data collections
+               // let linkedFields = [];
+               // (obj.connectFields() || []).forEach((f, index) => {
+               //    let connectedDcs = ab.datacollections(
+               //       (dColl) =>
+               //          dColl &&
+               //          dColl.datasource &&
+               //          dColl.datasource.id === f.settings.linkObject
+               //    );
+               //    (connectedDcs || []).forEach((linkedDc) => {
+               //       linkedFields.push({
+               //          id: index + 1,
+               //          name: linkedDc.label,
+               //          source: dc.id,
+               //          target: linkedDc.id
+               //       });
+               //    });
+               // });
+
+               // // MOCK UP for testing
+               // let linkedFields = [
+               //    {
+               //       id: "id",
+               //       name: "id",
+               //       source: "39378ee0-38f0-4b9d-a5aa-dddc61137fcd", // Player
+               //       target: "0de82362-4ab5-4f0f-8cfa-d1288d173cba" // Team
+               //    }
+               // ];
+
+               reportModels[dc.id] = {
+                  id: dc.id,
+                  name: dc.label,
+                  data: reportFields,
+                  refs: [],
+               };
+            });
+
+            return reportModels;
+         }
+
+         async getQueries() {
+            const moduleID = $$(ids.reportManager).getState().moduleId || "";
+
+            if (moduleID === "") return [];
+
+            return (
+               (
+                  await dc.model.findAll({
+                     where: {
+                        uuid: moduleID,
+                     },
+                  })
+               ).data[0][fieldQueries] || []
+            );
+         }
+
+         async addQuery(data) {
+            const moduleID = $$(ids.reportManager).getState().moduleId || "";
+
+            if (moduleID === "") return {};
+
+            const moduleData = (
+               await dc.model.findAll({
+                  where: {
+                     uuid: moduleID,
+                  },
+               })
+            ).data[0];
+
+            if (moduleData == null) return {};
+
+            const queries = [...(moduleData[fieldQueries] || [])];
+            const queryID = abWebix.uid();
+
+            queries.push(Object.assign({ id: queryID }, data));
+
+            const parsedData = {};
+
+            parsedData[fieldQueries] = queries.sort((a, b) => {
+               if (a.name < b.name) return -1;
+
+               if (a.name > b.name) return 1;
+
+               return 0;
+            });
+
+            await dc.model.update(moduleID, parsedData);
+
+            return { id: queryID };
+         }
+
+         async updateQuery(id, data) {
+            const moduleID = $$(ids.reportManager).getState().moduleId || "";
+
+            if (moduleID === "") return {};
+
+            const moduleData = (
+               await dc.model.findAll({
+                  where: {
+                     uuid: moduleID,
+                  },
+               })
+            ).data[0];
+
+            if (moduleData == null) return {};
+
+            const queries = [...(moduleData[fieldQueries] || [])];
+            const queryIndex = queries.findIndex((e) => e.id === id);
+
+            queries[queryIndex] = Object.assign({ id }, data);
+
+            const parsedData = {};
+
+            parsedData[fieldQueries] = queries.sort((a, b) => {
+               if (a.name < b.name) return -1;
+
+               if (a.name > b.name) return 1;
+
+               return 0;
+            });
+
+            await dc.model.update(moduleID, parsedData);
+
+            return { id };
+         }
+
+         async deleteQuery(id) {
+            const moduleID = $$(ids.reportManager).getState().moduleId || "";
+
+            if (moduleID === "") return {};
+
+            const moduleData = (
+               await dc.model.findAll({
+                  where: {
+                     uuid: moduleID,
+                  },
+               })
+            ).data[0];
+
+            if (moduleData == null) return {};
+
+            const queries = moduleData[fieldQueries] || [];
+            const queryIndex = queries.findIndex((e) => e.id === id);
+
+            if (queryIndex >= 0) {
+               const parsedData = {};
+
+               parsedData[fieldQueries] = queries
+                  .filter((e, i) => i !== queryIndex)
+                  .sort((a, b) => {
+                     if (a.name < b.name) return -1;
+
+                     if (a.name > b.name) return 1;
+
+                     return 0;
+                  });
+
+               await dc.model.update(moduleID, parsedData);
+            }
+
+            return { id: id };
+         }
+
+         async getData(config) {
+            let result = [];
+            let pullDataTasks = [];
+            let dcIds = [];
+            let dcData = {};
+            let reportFields = [];
+
+            // pull data of the base and join DCs
+            dcIds.push(config.data);
+            (config.joins || []).forEach((j) => {
+               dcIds.push(j.sid);
+               dcIds.push(j.tid);
+            });
+            dcIds = ab.uniq(dcIds);
+            dcIds.forEach((dcId) => {
+               pullDataTasks.push(
+                  new Promise((resolve, reject) => {
+                     const getData = async () => {
+                        try {
+                           dcData[dcId] = (await self.getData(dcId)) || [];
+
+                           resolve();
+                        } catch (err) {
+                           reject(err);
+                        }
                      };
-                  }
 
-                  async updateModule(id, data) {
-                     const parsedData = {};
+                     getData();
+                  })
+               );
+            });
 
-                     parsedData[fieldName] = data.name;
-                     parsedData[fieldText] = data.text;
+            dcIds.forEach((dcId) => {
+               const dataCol = ab.datacollectionByID(dcId);
 
-                     let response = {};
+               if (!dataCol) return;
 
-                     response = await dc.model.update(id, parsedData);
+               reportFields = reportFields.concat(
+                  self.getReportFields(dataCol).map((f) => {
+                     // change format of id to match the report widget
+                     f.id = `${dcId}.${f.id}`; // dc_id.field_id
+                     return f;
+                  })
+               );
+            });
 
-                     return { id: response.id };
-                  }
+            await Promise.all(pullDataTasks);
 
-                  async deleteModule(id) {
-                     await dc.model.delete(id);
+            // the data result equals data of the base DC
+            result = dcData[config.data] || [];
 
-                     return { id: id };
-                  }
+            if (config.joins?.length)
+               (config.joins || []).forEach((j) => {
+                  const sourceDc = ab.datacollectionByID(j.sid);
+                  if (!sourceDc) return;
 
-                  async getModels() {
-                     const reportModels = {};
+                  const sourceObj = sourceDc.datasource;
+                  if (!sourceObj) return;
 
-                     if (baseView.settings.datacollectionIDs === "")
-                        return reportModels;
+                  const targetDc = ab.datacollectionByID(j.tid);
+                  if (!targetDc) return;
 
-                     baseView.settings.datacollectionIDs
-                        .split(", ")
-                        .forEach((dcID) => {
-                           const dc = ab.datacollectionByID(dcID);
+                  const targetObj = targetDc.datasource;
+                  if (!targetObj) return;
 
-                           if (!dc) return;
+                  const sourceLinkField = sourceObj.fieldByID(j.sf);
+                  const targetLinkField = targetObj.fieldByID(j.tf);
+                  if (!sourceLinkField && !targetLinkField) return;
 
-                           const obj = dc.datasource;
+                  const sourceData = dcData[j.sid] || [];
+                  const targetData = dcData[j.tid] || [];
 
-                           if (!obj) return;
+                  sourceData.forEach((sData) => {
+                     targetData.forEach((tData) => {
+                        let sVal =
+                           sData[
+                              sourceLinkField
+                                 ? `${j.sid}.${sourceLinkField.columnName}.id`
+                                 : `${j.sid}.id`
+                           ] || [];
 
-                           const reportFields = self.getReportFields(dc);
+                        let tVal =
+                           tData[
+                              targetLinkField
+                                 ? `${j.tid}.${targetLinkField.columnName}.id`
+                                 : `${j.tid}.id`
+                           ] || [];
 
-                           // get connected data collections
-                           // let linkedFields = [];
-                           // (obj.connectFields() || []).forEach((f, index) => {
-                           //    let connectedDcs = ab.datacollections(
-                           //       (dColl) =>
-                           //          dColl &&
-                           //          dColl.datasource &&
-                           //          dColl.datasource.id === f.settings.linkObject
-                           //    );
-                           //    (connectedDcs || []).forEach((linkedDc) => {
-                           //       linkedFields.push({
-                           //          id: index + 1,
-                           //          name: linkedDc.label,
-                           //          source: dc.id,
-                           //          target: linkedDc.id
-                           //       });
-                           //    });
-                           // });
+                        if (!Array.isArray(sVal)) sVal = [sVal];
 
-                           // // MOCK UP for testing
-                           // let linkedFields = [
-                           //    {
-                           //       id: "id",
-                           //       name: "id",
-                           //       source: "39378ee0-38f0-4b9d-a5aa-dddc61137fcd", // Player
-                           //       target: "0de82362-4ab5-4f0f-8cfa-d1288d173cba" // Team
-                           //    }
-                           // ];
+                        if (!Array.isArray(tVal)) tVal = [tVal];
 
-                           reportModels[dc.id] = {
-                              id: dc.id,
-                              name: dc.label,
-                              data: reportFields,
-                              refs: [],
-                           };
-                        });
-
-                     return reportModels;
-                  }
-
-                  async getQueries() {
-                     const moduleID =
-                        $$(ids.reportManager).getState().moduleId || "";
-
-                     if (moduleID === "") return [];
-
-                     return (
-                        (
-                           await dc.model.findAll({
-                              where: {
-                                 uuid: moduleID,
-                              },
-                           })
-                        ).data[0][fieldQueries] || []
-                     );
-                  }
-
-                  async addQuery(data) {
-                     const moduleID =
-                        $$(ids.reportManager).getState().moduleId || "";
-
-                     if (moduleID === "") return {};
-
-                     const moduleData = (
-                        await dc.model.findAll({
-                           where: {
-                              uuid: moduleID,
-                           },
-                        })
-                     ).data[0];
-
-                     if (moduleData == null) return {};
-
-                     const queries = [...(moduleData[fieldQueries] || [])];
-                     const queryID = abWebix.uid();
-
-                     queries.push(Object.assign({ id: queryID }, data));
-
-                     const parsedData = {};
-
-                     parsedData[fieldQueries] = queries.sort((a, b) => {
-                        if (a.name < b.name) return -1;
-
-                        if (a.name > b.name) return 1;
-
-                        return 0;
-                     });
-
-                     await dc.model.update(moduleID, parsedData);
-
-                     return { id: queryID };
-                  }
-
-                  async updateQuery(id, data) {
-                     const moduleID =
-                        $$(ids.reportManager).getState().moduleId || "";
-
-                     if (moduleID === "") return {};
-
-                     const moduleData = (
-                        await dc.model.findAll({
-                           where: {
-                              uuid: moduleID,
-                           },
-                        })
-                     ).data[0];
-
-                     if (moduleData == null) return {};
-
-                     const queries = [...(moduleData[fieldQueries] || [])];
-                     const queryIndex = queries.findIndex((e) => e.id === id);
-
-                     queries[queryIndex] = Object.assign({ id }, data);
-
-                     const parsedData = {};
-
-                     parsedData[fieldQueries] = queries.sort((a, b) => {
-                        if (a.name < b.name) return -1;
-
-                        if (a.name > b.name) return 1;
-
-                        return 0;
-                     });
-
-                     await dc.model.update(moduleID, parsedData);
-
-                     return { id };
-                  }
-
-                  async deleteQuery(id) {
-                     const moduleID =
-                        $$(ids.reportManager).getState().moduleId || "";
-
-                     if (moduleID === "") return {};
-
-                     const moduleData = (
-                        await dc.model.findAll({
-                           where: {
-                              uuid: moduleID,
-                           },
-                        })
-                     ).data[0];
-
-                     if (moduleData == null) return {};
-
-                     const queries = moduleData[fieldQueries] || [];
-                     const queryIndex = queries.findIndex((e) => e.id === id);
-
-                     if (queryIndex >= 0) {
-                        const parsedData = {};
-
-                        parsedData[fieldQueries] = queries
-                           .filter((e, i) => i !== queryIndex)
-                           .sort((a, b) => {
-                              if (a.name < b.name) return -1;
-
-                              if (a.name > b.name) return 1;
-
-                              return 0;
-                           });
-
-                        await dc.model.update(moduleID, parsedData);
-                     }
-
-                     return { id: id };
-                  }
-
-                  async getData(config) {
-                     let result = [];
-                     let pullDataTasks = [];
-                     let dcIds = [];
-                     let dcData = {};
-                     let reportFields = [];
-
-                     // pull data of the base and join DCs
-                     dcIds.push(config.data);
-                     (config.joins || []).forEach((j) => {
-                        dcIds.push(j.sid);
-                        dcIds.push(j.tid);
-                     });
-                     dcIds = ab.uniq(dcIds);
-                     dcIds.forEach((dcId) => {
-                        pullDataTasks.push(
-                           new Promise((resolve, reject) => {
-                              const getData = async () => {
-                                 try {
-                                    dcData[dcId] =
-                                       (await self.getData(dcId)) || [];
-
-                                    resolve();
-                                 } catch (err) {
-                                    reject(err);
-                                 }
-                              };
-
-                              getData();
-                           })
+                        // Add joined row to the result array
+                        const matchedVal = sVal.filter(
+                           (val) => tVal.indexOf(val) > -1
                         );
+
+                        if (matchedVal?.length) {
+                           const updateRows =
+                              result.filter(
+                                 (r) =>
+                                    r[`${j.sid}.id`] === sData[`${j.sid}.id`] &&
+                                    !r[`${j.tid}.id`]
+                              ) || [];
+
+                           if (updateRows?.length)
+                              (updateRows || []).forEach((r) => {
+                                 for (const key in tData)
+                                    if (key !== "id") r[key] = tData[key];
+                              });
+                           else
+                              result.push(
+                                 Object.assign(
+                                    ab.cloneDeep(sData),
+                                    ab.cloneDeep(tData)
+                                 )
+                              );
+                        }
                      });
+                  });
+               });
 
-                     dcIds.forEach((dcId) => {
-                        const dataCol = ab.datacollectionByID(dcId);
+            // filter & sort
+            const queryVal = JSON.parse(config.query || "{}");
 
-                        if (!dataCol) return;
+            if (queryVal?.rules?.length)
+               queryVal.rules.forEach((r) => {
+                  if (!r || !r.type || !r.condition) return;
 
-                        reportFields = reportFields.concat(
-                           self.getReportFields(dataCol).map((f) => {
-                              // change format of id to match the report widget
-                              f.id = `${dcId}.${f.id}`; // dc_id.field_id
-                              return f;
-                           })
+                  switch (r.type) {
+                     case "date":
+                     case "datetime":
+                        // Convert string to Date object
+                        if (r.condition.filter) {
+                           if (ab.isString(r.condition.filter))
+                              r.condition.filter = ab.rules.toDate(
+                                 r.condition.filter
+                              );
+
+                           if (
+                              r.condition.filter.start &&
+                              ab.isString(r.condition.filter.start)
+                           )
+                              r.condition.filter.start = ab.rules.toDate(
+                                 r.condition.filter.start
+                              );
+
+                           if (
+                              r.condition.filter.end &&
+                              ab.isString(r.condition.filter.end)
+                           )
+                              r.condition.filter.end = ab.rules.toDate(
+                                 r.condition.filter.end
+                              );
+                        }
+
+                        break;
+                  }
+               });
+
+            // create a new query widget to get the filter function
+            const filterElem = abWebix.ui({
+               view: "query",
+               fields: reportFields,
+               value: queryVal,
+            });
+
+            // create a new data collection and apply the query filter
+            const tempDc = new abWebix.DataCollection();
+
+            tempDc.parse(result);
+
+            // filter
+            let filterFn;
+
+            try {
+               filterFn = filterElem.getFilterFunction();
+            } catch (error) {
+               // continue regardless of error
+            }
+
+            if (filterFn) tempDc.filter(filterFn);
+
+            // sorting
+            (config.sort || []).forEach((sort) => {
+               if (sort.id)
+                  tempDc.sort({
+                     as: "string",
+                     dir: sort.mod || "asc",
+                     by: `#${sort.id}#`,
+                  });
+            });
+
+            result = tempDc.serialize();
+
+            // clear
+            filterElem.destructor();
+            tempDc.destructor();
+
+            // group by
+            if (config?.group?.length) {
+               (config.group || []).forEach((groupProp) => {
+                  result = _(result).groupBy(groupProp);
+               });
+
+               result = result
+                  .map((groupedData, id) => {
+                     const groupedResult = {};
+
+                     (config.columns || []).forEach((col) => {
+                        const agg = col.split(".")[0];
+                        const rawCol = col.replace(
+                           /sum.|avg.|count.|max.|min./g,
+                           ""
                         );
+
+                        switch (agg) {
+                           case "sum":
+                              groupedResult[col] = ab.sumBy(
+                                 groupedData,
+                                 rawCol
+                              );
+                              break;
+                           case "avg":
+                              groupedResult[col] = ab.meanBy(
+                                 groupedData,
+                                 rawCol
+                              );
+                              break;
+                           case "count":
+                              groupedResult[col] = (groupedData || []).length;
+                              break;
+                           case "max":
+                              groupedResult[col] =
+                                 (ab.maxBy(groupedData, rawCol) || {})[
+                                    rawCol
+                                 ] || "";
+                              break;
+                           case "min":
+                              groupedResult[col] =
+                                 (ab.minBy(groupedData, rawCol) || {})[
+                                    rawCol
+                                 ] || "";
+                              break;
+                           default:
+                              groupedResult[col] = groupedData[0][col];
+                              break;
+                        }
                      });
 
-                     await Promise.all(pullDataTasks);
+                     return groupedResult;
+                  })
+                  .value();
+            }
 
-                     // the data result equals data of the base DC
-                     result = dcData[config.data] || [];
+            return result;
+         }
 
-                     if (config.joins?.length)
-                        (config.joins || []).forEach((j) => {
-                           const sourceDc = ab.datacollectionByID(j.sid);
-                           if (!sourceDc) return;
+         async getOptions(fields) {
+            return [];
+         }
+         async getFieldData(fieldId) {
+            return [];
+         }
+      }
+      class MyLocal extends reports.services.Local {
+         constructor(app) {
+            super(app);
 
-                           const sourceObj = sourceDc.datasource;
-                           if (!sourceObj) return;
+            this._currentModuleID = "";
+         }
 
-                           const targetDc = ab.datacollectionByID(j.tid);
-                           if (!targetDc) return;
+         getQueries() {
+            const currentModuleID = $$(ids.reportManager).getState().moduleId;
 
-                           const targetObj = targetDc.datasource;
-                           if (!targetObj) return;
+            if (this._currentModuleID !== currentModuleID) {
+               this._currentModuleID = currentModuleID;
+               this._queries = null;
+            }
 
-                           const sourceLinkField = sourceObj.fieldByID(j.sf);
-                           const targetLinkField = targetObj.fieldByID(j.tf);
-                           if (!sourceLinkField && !targetLinkField) return;
+            return super.getQueries();
+         }
+      }
+      class MyEditor extends reports.views.editor {
+         init() {
+            super.init();
 
-                           const sourceData = dcData[j.sid] || [];
-                           const targetData = dcData[j.tid] || [];
+            if (!self.readonly || settings.editMode === 1) return;
 
-                           sourceData.forEach((sData) => {
-                              targetData.forEach((tData) => {
-                                 let sVal =
-                                    sData[
-                                       sourceLinkField
-                                          ? `${j.sid}.${sourceLinkField.columnName}.id`
-                                          : `${j.sid}.id`
-                                    ] || [];
+            const $tabbar = this.$$("tabbar");
 
-                                 let tVal =
-                                    tData[
-                                       targetLinkField
-                                          ? `${j.tid}.${targetLinkField.columnName}.id`
-                                          : `${j.tid}.id`
-                                    ] || [];
+            if (settings.hideCommonTab === 1) {
+               const listener = () => {
+                  $tabbar.callEvent("onChange", ["data"]);
+                  $tabbar.disableOption("common");
+                  self.removeListener("editMode.tabbar.query", listener);
+               };
 
-                                 if (!Array.isArray(sVal)) sVal = [sVal];
+               self.on("editMode.tabbar.query", listener);
+            }
 
-                                 if (!Array.isArray(tVal)) tVal = [tVal];
+            if (settings.hideDataTab === 1) $tabbar.disableOption("other");
 
-                                 // Add joined row to the result array
-                                 const matchedVal = sVal.filter(
-                                    (val) => tVal.indexOf(val) > -1
-                                 );
+            if (settings.hideViewTab === 1) $tabbar.disableOption("structure");
 
-                                 if (matchedVal?.length) {
-                                    const updateRows =
-                                       result.filter(
-                                          (r) =>
-                                             r[`${j.sid}.id`] ===
-                                                sData[`${j.sid}.id`] &&
-                                             !r[`${j.tid}.id`]
-                                       ) || [];
+            this.on(this.app, "editMode.button.back", () => {
+               this.Reset(true);
+            });
+         }
 
-                                    if (updateRows?.length)
-                                       (updateRows || []).forEach((r) => {
-                                          for (const key in tData)
-                                             if (key !== "id")
-                                                r[key] = tData[key];
-                                       });
-                                    else
-                                       result.push(
-                                          Object.assign(
-                                             ab.cloneDeep(sData),
-                                             ab.cloneDeep(tData)
-                                          )
-                                       );
-                                 }
-                              });
-                           });
-                        });
+         Reset(forceReset = false) {
+            const id = this.AppState.moduleId;
+            const condition = self.readonly && !(settings.editMode === 1);
 
-                     // filter & sort
-                     const queryVal = JSON.parse(config.query || "{}");
+            if (!condition || id == null || forceReset) super.Reset();
 
-                     if (queryVal?.rules?.length)
-                        queryVal.rules.forEach((r) => {
-                           if (!r || !r.type || !r.condition) return;
+            this.Local.getModule(id);
+         }
 
-                           switch (r.type) {
-                              case "date":
-                              case "datetime":
-                                 // Convert string to Date object
-                                 if (r.condition.filter) {
-                                    if (ab.isString(r.condition.filter))
-                                       r.condition.filter = ab.rules.toDate(
-                                          r.condition.filter
-                                       );
+         TrackChanges() {
+            super.TrackChanges();
 
-                                    if (
-                                       r.condition.filter.start &&
-                                       ab.isString(r.condition.filter.start)
-                                    )
-                                       r.condition.filter.start =
-                                          ab.rules.toDate(
-                                             r.condition.filter.start
-                                          );
+            if (settings.hideCommonTab) self.emit("editMode.tabbar.query");
+         }
+      }
+      class MyToolBar extends reports.views.toolbar {
+         config() {
+            const ui = super.config();
 
-                                    if (
-                                       r.condition.filter.end &&
-                                       ab.isString(r.condition.filter.end)
-                                    )
-                                       r.condition.filter.end = ab.rules.toDate(
-                                          r.condition.filter.end
-                                       );
-                                 }
+            if (self.readonly && !(settings.editMode === 1)) {
+               ui.elements[5].cols = ui.elements[5].cols.map((e) =>
+                  Object.assign(e, {
+                     hidden: self.readonly && !(settings.editMode === 1),
+                  })
+               );
 
-                                 break;
-                           }
-                        });
-
-                     // create a new query widget to get the filter function
-                     const filterElem = abWebix.ui({
-                        view: "query",
-                        fields: reportFields,
-                        value: queryVal,
-                     });
-
-                     // create a new data collection and apply the query filter
-                     const tempDc = new abWebix.DataCollection();
-
-                     tempDc.parse(result);
-
-                     // filter
-                     let filterFn;
-
-                     try {
-                        filterFn = filterElem.getFilterFunction();
-                     } catch (error) {
-                        // continue regardless of error
-                     }
-
-                     if (filterFn) tempDc.filter(filterFn);
-
-                     // sorting
-                     (config.sort || []).forEach((sort) => {
-                        if (sort.id)
-                           tempDc.sort({
-                              as: "string",
-                              dir: sort.mod || "asc",
-                              by: `#${sort.id}#`,
-                           });
-                     });
-
-                     result = tempDc.serialize();
-
-                     // clear
-                     filterElem.destructor();
-                     tempDc.destructor();
-
-                     // group by
-                     if (config?.group?.length) {
-                        (config.group || []).forEach((groupProp) => {
-                           result = _(result).groupBy(groupProp);
-                        });
-
-                        result = result
-                           .map((groupedData, id) => {
-                              const groupedResult = {};
-
-                              (config.columns || []).forEach((col) => {
-                                 const agg = col.split(".")[0];
-                                 const rawCol = col.replace(
-                                    /sum.|avg.|count.|max.|min./g,
-                                    ""
-                                 );
-
-                                 switch (agg) {
-                                    case "sum":
-                                       groupedResult[col] = ab.sumBy(
-                                          groupedData,
-                                          rawCol
-                                       );
-                                       break;
-                                    case "avg":
-                                       groupedResult[col] = ab.meanBy(
-                                          groupedData,
-                                          rawCol
-                                       );
-                                       break;
-                                    case "count":
-                                       groupedResult[col] = (
-                                          groupedData || []
-                                       ).length;
-                                       break;
-                                    case "max":
-                                       groupedResult[col] =
-                                          (ab.maxBy(groupedData, rawCol) || {})[
-                                             rawCol
-                                          ] || "";
-                                       break;
-                                    case "min":
-                                       groupedResult[col] =
-                                          (ab.minBy(groupedData, rawCol) || {})[
-                                             rawCol
-                                          ] || "";
-                                       break;
-                                    default:
-                                       groupedResult[col] = groupedData[0][col];
-                                       break;
-                                 }
-                              });
-
-                              return groupedResult;
-                           })
-                           .value();
-                     }
-
-                     return result;
+               ui.elements[5].cols.push(
+                  {},
+                  {
+                     view: "button",
+                     type: "icon",
+                     icon: "wxi-angle-double-left",
+                     label: self.label("Back"),
+                     localId: "forceReset",
+                     click: () => {
+                        return this.app.callEvent("editMode.button.back", []);
+                     },
                   }
+               );
+            }
 
-                  async getOptions(fields) {
-                     return [];
-                  }
-                  async getFieldData(fieldId) {
-                     return [];
-                  }
-               },
-            ],
-            [
-               reports.services.Local,
-               class MyLocal extends reports.services.Local {
-                  constructor(app) {
-                     super(app);
+            return ui;
+         }
+      }
+      class MyEditorCommon extends reports.views["editor/common"] {
+         config() {
+            const ui = super.config();
 
-                     this._currentModuleID = "";
-                  }
-                  getQueries() {
-                     const currentModuleID = $$(ids.reportManager).getState()
-                        .moduleId;
+            if (!self.readonly) return ui;
 
-                     if (this._currentModuleID !== currentModuleID) {
-                        this._currentModuleID = currentModuleID;
-                        this._queries = null;
-                     }
+            return Object.assign({}, ui, {
+               elements: ui.elements.map((e, i) =>
+                  Object.assign(
+                     {
+                        hidden: !(i >= 2 && i < 5),
+                     },
+                     e
+                  )
+               ),
+            });
+         }
 
-                     return super.getQueries();
-                  }
-               },
-            ],
-            [
-               reports.views.table,
-               class MyTable extends reports.views.table {
-                  // NOTE: fix format of date column type
-                  GetColumnConfig(a) {
-                     if (a.type === "date") {
-                        return {
-                           id: a.id,
-                           header:
-                              !a.meta.header || a.meta.header === "none"
-                                 ? a.meta.name || a.name
-                                 : [
-                                      a.meta.name || a.name,
-                                      {
-                                         content:
-                                            a.header === "text"
-                                               ? "textFilter"
-                                               : "richSelectFilter",
-                                      },
-                                   ],
-                           type: a.type,
-                           sort: "date",
-                           width: a.width || 200,
-                           format: (val) => {
-                              // check valid date
-                              if (val?.getTime && !isNaN(val.getTime()))
-                                 return abWebix.i18n.dateFormatStr(val);
-                              else return "";
-                           },
-                        };
-                     } else return super.GetColumnConfig(a);
-                  }
-               },
-            ],
-         ]),
-      };
+         ShowDeleteButton() {
+            super.ShowDeleteButton();
 
-      const _ui = super.ui([_uiReportManager]);
+            if (self.readonly) this.$$("delete").hide();
+         }
+      }
+      class MyEditorData extends reports.views["editor/data"] {
+         config() {
+            const ui = super.config();
+
+            if (self.readonly) {
+               ui.rows[0].rows[0].hidden = true;
+
+               ui.rows[0].rows.unshift({
+                  label: "Filtering query",
+                  view: "label",
+                  width: 120,
+               });
+            }
+
+            return ui;
+         }
+      }
+      class MyTable extends reports.views.table {
+         // NOTE: fix format of date column type
+         GetColumnConfig(a) {
+            if (a.type === "date") {
+               return {
+                  id: a.id,
+                  header:
+                     !a.meta.header || a.meta.header === "none"
+                        ? a.meta.name || a.name
+                        : [
+                             a.meta.name || a.name,
+                             {
+                                content:
+                                   a.header === "text"
+                                      ? "textFilter"
+                                      : "richSelectFilter",
+                             },
+                          ],
+                  type: a.type,
+                  sort: "date",
+                  width: a.width || 200,
+                  format: (val) => {
+                     // check valid date
+                     if (val?.getTime && !isNaN(val.getTime()))
+                        return abWebix.i18n.dateFormatStr(val);
+                     else return "";
+                  },
+               };
+            } else return super.GetColumnConfig(a);
+         }
+      }
+
+      const _ui = super.ui([
+         {
+            id: ids.reportManager,
+            view: "reports",
+            toolbar: true,
+            override: new Map([
+               [reports.services.Backend, MyBackend],
+               [reports.services.Local, MyLocal],
+               [reports.views.editor, MyEditor],
+               [reports.views.toolbar, MyToolBar],
+               [reports.views["editor/common"], MyEditorCommon],
+               [reports.views["editor/data"], MyEditorData],
+               [reports.views.table, MyTable],
+            ]),
+         },
+      ]);
 
       delete _ui.type;
       delete _ui.height;
 
       return _ui;
+   }
+
+   async init(AB, accessLevel) {
+      this.AB = AB;
+      this.readonly = accessLevel < 2;
+
+      const $reportManager = $$(this.ids.reportManager);
+      const state = $reportManager.getState();
+
+      state.readonly = this.readonly;
+      state.mode =
+         this.readonly && this.settings.editMode === 1 ? "edit" : "list";
    }
 
    getReportFields(dc) {
