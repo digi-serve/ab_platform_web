@@ -71,7 +71,7 @@ module.exports = class ABViewContainerComponent extends ABViewComponent {
             continue;
          }
 
-         $$(this.viewComponentIDs[key]).hide();
+         $$(this.viewComponentIDs[key])?.hide();
       }
 
       await Promise.all(allInits);
