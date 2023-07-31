@@ -396,14 +396,14 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
                      case "datetime":
                         // Convert string to Date object
                         if (r.condition.filter) {
-                           if (ab.isString(r.condition.filter))
+                           if (typeof r.condition.filter === "string")
                               r.condition.filter = ab.rules.toDate(
                                  r.condition.filter
                               );
 
                            if (
                               r.condition.filter.start &&
-                              ab.isString(r.condition.filter.start)
+                              typeof r.condition.filter.start === "string"
                            )
                               r.condition.filter.start = ab.rules.toDate(
                                  r.condition.filter.start
@@ -411,7 +411,7 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
 
                            if (
                               r.condition.filter.end &&
-                              ab.isString(r.condition.filter.end)
+                              typeof r.condition.filter.end === "string"
                            )
                               r.condition.filter.end = ab.rules.toDate(
                                  r.condition.filter.end
@@ -660,32 +660,53 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
       class MyTable extends reports.views.table {
          // NOTE: fix format of date column type
          GetColumnConfig(a) {
-            if (a.type === "date") {
-               return {
-                  id: a.id,
-                  header:
-                     !a.meta.header || a.meta.header === "none"
-                        ? a.meta.name || a.name
-                        : [
-                             a.meta.name || a.name,
-                             {
-                                content:
-                                   a.header === "text"
-                                      ? "textFilter"
-                                      : "richSelectFilter",
-                             },
-                          ],
-                  type: a.type,
-                  sort: "date",
-                  width: a.width || 200,
-                  format: (val) => {
+            let config = {
+               id: a.id,
+               header:
+                  !a.meta.header || a.meta.header === "none"
+                     ? a.meta.name || a.name
+                     : [
+                          a.meta.name || a.name,
+                          {
+                             content:
+                                a.header === "text"
+                                   ? "textFilter"
+                                   : "richSelectFilter",
+                          },
+                       ],
+               type: a.type,
+               sort: "date",
+               width: a.width || 200,
+            };
+
+            switch (a.type) {
+               case "date":
+                  config.format = (val) => {
                      // check valid date
                      if (val?.getTime && !isNaN(val.getTime()))
                         return abWebix.i18n.dateFormatStr(val);
                      else return "";
-                  },
-               };
-            } else return super.GetColumnConfig(a);
+                  };
+
+                  break;
+
+               case "datetime":
+                  config.format = (val) => {
+                     // check valid date
+                     if (val?.getTime && !isNaN(val.getTime()))
+                        return abWebix.i18n.fullDateFormatStr(val);
+                     else return "";
+                  };
+
+                  break;
+
+               default:
+                  config = super.GetColumnConfig(a);
+
+                  break;
+            }
+
+            return config;
          }
       }
 
@@ -735,21 +756,39 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
       object.fields().forEach((f) => {
          const columnFormat = f.columnHeader();
 
-         fields.push({
-            id: f.columnName,
-            name: f.label,
-            filter: f.fieldIsFilterable(),
-            edit: false,
-            type: columnFormat.editor || "text",
-            format: columnFormat.format,
-            options: columnFormat.options,
-            ref: "",
-            key: false,
-            show: true,
-            abField: f,
-         });
+         if (!f.isConnection) {
+            let type = "text";
 
-         if (f.isConnection && f.settings.isSource) {
+            switch (f.key) {
+               case "boolean":
+               case "number":
+               case "date":
+                  type = f.key;
+
+                  break;
+
+               default:
+                  break;
+            }
+
+            fields.push({
+               id: f.columnName,
+               name: f.label,
+               filter: f.fieldIsFilterable(),
+               edit: false,
+               type: type,
+               format: columnFormat.format,
+               options: columnFormat.options,
+               ref: "",
+               key: false,
+               show: true,
+               abField: f,
+            });
+
+            return;
+         }
+
+         if (f.isSource()) {
             const linkedDcs = this.view.application.datacollectionsIncluded(
                (dc) =>
                   this.settings.datacollectionIDs.includes(dc.id) &&
@@ -781,10 +820,7 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
       const object = datacollection.datasource;
       if (!object) return [];
 
-      if (
-         datacollection.dataStatus === datacollection.dataStatusFlag.notInitial
-      )
-         await datacollection.loadData();
+      await this.waitInitializingDCEvery(1000, datacollection);
 
       const reportFields = this.getReportFields(datacollection);
       const reportData = [];
@@ -799,23 +835,26 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
             const columnName = field.columnName;
             const col = `${datacollection.id}.${columnName}`;
 
-            reportRow[col] = field ? field.format(row) : row[columnName];
+            if (field) {
+               // FK value of the connect field
+               if (field.isConnection) {
+                  let $pk = field.datasourceLink.PK();
+                  if (Array.isArray(row[columnName]))
+                     reportRow[`${col}.id`] = row[columnName].map(
+                        (link) => link[$pk] || link.id || link
+                     );
+                  else if (row[columnName])
+                     reportRow[`${col}.id`] =
+                        row[columnName][$pk] ||
+                        row[columnName].id ||
+                        row[columnName];
+               } else reportRow[col] = field.format(row);
+            } else reportRow[col] = row[columnName];
 
-            // FK value of the connect field
-            if (field && field.isConnection) {
-               let $pk = field.datasourceLink.PK();
-               if (Array.isArray(row[columnName]))
-                  reportRow[`${col}.id`] = row[columnName].map(
-                     (link) => link[$pk] || link.id || link
-                  );
-               else if (row[columnName])
-                  reportRow[`${col}.id`] =
-                     row[columnName][$pk] ||
-                     row[columnName].id ||
-                     row[columnName];
-            }
+            const rField = reportFields.find(
+               (f) => f.id === columnName || f.id === field.id
+            );
 
-            const rField = reportFields.filter((f) => f.id === columnName)[0];
             if (!rField) return;
 
             switch (rField.type) {
@@ -855,6 +894,12 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
       if (dc.dataStatus === dc.dataStatusFlag.notInitial) await dc.loadData();
 
       return await new Promise((resolve) => {
+         if (dc.dataStatus === dc.dataStatusFlag.initialized) {
+            resolve();
+
+            return;
+         }
+
          const interval = setInterval(() => {
             if (dc.dataStatus === dc.dataStatusFlag.initialized) {
                clearInterval(interval);
