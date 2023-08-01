@@ -66,11 +66,12 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
    onShow() {
       super.onShow();
 
+      const $dataview = $$(this.ids.dataview);
+      $dataview.resize();
+
       const item_width = this.getItemWidth();
 
-      const $dataview = $$(this.ids.dataview);
       $dataview.customize({ width: item_width });
-      // $dataview.resize();
    }
 
    initDetailComponent() {
@@ -91,10 +92,6 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
       _ui.type = "space";
       _ui.css = "ab-detail-view";
 
-      const recordWidth = this.getItemWidth();
-      _ui.minWidth = recordWidth - 20;
-      _ui.maxWidth = recordWidth - 10;
-
       if (detailsPage || editPage) {
          _ui.css += ` ab-detail-hover ab-record-#itemId#`;
 
@@ -109,7 +106,17 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
       const detailCom = this.detailComponent;
 
       const tmp_dom = document.createElement("div");
-      tmp_dom.appendChild(this._detail_ui.$view);
+      const $dataview = $$(this.ids.dataview);
+      const $detail_item = this._detail_ui;
+
+      const itemWidth =
+         $dataview.data.count() > 0
+            ? $dataview.type.width
+            : $detail_item.$width / this.settings.xCount - 10;
+
+      $detail_item.define({ width: itemWidth - 25 });
+
+      tmp_dom.appendChild($detail_item.$view);
 
       if (item) detailCom.displayData(item);
 
