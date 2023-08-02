@@ -31,6 +31,7 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
             view: "dataview",
             scroll: "y",
             sizeToContent: true,
+            css: "borderless",
             xCount: this.settings.xCount,
             template: (item) => this.itemTemplate(item),
             on: {
@@ -104,21 +105,27 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
 
    itemTemplate(item) {
       const detailCom = this.detailComponent;
-
-      const tmp_dom = document.createElement("div");
       const $dataview = $$(this.ids.dataview);
       const $detail_item = this._detail_ui;
+
+      if (item) detailCom.displayData(item);
 
       const itemWidth =
          $dataview.data.count() > 0
             ? $dataview.type.width
-            : $detail_item.$width / this.settings.xCount - 10;
+            : $detail_item.$width / this.settings.xCount - 30;
 
-      $detail_item.define({ width: itemWidth - 25 });
+      const itemHeight =
+         $dataview.data.count() > 0
+            ? $dataview.type.height - 5
+            : $detail_item.getChildViews()?.[0]?.$height + 25;
 
+      const tmp_dom = document.createElement("div");
       tmp_dom.appendChild($detail_item.$view);
 
-      if (item) detailCom.displayData(item);
+      $detail_item.define("width", itemWidth - 20);
+      $detail_item.define("height", itemHeight);
+      $detail_item.adjust();
 
       // Add cy attributes
       this.addCyItemAttributes(tmp_dom, item);
@@ -129,7 +136,7 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
    getItemWidth() {
       const $dataview = $$(this.ids.dataview);
 
-      let currElem = $dataview;
+      let currElem = $dataview.getParentView() ?? $dataview;
       let parentWidth = currElem?.$width;
       while (currElem && !parentWidth) {
          currElem = currElem?.getParentView?.();
@@ -137,6 +144,8 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
       }
 
       if (!parentWidth) parentWidth = screen.availWidth;
+
+      parentWidth -= 25;
 
       const recordWidth = Math.floor(parentWidth / this.settings.xCount);
 
