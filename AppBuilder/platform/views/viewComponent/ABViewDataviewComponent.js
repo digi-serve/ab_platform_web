@@ -108,7 +108,14 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
       const $dataview = $$(this.ids.dataview);
       const $detail_item = this._detail_ui;
 
-      if (item) detailCom.displayData(item);
+      // Mock up data to initialize height of item
+      if (!item || !Object.keys(item).length) {
+         item = item ?? {};
+         this.datacollection?.datasource?.fields?.().forEach((f) => {
+            item[f.columnName] = "Lorem Ipsum";
+         });
+      }
+      detailCom.displayData(item);
 
       const itemWidth =
          $dataview.data.count() > 0
@@ -117,8 +124,8 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
 
       const itemHeight =
          $dataview.data.count() > 0
-            ? $dataview.type.height - 5
-            : $detail_item.getChildViews()?.[0]?.$height + 25;
+            ? $dataview.type.height
+            : $detail_item.getChildViews()?.[0]?.$height + 30;
 
       const tmp_dom = document.createElement("div");
       tmp_dom.appendChild($detail_item.$view);
@@ -148,8 +155,6 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
 
       if (!parentWidth)
          parentWidth = $dataview?.getParentView?.().$width || screen.availWidth;
-
-      parentWidth -= 20;
 
       const $sidebar = this.getTabSidebar();
       if ($sidebar) {
