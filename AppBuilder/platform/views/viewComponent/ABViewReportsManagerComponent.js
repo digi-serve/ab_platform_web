@@ -393,7 +393,6 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
 
                   switch (r.type) {
                      case "date":
-                     case "datetime":
                         // Convert string to Date object
                         if (r.condition.filter) {
                            if (typeof r.condition.filter === "string")
@@ -465,7 +464,69 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
             if (config?.group?.length) {
                result = _.groupBy(result, (e) => {
                   return config.group
-                     .map((column) => e[column]?.toString?.())
+                     .map((column) => {
+                        const parsedColumn = column.split(".");
+                        const originalColumn =
+                           parsedColumn.length > 2
+                              ? `${parsedColumn[1]}.${parsedColumn[2]}`
+                              : column;
+                        const reportField = reportFields.find(
+                           (reportField) => reportField.id === originalColumn
+                        );
+
+                        switch (reportField.type) {
+                           case "date": {
+                              const dateStringData = abWebix.i18n.dateFormatStr(
+                                 e[originalColumn]
+                              );
+                              const parsedDateStringData =
+                                 dateStringData.split("/");
+
+                              switch (parsedColumn[0]) {
+                                 case "day":
+                                    e[column] = parsedDateStringData[1];
+
+                                    return parsedDateStringData[1];
+
+                                 case "month":
+                                    e[column] = parsedDateStringData[0];
+
+                                    return parsedDateStringData[0];
+
+                                 case "year":
+                                    e[column] = parsedDateStringData[2];
+
+                                    return parsedDateStringData[2];
+
+                                 case "yearmonth": {
+                                    e[
+                                       column
+                                    ] = `${parsedDateStringData[0]}/${parsedDateStringData[2]}`;
+
+                                    return e[column];
+                                 }
+
+                                 default:
+                                    e[column] = dateStringData;
+
+                                    return dateStringData;
+
+                                 // switch (reportField.abField.key) {
+                                 //    case "datetime":
+                                 //       return abWebix.i18n.fullDateFormatStr(
+                                 //          e[originalColumn]
+                                 //       );
+
+                                 //    default:
+                                 //       break;
+                                 // }
+                              }
+                           }
+
+                           default:
+                              return e[originalColumn]?.toString?.();
+                        }
+                     })
                      .join("");
                });
 
@@ -797,6 +858,11 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
 
                   break;
 
+               case "datetime":
+                  type = "date";
+
+                  break;
+
                default:
                   break;
             }
@@ -900,7 +966,6 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
                   break;
 
                case "date":
-               case "datetime":
                   reportRow[col] = row[columnName];
                   if (reportRow[col]) {
                      if (!(reportRow[col] instanceof Date))
