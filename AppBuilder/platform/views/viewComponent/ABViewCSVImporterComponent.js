@@ -1602,7 +1602,7 @@ module.exports = class ABViewCSVImporterComponent extends ABViewComponent {
                   : connectField.object.PK();
                const uuid =
                   hashLookups[connectField.id][
-                     newRowData[connectField.columnName]
+                  newRowData[connectField.columnName]
                   ];
 
                if (!uuid) {
