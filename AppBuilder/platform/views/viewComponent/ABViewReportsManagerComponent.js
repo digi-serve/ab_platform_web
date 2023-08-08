@@ -708,6 +708,44 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
 
             return config;
          }
+
+         async GetTableData(mod) {
+            const data = await super.GetTableData(mod);
+            const buckets = mod.buckets;
+
+            if (!buckets) return data;
+
+            if (buckets.length === 0) return data;
+
+            const columnIDs = mod.columns.map((e) => e.id);
+            const parsedBuckets = mod.buckets.filter((bucket) =>
+               columnIDs.includes(bucket.column)
+            );
+
+            if (parsedBuckets.length === 0) return data;
+
+            const records = data[0].map((e) => {
+               const parseRecord = {};
+
+               parsedBuckets.forEach((bucket) => {
+                  const options = bucket.options;
+
+                  for (let i = 0; i < options.length; i++)
+                     if (
+                        options[i].values?.includes(e[bucket.column]) ||
+                        i === options.length - 1
+                     ) {
+                        parseRecord[bucket.column] = options[i].id;
+
+                        break;
+                     }
+               });
+
+               return Object.assign({}, e, parseRecord);
+            });
+
+            return [records, data[1]];
+         }
       }
 
       const _ui = super.ui([
