@@ -27,19 +27,26 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
       const ids = this.ids;
       const _ui = super.ui([
          {
-            id: ids.dataview,
-            view: "dataview",
-            scroll: "y",
-            sizeToContent: true,
-            css: "borderless",
-            xCount: this.settings.xCount,
-            template: (item) => this.itemTemplate(item),
-            on: {
-               onAfterRender: () => {
-                  this.applyClickEvent();
-                  this.addCyAttribute();
+            cols: [
+               {
+                  id: ids.dataview,
+                  view: "dataview",
+                  scroll: "y",
+                  sizeToContent: true,
+                  css: "borderless",
+                  xCount: this.settings.xCount,
+                  template: (item) => this.itemTemplate(item),
+                  on: {
+                     onAfterRender: () => {
+                        this.applyClickEvent();
+                        this.addCyAttribute();
+                     },
+                  },
                },
-            },
+               {
+                  fillspace: true,
+               },
+            ],
          },
       ]);
 
@@ -136,20 +143,44 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
    getItemWidth() {
       const $dataview = $$(this.ids.dataview);
 
-      let currElem = $dataview.getParentView() ?? $dataview;
+      let currElem = $dataview;
       let parentWidth = currElem?.$width;
-      while (currElem && !parentWidth) {
+      while (currElem) {
+         if (currElem.config.view == "scrollview")
+            parentWidth =
+               currElem?.$width < parentWidth ? currElem?.$width : parentWidth;
+
          currElem = currElem?.getParentView?.();
-         parentWidth = currElem?.$width;
       }
 
-      if (!parentWidth) parentWidth = screen.availWidth;
+      if (!parentWidth)
+         parentWidth = $dataview?.getParentView?.().$width || screen.availWidth;
 
-      parentWidth -= 25;
+      parentWidth -= 20;
+
+      const $sidebar = this.getTabSidebar();
+      if ($sidebar) {
+         parentWidth -= $sidebar.$width;
+      }
 
       const recordWidth = Math.floor(parentWidth / this.settings.xCount);
 
       return recordWidth;
+   }
+
+   getTabSidebar() {
+      const $dataview = $$(this.ids.dataview);
+      let $sidebar;
+      let currElem = $dataview;
+      while (currElem && !$sidebar) {
+         $sidebar = (currElem.getChildViews?.() ?? []).filter(
+            (item) => item.config.view == "sidebar"
+         )[0];
+
+         currElem = currElem?.getParentView?.();
+      }
+
+      return $sidebar;
    }
 
    applyClickEvent() {
@@ -215,7 +246,7 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
    addCyAttribute() {
       const baseView = this.view;
       const $dataview = $$(this.ids.dataview);
-      const name = baseView.name.replace(".dataview", "");
+      const name = (baseView.name ?? "").replace(".dataview", "");
 
       $dataview.$view.setAttribute(
          "data-cy",
@@ -226,7 +257,7 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
    addCyItemAttributes(dom, item) {
       const baseView = this.view;
       const uuid = item.uuid;
-      const name = baseView.name.replace(".dataview", "");
+      const name = (baseView.name ?? "").replace(".dataview", "");
       dom.querySelector(".webix_accordionitem_body")?.setAttribute(
          "data-cy",
          `dataview item ${name} ${uuid} ${baseView.id}`
