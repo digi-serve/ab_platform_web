@@ -1,4 +1,5 @@
 const ABViewComponent = require("./ABViewComponent").default;
+const ABFieldCore = require("../../../core/dataFields/ABFieldCore");
 const CSVImporter = require("../../CSVImporter");
 
 module.exports = class ABViewCSVImporterComponent extends ABViewComponent {
@@ -1601,7 +1602,7 @@ module.exports = class ABViewCSVImporterComponent extends ABViewComponent {
                   : connectField.object.PK();
                const uuid =
                   hashLookups[connectField.id][
-                  newRowData[connectField.columnName]
+                     newRowData[connectField.columnName]
                   ];
 
                if (!uuid) {
@@ -1811,7 +1812,9 @@ module.exports = class ABViewCSVImporterComponent extends ABViewComponent {
 
    // Display linked data
    uiLinkedData() {
-      const linkedData = this.getParentValues();
+      const dcLink = this.datacollection?.datacollectionLink;
+      const linkedData = dcLink?.getCursor();
+      if (!linkedData) return;
 
       return {
          view: "window",
@@ -1838,19 +1841,19 @@ module.exports = class ABViewCSVImporterComponent extends ABViewComponent {
             id: "sets",
             editable: false,
             width: 400,
-            height: 300,
+            height: 200,
             elements: [
                { label: this.label("Linked Data"), type: "label" },
-               ...Object.keys(linkedData).map((columnName) => {
-                  return {
-                     label: columnName,
-                     type: "text",
-                     value:
-                        linkedData[columnName]?.uuid ??
-                        linkedData[columnName]?.id ??
-                        linkedData[columnName],
-                  };
-               }),
+               {
+                  label: "ID",
+                  type: "text",
+                  value: linkedData.uuid ?? linkedData.id,
+               },
+               {
+                  label: "Label",
+                  type: "text",
+                  value: dcLink.datasource.displayData(linkedData),
+               },
             ],
          },
       };
