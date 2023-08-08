@@ -27,26 +27,19 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
       const ids = this.ids;
       const _ui = super.ui([
          {
-            cols: [
-               {
-                  id: ids.dataview,
-                  view: "dataview",
-                  scroll: "y",
-                  sizeToContent: true,
-                  css: "borderless",
-                  xCount: this.settings.xCount,
-                  template: (item) => this.itemTemplate(item),
-                  on: {
-                     onAfterRender: () => {
-                        this.applyClickEvent();
-                        this.addCyAttribute();
-                     },
-                  },
+            id: ids.dataview,
+            view: "dataview",
+            scroll: "y",
+            sizeToContent: true,
+            css: "borderless",
+            xCount: this.settings.xCount,
+            template: (item) => this.itemTemplate(item),
+            on: {
+               onAfterRender: () => {
+                  this.applyClickEvent();
+                  this.addCyAttribute();
                },
-               {
-                  fillspace: true,
-               },
-            ],
+            },
          },
       ]);
 
