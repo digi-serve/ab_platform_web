@@ -1,5 +1,4 @@
 const ABViewComponent = require("./ABViewComponent").default;
-const ABFieldCore = require("../../../core/dataFields/ABFieldCore");
 const CSVImporter = require("../../CSVImporter");
 
 module.exports = class ABViewCSVImporterComponent extends ABViewComponent {
