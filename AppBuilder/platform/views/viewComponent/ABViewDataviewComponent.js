@@ -111,8 +111,20 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
       // Mock up data to initialize height of item
       if (!item || !Object.keys(item).length) {
          item = item ?? {};
-         this.datacollection?.datasource?.fields?.().forEach((f) => {
-            item[f.columnName] = "Lorem Ipsum";
+         this.datacollection?.datasource?.fields().forEach((f) => {
+            switch (f.key) {
+               case "string":
+               case "LongText":
+                  item[f.columnName] = "Lorem Ipsum";
+                  break;
+               case "date":
+               case "datetime":
+                  item[f.columnName] = new Date();
+                  break;
+               case "number":
+                  item[f.columnName] = 7;
+                  break;
+            }
          });
       }
       detailCom.displayData(item);
