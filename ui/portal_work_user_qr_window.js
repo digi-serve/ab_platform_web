@@ -40,7 +40,6 @@ class PortalWorkUserQRWindow extends ClassUI {
                   width: 40,
                   icon: "fa fa-repeat",
                   click: () => {
-                     console.log("refresh");
                      $$("qr-code-image").refresh();
                   },
                   on: {
