@@ -732,22 +732,18 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
                width: a.width || 200,
             };
 
+            const abField = self.AB.datacollectionByID(
+               a.mid
+            )?.datasource.fields((field) => field.columnName === a.name)[0];
+
             switch (a.type) {
                case "date":
                   config.format = (val) => {
                      // check valid date
                      if (val?.getTime && !isNaN(val.getTime()))
-                        return abWebix.i18n.dateFormatStr(val);
-                     else return "";
-                  };
-
-                  break;
-
-               case "datetime":
-                  config.format = (val) => {
-                     // check valid date
-                     if (val?.getTime && !isNaN(val.getTime()))
-                        return abWebix.i18n.fullDateFormatStr(val);
+                        return abField.key === "datetime"
+                           ? abWebix.i18n.fullDateFormatStr(val)
+                           : abWebix.i18n.dateFormatStr(val);
                      else return "";
                   };
 
