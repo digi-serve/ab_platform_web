@@ -463,58 +463,50 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
 
             // group by
             if (config?.group?.length) {
-               (config.group || []).forEach((groupProp) => {
-                  result = _(result).groupBy(groupProp);
+               result = _.groupBy(result, (e) => {
+                  return config.group
+                     .map((column) => e[column]?.toString?.())
+                     .join("");
                });
 
-               result = result
-                  .map((groupedData, id) => {
-                     const groupedResult = {};
+               result = Object.values(result).map((groupedData) => {
+                  const groupedResult = {};
 
-                     (config.columns || []).forEach((col) => {
-                        const agg = col.split(".")[0];
-                        const rawCol = col.replace(
-                           /sum.|avg.|count.|max.|min./g,
-                           ""
-                        );
+                  (config.columns || []).forEach((col) => {
+                     const agg = col.split(".")[0];
+                     const rawCol = col.replace(
+                        /sum.|avg.|count.|max.|min./g,
+                        ""
+                     );
 
-                        switch (agg) {
-                           case "sum":
-                              groupedResult[col] = ab.sumBy(
-                                 groupedData,
-                                 rawCol
-                              );
-                              break;
-                           case "avg":
-                              groupedResult[col] = ab.meanBy(
-                                 groupedData,
-                                 rawCol
-                              );
-                              break;
-                           case "count":
-                              groupedResult[col] = (groupedData || []).length;
-                              break;
-                           case "max":
-                              groupedResult[col] =
-                                 (ab.maxBy(groupedData, rawCol) || {})[
-                                    rawCol
-                                 ] || "";
-                              break;
-                           case "min":
-                              groupedResult[col] =
-                                 (ab.minBy(groupedData, rawCol) || {})[
-                                    rawCol
-                                 ] || "";
-                              break;
-                           default:
-                              groupedResult[col] = groupedData[0][col];
-                              break;
-                        }
-                     });
+                     switch (agg) {
+                        case "sum":
+                           groupedResult[col] = ab.sumBy(groupedData, rawCol);
+                           break;
+                        case "avg":
+                           groupedResult[col] = ab.meanBy(groupedData, rawCol);
+                           break;
+                        case "count":
+                           groupedResult[col] = (groupedData || []).length;
+                           break;
+                        case "max":
+                           groupedResult[col] =
+                              (ab.maxBy(groupedData, rawCol) || {})[rawCol] ||
+                              "";
+                           break;
+                        case "min":
+                           groupedResult[col] =
+                              (ab.minBy(groupedData, rawCol) || {})[rawCol] ||
+                              "";
+                           break;
+                        default:
+                           groupedResult[col] = groupedData[0][col];
+                           break;
+                     }
+                  });
 
-                     return groupedResult;
-                  })
-                  .value();
+                  return groupedResult;
+               });
             }
 
             return result;
