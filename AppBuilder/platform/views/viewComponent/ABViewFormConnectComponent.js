@@ -47,7 +47,8 @@ module.exports = class ABViewFormConnectComponent extends (
          id: ids.formItem,
          view: multiselect ? "multicombo" : "combo",
          name: field.columnName,
-         required: field?.settings?.required || settings?.required || false,
+         required:
+            field?.settings?.required || parseInt(settings?.required) || false,
          // label: field.label,
          // labelWidth: settings.labelWidth,
          dataFieldId: field.id,

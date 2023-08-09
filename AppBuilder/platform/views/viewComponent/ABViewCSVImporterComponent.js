@@ -24,6 +24,7 @@ module.exports = class ABViewCSVImporterComponent extends ABViewComponent {
                statusMessage: "",
                progressBar: "",
 
+               linkedDataButton: "",
                importButton: "",
                rules: "",
             },
@@ -264,15 +265,32 @@ module.exports = class ABViewCSVImporterComponent extends ABViewComponent {
                height: 6,
             },
             {
-               view: "button",
-               name: "import",
-               id: ids.importButton,
-               value: this.label("Import"),
-               css: "webix_primary",
-               disabled: true,
-               click: () => {
-                  this.import();
-               },
+               cols: [
+                  {
+                     id: ids.linkedDataButton,
+                     view: "button",
+                     label: this.label("Linked Data"),
+                     type: "icon",
+                     icon: "fa fa-info",
+                     maxWidth: 180,
+                     click: () => {
+                        this.showLinkedData();
+                     },
+                  },
+                  {
+                     view: "button",
+                     name: "import",
+                     id: ids.importButton,
+                     label: this.label("Import"),
+                     css: "webix_primary",
+                     disabled: true,
+                     type: "icon",
+                     icon: "fa fa-upload",
+                     click: () => {
+                        this.import();
+                     },
+                  },
+               ],
             },
          ],
       };
@@ -1259,8 +1277,6 @@ module.exports = class ABViewCSVImporterComponent extends ABViewComponent {
     * @return {Promise}
     */
    async import() {
-      // get ABDatacollection
-      const dc = this.datacollection;
       // if (dv == null) return Promise.resolve();
 
       // // get ABObject
@@ -1410,25 +1426,6 @@ module.exports = class ABViewCSVImporterComponent extends ABViewComponent {
          this.emit("done");
       };
 
-      // Set parent's data collection cursor
-      const dcLink = dc?.datacollectionLink;
-      const linkConnectFields = [];
-
-      let objectLink;
-      let linkValues;
-
-      if (dcLink?.getCursor()) {
-         objectLink = dcLink.datasource;
-
-         linkConnectFields.push(
-            ...currentObject.fields(
-               (f) => f.isConnection && f.settings.linkObject === objectLink.id
-            )
-         );
-
-         linkValues = dcLink.getCursor();
-      }
-
       const validRows = [];
 
       let allValid = true;
@@ -1437,20 +1434,7 @@ module.exports = class ABViewCSVImporterComponent extends ABViewComponent {
       // update row to green if valid
       // update row to red if !valid
       (selectedRows || []).forEach((data, index) => {
-         const newRowData = {};
-
-         // Set parent's data collection cursor
-         if (objectLink && linkConnectFields.length && linkValues) {
-            linkConnectFields.forEach((f) => {
-               const linkColName = f.indexField
-                  ? f.indexField.columnName
-                  : objectLink.PK();
-
-               newRowData[f.columnName] = {};
-               newRowData[f.columnName][linkColName] =
-                  linkValues[linkColName] || linkValues.id;
-            });
-         }
+         const newRowData = this.getParentValues();
 
          matchFields.forEach((f) => {
             if (!f.field?.key) return;
@@ -1617,7 +1601,7 @@ module.exports = class ABViewCSVImporterComponent extends ABViewComponent {
                   : connectField.object.PK();
                const uuid =
                   hashLookups[connectField.id][
-                     newRowData[connectField.columnName]
+                  newRowData[connectField.columnName]
                   ];
 
                if (!uuid) {
@@ -1823,5 +1807,108 @@ module.exports = class ABViewCSVImporterComponent extends ABViewComponent {
          uiCleanUp();
          console.error(err);
       }
+   }
+
+   // Display linked data
+   uiLinkedData() {
+      const dcLink = this.datacollection?.datacollectionLink;
+      const linkedData = dcLink?.getCursor();
+      if (!linkedData) return;
+
+      return {
+         view: "window",
+         modal: true,
+         resize: false,
+         head: {
+            view: "toolbar",
+            cols: [
+               {},
+               {
+                  view: "button",
+                  width: 35,
+                  css: "webix_transparent",
+                  type: "icon",
+                  icon: "nomargin fa fa-times",
+                  click: () => {
+                     this.hideLinkedData();
+                  },
+               },
+            ],
+         },
+         body: {
+            view: "property",
+            id: "sets",
+            editable: false,
+            width: 400,
+            height: 200,
+            elements: [
+               { label: this.label("Linked Data"), type: "label" },
+               {
+                  label: "ID",
+                  type: "text",
+                  value: linkedData.uuid ?? linkedData.id,
+               },
+               {
+                  label: "Label",
+                  type: "text",
+                  value: dcLink.datasource.displayData(linkedData),
+               },
+            ],
+         },
+      };
+   }
+
+   showLinkedData() {
+      const ui = this.uiLinkedData();
+      this._info_popup = this.AB.Webix.ui(ui);
+      this._info_popup.show($$(this.ids.linkedDataButton).$view, {
+         pos: "top",
+      });
+   }
+
+   hideLinkedData() {
+      this._info_popup?.hide();
+   }
+
+   getParentValues() {
+      const result = {};
+
+      // get ABDatacollection
+      const dc = this.datacollection;
+      const currentObject = this.CurrentObject;
+
+      // Set parent's data collection cursor
+      const dcLink = dc?.datacollectionLink;
+      const linkConnectFields = [];
+
+      let objectLink;
+      let linkValues;
+
+      if (dcLink?.getCursor()) {
+         objectLink = dcLink.datasource;
+
+         linkConnectFields.push(
+            ...currentObject.fields(
+               (f) => f.isConnection && f.settings.linkObject === objectLink.id
+            )
+         );
+
+         linkValues = dcLink.getCursor();
+      }
+
+      // Set parent's data collection cursor
+      if (objectLink && linkConnectFields.length && linkValues) {
+         linkConnectFields.forEach((f) => {
+            const linkColName = f.indexField
+               ? f.indexField.columnName
+               : objectLink.PK();
+
+            result[f.columnName] = result[f.columnName] ?? {};
+            result[f.columnName][linkColName] =
+               linkValues[linkColName] ?? linkValues.id;
+         });
+      }
+
+      return result;
    }
 };

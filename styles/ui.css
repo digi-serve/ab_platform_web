@@ -701,7 +701,7 @@ input[type="text"].selectivity-multiple-input {
    color: #337ab7;
    margin-bottom: 10px;
 }
-.ab-datacollection-table.borderless .webix_dataview_item {
+.ab-datacollection-table.borderless .webix_dataview_item, .borderless .webix_dataview_item {
    border: none;
 }
 .ab-datacollection-table .webix_dataview_item:hover {

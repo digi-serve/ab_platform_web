@@ -393,17 +393,16 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
 
                   switch (r.type) {
                      case "date":
-                     case "datetime":
                         // Convert string to Date object
                         if (r.condition.filter) {
-                           if (ab.isString(r.condition.filter))
+                           if (typeof r.condition.filter === "string")
                               r.condition.filter = ab.rules.toDate(
                                  r.condition.filter
                               );
 
                            if (
                               r.condition.filter.start &&
-                              ab.isString(r.condition.filter.start)
+                              typeof r.condition.filter.start === "string"
                            )
                               r.condition.filter.start = ab.rules.toDate(
                                  r.condition.filter.start
@@ -411,7 +410,7 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
 
                            if (
                               r.condition.filter.end &&
-                              ab.isString(r.condition.filter.end)
+                              typeof r.condition.filter.end === "string"
                            )
                               r.condition.filter.end = ab.rules.toDate(
                                  r.condition.filter.end
@@ -463,58 +462,112 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
 
             // group by
             if (config?.group?.length) {
-               (config.group || []).forEach((groupProp) => {
-                  result = _(result).groupBy(groupProp);
-               });
-
-               result = result
-                  .map((groupedData, id) => {
-                     const groupedResult = {};
-
-                     (config.columns || []).forEach((col) => {
-                        const agg = col.split(".")[0];
-                        const rawCol = col.replace(
-                           /sum.|avg.|count.|max.|min./g,
-                           ""
+               result = _.groupBy(result, (e) => {
+                  return config.group
+                     .map((column) => {
+                        const parsedColumn = column.split(".");
+                        const originalColumn =
+                           parsedColumn.length > 2
+                              ? `${parsedColumn[1]}.${parsedColumn[2]}`
+                              : column;
+                        const reportField = reportFields.find(
+                           (reportField) => reportField.id === originalColumn
                         );
 
-                        switch (agg) {
-                           case "sum":
-                              groupedResult[col] = ab.sumBy(
-                                 groupedData,
-                                 rawCol
+                        switch (reportField.type) {
+                           case "date": {
+                              const dateStringData = abWebix.i18n.dateFormatStr(
+                                 e[originalColumn]
                               );
-                              break;
-                           case "avg":
-                              groupedResult[col] = ab.meanBy(
-                                 groupedData,
-                                 rawCol
-                              );
-                              break;
-                           case "count":
-                              groupedResult[col] = (groupedData || []).length;
-                              break;
-                           case "max":
-                              groupedResult[col] =
-                                 (ab.maxBy(groupedData, rawCol) || {})[
-                                    rawCol
-                                 ] || "";
-                              break;
-                           case "min":
-                              groupedResult[col] =
-                                 (ab.minBy(groupedData, rawCol) || {})[
-                                    rawCol
-                                 ] || "";
-                              break;
-                           default:
-                              groupedResult[col] = groupedData[0][col];
-                              break;
-                        }
-                     });
+                              const parsedDateStringData =
+                                 dateStringData.split("/");
 
-                     return groupedResult;
-                  })
-                  .value();
+                              switch (parsedColumn[0]) {
+                                 case "day":
+                                    e[column] = parsedDateStringData[1];
+
+                                    return parsedDateStringData[1];
+
+                                 case "month":
+                                    e[column] = parsedDateStringData[0];
+
+                                    return parsedDateStringData[0];
+
+                                 case "year":
+                                    e[column] = parsedDateStringData[2];
+
+                                    return parsedDateStringData[2];
+
+                                 case "yearmonth": {
+                                    e[
+                                       column
+                                    ] = `${parsedDateStringData[0]}/${parsedDateStringData[2]}`;
+
+                                    return e[column];
+                                 }
+
+                                 default:
+                                    e[column] = dateStringData;
+
+                                    return dateStringData;
+
+                                 // switch (reportField.abField.key) {
+                                 //    case "datetime":
+                                 //       return abWebix.i18n.fullDateFormatStr(
+                                 //          e[originalColumn]
+                                 //       );
+
+                                 //    default:
+                                 //       break;
+                                 // }
+                              }
+                           }
+
+                           default:
+                              return e[originalColumn]?.toString?.();
+                        }
+                     })
+                     .join("");
+               });
+
+               result = Object.values(result).map((groupedData) => {
+                  const groupedResult = {};
+
+                  (config.columns || []).forEach((col) => {
+                     const agg = col.split(".")[0];
+                     const rawCol = col.replace(
+                        /sum.|avg.|count.|max.|min./g,
+                        ""
+                     );
+
+                     switch (agg) {
+                        case "sum":
+                           groupedResult[col] = ab.sumBy(groupedData, rawCol);
+                           break;
+                        case "avg":
+                           groupedResult[col] = ab.meanBy(groupedData, rawCol);
+                           break;
+                        case "count":
+                           groupedResult[col] = (groupedData || []).length;
+                           break;
+                        case "max":
+                           groupedResult[col] =
+                              (ab.maxBy(groupedData, rawCol) || {})[rawCol] ||
+                              "";
+                           break;
+                        case "min":
+                           groupedResult[col] =
+                              (ab.minBy(groupedData, rawCol) || {})[rawCol] ||
+                              "";
+                           break;
+                        default:
+                           groupedResult[col] = groupedData[0][col];
+                           break;
+                     }
+                  });
+
+                  return groupedResult;
+               });
             }
 
             return result;
@@ -660,32 +713,87 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
       class MyTable extends reports.views.table {
          // NOTE: fix format of date column type
          GetColumnConfig(a) {
-            if (a.type === "date") {
-               return {
-                  id: a.id,
-                  header:
-                     !a.meta.header || a.meta.header === "none"
-                        ? a.meta.name || a.name
-                        : [
-                             a.meta.name || a.name,
-                             {
-                                content:
-                                   a.header === "text"
-                                      ? "textFilter"
-                                      : "richSelectFilter",
-                             },
-                          ],
-                  type: a.type,
-                  sort: "date",
-                  width: a.width || 200,
-                  format: (val) => {
+            let config = {
+               id: a.id,
+               header:
+                  !a.meta.header || a.meta.header === "none"
+                     ? a.meta.name || a.name
+                     : [
+                          a.meta.name || a.name,
+                          {
+                             content:
+                                a.header === "text"
+                                   ? "textFilter"
+                                   : "richSelectFilter",
+                          },
+                       ],
+               type: a.type,
+               sort: "date",
+               width: a.width || 200,
+            };
+
+            const abField = self.AB.datacollectionByID(
+               a.mid
+            )?.datasource.fields((field) => field.columnName === a.name)[0];
+
+            switch (a.type) {
+               case "date":
+                  config.format = (val) => {
                      // check valid date
                      if (val?.getTime && !isNaN(val.getTime()))
-                        return abWebix.i18n.dateFormatStr(val);
+                        return abField.key === "datetime"
+                           ? abWebix.i18n.fullDateFormatStr(val)
+                           : abWebix.i18n.dateFormatStr(val);
                      else return "";
-                  },
-               };
-            } else return super.GetColumnConfig(a);
+                  };
+
+                  break;
+
+               default:
+                  config = super.GetColumnConfig(a);
+
+                  break;
+            }
+
+            return config;
+         }
+
+         async GetTableData(mod) {
+            const data = await super.GetTableData(mod);
+            const buckets = mod.buckets;
+
+            if (!buckets) return data;
+
+            if (buckets.length === 0) return data;
+
+            const columnIDs = mod.columns.map((e) => e.id);
+            const parsedBuckets = mod.buckets.filter((bucket) =>
+               columnIDs.includes(bucket.column)
+            );
+
+            if (parsedBuckets.length === 0) return data;
+
+            const records = data[0].map((e) => {
+               const parseRecord = {};
+
+               parsedBuckets.forEach((bucket) => {
+                  const options = bucket.options;
+
+                  for (let i = 0; i < options.length; i++)
+                     if (
+                        options[i].values?.includes(e[bucket.column]) ||
+                        i === options.length - 1
+                     ) {
+                        parseRecord[bucket.column] = options[i].id;
+
+                        break;
+                     }
+               });
+
+               return Object.assign({}, e, parseRecord);
+            });
+
+            return [records, data[1]];
          }
       }
 
@@ -735,21 +843,44 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
       object.fields().forEach((f) => {
          const columnFormat = f.columnHeader();
 
-         fields.push({
-            id: f.columnName,
-            name: f.label,
-            filter: f.fieldIsFilterable(),
-            edit: false,
-            type: columnFormat.editor || "text",
-            format: columnFormat.format,
-            options: columnFormat.options,
-            ref: "",
-            key: false,
-            show: true,
-            abField: f,
-         });
+         if (!f.isConnection) {
+            let type = "text";
 
-         if (f.isConnection && f.settings.isSource) {
+            switch (f.key) {
+               case "boolean":
+               case "number":
+               case "date":
+                  type = f.key;
+
+                  break;
+
+               case "datetime":
+                  type = "date";
+
+                  break;
+
+               default:
+                  break;
+            }
+
+            fields.push({
+               id: f.columnName,
+               name: f.label,
+               filter: f.fieldIsFilterable(),
+               edit: false,
+               type: type,
+               format: columnFormat.format,
+               options: columnFormat.options,
+               ref: "",
+               key: false,
+               show: true,
+               abField: f,
+            });
+
+            return;
+         }
+
+         if (f.isSource()) {
             const linkedDcs = this.view.application.datacollectionsIncluded(
                (dc) =>
                   this.settings.datacollectionIDs.includes(dc.id) &&
@@ -781,10 +912,7 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
       const object = datacollection.datasource;
       if (!object) return [];
 
-      if (
-         datacollection.dataStatus === datacollection.dataStatusFlag.notInitial
-      )
-         await datacollection.loadData();
+      await this.waitInitializingDCEvery(1000, datacollection);
 
       const reportFields = this.getReportFields(datacollection);
       const reportData = [];
@@ -799,23 +927,26 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
             const columnName = field.columnName;
             const col = `${datacollection.id}.${columnName}`;
 
-            reportRow[col] = field ? field.format(row) : row[columnName];
+            if (field) {
+               // FK value of the connect field
+               if (field.isConnection) {
+                  let $pk = field.datasourceLink.PK();
+                  if (Array.isArray(row[columnName]))
+                     reportRow[`${col}.id`] = row[columnName].map(
+                        (link) => link[$pk] || link.id || link
+                     );
+                  else if (row[columnName])
+                     reportRow[`${col}.id`] =
+                        row[columnName][$pk] ||
+                        row[columnName].id ||
+                        row[columnName];
+               } else reportRow[col] = field.format(row);
+            } else reportRow[col] = row[columnName];
 
-            // FK value of the connect field
-            if (field && field.isConnection) {
-               let $pk = field.datasourceLink.PK();
-               if (Array.isArray(row[columnName]))
-                  reportRow[`${col}.id`] = row[columnName].map(
-                     (link) => link[$pk] || link.id || link
-                  );
-               else if (row[columnName])
-                  reportRow[`${col}.id`] =
-                     row[columnName][$pk] ||
-                     row[columnName].id ||
-                     row[columnName];
-            }
+            const rField = reportFields.find(
+               (f) => f.id === columnName || f.id === field.id
+            );
 
-            const rField = reportFields.filter((f) => f.id === columnName)[0];
             if (!rField) return;
 
             switch (rField.type) {
@@ -831,7 +962,6 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
                   break;
 
                case "date":
-               case "datetime":
                   reportRow[col] = row[columnName];
                   if (reportRow[col]) {
                      if (!(reportRow[col] instanceof Date))
@@ -855,6 +985,12 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
       if (dc.dataStatus === dc.dataStatusFlag.notInitial) await dc.loadData();
 
       return await new Promise((resolve) => {
+         if (dc.dataStatus === dc.dataStatusFlag.initialized) {
+            resolve();
+
+            return;
+         }
+
          const interval = setInterval(() => {
             if (dc.dataStatus === dc.dataStatusFlag.initialized) {
                clearInterval(interval);
