@@ -14,6 +14,10 @@ module.exports = class ABViewPDFImporterComponent extends ABViewComponent {
                fileUploader: "",
                uploadList: "",
                dataview: "",
+               fullImagePopup: "",
+               fullImageCarousel: "",
+               fullImageSelectToggle: "",
+               fullImageLabel: "",
             },
             ids
          )
@@ -22,6 +26,7 @@ module.exports = class ABViewPDFImporterComponent extends ABViewComponent {
 
    ui() {
       const ids = this.ids;
+      const self = this;
       const _ui = super.ui([
          {
             rows: [
@@ -108,30 +113,24 @@ module.exports = class ABViewPDFImporterComponent extends ABViewComponent {
                         this.renderPageImages();
                      },
                      onItemClick: function (id, e, node) {
-                        let selectedIds = this.getSelectedId();
-                        if (!Array.isArray(selectedIds))
-                           selectedIds = [selectedIds];
-
                         // Unselect
                         if (e?.target?.className?.includes?.("unselect-page")) {
-                           selectedIds = selectedIds.filter(
-                              (pageId) => pageId != id
-                           );
+                           this.unselect(id);
                         }
                         // Select
                         else if (
                            e?.target?.className?.includes?.("select-page")
                         ) {
-                           selectedIds.push(id);
+                           this.select(id);
                         }
                         // Zoom
                         else if (e?.target?.className?.includes?.("pdf-zoom")) {
-                           alert("TODO");
+                           self._fullImagePopup.show();
+                           $$(self.ids.fullImageCarousel).setActiveIndex(
+                              parseInt(id ?? 0) - 1
+                           );
+                           self.refreshFullImage();
                         }
-
-                        selectedIds = selectedIds.filter((pageId) => pageId);
-                        if (selectedIds.length) this.select(selectedIds);
-                        else this.unselectAll();
                      },
                   },
                },
@@ -183,13 +182,105 @@ module.exports = class ABViewPDFImporterComponent extends ABViewComponent {
       return _ui;
    }
 
+   uiPopup() {
+      const ids = this.ids;
+      return {
+         id: ids.fullImagePopup,
+         view: "window",
+         modal: true,
+         position: "center",
+         headHeight: 25,
+         head: {
+            cols: [
+               { fillspace: true },
+               {
+                  view: "button",
+                  type: "icon",
+                  icon: "fa fa-times",
+                  maxWidth: 25,
+                  height: 25,
+                  click: () => {
+                     $$(ids.fullImagePopup)?.hide();
+                  },
+               },
+            ],
+         },
+         body: {
+            rows: [
+               {
+                  id: ids.fullImageCarousel,
+                  view: "carousel",
+                  width: 600,
+                  height: 500,
+                  navigation: {
+                     items: true,
+                     buttons: true,
+                     type: "side",
+                  },
+                  cols: [],
+                  on: {
+                     onShow: () => {
+                        this.refreshFullImage();
+                     },
+                  },
+               },
+               {
+                  view: "layout",
+                  cols: [
+                     {
+                        id: ids.fullImageSelectToggle,
+                        view: "toggle",
+                        type: "icon",
+                        offIcon: "fa fa-square-o",
+                        onIcon: "fa fa-check-square-o",
+                        offLabel: this.label("Unselected"),
+                        onLabel: this.label("Selected"),
+                        width: 130,
+                        on: {
+                           onChange: (isSelected) => {
+                              const activeIndex = $$(
+                                 this.ids.fullImageCarousel
+                              ).getActiveIndex();
+                              const pageNumber = activeIndex + 1;
+
+                              if (isSelected) this.select(pageNumber);
+                              else this.unselect(pageNumber);
+                           },
+                        },
+                     },
+                     {
+                        fillspace: true,
+                     },
+                     {
+                        id: ids.fullImageLabel,
+                        view: "label",
+                        width: 120,
+                        label: `${this.label("Page Number")}: ${"#"}`,
+                     },
+                  ],
+               },
+            ],
+         },
+      };
+   }
+
+   async init(AB) {
+      await super.init(AB);
+
+      if (!this._fullImagePopup) {
+         const fullImagePopup = this.uiPopup();
+         this._fullImagePopup = this.AB.Webix.ui(fullImagePopup);
+      }
+   }
+
    async _readFileBuffer() {
       const _csvFileInfo = this._csvFileInfo;
       if (!_csvFileInfo || !_csvFileInfo.file)
          return Promise.resolve(new ArrayBuffer(0));
 
+      const fileReader = new FileReader();
+
       return new Promise((resolve, reject) => {
-         const fileReader = new FileReader();
          fileReader.onload = (event) => {
             const fileBuffer = event.target.result;
             resolve(fileBuffer);
@@ -212,20 +303,26 @@ module.exports = class ABViewPDFImporterComponent extends ABViewComponent {
 
       const total_page = this._pdfDoc.numPages;
       const $dataview = $$(this.ids.dataview);
+      const $carousel = $$(this.ids.fullImageCarousel);
+      const carousel_list = [];
       for (let pageNumber = 1; pageNumber <= total_page; pageNumber++) {
          $dataview.add({
             id: pageNumber,
             pageNumber,
          });
+
+         carousel_list.push({
+            template: (item) => {
+               return this.fullImageTemplate(item);
+            },
+            data: {
+               pageNumber,
+            },
+         });
       }
+
       this.renderPageImages();
-   }
-
-   clearDataview() {
-      const $dataview = $$(this.ids.dataview);
-      if (!$dataview) return;
-
-      $dataview.clearAll();
+      if ($carousel) this.AB.Webix.ui(carousel_list, $carousel);
    }
 
    removeFile(id) {
@@ -244,8 +341,7 @@ module.exports = class ABViewPDFImporterComponent extends ABViewComponent {
 
    pageTemplate(item) {
       const $dataview = $$(this.ids.dataview);
-      let selectedPageIds = $dataview.getSelectedId();
-      if (!Array.isArray(selectedPageIds)) selectedPageIds = [selectedPageIds];
+      let selectedPageIds = $dataview.getSelectedId(true);
 
       return `
       <div>
@@ -263,7 +359,7 @@ module.exports = class ABViewPDFImporterComponent extends ABViewComponent {
          </div>
          <div class="pdf-zoom pdf-data-view-image">
             <canvas class="pdf-zoom" width="${
-               this.pageWidth
+               this.pageItemWidth
             }" id="${this.pageTemplateId(item.pageNumber)}"></canvas>
             <div class="pdf-zoom pdf-data-view-image-icon">
                <i class="pdf-zoom fa fa-search-plus fa-4x"></i>
@@ -276,18 +372,16 @@ module.exports = class ABViewPDFImporterComponent extends ABViewComponent {
    renderPageImages() {
       const $dataview = $$(this.ids.dataview);
       $dataview?.find({}).forEach((item) => {
-         this.showPage(item.pageNumber);
+         this.showPage(item.pageNumber, this.pageTemplateId(item.pageNumber));
       });
    }
 
-   async showPage(pageNumber) {
+   async showPage(pageNumber, canvas_dom_id) {
       if (!this._pdfDoc) return;
 
       pageNumber = parseInt(pageNumber);
       const page = await this._pdfDoc.getPage(pageNumber);
-      const canvas_pdf_page = document.querySelector(
-         `#${this.pageTemplateId(pageNumber)}`
-      );
+      const canvas_pdf_page = document.querySelector(`#${canvas_dom_id}`);
 
       const pdf_original_width = page.getViewport({ scale: 1 }).width;
       const scale_required = canvas_pdf_page.width / pdf_original_width;
@@ -302,6 +396,25 @@ module.exports = class ABViewPDFImporterComponent extends ABViewComponent {
       });
    }
 
+   clearDataview() {
+      const $dataview = $$(this.ids.dataview);
+      const $carousel = $$(this.ids.fullImageCarousel);
+
+      $dataview?.clearAll();
+      if ($carousel)
+         this.AB.Webix.ui(
+            [
+               {
+                  view: "label",
+                  align: "center",
+                  height: $carousel.height,
+                  label: this.label("No image"),
+               },
+            ],
+            $carousel
+         );
+   }
+
    displaySmall() {
       this._isDisplayBig = false;
       $$(this.ids.dataview)?.render();
@@ -314,8 +427,33 @@ module.exports = class ABViewPDFImporterComponent extends ABViewComponent {
       this.renderPageImages();
    }
 
-   get pageWidth() {
+   get pageItemWidth() {
       return this._isDisplayBig ? BIG_PAGE_WIDTH : SMALL_PAGE_WIDTH;
+   }
+
+   select(pageNumber) {
+      const $dataview = $$(this.ids.dataview);
+
+      let selectedIds = $dataview.getSelectedId(true);
+
+      selectedIds.push(pageNumber);
+      selectedIds = selectedIds.filter((pageId) => pageId);
+
+      if (selectedIds.length) $dataview.select(selectedIds);
+      else $dataview.unselectAll();
+   }
+
+   unselect(pageNumber) {
+      const $dataview = $$(this.ids.dataview);
+
+      let selectedIds = $dataview.getSelectedId(true);
+
+      selectedIds = selectedIds.filter(
+         (pageId) => pageId && pageId != pageNumber
+      );
+
+      if (selectedIds.length) $dataview.select(selectedIds);
+      else $dataview.unselectAll();
    }
 
    selectAll() {
@@ -324,6 +462,30 @@ module.exports = class ABViewPDFImporterComponent extends ABViewComponent {
 
    unselectAll() {
       $$(this.ids.dataview)?.unselectAll();
+   }
+
+   fullImageTemplate(item) {
+      const $carousel = $$(this.ids.fullImageCarousel);
+      return `<canvas width="${
+         $carousel.config.width - 20
+      }" id="${this.pageTemplateId(item.pageNumber)}_full_size"></canvas>`;
+   }
+
+   refreshFullImage() {
+      const ids = this.ids;
+      const activeIndex = $$(ids.fullImageCarousel).getActiveIndex();
+      const pageNumber = activeIndex + 1;
+
+      this.showPage(pageNumber, `${this.pageTemplateId(pageNumber)}_full_size`);
+
+      const selectedPageIds = $$(ids.dataview).getSelectedId(true);
+      const isSelected =
+         selectedPageIds.filter((pageId) => pageId == pageNumber).length > 0;
+      $$(ids.fullImageSelectToggle).setValue(isSelected);
+
+      $$(ids.fullImageLabel).setValue(
+         `${this.label("Page Number")}: ${pageNumber}`
+      );
    }
 
    submit() {}
