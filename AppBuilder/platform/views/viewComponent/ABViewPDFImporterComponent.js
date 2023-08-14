@@ -18,6 +18,9 @@ module.exports = class ABViewPDFImporterComponent extends ABViewComponent {
                fullImageCarousel: "",
                fullImageSelectToggle: "",
                fullImageLabel: "",
+               selectAll: "",
+               unselectAll: "",
+               submit: "",
             },
             ids
          )
@@ -140,6 +143,7 @@ module.exports = class ABViewPDFImporterComponent extends ABViewComponent {
                {
                   cols: [
                      {
+                        id: ids.selectAll,
                         view: "button",
                         type: "icon",
                         icon: "fa fa-check-square-o",
@@ -150,6 +154,7 @@ module.exports = class ABViewPDFImporterComponent extends ABViewComponent {
                         },
                      },
                      {
+                        id: ids.unselectAll,
                         view: "button",
                         type: "icon",
                         icon: "fa fa-square-o",
@@ -163,10 +168,12 @@ module.exports = class ABViewPDFImporterComponent extends ABViewComponent {
                         fillspace: true,
                      },
                      {
+                        id: ids.submit,
                         view: "button",
                         css: "webix_primary",
                         type: "icon",
                         icon: "fa fa-floppy-o",
+                        disabled: true,
                         maxWidth: 180,
                         label: this.label("Submit"),
                         click: () => {
@@ -267,6 +274,9 @@ module.exports = class ABViewPDFImporterComponent extends ABViewComponent {
    async init(AB) {
       await super.init(AB);
 
+      const $dataview = $$(this.ids.dataview);
+      if ($dataview) this.AB.Webix.extend($dataview, webix.ProgressBar);
+
       if (!this._fullImagePopup) {
          const fullImagePopup = this.uiPopup();
          this._fullImagePopup = this.AB.Webix.ui(fullImagePopup);
@@ -289,6 +299,71 @@ module.exports = class ABViewPDFImporterComponent extends ABViewComponent {
             reject(event);
          };
          fileReader.readAsArrayBuffer(_csvFileInfo.file);
+      });
+   }
+
+   async _toBlob(pageNumber, canvas) {
+      if (!canvas) return;
+
+      return new Promise((resolve, reject) => {
+         canvas.toBlob((blob) => {
+            const file = new File([blob], `${pageNumber}.png`, {
+               type: "image/png",
+            });
+
+            resolve(file);
+         }, "image/png");
+      });
+   }
+
+   async _uploadImage(pageNumber) {
+      // Create a temporary CANVAS dom to render page image with specify the height
+      const $carousel = $$(this.ids.fullImageCarousel);
+      const canvasId = `${this.view.id}_temp_canvas`;
+      const canvas =
+         document.getElementById(canvasId) ?? document.createElement("canvas");
+      canvas.id = canvasId;
+      canvas.width = $carousel.config.width - 20;
+
+      await this.showPage(pageNumber, canvas);
+      const fileBlob = await this._toBlob(pageNumber, canvas);
+
+      return new Promise((resolve, reject) => {
+         // Create a uploader to upload images
+         const $uploader = this.AB.Webix.ui({
+            view: "uploader",
+            apiOnly: true,
+            upload: this.field.urlUpload(),
+            inputName: "file",
+            multiple: false,
+            on: {
+               // when upload is complete:
+               onFileUpload: (item, response) => {
+                  // RETURN HERE
+                  resolve(response?.data?.uuid);
+                  $uploader.destructor();
+               },
+               // if an error was returned
+               onFileUploadError: (item, response) => {
+                  reject(response);
+               },
+            },
+         });
+
+         $uploader.addFile(fileBlob, fileBlob.size);
+      });
+   }
+
+   _increaseProgressValue() {
+      const $dataview = $$(this.ids.dataview);
+      const maxProgressStep = ($dataview.getSelectedId(true) ?? []).length * 2;
+
+      this._progressSteps = this._progressSteps ?? 0;
+      this._progressSteps++;
+
+      $dataview?.showProgress?.({
+         type: "bottom",
+         position: this._progressSteps / maxProgressStep,
       });
    }
 
@@ -323,6 +398,8 @@ module.exports = class ABViewPDFImporterComponent extends ABViewComponent {
 
       this.renderPageImages();
       if ($carousel) this.AB.Webix.ui(carousel_list, $carousel);
+
+      $$(this.ids.submit)?.enable();
    }
 
    removeFile(id) {
@@ -331,6 +408,8 @@ module.exports = class ABViewPDFImporterComponent extends ABViewComponent {
       delete this._pdfDoc;
       delete this._csvFileInfo;
       this.clearDataview();
+
+      $$(this.ids.submit)?.disable();
 
       return true;
    }
@@ -372,28 +451,29 @@ module.exports = class ABViewPDFImporterComponent extends ABViewComponent {
    renderPageImages() {
       const $dataview = $$(this.ids.dataview);
       $dataview?.find({}).forEach((item) => {
-         this.showPage(item.pageNumber, this.pageTemplateId(item.pageNumber));
+         const canvas_dom = document.querySelector(
+            `#${this.pageTemplateId(item.pageNumber)}`
+         );
+         this.showPage(item.pageNumber, canvas_dom);
       });
    }
 
-   async showPage(pageNumber, canvas_dom_id) {
+   async showPage(pageNumber, canvas_dom) {
       if (!this._pdfDoc) return;
 
       pageNumber = parseInt(pageNumber);
       const page = await this._pdfDoc.getPage(pageNumber);
-      const canvas_pdf_page = document.querySelector(`#${canvas_dom_id}`);
-
       const pdf_original_width = page.getViewport({ scale: 1 }).width;
-      const scale_required = canvas_pdf_page.width / pdf_original_width;
+      const scale_required = canvas_dom.width / pdf_original_width;
 
       // get viewport to render the page at required scale
       const viewport = page.getViewport({ scale: scale_required });
-      canvas_pdf_page.height = viewport.height;
+      canvas_dom.height = viewport.height;
 
-      page.render({
-         canvasContext: canvas_pdf_page.getContext("2d"),
+      return page.render({
+         canvasContext: canvas_dom.getContext("2d"),
          viewport: viewport,
-      });
+      }).promise;
    }
 
    clearDataview() {
@@ -464,19 +544,25 @@ module.exports = class ABViewPDFImporterComponent extends ABViewComponent {
       $$(this.ids.dataview)?.unselectAll();
    }
 
+   fullImageTemplateId(pageNumber) {
+      return `${this.pageTemplateId(pageNumber)}_full_size`;
+   }
+
    fullImageTemplate(item) {
       const $carousel = $$(this.ids.fullImageCarousel);
       return `<canvas width="${
          $carousel.config.width - 20
-      }" id="${this.pageTemplateId(item.pageNumber)}_full_size"></canvas>`;
+      }" id="${this.fullImageTemplateId(item.pageNumber)}"></canvas>`;
    }
 
    refreshFullImage() {
       const ids = this.ids;
       const activeIndex = $$(ids.fullImageCarousel).getActiveIndex();
       const pageNumber = activeIndex + 1;
-
-      this.showPage(pageNumber, `${this.pageTemplateId(pageNumber)}_full_size`);
+      const canvas_dom = document.querySelector(
+         `#${this.fullImageTemplateId(pageNumber)}`
+      );
+      this.showPage(pageNumber, canvas_dom);
 
       const selectedPageIds = $$(ids.dataview).getSelectedId(true);
       const isSelected =
@@ -488,5 +574,116 @@ module.exports = class ABViewPDFImporterComponent extends ABViewComponent {
       );
    }
 
-   submit() {}
+   get dataCollection() {
+      return this.AB.datacollectionByID(this.view.settings?.dataviewID || "");
+   }
+
+   get object() {
+      return this.dataCollection?.datasource;
+   }
+
+   get field() {
+      return this.object?.fields?.(
+         (f) => f.id == this.view.settings.fieldID
+      )[0];
+   }
+
+   busy() {
+      const ids = this.ids;
+
+      const $fileUploader = $$(ids.fileUploader);
+      const $uploadList = $$(ids.uploadList);
+      const $dataview = $$(ids.dataview);
+      const $submit = $$(ids.submit);
+      const $selectAll = $$(ids.selectAll);
+      const $unselectAll = $$(ids.unselectAll);
+      const $selectToggle = $$(ids.fullImageSelectToggle);
+
+      $fileUploader?.disable();
+      $uploadList?.disable();
+      $submit?.disable();
+      $selectAll?.disable();
+      $unselectAll?.disable();
+      $selectToggle?.disable();
+      $dataview?.showProgress?.({
+         type: "bottom",
+         position: 0.001,
+      });
+   }
+
+   ready() {
+      const ids = this.ids;
+
+      const $fileUploader = $$(ids.fileUploader);
+      const $uploadList = $$(ids.uploadList);
+      const $dataview = $$(ids.dataview);
+      const $submit = $$(ids.submit);
+      const $selectAll = $$(ids.selectAll);
+      const $unselectAll = $$(ids.unselectAll);
+      const $selectToggle = $$(ids.fullImageSelectToggle);
+
+      $fileUploader?.enable();
+      $uploadList?.enable();
+      $submit?.enable();
+      $selectAll?.enable();
+      $unselectAll?.enable();
+      $selectToggle?.enable();
+      $dataview?.hideProgress?.();
+
+      delete this._progressSteps;
+   }
+
+   async submit() {
+      const field = this.field;
+      if (!this._pdfDoc || !field) return;
+
+      this.busy();
+
+      const ids = this.ids;
+      const $dataview = $$(ids.dataview);
+      const selectedPageIds = $dataview.getSelectedId(true) ?? [];
+      const model = field.object.model();
+      const dcLink = this.dataCollection.datacollectionLink;
+
+      for (let i = 0; i < selectedPageIds.length; i++) {
+         const pageNumber = selectedPageIds[i];
+         if (pageNumber == null || pageNumber == "") return;
+
+         const uploadId = await this._uploadImage(pageNumber);
+
+         this._increaseProgressValue();
+
+         // Insert Data
+         const values = field.object.defaultValues();
+         values[field.columnName] = uploadId;
+
+         // Set linked data from the parent DC
+         const linkValues = dcLink?.getCursor();
+         if (linkValues) {
+            const objectLink = dcLink?.datasource;
+
+            const connectFields = field.object.connectFields();
+            connectFields.forEach((f) => {
+               if (
+                  objectLink.id == f.settings.linkObject &&
+                  values[f.columnName] === undefined
+               ) {
+                  const linkColName = f.indexField
+                     ? f.indexField.columnName
+                     : objectLink.PK();
+
+                  values[f.columnName] = {};
+                  values[f.columnName][linkColName] =
+                     linkValues[linkColName] ?? linkValues.id;
+               }
+            });
+         }
+
+         await model.create(values);
+
+         this._increaseProgressValue();
+      }
+
+      this.ready();
+   }
 };
