@@ -266,6 +266,9 @@ module.exports = class ABViewFormConnectComponent extends (
    }
 
    async callbackSaveData(saveData) {
+      if (saveData == null) return;
+      else if (!Array.isArray(saveData)) saveData = [saveData];
+
       const ids = this.ids;
       const field = this.field;
 
@@ -293,17 +296,17 @@ module.exports = class ABViewFormConnectComponent extends (
       $formItem.getList().define("data", data);
 
       if (field.settings.linkType === "many") {
-         const currentVals = $formItem.getValue();
-
-         let selectedItems;
-         if (currentVals.indexOf(saveData.id) === -1)
-            selectedItems = currentVals
-               ? `${currentVals},${saveData.id}`
-               : saveData.id;
+         let selectedItems = $formItem.getValue();
+         saveData.forEach((sData) => {
+            if (selectedItems.indexOf(sData.id) === -1)
+               selectedItems = selectedItems
+                  ? `${selectedItems},${sData.id}`
+                  : sData.id;
+         });
 
          $formItem.setValue(selectedItems);
       } else {
-         $formItem.setValue(saveData.id);
+         $formItem.setValue(saveData[0].id);
       }
       // close the popup when we are finished
       // $$(ids.popup)?.close();

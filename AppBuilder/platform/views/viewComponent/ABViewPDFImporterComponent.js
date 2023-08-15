@@ -118,13 +118,13 @@ module.exports = class ABViewPDFImporterComponent extends ABViewComponent {
                      onItemClick: function (id, e, node) {
                         // Unselect
                         if (e?.target?.className?.includes?.("unselect-page")) {
-                           this.unselect(id);
+                           self.unselect(id);
                         }
                         // Select
                         else if (
                            e?.target?.className?.includes?.("select-page")
                         ) {
-                           this.select(id);
+                           self.select(id);
                         }
                         // Zoom
                         else if (e?.target?.className?.includes?.("pdf-zoom")) {
@@ -686,9 +686,7 @@ module.exports = class ABViewPDFImporterComponent extends ABViewComponent {
       }
 
       // NOTE: trigger this event to ABViewPropertyAddPage
-      newValues.forEach((newVal) => {
-         if (newVal) this.view.emit("saved", newVal);
-      });
+      if (newValues) this.view.emit("saved", newValues);
 
       this.ready();
    }
