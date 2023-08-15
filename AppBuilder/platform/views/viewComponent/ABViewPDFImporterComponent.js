@@ -118,13 +118,13 @@ module.exports = class ABViewPDFImporterComponent extends ABViewComponent {
                      onItemClick: function (id, e, node) {
                         // Unselect
                         if (e?.target?.className?.includes?.("unselect-page")) {
-                           this.unselect(id);
+                           self.unselect(id);
                         }
                         // Select
                         else if (
                            e?.target?.className?.includes?.("select-page")
                         ) {
-                           this.select(id);
+                           self.select(id);
                         }
                         // Zoom
                         else if (e?.target?.className?.includes?.("pdf-zoom")) {
@@ -644,6 +644,7 @@ module.exports = class ABViewPDFImporterComponent extends ABViewComponent {
       const selectedPageIds = $dataview.getSelectedId(true) ?? [];
       const model = field.object.model();
       const dcLink = this.dataCollection.datacollectionLink;
+      const newValues = [];
 
       for (let i = 0; i < selectedPageIds.length; i++) {
          const pageNumber = selectedPageIds[i];
@@ -679,10 +680,13 @@ module.exports = class ABViewPDFImporterComponent extends ABViewComponent {
             });
          }
 
-         await model.create(values);
+         newValues.push(await model.create(values));
 
          this._increaseProgressValue();
       }
+
+      // NOTE: trigger this event to ABViewPropertyAddPage
+      if (newValues) this.view.emit("saved", newValues);
 
       this.ready();
    }
