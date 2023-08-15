@@ -45,6 +45,7 @@
     "formiojs": "^4.12.7",
     "jszip-utils": "^0.1.0",
     "nanoid": "^3.3.4",
+    "pdfjs-dist": "^3.9.179",
     "tinymce": "^5.8.1",
     "uuid": "^8.3.2"
   },
