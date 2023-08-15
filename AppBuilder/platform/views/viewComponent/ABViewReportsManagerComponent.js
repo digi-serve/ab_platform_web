@@ -19,7 +19,6 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
 
    ui() {
       const self = this;
-      const baseView = this.view;
       const settings = this.settings;
       const ab = this.AB;
       const abWebix = ab.Webix;
@@ -85,10 +84,11 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
          async getModels() {
             const reportModels = {};
 
-            if (baseView.settings.datacollectionIDs.length === 0)
-               return reportModels;
-
-            baseView.settings.datacollectionIDs.forEach((dcID) => {
+            // If no selected DC then get all DCs
+            (settings.datacollectionIDs.length > 0
+               ? settings.datacollectionIDs
+               : self.view.application.datacollectionIDs
+            ).forEach((dcID) => {
                const dc = ab.datacollectionByID(dcID);
 
                if (!dc) return;
