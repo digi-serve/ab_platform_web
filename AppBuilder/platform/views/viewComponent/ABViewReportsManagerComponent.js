@@ -84,6 +84,7 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
          async getModels() {
             const reportModels = {};
 
+            // If no selected DC then get all DCs
             (settings.datacollectionIDs.length > 0
                ? settings.datacollectionIDs
                : self.view.application.datacollectionIDs
