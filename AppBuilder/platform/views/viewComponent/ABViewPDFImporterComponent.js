@@ -644,6 +644,7 @@ module.exports = class ABViewPDFImporterComponent extends ABViewComponent {
       const selectedPageIds = $dataview.getSelectedId(true) ?? [];
       const model = field.object.model();
       const dcLink = this.dataCollection.datacollectionLink;
+      const newValues = [];
 
       for (let i = 0; i < selectedPageIds.length; i++) {
          const pageNumber = selectedPageIds[i];
@@ -679,10 +680,15 @@ module.exports = class ABViewPDFImporterComponent extends ABViewComponent {
             });
          }
 
-         await model.create(values);
+         newValues.push(await model.create(values));
 
          this._increaseProgressValue();
       }
+
+      // NOTE: trigger this event to ABViewPropertyAddPage
+      newValues.forEach((newVal) => {
+         if (newVal) this.view.emit("saved", newVal);
+      });
 
       this.ready();
    }

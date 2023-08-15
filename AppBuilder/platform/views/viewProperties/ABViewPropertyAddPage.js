@@ -1,5 +1,6 @@
 import ABViewProperty from "./ABViewProperty";
 import ABViewFormButton from "../ABViewFormButton";
+import ABViewPDFImporter from "../ABViewPDFImporter";
 
 let L = (...params) => AB.Multilingual.label(...params);
 
@@ -213,12 +214,18 @@ export default class ABViewPropertyAddPage extends ABViewProperty {
                let ui = popUpComp.ui();
 
                // Listen 'saved' event of the form widget
-               const button = pageClone.views(
-                  (v) => v instanceof ABViewFormButton,
-                  true
-               )[0];
-               if (button) {
-                  button.parent.on("saved", (savedData) => {
+               const saveViews =
+                  pageClone.views(
+                     (v) =>
+                        v instanceof ABViewFormButton ||
+                        v instanceof ABViewPDFImporter,
+                     true
+                  ) ?? [];
+
+               saveViews.forEach((view) => {
+                  const v =
+                     view instanceof ABViewFormButton ? view.parent : view;
+                  v.on("saved", (savedData) => {
                      _logic?.callbacks?.onSaveData(savedData);
                      // ? is there ever a case where we want to keep an add popup open after saving?
                      // ! setting this to always close
@@ -230,7 +237,7 @@ export default class ABViewPropertyAddPage extends ABViewProperty {
                         popup.close();
                      }
                   });
-               }
+               });
 
                let popupTemplate = {
                   view: "window",
