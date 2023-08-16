@@ -574,12 +574,8 @@ module.exports = class ABViewPDFImporterComponent extends ABViewComponent {
       );
    }
 
-   get dataCollection() {
-      return this.AB.datacollectionByID(this.view.settings?.dataviewID || "");
-   }
-
    get object() {
-      return this.dataCollection?.datasource;
+      return this.view.datacollection?.datasource;
    }
 
    get field() {
@@ -643,7 +639,7 @@ module.exports = class ABViewPDFImporterComponent extends ABViewComponent {
       const $dataview = $$(ids.dataview);
       const selectedPageIds = $dataview.getSelectedId(true) ?? [];
       const model = field.object.model();
-      const dcLink = this.dataCollection.datacollectionLink;
+      const dcLink = this.datacollection.datacollectionLink;
       const newValues = [];
 
       for (let i = 0; i < selectedPageIds.length; i++) {
@@ -684,6 +680,8 @@ module.exports = class ABViewPDFImporterComponent extends ABViewComponent {
 
          this._increaseProgressValue();
       }
+
+      this.view.doSubmitRules(newValues);
 
       // NOTE: trigger this event to ABViewPropertyAddPage
       if (newValues) this.view.emit("saved", newValues);
