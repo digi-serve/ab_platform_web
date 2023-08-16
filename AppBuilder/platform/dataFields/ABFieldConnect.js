@@ -428,10 +428,12 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                      opt.value = opt.text;
                   });
 
+                  // 8/10/2023 - We are not actually using this (see line 338) - If we need to store
+                  // user data in local storage we should encrypt it.
                   // cache options if not a xxx->one connection
-                  if (this?.settings?.linkViaType != "one") {
-                     this.AB.Storage.set(storageID, this._options);
-                  }
+                  // if (this?.settings?.linkViaType != "one") {
+                  //    this.AB.Storage.set(storageID, this._options);
+                  // }
                   return respond(this._options);
                } catch (err) {
                   this.AB.notify.developer(err, {
