@@ -10,7 +10,7 @@ module.exports = {
       "pdf.worker": "pdfjs-dist/build/pdf.worker.entry",
    },
    output: {
-      path: path.join(APP, "..", "web", "assets", "app"),
+      path: path.join(APP, "..", "web", "assets"),
       filename: "[name].[contenthash].js",
    },
    module: {
@@ -30,9 +30,19 @@ module.exports = {
          template: "./webpack/index.ejs",
          filename: "../../../web/assets/index.html",
          inject: "body",
-         publicPath: "/assets/app",
+         publicPath: "/assets",
       }),
-      new CleanWebpackPlugin(),
+      new CleanWebpackPlugin({
+         cleanOnceBeforeBuildPatterns: [
+            "!dependencies/*",
+            "!font/*",
+            "!fonts/*",
+            "!images/*",
+            "!plugins/*",
+            "!skins/*",
+            "!tenant/*",
+         ],
+      }),
    ],
    resolve: {
       alias: {
