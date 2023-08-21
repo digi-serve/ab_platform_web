@@ -8,7 +8,6 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
          Object.assign(
             {
                reportManager: "",
-               reports: "",
             },
             ids
          )
@@ -741,7 +740,7 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
                   config.format = (val) => {
                      // check valid date
                      if (val?.getTime && !isNaN(val.getTime()))
-                        return abField.key === "datetime"
+                        return abField?.key === "datetime"
                            ? abWebix.i18n.fullDateFormatStr(val)
                            : abWebix.i18n.dateFormatStr(val);
                      else return "";
