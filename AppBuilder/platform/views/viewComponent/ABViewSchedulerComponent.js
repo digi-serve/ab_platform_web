@@ -286,7 +286,6 @@ module.exports = class ABViewSchedulerComponent extends ABViewComponent {
 
                         await dc.model.update(id, data);
                      }
-                     url(path) {}
                   },
                ],
                [
@@ -317,6 +316,17 @@ module.exports = class ABViewSchedulerComponent extends ABViewComponent {
                         else uiNavPopup.body.data = options;
 
                         return uiNavPopup;
+                     }
+                  },
+               ],
+               [
+                  scheduler.views["modes/day/multiday"],
+                  class CustomModesDayMultiday extends scheduler.views[
+                     "modes/day/multiday"
+                  ] {
+                     LimitData(data) {
+                        // Get an error the case when the data parameter is undefined.
+                        super.LimitData(data || []);
                      }
                   },
                ],
