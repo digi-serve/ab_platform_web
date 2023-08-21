@@ -28,7 +28,7 @@ module.exports = {
    plugins: [
       new HtmlWebpackPlugin({
          template: "./webpack/index.ejs",
-         filename: "../../../web/assets/index.html",
+         filename: path.join(APP, "..", "web", "assets", "index.html"),
          inject: "body",
          publicPath: "/assets",
       }),
