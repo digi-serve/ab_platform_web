@@ -30,10 +30,16 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
             id: ids.dataview,
             view: "dataview",
             scroll: "y",
-            sizeToContent: true,
-            css: "borderless",
             xCount: this.settings.xCount,
             template: (item) => this.itemTemplate(item),
+            css: "borderless",
+            type: {
+               template: (item) => {
+                  return this.itemTemplate(item);
+               },
+               width: "auto",
+               height: "auto",
+            },
             on: {
                onAfterRender: () => {
                   this.applyClickEvent();
@@ -69,10 +75,6 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
 
       const $dataview = $$(this.ids.dataview);
       $dataview.resize();
-
-      const item_width = this.getItemWidth();
-
-      $dataview.customize({ width: item_width });
    }
 
    initDetailComponent() {
@@ -129,53 +131,18 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
       }
       detailCom.displayData(item);
 
-      const itemWidth =
-         $dataview.data.count() > 0
-            ? $dataview.type.width
-            : $detail_item.$width / this.settings.xCount - 30;
-
-      const itemHeight =
-         $dataview.data.count() > 0
-            ? $dataview.type.height
-            : $detail_item.getChildViews()?.[0]?.$height + 30;
+      const itemHeight = $detail_item.getChildViews()?.[0]?.$height + 25;
+      $detail_item.define("width", $dataview.type.width - 30);
+      $detail_item.define("height", itemHeight);
+      $detail_item.adjust();
 
       const tmp_dom = document.createElement("div");
       tmp_dom.appendChild($detail_item.$view);
-
-      $detail_item.define("width", itemWidth - 20);
-      $detail_item.define("height", itemHeight);
-      $detail_item.adjust();
 
       // Add cy attributes
       this.addCyItemAttributes(tmp_dom, item);
 
       return tmp_dom.innerHTML.replace(/#itemId#/g, item.id);
-   }
-
-   getItemWidth() {
-      const $dataview = $$(this.ids.dataview);
-
-      let currElem = $dataview;
-      let parentWidth = currElem?.$width;
-      while (currElem) {
-         if (currElem.config.view == "scrollview")
-            parentWidth =
-               currElem?.$width < parentWidth ? currElem?.$width : parentWidth;
-
-         currElem = currElem?.getParentView?.();
-      }
-
-      if (!parentWidth)
-         parentWidth = $dataview?.getParentView?.().$width || screen.availWidth;
-
-      const $sidebar = this.getTabSidebar();
-      if ($sidebar) {
-         parentWidth -= $sidebar.$width;
-      }
-
-      const recordWidth = Math.floor(parentWidth / this.settings.xCount);
-
-      return recordWidth;
    }
 
    getTabSidebar() {
