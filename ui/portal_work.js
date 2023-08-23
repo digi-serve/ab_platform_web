@@ -335,18 +335,18 @@ class PortalWork extends ClassUI {
             ${L("No network detected. Work will not be saved.")}`
       );
 
-      if (navigator.onLine) {
-         $$("portal_work_no_network_detected").hide();
-      } else {
-         $$("portal_work_no_network_detected").show();
-      }
+      const $portalWorkNoNetworkDetected = $$(
+         "portal_work_no_network_detected"
+      );
 
-      navigator?.connection?.addEventListener("change", function () {
-         if (navigator.onLine) {
-            $$("portal_work_no_network_detected").hide();
-         } else {
-            $$("portal_work_no_network_detected").show();
-         }
+      if (!navigator.onLine) $portalWorkNoNetworkDetected.show();
+
+      window.addEventListener("offline", () => {
+         $portalWorkNoNetworkDetected.show();
+      });
+
+      window.addEventListener("online", () => {
+         $portalWorkNoNetworkDetected.hide();
       });
 
       $$("portal_work_server_comunication_disabled_detected_label").setValue(
