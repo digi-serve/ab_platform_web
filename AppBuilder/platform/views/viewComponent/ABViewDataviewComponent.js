@@ -158,7 +158,10 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
       let currElem = $dataview;
       let parentWidth = currElem?.$width;
       while (currElem) {
-         if (currElem.config.view == "scrollview" || currElem.config.view == "layout")
+         if (
+            currElem.config.view == "scrollview" ||
+            currElem.config.view == "layout"
+         )
             parentWidth =
                currElem?.$width < parentWidth ? currElem?.$width : parentWidth;
 
