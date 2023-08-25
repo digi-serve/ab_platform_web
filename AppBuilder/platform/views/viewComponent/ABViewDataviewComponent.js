@@ -31,7 +31,7 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
             view: "dataview",
             scroll: "y",
             sizeToContent: true,
-            css: "borderless",
+            css: "borderless transparent",
             xCount: this.settings.xCount,
             template: (item) => this.itemTemplate(item),
             on: {
@@ -90,7 +90,7 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
 
       const _ui = detailCom.ui();
       // adjust the UI to make sure it will look like a "card"
-      _ui.type = "space";
+      _ui.type = "clean";
       _ui.css = "ab-detail-view";
 
       if (detailsPage || editPage) {
@@ -132,18 +132,18 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
       const itemWidth =
          $dataview.data.count() > 0
             ? $dataview.type.width
-            : $detail_item.$width / this.settings.xCount - 30;
+            : ($detail_item.$width - 20) / this.settings.xCount;
 
       const itemHeight =
          $dataview.data.count() > 0
             ? $dataview.type.height
-            : $detail_item.getChildViews()?.[0]?.$height + 30;
+            : $detail_item.getChildViews()?.[0]?.$height;
 
       const tmp_dom = document.createElement("div");
       tmp_dom.appendChild($detail_item.$view);
 
-      $detail_item.define("width", itemWidth - 20);
-      $detail_item.define("height", itemHeight);
+      $detail_item.define("width", itemWidth - 24);
+      $detail_item.define("height", itemHeight + 15);
       $detail_item.adjust();
 
       // Add cy attributes

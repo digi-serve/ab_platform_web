@@ -610,6 +610,15 @@ input[type="text"].selectivity-multiple-input {
 .transparent {
    background: transparent !important;
 }
+.borderless {
+   border: none !important;
+}
+.nopadding: {
+   padding: 0 !important;
+}
+.nomargin {
+   margin: 0 !important;
+}
 .webix_modal {
    opacity: 0.8;
 }
@@ -701,8 +710,10 @@ input[type="text"].selectivity-multiple-input {
    color: #337ab7;
    margin-bottom: 10px;
 }
-.ab-datacollection-table.borderless .webix_dataview_item, .borderless .webix_dataview_item {
+.ab-datacollection-table.borderless .webix_dataview_item,
+.borderless .webix_dataview_item {
    border: none;
+   padding: 12px;
 }
 .ab-datacollection-table .webix_dataview_item:hover {
    background: #edeff0;
