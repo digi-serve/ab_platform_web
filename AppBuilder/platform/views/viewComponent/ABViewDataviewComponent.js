@@ -169,11 +169,13 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
       }
 
       if (!parentWidth)
-         parentWidth = $dataview?.getParentView?.().$width || screen.availWidth;
+         parentWidth = $dataview?.getParentView?.().$width || window.innerWidth;
 
-      const $sidebar = this.getTabSidebar();
-      if ($sidebar) {
-         parentWidth -= $sidebar.$width;
+      if (window.innerWidth - 18 <= parentWidth) {
+         const $sidebar = this.getTabSidebar();
+         if ($sidebar) {
+            parentWidth -= $sidebar.$width;
+         }
       }
 
       const recordWidth = Math.floor(parentWidth / this.settings.xCount);
