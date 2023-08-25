@@ -33,15 +33,7 @@ module.exports = {
          publicPath: "/assets",
       }),
       new CleanWebpackPlugin({
-         cleanOnceBeforeBuildPatterns: [
-            "!dependencies/*",
-            "!font/*",
-            "!fonts/*",
-            "!images/*",
-            "!plugins/*",
-            "!skins/*",
-            "!tenant/*",
-         ],
+         cleanOnceBeforeBuildPatterns: ["*.js", "*.js.map"],
       }),
    ],
    resolve: {
