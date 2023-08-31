@@ -121,7 +121,6 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
       this.initCallbacks(options);
       this.initEvents();
       this.initValidationRules();
-      this.loadDcDataOfRecordRules();
 
       const abWebix = this.AB.Webix;
       const $form = $$(this.ids.form);
@@ -342,7 +341,9 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
       });
    }
 
-   loadDcDataOfRecordRules() {
+   async loadDcDataOfRecordRules() {
+      const tasks = [];
+
       (this.settings?.recordRules ?? []).forEach((rule) => {
          (rule?.actionSettings?.valueRules?.fieldOperations ?? []).forEach(
             (op) => {
@@ -351,16 +352,20 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
                const pullDataDC = this.AB.datacollectionByID(op.value);
 
                if (
-                  pullDataDC &&
-                  pullDataDC.dataStatus === pullDataDC.dataStatusFlag.notInitial
+                  pullDataDC?.dataStatus ===
+                  pullDataDC.dataStatusFlag.notInitial
                )
-                  pullDataDC.loadData();
+                  tasks.push(pullDataDC.loadData());
             }
          );
       });
+
+      return await Promise.all(tasks);
    }
 
    async onShow(data) {
+      this.saveButton?.disable();
+
       this._showed = true;
 
       const baseView = this.view;
@@ -396,6 +401,10 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
       this.focusOnFirst();
 
       if ($form) $form.adjust();
+
+      await this.loadDcDataOfRecordRules();
+
+      this.saveButton?.enable();
    }
 
    async displayData(rowData) {
@@ -542,5 +551,12 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
 
       if (childComponent && $$(childComponent.ids.formItem))
          $$(childComponent.ids.formItem).focus();
+   }
+
+   get saveButton() {
+      return $$(this.ids.form)?.queryView({
+         view: "button",
+         type: "form",
+      });
    }
 };
