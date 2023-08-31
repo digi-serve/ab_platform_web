@@ -60,8 +60,9 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
       });
 
       const ids = this.ids;
-      const dataView = $$(ids.dataview);
-      dc.bind(dataView);
+      const $dataView = $$(ids.dataview);
+      AB.Webix.extend($dataView, AB.Webix.ProgressBar);
+      dc.bind($dataView);
    }
 
    onShow() {
