@@ -977,7 +977,7 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
    }
 
    async waitInitializingDCEvery(milliSeconds, dc) {
-      if (dc == null) return;
+      if (!this.__isShowing || dc == null) return;
       // if we manage a datacollection, then make sure it has started
       // loading it's data when we are showing our component.
       // load data when a widget is showing
@@ -998,5 +998,11 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
             }
          }, milliSeconds);
       });
+   }
+
+   async onShow() {
+      super.onShow();
+
+      this.__isShowing = true;
    }
 };
