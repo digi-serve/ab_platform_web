@@ -7,9 +7,10 @@ module.exports = {
    context: APP,
    entry: {
       app: path.join(APP, "index.js"),
+      "pdf.worker": "pdfjs-dist/build/pdf.worker.entry",
    },
    output: {
-      path: path.join(APP, "..", "web", "assets", "app"),
+      path: path.join(APP, "..", "web", "assets"),
       filename: "[name].[contenthash].js",
    },
    module: {
@@ -27,11 +28,13 @@ module.exports = {
    plugins: [
       new HtmlWebpackPlugin({
          template: "./webpack/index.ejs",
-         filename: "../../../web/assets/index.html",
+         filename: path.join(APP, "..", "web", "assets", "index.html"),
          inject: "body",
-         publicPath: "/assets/app",
+         publicPath: "/assets",
       }),
-      new CleanWebpackPlugin(),
+      new CleanWebpackPlugin({
+         cleanOnceBeforeBuildPatterns: ["*.js", "*.js.map"],
+      }),
    ],
    resolve: {
       alias: {

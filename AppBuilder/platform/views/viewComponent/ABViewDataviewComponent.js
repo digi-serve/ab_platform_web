@@ -31,7 +31,7 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
             view: "dataview",
             scroll: "y",
             sizeToContent: true,
-            css: "borderless",
+            css: "borderless transparent",
             xCount: this.settings.xCount,
             template: (item) => this.itemTemplate(item),
             on: {
@@ -60,8 +60,9 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
       });
 
       const ids = this.ids;
-      const dataView = $$(ids.dataview);
-      dc.bind(dataView);
+      const $dataView = $$(ids.dataview);
+      AB.Webix.extend($dataView, AB.Webix.ProgressBar);
+      dc.bind($dataView);
    }
 
    onShow() {
@@ -71,8 +72,8 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
       $dataview.resize();
 
       const item_width = this.getItemWidth();
-
       $dataview.customize({ width: item_width });
+      $dataview.getTopParentView?.().resize?.();
    }
 
    initDetailComponent() {
@@ -90,7 +91,7 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
 
       const _ui = detailCom.ui();
       // adjust the UI to make sure it will look like a "card"
-      _ui.type = "space";
+      _ui.type = "clean";
       _ui.css = "ab-detail-view";
 
       if (detailsPage || editPage) {
@@ -132,18 +133,18 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
       const itemWidth =
          $dataview.data.count() > 0
             ? $dataview.type.width
-            : $detail_item.$width / this.settings.xCount - 30;
+            : ($detail_item.$width - 20) / this.settings.xCount;
 
       const itemHeight =
          $dataview.data.count() > 0
             ? $dataview.type.height
-            : $detail_item.getChildViews()?.[0]?.$height + 30;
+            : $detail_item.getChildViews()?.[0]?.$height;
 
       const tmp_dom = document.createElement("div");
       tmp_dom.appendChild($detail_item.$view);
 
-      $detail_item.define("width", itemWidth - 20);
-      $detail_item.define("height", itemHeight);
+      $detail_item.define("width", itemWidth - 24);
+      $detail_item.define("height", itemHeight + 15);
       $detail_item.adjust();
 
       // Add cy attributes
@@ -158,7 +159,10 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
       let currElem = $dataview;
       let parentWidth = currElem?.$width;
       while (currElem) {
-         if (currElem.config.view == "scrollview")
+         if (
+            currElem.config.view == "scrollview" ||
+            currElem.config.view == "layout"
+         )
             parentWidth =
                currElem?.$width < parentWidth ? currElem?.$width : parentWidth;
 
@@ -166,11 +170,16 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
       }
 
       if (!parentWidth)
-         parentWidth = $dataview?.getParentView?.().$width || screen.availWidth;
+         parentWidth = $dataview?.getParentView?.().$width || window.innerWidth;
 
-      const $sidebar = this.getTabSidebar();
-      if ($sidebar) {
-         parentWidth -= $sidebar.$width;
+      // check if the browser window minus webix default padding is the same as the parent window
+      // if so we need to check to see if there is a sidebar and reduce the usable space by the
+      // width of the sidebar
+      if (window.innerWidth - 18 <= parentWidth) {
+         const $sidebar = this.getTabSidebar();
+         if ($sidebar) {
+            parentWidth -= $sidebar.$width;
+         }
       }
 
       const recordWidth = Math.floor(parentWidth / this.settings.xCount);
@@ -184,7 +193,7 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
       let currElem = $dataview;
       while (currElem && !$sidebar) {
          $sidebar = (currElem.getChildViews?.() ?? []).filter(
-            (item) => item.config.view == "sidebar"
+            (item) => item?.config?.view == "sidebar"
          )[0];
 
          currElem = currElem?.getParentView?.();

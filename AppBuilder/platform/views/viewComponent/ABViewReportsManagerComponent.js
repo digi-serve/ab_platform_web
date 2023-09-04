@@ -8,7 +8,6 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
          Object.assign(
             {
                reportManager: "",
-               reports: "",
             },
             ids
          )
@@ -19,7 +18,6 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
 
    ui() {
       const self = this;
-      const baseView = this.view;
       const settings = this.settings;
       const ab = this.AB;
       const abWebix = ab.Webix;
@@ -85,10 +83,11 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
          async getModels() {
             const reportModels = {};
 
-            if (baseView.settings.datacollectionIDs.length === 0)
-               return reportModels;
-
-            baseView.settings.datacollectionIDs.forEach((dcID) => {
+            // If no selected DC then get all DCs
+            (settings.datacollectionIDs.length > 0
+               ? settings.datacollectionIDs
+               : self.view.application.datacollectionIDs
+            ).forEach((dcID) => {
                const dc = ab.datacollectionByID(dcID);
 
                if (!dc) return;
@@ -741,7 +740,7 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
                   config.format = (val) => {
                      // check valid date
                      if (val?.getTime && !isNaN(val.getTime()))
-                        return abField.key === "datetime"
+                        return abField?.key === "datetime"
                            ? abWebix.i18n.fullDateFormatStr(val)
                            : abWebix.i18n.dateFormatStr(val);
                      else return "";
@@ -978,7 +977,7 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
    }
 
    async waitInitializingDCEvery(milliSeconds, dc) {
-      if (dc == null) return;
+      if (!this.__isShowing || dc == null) return;
       // if we manage a datacollection, then make sure it has started
       // loading it's data when we are showing our component.
       // load data when a widget is showing
@@ -999,5 +998,11 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
             }
          }, milliSeconds);
       });
+   }
+
+   async onShow() {
+      super.onShow();
+
+      this.__isShowing = true;
    }
 };

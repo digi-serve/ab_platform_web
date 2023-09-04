@@ -17,6 +17,7 @@ module.exports = class ABViewSchedulerComponent extends ABViewComponent {
    ui() {
       const ids = this.ids;
       const ab = this.AB;
+      const self = this;
       const abWebix = this.AB.Webix;
       const settings = this.settings;
       const dc = this.datacollection;
@@ -161,8 +162,9 @@ module.exports = class ABViewSchedulerComponent extends ABViewComponent {
                         if (dcCalendar == null) return [];
 
                         if (
+                           self.__isShowing &&
                            dcCalendar.dataStatus ===
-                           dcCalendar.dataStatusFlag.notInitial
+                              dcCalendar.dataStatusFlag.notInitial
                         )
                            // load data when a widget is showing
                            await dcCalendar.loadData();
@@ -181,7 +183,10 @@ module.exports = class ABViewSchedulerComponent extends ABViewComponent {
                         // loading it's data when we are showing our component.
                         if (dc == null) return [];
 
-                        if (dc.dataStatus === dc.dataStatusFlag.notInitial)
+                        if (
+                           self.__isShowing &&
+                           dc.dataStatus === dc.dataStatusFlag.notInitial
+                        )
                            // load data when a widget is showing
                            await dc.loadData();
 
@@ -286,7 +291,6 @@ module.exports = class ABViewSchedulerComponent extends ABViewComponent {
 
                         await dc.model.update(id, data);
                      }
-                     url(path) {}
                   },
                ],
                [
@@ -320,6 +324,17 @@ module.exports = class ABViewSchedulerComponent extends ABViewComponent {
                      }
                   },
                ],
+               [
+                  scheduler.views["modes/day/multiday"],
+                  class CustomModesDayMultiday extends scheduler.views[
+                     "modes/day/multiday"
+                  ] {
+                     LimitData(data) {
+                        // Get an error the case when the data parameter is undefined.
+                        super.LimitData(data || []);
+                     }
+                  },
+               ],
             ]),
          },
       ]);
@@ -327,5 +342,11 @@ module.exports = class ABViewSchedulerComponent extends ABViewComponent {
       delete _ui.type;
 
       return _ui;
+   }
+
+   async onShow() {
+      super.onShow();
+
+      this.__isShowing = true;
    }
 };
