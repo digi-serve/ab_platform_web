@@ -39,6 +39,7 @@
     "webpack-merge": "^5.8.0"
   },
   "dependencies": {
+    "@sentry/browser": "^7.67.0",
     "ab-utils": "npm:@digiserve/ab-utils@^1.3.1",
     "atomicjs": "^4.4.1",
     "chai": "^4.3.7",
@@ -52,6 +53,7 @@
   "sideEffects": [
     "*.css",
     "./js/webix/extras/tinymce.js",
-    "./js/webix/locales/*"
+    "./js/webix/locales/*",
+    "./init/sentry.js"
   ]
 }

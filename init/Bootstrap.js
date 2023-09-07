@@ -21,6 +21,8 @@ import events from "events";
 
 const EventEmitter = events.EventEmitter;
 
+import * as Sentry from "@sentry/browser";
+
 import Config from "../config/Config.js";
 
 import FormIO from "../node_modules/formiojs/dist/formio.full.min.js";
@@ -85,8 +87,9 @@ class Bootstrap extends EventEmitter {
       // {obj} ._ui
       // the Webix Object that is our UI display
 
-      // TODO: make sure "error" s are handled and sent to logs
-      // this.on("error", ()=>{ Analytics.error })
+      this.on("error", (err) => {
+         Sentry.captureException(err);
+      });
    }
 
    init(ab) {
@@ -119,6 +122,7 @@ class Bootstrap extends EventEmitter {
             // load definitions for current user
             .then(async () => {
                if (Config.userConfig()) {
+                  Sentry.setUser({ username: Config.userConfig().username });
                   preloadMessage("Loading App Definitions");
                   await initDefinitions.init(this);
                }
@@ -134,6 +138,8 @@ class Bootstrap extends EventEmitter {
                const tenantInfo = Config.tenantConfig();
 
                if (tenantInfo) {
+                  Sentry.setContext("tenant", tenantInfo);
+                  Sentry.setTag("tenant", tenantInfo.id);
                   const plugins = Config.plugins() || [];
 
                   // Short Term Fix: Don't load ABDesigner for non builders (need a way to assign plugins to users/roles);
