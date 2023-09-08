@@ -2,7 +2,6 @@ const ABViewComponent = require("./ABViewComponent").default;
 const ABFieldCalculate = require("../../dataFields/ABFieldCalculate");
 const ABFieldFormula = require("../../dataFields/ABFieldFormula");
 const ABFieldNumber = require("../../dataFields/ABFieldNumber");
-const ABObjectQuery = require("../../ABObjectQuery");
 
 module.exports = class ABViewPivotComponent extends ABViewComponent {
    constructor(baseView, idBase, ids) {
@@ -14,6 +13,7 @@ module.exports = class ABViewPivotComponent extends ABViewComponent {
    }
 
    ui() {
+      const self = this;
       const settings = this.settings;
       const _ui = super.ui([
          {
@@ -33,6 +33,44 @@ module.exports = class ABViewPivotComponent extends ABViewComponent {
                   ? parseFloat(value).toFixed(decimalPlaces || 0)
                   : value;
             },
+            override: new Map([
+               [
+                  pivot.services.Backend,
+                  class MyBackend extends pivot.services.Backend {
+                     data() {
+                        const dc = self.datacollection;
+                        if (!dc) return webix.promise.resolve([]);
+
+                        const object = dc.datasource;
+                        if (!object) return webix.promise.resolve([]);
+
+                        const data = dc.getData();
+                        const dataMapped = data.map((d) => {
+                           const result = {};
+
+                           object.fields().forEach((f) => {
+                              if (
+                                 f instanceof ABFieldCalculate ||
+                                 f instanceof ABFieldFormula ||
+                                 f instanceof ABFieldNumber
+                              )
+                                 result[f.columnName] = d[f.columnName];
+                              else result[f.columnName] = f.format(d);
+                           });
+
+                           return result;
+                        });
+
+                        // set pivot configuration
+                        const settings = self.settings;
+                        if (settings.structure)
+                           this.setStructure(settings.structure);
+
+                        return webix.promise.resolve(dataMapped);
+                     }
+                  },
+               ],
+            ]),
          },
       ]);
 
@@ -54,58 +92,28 @@ module.exports = class ABViewPivotComponent extends ABViewComponent {
 
       const $pivot = $$(ids.pivot);
 
-      if ($pivot && object instanceof ABObjectQuery) {
-         const customLabels = {};
+      const fields = object.fields().map((f) => {
+         let fieldType = "text";
 
-         object.fields().forEach((f) => {
-            customLabels[f.columnName] = f.label;
-         });
+         switch (f.key) {
+            case "calculate":
+            case "formula":
+            case "number":
+               fieldType = "number";
+               break;
+            case "date":
+            case "datetime":
+               fieldType = "date";
+               break;
+         }
 
-         $pivot.define("fieldMap", customLabels);
-      }
-
-      const populateData = () => {
-         const data = dc.getData();
-         const dataMapped = data.map((d) => {
-            const result = {};
-
-            object.fields().forEach((f) => {
-               if (
-                  f instanceof ABFieldCalculate ||
-                  f instanceof ABFieldFormula ||
-                  f instanceof ABFieldNumber
-               )
-                  result[f.columnName] = d[f.columnName];
-               else result[f.columnName] = f.format(d);
-            });
-
-            return result;
-         });
-
-         $pivot.parse(dataMapped);
-
-         const settings = this.settings;
-
-         // set pivot configuration
-         if (settings.structure) $pivot.setStructure(settings.structure);
-      };
-
-      this.view.eventAdd({
-         emitter: dc,
-         eventName: "initializedData",
-         listener: () => {
-            populateData();
-         },
+         return {
+            id: f.columnName,
+            value: f.label,
+            type: fieldType,
+         };
       });
 
-      switch (dc.dataStatus) {
-         case dc.dataStatusFlag.notInitial:
-            dc.loadData();
-            break;
-
-         case dc.dataStatusFlag.initialized:
-            populateData();
-            break;
-      }
+      $pivot.define("fields", fields);
    }
 };
