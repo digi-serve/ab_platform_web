@@ -26,6 +26,8 @@ module.exports = class ABViewPivotComponent extends ABViewComponent {
             min: settings.min,
             max: settings.max,
             height: settings.height,
+            fields: this._getFields(),
+            structure: settings.structure ?? undefined,
             format: (value) => {
                const decimalPlaces = settings.decimalPlaces ?? 2;
 
@@ -37,12 +39,18 @@ module.exports = class ABViewPivotComponent extends ABViewComponent {
                [
                   pivot.services.Backend,
                   class MyBackend extends pivot.services.Backend {
-                     data() {
+                     async data() {
                         const dc = self.datacollection;
                         if (!dc) return webix.promise.resolve([]);
 
                         const object = dc.datasource;
                         if (!object) return webix.promise.resolve([]);
+
+                        switch (dc.dataStatus) {
+                           case dc.dataStatusFlag.notInitial:
+                              await dc.loadData();
+                              break;
+                        }
 
                         const data = dc.getData();
                         const dataMapped = data.map((d) => {
@@ -61,11 +69,6 @@ module.exports = class ABViewPivotComponent extends ABViewComponent {
                            return result;
                         });
 
-                        // set pivot configuration
-                        const settings = self.settings;
-                        if (settings.structure)
-                           this.setStructure(settings.structure);
-
                         return webix.promise.resolve(dataMapped);
                      }
                   },
@@ -79,18 +82,12 @@ module.exports = class ABViewPivotComponent extends ABViewComponent {
       return _ui;
    }
 
-   async init(AB) {
-      await super.init(AB);
-
-      const ids = this.ids;
-
+   _getFields() {
       const dc = this.datacollection;
-      if (!dc) return;
+      if (!dc) return [];
 
       const object = dc.datasource;
-      if (!object) return;
-
-      const $pivot = $$(ids.pivot);
+      if (!object) return [];
 
       const fields = object.fields().map((f) => {
          let fieldType = "text";
@@ -114,6 +111,6 @@ module.exports = class ABViewPivotComponent extends ABViewComponent {
          };
       });
 
-      $pivot.define("fields", fields);
+      return fields;
    }
 };
