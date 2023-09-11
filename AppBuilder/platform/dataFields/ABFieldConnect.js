@@ -483,7 +483,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             if (itemObj && itemObj.id) {
                vals.push(itemObj.id);
             } else {
-               vals.push(val);
+               vals.push(value);
             }
          }
       }
