@@ -18,7 +18,7 @@ jobs:
   call-run-cy-test:
     name: Test
     needs: call-update-sub
-    uses: ./.github/workflows/cypress-e2e-tests.yml
+    uses: ./.github/workflows/e2e-tests.yml
     with:
       ref: ${{ needs.call-update-sub.outputs.branch }}
 
