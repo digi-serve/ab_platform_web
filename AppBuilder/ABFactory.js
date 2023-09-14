@@ -39,10 +39,10 @@ import Tenant from "../resources/Tenant.js";
 import UISettings from "./uiSettings/config.js";
 // UISettings: detailed settings for our common UI elements
 
-// import Webix from "../js/webix/webix.min.js";
+import Webix from "../js/webix/webix.min.js";
 // NOTE: moved to require() because using import with webix.js
 // really messed things up!
-var Webix = require("../js/webix/webix.js");
+// var Webix = require("../js/webix/webix.js");
 
 class ABValidator {
    constructor(AB) {
@@ -831,14 +831,14 @@ class ABFactory extends ABFactoryCore {
     *     Additional related information concerning the issue.
     */
    notify(domain, error, info) {
-      const scope = new Sentry.Scope();
-      // Mark builder alerts as lower level in sentry
-      if (domain == "builder") scope.setLevel("warning");
-      scope.setTag("domain", domain);
-      scope.setContext("info", info);
-      Sentry.captureException(error, scope);
-      console.error(error);
-      console.error(info);
+      // const scope = new Sentry.Scope();
+      // // Mark builder alerts as lower level in sentry
+      // if (domain == "builder") scope.setLevel("warning");
+      // scope.setTag("domain", domain);
+      // scope.setContext("info", info);
+      // Sentry.captureException(error, scope);
+      // console.error(error);
+      // console.error(info);
    }
 
    plugins() {

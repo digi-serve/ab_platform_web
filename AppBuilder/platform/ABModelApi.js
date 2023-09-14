@@ -16,7 +16,7 @@ module.exports = class ABModelAPI extends ABModel {
     */
    batchCreate(values) {
       var error = new Error(
-         "ABObjectQuery.ABModelAPI.batchCreate() should not be called."
+         "ABObjectQuery.ABModelAPI.batchCreate() does not be implemented."
       );
       return Promise.reject(error);
    }
@@ -27,7 +27,7 @@ module.exports = class ABModelAPI extends ABModel {
     */
    create(values) {
       var error = new Error(
-         "ABObjectQuery.ABModelAPI.create() should not be called."
+         "ABObjectQuery.ABModelAPI.create() does not be implemented."
       );
       return Promise.reject(error);
    }
@@ -40,7 +40,7 @@ module.exports = class ABModelAPI extends ABModel {
     */
    delete(id) {
       var error = new Error(
-         "ABObjectQuery.ABModelAPI.delete() should not be called."
+         "ABObjectQuery.ABModelAPI.delete() does not be implemented."
       );
       return Promise.reject(error);
    }
@@ -51,7 +51,7 @@ module.exports = class ABModelAPI extends ABModel {
     */
    update(id, values) {
       var error = new Error(
-         "ABObjectQuery.ABModelAPI.update() should not be called."
+         "ABObjectQuery.ABModelAPI.update() does not be implemented."
       );
       return Promise.reject(error);
    }
@@ -62,7 +62,7 @@ module.exports = class ABModelAPI extends ABModel {
     */
    batchUpdate({ rowIds, values }) {
       var error = new Error(
-         "ABObjectQuery.ABModelAPI.batchUpdate() should not be called."
+         "ABObjectQuery.ABModelAPI.batchUpdate() does not be implemented."
       );
       return Promise.reject(error);
    }
