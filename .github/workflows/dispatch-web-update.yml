@@ -23,6 +23,6 @@ jobs:
         uses: peter-evans/repository-dispatch@v2
         with:
           token: ${{ secrets.TOKEN }}
-          repository: digi-serve/ab_runtime
+          repository: digi-serve/ab_service_web
           event-type: web_new_version
           client-payload: '{"type": "${{ inputs.type }}", "version": "${{ inputs.version }}", "repo": "${{ inputs.repo }}"}'
