@@ -1,6 +1,6 @@
 {
   "name": "ab_platform_web",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "AppBuilder runtime environment for the Web client.",
   "main": "index.js",
   "scripts": {
@@ -47,6 +47,7 @@
     "jszip-utils": "^0.1.0",
     "nanoid": "^3.3.4",
     "pdfjs-dist": "^3.9.179",
+    "semver": "^7.5.4",
     "tinymce": "^5.8.1",
     "uuid": "^8.3.2"
   },
