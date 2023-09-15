@@ -11,6 +11,9 @@ on:
       repo:
         type: string
         required: true
+    secrets:
+      TOKEN:
+        required: true
 jobs:
   dispatch-web-update:
     name: Dipsatch Web Service Update
@@ -19,7 +22,7 @@ jobs:
       - name: Repository Dispatch
         uses: peter-evans/repository-dispatch@v2
         with:
-          token: ${{ secrets.PAT }}
+          token: ${{ secrets.TOKEN }}
           repository: digi-serve/ab_runtime
           event-type: web_new_version
           client-payload: '{"type": "${{ inputs.type }}", "version": "${{ inputs.version }}", "repo": "${{ inputs.repo }}"}'

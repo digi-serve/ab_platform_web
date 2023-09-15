@@ -57,6 +57,8 @@ jobs:
       type: patch
       version: ${{ needs.call-bump-version.outputs.new_version }}
       repo: ab_platform_web
+    secrets:
+      TOKEN: ${{ secrets.PAT }}
 
   call-open-pr-fail:
     name: Tests Failed

@@ -39,3 +39,5 @@ jobs:
       type: ${{ needs.call-get-label.outputs.label }}
       version: ${{ needs.call-bump-version.outputs.new_version }}
       repo: ab_platform_web
+    secrets:
+      TOKEN: ${{ secrets.PAT }}
