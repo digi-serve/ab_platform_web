@@ -33,7 +33,7 @@ jobs:
       tag: v${{ needs.call-bump-version.outputs.new_version }}
   dispatch-web-update:
     name: Dipsatch Web Service Update
-    needs: [ call-docker-build, call-bump-version, call-get-label ]
+    needs: [ call-bump-version, call-get-label ]
     uses: ./.github/workflows/dispatch-web-update.yml
     with:
       type: ${{ needs.call-get-label.outputs.label }}
