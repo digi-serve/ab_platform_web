@@ -9,5 +9,5 @@ Sentry.init({
    normalizeDepth: 5,
    tracesSampleRate: 0.1,
    replaysSessionSampleRate: 0,
-   replaysOnErrorSampleRate: 0.1,
+   replaysOnErrorSampleRate: 0,
 });
