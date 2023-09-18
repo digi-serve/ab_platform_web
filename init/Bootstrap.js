@@ -128,46 +128,54 @@ class Bootstrap extends EventEmitter {
                }
             })
 
-            .then(() => {
-               // 2.5) Load any plugins
+            .then(() =>
+               // Wrap with sentry span to track performance
+               Sentry.startSpan(
+                  { name: "loading plugins", op: "function" },
+                  () => {
+                     // 2.5) Load any plugins
 
-               // Make sure the BootStrap Object is available globally
-               window.__ABBS = this;
+                     // Make sure the BootStrap Object is available globally
+                     window.__ABBS = this;
 
-               const allPluginsLoaded = [];
-               const tenantInfo = Config.tenantConfig();
+                     const allPluginsLoaded = [];
+                     const tenantInfo = Config.tenantConfig();
 
-               if (tenantInfo) {
-                  Sentry.setContext("tenant", tenantInfo);
-                  Sentry.setTag("tenant", tenantInfo.id);
-                  const plugins = Config.plugins() || [];
+                     if (tenantInfo) {
+                        Sentry.setContext("tenant", tenantInfo);
+                        Sentry.setTag("tenant", tenantInfo.id);
+                        const plugins = Config.plugins() || [];
 
-                  // Short Term Fix: Don't load ABDesigner for non builders (need a way to assign plugins to users/roles);
-                  const designerIndex = plugins.indexOf("ABDesigner.js");
-                  if (designerIndex > -1) {
-                     const builderRoles = [
-                        "6cc04894-a61b-4fb5-b3e5-b8c3f78bd331",
-                        "e1be4d22-1d00-4c34-b205-ef84b8334b19",
-                     ];
-                     const userInfo = Config.userConfig();
-                     const userBuilderRoles = userInfo?.roles.filter(
-                        (role) => builderRoles.indexOf(role.uuid) > -1
-                     ).length;
-                     // Remove if no builder roles
-                     if (userBuilderRoles < 1 || userInfo == null) {
-                        plugins.splice(designerIndex, 1);
+                        // Short Term Fix: Don't load ABDesigner for non builders (need a way to assign plugins to users/roles);
+                        const designerIndex = plugins.indexOf("ABDesigner.js");
+                        if (designerIndex > -1) {
+                           const builderRoles = [
+                              "6cc04894-a61b-4fb5-b3e5-b8c3f78bd331",
+                              "e1be4d22-1d00-4c34-b205-ef84b8334b19",
+                           ];
+                           const userInfo = Config.userConfig();
+                           const userBuilderRoles = userInfo?.roles.filter(
+                              (role) => builderRoles.indexOf(role.uuid) > -1
+                           ).length;
+                           // Remove if no builder roles
+                           if (userBuilderRoles < 1 || userInfo == null) {
+                              plugins.splice(designerIndex, 1);
+                           }
+                        }
+                        plugins.forEach((p) => {
+                           preloadMessage(`plugin (${p})`);
+                           // Wrap with sentry span to track performance
+                           const loading = Sentry.startSpan(
+                              { name: `plugin ${p}`, op: "resource.script" },
+                              () => loadScript(tenantInfo.id, p)
+                           );
+                           allPluginsLoaded.push(loading);
+                        });
                      }
+                     return Promise.all(allPluginsLoaded);
                   }
-
-                  console.log("plugins:", plugins);
-
-                  plugins.forEach((p) => {
-                     preloadMessage(`Loading Plugin (${p})`);
-                     allPluginsLoaded.push(loadScript(tenantInfo.id, p));
-                  });
-               }
-               return Promise.all(allPluginsLoaded);
-            })
+               )
+            )
 
             .then(async () => {
                // 3) Now we have enough info, to create an instance of our
