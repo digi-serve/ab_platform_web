@@ -19,5 +19,6 @@ Sentry.init({
    release: version,
    integrations: [new Sentry.BrowserTracing()],
    normalizeDepth: 5,
+   sampleRate: 0.1,
    tracesSampleRate: 0.1,
 });
