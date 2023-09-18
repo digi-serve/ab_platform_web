@@ -11,6 +11,7 @@ module.exports = merge(common, {
       }),
       new webpack.DefinePlugin({
          WEBPACK_MODE: JSON.stringify("production"),
+         VERSION: JSON.stringify(process.env.npm_package_version),
       }),
    ],
    devtool: "source-map",
