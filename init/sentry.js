@@ -11,9 +11,7 @@ Sentry.init({
    /* global WEBPACK_MODE - This is set by the DefinePlugin in webpack. */
 
    //    release: "my-project-name@2.3.12",
-   integrations: [new Sentry.BrowserTracing(), new Sentry.Replay()],
+   integrations: [new Sentry.BrowserTracing()],
    normalizeDepth: 5,
    tracesSampleRate: 0.1,
-   replaysSessionSampleRate: 0,
-   replaysOnErrorSampleRate: 0,
 });
