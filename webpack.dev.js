@@ -8,6 +8,7 @@ module.exports = merge(common, {
    plugins: [
       new webpack.DefinePlugin({
          WEBPACK_MODE: JSON.stringify("development"),
+         VERSION: JSON.stringify(process.env.npm_package_version),
       }),
    ],
 });

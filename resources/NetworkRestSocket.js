@@ -5,6 +5,7 @@
  */
 
 import NetworkRest from "./NetworkRest";
+import * as Sentry from "@sentry/browser";
 
 const listSocketEvents = [
    // NOTE: ABFactory.definitionXXX() will manage emitting these
@@ -78,7 +79,17 @@ class NetworkRestSocket extends NetworkRest {
       return io.socket.isConnected();
    }
 
-   salSend(params) {
+   // Wrap the call with senrty span for perfromance tracking
+   async salSend(params) {
+      const shortRoute =
+         params.url.match(/https?:\/\/[^/]+(\/.+)/)?.[1] ?? params.url;
+      return Sentry.startSpan(
+         { name: shortRoute, op: "websocket.client" },
+         async () => await this._salSend(params)
+      );
+   }
+
+   _salSend(params) {
       return new Promise((resolve, reject) => {
          params.method = params.method.toLowerCase();
 
