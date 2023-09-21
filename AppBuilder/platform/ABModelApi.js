@@ -25,11 +25,15 @@ module.exports = class ABModelAPI extends ABModel {
     * @method create
     * update model values on the server.
     */
-   create(values) {
-      var error = new Error(
-         "ABObjectQuery.ABModelAPI.create() does not be implemented."
-      );
-      return Promise.reject(error);
+   async create(values) {
+      if (this.object.isFetched)
+         if (this.object.readonly === 1) {
+            return await Promise.reject(
+               new Error("This is the read only object")
+            );
+         }
+
+      await super.create(values);
    }
 
    /**
