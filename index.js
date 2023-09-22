@@ -16,6 +16,8 @@ import "./js/webix/webix.min.css";
 
 import "./styles/ui.css";
 
+import "./init/sentry.js";
+
 // NOTE: keep Font Awesome AFTER webix css so webix wont
 // override our icon styles
 import "./styles/font-awesome.min.css";

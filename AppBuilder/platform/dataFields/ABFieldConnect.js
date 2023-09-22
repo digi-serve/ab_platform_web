@@ -468,7 +468,11 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                vals.push(val.id);
             } else {
                let itemObj = this.getItemFromVal(val);
-               vals.push(itemObj.id);
+               if (itemObj && itemObj.id) {
+                  vals.push(itemObj.id);
+               } else {
+                  vals.push(val);
+               }
             }
          });
       } else {
@@ -478,6 +482,8 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             let itemObj = this.getItemFromVal(value);
             if (itemObj && itemObj.id) {
                vals.push(itemObj.id);
+            } else {
+               vals.push(value);
             }
          }
       }

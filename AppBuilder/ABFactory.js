@@ -4,6 +4,7 @@ import _ from "lodash";
 import moment from "moment";
 import { nanoid } from "nanoid";
 import { v4 as uuidv4 } from "uuid";
+import * as Sentry from "@sentry/browser";
 
 import FilterComplex from "./platform/FilterComplex";
 
@@ -830,7 +831,12 @@ class ABFactory extends ABFactoryCore {
     *     Additional related information concerning the issue.
     */
    notify(domain, error, info) {
-      console.error("TODO: ABFactory.notify(): pass error off to analytics");
+      const scope = new Sentry.Scope();
+      // Mark builder alerts as lower level in sentry
+      if (domain == "builder") scope.setLevel("warning");
+      scope.setTag("domain", domain);
+      scope.setContext("info", info);
+      Sentry.captureException(error, scope);
       console.error(error);
       console.error(info);
    }
