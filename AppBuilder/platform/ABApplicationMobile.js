@@ -25,6 +25,8 @@ module.exports = class ABClassApplicationMobile extends (
     * @return {ABViewPageMobile}
     */
    pageNew(values) {
-      return new ABViewPageMobile(values, this);
+      const newPage = new ABViewPageMobile(values, this);
+      newPage.parent = this;
+      return newPage;
    }
 };
