@@ -161,13 +161,7 @@ module.exports = class ABViewSchedulerComponent extends ABViewComponent {
                         // loading it's data when we are showing our component.
                         if (dcCalendar == null) return [];
 
-                        if (
-                           self.__isShowing &&
-                           dcCalendar.dataStatus ===
-                              dcCalendar.dataStatusFlag.notInitial
-                        )
-                           // load data when a widget is showing
-                           await dcCalendar.loadData();
+                        await self.waitInitializingDCEvery(1000, dcCalendar);
 
                         return dcCalendar.getData().map((e) => {
                            return {
@@ -183,12 +177,7 @@ module.exports = class ABViewSchedulerComponent extends ABViewComponent {
                         // loading it's data when we are showing our component.
                         if (dc == null) return [];
 
-                        if (
-                           self.__isShowing &&
-                           dc.dataStatus === dc.dataStatusFlag.notInitial
-                        )
-                           // load data when a widget is showing
-                           await dc.loadData();
+                        await self.waitInitializingDCEvery(1000, dc);
 
                         const units = await this.units();
                         const sections = await this.sections();
@@ -347,6 +336,13 @@ module.exports = class ABViewSchedulerComponent extends ABViewComponent {
    async onShow() {
       super.onShow();
 
-      this.__isShowing = true;
+      const ids = this.ids;
+      const $component = $$(ids.component);
+
+      if ($component != null && !this.__isShowing) {
+         this.__isShowing = true;
+
+         $component.reconstruct();
+      }
    }
 };
