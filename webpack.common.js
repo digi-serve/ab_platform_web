@@ -34,7 +34,12 @@ module.exports = {
          publicPath: "/assets",
       }),
       new CleanWebpackPlugin({
-         cleanOnceBeforeBuildPatterns: ["*.js", "*.js.map"],
+         cleanOnceBeforeBuildPatterns: [
+            "*.js",
+            "*.js.map",
+            "*.gz",
+            "*.LICENSE.txt",
+         ],
       }),
       sentryWebpackPlugin({
          authToken: process.env.SENTRY_AUTH_TOKEN,
