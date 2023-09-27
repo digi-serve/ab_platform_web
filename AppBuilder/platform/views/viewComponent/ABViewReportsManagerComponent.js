@@ -976,33 +976,16 @@ module.exports = class ABViewReportsManagerComponent extends ABViewComponent {
       return reportData;
    }
 
-   async waitInitializingDCEvery(milliSeconds, dc) {
-      if (!this.__isShowing || dc == null) return;
-      // if we manage a datacollection, then make sure it has started
-      // loading it's data when we are showing our component.
-      // load data when a widget is showing
-      if (dc.dataStatus === dc.dataStatusFlag.notInitial) await dc.loadData();
-
-      return await new Promise((resolve) => {
-         if (dc.dataStatus === dc.dataStatusFlag.initialized) {
-            resolve();
-
-            return;
-         }
-
-         const interval = setInterval(() => {
-            if (dc.dataStatus === dc.dataStatusFlag.initialized) {
-               clearInterval(interval);
-
-               resolve();
-            }
-         }, milliSeconds);
-      });
-   }
-
    async onShow() {
       super.onShow();
 
-      this.__isShowing = true;
+      const ids = this.ids;
+      const $component = $$(ids.component);
+
+      if ($component != null && !this.__isShowing) {
+         this.__isShowing = true;
+
+         $component.reconstruct();
+      }
    }
 };
