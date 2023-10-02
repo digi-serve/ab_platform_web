@@ -1,0 +1,9 @@
+name: Check Release Labels
+on:
+  pull_request:
+    types: [opened, labeled, unlabeled, synchronize]
+    branches: [master]
+jobs:
+  call-check-pr:
+    name: Check
+    uses: digi-serve/.github/.github/workflows/check-pr-release-label.yml@master

@@ -131,6 +131,39 @@ export default class ABViewComponent extends ClassUI {
    }
 
    /**
+    * @method waitInitializingDCEvery()
+    * Wait until the DC is initialized, checking every millisecond as specified by the parameter
+    * @param {number} milliSeconds
+    * The amount of milliseconds to recheck DC status.
+    * @param {object} dc
+    * the AB DC instance.
+    */
+
+   async waitInitializingDCEvery(milliSeconds, dc) {
+      if (!this.__isShowing || dc == null) return;
+      // if we manage a datacollection, then make sure it has started
+      // loading it's data when we are showing our component.
+      // load data when a widget is showing
+      if (dc.dataStatus === dc.dataStatusFlag.notInitial) await dc.loadData();
+
+      return await new Promise((resolve) => {
+         if (dc.dataStatus === dc.dataStatusFlag.initialized) {
+            resolve();
+
+            return;
+         }
+
+         const interval = setInterval(() => {
+            if (dc.dataStatus === dc.dataStatusFlag.initialized) {
+               clearInterval(interval);
+
+               resolve();
+            }
+         }, milliSeconds);
+      });
+   }
+
+   /**
     * @method onShow()
     * perform any preparations necessary when showing this component.
     */
