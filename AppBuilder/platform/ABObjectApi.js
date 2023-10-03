@@ -9,11 +9,7 @@ module.exports = class ABObjectApi extends ABObjectApiCore {
    async fetchData(insertDataMax = 20) {
       if (this.isFetched) return;
 
-      const headers = {};
-
-      this.request.headers.forEach((header) => {
-         headers[header.key] = header.value;
-      });
+      const headers = this.headers;
 
       const response = await atomicjs(this.request.url, {
          method: this.request.verb,
@@ -23,11 +19,7 @@ module.exports = class ABObjectApi extends ABObjectApiCore {
          withCredentials: false,
       });
 
-      let parsedResponse = response;
-
-      this.response.dataKey.split(".").forEach((key) => {
-         parsedResponse = parsedResponse[key];
-      });
+      let parsedResponse = this.dataFromKey(response);
 
       const model = this.model();
 
@@ -65,28 +57,39 @@ module.exports = class ABObjectApi extends ABObjectApiCore {
       await this.save();
    }
 
-   ///
-   /// Fields
-   ///
-
    /**
-    * @method importFields
-    * instantiate a set of fields from the given attributes.
-    * Our attributes are a set of field URLs That should already be created in their respective
-    * ABObjects.
-    * @param {array} fieldSettings The different field urls for each field
-    *             { }
-    * @param {bool} shouldAliasColumn
-    *        should we add the object alias to the columnNames?
-    *        this is primarily used on the web client
+    * @method save()
+    *
+    * persist this instance of ABObject with it's parent ABApplication
+    *
+    *
+    * @return {Promise}
+    *						.resolve( {this} )
     */
-   importFields(fieldSettings) {
-      super.importFields(fieldSettings);
+   async save() {
+      return await super.save(true);
+   }
 
-      this._fields.forEach((fieldEntry) => {
-         // include object name {aliasName}.{columnName}
-         // to use it in grid headers & hidden fields
-         fieldEntry.field.columnName = `${fieldEntry.alias}.${fieldEntry.field.columnName}`;
+   dataFromKey(data) {
+      let result = data;
+
+      (this.response.dataKey ?? "").split(".").forEach((key) => {
+         if (key == "" || key == null) return;
+         result = result?.[key];
       });
+
+      return result;
+   }
+
+   get headers() {
+      const headers = {};
+
+      (this.request.headers ?? []).forEach((header) => {
+         if (header?.value == null) return;
+
+         headers[header.key] = header.value;
+      });
+
+      return headers;
    }
 };

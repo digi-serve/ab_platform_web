@@ -179,7 +179,7 @@ module.exports = class ABField extends ABFieldCore {
     * @return {Promise}
     *						.resolve( {this} )
     */
-   async save() {
+   async save(skipMigrate = false) {
       let isAdd = false;
       // if this is our initial save()
       if (!this.id) {
@@ -231,7 +231,7 @@ module.exports = class ABField extends ABFieldCore {
       // but not connectObject fields:
       // ABFieldConnect.migrateXXX() gets called from the UI popupNewDataField
       // in order to handle the timings of the 2 fields that need to be created
-      if (!this.isConnection) {
+      if (!this.isConnection && !skipMigrate) {
          const fnMigrate = isAdd ? this.migrateCreate() : this.migrateUpdate();
          await fnMigrate;
       }
