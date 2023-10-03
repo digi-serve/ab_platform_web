@@ -11,6 +11,44 @@ module.exports = class ABModelAPI extends ABModel {
    ///
 
    /**
+    * @method findAll
+    * performs a data find with the provided condition.
+    */
+   async findAll(cond) {
+      const requestConfigs = this.object.request ?? {};
+
+      // Load data
+      const response = await fetch(requestConfigs.url, {
+         method: (requestConfigs.verb ?? "GET").toUpperCase(),
+         headers: this.object.headers,
+         mode: "cors",
+         cache: "no-cache",
+      });
+
+      // Convert to JSON
+      let result = await response.json();
+
+      // Extract data from key
+      result = this.object.dataFromKey(result);
+
+      // TODO: filter data from FilterComplex by .cond variable
+
+      return new Promise((resolve, reject) => {
+         const context = { resolve, reject };
+         const err = null;
+         const data = {
+            data: result,
+            // TODO: Paging
+            // limit: 30,
+            // offset: 0,
+            // pos: 0,
+            // total_count: 3
+         };
+         this.handler_findAll(context, err, data);
+      });
+   }
+
+   /**
     * @method batchCreate
     * update model values on the server.
     */
