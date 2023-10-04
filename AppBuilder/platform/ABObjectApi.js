@@ -92,4 +92,26 @@ module.exports = class ABObjectApi extends ABObjectApiCore {
 
       return headers;
    }
+
+   /**
+    * @function getPagingValues()
+    *
+    * @return {Object} - {
+    *                       start: "Property name of the API for start index",
+    *                       limit: "Property name of the API for limit return the item number"
+    *                     }
+    */
+   getPagingValues({ skip, limit }) {
+      const result = {};
+      const pagingSettings = this.request?.paging ?? {};
+
+      if (pagingSettings.start && skip != null) {
+         result[pagingSettings.start] = skip;
+      }
+      if (pagingSettings.limit && limit != null) {
+         result[pagingSettings.limit] = limit;
+      }
+
+      return result;
+   }
 };

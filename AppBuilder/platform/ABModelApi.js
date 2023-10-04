@@ -16,11 +16,29 @@ module.exports = class ABModelAPI extends ABModel {
     */
    async findAll(cond) {
       const requestConfigs = this.object.request ?? {};
+      let url = requestConfigs.url;
+      let headers = this.object.headers;
+
+      // Paging
+      const pagingValues = this.object.getPagingValues({
+         skip: cond?.skip,
+         limit: cond?.limit,
+      });
+      if (Object.keys(pagingValues).length) {
+         switch (requestConfigs.paging.type) {
+            case "queryString":
+               url = `${url}?${new URLSearchParams(pagingValues).toString()}`;
+               break;
+            case "header":
+               headers = Object.assign(headers, pagingValues);
+               break;
+         }
+      }
 
       // Load data
-      const response = await fetch(requestConfigs.url, {
+      const response = await fetch(url, {
          method: (requestConfigs.verb ?? "GET").toUpperCase(),
-         headers: this.object.headers,
+         headers,
          mode: "cors",
          cache: "no-cache",
       });
@@ -33,18 +51,23 @@ module.exports = class ABModelAPI extends ABModel {
 
       // TODO: filter data from FilterComplex by .cond variable
 
+      const returnData = {
+         data: result,
+         limit: cond?.limit,
+         // offset: 0,
+         pos: cond?.skip,
+         // total_count: 3
+      };
+
+      // Paging
+      if (pagingValues.total && result[pagingValues.total] != null) {
+         returnData.total_count = result[pagingValues.total];
+      }
+
       return new Promise((resolve, reject) => {
          const context = { resolve, reject };
          const err = null;
-         const data = {
-            data: result,
-            // TODO: Paging
-            // limit: 30,
-            // offset: 0,
-            // pos: 0,
-            // total_count: 3
-         };
-         this.handler_findAll(context, err, data);
+         this.handler_findAll(context, err, returnData);
       });
    }
 
