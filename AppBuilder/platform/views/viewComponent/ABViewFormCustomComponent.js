@@ -42,9 +42,9 @@ module.exports = class ABViewFormCustomComponent extends (
 
       if (formSettings.showLabel) {
          if (formSettings.labelPosition === "top")
-            templateLabel = `<label style="box-sizing: border-box; display:block; text-align: left; margin: 0; padding:1px 7.5px 0 3px; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;" class="webix_inp_top_label ${requiredClass}">#label#</label>`;
+            templateLabel = `<label style="box-sizing: border-box; display:block; text-align: left; margin: 0; padding:1px 7.5px 0 3px; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; color: #313131;" class="webix_inp_top_label ${requiredClass}">#label#</label>`;
          else
-            templateLabel = `<label style="box-sizing: border-box; width: #width#px; display: inline-block; line-height: 32px; float: left; margin: 0; padding:1px 7.5px 0 3px; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;" class="${requiredClass}">#label#</label>`;
+            templateLabel = `<label style="box-sizing: border-box; width: #width#px; display: inline-block; line-height: 32px; float: left; margin: 0; padding:1px 8px 0 0; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; color: #313131;" class="${requiredClass}">#label#</label>`;
       }
 
       let height = 38;
