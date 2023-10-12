@@ -475,7 +475,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
 
       let html = [
          `<div class="image-data-field-icon" style="${iconDisplay}">#drag#</div>` +
-            `<div class="image-data-field-image" style="${imageDisplay} width:${options.width}; height:${options.height}; ${imageURL}">#remove#</div>`,
+            `<div class="image-data-field-image" style="${imageDisplay} height:${options.height}; ${imageURL}">#remove#</div>`,
       ].join("");
 
       html = html.replace(

@@ -42,12 +42,13 @@ module.exports = class ABViewFormCustomComponent extends (
 
       if (formSettings.showLabel) {
          if (formSettings.labelPosition === "top")
-            templateLabel = `<label style="display:block; text-align: left; margin: 0; padding:1px 7.5px 0 3px; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;" class="webix_inp_top_label ${requiredClass}">#label#</label>`;
+            templateLabel = `<label style="box-sizing: border-box; display:block; text-align: left; margin: 0; padding:1px 7.5px 0 3px; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;" class="webix_inp_top_label ${requiredClass}">#label#</label>`;
          else
-            templateLabel = `<label style="width: #width#px; display: inline-block; line-height: 32px; float: left; margin: 0; padding:1px 7.5px 0 3px; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;" class="${requiredClass}">#label#</label>`;
+            templateLabel = `<label style="box-sizing: border-box; width: #width#px; display: inline-block; line-height: 32px; float: left; margin: 0; padding:1px 7.5px 0 3px; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;" class="${requiredClass}">#label#</label>`;
       }
 
       let height = 38;
+      let width = this.new_width;
 
       if (field instanceof ABFieldImage) {
          if (settings.useHeight) {
@@ -64,12 +65,12 @@ module.exports = class ABViewFormCustomComponent extends (
                height = DEFAULT_HEIGHT;
             }
          }
+         width =
+            settings.useWidth && settings.imageWidth ? settings.imageWidth : 0;
       } else if (formSettings.showLabel && formSettings.labelPosition === "top")
          height = DEFAULT_HEIGHT;
 
-      const template = `<div class="customField ${
-         formSettings.labelPosition
-      }">${
+      let template = `<div class="customField ${formSettings.labelPosition}">${
          formSettings.labelPosition == "top" ? "" : templateLabel
       }#template#</div>`
          .replace(/#width#/g, formSettings.labelWidth)
@@ -78,12 +79,21 @@ module.exports = class ABViewFormCustomComponent extends (
             /#template#/g,
             field
                ?.columnHeader({
-                  width: this.new_width,
+                  width: width,
                   height: height,
                   editable: true,
                })
                .template({}) ?? ""
          );
+
+      if (settings.useWidth == 0) {
+         template = template.replace(
+            /"ab-image-data-field" style="float: left; width: 100%/g,
+            '"ab-image-data-field" style="float: left; width: calc(100% - ' +
+               formSettings.labelWidth +
+               "px)"
+         );
+      }
 
       return super.ui({
          view: "forminput",
@@ -155,8 +165,8 @@ module.exports = class ABViewFormCustomComponent extends (
             ? parseInt(field.settings.imageHeight) || DEFAULT_HEIGHT
             : DEFAULT_HEIGHT;
          options.width = field.settings.useWidth
-            ? parseInt(field.settings.imageWidth) || this.new_width
-            : this.new_width;
+            ? parseInt(field.settings.imageWidth) || 0
+            : 0;
       }
 
       field.customDisplay(rowData, this.AB._App, node, options);
