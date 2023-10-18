@@ -240,9 +240,10 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
    async getOptions(whereClause, term, sort, editor) {
       const theEditor = editor;
 
+      // PREVENT: repeatly refresh data too often
       if (this._getOptionsToggle) clearTimeout(this._getOptionsToggle);
       await new Promise((resolve) => {
-         this._getOptionsToggle = setTimeout(resolve, 300);
+         this._getOptionsToggle = setTimeout(resolve, 100);
       });
 
       return new Promise((resolve, reject) => {
