@@ -574,8 +574,9 @@ input[type="text"].selectivity-multiple-input {
    /* pointer-events: none; */
    padding: 0;
 }
-.ab-image-holder .webix_template {
+.ab-image-holder, .ab-image-holder .webix_template {
    padding: 0;
+   overflow: visible;
 }
 .ab-image-data-field {
    width: 100%;
@@ -959,8 +960,11 @@ input[type="text"].selectivity-multiple-input {
 .image-data-field-image {
    position: relative;
    border: 5px solid white;
-   background-size: cover;
+   background-size: contain;
    background-position: center;
+   overflow: visible;
+   background-repeat: no-repeat;
+   background-color: #333;
 }
 .ab-delete-photo {
    position: absolute;
@@ -1676,6 +1680,7 @@ div.webix_dataview_item.webix_transparent {
    margin: 5px;
    height: calc(100% - 10px);
    overflow: hidden;
+   box-sizing: border-box;
 }
 .webix_cell > .ab-image-data-field {
    margin-left: -12px;
