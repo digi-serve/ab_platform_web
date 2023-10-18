@@ -242,7 +242,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
       if (this._getOptionsToggle) clearTimeout(this._getOptionsToggle);
       await new Promise((resolve) => {
-         this._getOptionsToggle = setTimeout(resolve, 400);
+         this._getOptionsToggle = setTimeout(resolve, 300);
       });
 
       return new Promise((resolve, reject) => {
