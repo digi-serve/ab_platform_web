@@ -237,8 +237,14 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
     *
     * @return {Promise}
     */
-   getOptions(whereClause, term, sort, editor) {
+   async getOptions(whereClause, term, sort, editor) {
       const theEditor = editor;
+
+      if (this._getOptionsToggle) clearTimeout(this._getOptionsToggle);
+      await new Promise((resolve) => {
+         this._getOptionsToggle = setTimeout(resolve, 300);
+      });
+
       return new Promise((resolve, reject) => {
          let haveResolved = false;
          // {bool}
@@ -629,11 +635,10 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       if (addCy) {
          this.populateOptionsDataCy(theEditor, field, form);
       }
-      if (theEditor.getValue && theEditor.getValue()) {
+      if (theEditor.getValue?.() && data?.length) {
          theEditor.setValue(theEditor.getValue());
-         // } else if (this._selectedData && this._selectedData.length) {
-         //    theEditor.setValue(this.editFormat(this._selectedData));
       }
+
       theEditor.unblockEvent();
    }
 
