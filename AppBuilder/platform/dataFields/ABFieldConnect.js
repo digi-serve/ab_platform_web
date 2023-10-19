@@ -640,7 +640,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          let selectedVal = theEditor.getValue();
 
          // Check exists item
-         const isExists = data.filter((d) => d.id == selectedVal).length > 0;
+         const isExists = data.some((d) => d.id == selectedVal);
 
          // Select option item from custom index value
          if (
