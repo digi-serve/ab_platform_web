@@ -637,9 +637,28 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          this.populateOptionsDataCy(theEditor, field, form);
       }
       if (theEditor.getValue?.() && data?.length) {
-         theEditor.setValue(theEditor.getValue());
-      }
+         let selectedVal = theEditor.getValue();
 
+         // Check exists item
+         const isExists = data.filter((d) => d.id == selectedVal).length > 0;
+
+         // Select option item from custom index value
+         if (
+            !isExists &&
+            field.isConnection &&
+            (field.indexField || field.indexField2)
+         ) {
+            const selectedItem = data.filter(
+               (d) =>
+                  d[field.indexField?.columnName ?? ""] == selectedVal ||
+                  d[field.indexField2?.columnName ?? ""] == selectedVal
+            )[0];
+
+            if (selectedItem) selectedVal = selectedItem.id;
+         }
+
+         theEditor.setValue(selectedVal);
+      }
       theEditor.unblockEvent();
    }
 
