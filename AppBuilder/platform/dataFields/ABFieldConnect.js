@@ -569,14 +569,34 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
                   if (parentValue) {
                      if (value.filterColumn) {
-                        if (
-                           field.object
-                              .fieldByID(value.filterValue.config.dataFieldId)
-                              .getItemFromVal(parentValue)
-                        ) {
-                           newVal = field.object
-                              .fieldByID(value.filterValue.config.dataFieldId)
-                              .getItemFromVal(parentValue)[value.filterColumn];
+                        const filterField = field.object.fieldByID(
+                           value.filterValue.config.dataFieldId
+                        );
+                        let valItem;
+
+                        // When options does not load yet, then pull select value from DC
+                        if (!filterField._options?.length) {
+                           const linkedField =
+                              (form.datacollection.datasource?.fields(
+                                 (f) =>
+                                    f.id == value.value ||
+                                    f.columnName == value.value
+                              ) ?? [])[0];
+
+                           if (linkedField) {
+                              // Get values from DC
+                              const formVals = form.datacollection?.getCursor();
+
+                              valItem =
+                                 formVals[linkedField.relationName()] ??
+                                 formVals[value.value];
+                           }
+                        } else {
+                           valItem = filterField.getItemFromVal(parentValue);
+                        }
+
+                        if (valItem) {
+                           newVal = valItem[value.filterColumn];
                         } else {
                            newVal = parentValue;
                         }
@@ -826,3 +846,4 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       }
    }
 };
+
