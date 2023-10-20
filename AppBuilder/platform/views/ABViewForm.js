@@ -192,6 +192,9 @@ module.exports = class ABViewForm extends ABViewFormCore {
          }
       );
 
+      if (allVals.translations?.length > 0)
+         formVals.translations = allVals.translations;
+
       return formVals;
    }
 
