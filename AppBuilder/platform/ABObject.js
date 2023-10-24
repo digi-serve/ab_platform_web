@@ -406,7 +406,7 @@ module.exports = class ABObject extends ABObjectCore {
     * @return {Promise}
     *						.resolve( {this} )
     */
-   async save() {
+   async save(skipMigrate = false) {
       var isAdd = false;
 
       // if this is our initial save()
@@ -417,7 +417,7 @@ module.exports = class ABObject extends ABObjectCore {
 
       try {
          await super.save();
-         if (isAdd) {
+         if (isAdd && !skipMigrate) {
             await this.migrateCreate();
          }
          return this;
