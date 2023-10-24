@@ -14,61 +14,11 @@ module.exports = class ABModelAPI extends ABModel {
     * @method findAll
     * performs a data find with the provided condition.
     */
-   async findAll(cond) {
-      const requestConfigs = this.object.request ?? {};
-      let url = requestConfigs.url;
-      let headers = this.object.headers;
+   async findAll(cond = {}) {
+      cond.isAPI = true;
+      cond.url = this.object?.request?.url;
 
-      // Paging
-      const pagingValues = this.object.getPagingValues({
-         skip: cond?.skip,
-         limit: cond?.limit,
-      });
-      if (Object.keys(pagingValues).length) {
-         switch (requestConfigs.paging.type) {
-            case "queryString":
-               url = `${url}?${new URLSearchParams(pagingValues).toString()}`;
-               break;
-            case "header":
-               headers = Object.assign(headers, pagingValues);
-               break;
-         }
-      }
-
-      // Load data
-      const response = await fetch(url, {
-         method: (requestConfigs.verb ?? "GET").toUpperCase(),
-         headers,
-         mode: "cors",
-         cache: "no-cache",
-      });
-
-      // Convert to JSON
-      let result = await response.json();
-
-      // Extract data from key
-      result = this.object.dataFromKey(result);
-
-      // TODO: filter data from FilterComplex by .cond variable
-
-      const returnData = {
-         data: result,
-         limit: cond?.limit,
-         // offset: 0,
-         pos: cond?.skip,
-         // total_count: 3
-      };
-
-      // Paging
-      if (pagingValues.total && result[pagingValues.total] != null) {
-         returnData.total_count = result[pagingValues.total];
-      }
-
-      return new Promise((resolve, reject) => {
-         const context = { resolve, reject };
-         const err = null;
-         this.handler_findAll(context, err, returnData);
-      });
+      return super.findAll(cond);
    }
 
    /**
@@ -76,8 +26,8 @@ module.exports = class ABModelAPI extends ABModel {
     * update model values on the server.
     */
    batchCreate(values) {
-      var error = new Error(
-         "ABObjectQuery.ABModelAPI.batchCreate() does not be implemented."
+      const error = new Error(
+         "ABObjectApi.ABModelAPI.batchCreate() does not be implemented."
       );
       return Promise.reject(error);
    }
@@ -87,10 +37,10 @@ module.exports = class ABModelAPI extends ABModel {
     * update model values on the server.
     */
    async create(values) {
-      if (this.object.isFetched && this.object.readonly === 1)
-         return await Promise.reject(new Error("This is the read only object"));
-
-      await super.create(values);
+      const error = new Error(
+         "ABObjectApi.ABModelAPI.create() does not be implemented."
+      );
+      return Promise.reject(error);
    }
 
    /**
@@ -100,8 +50,8 @@ module.exports = class ABModelAPI extends ABModel {
     * @return {Promise}
     */
    delete(id) {
-      var error = new Error(
-         "ABObjectQuery.ABModelAPI.delete() does not be implemented."
+      const error = new Error(
+         "ABObjectApi.ABModelAPI.delete() does not be implemented."
       );
       return Promise.reject(error);
    }
@@ -111,8 +61,8 @@ module.exports = class ABModelAPI extends ABModel {
     * update model values on the server.
     */
    update(id, values) {
-      var error = new Error(
-         "ABObjectQuery.ABModelAPI.update() does not be implemented."
+      const error = new Error(
+         "ABObjectApi.ABModelAPI.update() does not be implemented."
       );
       return Promise.reject(error);
    }
@@ -122,8 +72,8 @@ module.exports = class ABModelAPI extends ABModel {
     * update value to many rows on the server.
     */
    batchUpdate({ rowIds, values }) {
-      var error = new Error(
-         "ABObjectQuery.ABModelAPI.batchUpdate() does not be implemented."
+      const error = new Error(
+         "ABObjectApi.ABModelAPI.batchUpdate() does not be implemented."
       );
       return Promise.reject(error);
    }
