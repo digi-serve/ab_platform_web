@@ -17,8 +17,8 @@ module.exports = class ABMobileView extends ABMobileViewCore {
    componentList(isEdited) {
       // views not allowed to drop onto this View:
       var viewsToIgnore = [
-         // "view",
-         // "page",
+         "mobile-view",
+         "mobile-page",
          // "formpanel",
          // "viewcontainer",
          // // not allowed Detail's widgets
