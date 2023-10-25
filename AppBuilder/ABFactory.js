@@ -831,14 +831,14 @@ class ABFactory extends ABFactoryCore {
     *     Additional related information concerning the issue.
     */
    notify(domain, error, info) {
-      const scope = new Sentry.Scope();
-      // Mark builder alerts as lower level in sentry
-      if (domain == "builder") scope.setLevel("warning");
-      scope.setTag("domain", domain);
-      scope.setContext("info", info);
-      Sentry.captureException(error, scope);
-      console.error(error);
-      console.error(info);
+      // const scope = new Sentry.Scope();
+      // // Mark builder alerts as lower level in sentry
+      // if (domain == "builder") scope.setLevel("warning");
+      // scope.setTag("domain", domain);
+      // scope.setContext("info", info);
+      // Sentry.captureException(error, scope);
+      // console.error(error);
+      // console.error(info);
    }
 
    plugins() {

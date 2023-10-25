@@ -293,7 +293,11 @@ class PortalWork extends ClassUI {
 
       // Get all our ABApplications and loaded Plugins in allApplications
       const allApplications = (
-         this.AB.applications((a) => a.isWebApp) || []
+         this.AB.applications(
+            (a) =>
+               a.isWebApp &&
+               a.isAccessibleForRoles(this.AB.Account.rolesAll() ?? [])
+         ) || []
       ).concat(this.AB.plugins() || []);
 
       // Build out our Navigation Side Bar Menu with our available

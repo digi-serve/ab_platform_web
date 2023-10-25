@@ -237,8 +237,15 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
     *
     * @return {Promise}
     */
-   getOptions(whereClause, term, sort, editor) {
+   async getOptions(whereClause, term, sort, editor) {
       const theEditor = editor;
+
+      // PREVENT: repeatly refresh data too often
+      if (this._getOptionsToggle) clearTimeout(this._getOptionsToggle);
+      await new Promise((resolve) => {
+         this._getOptionsToggle = setTimeout(resolve, 100);
+      });
+
       return new Promise((resolve, reject) => {
          let haveResolved = false;
          // {bool}
@@ -562,14 +569,34 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
                   if (parentValue) {
                      if (value.filterColumn) {
-                        if (
-                           field.object
-                              .fieldByID(value.filterValue.config.dataFieldId)
-                              .getItemFromVal(parentValue)
-                        ) {
-                           newVal = field.object
-                              .fieldByID(value.filterValue.config.dataFieldId)
-                              .getItemFromVal(parentValue)[value.filterColumn];
+                        const filterField = field.object.fieldByID(
+                           value.filterValue.config.dataFieldId
+                        );
+                        let valItem;
+
+                        // When options does not load yet, then pull select value from DC
+                        if (!filterField._options?.length) {
+                           const linkedField =
+                              (form.datacollection.datasource?.fields(
+                                 (f) =>
+                                    f.id == value.value ||
+                                    f.columnName == value.value
+                              ) ?? [])[0];
+
+                           if (linkedField) {
+                              // Get values from DC
+                              const formVals = form.datacollection?.getCursor();
+
+                              valItem =
+                                 formVals[linkedField.relationName()] ??
+                                 formVals[value.value];
+                           }
+                        } else {
+                           valItem = filterField.getItemFromVal(parentValue);
+                        }
+
+                        if (valItem) {
+                           newVal = valItem[value.filterColumn];
                         } else {
                            newVal = parentValue;
                         }
@@ -629,10 +656,28 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       if (addCy) {
          this.populateOptionsDataCy(theEditor, field, form);
       }
-      if (theEditor.getValue && theEditor.getValue()) {
-         theEditor.setValue(theEditor.getValue());
-         // } else if (this._selectedData && this._selectedData.length) {
-         //    theEditor.setValue(this.editFormat(this._selectedData));
+      if (theEditor.getValue?.() && data?.length) {
+         let selectedVal = theEditor.getValue();
+
+         // Check exists item
+         const isExists = data.some((d) => d.id == selectedVal);
+
+         // Select option item from custom index value
+         if (
+            !isExists &&
+            field.isConnection &&
+            (field.indexField || field.indexField2)
+         ) {
+            const selectedItem = data.filter(
+               (d) =>
+                  d[field.indexField?.columnName ?? ""] == selectedVal ||
+                  d[field.indexField2?.columnName ?? ""] == selectedVal
+            )[0];
+
+            if (selectedItem) selectedVal = selectedItem.id;
+         }
+
+         theEditor.setValue(selectedVal);
       }
       theEditor.unblockEvent();
    }
@@ -801,3 +846,4 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       }
    }
 };
+
