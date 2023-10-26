@@ -87,10 +87,10 @@ module.exports = class ABModelAPI extends ABModel {
     * update model values on the server.
     */
    async create(values) {
-      if (this.object.isFetched && this.object.readonly === 1)
-         return await Promise.reject(new Error("This is the read only object"));
-
-      await super.create(values);
+      const error = new Error(
+         "ABObjectApi.ABModelAPI.create() does not be implemented."
+      );
+      return Promise.reject(error);
    }
 
    /**

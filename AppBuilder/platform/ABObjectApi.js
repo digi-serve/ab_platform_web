@@ -57,19 +57,6 @@ module.exports = class ABObjectApi extends ABObjectApiCore {
       await this.save();
    }
 
-   /**
-    * @method save()
-    *
-    * persist this instance of ABObject with it's parent ABApplication
-    *
-    *
-    * @return {Promise}
-    *						.resolve( {this} )
-    */
-   async save() {
-      return await super.save(true);
-   }
-
    dataFromKey(data) {
       let result = data;
 
