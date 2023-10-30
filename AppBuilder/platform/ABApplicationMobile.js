@@ -29,4 +29,17 @@ module.exports = class ABClassApplicationMobile extends (
       newPage.parent = this;
       return newPage;
    }
+
+   async setPageDefault(page) {
+      if (this.pageDefault != page.id) {
+         let oldPage = this.pageByID(this.pageDefault, true);
+         if (oldPage) {
+            oldPage.defaultPage = 0;
+            await oldPage.save();
+         }
+
+         this.pageDefault = page.id;
+         await this.save();
+      }
+   }
 };
