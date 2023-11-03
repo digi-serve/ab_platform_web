@@ -224,7 +224,8 @@ export default class ABViewCarouselComponent extends ABViewComponent {
 
          return [
             `<div class="ab-carousel-image-container">`,
-            `<img src="${row.src}" class="content" ondragstart="return false" />`,
+            `<link rel="preload" href="${row.src}" as="image" fetchpriotity="low"/>`,
+            `<img src="${row.src}" class="content" ondragstart="return false" loading="lazy" />`,
             settings.showLabel
                ? `<div class="ab-carousel-image-title">${row.label || ""}</div>`
                : "",
