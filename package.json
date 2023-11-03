@@ -56,6 +56,8 @@
     "*.css",
     "./js/webix/extras/tinymce.js",
     "./js/webix/locales/*",
+    "./js/webix/componenets/**/*.js",
+    "./js/webix/extras/*.js",
     "./init/sentry.js"
   ]
 }

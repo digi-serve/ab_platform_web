@@ -109,7 +109,7 @@ class ABFactory extends ABFactoryCore {
       this.Network = Network;
       this.Storage = Storage;
       this.Tenant = Tenant;
-      this.Webix = Webix;
+      this.Webix = webix;
 
       // Plugin Classes
       this.ClassUI = ClassUI;
@@ -852,7 +852,7 @@ class ABFactory extends ABFactoryCore {
    // Utilities
    //
    alert(options) {
-      Webix.alert(options);
+      this.webix.alert(options);
    }
 
    cloneDeep(value) {

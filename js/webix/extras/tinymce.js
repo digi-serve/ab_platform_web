@@ -1,5 +1,11 @@
-import webix from "../webix.min.js";
 import tinymce from "tinymce";
+import "tinymce/icons/default";
+import "tinymce/themes/silver";
+import "tinymce/plugins/link";
+import "tinymce/skins/ui/oxide/skin.min.css";
+import "tinymce/skins/ui/oxide/content.css"; // content.min.css ?
+import "tinymce/skins/content/default/content.min.css";
+
 webix.protoUI(
    {
       name: "tinymce-editor",
