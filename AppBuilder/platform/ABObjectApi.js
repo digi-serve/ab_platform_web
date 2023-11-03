@@ -69,49 +69,4 @@ module.exports = class ABObjectApi extends ABObjectApiCore {
    async save() {
       return await super.save(true);
    }
-
-   dataFromKey(data) {
-      let result = data;
-
-      (this.response.dataKey ?? "").split(".").forEach((key) => {
-         if (key == "" || key == null) return;
-         result = result?.[key];
-      });
-
-      return result;
-   }
-
-   get headers() {
-      const headers = {};
-
-      (this.request.headers ?? []).forEach((header) => {
-         if (header?.value == null) return;
-
-         headers[header.key] = header.value;
-      });
-
-      return headers;
-   }
-
-   /**
-    * @function getPagingValues()
-    *
-    * @return {Object} - {
-    *                       start: "Property name of the API for start index",
-    *                       limit: "Property name of the API for limit return the item number"
-    *                     }
-    */
-   getPagingValues({ skip, limit }) {
-      const result = {};
-      const pagingSettings = this.request?.paging ?? {};
-
-      if (pagingSettings.start && skip != null) {
-         result[pagingSettings.start] = skip;
-      }
-      if (pagingSettings.limit && limit != null) {
-         result[pagingSettings.limit] = limit;
-      }
-
-      return result;
-   }
 };
