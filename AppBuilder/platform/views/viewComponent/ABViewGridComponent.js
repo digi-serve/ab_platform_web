@@ -3,10 +3,6 @@ import ABPopupExport from "../ABViewGridPopupExport";
 import ABPopupMassUpdateClass from "../ABViewGridPopupMassUpdate";
 import ABPopupSortField from "../ABViewGridPopupSortFields";
 
-function timeout(ms) {
-   return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 export default class ABViewGridComponent extends ABViewComponent {
    constructor(baseView, idBase, ids) {
       super(
