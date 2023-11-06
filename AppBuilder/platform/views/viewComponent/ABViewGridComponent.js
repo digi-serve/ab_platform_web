@@ -700,48 +700,51 @@ export default class ABViewGridComponent extends ABViewComponent {
             updateRow();
          }
          // if this was our trash icon:
-         else if (e.target.className.indexOf("trash") > -1)
-            abWebix.confirm({
-               title: self.label("Delete data"),
-               text: self.label("Do you want to delete this row?"),
-               callback: function (result) {
-                  if (result) {
-                     const deleteRow = async () => {
-                        try {
-                           const response = await CurrentObject.model().delete(
-                              id.row
-                           );
+         else if (e.target.className.indexOf("trash") > -1) {
+            // If the confirm popup is showing, then skip to show a new one
+            if (!this._deleteConfirmPopup) {
+               this._deleteConfirmPopup = abWebix.confirm({
+                  title: self.label("Delete data"),
+                  text: self.label("Do you want to delete this row?"),
+                  callback: (result) => {
+                     delete this._deleteConfirmPopup;
+                     if (result) {
+                        const deleteRow = async () => {
+                           try {
+                              const response =
+                                 await CurrentObject.model().delete(id.row);
 
-                           if (response.numRows > 0) {
-                              $DataTable.remove(id);
-                              $DataTable.clearSelection();
-                           } else
-                              abWebix.alert({
-                                 text: self.label(
-                                    "No rows were effected.  This does not seem right."
-                                 ),
+                              if (response.numRows > 0) {
+                                 $DataTable.remove(id);
+                                 $DataTable.clearSelection();
+                              } else
+                                 abWebix.alert({
+                                    text: self.label(
+                                       "No rows were effected.  This does not seem right."
+                                    ),
+                                 });
+                           } catch (err) {
+                              self.AB.notify.developer(err, {
+                                 context: "ABViewGridComponent.onItemClick",
+                                 message: "Error deleting item",
+                                 obj: CurrentObject.toObj(),
+                                 id: id.row,
                               });
-                        } catch (err) {
-                           self.AB.notify.developer(err, {
-                              context: "ABViewGridComponent.onItemClick",
-                              message: "Error deleting item",
-                              obj: CurrentObject.toObj(),
-                              id: id.row,
-                           });
 
-                           //// TODO: what do we do here?
-                        }
-                     };
+                              //// TODO: what do we do here?
+                           }
+                        };
 
-                     deleteRow();
-                  }
+                        deleteRow();
+                     }
 
-                  $DataTable.clearSelection();
+                     $DataTable.clearSelection();
 
-                  return true;
-               },
-            });
-         else if (settings.detailsPage.length) {
+                     return true;
+                  },
+               });
+            }
+         } else if (settings.detailsPage.length) {
             // If an icon wasn't selected but a details page is set
             // view the details page
             self.changePage(dc, id, settings.detailsPage);
