@@ -236,6 +236,12 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
             upload: url,
             inputName: "file",
             multiple: false,
+            status: (f) => {
+              if (f.percent) {
+                 webixContainer.hideProgress();
+                 webixContainer.showProgress({ type: "bottom", position: (f.percent/100)})
+              }
+            },
             // formData:{
             // 	appKey:application.name,
             // 	permission:actionKey,
@@ -244,7 +250,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
             // },
             on: {
                // when a file is added to the uploader
-               onBeforeFileAdd: function (item) {
+               onBeforeFileAdd: (item) => {
                   node.classList.remove("webix_invalid");
                   node.classList.remove("webix_invalid_cell");
 
@@ -267,9 +273,17 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
                      return false;
                   }
 
+                  // Display the image from local file
+                  var reader = new FileReader();
+                  reader.onload = (e) => {
+                     this.showImage("local", node, e.target.result);
+                  };
+                  reader.readAsDataURL(item.file);
+                  // console.log(event.target.result);
+
                   // start progress indicator
                   webixContainer.showProgress({
-                     type: "icon",
+                     type: "bottom",
                      delay: 2000,
                   });
                },
@@ -494,14 +508,14 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
       return html;
    }
 
-   showImage(uuid, node) {
+   showImage(uuid, node, url) {
       const parentContainer = node.querySelector(".ab-image-holder");
       if (parentContainer) {
          parentContainer.querySelector(".image-data-field-icon").style.display =
             "none";
          const image = parentContainer.querySelector(".image-data-field-image");
          image.style.display = "";
-         image.style.backgroundImage = `url('${this.urlImage(uuid)}')`;
+         image.style.backgroundImage = `url('${url ?? this.urlImage(uuid)}')`;
          image.setAttribute("image-uuid", uuid);
       }
    }
