@@ -299,6 +299,11 @@ class PortalAccessLevelManager extends ClassUI {
    }
 
    buildAccessAccordion(role) {
+      const L = this.AB.Label();
+      const application = this.AB.applicationByID(this.appId);
+      const isRoleAccessManager =
+         parseInt(application.accessManagers.useRole) == 1 &&
+         application.accessManagers.role.indexOf(role) > -1;
       const manageUsers = {
          rows: [
             {
@@ -512,11 +517,17 @@ class PortalAccessLevelManager extends ClassUI {
          view: "accordionitem",
          id: `amp_accordionitem_${role}`,
          header: () => {
-            return (
+            return `${
                this.roles?.find((r) => {
                   return r.id === role;
                })?.value ?? role
-            );
+            } ${
+               isRoleAccessManager
+                  ? `<span class="header" webix_tooltip="${L(
+                       "This role has been assigned as a Page Access Manager for this App. This means they have full access. Please remove the permissions from the App's Setting page if you would like to manage their access here."
+                    )}">${this.WARNING_ICON}</span>`
+                  : ""
+            }`;
          },
          collapsed: true,
          body: {
@@ -528,6 +539,11 @@ class PortalAccessLevelManager extends ClassUI {
       $$("amp_accordion").addView(newAccordionItem, -1);
       $$("amp_accordion").show();
       $$("amp_accordion_noSelection").hide();
+
+      if (isRoleAccessManager)
+         this.AB.Webix.TooltipControl.addTooltip(
+            $$(`amp_accordionitem_${role}`).$view
+         );
 
       $$(`linetree_${role}`).openAll();
    }
