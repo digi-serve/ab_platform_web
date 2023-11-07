@@ -24,13 +24,12 @@ import Bootstrap from "./init/Bootstrap.js";
 // Bootstrap is responsible for initializing the platform.
 
 // Import webix dynamically so we load it before we load other files that need it
-// Don't use minified webix! Webpack will minify it for us and give sourcemaps,
-// making debugging easier
 import(
    /* webpackChunkName: "webix" */
    /* webpackPreload: true */
-   "./js/webix/webix.js"
+   "./js/webix/webix.min.js"
 ).then((webix) => {
+   webix.debug({});
    // Make sure webix is global object
    window.webix = webix;
    // Now load additional webix resources

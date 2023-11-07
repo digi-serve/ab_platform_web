@@ -7,8 +7,6 @@
  * Notes:
  * - use `webpackMode: "eager"` comment to include the dynamic import in this
  *   package
- * - use unminified js - webpack will handle minifying in production mode,
- *   and will create sourcemaps to help when debugging
  */
 
 // CSS
@@ -22,28 +20,28 @@ import "./components/hint/hint.css";
 // Components
 import(
    /* webpackMode: "eager" */
-   "./components/gantt/gantt.js"
+   "./components/gantt/gantt.min.js"
 ).then((gantt) => (window.gantt = gantt));
 import "./components/hint/hint.js";
 import(
    /* webpackMode: "eager" */
-   "./components/kanban/kanban.js"
+   "./components/kanban/kanban.min.js"
 ).then((kanban) => (window.kanban = kanban));
 import(
    /* webpackMode: "eager" */
-   "./components/pivot/pivot.js"
+   "./components/pivot/pivot.min.js"
 ).then((pivot) => (window.pivot = pivot));
-import "./components/query/query.js";
+import "./components/query/query.min.js";
 // Should use webix/query, querybuilder no longer maintained
 // But we still use this in some places (processing record rules, etc)
-import "./components/querybuilder/querybuilder.js";
+import "./components/querybuilder/querybuilder.min.js";
 import(
    /* webpackMode: "eager" */
-   "./components/reports/reports.js"
+   "./components/reports/reports.min.js"
 ).then((report) => (window.reports = report));
 import(
    /* webpackMode: "eager" */
-   "./components/scheduler/scheduler.js"
+   "./components/scheduler/scheduler.min.js"
 ).then((scheduler) => (window.scheduler = scheduler));
 
 // Extras
