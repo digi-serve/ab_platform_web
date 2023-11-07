@@ -524,7 +524,7 @@ class PortalAccessLevelManager extends ClassUI {
             } ${
                isRoleAccessManager
                   ? `<span class="header" webix_tooltip="${L(
-                       "This is a role access level. If you would like to use the page access level, then you need to remove this from the role access level."
+                       "This role has been assigned as a Page Access Manager for this App. This means they have full access. Please remove the permissions from the App's Setting page if you would like to manage their access here."
                     )}">${this.WARNING_ICON}</span>`
                   : ""
             }`;
