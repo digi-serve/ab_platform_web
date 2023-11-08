@@ -12,7 +12,6 @@ io.sails.reconnection = true;
 import "./styles/loader.css";
 import "./js/webix/webix.min.css";
 
-/** @typedef {import("./js/webix/types/webix.global").Webix} Webix */
 import "./styles/ui.css";
 
 import "./init/sentry.js";
@@ -30,7 +29,6 @@ import(
    /* webpackPreload: true */
    "./js/webix/webix.min.js"
 ).then((webix) => {
-   webix.debug({});
    // Make sure webix is global object
    window.webix = webix;
    // Now load additional webix resources
