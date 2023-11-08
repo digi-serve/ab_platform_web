@@ -847,7 +847,7 @@ class ABFactory extends ABFactoryCore {
    // Utilities
    //
    alert(options) {
-      this.webix.alert(options);
+      this.Webix.alert(options);
    }
 
    cloneDeep(value) {
