@@ -208,7 +208,6 @@ module.exports = class ABViewForm extends ABViewFormCore {
     * @return {boolean} isValid
     */
    validateData($formView, object, formVals) {
-      let isValid = true;
       let list = "";
 
       // validate required fields
@@ -219,14 +218,37 @@ module.exports = class ABViewForm extends ABViewFormCore {
       ).map((fComp) => fComp.field());
 
       // validate data
-      let validator;
-      if (isValid) {
-         validator = object.isValidData(formVals);
-         isValid = validator.pass();
-      }
+      const validator = object.isValidData(formVals);
+      let isValid = validator.pass();
 
       // $$($formView).validate();
       $formView.validate();
+      /**
+       * helper function to fix the webix ui after adding an validation error
+       * message.
+       * @param {string} col - field.columnName
+       */
+      const fixInvalidMessageUI = (col) => {
+         const $forminput = $formView.elements[col];
+         if (!$forminput) return;
+         // Y position
+         const height = $forminput.$height;
+         if (height < 56) {
+            $forminput.define("height", 60);
+            $forminput.resize();
+         }
+
+         // X position
+         const domInvalidMessage = $forminput.$view.getElementsByClassName(
+            "webix_inp_bottom_label"
+         )[0];
+         if (!domInvalidMessage?.style["margin-left"]) {
+            domInvalidMessage.style.marginLeft = `${
+               this.settings.labelWidth ??
+               ABViewFormPropertyComponentDefaults.labelWidth
+            }px`;
+         }
+      };
 
       // Display required messages
       requiredFields.forEach((f) => {
@@ -239,27 +261,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
             isValid = false;
 
             // Fix position of invalid message
-            const $forminput = $formView.elements[f.columnName];
-            if ($forminput) {
-               // Y position
-               const height = $forminput.$height;
-               if (height < 56) {
-                  $forminput.define("height", 60);
-                  $forminput.resize();
-               }
-
-               // X position
-               const domInvalidMessage =
-                  $forminput.$view.getElementsByClassName(
-                     "webix_inp_bottom_label"
-                  )[0];
-               if (!domInvalidMessage?.style["margin-left"]) {
-                  domInvalidMessage.style.marginLeft = `${
-                     this.settings.labelWidth ??
-                     ABViewFormPropertyComponentDefaults.labelWidth
-                  }px`;
-               }
-            }
+            fixInvalidMessageUI(f.columnName);
          }
       });
 
@@ -275,6 +277,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
             validator.errors.forEach((err) => {
                $formView.markInvalid(err.name, err.message);
                list += `<li>${err.name}: ${err.message}</li>`;
+               fixInvalidMessageUI(err.name);
             });
 
             saveButton?.disable();
@@ -315,12 +318,6 @@ module.exports = class ABViewForm extends ABViewFormCore {
       // call .onBeforeSaveData event
       // if this function returns false, then it will not go on.
       if (!this._callbacks?.onBeforeSaveData?.()) return;
-
-      // form validate
-      if (!$formView || !$formView.validate()) {
-         // TODO : error message
-         return;
-      }
 
       $formView.clearValidation();
 
@@ -469,7 +466,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
       try {
          this.doSubmitRules(newFormVals);
       } catch (errs) {
-         this.AB.notify.developer(err, {
+         this.AB.notify.developer(errs, {
             message: "Error processing Submit Rules.",
             view: this.toObj(),
             newFormVals: newFormVals,

@@ -624,7 +624,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
       return `/file/upload/${this.object.id}/${this.id}/${isWebix ? "1" : "0"}`;
    }
 
-  /**
+   /**
     * @method isValidData
     * Parse through the given data and return an error if this field's
     * data seems invalid.
@@ -633,8 +633,8 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
     * @return {array}
     */
    isValidData(data, validator) {
-      const errs = super.isValidData(data, validator);
-      if(this.uploadInProgress) errs.push(new Error("Image is still uploading"));
-      return errs;
+      super.isValidData(data, validator);
+      if (this.uploadInProgress)
+         validator.addError(this.columnName, L("Image still uploading"));
    }
 };
