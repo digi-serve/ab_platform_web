@@ -12,6 +12,7 @@ io.sails.reconnection = true;
 import "./styles/loader.css";
 import "./js/webix/webix.min.css";
 
+/** @typedef {import("./js/webix/types/webix.global").Webix} Webix */
 import "./styles/ui.css";
 
 import "./init/sentry.js";
