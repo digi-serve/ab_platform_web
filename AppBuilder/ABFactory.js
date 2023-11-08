@@ -39,11 +39,6 @@ import Tenant from "../resources/Tenant.js";
 import UISettings from "./uiSettings/config.js";
 // UISettings: detailed settings for our common UI elements
 
-import Webix from "../js/webix/webix.min.js";
-// NOTE: moved to require() because using import with webix.js
-// really messed things up!
-// var Webix = require("../js/webix/webix.js");
-
 class ABValidator {
    constructor(AB) {
       this.AB = AB;
