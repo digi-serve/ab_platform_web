@@ -10,8 +10,6 @@ io.sails.reconnection = true;
 
 // Include these .css and .js files as part of our bundle.
 import "./styles/loader.css";
-
-import webix from "./js/webix/webix.min.js";
 import "./js/webix/webix.min.css";
 
 import "./styles/ui.css";
@@ -21,48 +19,37 @@ import "./init/sentry.js";
 // NOTE: keep Font Awesome AFTER webix css so webix wont
 // override our icon styles
 import "./styles/font-awesome.min.css";
-/* eslint-enable no-unused-vars */
 
 import Bootstrap from "./init/Bootstrap.js";
 // Bootstrap is responsible for initializing the platform.
 
-// Import webix components
-import * as gantt from "./js/webix/components/gantt/gantt.min.js";
-import "./js/webix/components/gantt/gantt.min.css";
-
-import * as kanban from "./js/webix/components/kanban/kanban.min.js";
-import * as pivot from "./js/webix/components/pivot/pivot.min.js";
-import * as report from "./js/webix/components/reports/reports.min.js";
-import "./js/webix/components/reports/reports.min.css";
-import "./js/webix/components/query/query.min.css";
-import query from "./js/webix/components/query/query.min.js";
-import * as scheduler from "./js/webix/components/scheduler/scheduler.min.js";
-import "./js/webix/components/scheduler/scheduler.min.css";
-
-// Make sure webix is global object
-if (!window.webix) {
+// Import webix dynamically so we load it before we load other files that need it
+import(
+   /* webpackChunkName: "webix" */
+   /* webpackPreload: true */
+   "./js/webix/webix.min.js"
+).then((webix) => {
+   // Make sure webix is global object
    window.webix = webix;
-}
+   // Now load additional webix resources
+   import(
+      /* webpackChunkName: "webix.resources" */
+      /* webpackPreload: true */
+      "./js/webix/webixResources"
+   );
 
-window.gantt = gantt;
-window.kanban = kanban;
-window.pivot = pivot;
-window.reports = report;
-window.scheduler = scheduler;
+   Bootstrap.init().catch((err) => {
+      // This is a known error that has already been handled.
+      if (err.code == "ENODEFS") return;
 
-Bootstrap.init().catch((err) => {
-   // This is a known error that has already been handled.
-   if (err.code == "ENODEFS") return;
+      var errorMSG = err.toString();
 
-   var errorMSG = err.toString();
+      Bootstrap.alert({
+         type: "alert-error",
+         title: "Error initializing Portal:",
+         text: errorMSG,
+      });
 
-   Bootstrap.alert({
-      type: "alert-error",
-      title: "Error initializing Portal:",
-      text: errorMSG,
+      Bootstrap.error(err);
    });
-
-   Bootstrap.error(err);
 });
-
-export default Bootstrap;
