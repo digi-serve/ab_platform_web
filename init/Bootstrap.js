@@ -5,18 +5,6 @@
  * well the main ABFactory object that will drive the rest of the applications.
  */
 
-import * as Webix from "../js/webix/webix.min.js";
-// NOTE: changed to require() so switching to webix_debug.js will work.
-// const Webix = require("../js/webix/webix_debug.js");
-
-import webixCSS from "../js/webix/webix.min.css";
-// Make sure webix is global object
-if (!window.webix) {
-   window.webix = Webix;
-}
-
-import "../js/webix/locales/th-TH.js";
-
 import events from "events";
 
 const EventEmitter = events.EventEmitter;
@@ -37,25 +25,8 @@ import initDefinitions from "../init/initDefinitions.js";
 
 // import JSZipUtils from "jszip-utils/dist/jszip-utils.min.js";
 
-// Should use webix/query, querybuilder no longer maintained
-// But we still use this in some places (processing record rules, etc)
-import("../js/webix/components/querybuilder/querybuilder.min.js");
-// We need to do a dynamic import to ensure webix is loaded first
-import "../js/webix/components/querybuilder/querybuilder.min.css";
-
 import Selectivity from "../js/selectivity/selectivity.min.js";
 import selectivityCSS from "../js/selectivity/selectivity.min.css";
-
-import * as tinymce from "../js/webix/extras/tinymce";
-import "tinymce/icons/default";
-import "tinymce/themes/silver";
-import "tinymce/plugins/link";
-import "tinymce/skins/ui/oxide/skin.min.css";
-import "tinymce/skins/ui/oxide/content.css"; // content.min.css ?
-import "tinymce/skins/content/default/content.min.css";
-
-import("../js/webix/components/hint/hint.js");
-import "../js/webix/components/hint/hint.css";
 
 import UI from "../ui/ui.js";
 import PreloadUI from "../ui/loading.js";
@@ -238,7 +209,7 @@ class Bootstrap extends EventEmitter {
                return Promise.resolve().then(() => {
                   // webix recommends wrapping any webix code in the .ready()
                   // function that executes after page loading.
-                  Webix.ready(() => {
+                  webix.ready(() => {
                      const locales = {
                         en: "en-US",
                         "zh-hans": "zh-CN",
@@ -253,7 +224,7 @@ class Bootstrap extends EventEmitter {
                            languageCode
                         ) &&
                         Object.prototype.hasOwnProperty.call(
-                           Webix.i18n.locales,
+                           webix.i18n.locales,
                            locales[languageCode]
                         )
                            ? locales[languageCode]
@@ -265,7 +236,7 @@ class Bootstrap extends EventEmitter {
                      // with the exception that scroll bars appear when user
                      // hovers over a scrollable area
                      /* if (!Webix.env.touch  && Webix.env.scrollSize ) */
-                     Webix.CustomScroll.init();
+                     webix.CustomScroll.init();
 
                      const div = this.div();
 
@@ -286,7 +257,7 @@ class Bootstrap extends EventEmitter {
    }
 
    alert(options) {
-      Webix.alert(options);
+      webix.alert(options);
    }
 
    div(el) {

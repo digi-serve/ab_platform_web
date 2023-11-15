@@ -222,24 +222,35 @@ export default class ABViewCarouselComponent extends ABViewComponent {
       if (row?.src) {
          const settings = this.settings;
 
-         return [
-            `<div class="ab-carousel-image-container">`,
-            `<img src="${row.src}" class="content" ondragstart="return false" />`,
-            settings.showLabel
-               ? `<div class="ab-carousel-image-title">${row.label || ""}</div>`
-               : "",
-            `<div class="ab-carousel-image-icon">`,
-            settings.detailsPage || settings.detailsTab
-               ? `<span ab-row-id="${row.id}" class="ab-carousel-detail webix_icon fa fa-eye"></span>`
-               : "",
-            settings.editPage || settings.editTab
-               ? `<span ab-row-id="${row.id}" class="ab-carousel-edit webix_icon fa fa-pencil"></span>`
-               : "",
-            `<span class="webix_icon ab-carousel-fullscreen fa fa-arrows-alt"></span>`,
-            `<span style="display: none;" class="webix_icon ab-carousel-exit-fullscreen fa fa-times"></span>`,
-            `</div>`,
-            `</div>`,
-         ].join("");
+         return `<div class="ab-carousel-image-container">
+            <link rel="preload" href="${
+               row.src
+            }" as="image" fetchpriotity="low"/>
+            <img src="${
+               row.src
+            }" class="content" ondragstart="return false" loading="lazy" />
+            ${
+               settings.showLabel
+                  ? `<div class="ab-carousel-image-title">${
+                       row.label || ""
+                    }</div>`
+                  : ""
+            }
+            <div class="ab-carousel-image-icon">
+            ${
+               settings.detailsPage || settings.detailsTab
+                  ? `<span ab-row-id="${row.id}" class="ab-carousel-detail webix_icon fa fa-eye"></span>`
+                  : ""
+            }
+            ${
+               settings.editPage || settings.editTab
+                  ? `<span ab-row-id="${row.id}" class="ab-carousel-edit webix_icon fa fa-pencil"></span>`
+                  : ""
+            }
+               <span class="webix_icon ab-carousel-fullscreen fa fa-arrows-alt"></span>
+               <span style="display: none;" class="webix_icon ab-carousel-exit-fullscreen fa fa-times"></span>
+            </div>
+         </div>`;
       }
       // empty image
       else return "";

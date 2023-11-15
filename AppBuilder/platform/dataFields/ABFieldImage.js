@@ -236,6 +236,15 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
             upload: url,
             inputName: "file",
             multiple: false,
+            status: (f) => {
+               if (f.percent) {
+                  webixContainer.hideProgress();
+                  webixContainer.showProgress({
+                     type: "top",
+                     position: f.percent / 100,
+                  });
+               }
+            },
             // formData:{
             // 	appKey:application.name,
             // 	permission:actionKey,
@@ -244,7 +253,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
             // },
             on: {
                // when a file is added to the uploader
-               onBeforeFileAdd: function (item) {
+               onBeforeFileAdd: (item) => {
                   node.classList.remove("webix_invalid");
                   node.classList.remove("webix_invalid_cell");
 
@@ -266,20 +275,24 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
                      );
                      return false;
                   }
-
-                  // start progress indicator
-                  webixContainer.showProgress({
-                     type: "icon",
-                     delay: 2000,
-                  });
+                  this.uploadInProgress = true;
+                  // Display the image from local file
+                  var reader = new FileReader();
+                  reader.onload = (e) => {
+                     this.showImage(null, node, e.target.result);
+                     webixContainer.showProgress({
+                        type: "top",
+                        delay: 2000,
+                     });
+                  };
+                  reader.readAsDataURL(item.file);
                },
 
                // when upload is complete:
                onFileUpload: async (item, response) => {
                   webixContainer.hideProgress();
                   this.showImage(response.data.uuid, node);
-
-                  // TODO: delete previous image from our OPsPortal service?
+                  this.uploadInProgress = false;
 
                   const values = {};
                   values[this.columnName] = response.data.uuid;
@@ -494,14 +507,14 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
       return html;
    }
 
-   showImage(uuid, node) {
+   showImage(uuid, node, url) {
       const parentContainer = node.querySelector(".ab-image-holder");
       if (parentContainer) {
          parentContainer.querySelector(".image-data-field-icon").style.display =
             "none";
          const image = parentContainer.querySelector(".image-data-field-image");
          image.style.display = "";
-         image.style.backgroundImage = `url('${this.urlImage(uuid)}')`;
+         image.style.backgroundImage = `url('${url ?? this.urlImage(uuid)}')`;
          image.setAttribute("image-uuid", uuid);
       }
    }
@@ -609,5 +622,19 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
     */
    urlUpload(isWebix = true) {
       return `/file/upload/${this.object.id}/${this.id}/${isWebix ? "1" : "0"}`;
+   }
+
+   /**
+    * @method isValidData
+    * Parse through the given data and return an error if this field's
+    * data seems invalid.
+    * @param {obj} data  a key=>value hash of the inputs to parse.
+    * @param {OPValidator} validator  provided Validator fn
+    * @return {array}
+    */
+   isValidData(data, validator) {
+      super.isValidData(data, validator);
+      if (this.uploadInProgress)
+         validator.addError(this.columnName, L("Image still uploading"));
    }
 };

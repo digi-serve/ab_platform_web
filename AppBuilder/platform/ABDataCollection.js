@@ -119,12 +119,22 @@ module.exports = class ABDataCollection extends ABDataCollectionCore {
          dc.define("dataFeed", (value, params) => {
             let cursorUpdated = false;
             // check if the current cursor was updated
-            if (this?.datacollectionLink?.getCursor()?.id == value) {
+            if (dc.__prevLinkDcCursor != value) {
                cursorUpdated = true;
             }
 
+            dc.__prevLinkDcCursor = this?.datacollectionLink?.getCursor()?.id;
+
+            // NOTE: If no cursor of the parent DC, then show empty list
+            if (
+               this.datacollectionLink &&
+               value == null &&
+               dc.__prevLinkDcCursor == null
+            ) {
+               this.clearAll();
+            }
             // this is the same item that was already bound...don't reload data
-            if (cursorUpdated) {
+            else if (cursorUpdated) {
                // now that we have the modified wheres the dataCollections wheres
                // need to be modified for subsequent loads on scroll so lets set them
                // this.reloadWheres(wheres);
