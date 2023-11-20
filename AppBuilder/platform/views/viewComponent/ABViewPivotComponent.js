@@ -76,7 +76,7 @@ module.exports = class ABViewPivotComponent extends ABViewComponent {
                class CustomTable extends pivot.views.table {
                   CellFormat(value) {
                      const decimalPlaces = settings.decimalPlaces ?? 2;
-                     if (!value) value === 0 ? "0" : "";
+                     if (!value) value = value === 0 ? "0" : "";
                      return value
                         ? parseFloat(value).toFixed(decimalPlaces)
                         : value;
