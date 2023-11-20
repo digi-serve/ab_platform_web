@@ -71,6 +71,18 @@ module.exports = class ABViewPivotComponent extends ABViewComponent {
                   }
                },
             ],
+            [
+               pivot.views.table,
+               class CustomTable extends pivot.views.table {
+                  CellFormat(value) {
+                     const decimalPlaces = settings.decimalPlaces ?? 2;
+                     if (!value) value = value === 0 ? "0" : "";
+                     return value
+                        ? parseFloat(value).toFixed(decimalPlaces)
+                        : value;
+                  }
+               },
+            ],
          ]),
       };
 
