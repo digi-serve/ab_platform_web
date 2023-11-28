@@ -388,7 +388,7 @@ module.exports = class ABClassApplication extends ABApplicationCore {
          "datacollectionsIncluded",
          "processes",
          "pages",
-         "views",
+         // "views", // <-- these are gathered in "pages"
       ].forEach((k) => {
          this[k]().forEach((o) => {
             warnings = warnings.concat(o.warningsAll());

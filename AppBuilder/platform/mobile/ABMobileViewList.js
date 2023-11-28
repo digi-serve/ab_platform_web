@@ -4,10 +4,16 @@ module.exports = class ABMobileViewList extends ABMobileViewListCore {
    // constructor(values, application, parent, defaultValues) {
    //    super(values, application, parent, defaultValues);
    // }
-   // warningsEval() {
-   //    super.warningsEval();
-   //    if (!this.text) {
-   //       this.warningsMessage("has no text value set.");
-   //    }
-   // }
+   warningsEval() {
+      super.warningsEval();
+
+      ["linkPageAdd", "linkPageDetail"].forEach((k) => {
+         if (this.settings[k]) {
+            let page = this.application.pageByID(this.settings[k], true);
+            if (!page) {
+               this.warningsMessage(`${k} references an unknown Page.`);
+            }
+         }
+      });
+   }
 };

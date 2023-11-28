@@ -68,14 +68,14 @@ module.exports = class ABMobilePage extends ABMobilePageCore {
       return newPage;
    }
 
-   // warningsEval() {
-   //    super.warningsEval();
-   //    let allViews = this.views();
-   //    if (allViews.length == 0) {
-   //       this.warningsMessage("has no sub views");
-   //    }
-   //    (this.pages() || []).forEach((p) => {
-   //       p.warningsEval();
-   //    });
-   // }
+   warningsEval() {
+      super.warningsEval();
+      let allViews = this.views();
+      if (allViews.length == 0) {
+         this.warningsMessage("has no widgets");
+      }
+      (this.pages() || []).forEach((p) => {
+         p.warningsEval();
+      });
+   }
 };
