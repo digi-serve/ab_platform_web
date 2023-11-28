@@ -575,6 +575,8 @@ class ABQL extends ABQLCore {
             if (this.params && this.params[pDef.name]) {
                Filter.setValue(this.params[pDef.name]);
                initialCond = JSON.stringify(this.params[pDef.name]);
+            } else {
+               Filter.setValue(null);
             }
 
             // what we show on the panel, is a text representation
