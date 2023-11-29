@@ -156,6 +156,16 @@ class Bootstrap extends EventEmitter {
 
                let definitions = Config.definitions() || null;
 
+               // Sanity Check:
+               // Prevent invalid defintion format
+               if (typeof definitions === "string") {
+                  try {
+                     definitions = JSON.parse(definitions);
+                  } catch (e) {
+                     /* what to do? */
+                  }
+               }
+
                if (definitions) {
                   // NOTE: when loading up an unauthorized user,
                   // definitions will be null: we can skip the plugins
