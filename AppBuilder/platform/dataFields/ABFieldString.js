@@ -116,6 +116,33 @@ module.exports = class ABFieldString extends ABFieldStringCore {
       return formComponentSetting;
    }
 
+   /**
+    * @method formComponentMobile
+    * returns a drag and droppable component that is used on the UI
+    * interface builder to place form components related to this ABField.
+    *
+    * an ABField defines which form component is used to edit it's contents.
+    * However, what is returned here, needs to be able to create an instance of
+    * the component that will be stored with the ABViewForm.
+    */
+   formComponentMobile() {
+      // NOTE: what is being returned here needs to mimic an ABView CLASS.
+      // primarily the .common() and .newInstance() methods.
+      const formComponentSetting = super.formComponent();
+
+      // .common() is used to create the display in the list
+      formComponentSetting.common = () => {
+         return {
+            key: "mobile-textbox",
+            settings: {
+               type: "single",
+            },
+         };
+      };
+
+      return formComponentSetting;
+   }
+
    detailComponent() {
       const detailComponentSetting = super.detailComponent();
 
