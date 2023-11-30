@@ -36,8 +36,8 @@ module.exports = class ABFieldCalculate extends ABFieldCalculateCore {
       return config;
    }
 
-   /*
-    * @funciton formComponent
+   /**
+    * @method formComponent
     * returns a drag and droppable component that is used on the UI
     * interface builder to place form components related to this ABField.
     *
@@ -47,6 +47,10 @@ module.exports = class ABFieldCalculate extends ABFieldCalculateCore {
     */
    formComponent() {
       return super.formComponent("fieldreadonly");
+   }
+
+   formComponentMobile() {
+      return super.formComponent("mobile-fieldreadonly");
    }
 
    detailComponent() {
