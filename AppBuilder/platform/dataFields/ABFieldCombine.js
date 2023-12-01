@@ -52,6 +52,10 @@ module.exports = class ABFieldCombine extends ABFieldCombineCore {
       return super.formComponent("fieldreadonly");
    }
 
+   formComponentMobile() {
+      return super.formComponent("mobile-fieldreadonly");
+   }
+
    detailComponent() {
       const detailComponentSetting = super.detailComponent();
 
