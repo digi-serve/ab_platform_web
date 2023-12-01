@@ -365,7 +365,7 @@ module.exports = class ABViewRuleActionFormRecordRuleUpdateConnected extends (
                   glue: "and",
                   rules: [
                      {
-                        key: `${connObj.dbTableName()}.${connObj.PK()}`,
+                        key: `${connObj.tableName}.${connObj.PK()}`,
                         rule: "in",
                         value: ids,
                      },
@@ -414,6 +414,11 @@ module.exports = class ABViewRuleActionFormRecordRuleUpdateConnected extends (
          // done in modifyCondition()
          modifyCondition((err) => {
             if (err) {
+               AB.notify.developer(err, {
+                  message:
+                     "!!! ABViewRuleActionFormRecordRuleUpdateConnected.modifyCondition: error:",
+                  data: options.data,
+               });
                reject(err);
                return;
             }
