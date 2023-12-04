@@ -241,9 +241,9 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       const theEditor = editor;
 
       // PREVENT: repeatly refresh data too often
-      if (this._getOptionsToggle) clearTimeout(this._getOptionsToggle);
+      if (theEditor._getOptionsThrottle) clearTimeout(theEditor._getOptionsThrottle);
       await new Promise((resolve) => {
-         this._getOptionsToggle = setTimeout(resolve, 100);
+         theEditor._getOptionsThrottle = setTimeout(resolve, 100);
       });
 
       return new Promise((resolve, reject) => {
@@ -846,4 +846,3 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       }
    }
 };
-
