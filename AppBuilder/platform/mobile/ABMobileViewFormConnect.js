@@ -71,9 +71,9 @@ module.exports = class ABMobileViewFormConnect extends (
     * return a UI component based upon this view.
     * @return {obj} UI component
     */
-   component() {
-      return new ABViewFormConnectComponent(this);
-   }
+   // component() {
+   //    return new ABViewFormConnectComponent(this);
+   // }
 
    // get addPageTool() {
    //    if (this.__addPageTool == null)
