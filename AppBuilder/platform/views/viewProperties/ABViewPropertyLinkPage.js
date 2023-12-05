@@ -33,9 +33,15 @@ class ABViewPropertyLinkPageComponent extends ABViewComponent {
    }
 
    changePage(pageId, rowId) {
-      if (this.datacollection) this.datacollection.setCursor(rowId);
-
-      if (this.view) this.view.changePage(pageId);
+      if (this.datacollection) {
+         this.datacollection.once("changeCursor", () => {
+            this.view?.changePage(pageId);
+         });
+         this.datacollection.setCursor(rowId);
+      }
+      else {
+         this.view?.changePage(pageId);
+      }
    }
 }
 
