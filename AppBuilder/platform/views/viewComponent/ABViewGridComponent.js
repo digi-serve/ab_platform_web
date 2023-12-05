@@ -908,8 +908,7 @@ export default class ABViewGridComponent extends ABViewComponent {
 
       // Pass settings to link page module
       if (this.linkPage) this.linkPage.changePage(page, rowId);
-
-      super.changePage(page);
+      else super.changePage(page);
    }
 
    columnConfig(headers = []) {

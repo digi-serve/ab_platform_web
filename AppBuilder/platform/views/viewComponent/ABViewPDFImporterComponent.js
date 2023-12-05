@@ -399,6 +399,9 @@ module.exports = class ABViewPDFImporterComponent extends ABViewComponent {
       this.renderPageImages();
       if ($carousel) this.AB.Webix.ui(carousel_list, $carousel);
 
+      // Select all of images by default
+      this.selectAll();
+
       $$(this.ids.submit)?.enable();
    }
 
