@@ -7,6 +7,7 @@ class PortalWorkUserQRWindow extends ClassUI {
       this.idTaskMultiview = "taskMultiview";
       this.idTaskTitle = "taskTitle";
       this.idTaskPager = "taskPager";
+      this.classQrImageDom = "qr-code-image-dom";
    }
 
    ui() {
@@ -82,7 +83,15 @@ class PortalWorkUserQRWindow extends ClassUI {
                   autoheight: true,
                   autowidth: true,
                   template:
-                     "<img src='/relay/user-qr' style='margin: 10px auto 20px;display:block;' />",
+                     `<img src='/relay/user-qr' class='${this.classQrImageDom}' style='margin: 10px auto 20px;display:block;' />`,
+                  on: {
+                     onAfterRender: () => {
+                        const $img = $$("qr-code-image").$view.getElementsByClassName(this.classQrImageDom)[0];
+                        $img.onload = () => {
+                           $$("qr-code-image").adjust();
+                        };
+                     }
+                  }
                },
 
                {
