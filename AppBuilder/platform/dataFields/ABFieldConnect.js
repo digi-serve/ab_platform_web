@@ -244,21 +244,23 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
    async getOptions(whereClause, term, sort, editor) {
       const theEditor = editor;
 
-      // PREVENT: repeatly refresh data too often
-      if (theEditor._getOptionsThrottle) {
-         clearTimeout(theEditor._getOptionsThrottle);
-         // NOTE: remove variables that reference the Promise and Resolve to let GC cleans up.
-         // https://dev.to/xnimorz/js-promises-3-garbage-collection-and-memory-leaks-2oi7?fbclid=IwAR1wqgNz2KqchaM7eRkclR6YWHT01eva4y5IWpnaY0in6BrxmTAtpNCnEXM
-         delete theEditor._timeToPullData;
-         delete theEditor._getOptionsResolve;
+      if (theEditor) {
+         // PREVENT: repeatly refresh data too often
+         if (theEditor._getOptionsThrottle) {
+            clearTimeout(theEditor._getOptionsThrottle);
+            // NOTE: remove variables that reference the Promise and Resolve to let GC cleans up.
+            // https://dev.to/xnimorz/js-promises-3-garbage-collection-and-memory-leaks-2oi7?fbclid=IwAR1wqgNz2KqchaM7eRkclR6YWHT01eva4y5IWpnaY0in6BrxmTAtpNCnEXM
+            delete theEditor._timeToPullData;
+            delete theEditor._getOptionsResolve;
+         }
+         theEditor._timeToPullData = await new Promise((resolve) => {
+            theEditor._getOptionsResolve = resolve;
+            theEditor._getOptionsThrottle = setTimeout(() => {
+               resolve(true);
+            }, 100);
+         });
+         if (!theEditor._timeToPullData) return;
       }
-      theEditor._timeToPullData = await new Promise((resolve) => {
-         theEditor._getOptionsResolve = resolve;
-         theEditor._getOptionsThrottle = setTimeout(() => {
-            resolve(true);
-         }, 100);
-      });
-      if (!theEditor._timeToPullData) return;
 
       return new Promise((resolve, reject) => {
          let haveResolved = false;
