@@ -39,6 +39,12 @@ class Performance {
    error() {}
    mark() {}
    measure() {}
+   notify(domain, error, info) {
+      console.group(`Notify ${domain}:`);
+      console.error(error);
+      console.log("context", info);
+      console.groupEnd();
+   }
    setContext() {}
 }
 
@@ -87,6 +93,17 @@ class SentryPerformance extends Performance {
          this.childSpans[key]?.finish?.();
          delete this.childSpans[key];
       }
+   }
+
+   notify(domain, error, info) {
+      const scope = new Sentry.Scope();
+      // Mark builder alerts as lower level in sentry
+      if (domain == "builder") scope.setLevel("warning");
+      scope.setTag("domain", domain);
+      scope.setContext("info", info);
+      Sentry.captureException(error, scope);
+      // Also log to console:
+      super.notify();
    }
 
    setContext(key, data) {
@@ -197,6 +214,17 @@ class PerformanceInterface {
     */
    measure(key) {
       this._source.measure(key);
+   }
+
+   /**
+    * Implements AB.notify which will log differently depending on our tracking
+    * option
+    * @param {string} domain which group of people we are sending a notification to.
+    * @param {Error} error An error object generated at the point of issue.
+    * @param {json} info Additional related information concerning the issue.
+    */
+   notify(domain, error, info) {
+      this._source.notify(domain, error, info);
    }
 
    /**

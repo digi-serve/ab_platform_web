@@ -4,8 +4,7 @@ import _ from "lodash";
 import moment from "moment";
 import { nanoid } from "nanoid";
 import { v4 as uuidv4 } from "uuid";
-import * as Sentry from "@sentry/browser";
-
+import performance from "../utils/performance";
 import FilterComplex from "./platform/FilterComplex";
 
 //
@@ -815,25 +814,14 @@ class ABFactory extends ABFactoryCore {
    // }
 
    /**
-    * notify()
     * will send alerts to a group of people. These alerts are usually about
     * configuration errors, or software problems.
-    * @param {string} domain
-    *     which group of people we are sending a notification to.
-    * @param {Error} error
-    *     An error object generated at the point of issue.
-    * @param {json} info
-    *     Additional related information concerning the issue.
+    * @param {string} domain which group of people we are sending a notification to.
+    * @param {Error} error An error object generated at the point of issue.
+    * @param {json} info Additional related information concerning the issue.
     */
    notify(domain, error, info) {
-      const scope = new Sentry.Scope();
-      // Mark builder alerts as lower level in sentry
-      if (domain == "builder") scope.setLevel("warning");
-      scope.setTag("domain", domain);
-      scope.setContext("info", info);
-      Sentry.captureException(error, scope);
-      console.error(error);
-      console.error(info);
+      performance.notify(domain, error, info);
    }
 
    plugins() {
