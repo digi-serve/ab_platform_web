@@ -177,6 +177,20 @@ class Config {
       return ConfigDesktop;
    }
 
+   /**
+    * @typedef User - based on SITE_USER
+    * @property {string} email email address
+    * @property {string} id
+    * @property {number} isActive wether the user is active in the system
+    * @property {string} languageCode
+    * @property {string} username
+    * ...
+    */
+
+   /**
+    * Information about the current user
+    * @returns {User}
+    */
    userConfig() {
       if (this._config && this._config.user) {
          return this._config.user;
