@@ -176,8 +176,8 @@ module.exports = class ABViewFormButton extends ABViewFormItemComponent {
                this.AB.notifyDeveloper(e, {
                   context:
                      "formButton.onSave > catch err > saveButton.enable()",
-                  buttonID: this.view.id,
-                  formID: this.view.parent.id,
+                  buttonID: this?.view?.id,
+                  formID: this?.view?.parent?.id,
                });
             }
          });
