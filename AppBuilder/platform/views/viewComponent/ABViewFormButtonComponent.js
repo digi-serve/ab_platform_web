@@ -168,7 +168,18 @@ module.exports = class ABViewFormButton extends ABViewFormItemComponent {
          })
          .catch((err) => {
             console.error(err);
-            saveButton.enable?.();
+            // Catch uncaught error reported in Sentry and add context
+            // APPBUILDER-WEB-1A3(https://appdev-designs.sentry.io/issues/4631880265/)
+            try {
+               saveButton.enable?.();
+            } catch (e) {
+               this.AB.notifyDeveloper(e, {
+                  context:
+                     "formButton.onSave > catch err > saveButton.enable()",
+                  buttonID: this?.view?.id,
+                  formID: this?.view?.parent?.id,
+               });
+            }
          });
    }
 };
