@@ -2,11 +2,11 @@
  * Performance - utility to track performance of the web platform
  * Written initally for sentry, but could be extended to support others
  * tracking tools.
- * Also can supports the User timing API for lighthouse / local dev
+ * Also supports the User timing API for lighthouse / local dev
  */
 
 import * as Sentry from "@sentry/browser";
-/* These come form the DefinePlugin in webpack  */
+/* These come from the DefinePlugin in webpack  */
 let webpackMode = "development";
 let version, dsn;
 try {
@@ -121,7 +121,7 @@ class SentryPerformance extends Performance {
 }
 
 /*
- * Browser Performance tracking - uses the Performance API
+ * Browser Performance tracking - uses the User Timing API
  */
 class BrowserPerformnace extends Performance {
    error(err) {

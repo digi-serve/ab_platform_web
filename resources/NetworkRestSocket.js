@@ -91,7 +91,7 @@ class NetworkRestSocket extends NetworkRest {
             op: "websocket.client",
             data: {
                http: {
-                  query,
+                  query: query || undefined,
                   method: params.method,
                },
                url: params.url,
@@ -109,7 +109,7 @@ class NetworkRestSocket extends NetworkRest {
          io.socket.request(params, (data, jwres) => {
             // {json} data
             // the data response from the request
-            // {json} jwres :
+            // {json} jwres
             // A JSON WebSocket Response object.
             //    {json} jwres.headers :  header values
             //    {int}  jwres.statusCode : http response code
