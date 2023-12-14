@@ -99,6 +99,7 @@ class Bootstrap extends EventEmitter {
       await initConfig.init(this);
       performance.measure("initConfig");
       const userInfo = Config.userConfig();
+      let definitionsLoading;
       if (userInfo) {
          // load definitions for current user
          performance.setContext("user", {
@@ -106,8 +107,9 @@ class Bootstrap extends EventEmitter {
          });
          preloadMessage("Loading App Definitions");
          performance.mark("initDefinitions", { op: "function" });
-         await initDefinitions.init(this);
-         performance.measure("initDefinitions");
+         definitionsLoading = initDefinitions
+            .init(this)
+            .then(() => performance.measure("initDefinitions"));
       }
       // 2.5) Load any plugins
       performance.mark("loadPlugins", { op: "fucntion" });
@@ -147,13 +149,13 @@ class Bootstrap extends EventEmitter {
             allPluginsLoaded.push(loading);
          });
       }
-      await Promise.all(allPluginsLoaded);
-      performance.measure("loadPlugins");
+      const pluginsLoading = Promise.all(allPluginsLoaded).then(() => performance.measure("loadPlugins"));
       // 3) Now we have enough info, to create an instance of our
       //    {ABFactory} that drives the rest of the AppBuilder objects
       performance.mark("createABFactory", { op: "function" });
       preloadMessage("Starting AppBuilder");
 
+      if (definitionsLoading) await definitionsLoading;
       const { default: ABFactory } = await loadABFactory;
       let definitions = Config.definitions() || null;
 
@@ -161,6 +163,7 @@ class Bootstrap extends EventEmitter {
          // NOTE: when loading up an unauthorized user,
          // definitions will be null: we can skip the plugins
          // Q: is it possible to load a plugin when unauthorized?
+         await pluginsLoading;
          this._plugins.forEach((p) => {
             definitions = definitions.concat(p.definitions());
          });
