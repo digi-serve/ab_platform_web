@@ -9,8 +9,6 @@ import events from "events";
 
 const EventEmitter = events.EventEmitter;
 
-import * as Sentry from "@sentry/browser";
-
 import Config from "../config/Config.js";
 
 import FormIO from "../node_modules/formiojs/dist/formio.full.min.js";

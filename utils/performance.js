@@ -141,15 +141,17 @@ class BrowserPerformnace extends Performance {
          const mark = window.performance.getEntriesByName(key, "mark")[0];
          const measure = window.performance.measure(key, {
             start: key,
-            detail: mark.detail,
+            detail: mark?.detail,
          });
          if (this.mainSpanKey === key) {
-            console.log(`${measure.name} finished in ${measure.duration} ms`);
-            console.table(window.performance.getEntriesByType("measure"), [
-               "name",
-               "duration",
-               "startTime",
-            ]);
+            console.groupCollapsed(
+               `${measure.name} finished in ${measure.duration} ms`
+            );
+            const entries = window.performance.getEntriesByType("measure");
+            if (entries.length > 1)
+               console.table(entries, ["name", "duration", "startTime"]);
+            else console.log(measure);
+            console.groupEnd();
             delete this.mainSpanKey;
             window.performance.clearMarks();
             window.performance.clearMeasures();

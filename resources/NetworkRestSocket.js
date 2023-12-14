@@ -4,8 +4,8 @@
  * and outlines the basic Network interface.
  */
 
+import performance from "../utils/performance";
 import NetworkRest from "./NetworkRest";
-import * as Sentry from "@sentry/browser";
 
 const listSocketEvents = [
    // NOTE: ABFactory.definitionXXX() will manage emitting these
@@ -79,24 +79,37 @@ class NetworkRestSocket extends NetworkRest {
       return io.socket.isConnected();
    }
 
-   // Wrap the call with senrty span for perfromance tracking
-   async salSend(params) {
-      const shortRoute =
-         params.url.match(/https?:\/\/[^/]+(\/.+)/)?.[1] ?? params.url;
-      return Sentry.startSpan(
-         { name: shortRoute, op: "websocket.client" },
-         async () => await this._salSend(params)
-      );
-   }
+   salSend(params) {
+      let route, query;
+      try {
+         // Extract paramitized route (ex: `/app_builder/model/:ID`) for performance tracking
+         [, route, query] = params.url.match(
+            /https?:\/\/[^/]+(\/[^?]+)\??(.*)/
+         );
+         route = route.replace(/\b[a-fA-F\d-]{36}\b/g, ":ID");
+         performance.mark(route, {
+            op: "websocket.client",
+            data: {
+               http: {
+                  query,
+                  method: params.method,
+               },
+               url: params.url,
+            },
+         });
+      } catch (err) {
+         this.AB.notifyDeveloper(err, {
+            context: `salSend() create performance.mark`,
+         });
+      }
 
-   _salSend(params) {
       return new Promise((resolve, reject) => {
          params.method = params.method.toLowerCase();
 
          io.socket.request(params, (data, jwres) => {
             // {json} data
             // the data response from the request
-            // {json} jwres
+            // {json} jwres :
             // A JSON WebSocket Response object.
             //    {json} jwres.headers :  header values
             //    {int}  jwres.statusCode : http response code
@@ -128,7 +141,9 @@ class NetworkRestSocket extends NetworkRest {
                }
 
                if (typeof data == "string") {
+                  performance.mark("JSON.parse", { op: "serialize" });
                   data = JSON.parse(data);
+                  performance.measure("JSON.parse");
                }
 
                // Got a JSON response but was the service response an error?
@@ -142,6 +157,7 @@ class NetworkRestSocket extends NetworkRest {
                }
                // Success!
                else {
+                  performance.measure(route);
                   resolve(data);
                }
             }
