@@ -85,16 +85,16 @@ class Bootstrap extends EventEmitter {
 
       preloadMessage("Waiting for the API Server");
 
-      performance.mark("bootstrap");
+      performance.mark("bootstrap", { op: "function" });
       // on the web platform, we need to gather the appropriate configuration
       // information before we can show the UI
       // 1) Find or create the DIV element our UI is to attach to
       //    this DIV element can contain settings pertainent to our setup
-      performance.mark("initDiv");
+      performance.mark("initDiv", { op: "ui.render" });
       await initDiv.init(this);
       performance.measure("initDiv");
       // 2) Request the User's Configuration Information from the server.
-      performance.mark("initConfig");
+      performance.mark("initConfig", { op: "function" });
       preloadMessage("Getting Configuration Settings");
       await initConfig.init(this);
       performance.measure("initConfig");
@@ -105,7 +105,7 @@ class Bootstrap extends EventEmitter {
             id: userInfo.id,
          });
          preloadMessage("Loading App Definitions");
-         performance.mark("initDefinitions");
+         performance.mark("initDefinitions", { op: "function" });
          await initDefinitions.init(this);
          performance.measure("initDefinitions");
       }
@@ -151,7 +151,7 @@ class Bootstrap extends EventEmitter {
       performance.measure("loadPlugins");
       // 3) Now we have enough info, to create an instance of our
       //    {ABFactory} that drives the rest of the AppBuilder objects
-      performance.mark("createABFactory");
+      performance.mark("createABFactory", { op: "function" });
       preloadMessage("Starting AppBuilder");
 
       const { default: ABFactory } = await loadABFactory;
@@ -200,7 +200,7 @@ class Bootstrap extends EventEmitter {
       performance.measure("createABFactory");
 
       // 4) Now we can create the UI and send it the {ABFactory}
-      performance.mark("initUI");
+      performance.mark("initUI", { op: "ui.render" });
       // webix recommends wrapping any webix code in the .ready()
       // function that executes after page loading.
       webix.ready(() => {

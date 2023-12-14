@@ -6,7 +6,6 @@
  */
 
 import * as Sentry from "@sentry/browser";
-
 /* These come form the DefinePlugin in webpack  */
 let webpackMode = "development";
 let version, dsn;
@@ -40,9 +39,9 @@ class Performance {
    mark() {}
    measure() {}
    notify(domain, error, info) {
-      console.group(`Notify ${domain}:`);
+      console.groupCollapsed(`Notify ${domain}: ${error?.message ?? ""}`);
       console.error(error);
-      console.log("context", info);
+      console.log("info", info);
       console.groupEnd();
    }
    setContext() {}
@@ -73,7 +72,7 @@ class SentryPerformance extends Performance {
       Sentry.captureException(err);
    }
 
-   mark(key, context) {
+   mark(key, context = {}) {
       context.name = key;
       if (!this.mainSpan) {
          this.mainSpanKey = key;
@@ -88,7 +87,7 @@ class SentryPerformance extends Performance {
          this.mainSpan.finish();
          delete this.mainSpan;
          delete this.mainSpanKey;
-         delete this.childSpans;
+         this.childSpans = {};
       } else {
          this.childSpans[key]?.finish?.();
          delete this.childSpans[key];
@@ -103,7 +102,7 @@ class SentryPerformance extends Performance {
       scope.setContext("info", info);
       Sentry.captureException(error, scope);
       // Also log to console:
-      super.notify();
+      super.notify(domain, error, info);
    }
 
    setContext(key, data) {
@@ -157,7 +156,7 @@ class BrowserPerformnace extends Performance {
             window.performance.clearMeasures();
          }
       } catch (e) {
-         console.warn(e);
+         // console.warn(e);
       }
    }
 }
@@ -187,7 +186,7 @@ class PerformanceInterface {
    init() {
       if (this.initialized) return;
       this._source.init();
-      console.log("Performance.init() complete", mode);
+      // console.log("Performance.init() complete", mode);
       this.initialized = true;
    }
 
@@ -235,19 +234,7 @@ class PerformanceInterface {
     * @pram {object} data
     */
    setContext(key, data) {
-      if (this.mode === "sentry") {
-         switch (key) {
-            case "tags":
-               Sentry.setTags(data);
-               break;
-            case "user":
-               Sentry.setUser(data);
-               break;
-            default:
-               Sentry.setContext(key, data);
-               break;
-         }
-      }
+      this._source.setContext(key, data);
    }
 }
 
