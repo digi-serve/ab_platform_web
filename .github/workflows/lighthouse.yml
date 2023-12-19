@@ -1,0 +1,59 @@
+name: Lighthouse CI
+on:
+   pull_request:
+      branches: ["master"]
+jobs:
+   lighthouse:
+      runs-on: ubuntu-latest
+      steps:
+         - uses: actions/checkout@v3
+           with:
+              path: ab_platform_web
+              submodules: true
+
+         - uses: actions/checkout@v3
+           with:
+              path: web
+              repository: digi-serve/ab_service_web
+              token: ${{ secrets.GITHUB_TOKEN }}
+              ref: master
+
+         - run: npm i
+           working-directory: ./ab_platform_web
+
+         - name: Webpack
+           run: npm run build:update
+           working-directory: ./ab_platform_web
+
+         # webpack expects the folder to be called "web" ab-install action expects "ab_service_web"
+         - run: mv web ab_service_web
+
+         - uses: digi-serve/ab-install-action@v1
+           with:
+              repository: digi-serve/ab_service_web
+
+         - run: npm install pm2@latest -g
+         - name: Save Logs
+           run: pm2 start ./logs.js -- --toFile logs/ABServices.log
+           working-directory: ./AppBuilder
+
+         - name: Wait for AB
+           uses: ifaxity/wait-on-action@v1
+           with:
+              resource: http://localhost
+              timeout: 300000
+
+         - name: run Lighthouse CI
+           run: |
+              npm install -g @lhci/cli
+              lhci autorun
+           env:
+              LHCI_UPLOAD__TARGET: "temporary-public-storage"
+              LHCI_COLLECT__URL: "http://localhost"
+              LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+
+         - uses: actions/upload-artifact@v2
+           if: failure()
+           with:
+              name: ABServices.log
+              path: ./AppBuilder/logs/ABServices.log
