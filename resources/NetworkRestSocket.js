@@ -98,7 +98,7 @@ class NetworkRestSocket extends NetworkRest {
             },
          });
       } catch (err) {
-         this.AB.notifyDeveloper(err, {
+         this.AB.notify.developer(err, {
             context: `salSend() create performance.mark`,
          });
       }
