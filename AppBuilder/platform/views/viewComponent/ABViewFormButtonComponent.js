@@ -173,7 +173,7 @@ module.exports = class ABViewFormButton extends ABViewFormItemComponent {
             try {
                saveButton.enable?.();
             } catch (e) {
-               this.AB.notifyDeveloper(e, {
+               this.AB.notify.developer(e, {
                   context:
                      "formButton.onSave > catch err > saveButton.enable()",
                   buttonID: this?.view?.id,
