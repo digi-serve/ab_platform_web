@@ -45,12 +45,14 @@ jobs:
 
          - name: run Lighthouse CI
            run: |
-              npm install -g @lhci/cli
+              npm install -g @lhci/cli puppeteer
               lhci autorun
+           working-directory: ./ab_platform_web
            env:
               LHCI_UPLOAD__TARGET: "temporary-public-storage"
               LHCI_COLLECT__URL: "http://localhost"
               LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+              LHCI_COLLECT__PUPPETEER_SCRIPT: "ciLighthouseAuth.js"
 
          - uses: actions/upload-artifact@v2
            if: failure()
