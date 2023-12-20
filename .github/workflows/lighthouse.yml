@@ -50,7 +50,7 @@ jobs:
            working-directory: ./ab_platform_web
            env:
               LHCI_UPLOAD__TARGET: "temporary-public-storage"
-              LHCI_COLLECT__URL: "http://localhost"
+              LHCI_COLLECT__URL: "http://127.0.0.1"
               LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
               LHCI_COLLECT__PUPPETEER_SCRIPT: "ciLighthouseAuth.js"
 
