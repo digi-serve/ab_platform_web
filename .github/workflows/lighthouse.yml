@@ -54,6 +54,40 @@ jobs:
               LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
               LHCI_COLLECT__PUPPETEER_SCRIPT: "ciLighthouseAuth.js"
 
+         - id: get_report
+           run: |
+              echo "LH_REPORT_A=$(ls | grep lhr- | grep .json | sed -n 1p)" >> $GITHUB_OUTPUT
+              echo "LH_REPORT_B=$(ls | grep lhr- | grep .json | sed -n 2p)" >> $GITHUB_OUTPUT
+              echo "LH_REPORT_C=$(ls | grep lhr- | grep .json | sed -n 3p)" >> $GITHUB_OUTPUT
+           working-directory: ./ab_platform_web/.lighthouseci
+
+         - id: generate_comment
+           uses: actions/github-script@v7
+           env:
+              REPORT_A: ${{ steps.get_report.outputs.LH_REPORT_A }}
+              REPORT_B: ${{ steps.get_report.outputs.LH_REPORT_B }}
+              REPORT_C: ${{ steps.get_report.outputs.LH_REPORT_C }}
+           with:
+              script: |
+                 const reports = [
+                    require(`./ab_platform_web/.lighthouseci/${process.env.REPORT_A}`),
+                    require(`./ab_platform_web/.lighthouseci/${process.env.REPORT_B}`),
+                    require(`./ab_platform_web/.lighthouseci/${process.env.REPORT_C}`),
+                 ];
+                 const links = require("./ab_platform_web/.lighthouseci/links.json");
+                 const score = Math.round(
+                    reports.map(r => r.categories.performance.score).reduce((a,b) => a + b) / 3 * 100
+                 );
+                 const color = score - 49 <= 0 ? "red" : score - 89 <= 0 ? "orange": "green"
+                 const link = links[Object.keys(links)[0]];
+                 return `[![badge](https://img.shields.io/badge/Lighthouse%20Performance-${score}-${color}?style=for-the-badge&logo=lighthouse&logoColor=%23F44B21)](${link})`;
+
+         - uses: NejcZdovc/comment-pr@v2
+           with:
+              message: ${{ steps.generate_comment.outputs.result }}
+           env:
+              GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
          - uses: actions/upload-artifact@v2
            if: failure()
            with:
