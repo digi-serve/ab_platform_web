@@ -8,4 +8,5 @@
 ![](https://img.shields.io/badge/Cumulative%20Layout%20Shift-{CLS}-{CLS_COLOR}?style=flat-square&labelColor=white)
 ![](https://img.shields.io/badge/Speed%20Index-{SPEED}-{SPEED_COLOR}?style=flat-square&labelColor=white)
 -------
-📄[Full Report]({LINK})
+📄[Full Report]({LINK}) 
+*Note: Above values are an average of 3 reports, only the last report was uploaded.*
