@@ -75,16 +75,46 @@ jobs:
                     require(`./ab_platform_web/.lighthouseci/${process.env.REPORT_C}`),
                  ];
                  const links = require("./ab_platform_web/.lighthouseci/links.json");
-                 const score = Math.round(
-                    reports.map(r => r.categories.performance.score).reduce((a,b) => a + b) / 3 * 100
-                 );
-                 const color = score - 49 <= 0 ? "red" : score - 89 <= 0 ? "orange": "green"
-                 const link = links[Object.keys(links)[0]];
-                 return `[![badge](https://img.shields.io/badge/Lighthouse%20Performance-${score}-${color}?style=for-the-badge&logo=lighthouse&logoColor=%23F44B21)](${link})`;
+                 const getColor = (score) => score - 49 <= 0 ? "#FF3333" : score - 89 <= 0 ? "#FFAA33": "#00CC66";
+                 const average = (vals, multiply = 1) => Math.round(vals.reduce((a,b) => a + b) / vals.length * multiply);
+                 const extractDetails = (key) => {
+                    const reportEntry = reports[0].audits[key];
+                    const details = {
+                       title: reportEntry.title,
+                       score: average(reports.map(r => r.audits[key].score), 100),
+                    };
+                    details.color = getColor(details.color);
+                    if (reportEntry.scoreDisplayMode === "numeric") {
+                       details.score = average(reports.map(r => r.audits[key].numericValue));
+                       details.units = reportEntry.numericUnit === "millisecond" ? "ms" : reportEntry.numericUnit;
+                    }
+                    return details;
+                 }
+                 const performance = average(reports.map(r => r.categories.performance.score), 100);
+                 core.exportVariable("PERFORMANCE", performance);
+                 core.exportVariable("PERFORMANCE_COLOR", getColor(performance));
+                 const fcp = extractDetails("first-contentful-paint");
+                 core.exportVariable("FCP", `${fcp.score} ${fcp.units}`);
+                 core.exportVariable("FCP_COLOR", fcp.color);
+                 const lcp = extractDetails("largest-contentful-paint");
+                 core.exportVariable("LCP", `${lcp.score} ${lcp.units}`);
+                 core.exportVariable("LCP_COLOR", lcp.color);
+                 const tbt = extractDetails("total-blocking-time");
+                 core.exportVariable("TBT", `${tbt.score} ${tbt.units}`);
+                 core.exportVariable("TBT_COLOR", tbt.color);
+                 const cls = extractDetails("cumulative-layout-shift");
+                 core.exportVariable("CLS", `${cls.score} ${cls.units}`);
+                 core.exportVariable("CLS_COLOR", cls.color);
+                 const speed = extractDetails("speed-index");
+                 core.exportVariable("SPEED", `${speed.score} ${speed.units}`);
+                 core.exportVariable("SPEED_COLOR", speed.color);
+                 core.exportVariable("LINK", links[Object.keys(links)[0]]);
 
+         - uses: actions/checkout@v3
          - uses: NejcZdovc/comment-pr@v2
            with:
-              message: ${{ steps.generate_comment.outputs.result }}
+              file: lighthouse.md
+              identifier: LIGHTHOUSE_REPORT
            env:
               GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
