@@ -14,7 +14,8 @@ import "./js/webix/webix.min.css";
 
 import "./styles/ui.css";
 
-import "./init/sentry.js";
+import performance from "./utils/performance";
+performance.init();
 
 // NOTE: keep Font Awesome AFTER webix css so webix wont
 // override our icon styles

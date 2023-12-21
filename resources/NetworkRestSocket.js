@@ -4,8 +4,8 @@
  * and outlines the basic Network interface.
  */
 
+import performance from "../utils/performance";
 import NetworkRest from "./NetworkRest";
-import * as Sentry from "@sentry/browser";
 
 const listSocketEvents = [
    // NOTE: ABFactory.definitionXXX() will manage emitting these
@@ -49,15 +49,12 @@ class NetworkRestSocket extends NetworkRest {
                      let model = obj.model();
                      if (ev != "ab.datacollection.delete") {
                         let jobID = this.AB.jobID();
-                        console.log(`${jobID} : ${ev}:normalization begin`);
-                        let timeFrom = performance.now();
+                        performance.mark(`${ev}:normalization`, {
+                           op: "function",
+                           data: { jobID },
+                        });
                         model.normalizeData(data.data);
-                        let timeTo = performance.now();
-                        console.log(
-                           `${jobID} : ${ev}:normalization end:  ${
-                              timeTo - timeFrom
-                           }ms`
-                        );
+                        performance.measure(`${ev}:normalization`);
                      }
                   }
                }
@@ -79,17 +76,30 @@ class NetworkRestSocket extends NetworkRest {
       return io.socket.isConnected();
    }
 
-   // Wrap the call with senrty span for perfromance tracking
-   async salSend(params) {
-      const shortRoute =
-         params.url.match(/https?:\/\/[^/]+(\/.+)/)?.[1] ?? params.url;
-      return Sentry.startSpan(
-         { name: shortRoute, op: "websocket.client" },
-         async () => await this._salSend(params)
-      );
-   }
+   salSend(params) {
+      let route, query;
+      try {
+         // Extract paramitized route (ex: `/app_builder/model/:ID`) for performance tracking
+         [, route, query] = params.url.match(
+            /https?:\/\/[^/]+(\/[^?]+)\??(.*)/
+         );
+         route = route.replace(/\b[a-fA-F\d-]{36}\b/g, ":ID");
+         performance.mark(route, {
+            op: "websocket.client",
+            data: {
+               http: {
+                  query: query || undefined,
+                  method: params.method,
+               },
+               url: params.url,
+            },
+         });
+      } catch (err) {
+         this.AB.notify.developer(err, {
+            context: `salSend() create performance.mark`,
+         });
+      }
 
-   _salSend(params) {
       return new Promise((resolve, reject) => {
          params.method = params.method.toLowerCase();
 
@@ -128,7 +138,9 @@ class NetworkRestSocket extends NetworkRest {
                }
 
                if (typeof data == "string") {
+                  performance.mark("JSON.parse", { op: "serialize" });
                   data = JSON.parse(data);
+                  performance.measure("JSON.parse");
                }
 
                // Got a JSON response but was the service response an error?
@@ -142,6 +154,7 @@ class NetworkRestSocket extends NetworkRest {
                }
                // Success!
                else {
+                  performance.measure(route);
                   resolve(data);
                }
             }

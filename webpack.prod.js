@@ -2,6 +2,7 @@ const { merge } = require("webpack-merge");
 const common = require("./webpack.common.js");
 const CompressionPlugin = require("compression-webpack-plugin");
 const webpack = require("webpack");
+const { sentryWebpackPlugin } = require("@sentry/webpack-plugin");
 
 module.exports = merge(common, {
    mode: "production",
@@ -12,6 +13,14 @@ module.exports = merge(common, {
       new webpack.DefinePlugin({
          WEBPACK_MODE: JSON.stringify("production"),
          VERSION: JSON.stringify(process.env.npm_package_version),
+         SENTRY_DSN: JSON.stringify(
+            "https://c16443e39a66eae141954dfd23890812@o144358.ingest.sentry.io/4505832903147520"
+         ),
+      }),
+      sentryWebpackPlugin({
+         authToken: process.env.SENTRY_AUTH_TOKEN,
+         org: "appdev-designs",
+         project: "appbuilder-web",
       }),
    ],
    devtool: "source-map",
