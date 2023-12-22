@@ -190,7 +190,7 @@ module.exports = class ABHint extends ABHintCore {
       let dontShow = `<label class="dontShow">
                         <input onclick="webix.storage.cookie.put(this.dataset.hintId, {'hide': this.checked});" data-hint-id="${
                            this.id
-                        }" type="checkbox"> 
+                        }" type="checkbox">
                         ${L("Don't show this again.")}
                      </label>`;
       this.stepIDs.forEach((step) => {
@@ -253,7 +253,15 @@ module.exports = class ABHint extends ABHintCore {
 
       webix.delay(
          () => {
-            webix.ui(ui).start();
+            try {
+               webix.ui(ui).start();
+            } catch (err) {
+               this.AB.notify.developer(err, {
+                  context:
+                     "ABHint.createUIHint() error calling webix.ui(ui).start()",
+                  ui,
+               });
+            }
          },
          null,
          null,

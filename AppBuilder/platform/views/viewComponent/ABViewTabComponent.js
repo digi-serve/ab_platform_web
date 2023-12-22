@@ -228,7 +228,7 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
                      );
 
                   baseView.views((view) => {
-                     const node = $sidebar.$view.querySelector(
+                     const node = $sidebar?.$view?.querySelector(
                         `[webix_tm_id="${view.id}_menu"]`
                      );
 
