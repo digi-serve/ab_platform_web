@@ -63,17 +63,30 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
       const $dataView = $$(ids.dataview);
       AB.Webix.extend($dataView, AB.Webix.ProgressBar);
       dc.bind($dataView);
+
+      window.addEventListener("resize", () => {
+         clearTimeout(this._resizeEvent);
+         this._resizeEvent = setTimeout(() => {
+            this.resize($dataView.getParentView());
+            delete this._resizeEvent;
+         }, 20);
+      });
    }
 
    onShow() {
       super.onShow();
 
+      this.resize();
+   }
+
+   resize(base_element) {
       const $dataview = $$(this.ids.dataview);
       $dataview.resize();
 
-      const item_width = this.getItemWidth();
+      const item_width = this.getItemWidth(base_element);
       $dataview.customize({ width: item_width });
       $dataview.getTopParentView?.().resize?.();
+
    }
 
    initDetailComponent() {
@@ -153,10 +166,10 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
       return tmp_dom.innerHTML.replace(/#itemId#/g, item.id);
    }
 
-   getItemWidth() {
+   getItemWidth(base_element) {
       const $dataview = $$(this.ids.dataview);
 
-      let currElem = $dataview;
+      let currElem = base_element ?? $dataview;
       let parentWidth = currElem?.$width;
       while (currElem) {
          if (
@@ -171,6 +184,9 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
 
       if (!parentWidth)
          parentWidth = $dataview?.getParentView?.().$width || window.innerWidth;
+
+      if (parentWidth > window.innerWidth)
+         parentWidth = window.innerWidth;
 
       // check if the browser window minus webix default padding is the same as the parent window
       // if so we need to check to see if there is a sidebar and reduce the usable space by the
