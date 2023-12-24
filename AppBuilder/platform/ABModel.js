@@ -98,7 +98,7 @@ module.exports = class ABModel extends ABModelCore {
             return;
          }
 
-         let jobID = this.AB.jobID();
+         // let jobID = this.AB.jobID();
          // console.log(`${jobID} : normalization begin`);
          // let timeFrom = performance.now();
          if (key) {

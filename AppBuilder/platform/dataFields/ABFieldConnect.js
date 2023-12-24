@@ -220,7 +220,10 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
    }
 
    formComponentMobile() {
-      return super.formComponent("mobile-connect");
+      if (this.settings.linkType == "many") {
+         return super.formComponent("mobile-selectmultiple");
+      }
+      return super.formComponent("mobile-selectsingle");
    }
 
    detailComponent() {

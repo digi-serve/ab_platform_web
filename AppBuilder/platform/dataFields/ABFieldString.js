@@ -57,39 +57,6 @@ module.exports = class ABFieldString extends ABFieldStringCore {
    }
 
    /**
-    * @method isValidData
-    * Parse through the given data and return an error if this field's
-    * data seems invalid.
-    * @param {obj} data  a key=>value hash of the inputs to parse.
-    * @param {OPValidator} validator  provided Validator fn
-    * @return {array}
-    */
-   isValidData(data, validator) {
-      super.isValidData(data, validator);
-
-      if (data && data[this.columnName]) {
-         const max_length = this.constructor.defaults().MAX_CHAR_LENGTH;
-
-         if (data[this.columnName].length > max_length) {
-            const L = this.AB.Label();
-            validator.addError(
-               this.columnName,
-               L("should NOT be longer than {0} characters", [max_length])
-            );
-         }
-      }
-   }
-
-   /*
-    * @property isMultilingual
-    * does this field represent multilingual data?
-    * @return {bool}
-    */
-   get isMultilingual() {
-      return this.settings.supportMultilingual == 1;
-   }
-
-   /**
     * @method formComponent
     * returns a drag and droppable component that is used on the UI
     * interface builder to place form components related to this ABField.
