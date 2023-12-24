@@ -2,7 +2,6 @@ const path = require("path");
 const APP = path.resolve(__dirname);
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
-const { sentryWebpackPlugin } = require("@sentry/webpack-plugin");
 
 module.exports = {
    context: APP,
@@ -45,11 +44,6 @@ module.exports = {
             "*.gz",
             "*.LICENSE.txt",
          ],
-      }),
-      sentryWebpackPlugin({
-         authToken: process.env.SENTRY_AUTH_TOKEN,
-         org: "appdev-designs",
-         project: "appbuilder-web",
       }),
    ],
    resolve: {

@@ -9,8 +9,6 @@ import events from "events";
 
 const EventEmitter = events.EventEmitter;
 
-import * as Sentry from "@sentry/browser";
-
 import Config from "../config/Config.js";
 
 import FormIO from "../node_modules/formiojs/dist/formio.full.min.js";
@@ -31,6 +29,8 @@ import selectivityCSS from "../js/selectivity/selectivity.min.css";
 import UI from "../ui/ui.js";
 import PreloadUI from "../ui/loading.js";
 import ErrorNoDefsUI from "../ui/error_noDefs.js";
+
+import performance from "../utils/performance.js";
 
 class Bootstrap extends EventEmitter {
    constructor(definitions) {
@@ -59,11 +59,11 @@ class Bootstrap extends EventEmitter {
       // the Webix Object that is our UI display
 
       this.on("error", (err) => {
-         Sentry.captureException(err);
+         performance.error(err);
       });
    }
 
-   init(ab) {
+   async init(ab) {
       // We rerun init after a sucessful login, at that point we already have AB.
       // This means we can use `AB.Network` over the fetch API when loading
       // config again. This prevents the session from being reset, which was
@@ -75,191 +75,179 @@ class Bootstrap extends EventEmitter {
       const loadABFactory = import("../AppBuilder/ABFactory");
       // @const {Promise} loadABFactory Defer loading the ABFactory for a smaller
       // inital file size, allowing us to show the loading UI sooner.
+
+      /**
+       * @type {Function} preloadMessage
+       * @description show a loading message
+       * @param {string} message to display on the loading screen
+       */
       const preloadMessage = (m) => this.ui().preloadMessage(m);
+
       preloadMessage("Waiting for the API Server");
+
+      performance.mark("bootstrap", { op: "function" });
       // on the web platform, we need to gather the appropriate configuration
       // information before we can show the UI
-      return (
-         // 1) Find or create the DIV element our UI is to attach to
-         //    this DIV element can contain settings pertainent to our setup
-         initDiv
+      // 1) Find or create the DIV element our UI is to attach to
+      //    this DIV element can contain settings pertainent to our setup
+      performance.mark("initDiv", { op: "ui.render" });
+      await initDiv.init(this);
+      performance.measure("initDiv");
+      // 2) Request the User's Configuration Information from the server.
+      performance.mark("initConfig", { op: "function" });
+      preloadMessage("Getting Configuration Settings");
+      await initConfig.init(this);
+      performance.measure("initConfig");
+      const userInfo = Config.userConfig();
+      let definitionsLoading;
+      if (userInfo) {
+         // load definitions for current user
+         performance.setContext("user", {
+            id: userInfo.id,
+         });
+         preloadMessage("Loading App Definitions");
+         performance.mark("initDefinitions", { op: "function" });
+         definitionsLoading = initDefinitions
             .init(this)
-            .then(() => {
-               // 2) Request the User's Configuration Information from the
-               //    server.
-               preloadMessage("Getting Configuration Settings");
-               return initConfig.init(this);
-            })
-            // load definitions for current user
-            .then(async () => {
-               if (Config.userConfig()) {
-                  Sentry.setUser({ username: Config.userConfig().username });
-                  preloadMessage("Loading App Definitions");
-                  await initDefinitions.init(this);
-               }
-            })
+            .then(() => performance.measure("initDefinitions"));
+      }
+      // 2.5) Load any plugins
+      performance.mark("loadPlugins", { op: "fucntion" });
+      // Make sure the BootStrap Object is available globally
+      window.__ABBS = this;
 
-            .then(() =>
-               // Wrap with sentry span to track performance
-               Sentry.startSpan(
-                  { name: "loading plugins", op: "function" },
-                  () => {
-                     // 2.5) Load any plugins
+      const allPluginsLoaded = [];
+      const tenantInfo = Config.tenantConfig();
 
-                     // Make sure the BootStrap Object is available globally
-                     window.__ABBS = this;
+      if (tenantInfo) {
+         performance.setContext("tenant", tenantInfo);
+         performance.setContext("tags", { tenant: tenantInfo.id });
+         const plugins = Config.plugins() || [];
 
-                     const allPluginsLoaded = [];
-                     const tenantInfo = Config.tenantConfig();
-
-                     if (tenantInfo) {
-                        Sentry.setContext("tenant", tenantInfo);
-                        Sentry.setTag("tenant", tenantInfo.id);
-                        const plugins = Config.plugins() || [];
-
-                        // Short Term Fix: Don't load ABDesigner for non builders (need a way to assign plugins to users/roles);
-                        const designerIndex = plugins.indexOf("ABDesigner.js");
-                        if (designerIndex > -1) {
-                           const builderRoles = [
-                              "6cc04894-a61b-4fb5-b3e5-b8c3f78bd331",
-                              "e1be4d22-1d00-4c34-b205-ef84b8334b19",
-                           ];
-                           const userInfo = Config.userConfig();
-                           const userBuilderRoles = userInfo?.roles.filter(
-                              (role) => builderRoles.indexOf(role.uuid) > -1
-                           ).length;
-                           // Remove if no builder roles
-                           if (userBuilderRoles < 1 || userInfo == null) {
-                              plugins.splice(designerIndex, 1);
-                           }
-                        }
-                        plugins.forEach((p) => {
-                           preloadMessage(`plugin (${p})`);
-                           // Wrap with sentry span to track performance
-                           const loading = Sentry.startSpan(
-                              { name: `plugin ${p}`, op: "resource.script" },
-                              () => loadScript(tenantInfo.id, p)
-                           );
-                           allPluginsLoaded.push(loading);
-                        });
-                     }
-                     return Promise.all(allPluginsLoaded);
-                  }
-               )
-            )
-
-            .then(async () => {
-               // 3) Now we have enough info, to create an instance of our
-               //    {ABFactory} that drives the rest of the AppBuilder objects
-               preloadMessage("Starting AppBuilder");
-               const { default: ABFactory } = await loadABFactory;
-
-               let definitions = Config.definitions() || null;
-
-               // Sanity Check:
-               // Prevent invalid defintion format
-               if (typeof definitions === "string") {
-                  try {
-                     definitions = JSON.parse(definitions);
-                  } catch (e) {
-                     /* what to do? */
-                  }
-               }
-
-               if (definitions) {
-                  // NOTE: when loading up an unauthorized user,
-                  // definitions will be null: we can skip the plugins
-                  // Q: is it possible to load a plugin when unauthorized?
-                  this._plugins.forEach((p) => {
-                     definitions = definitions.concat(p.definitions());
-                  });
-               }
-               this.AB = new ABFactory(definitions);
-
-               // NOTE: special case: User has no Roles defined.
-               // direct them to our special ErrorNoDefsUI
-               const userConfig = this.AB.Config.userConfig();
-
-               if (userConfig && userConfig.roles.length == 0) {
-                  await this.AB.init();
-                  ErrorNoDefsUI.init(this.AB);
-                  ErrorNoDefsUI.attach();
-                  if (Config.userReal()) {
-                     ErrorNoDefsUI.switcherooUser(Config.userConfig());
-                  }
-                  this.ui().destroy(); // remove the preloading screen
-                  this.ui(ErrorNoDefsUI);
-
-                  let err = new Error("No Definitions");
-                  err.code = "ENODEFS";
-                  throw err;
-               }
-
-               if (!window.AB) window.AB = this.AB;
-
-               // Make our Factory Global.
-               // Transition: we still have some UI code that depends on accessing
-               // our Factory as a Global var.  So until those are rewritten we will
-               // make our factory Global.
-
-               return this.AB.init().then(() => {
-                  // 3.5  prepare the plugins
-                  this._plugins.forEach((p) => {
-                     p.apply(this.AB);
-                     const labels = p.labels(
-                        this.AB.Multilingual.currentLanguage()
-                     );
-                     this.AB.Multilingual.pluginLoadLabels(p.key, labels);
-                  });
-               });
-            })
-
-            .then(() => {
-               // 4) Now we can create the UI and send it the {ABFactory}
-               return Promise.resolve().then(() => {
-                  // webix recommends wrapping any webix code in the .ready()
-                  // function that executes after page loading.
-                  webix.ready(() => {
-                     const locales = {
-                        en: "en-US",
-                        "zh-hans": "zh-CN",
-                        th: "th-TH",
-                     };
-                     // locales - map ab languageCode to webix locale
-                     const { languageCode } = AB.Config.userConfig() ?? {};
-                     // save the webix locale used to set locale in ClassUIPage.renderPage()
-                     window.webixLocale =
-                        Object.prototype.hasOwnProperty.call(
-                           locales,
-                           languageCode
-                        ) &&
-                        Object.prototype.hasOwnProperty.call(
-                           webix.i18n.locales,
-                           locales[languageCode]
-                        )
-                           ? locales[languageCode]
-                           : false;
-
-                     // webix pro offers a feature that hides scroll bars by
-                     // default for browsers that include them due to the user's
-                     // UI. The experience becomes more like a touch interface
-                     // with the exception that scroll bars appear when user
-                     // hovers over a scrollable area
-                     /* if (!Webix.env.touch  && Webix.env.scrollSize ) */
-                     webix.CustomScroll.init();
-
-                     const div = this.div();
-
-                     UI.attach(div.id);
-                     this.ui().destroy(); // remove the preloading screen
-                     this.ui(UI);
-                     this.ui().init(this.AB);
-                     // this.ui().init() routine handles the remaining
-                     // bootup/display process.
-                  });
-               });
-            })
+         // Short Term Fix: Don't load ABDesigner for non builders (need a way
+         // to assign plugins to users/roles);
+         const designerIndex = plugins.indexOf("ABDesigner.js");
+         if (designerIndex > -1) {
+            const builderRoles = [
+               "6cc04894-a61b-4fb5-b3e5-b8c3f78bd331",
+               "e1be4d22-1d00-4c34-b205-ef84b8334b19",
+            ];
+            const userBuilderRoles = userInfo?.roles.filter(
+               (role) => builderRoles.indexOf(role.uuid) > -1
+            ).length;
+            // Remove if no builder roles
+            if (userBuilderRoles < 1 || userInfo == null) {
+               plugins.splice(designerIndex, 1);
+            }
+         }
+         plugins.forEach((p) => {
+            preloadMessage(`plugin (${p})`);
+            performance.mark(`plugin:${p}`, { op: "resource.script" });
+            const loading = loadScript(tenantInfo.id, p).then(() =>
+               performance.measure(`plugin:${p}`)
+            );
+            allPluginsLoaded.push(loading);
+         });
+      }
+      const pluginsLoading = Promise.all(allPluginsLoaded).then(() =>
+         performance.measure("loadPlugins")
       );
+      // 3) Now we have enough info, to create an instance of our
+      //    {ABFactory} that drives the rest of the AppBuilder objects
+      performance.mark("createABFactory", { op: "function" });
+      preloadMessage("Starting AppBuilder");
+
+      if (definitionsLoading) await definitionsLoading;
+      const { default: ABFactory } = await loadABFactory;
+      let definitions = Config.definitions() || null;
+
+      if (definitions) {
+         // NOTE: when loading up an unauthorized user,
+         // definitions will be null: we can skip the plugins
+         // Q: is it possible to load a plugin when unauthorized?
+         await pluginsLoading;
+         this._plugins.forEach((p) => {
+            definitions = definitions.concat(p.definitions());
+         });
+      }
+      this.AB = new ABFactory(definitions);
+
+      if (!window.AB) window.AB = this.AB;
+      // Make our Factory Global.
+      // Transition: we still have some UI code that depends on accessing
+      // our Factory as a Global var.  So until those are rewritten we will
+      // make our factory Global.
+
+      await this.AB.init();
+      // NOTE: special case: User has no Roles defined.
+      // direct them to our special ErrorNoDefsUI
+      if (userInfo && userInfo.roles.length == 0) {
+         performance.measure("createABFactory");
+         ErrorNoDefsUI.init(this.AB);
+         ErrorNoDefsUI.attach();
+         if (Config.userReal()) {
+            ErrorNoDefsUI.switcherooUser(Config.userConfig());
+         }
+         this.ui().destroy(); // remove the preloading screen
+         this.ui(ErrorNoDefsUI);
+
+         let err = new Error("No Definitions");
+         err.code = "ENODEFS";
+         throw err;
+      }
+
+      // 3.5  prepare the plugins
+      this._plugins.forEach((p) => {
+         p.apply(this.AB);
+         const labels = p.labels(this.AB.Multilingual.currentLanguage());
+         this.AB.Multilingual.pluginLoadLabels(p.key, labels);
+      });
+      performance.measure("createABFactory");
+
+      // 4) Now we can create the UI and send it the {ABFactory}
+      performance.mark("initUI", { op: "ui.render" });
+      // webix recommends wrapping any webix code in the .ready()
+      // function that executes after page loading.
+      webix.ready(() => {
+         const locales = {
+            en: "en-US",
+            "zh-hans": "zh-CN",
+            th: "th-TH",
+         };
+         // locales - map ab languageCode to webix locale
+         const { languageCode } = AB.Config.userConfig() ?? {};
+         // save the webix locale used to set locale in ClassUIPage.renderPage()
+         window.webixLocale =
+            Object.prototype.hasOwnProperty.call(locales, languageCode) &&
+            Object.prototype.hasOwnProperty.call(
+               webix.i18n.locales,
+               locales[languageCode]
+            )
+               ? locales[languageCode]
+               : false;
+
+         // webix pro offers a feature that hides scroll bars by
+         // default for browsers that include them due to the user's
+         // UI. The experience becomes more like a touch interface
+         // with the exception that scroll bars appear when user
+         // hovers over a scrollable area
+         /* if (!Webix.env.touch  && Webix.env.scrollSize ) */
+         webix.CustomScroll.init();
+
+         const div = this.div();
+
+         UI.attach(div.id);
+         this.ui().destroy(); // remove the preloading screen
+         this.ui(UI);
+         this.ui()
+            .init(this.AB)
+            .then(() => {
+               performance.measure("initUI");
+               performance.measure("bootstrap");
+            });
+         // this.ui().init() routine handles the remaining
+         // bootup/display process.
+      });
    }
 
    addPlugin(plugin) {

@@ -9,6 +9,7 @@ module.exports = merge(common, {
       new webpack.DefinePlugin({
          WEBPACK_MODE: JSON.stringify("development"),
          VERSION: JSON.stringify(process.env.npm_package_version),
+         SENTRY_DSN: JSON.stringify(undefined),
       }),
    ],
 });
