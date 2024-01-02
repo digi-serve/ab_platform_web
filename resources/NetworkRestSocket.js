@@ -145,7 +145,7 @@ class NetworkRestSocket extends NetworkRest {
 
                // Got a JSON response but was the service response an error?
                // this would be a strange case where the .statusCode < 400
-               if (data.status && data.status == "error") {
+               if (data?.status && data?.status == "error") {
                   // make sure to reject an err.responseText = data
                   reject({
                      status: jwres.statusCode,
