@@ -16,10 +16,6 @@ module.exports = {
    module: {
       rules: [
          {
-            test: /\.css$/,
-            use: ["style-loader", "css-loader?url=false"],
-         },
-         {
             test: /\.(eot|woff|woff2|svg|ttf)([?]?.*)$/,
             use: ["url-loader?limit=10000000"],
          },
