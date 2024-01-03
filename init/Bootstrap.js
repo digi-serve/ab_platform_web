@@ -17,6 +17,7 @@ import "../node_modules/formiojs/dist/formio.builder.min.css";
 // import FormIOCSS from "../node_modules/formiojs/dist/formio.full.min.css";
 
 import initConfig from "../init/initConfig.js";
+import initConnectListerner from "../init/initConnectListerner.js";
 import initDiv from "../init/initDiv.js";
 import initDefinitions from "../init/initDefinitions.js";
 // import initResources from "../init/initResources.js";
@@ -115,6 +116,9 @@ class Bootstrap extends EventEmitter {
       performance.mark("loadPlugins", { op: "fucntion" });
       // Make sure the BootStrap Object is available globally
       window.__ABBS = this;
+
+      // Listen 'disconnect' event
+      initConnectListerner.init(this);
 
       const allPluginsLoaded = [];
       const tenantInfo = Config.tenantConfig();
