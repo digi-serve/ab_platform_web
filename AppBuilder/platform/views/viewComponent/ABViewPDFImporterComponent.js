@@ -1,4 +1,3 @@
-const PDFJS = require("pdfjs-dist");
 const ABViewComponent = require("./ABViewComponent").default;
 
 const SMALL_PAGE_WIDTH = 150;
@@ -283,6 +282,37 @@ module.exports = class ABViewPDFImporterComponent extends ABViewComponent {
       }
    }
 
+   onShow() {
+      this.initPdfjs();
+      super.onShow();
+   }
+
+   /**
+    * Loads the pdfjs dependecies. We defer loading since it is a large library
+    * that is not needed in the initial page load.
+    */
+   async initPdfjs() {
+      if (this.pdjfs && window.pdfjsWorker) return;
+      this.busy();
+      let loadingWorker;
+      if (!window.pdfjsWorker) {
+         loadingWorker = import(
+            /* webpackChunkName: "pdfjs.worker" */
+            /* webpackPrefetch: true */
+            "pdfjs-dist/build/pdf.worker.entry"
+         );
+      }
+      if (!this.pdfjs) {
+         this.pdfjs = await import(
+            /* webpackChunkName: "pdfjs" */
+            /* webpackPrefetch: true */
+            "pdfjs-dist"
+         );
+      }
+      if (loadingWorker) await loadingWorker;
+      this.ready();
+   }
+
    async _readFileBuffer() {
       const _csvFileInfo = this._csvFileInfo;
       if (!_csvFileInfo || !_csvFileInfo.file)
@@ -374,7 +404,7 @@ module.exports = class ABViewPDFImporterComponent extends ABViewComponent {
       if (!_csvFileInfo) return;
 
       const fileBuffer = await this._readFileBuffer();
-      this._pdfDoc = await PDFJS.getDocument(fileBuffer).promise;
+      this._pdfDoc = await this.pdfjs.getDocument(fileBuffer).promise;
 
       const total_page = this._pdfDoc.numPages;
       const $dataview = $$(this.ids.dataview);
