@@ -19,9 +19,10 @@ class PreloadUI extends ClassUI {
                            padding: 30,
                            rows: [
                               {
+                                 // .lds-default is a pure css loader from https://loading.io/
                                  template: `<div style='text-align: center; font-size:40px; line-height: 90px;'>
-                                       <i class="fa fa-spinner fa-pulse fa-2x fa-fw"></i>
-                                       <span class="sr-only">Loading...</span>
+                                          <div class="lds-default"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+                                          <span class="sr-only">Loading...</span>
                                     </div>`,
                                  borderless: true,
                                  height: 110,
