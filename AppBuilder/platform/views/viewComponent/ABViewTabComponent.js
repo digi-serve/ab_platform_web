@@ -323,7 +323,7 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
                                  baseView.views((view) => {
                                     const node = $$(
                                        ids.tab
-                                    ).$view.querySelector(
+                                    )?.$view?.querySelector(
                                        `[button_id="${view.id}"]`
                                     );
 

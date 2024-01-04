@@ -40,7 +40,7 @@ function _toInternal(cond, fields = []) {
       };
 
       if (Array.isArray(cond.value)) cond.includes = cond.value;
-      else cond.includes = (cond.value ?? "").split(",");
+      else cond.includes = cond.value?.split?.(",") ?? [];
 
       if (field?.key == "date" || field?.key == "datetime") {
          cond.condition.filter = cond.condition.filter
