@@ -371,12 +371,12 @@ module.exports = class ABViewPDFImporterComponent extends ABViewComponent {
                onFileUpload: (item, response) => {
                   // RETURN HERE
                   resolve(response?.data?.uuid);
-                  $uploader.destructor();
                },
                // if an error was returned
                onFileUploadError: (item, response) => {
                   reject(response);
                },
+               onUploadComplete: () => $uploader.destructor(),
             },
          });
 
