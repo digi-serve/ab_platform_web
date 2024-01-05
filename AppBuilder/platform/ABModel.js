@@ -66,7 +66,7 @@ module.exports = class ABModel extends ABModelCore {
       };
 
       this.handler_delete = (...params) => {
-         this.handler_common("ab.datacollection.update", ...params);
+         this.handler_common("ab.datacollection.delete", ...params);
       };
 
       this.handler_findAll = (...params) => {

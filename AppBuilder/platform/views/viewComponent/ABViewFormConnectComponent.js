@@ -197,21 +197,22 @@ module.exports = class ABViewFormConnectComponent extends (
       // so it doesn't trigger onChange again
       const $formItem = $$(ids.formItem);
 
-      // for xxx->one connections we need to populate again before setting
-      // values because we need to use the selected values to add options
-      // to the UI
-      if (this?.field?.settings?.linkViaType == "one") {
-         this.busy();
-         await field.getAndPopulateOptions(
-            $formItem,
-            baseView.options,
-            field,
-            baseView.parentFormComponent()
-         );
-         this.ready();
-      }
-
+      // Q: if we don't have a $formItem, is any of the rest valid?
       if ($formItem) {
+         // for xxx->one connections we need to populate again before setting
+         // values because we need to use the selected values to add options
+         // to the UI
+         if (this?.field?.settings?.linkViaType == "one") {
+            this.busy();
+            await field.getAndPopulateOptions(
+               $formItem,
+               baseView.options,
+               field,
+               baseView.parentFormComponent()
+            );
+            this.ready();
+         }
+
          $formItem.blockEvent();
 
          const prepedVals = selectedValues.join
