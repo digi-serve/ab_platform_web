@@ -294,22 +294,12 @@ module.exports = class ABViewPDFImporterComponent extends ABViewComponent {
    async initPdfjs() {
       if (this.pdjfs && window.pdfjsWorker) return;
       this.busy();
-      let loadingWorker;
-      if (!window.pdfjsWorker) {
-         loadingWorker = import(
-            /* webpackChunkName: "pdfjs.worker" */
-            /* webpackPrefetch: true */
-            "pdfjs-dist/build/pdf.worker.entry"
-         );
-      }
-      if (!this.pdfjs) {
-         this.pdfjs = await import(
-            /* webpackChunkName: "pdfjs" */
-            /* webpackPrefetch: true */
-            "pdfjs-dist/webpack"
-         );
-      }
-      if (loadingWorker) await loadingWorker;
+      this.pdfjs = await import(
+         /* webpackChunkName: "pdfjs" */
+         /* webpackPrefetch: true */
+         "../../../../init/pdfjs"
+      );
+
       this.ready();
    }
 
