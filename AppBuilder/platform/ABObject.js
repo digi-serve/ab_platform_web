@@ -1,5 +1,4 @@
 const ABObjectCore = require("../core/ABObjectCore");
-const ABObjectWorkspaceViewCollection = require("./workspaceViews/ABObjectWorkspaceViewCollection");
 
 let L = (...params) => AB.Multilingual.label(...params);
 
@@ -23,12 +22,6 @@ let L = (...params) => AB.Multilingual.label(...params);
 module.exports = class ABObject extends ABObjectCore {
    constructor(attributes, AB) {
       super(attributes, AB);
-
-      this.workspaceViews = new ABObjectWorkspaceViewCollection(
-         attributes,
-         this,
-         AB
-      );
 
       // listen for our ABFields."definition.updated"
       this.fields().forEach((f) => {
