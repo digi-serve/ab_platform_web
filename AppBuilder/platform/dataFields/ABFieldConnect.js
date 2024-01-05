@@ -529,6 +529,8 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
    }
 
    getAndPopulateOptions(editor, options, field, form) {
+      if (!editor) return Promise.resolve([]);
+
       const theEditor = editor;
       // if editor has options and is xxx->one store the options on the field
       if (
