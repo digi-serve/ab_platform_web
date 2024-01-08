@@ -190,6 +190,11 @@ class PortalWorkInboxAccordion extends ClassUI {
    show() {
       $$(this.id).show();
       $$(this.id).expand();
+      this.initFormIOPreview();
+   }
+
+   initFormIOPreview() {
+      this.AB.custom.formiopreview.init();
    }
 }
 

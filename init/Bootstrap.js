@@ -11,16 +11,15 @@ const EventEmitter = events.EventEmitter;
 
 import Config from "../config/Config.js";
 
-import FormIO from "../node_modules/formiojs/dist/formio.full.min.js";
-import "../node_modules/formiojs/dist/formio.form.min.css";
-import "../node_modules/formiojs/dist/formio.builder.min.css";
+// import FormIO from "../node_modules/formiojs/dist/formio.full.min.js";
+// import "../node_modules/formiojs/dist/formio.form.min.css";
+// import "../node_modules/formiojs/dist/formio.builder.min.css";
 // import FormIOCSS from "../node_modules/formiojs/dist/formio.full.min.css";
-
+//
 import initConfig from "../init/initConfig.js";
 import initConnectListerner from "../init/initConnectListerner.js";
 import initDiv from "../init/initDiv.js";
 import initDefinitions from "../init/initDefinitions.js";
-// import initResources from "../init/initResources.js";
 
 // import JSZipUtils from "jszip-utils/dist/jszip-utils.min.js";
 
@@ -73,7 +72,10 @@ class Bootstrap extends EventEmitter {
 
       PreloadUI.attach();
       this.ui(PreloadUI);
-      const loadABFactory = import("../AppBuilder/ABFactory");
+      const loadABFactory = import(
+         /* webpackChunkName: "AB" */
+         "../AppBuilder/ABFactory"
+      );
       // @const {Promise} loadABFactory Defer loading the ABFactory for a smaller
       // inital file size, allowing us to show the loading UI sooner.
 

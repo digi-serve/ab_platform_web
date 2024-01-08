@@ -52,7 +52,7 @@ module.exports = {
       splitChunks: {
          cacheGroups: {
             vendor: {
-               test: /[\\/]node_modules[\\/](?!pdfjs\-dist)/,
+               test: /[\\/]node_modules[\\/](?!pdfjs-dist)(?!formiojs)(?!bootstrap)/,
                name: "vendor",
                chunks: "all",
                reuseExistingChunk: true,
