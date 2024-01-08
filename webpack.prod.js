@@ -1,15 +1,26 @@
 const { merge } = require("webpack-merge");
 const common = require("./webpack.common.js");
 const CompressionPlugin = require("compression-webpack-plugin");
-const webpack = require("webpack");
+const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const { sentryWebpackPlugin } = require("@sentry/webpack-plugin");
+const webpack = require("webpack");
 
 module.exports = merge(common, {
    mode: "production",
+   module: {
+      rules: [
+         {
+            test: /\.css$/i,
+            use: [MiniCssExtractPlugin.loader, "css-loader?url=false"],
+         },
+      ],
+   },
    plugins: [
       new CompressionPlugin({
          exclude: /index\.ejs/,
       }),
+      new MiniCssExtractPlugin(),
       new webpack.DefinePlugin({
          WEBPACK_MODE: JSON.stringify("production"),
          VERSION: JSON.stringify(process.env.npm_package_version),
@@ -24,4 +35,11 @@ module.exports = merge(common, {
       }),
    ],
    devtool: "source-map",
+   optimization: {
+      usedExports: true,
+      minimizer: [
+         `...`, // <- this tells webpack to use existing minifiers
+         new CssMinimizerPlugin(),
+      ],
+   },
 });
