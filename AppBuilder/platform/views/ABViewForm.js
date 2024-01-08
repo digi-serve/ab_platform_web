@@ -59,9 +59,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
       }
       // Remove default button from array, then we will add it to be the last item later (.push)
       else {
-         this._views = this.views(
-            (v) => !(v instanceof ABViewFormButton) && !v.settings.isDefault
-         );
+         this._views = this.views((v) => v.id != defaultButton.id);
       }
 
       // Calculate position Y of the default button

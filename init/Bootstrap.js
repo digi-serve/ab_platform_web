@@ -153,7 +153,9 @@ class Bootstrap extends EventEmitter {
             allPluginsLoaded.push(loading);
          });
       }
-      const pluginsLoading = Promise.all(allPluginsLoaded).then(() => performance.measure("loadPlugins"));
+      const pluginsLoading = Promise.all(allPluginsLoaded).then(() =>
+         performance.measure("loadPlugins")
+      );
       // 3) Now we have enough info, to create an instance of our
       //    {ABFactory} that drives the rest of the AppBuilder objects
       performance.mark("createABFactory", { op: "function" });
