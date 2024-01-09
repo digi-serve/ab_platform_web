@@ -5,6 +5,7 @@
  */
 
 import "pdfjs-dist/build/pdf.worker";
-import pdfjs from "pdfjs-dist/webpack";
+// import pdfjs from "pdfjs-dist/webpack";
+const pdfjs = require("pdfjs-dist/webpack");
 
 export default pdfjs;
