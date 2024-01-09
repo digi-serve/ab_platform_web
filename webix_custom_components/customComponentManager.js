@@ -18,6 +18,7 @@ var componentList = [
    require("./numbertext"),
    require("./thaicalendar"),
    require("./timepicker"),
+   require("./tinyMce").default,
    require("./totalfooter"),
    require("./treesuggest"),
    // require('./savablelayout')

@@ -1,5 +1,3 @@
-import ABLazyCustomComponent from "./lazyComponent.js";
-
 /*
  * formioBuilder
  *
@@ -11,7 +9,7 @@ import ABLazyCustomComponent from "./lazyComponent.js";
  *
  * Note: This component is lazy loaded and requires calling .init() before using
  */
-
+import ABLazyCustomComponent from "./lazyComponent.js";
 export default class ABCustomFormBuilderBuilder extends ABLazyCustomComponent {
    get key() {
       return "formiobuilder";
