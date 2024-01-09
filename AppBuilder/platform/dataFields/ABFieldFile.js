@@ -340,6 +340,10 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
       return super.formComponent("fieldcustom");
    }
 
+   formComponentMobile() {
+      return super.formComponent("mobile-file");
+   }
+
    detailComponent() {
       const detailComponentSetting = super.detailComponent();
 

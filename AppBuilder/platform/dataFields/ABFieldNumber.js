@@ -62,6 +62,10 @@ module.exports = class ABFieldNumber extends ABFieldNumberCore {
       return super.formComponent("numberbox");
    }
 
+   formComponentMobile() {
+      return super.formComponent("mobile-numberbox");
+   }
+
    detailComponent() {
       const detailComponentSetting = super.detailComponent();
 

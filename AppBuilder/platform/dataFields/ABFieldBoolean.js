@@ -53,8 +53,8 @@ module.exports = class ABFieldBoolean extends ABFieldBooleanCore {
       return config;
    }
 
-   /*
-    * @funciton formComponent
+   /**
+    * @method formComponent
     * returns a drag and droppable component that is used on the UI
     * interface builder to place form components related to this ABField.
     *
@@ -64,6 +64,10 @@ module.exports = class ABFieldBoolean extends ABFieldBooleanCore {
     */
    formComponent() {
       return super.formComponent("checkbox");
+   }
+
+   formComponentMobile() {
+      return super.formComponent("mobile-checkbox");
    }
 
    detailComponent() {

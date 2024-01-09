@@ -439,6 +439,10 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
       return super.formComponent("fieldcustom");
    }
 
+   formComponentMobile() {
+      return super.formComponent("mobile-image");
+   }
+
    detailComponent() {
       const detailComponentSetting = super.detailComponent();
 

@@ -315,6 +315,30 @@ module.exports = class ABFieldList extends ABFieldListCore {
       return formComponentSetting;
    }
 
+   formComponentMobile() {
+      const formComponentSetting = super.formComponent();
+
+      // .common() is used to create the display in the list
+      formComponentSetting.common = () => {
+         return {
+            key: this.settings.isMultiple
+               ? "mobile-selectmultiple"
+               : "mobile-selectsingle",
+            settings: {
+               options: this.settings.options.map(function (opt) {
+                  return {
+                     id: opt.id,
+                     value: opt.text,
+                     hex: opt.hex,
+                  };
+               }),
+            },
+         };
+      };
+
+      return formComponentSetting;
+   }
+
    detailComponent() {
       const detailComponentSetting = super.detailComponent();
 

@@ -94,6 +94,21 @@ module.exports = class ABFieldDateTime extends ABFieldDateTimeCore {
       return formComponentSetting;
    }
 
+   formComponentMobile() {
+      // NOTE: what is being returned here needs to mimic an ABView CLASS.
+      // primarily the .common() and .newInstance() methods.
+      const formComponentSetting = super.formComponent("mobile-datetime");
+
+      // .common() is used to create the display in the list
+      formComponentSetting.common = () => {
+         return {
+            key: "mobile-datetime",
+         };
+      };
+
+      return formComponentSetting;
+   }
+
    detailComponent() {
       const detailComponentSetting = super.detailComponent();
 

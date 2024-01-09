@@ -28,8 +28,7 @@ module.exports = class ABFieldDate extends ABFieldDateCore {
       // if (this.settings.includeTime)
       // config.editor = "datetime";
       // else
-      config.editor =
-         this.AB.Account?._config?.languageCode == "th" ? "thaidate" : "date";
+      config.editor = this.AB.Account?.language() == "th" ? "thaidate" : "date";
 
       // allows entering characters in datepicker input, false by default
       config.editable = true;
@@ -84,6 +83,21 @@ module.exports = class ABFieldDate extends ABFieldDateCore {
       formComponentSetting.common = () => {
          return {
             key: "datepicker",
+         };
+      };
+
+      return formComponentSetting;
+   }
+
+   formComponentMobile() {
+      // NOTE: what is being returned here needs to mimic an ABView CLASS.
+      // primarily the .common() and .newInstance() methods.
+      const formComponentSetting = super.formComponent("mobile-date");
+
+      // .common() is used to create the display in the list
+      formComponentSetting.common = () => {
+         return {
+            key: "mobile-date",
          };
       };
 

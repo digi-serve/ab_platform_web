@@ -6,6 +6,7 @@ import PortalWorkInboxTaskWindow from "./portal_work_inbox_taskWindow.js";
 import PortalWorkUserProfileWindow from "./portal_work_user_profile_window.js";
 import PortalWorkUserSwitcheroo from "./portal_work_user_switcheroo.js";
 import PortalWorkUserQRWindow from "./portal_work_user_qr_window.js";
+import PortalWorkUserMobileQR from "./portal_work_user_mobile_qr.js";
 import PortalAccessLevelManager from "./portal_access_level_manager.js";
 import TranslationTool from "./portal_translation_tool.js";
 import TutorialManager from "./portal_tutorial_manager.js";
@@ -292,8 +293,10 @@ class PortalWork extends ClassUI {
 
       // Get all our ABApplications and loaded Plugins in allApplications
       const allApplications = (
-         this.AB.applications((a) =>
-            a.isAccessibleForRoles(this.AB.Account.rolesAll() ?? [])
+         this.AB.applications(
+            (a) =>
+               a.isWebApp &&
+               a.isAccessibleForRoles(this.AB.Account.rolesAll() ?? [])
          ) || []
       ).concat(this.AB.plugins() || []);
 
@@ -309,10 +312,22 @@ class PortalWork extends ClassUI {
       $$("abSidebarMenu").define("data", menu_data);
       this.sidebarResize();
 
+      PortalWorkUserMobileQR.init(AB);
+
       const userMenuOptions = [
          { id: "user_profile", label: L("User Profile"), icon: "user" },
          { id: "user_logout", label: L("Logout"), icon: "ban" },
       ];
+
+      // add in any Mobile App QR Codes:
+      const allMobile = this.AB.applications((a) => a.isMobile);
+      allMobile.forEach((m) => {
+         userMenuOptions.splice(1, 0, {
+            id: m.id, // "pwa_app",
+            label: m.label,
+            icon: m.icon.replace("fa-", ""),
+         });
+      });
 
       if (this.AB.Account.canSwitcheroo()) {
          userMenuOptions.splice(1, 0, {
@@ -415,15 +430,22 @@ class PortalWork extends ClassUI {
                         PortalWorkUserQRWindow.show();
                         break;
                      default:
-                        //eslint-disable-next-line
-                        const item = userMenuOptions.filter(
-                           (o) => o.id == id
-                        )[0];
-                        webix.message(
-                           `<b>Not yet implemented</b><br/>
+                        // was this one of our Mobile Apps?
+                        const mobileApp = this.AB.applicationByID(id);
+                        if (mobileApp) {
+                           PortalWorkUserMobileQR.load(mobileApp);
+                           PortalWorkUserMobileQR.show();
+                        } else {
+                           //eslint-disable-next-line
+                           const item = userMenuOptions.filter(
+                              (o) => o.id == id
+                           )[0];
+                           webix.message(
+                              `<b>Not yet implemented</b><br/>
                            Menu item:<i>${item.label}</i><br/>
                            Menu ID:<i>${item.id}</i>`
-                        );
+                           );
+                        }
                   }
                   $$("userMenu").hide();
                },
@@ -1030,4 +1052,3 @@ class PortalWork extends ClassUI {
 }
 
 export default new PortalWork();
-

@@ -12,11 +12,23 @@ module.exports = class ABClassApplication extends ABApplicationCore {
 
       // now listen for any updates to our managed objects
       this._handler_page_updated = (definition) => {
-         var currPage = this._pages.find((p) => p.id === definition.id);
-         if (currPage) {
-            this._pages = this._pages.filter((p) => p.id != currPage.id);
-            this._pages.push(currPage.refreshInstance());
-         }
+         // we want to keep the same pageID order:
+         var newPages = [];
+         this.pages().forEach((pg) => {
+            if (pg.id === definition.id) {
+               newPages.push(pg.refreshInstance(this));
+               return;
+            }
+            newPages.push(pg);
+         });
+
+         this._pages = newPages;
+
+         // var currPage = this._pages.find((p) => p.id === definition.id);
+         // if (currPage) {
+         //    this._pages = this._pages.filter((p) => p.id != currPage.id);
+         //    this._pages.push(currPage.refreshInstance());
+         // }
       };
       this._pages.forEach((p) => {
          p.on("definition.updated", this._handler_page_updated);
@@ -376,7 +388,7 @@ module.exports = class ABClassApplication extends ABApplicationCore {
          "datacollectionsIncluded",
          "processes",
          "pages",
-         "views",
+         // "views", // <-- these are gathered in "pages"
       ].forEach((k) => {
          this[k]().forEach((o) => {
             warnings = warnings.concat(o.warningsAll());

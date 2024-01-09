@@ -50,6 +50,10 @@ module.exports = class ABFieldFormula extends ABFieldFormulaCore {
       return super.formComponent("fieldreadonly");
    }
 
+   formComponentMobile() {
+      return super.formComponent("mobile-fieldreadonly");
+   }
+
    detailComponent() {
       const detailComponentSetting = super.detailComponent();
 

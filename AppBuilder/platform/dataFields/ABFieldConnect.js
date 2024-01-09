@@ -219,6 +219,13 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       return super.formComponent("connect");
    }
 
+   formComponentMobile() {
+      if (this.settings.linkType == "many") {
+         return super.formComponent("mobile-selectmultiple");
+      }
+      return super.formComponent("mobile-selectsingle");
+   }
+
    detailComponent() {
       const detailComponentSetting = super.detailComponent();
 
@@ -634,18 +641,20 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          );
       }
 
-      const handlerOptionData = (data) => {
-         if (theEditor.$destructed) {
-            this.removeListener("option.data", handlerOptionData);
-            return;
-         }
-         this.populateOptions(theEditor, data, field, form, true);
-      };
+      if (!this.handlerOptionData) {
+         this.handlerOptionData = (data) => {
+            if (theEditor.$destructed) {
+               this.removeListener("option.data", this.handlerOptionData);
+               return;
+            }
+            this.populateOptions(theEditor, data, field, form, true);
+         };
+      }
 
       // try to make sure we don't continually add up listeners.
-      this.removeListener("option.data", handlerOptionData).once(
+      this.removeListener("option.data", this.handlerOptionData).once(
          "option.data",
-         handlerOptionData
+         this.handlerOptionData
       );
 
       return new Promise((resolve, reject) => {
