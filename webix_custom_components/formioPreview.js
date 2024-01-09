@@ -3,6 +3,8 @@
  *
  * Create a custom webix component.
  *
+ * Note: This component is lazy loaded and requires calling .init() before using
+ *
  */
 var ABEmitter = require("../AppBuilder/platform/ABEmitter.js");
 module.exports = class ABCustomFormIOPreview extends ABEmitter {
@@ -17,11 +19,11 @@ module.exports = class ABCustomFormIOPreview extends ABEmitter {
 
    async init() {
       if (this.initialized) return;
-      const { default: Form } = await import(
+      const { Form } = await import(
          /* webpackChunkName: "formio" */
          /* webpackPrefetch: true */
          /* webpackFetchPrioirtiy: "low" */
-         "../init/formioViewer.js"
+         "../init/formio.js"
       );
       // Our webix UI definition:
       var _ui = {

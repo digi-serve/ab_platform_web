@@ -14,6 +14,7 @@ var componentList = [
    require("./editunitlist"),
    require("./focusableTemplate"),
    require("./formioPreview"),
+   require("./formioBuilder").default,
    require("./numbertext"),
    require("./thaicalendar"),
    require("./timepicker"),
