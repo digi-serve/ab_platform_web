@@ -28,7 +28,6 @@ export default class ABCustomFormBuilderBuilder extends ABLazyCustomComponent {
    async init() {
       if (this.initialized) return;
       const { FormBuilder } = await import(
-         /* webpackChunkName: "formio" */
          /* webpackPrefetch: true */
          /* webpackFetchPrioirtiy: "low" */
          "../init/formio.js"

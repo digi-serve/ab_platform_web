@@ -15,7 +15,6 @@ module.exports = class ABCustomFormIOPreview extends ABLazyCustomComponent {
    async init() {
       if (this.initialized) return;
       const { Form } = await import(
-         /* webpackChunkName: "formio" */
          /* webpackPrefetch: true */
          /* webpackFetchPrioirtiy: "low" */
          "../init/formio.js"

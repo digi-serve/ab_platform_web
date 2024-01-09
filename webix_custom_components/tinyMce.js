@@ -15,7 +15,6 @@ export default class ABCustomTinyMCE extends ABLazyCustomComponent {
       if (this.initialized) return;
 
       await import(
-         /* webpackChunkName: "tiny" */
          /* webpackPrefetch: true */
          "../js/webix/extras/tinymce.js"
       );

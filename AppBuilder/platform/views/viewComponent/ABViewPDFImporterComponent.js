@@ -295,7 +295,6 @@ module.exports = class ABViewPDFImporterComponent extends ABViewComponent {
       if (this.pdjfs && window.pdfjsWorker) return;
       this.busy();
       this.pdfjs = await import(
-         /* webpackChunkName: "pdfjs" */
          /* webpackPrefetch: true */
          "../../../../init/pdfjs"
       );
