@@ -1,3 +1,5 @@
+import ABLazyCustomComponent from "./lazyComponent.js";
+
 /*
  * formioBuilder
  *
@@ -10,13 +12,13 @@
  * Note: This component is lazy loaded and requires calling .init() before using
  */
 
-export default class ABCustomFormBuilderBuilder {
+export default class ABCustomFormBuilderBuilder extends ABLazyCustomComponent {
    get key() {
       return "formiobuilder";
    }
 
    constructor(App) {
-      this.AB = App.AB;
+      super(App);
       this.label = this.AB.Label();
       this.view = this.key;
    }

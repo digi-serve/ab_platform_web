@@ -10,7 +10,7 @@ io.sails.reconnection = true;
 
 // Include these .css and .js files as part of our bundle.
 import "./styles/loader.css";
-import "./js/webix/webix.min.css";
+import "./js/webix/webix.css";
 
 import "./styles/ui.css";
 

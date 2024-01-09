@@ -6,15 +6,10 @@
  * Note: This component is lazy loaded and requires calling .init() before using
  *
  */
-var ABEmitter = require("../AppBuilder/platform/ABEmitter.js");
-module.exports = class ABCustomFormIOPreview extends ABEmitter {
+const ABLazyCustomComponent = require("./lazyComponent.js");
+module.exports = class ABCustomFormIOPreview extends ABLazyCustomComponent {
    get key() {
       return "formiopreview";
-   }
-
-   constructor() {
-      super();
-      this.initialized = false;
    }
 
    async init() {
@@ -85,7 +80,7 @@ module.exports = class ABCustomFormIOPreview extends ABEmitter {
       this._logic = {};
 
       // Tell Webix to create an INSTANCE of our custom component:
-      webix.protoUI(_ui, webix.ui.view);
+      this.AB.Webix.protoUI(_ui, this.AB.Webix.ui.view);
       this.initialized = true;
    }
 };

@@ -193,6 +193,10 @@ class PortalWorkInboxAccordion extends ClassUI {
       this.initFormIOPreview();
    }
 
+   /**
+    * Ensure the formio custom webix component is loaded and ready to
+    * use.
+    */
    initFormIOPreview() {
       this.AB.custom.formiopreview.init();
    }
