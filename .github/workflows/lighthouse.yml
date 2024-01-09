@@ -1,5 +1,7 @@
 name: Lighthouse CI
 on:
+   push:
+      branches: ["master"]
    pull_request:
       branches: ["master"]
 jobs:
@@ -49,12 +51,15 @@ jobs:
               lhci autorun
            working-directory: ./ab_platform_web
            env:
-              LHCI_UPLOAD__TARGET: "temporary-public-storage"
+              LHCI_UPLOAD__TARGET: "lhci"
+              LHCI_UPLOAD__SERVER_BASE_URL: "https://lighthouse.digiserve.org/"
+              LHCI_UPLOAD__TOKEN: ${{ secrets.LHCI_BUILD_TOKEN }}
               LHCI_COLLECT__URL: "http://127.0.0.1"
               LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
               LHCI_COLLECT__PUPPETEER_SCRIPT: "ciLighthouseAuth.js"
 
          - name: Get the Lighouse Reports
+           if: ${{ github.event_name == 'pull_request' }}
            id: get_report
            run: |
               echo "LH_REPORT_A=$(ls | grep lhr- | grep .json | sed -n 1p)" >> $GITHUB_OUTPUT
@@ -63,6 +68,7 @@ jobs:
            working-directory: ./ab_platform_web/.lighthouseci
 
          - name: Extract Report Highlights
+           if: ${{ github.event_name == 'pull_request' }}
            uses: actions/github-script@v7
            env:
               REPORT_A: ${{ steps.get_report.outputs.LH_REPORT_A }}
@@ -112,9 +118,11 @@ jobs:
 
          # NejcZdovc/comment-pr@v2 needs a checkout to the base path
          - name: Fix for NejcZdovc/comment-pr
+           if: ${{ github.event_name == 'pull_request' }}
            uses: actions/checkout@v3
 
          - name: Add Lighthouse Results to PR Commnet
+           if: ${{ github.event_name == 'pull_request' }}
            uses: NejcZdovc/comment-pr@v2
            with:
               file: lighthouse.md
