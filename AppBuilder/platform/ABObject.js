@@ -437,7 +437,7 @@ module.exports = class ABObject extends ABObjectCore {
    toObj() {
       var result = super.toObj();
 
-      result.objectWorkspaceViews = this.workspaceViews.toObj();
+      result.objectWorkspaceViews = this.workspaceViews?.toObj();
 
       return result;
    }
