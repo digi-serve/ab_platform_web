@@ -25,14 +25,8 @@ module.exports = class ABLazyCustomComponent extends ABEmitter {
                data: { key: this.key },
             },
             $init: () =>
-               this.AB.notify.developer(
-                  new Error(
-                     `${this.key} custom webix component used before being initalized`
-                  ),
-                  {
-                     context: `ABLazyCustomComponent (${this.key}) -> setDefaultUI()`,
-                     fix: `call AB.custom.${this.key}.init() before the component is used`,
-                  }
+               console.warn(
+                  `${this.key} custom webix component used before being initalized`
                ),
          },
          this.AB.Webix.ui.template

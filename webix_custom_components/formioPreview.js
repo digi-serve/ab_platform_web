@@ -64,8 +64,8 @@ module.exports = class ABCustomFormIOPreview extends ABLazyCustomComponent {
                   comp.action == "event" &&
                   comp.event
                ) {
-                  form.once(comp.event, function (click) {
-                     config.onButton ? config.onButton(comp.event) : null;
+                  form.once(comp.event, function (/* click */) {
+                     config?.onButton(comp.event);
                      // _this.emit("button", comp.event);
                   });
                }

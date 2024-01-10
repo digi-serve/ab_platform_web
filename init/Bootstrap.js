@@ -11,11 +11,6 @@ const EventEmitter = events.EventEmitter;
 
 import Config from "../config/Config.js";
 
-// import FormIO from "../node_modules/formiojs/dist/formio.full.min.js";
-// import "../node_modules/formiojs/dist/formio.form.min.css";
-// import "../node_modules/formiojs/dist/formio.builder.min.css";
-// import FormIOCSS from "../node_modules/formiojs/dist/formio.full.min.css";
-//
 import initConfig from "../init/initConfig.js";
 import initConnectListerner from "../init/initConnectListerner.js";
 import initDiv from "../init/initDiv.js";
