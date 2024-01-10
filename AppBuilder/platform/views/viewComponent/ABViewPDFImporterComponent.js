@@ -294,10 +294,10 @@ module.exports = class ABViewPDFImporterComponent extends ABViewComponent {
    async initPdfjs() {
       if (this.pdjfs && window.pdfjsWorker) return;
       this.busy();
-      this.pdfjs = await import(
+      this.pdfjs = (await import(
          /* webpackPrefetch: true */
          "../../../../init/pdfjs"
-      );
+      )).default;
 
       this.ready();
    }
