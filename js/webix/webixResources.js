@@ -9,14 +9,6 @@
  *   package
  */
 
-// CSS
-import "./components/gantt/gantt.min.css";
-import "./components/reports/reports.min.css";
-import "./components/query/query.min.css";
-import "./components/scheduler/scheduler.min.css";
-import "./components/querybuilder/querybuilder.min.css";
-import "./components/hint/hint.css";
-
 // Components
 import(
    /* webpackMode: "eager" */
@@ -43,9 +35,6 @@ import(
    /* webpackMode: "eager" */
    "./components/scheduler/scheduler.min.js"
 ).then((scheduler) => (window.scheduler = scheduler));
-
-// Extras
-// import "./extras/tinymce";
 
 // Locales
 import "./locales/th-TH.js";

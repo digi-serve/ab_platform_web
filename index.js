@@ -8,18 +8,22 @@ io.sails.reconnection = true;
 // (see api_sails/views/site/index.ejs)
 // I'm including this here more for documentation purposes.
 
-// Include these .css and .js files as part of our bundle.
+// Include all CSS here
 import "./styles/loader.css";
 import "./js/webix/webix.css";
-
+import "./js/webix/components/gantt/gantt.min.css";
+import "./js/webix/components/reports/reports.min.css";
+import "./js/webix/components/query/query.min.css";
+import "./js/webix/components/scheduler/scheduler.min.css";
+import "./js/webix/components/querybuilder/querybuilder.min.css";
+import "./js/webix/components/hint/hint.css";
 import "./styles/ui.css";
+// NOTE: keep Font Awesome AFTER webix css so webix wont
+// override our icon stylesimport "./styles/font-awesome.min.css";
+import "./styles/font-awesome.min.css";
 
 import performance from "./utils/performance";
 performance.init();
-
-// NOTE: keep Font Awesome AFTER webix css so webix wont
-// override our icon styles
-import "./styles/font-awesome.min.css";
 
 import Bootstrap from "./init/Bootstrap.js";
 // Bootstrap is responsible for initializing the platform.

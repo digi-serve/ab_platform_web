@@ -1,6 +1,7 @@
 const { merge } = require("webpack-merge");
 const common = require("./webpack.common.js");
 const CompressionPlugin = require("compression-webpack-plugin");
+const Critters = require("critters-webpack-plugin");
 const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const { sentryWebpackPlugin } = require("@sentry/webpack-plugin");
@@ -27,6 +28,10 @@ module.exports = merge(common, {
          SENTRY_DSN: JSON.stringify(
             "https://c16443e39a66eae141954dfd23890812@o144358.ingest.sentry.io/4505832903147520"
          ),
+      }),
+      new Critters({
+         pruneSource: true,
+         preload: "swap",
       }),
       sentryWebpackPlugin({
          authToken: process.env.SENTRY_AUTH_TOKEN,
