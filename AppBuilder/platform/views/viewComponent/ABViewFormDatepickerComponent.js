@@ -81,6 +81,20 @@ module.exports = class ABViewFormDatepickerComponent extends (
       const text = rowData[field.columnName];
       if (!field || !text) return null;
 
+      // Sentry Fix: caught an error where this.AB was not set, but this.view was...
+      // attempt to catch this situation and post more data:
+      if (!this.AB) {
+         if (this.view.AB) {
+            this.AB = this.view.AB;
+         } else {
+            let errNoAB = new Error(
+               "ABViewFormDatePicerComponent:getValue(): AB was not set."
+            );
+            // sentry logs the console before the error, so dump the offending view here:
+            console.log("view:", JSON.stringify(this.view.toObj()));
+            throw errNoAB;
+         }
+      }
       const date = this.AB.Webix.Date.strToDate(field.getFormat())(text);
 
       if (this.AB.Account?._config?.languageCode == "th")

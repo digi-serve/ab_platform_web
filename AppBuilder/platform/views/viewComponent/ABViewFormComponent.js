@@ -170,7 +170,7 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
                   field?.linkViaOneValues
                ) {
                   delete field.linkViaOneValues;
-                  if (rowData[field.columnName]) {
+                  if (rowData?.[field.columnName]) {
                      if (Array.isArray(rowData[field.columnName])) {
                         let valArray = [];
                         rowData[field.columnName].forEach((v) => {
