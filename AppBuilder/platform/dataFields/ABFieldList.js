@@ -260,7 +260,8 @@ module.exports = class ABFieldList extends ABFieldListCore {
                   node.classList.add("webix_invalid_cell");
 
                   this.AB.notify.developer(err, {
-                     message: "Error updating our entry.",
+                     message:
+                        "ABFieldList:customDisplay(): Error updating our entry.",
                      row: row,
                      values: "",
                      field: this.toObj(),

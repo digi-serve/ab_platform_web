@@ -323,7 +323,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
                         this.AB.notify.developer(err, {
                            context:
                               "ABFieldImage.onFileUpload(): model.update(): error updating our entry",
-                           field: this,
+                           field: this.toObj(),
                            row,
                            values,
                         });
@@ -338,7 +338,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
                onFileUploadError: (item, response) => {
                   this.AB.notify.developer(new Error("Error uploading image"), {
                      context: "ABFieldImage. uploader. onFileUploadError():",
-                     field: this,
+                     field: this.toObj(),
                      response,
                   });
                   webixContainer.hideProgress();
@@ -407,7 +407,7 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
                      this.AB.notify.developer(err, {
                         context:
                            "ABFieldImage: customEdit(): Error updating our entry",
-                        field: this,
+                        field: this.toObj(),
                         row: row,
                         values: values,
                      });
