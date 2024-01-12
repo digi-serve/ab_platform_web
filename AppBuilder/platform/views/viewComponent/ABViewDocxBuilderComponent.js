@@ -358,6 +358,10 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
             val.forEach((v) => {
                if (!v) return;
 
+               // Sentry Fix: sometimes v is just the uuid
+               // Q: what should we do in this case?
+               if (typeof v == "string") return;
+
                // format relation data
                if (field.datasourceLink) {
                   field.datasourceLink

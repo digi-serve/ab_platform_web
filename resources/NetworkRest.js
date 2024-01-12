@@ -342,6 +342,10 @@ class NetworkRest extends EventEmitter {
                      this.AB.notify.developer(error, {
                         context:
                            "NetworkRest:_request:Unknown Error returned from server",
+                        err,
+                        response: err.responseText,
+                        text: err.statusText || err.message,
+                        url: error.url,
                      });
                      // this.AB.Analytics.logError(error);
                      // this.AB.error(error);

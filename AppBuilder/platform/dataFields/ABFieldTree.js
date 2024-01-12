@@ -341,7 +341,8 @@ module.exports = class ABFieldTree extends ABFieldTreeCore {
                               node.classList.add("webix_invalid_cell");
 
                               this.AB.notify.developer(err, {
-                                 message: "Error updating our entry.",
+                                 message:
+                                    "ABFieldTree:onItemClick(): Error updating our entry.",
                                  row: row,
                                  values: values,
                               });
