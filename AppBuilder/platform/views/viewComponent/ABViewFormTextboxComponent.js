@@ -5,16 +5,16 @@ module.exports = class ABViewFormTextboxComponent extends (
 ) {
    constructor(baseView, idBase, ids) {
       super(baseView, idBase || `ABViewFormTextbox_${baseView.id}`, ids);
+      this.type =
+         this.settings.type ||
+         this.view.settings.type ||
+         this.view.constructor.defaultValues().type;
    }
 
    ui() {
       const _ui = {};
 
-      switch (
-         this.settings.type ||
-         this.view.settings.type ||
-         this.view.constructor.defaultValues().type
-      ) {
+      switch (this.type) {
          case "single":
             _ui.view = "text";
             break;
@@ -43,15 +43,16 @@ module.exports = class ABViewFormTextboxComponent extends (
       return super.ui(_ui);
    }
 
-   onShow() {
-      const settings = this.view.settings ?? {};
+   async onShow() {
+      if (this.type !== "rich") return;
+      await this.initTinyMCE();
       const _ui = this.ui();
       const _uiFormItem = _ui.rows[0];
-      let $formItem = $$(_uiFormItem.id);
+      let $formItem = $$(this.ids.formItem);
 
       // WORKAROUND : to fix breaks TinyMCE when switch pages/tabs
       // https://forum.webix.com/discussion/6772/switching-tabs-breaks-tinymce
-      if (settings.type === "rich" && $formItem) {
+      if ($formItem) {
          // recreate rich editor
          $formItem = this.AB.Webix.ui(_uiFormItem, $formItem);
 
@@ -69,5 +70,12 @@ module.exports = class ABViewFormTextboxComponent extends (
                editor.contentAreaContainer.setAttribute("data-cy", dataCy);
             });
       }
+   }
+
+   /**
+    * Ensure TinyMCE has been loaded and initialized.
+    */
+   async initTinyMCE() {
+      await this.AB.custom["tinymce-editor"].init();
    }
 };

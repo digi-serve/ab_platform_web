@@ -45,7 +45,7 @@ import(
 ).then((scheduler) => (window.scheduler = scheduler));
 
 // Extras
-import "./extras/tinymce";
+// import "./extras/tinymce";
 
 // Locales
 import "./locales/th-TH.js";

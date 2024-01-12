@@ -51,9 +51,32 @@ module.exports = {
       runtimeChunk: "single",
       splitChunks: {
          cacheGroups: {
+            vendors: false,
+            default: false,
+            pdfjs: {
+               test: /[\\/]node_modules[\\/]pdfjs-dist|[\\/]init[\\/]pdfjs/,
+               filename: "pdfjs.[name].[contenthash].js",
+               chunks: "all",
+               reuseExistingChunk: true,
+               priority: 10,
+            },
+            formio: {
+               test: /[\\/]node_modules[\\/](?:formiojs|bootstrap)|[\\/]init[\\/]formio/,
+               filename: "formio.[name].[contenthash].js",
+               chunks: "all",
+               reuseExistingChunk: true,
+               priority: 10,
+            },
+            tinymce: {
+               test: /[\\/]node_modules[\\/]tinymce|[\\/]js[\\/]webix[\\/]extras[\\/]tinymce/,
+               filename: "tinymce.[name].[contenthash].js",
+               chunks: "all",
+               reuseExistingChunk: true,
+               priority: 10,
+            },
             vendor: {
-               test: /[\\/]node_modules[\\/](?!pdfjs\-dist)/,
-               name: "vendor",
+               test: /[\\/]node_modules[\\/](?!pdfjs-dist)(?!formiojs)(?!bootstrap)(?!tinymce)/,
+               filename: "vendor.[name].[contenthash].js",
                chunks: "all",
                reuseExistingChunk: true,
             },
