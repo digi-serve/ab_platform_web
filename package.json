@@ -65,5 +65,10 @@
     "./js/webix/componenets/**/*.js",
     "./js/webix/extras/*.js",
     "./init/sentry.js"
-  ]
+  ],
+  "overrides": {
+    "critters-webpack-plugin": {
+       "html-webpack-plugin": "$html-webpack-plugin"
+    }
+  }
 }
