@@ -11,6 +11,7 @@ module.exports = {
    output: {
       path: path.join(APP, "..", "web", "assets"),
       filename: "[name].[contenthash].js",
+      publicPath: "/assets/",
    },
    module: {
       rules: [
@@ -30,7 +31,6 @@ module.exports = {
          template: "./webpack/index.ejs",
          filename: path.join(APP, "..", "web", "assets", "index.html"),
          inject: "body",
-         publicPath: "/assets",
       }),
       new CleanWebpackPlugin({
          cleanOnceBeforeBuildPatterns: [

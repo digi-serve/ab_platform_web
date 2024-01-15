@@ -22,7 +22,6 @@ import Selectivity from "../js/selectivity/selectivity.min.js";
 import selectivityCSS from "../js/selectivity/selectivity.min.css";
 
 import UI from "../ui/ui.js";
-import PreloadUI from "../ui/loading.js";
 import ErrorNoDefsUI from "../ui/error_noDefs.js";
 
 import performance from "../utils/performance.js";
@@ -65,21 +64,25 @@ class Bootstrap extends EventEmitter {
       // happening inconsitently.
       if (ab) this.AB = ab;
 
-      PreloadUI.attach();
-      this.ui(PreloadUI);
       const loadABFactory = import(
          /* webpackChunkName: "AB" */
          "../AppBuilder/ABFactory"
       );
       // @const {Promise} loadABFactory Defer loading the ABFactory for a smaller
       // inital file size, allowing us to show the loading UI sooner.
-
       /**
        * @type {Function} preloadMessage
        * @description show a loading message
        * @param {string} message to display on the loading screen
        */
-      const preloadMessage = (m) => this.ui().preloadMessage(m);
+      const preloadMessage = (m) =>
+         (document.getElementById("preload-text").innerHTML = m);
+      /**
+       * @type {Function}
+       * @description remove the preload ui elements
+       */
+      const destroyPreloadUI = () =>
+         document.getElementById("preloader").remove();
 
       preloadMessage("Waiting for the API Server");
 
@@ -189,7 +192,7 @@ class Bootstrap extends EventEmitter {
          if (Config.userReal()) {
             ErrorNoDefsUI.switcherooUser(Config.userConfig());
          }
-         this.ui().destroy(); // remove the preloading screen
+         destroyPreloadUI();
          this.ui(ErrorNoDefsUI);
 
          let err = new Error("No Definitions");
@@ -238,7 +241,7 @@ class Bootstrap extends EventEmitter {
          const div = this.div();
 
          UI.attach(div.id);
-         this.ui().destroy(); // remove the preloading screen
+         destroyPreloadUI();
          this.ui(UI);
          this.ui()
             .init(this.AB)

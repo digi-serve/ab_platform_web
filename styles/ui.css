@@ -1636,6 +1636,15 @@ div.amp .fa-unlock-alt {
    overflow: visible;
    display: inline-block;
 }
+.preload-card {
+   opacity: 0;
+   animation: 1s ease 0s normal forwards 1 onlyfadein;
+   background: white;
+   border-radius: 30px;
+   box-shadow: 0px 20px 20px rgba(0, 0, 0, 0.4);
+   position: relative;
+
+}
 div.webix_dataview_item.webix_transparent {
    padding: 0px;
 }
@@ -1650,6 +1659,17 @@ div.webix_dataview_item.webix_transparent {
       opacity: 1;
       top: 0;
       transform: scale(1);
+      box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.4);
+   }
+}
+
+@keyframes onlyfadein {
+   0% {
+      opacity: 0;
+      box-shadow: 0px 20px 20px rgba(0, 0, 0, 0.4);
+   }
+   100% {
+      opacity: 1;
       box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.4);
    }
 }
