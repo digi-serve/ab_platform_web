@@ -1,13 +1,3 @@
-io.sails.reconnection = true;
-// {bool}
-// by default, sails.io will not reconnect.  setting this to true will
-// tell it to auto reconnect.
-// NOTE: this is usually TOO LATE in the boot up process to set this
-// value.  The index.ejs file should have this as a parameter to the
-// <script> tag that loads the socket library.
-// (see api_sails/views/site/index.ejs)
-// I'm including this here more for documentation purposes.
-
 // Include all CSS here
 import "./styles/loader.css";
 import "./js/webix/webix.css";

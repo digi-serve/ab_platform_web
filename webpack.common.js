@@ -7,6 +7,7 @@ module.exports = {
    context: APP,
    entry: {
       app: path.join(APP, "index.js"),
+      sailsio: path.join(APP, "init", "sailsIo.js"),
    },
    output: {
       path: path.join(APP, "..", "web", "assets"),
