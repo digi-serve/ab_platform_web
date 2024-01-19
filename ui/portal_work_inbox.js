@@ -112,8 +112,9 @@ class PortalWorkInbox extends ClassUI {
    init(AB) {
       this.AB = AB;
 
-      ////  Load the { items, meta } data structure
-      this.AB.Network.get({ url: "/inbox/config" }).then((inboxConfig) => {
+      //  Load the { items, meta } data structure before continuing with
+      // the rest of the init process.
+      this.AB.Network.get({ url: "/config/inbox" }).then((inboxConfig) => {
          this.AB.Config.configInbox(inboxConfig);
 
          this.initDelayed(AB);
