@@ -112,6 +112,15 @@ class PortalWorkInbox extends ClassUI {
    init(AB) {
       this.AB = AB;
 
+      ////  Load the { items, meta } data structure
+      this.AB.Network.get({ url: "/inbox/config" }).then((inboxConfig) => {
+         this.AB.Config.configInbox(inboxConfig);
+
+         this.initDelayed(AB);
+      });
+   }
+
+   initDelayed(AB) {
       webix.ui(this.ui());
 
       this.allAppAccordions = {};

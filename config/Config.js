@@ -74,6 +74,11 @@ class Config {
       defaultsDeep(this._config, configDefaults);
    }
 
+   configInbox(json) {
+      this._config.inbox = json.inbox || [];
+      this._config.inboxMeta = json.meta || [];
+   }
+
    configUser(json) {
       this._configUser = json;
    }
