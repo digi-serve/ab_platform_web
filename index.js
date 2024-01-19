@@ -25,6 +25,9 @@ import "./styles/font-awesome.min.css";
 import performance from "./utils/performance";
 performance.init();
 
+import Preloader from "./init/Preloader.js";
+// load all our resources in parallel
+
 import Bootstrap from "./init/Bootstrap.js";
 // Bootstrap is responsible for initializing the platform.
 
@@ -33,7 +36,7 @@ import(
    /* webpackChunkName: "webix" */
    /* webpackPreload: true */
    "./js/webix/webix.min.js"
-).then((webix) => {
+).then(async (webix) => {
    // Make sure webix is global object
    window.webix = webix;
    // Now load additional webix resources
@@ -42,6 +45,10 @@ import(
       /* webpackPreload: true */
       "./js/webix/webixResources"
    );
+
+   // __AB_preload should be created by our /config/preload script that gets
+   // loaded on the initial page load.
+   await window.__AB_preload;
 
    Bootstrap.init().catch((err) => {
       // This is a known error that has already been handled.
