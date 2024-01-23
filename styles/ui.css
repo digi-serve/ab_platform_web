@@ -1759,25 +1759,21 @@ div.webix_dataview_item.webix_transparent {
    background: #657584;
    color: #fff;
 }
-.portal_work_no_network_detected {
+.portal_work_warning_banner {
    background: #e64b2a;
    color: #fff;
 }
-.portal_work_no_network_detected .webix_el_box {
+.portal_work_warning_banner .webix_el_box {
    color: #fff;
 }
-.portal_work_server_comunication_disabled_detected {
-   background: #e64b2a;
+.portal_work_warning_banner .webix_button {
    color: #fff;
-}
-.portal_work_server_comunication_disabled_detected .webix_el_box {
-   color: #fff;
+   font-size: 14px;
 }
 .portal_work_switcheroo_user_switched {
    background: #2196f3;
    color: #fff;
 }
-
 .portal_work_switcheroo_user_switched .webix_el_box {
    color: #fff;
 }
