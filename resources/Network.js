@@ -190,6 +190,30 @@ class Network extends EventEmitter {
    }
 
    /**
+    * Check whether the network is slow
+    * @returns {Boolean}
+    */
+   isNetworkSlow() {
+      return !!this._networkSlow;
+   }
+
+   /**
+    * Register the network speed test worker
+    * @param {Worker} worker
+    * @param {boolean} slow is the current state slow?
+    */
+   registerNetworkTestWorker(worker, slow) {
+      this._networkTestWorker = worker;
+      this._networkSlow = slow;
+      this._networkTestWorker.onmessage = ({ data }) => {
+         if (this._networkSlow !== data) {
+            this._networkSlow = data;
+            this.emit("networkslow", this._networkSlow);
+         }
+      };
+   }
+
+   /**
     * @method networkStatus
     * return the connection type currently registered with the network
     * plugin.

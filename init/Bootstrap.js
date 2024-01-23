@@ -84,8 +84,14 @@ class Bootstrap extends EventEmitter {
       const destroyPreloadUI = () =>
          document.getElementById("preloader").remove();
 
-      const networkTest = new Worker(new URL("../utils/networkTest.js", import.meta.url));
-      networkTest.onmessage = (m) => console.log("worker message: ", m)
+      const networkTestWorker = new Worker(
+         new URL("../utils/networkTest.js", import.meta.url)
+      );
+      let networkIsSlow = false;
+      networkTestWorker.onmessage = (m) => {
+         console.log("worker message: ", m);
+         networkIsSlow = m.data;
+      };
 
       preloadMessage("Waiting for the API Server");
 
@@ -184,7 +190,10 @@ class Bootstrap extends EventEmitter {
       // Transition: we still have some UI code that depends on accessing
       // our Factory as a Global var.  So until those are rewritten we will
       // make our factory Global.
-
+      this.AB.Network.registerNetworkTestWorker(
+         networkTestWorker,
+         networkIsSlow
+      );
       await this.AB.init();
       // NOTE: special case: User has no Roles defined.
       // direct them to our special ErrorNoDefsUI

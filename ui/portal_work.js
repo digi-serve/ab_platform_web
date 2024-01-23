@@ -435,7 +435,6 @@ class PortalWork extends ClassUI {
                            PortalWorkUserMobileQR.load(mobileApp);
                            PortalWorkUserMobileQR.show();
                         } else {
-                           //eslint-disable-next-line
                            const item = userMenuOptions.filter(
                               (o) => o.id == id
                            )[0];
@@ -667,6 +666,11 @@ class PortalWork extends ClassUI {
       this.AB.Network.on("queue.synced", () => {
          this.networkWarningDisplay("no_server", 0);
          this.networkWarningClear("no_server");
+      });
+
+      if (this.AB.Network.isNetworkSlow()) this.networkWarningDisplay("slow");
+      this.AB.Network.on("networkslow", (isSlow) => {
+         isSlow ? this.networkWarningDisplay("slow") : this.networkWarningClear("slow")
       });
 
       this.emit("ready");
