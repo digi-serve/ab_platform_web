@@ -84,6 +84,9 @@ class Bootstrap extends EventEmitter {
       const destroyPreloadUI = () =>
          document.getElementById("preloader").remove();
 
+      const networkTest = new Worker(new URL("../utils/networkTest.js", import.meta.url));
+      networkTest.onmessage = (m) => console.log("worker message: ", m)
+
       preloadMessage("Waiting for the API Server");
 
       performance.mark("bootstrap", { op: "function" });
