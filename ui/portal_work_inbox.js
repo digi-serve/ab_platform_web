@@ -225,6 +225,8 @@ class PortalWorkInbox extends ClassUI {
    }
 
    createAccordian(app) {
+      if (!app) return;
+
       // convert config info with current language labels
       this.translate(app, this.lang);
 
@@ -316,7 +318,7 @@ class PortalWorkInbox extends ClassUI {
     *        the language_code of the translations to use.
     */
    translate(obj, lang) {
-      if (obj.translations) {
+      if (obj?.translations) {
          var entry = obj.translations.find((t) => t.language_code == lang);
          if (!entry) {
             entry = obj.translations[0];

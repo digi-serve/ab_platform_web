@@ -70,13 +70,17 @@ class Config {
    }
 
    config(json) {
-      this._config = json;
+      this._config = this._config || {};
+      Object.keys(json).forEach((k) => {
+         this._config[k] = json[k];
+      });
       defaultsDeep(this._config, configDefaults);
    }
 
    configInbox(json) {
+      this._config = this._config || {};
       this._config.inbox = json.inbox || [];
-      this._config.inboxMeta = json.meta || [];
+      this._config.inboxMeta = json.inboxMeta || [];
    }
 
    configUser(json) {
