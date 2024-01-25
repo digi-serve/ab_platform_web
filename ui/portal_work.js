@@ -26,9 +26,7 @@ class PortalWork extends ClassUI {
                css: "portal_work_warning_banner warning_custom_css",
                hidden: true,
                cols: [
-                  {
-                     width: 5,
-                  },
+                  { width: 5 },
                   {
                      id: "portal_work_network_warning_label",
                      view: "label",
@@ -39,20 +37,10 @@ class PortalWork extends ClassUI {
                      view: "button",
                      align: "center",
                      hidden: true,
-                     width: 140,
+                     width: 100,
                      css: "webix_transparent",
-                     on: {
-                        onItemClick: () => {
-                           // test out network going offline:
-                           // this.AB.Network._testingHack = !this.AB.Network
-                           //    ._testingHack;
-                           this.AB.Network._connectionCheck();
-                        },
-                     },
                   },
-                  {
-                     width: 5,
-                  },
+                  { width: 5 },
                ],
             },
             {
@@ -327,8 +315,19 @@ class PortalWork extends ClassUI {
          );
          $$("portal_work_switcheroo_user_switched").show();
       }
-
+      /** @type {Object.<string, NetworkWarning>} */
       this.networkWarnings = {
+         /**
+          * @typedef {object} NetworkWarning - define the display & behavior of
+          * a Network Warning
+          * @prop {string} label - warning message to display
+          * @prop {number} priority - 1 is the highest prioirity
+          * @prop {Function} [click] - click hanlder function
+          * @prop {string} [button] - label for the button
+          * @prop {string | number} [value] - to replace in button lable
+          * @prop {string} [css] - custom css to add to the warning ui
+          * @prop {Boolean} [active] - is the warning currently active
+          */
          no_network: {
             label: `<i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
             ${L("No network detected. Work will not be saved.")}`,
@@ -340,13 +339,10 @@ class PortalWork extends ClassUI {
                "Uh oh...we cannot communicate with our servers, please wait before saving data."
             )}`,
             priority: 2,
-            click: () => {
-               // test out network going offline:
-               // this.AB.Network._testingHack = !this.AB.Network
-               //    ._testingHack;
-               this.AB.Network._connectionCheck();
-            },
-            button: "retry #value# requests",
+            click: () => this.AB.Network._connectionCheck(),
+            button: `<i class="fa fa-refresh" aria-hidden="true"></i> #value# ${L(
+               "requests"
+            )}`,
             value: 0,
          },
          slow: {
@@ -357,7 +353,9 @@ class PortalWork extends ClassUI {
                this.networkWarningClear("slow");
                this.networkWarnings.slow.disabled = true;
             },
-            button: "dismiss",
+            button: `<i class="fa fa-times" aria-hidden="true"></i> ${L(
+               "dismiss"
+            )}`,
             css: "background: #c98025",
          },
       };
@@ -670,7 +668,9 @@ class PortalWork extends ClassUI {
 
       if (this.AB.Network.isNetworkSlow()) this.networkWarningDisplay("slow");
       this.AB.Network.on("networkslow", (isSlow) => {
-         isSlow ? this.networkWarningDisplay("slow") : this.networkWarningClear("slow")
+         isSlow
+            ? this.networkWarningDisplay("slow")
+            : this.networkWarningClear("slow");
       });
 
       this.emit("ready");
@@ -695,45 +695,42 @@ class PortalWork extends ClassUI {
 
    /**
     * Display a network warning banner. Will not update if a higher priority
-    * warning is already active.
+    * warning is already active, but will save the state in case the active
+    * warning is cleared before this one. Can be called without a key to
+    * update/clear exisiting warnings.
     * @param {string?} key
     */
    networkWarningDisplay(key, value) {
-      console.log(key);
       if (key) this.networkWarnings[key].active = true;
       if (key && value) this.networkWarnings[key].value = value;
 
       // get the highest priority active warning
       let warning;
       for (const k in this.networkWarnings) {
-         if (
-            !this.networkWarnings[k].active ||
-            this.networkWarnings[k].disabled
-         )
-            continue;
-         if (!warning || warning.priority > this.networkWarnings[k].priority) {
-            warning = this.networkWarnings[k];
+         const entry = this.networkWarnings[k];
+         if (!entry.active || entry.disabled) continue;
+         if (!warning || warning.priority > entry.priority) {
+            warning = entry;
          }
       }
       if (!warning) {
+         // No active warnings so hide the banner
          $$("portal_work_network_warning").hide();
          return;
       }
       $$("portal_work_network_warning_label").setValue(warning.label);
+      const button = $$("portal_work_network_warning_button");
       if (warning.click) {
-         $$("portal_work_network_warning_button").define(
-            "click",
-            warning.click
-         );
+         button.define("click", warning.click);
          const buttonText = (warning.button ?? "").replaceAll(
             "#value#",
             warning.value
          );
-         $$("portal_work_network_warning_button").define("label", buttonText);
-         $$("portal_work_network_warning_button").refresh();
-         $$("portal_work_network_warning_button").show();
+         button.define("label", buttonText);
+         button.refresh();
+         button.show();
       } else {
-         $$("portal_work_network_warning_button").hide();
+         button.hide();
       }
       warning.css
          ? this.AB.Webix.html.addStyle(

@@ -89,8 +89,10 @@ class Bootstrap extends EventEmitter {
       );
       let networkIsSlow = false;
       networkTestWorker.onmessage = (m) => {
+         const $uiWarning = document.getElementById("preload_network_warning");
          console.log("worker message: ", m);
          networkIsSlow = m.data;
+         $uiWarning.hidden = !networkIsSlow;
       };
 
       preloadMessage("Waiting for the API Server");
