@@ -88,11 +88,22 @@ class Bootstrap extends EventEmitter {
          new URL("../utils/networkTest.js", import.meta.url)
       );
       let networkIsSlow = false;
-      networkTestWorker.onmessage = (m) => {
-         const $uiWarning = document.getElementById("preload_network_warning");
-         console.log("worker message: ", m);
-         networkIsSlow = m.data;
-         $uiWarning.hidden = !networkIsSlow;
+      networkTestWorker.onmessage = ({ data }) => {
+         if (networkIsSlow !== data) {
+            networkIsSlow = data;
+            const $uiWarning = document.getElementById(
+               "preload_network_warning"
+            );
+            networkIsSlow ? $uiWarning.show() : $uiWarning.hide();
+            // Tell sentry our network speed changed
+            performance.setContext("breadcrumb", {
+               category: "network",
+               message: networkIsSlow
+                  ? "Slow network detected"
+                  : "Network speed restored",
+               level: "info",
+            });
+         }
       };
 
       preloadMessage("Waiting for the API Server");

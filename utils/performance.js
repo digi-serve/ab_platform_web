@@ -113,6 +113,9 @@ class SentryPerformance extends Performance {
          case "user":
             Sentry.setUser(data);
             break;
+         case "breadcrumb":
+            Sentry.addBreadcrumb(data);
+            break;
          default:
             Sentry.setContext(key, data);
             break;
