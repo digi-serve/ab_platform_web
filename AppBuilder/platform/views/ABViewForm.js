@@ -331,6 +331,9 @@ module.exports = class ABViewForm extends ABViewFormCore {
       const model = dv.model;
       if (model == null) return;
 
+      // show progress icon
+      $formView.showProgress?.({ type: "icon" });
+
       // get update data
       const formVals = this.getFormValues(
          $formView,
@@ -408,11 +411,9 @@ module.exports = class ABViewForm extends ABViewFormCore {
       // validate data
       if (!this.validateData($formView, obj, formVals)) {
          // console.warn("Data is invalid.");
+         $formView.hideProgress?.();
          return;
       }
-
-      // show progress icon
-      $formView.showProgress?.({ type: "icon" });
 
       let newFormVals;
       // {obj}
