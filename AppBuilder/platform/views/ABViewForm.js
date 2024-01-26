@@ -396,6 +396,9 @@ module.exports = class ABViewForm extends ABViewFormCore {
          $formView?.hideProgress?.();
       };
 
+      // Load data of DCs that use in record rules
+      await this.loadDcDataOfRecordRules();
+
       // wait for our Record Rules to be ready before we continue.
       await this.recordRulesReady();
 
@@ -490,6 +493,30 @@ module.exports = class ABViewForm extends ABViewFormCore {
       if (childComponent && $$(childComponent.ui.id)) {
          $$(childComponent.ui.id).focus();
       }
+   }
+
+   async loadDcDataOfRecordRules() {
+      const tasks = [];
+
+      (this.settings?.recordRules ?? []).forEach((rule) => {
+         (rule?.actionSettings?.valueRules?.fieldOperations ?? []).forEach(
+            (op) => {
+               if (op.valueType !== "exist") return;
+
+               const pullDataDC = this.AB.datacollectionByID(op.value);
+
+               if (
+                  pullDataDC?.dataStatus ===
+                  pullDataDC.dataStatusFlag.notInitial
+               )
+                  tasks.push(pullDataDC.loadData());
+            }
+         );
+      });
+
+      await Promise.all(tasks)
+
+      return true;
    }
 
    get viewComponents() {

@@ -341,28 +341,6 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
       });
    }
 
-   async loadDcDataOfRecordRules() {
-      const tasks = [];
-
-      (this.settings?.recordRules ?? []).forEach((rule) => {
-         (rule?.actionSettings?.valueRules?.fieldOperations ?? []).forEach(
-            (op) => {
-               if (op.valueType !== "exist") return;
-
-               const pullDataDC = this.AB.datacollectionByID(op.value);
-
-               if (
-                  pullDataDC?.dataStatus ===
-                  pullDataDC.dataStatusFlag.notInitial
-               )
-                  tasks.push(pullDataDC.loadData());
-            }
-         );
-      });
-
-      return await Promise.all(tasks);
-   }
-
    async onShow(data) {
       this.saveButton?.disable();
 
@@ -402,7 +380,10 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
 
       if ($form) $form.adjust();
 
-      await this.loadDcDataOfRecordRules();
+      // Load data of DCs that are use in record rules here
+      // no need to wait until they are done. (Let the save button enable)
+      // It will be re-check again when saving.
+      baseView.loadDcDataOfRecordRules();
 
       this.saveButton?.enable();
    }
