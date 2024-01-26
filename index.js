@@ -15,9 +15,6 @@ import "./styles/font-awesome.min.css";
 import performance from "./utils/performance";
 performance.init();
 
-import Preloader from "./init/Preloader.js";
-// load all our resources in parallel
-
 import Bootstrap from "./init/Bootstrap.js";
 // Bootstrap is responsible for initializing the platform.
 

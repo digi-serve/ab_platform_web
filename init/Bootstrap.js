@@ -105,17 +105,12 @@ class Bootstrap extends EventEmitter {
 
       await initUser.init(this);
       const userInfo = Config.userConfig();
-      let definitionsLoading;
+
       if (userInfo) {
          // load definitions for current user
          performance.setContext("user", {
             id: userInfo.id,
          });
-         preloadMessage("Loading App Definitions");
-         performance.mark("initDefinitions", { op: "function" });
-         definitionsLoading = initDefinitions
-            .init(this)
-            .then(() => performance.measure("initDefinitions"));
       }
       // 2.5) Load any plugins
       performance.mark("loadPlugins", { op: "function" });
@@ -174,8 +169,6 @@ class Bootstrap extends EventEmitter {
       //    {ABFactory} that drives the rest of the AppBuilder objects
       performance.mark("createABFactory", { op: "function" });
       preloadMessage("Starting AppBuilder");
-
-      if (definitionsLoading) await definitionsLoading;
 
       const { default: ABFactory } = await loadABFactory;
       let definitions = Config.definitions() || null;
