@@ -1,8 +1,11 @@
 import { nanoid } from "nanoid";
 export default {
-   init: async (BS) => {
+   init: async (/* BS */) => {
       // BS {Bootstrap}
       // The initial Bootstrap object found in "./Bootstrap.js"
+      /* 
+       * Definitions now loaded in preloader.
+       *
       let updated;
       try {
          if (BS.AB) {
@@ -60,5 +63,8 @@ export default {
          // Fire the loading
          head.appendChild(script);
       });
+      *
+      *
+      */
    },
 };

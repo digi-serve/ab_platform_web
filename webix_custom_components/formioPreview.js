@@ -55,7 +55,7 @@ module.exports = class ABCustomFormIOPreview extends ABLazyCustomComponent {
             // now that it is set up we can push it into the global var
             // formBuilder = builder;
             // Provide a default submission.
-            form.submission = {
+            form.instance.submission = {
                data: formData,
             };
             (formComponents.components || []).forEach((comp) => {
@@ -64,7 +64,7 @@ module.exports = class ABCustomFormIOPreview extends ABLazyCustomComponent {
                   comp.action == "event" &&
                   comp.event
                ) {
-                  form.once(comp.event, function (/* click */) {
+                  form.instance.once(comp.event, function (/* click */) {
                      config?.onButton(comp.event);
                      // _this.emit("button", comp.event);
                   });

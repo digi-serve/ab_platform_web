@@ -56,6 +56,12 @@ class Config {
       // these are the configuration settings returned from the server. These
       // are more detailed configuration settings for the running of the site.
 
+      this._configUser = null;
+      // {obj} _configUser
+      // the default settings for the current user of the system.
+      //    .user {obj}  the current info for who we think is using the site
+      //    .userReal {obj}  if switheroo'd, this is the actual user
+
       this._settings = {};
       // {obj} _settings
       // settings are the configuration parameters found on the base <div>
@@ -64,8 +70,21 @@ class Config {
    }
 
    config(json) {
-      this._config = json;
+      this._config = this._config || {};
+      Object.keys(json).forEach((k) => {
+         this._config[k] = json[k];
+      });
       defaultsDeep(this._config, configDefaults);
+   }
+
+   configInbox(json) {
+      this._config = this._config || {};
+      this._config.inbox = json.inbox || [];
+      this._config.inboxMeta = json.inboxMeta || [];
+   }
+
+   configUser(json) {
+      this._configUser = json;
    }
 
    setting(key, value) {
@@ -192,14 +211,11 @@ class Config {
     * @returns {User}
     */
    userConfig() {
-      if (this._config && this._config.user) {
-         return this._config.user;
-      }
-      return null;
+      return this._configUser?.user ?? null;
    }
 
    userReal() {
-      return this._config?.userReal ?? false;
+      return this._configUser?.userReal ?? false;
    }
 }
 export default new Config();

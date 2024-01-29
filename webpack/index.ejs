@@ -9,7 +9,25 @@
       <title>AppBuilder</title>
       <!-- https://www.filamentgroup.com/lab/load-css-simpler/#the-code -->
       <link href="/__getCookie" rel="stylesheet" media="print" onload="this.media='all'" />
-      <script type='text/javascript' src='/assets/dependencies/sails.io.js' reconnection="true" defer></script>
+<!--      <script type='text/javascript' src='/assets/dependencies/sails.io.js' reconnection="true" defer></script>  -->
+      <script> 
+
+         //
+         // Setup some promises used during our boot up process.
+         //
+
+         // .__AB_preload  {Promise} our index.js script will await this 
+         // before continuing the Bootstrap.init();  This way all resources will
+         // be loaded before we start the initialization.
+         window.__AB_preload = new Promise(async (resolve, reject) => {
+            window.__AB_preload_resolve = resolve;
+         });
+
+         window.__AB_socketReady = new Promise((resolve) => {
+            window.__AB_socketReady_resolve = resolve;
+         });
+      </script>
+      <script type='text/javascript' src='/config/preloader' defer></script>  
    </head>
 
    <body style="margin:0q;">
