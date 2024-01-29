@@ -194,7 +194,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
             notEqualListCondition: L("does not equal"),
 
             checkedCondition: L("is checked"),
-            notCheckedCondition: L("is not checked"),
+            notCheckedCondition: L("is unchecked"),
 
             isCurrentUserCondition: L("is current user"),
             isNotCurrentUserCondition: L("is not current user"),
@@ -354,6 +354,8 @@ module.exports = class FilterComplex extends FilterComplexCore {
                case "greater_or_equal_current":
                case "is_empty":
                case "is_not_empty":
+               case "checked":
+               case "unchecked":
                   // There are only a few rules that don't need a
                   // value
                   break;
@@ -526,7 +528,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
 
       switch (field?.key) {
          case "boolean":
-            result = this.uiBooleanValue(field);
+            result = this.uiNoneValue(field);
             break;
          case "connectObject":
             result = []
