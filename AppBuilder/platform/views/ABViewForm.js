@@ -331,6 +331,9 @@ module.exports = class ABViewForm extends ABViewFormCore {
       const model = dv.model;
       if (model == null) return;
 
+      // show progress icon
+      $formView.showProgress?.({ type: "icon" });
+
       // get update data
       const formVals = this.getFormValues(
          $formView,
@@ -396,6 +399,9 @@ module.exports = class ABViewForm extends ABViewFormCore {
          $formView?.hideProgress?.();
       };
 
+      // Load data of DCs that use in record rules
+      await this.loadDcDataOfRecordRules();
+
       // wait for our Record Rules to be ready before we continue.
       await this.recordRulesReady();
 
@@ -405,11 +411,9 @@ module.exports = class ABViewForm extends ABViewFormCore {
       // validate data
       if (!this.validateData($formView, obj, formVals)) {
          // console.warn("Data is invalid.");
+         $formView.hideProgress?.();
          return;
       }
-
-      // show progress icon
-      $formView.showProgress?.({ type: "icon" });
 
       let newFormVals;
       // {obj}
@@ -490,6 +494,30 @@ module.exports = class ABViewForm extends ABViewFormCore {
       if (childComponent && $$(childComponent.ui.id)) {
          $$(childComponent.ui.id).focus();
       }
+   }
+
+   async loadDcDataOfRecordRules() {
+      const tasks = [];
+
+      (this.settings?.recordRules ?? []).forEach((rule) => {
+         (rule?.actionSettings?.valueRules?.fieldOperations ?? []).forEach(
+            (op) => {
+               if (op.valueType !== "exist") return;
+
+               const pullDataDC = this.AB.datacollectionByID(op.value);
+
+               if (
+                  pullDataDC?.dataStatus ===
+                  pullDataDC.dataStatusFlag.notInitial
+               )
+                  tasks.push(pullDataDC.loadData());
+            }
+         );
+      });
+
+      await Promise.all(tasks)
+
+      return true;
    }
 
    get viewComponents() {
