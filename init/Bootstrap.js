@@ -68,6 +68,7 @@ class Bootstrap extends EventEmitter {
 
       const loadABFactory = import(
          /* webpackChunkName: "AB" */
+         /* webpackPrefetch: true */
          "../AppBuilder/ABFactory"
       );
       // @const {Promise} loadABFactory Defer loading the ABFactory for a smaller
