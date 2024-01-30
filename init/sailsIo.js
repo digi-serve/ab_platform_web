@@ -5,3 +5,5 @@ io.sails.reconnection = true;
 // {bool}
 // by default, sails.io will not reconnect.  setting this to true will
 // tell it to auto reconnect.
+
+window.__AB_socketReady_resolve();

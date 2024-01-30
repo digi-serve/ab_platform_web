@@ -15,6 +15,8 @@ import initConfig from "../init/initConfig.js";
 import initConnectListerner from "../init/initConnectListerner.js";
 import initDiv from "../init/initDiv.js";
 import initDefinitions from "../init/initDefinitions.js";
+import initUser from "../init/initUser.js";
+// import initResources from "../init/initResources.js";
 
 // import JSZipUtils from "jszip-utils/dist/jszip-utils.min.js";
 
@@ -66,6 +68,7 @@ class Bootstrap extends EventEmitter {
 
       const loadABFactory = import(
          /* webpackChunkName: "AB" */
+         /* webpackPrefetch: true */
          "../AppBuilder/ABFactory"
       );
       // @const {Promise} loadABFactory Defer loading the ABFactory for a smaller
@@ -116,29 +119,34 @@ class Bootstrap extends EventEmitter {
       performance.mark("initDiv", { op: "ui.render" });
       await initDiv.init(this);
       performance.measure("initDiv");
+
       // 2) Request the User's Configuration Information from the server.
       performance.mark("initConfig", { op: "function" });
       preloadMessage("Getting Configuration Settings");
       await initConfig.init(this);
       performance.measure("initConfig");
+
+      await initUser.init(this);
       const userInfo = Config.userConfig();
-      let definitionsLoading;
+
       if (userInfo) {
          // load definitions for current user
          performance.setContext("user", {
             id: userInfo.id,
          });
-         preloadMessage("Loading App Definitions");
-         performance.mark("initDefinitions", { op: "function" });
-         definitionsLoading = initDefinitions
-            .init(this)
-            .then(() => performance.measure("initDefinitions"));
       }
       // 2.5) Load any plugins
-      performance.mark("loadPlugins", { op: "fucntion" });
-      // Make sure the BootStrap Object is available globally
-      window.__ABBS = this;
+      performance.mark("loadPlugins", { op: "function" });
 
+      // Plugins are now loaded via the Preloader and stored in
+      (window.__AB_Plugins || []).forEach((p) => {
+         this.addPlugin(p);
+      });
+      performance.measure("loadPlugins");
+
+      // Make sure the BootStrap Object is available globally
+      // window.__ABBS = this;
+      /*
       // Listen 'disconnect' event
       initConnectListerner.init(this);
 
@@ -178,12 +186,13 @@ class Bootstrap extends EventEmitter {
       const pluginsLoading = Promise.all(allPluginsLoaded).then(() =>
          performance.measure("loadPlugins")
       );
+*/
+
       // 3) Now we have enough info, to create an instance of our
       //    {ABFactory} that drives the rest of the AppBuilder objects
       performance.mark("createABFactory", { op: "function" });
       preloadMessage("Starting AppBuilder");
 
-      if (definitionsLoading) await definitionsLoading;
       const { default: ABFactory } = await loadABFactory;
       let definitions = Config.definitions() || null;
 
@@ -191,7 +200,6 @@ class Bootstrap extends EventEmitter {
          // NOTE: when loading up an unauthorized user,
          // definitions will be null: we can skip the plugins
          // Q: is it possible to load a plugin when unauthorized?
-         await pluginsLoading;
          this._plugins.forEach((p) => {
             definitions = definitions.concat(p.definitions());
          });
