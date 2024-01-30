@@ -14,13 +14,27 @@
    <body style="margin:0q;">
       <div appbuilder-portal="default" appbuilder-portal-autoenter="true" style="height: 100vh;">
          <!-- Preloader UI (uses webix classes for style, not actually webix components) -->
-         <div class="portalLogin" id="preloader" style="white-space: nowrap; 110%; height: 110%;">
+         <!-- Slow Network warning -->
+         <div hidden class="webix_view portal_work_warning_banner warning_custom_css webix_layout_line"
+            id="preload_network_warning" style="white-space: nowrap; margin-left: 0px; border-width: 0px;
+               margin-top: 0px; width: 100%; height: 30px; background: #c98025;">
+            <div class="webix_view webix_control webix_el_label" style="display: inline-block; vertical-align: top; border-width:
+               0px; margin-top: 0px; width:100%; height: 30px; text-align: center;">
+               <div class="webix_el_box" style="width: 100%; height: 30px; line-height: 24px; display: inline-block;">
+                  Slow Network Detected! Please be patient while the page loads.
+               </div>
+            </div>
+         </div>
+
+         <div class="portalLogin" id="preloader" style="white-space: nowrap;
+            height: 100vh">
             <div style="display: inline-block; vertical-align: top; border-width:
                0px; margin-top: 0px; margin-left: 0px; width: calc((100% -
                360px)/2); height: 100%;">
             </div>
             <div class="webix_view webix_layout_line"
                style="display: inline-block; vertical-align: top; border-top-width: 0px; border-bottom-width: 0px; margin-top: 0px; margin-left: -1px; width: 360px; height: 823px;">
+
                <div style="border-width: 0px; margin-left: 0px; margin-top: 0px; width: 360px; height: 313px;">
                </div>
                <div class="webix_view webix_layout_line"
