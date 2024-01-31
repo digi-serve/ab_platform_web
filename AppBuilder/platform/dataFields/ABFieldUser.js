@@ -163,7 +163,7 @@ module.exports = class ABFieldUser extends ABFieldUserCore {
             val = val.replace(/ab-current-user/g, this.AB.Account.username());
          else if (Array.isArray(val))
             val = val.map((v) =>
-               (v.username ?? v.uuid ?? v.id ?? v)?.replace(
+               (v?.username ?? v?.uuid ?? v?.id ?? v)?.replace(
                   /ab-current-user/g,
                   this.AB.Account.username()
                )
@@ -197,6 +197,20 @@ module.exports = class ABFieldUser extends ABFieldUserCore {
          }
 
          return result;
+      });
+   }
+
+   getOptions(...params) {
+      return super.getOptions(...params).then((options) => {
+         // in a ABFieldUser, our options.id elements need to have
+         // the username, not the .uuid:
+         (options || []).forEach((o) => {
+            if (o.username) {
+               o.id = o.username;
+            }
+         });
+
+         return options;
       });
    }
 };
