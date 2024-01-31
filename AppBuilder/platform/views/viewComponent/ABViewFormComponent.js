@@ -403,6 +403,12 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
             (comp instanceof ABViewFormJson && comp.settings.type === "filter")
       );
 
+      const normalFields = baseView.fieldComponents(
+         (comp) =>
+            comp instanceof ABViewFormItem &&
+            !(comp instanceof ABViewFormCustom)
+      );
+
       // Set default values
       if (!rowData) {
          customFields.forEach((f) => {
@@ -424,20 +430,14 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
             comp?.refresh?.(defaultRowData);
          });
 
-         const normalFields = baseView.fieldComponents(
-            (comp) =>
-               comp instanceof ABViewFormItem &&
-               !(comp instanceof ABViewFormCustom)
-         );
-
          normalFields.forEach((f) => {
+            if (f.key === "button") return;
+
             const field = f.field();
             if (!field) return;
 
             const comp = baseView.viewComponents[f.id];
             if (!comp) return;
-
-            if (f.key === "button") return;
 
             const colName = field.columnName;
 
@@ -460,7 +460,7 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
       }
 
       // Populate value to custom fields
-      else
+      else {
          customFields.forEach((f) => {
             const comp = baseView.viewComponents[f.id];
             if (!comp) return;
@@ -472,6 +472,19 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
 
             comp?.refresh?.(rowData);
          });
+
+         normalFields.forEach((f) => {
+            if (f.key === "button") return;
+
+            const field = f.field();
+            if (!field) return;
+
+            const comp = baseView.viewComponents[f.id];
+            if (!comp) return;
+
+            field.setValue($$(comp.ids.formItem), rowData);
+         });
+      }
 
       this.timerId = null;
    }
