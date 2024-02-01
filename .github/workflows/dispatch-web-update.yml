@@ -1,0 +1,28 @@
+name: Dipsatch Web Service Update
+on:
+   workflow_call:
+    inputs:
+      type:
+        type: string
+        required: true
+      version:
+        type: string
+        required: true
+      repo:
+        type: string
+        required: true
+    secrets:
+      TOKEN:
+        required: true
+jobs:
+  dispatch-web-update:
+    name: Dipsatch Web Service Update
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.TOKEN }}
+          repository: digi-serve/ab_service_web
+          event-type: web_new_version
+          client-payload: '{"type": "${{ inputs.type }}", "version": "${{ inputs.version }}", "repo": "${{ inputs.repo }}"}'

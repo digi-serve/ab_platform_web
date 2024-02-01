@@ -1,0 +1,131 @@
+name: Lighthouse CI
+on:
+   push:
+      branches: ["master"]
+   pull_request:
+      branches: ["master"]
+jobs:
+   lighthouse:
+      runs-on: ubuntu-latest
+      steps:
+         - name: Checkout Platform Web
+           uses: actions/checkout@v3
+           with:
+              path: ab_platform_web
+              submodules: true
+
+         - name: Checkout Web Service
+           uses: actions/checkout@v3
+           with:
+              path: web
+              repository: digi-serve/ab_service_web
+              token: ${{ secrets.GITHUB_TOKEN }}
+              ref: master
+
+         - name: Install NPM Dependencies
+           run: npm i
+           working-directory: ./ab_platform_web
+
+         - name: Run Webpack
+           run: npm run build:update
+           working-directory: ./ab_platform_web
+
+         # webpack expects the folder to be called "web" ab-install action expects "ab_service_web"
+         - name: Fix Web Servive Foledr Name
+           run: mv web ab_service_web
+
+         - name: Install AppBuilder
+           uses: digi-serve/ab-install-action@v1
+           with:
+              repository: digi-serve/ab_service_web
+
+         - name: Wait for AppBuilder
+           uses: ifaxity/wait-on-action@v1
+           with:
+              resource: http://localhost
+              timeout: 300000
+
+         - name: Run Lighthouse CI
+           run: |
+              npm install -g @lhci/cli puppeteer
+              lhci autorun
+           working-directory: ./ab_platform_web
+           env:
+              LHCI_UPLOAD__TARGET: "lhci"
+              LHCI_UPLOAD__SERVER_BASE_URL: "https://lighthouse.digiserve.org/"
+              LHCI_UPLOAD__TOKEN: ${{ secrets.LHCI_BUILD_TOKEN }}
+              LHCI_COLLECT__URL: "http://127.0.0.1"
+              LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+              LHCI_COLLECT__PUPPETEER_SCRIPT: "ciLighthouseAuth.js"
+
+         - name: Get the Lighouse Reports
+           if: ${{ github.event_name == 'pull_request' }}
+           id: get_report
+           run: |
+              echo "LH_REPORT_A=$(ls | grep lhr- | grep .json | sed -n 1p)" >> $GITHUB_OUTPUT
+              echo "LH_REPORT_B=$(ls | grep lhr- | grep .json | sed -n 2p)" >> $GITHUB_OUTPUT
+              echo "LH_REPORT_C=$(ls | grep lhr- | grep .json | sed -n 3p)" >> $GITHUB_OUTPUT
+           working-directory: ./ab_platform_web/.lighthouseci
+
+         - name: Extract Report Highlights
+           if: ${{ github.event_name == 'pull_request' }}
+           uses: actions/github-script@v7
+           env:
+              REPORT_A: ${{ steps.get_report.outputs.LH_REPORT_A }}
+              REPORT_B: ${{ steps.get_report.outputs.LH_REPORT_B }}
+              REPORT_C: ${{ steps.get_report.outputs.LH_REPORT_C }}
+           with:
+              script: |
+                 const reports = [
+                    require(`./ab_platform_web/.lighthouseci/${process.env.REPORT_A}`),
+                    require(`./ab_platform_web/.lighthouseci/${process.env.REPORT_B}`),
+                    require(`./ab_platform_web/.lighthouseci/${process.env.REPORT_C}`),
+                 ];
+                 const links = require("./ab_platform_web/.lighthouseci/links.json");
+                 const getColor = (score) => score - 49 <= 0 ? "FF3333" : score - 89 <= 0 ? "FFAA33": "00CC66";
+                 const average = (vals, multiply = 1) => Math.round(vals.reduce((a,b) => a + b) / vals.length * multiply);
+                 const extractDetails = (key) => {
+                    const reportEntry = reports[0].audits[key];
+                    const details = {
+                       title: reportEntry.title,
+                       score: average(reports.map(r => r.audits[key].score), 100),
+                    };
+                    details.color = getColor(details.score);
+                    if (reportEntry.scoreDisplayMode === "numeric") {
+                       details.score = average(reports.map(r => r.audits[key].numericValue));
+                    }
+                    return details;
+                 }
+                 const performance = average(reports.map(r => r.categories.performance.score), 100);
+                 core.exportVariable("PERFORMANCE", performance);
+                 core.exportVariable("PERFORMANCE_COLOR", getColor(performance));
+                 const fcp = extractDetails("first-contentful-paint");
+                 core.exportVariable("FCP", `${Math.round(fcp.score/100)/10}%20s`);
+                 core.exportVariable("FCP_COLOR", fcp.color);
+                 const lcp = extractDetails("largest-contentful-paint");
+                 core.exportVariable("LCP", `${Math.round(lcp.score/100)/10}%20s`);
+                 core.exportVariable("LCP_COLOR", lcp.color);
+                 const tbt = extractDetails("total-blocking-time");
+                 core.exportVariable("TBT", `${tbt.score}%20ms`);
+                 core.exportVariable("TBT_COLOR", tbt.color);
+                 const cls = extractDetails("cumulative-layout-shift");
+                 core.exportVariable("CLS", cls.score);
+                 core.exportVariable("CLS_COLOR", cls.color);
+                 const speed = extractDetails("speed-index");
+                 core.exportVariable("SPEED", `${Math.round(speed.score/100)/10}%20s`);
+                 core.exportVariable("SPEED_COLOR", speed.color);
+                 core.exportVariable("LINK", links[Object.keys(links)[0]]);
+
+         # NejcZdovc/comment-pr@v2 needs a checkout to the base path
+         - name: Fix for NejcZdovc/comment-pr
+           if: ${{ github.event_name == 'pull_request' }}
+           uses: actions/checkout@v3
+
+         - name: Add Lighthouse Results to PR Commnet
+           if: ${{ github.event_name == 'pull_request' }}
+           uses: NejcZdovc/comment-pr@v2
+           with:
+              file: lighthouse.md
+              identifier: LIGHTHOUSE_REPORT
+           env:
+              GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}

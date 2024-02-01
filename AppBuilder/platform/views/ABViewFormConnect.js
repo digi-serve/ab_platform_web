@@ -8,11 +8,6 @@ const ABViewPropertyEditPage =
 const ABViewFormConnectPropertyComponentDefaults =
    ABViewFormConnectCore.defaultValues();
 
-const ABPopupSort = require("../../../ABDesigner/ab_work_object_workspace_popupSortFields");
-
-let FilterComponent = null;
-let SortComponent = null;
-
 module.exports = class ABViewFormConnect extends ABViewFormConnectCore {
    /**
     * @param {obj} values  key=>value hash of ABView values

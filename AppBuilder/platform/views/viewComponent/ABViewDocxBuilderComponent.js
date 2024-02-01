@@ -211,18 +211,51 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
 
       datacollections
          .filter((dc) => dc?.datasource)
-         .forEach((dc) => {
+         .forEach(async (dc) => {
             const obj = dc.datasource;
+            const objModel = obj.model();
             const dcCursor = dc.getCursor();
             const dcValues = [];
-            const dataList = [];
+            // const dataList = [];
 
             // merge cursor to support dc and tree cursor in the report
-            if (dcCursor) {
-               const treeCursor = dc.getCursor(true);
+            // if (dcCursor) {
+            //    const treeCursor = dc.getCursor(true);
 
-               dataList.push(this.AB.merge({}, dcCursor, treeCursor));
-            } else dataList.push(...this.AB.cloneDeep(dc.getData()));
+            //    dataList.push(this.AB.merge({}, dcCursor, treeCursor));
+            // } else {
+            //    dataList.push(...this.AB.cloneDeep(dc.getData()));
+            // }
+
+            let where = {};
+            if (dcCursor) {
+               where = {
+                  glue: "and",
+                  rules: [
+                     {
+                        key: obj.PK(),
+                        rule: "equals",
+                        value: dcCursor[obj.PK()],
+                     },
+                  ],
+               };
+            } else {
+               where = this.AB.merge(
+                  where,
+                  dc.settings?.objectWorkspace?.filterConditions ?? {}
+               );
+            }
+
+            // Pull data that have full relation values.
+            // NOTE: When get data from DataCollection, those data is pruned.
+            const dataList = (
+               await objModel.findAll({
+                  disableMinifyRelation: true,
+                  populate: true,
+                  skip: 0,
+                  where,
+               })
+            ).data;
 
             // update property names to column labels to match format names in docx file
             const mlFields = obj.multilingualFields();
@@ -327,6 +360,10 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
          if (val?.forEach)
             val.forEach((v) => {
                if (!v) return;
+
+               // Sentry Fix: sometimes v is just the uuid
+               // Q: what should we do in this case?
+               if (typeof v == "string") return;
 
                // format relation data
                if (field.datasourceLink) {

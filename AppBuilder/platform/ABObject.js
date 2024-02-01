@@ -1,5 +1,4 @@
 const ABObjectCore = require("../core/ABObjectCore");
-const ABObjectWorkspaceViewCollection = require("./workspaceViews/ABObjectWorkspaceViewCollection");
 
 let L = (...params) => AB.Multilingual.label(...params);
 
@@ -23,12 +22,6 @@ let L = (...params) => AB.Multilingual.label(...params);
 module.exports = class ABObject extends ABObjectCore {
    constructor(attributes, AB) {
       super(attributes, AB);
-
-      this.workspaceViews = new ABObjectWorkspaceViewCollection(
-         attributes,
-         this,
-         AB
-      );
 
       // listen for our ABFields."definition.updated"
       this.fields().forEach((f) => {
@@ -406,7 +399,7 @@ module.exports = class ABObject extends ABObjectCore {
     * @return {Promise}
     *						.resolve( {this} )
     */
-   async save() {
+   async save(skipMigrate = false) {
       var isAdd = false;
 
       // if this is our initial save()
@@ -417,7 +410,7 @@ module.exports = class ABObject extends ABObjectCore {
 
       try {
          await super.save();
-         if (isAdd) {
+         if (isAdd && !skipMigrate) {
             await this.migrateCreate();
          }
          return this;
@@ -444,7 +437,7 @@ module.exports = class ABObject extends ABObjectCore {
    toObj() {
       var result = super.toObj();
 
-      result.objectWorkspaceViews = this.workspaceViews.toObj();
+      result.objectWorkspaceViews = this.workspaceViews?.toObj();
 
       return result;
    }

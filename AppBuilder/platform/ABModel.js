@@ -66,7 +66,7 @@ module.exports = class ABModel extends ABModelCore {
       };
 
       this.handler_delete = (...params) => {
-         this.handler_common("ab.datacollection.update", ...params);
+         this.handler_common("ab.datacollection.delete", ...params);
       };
 
       this.handler_findAll = (...params) => {
@@ -98,9 +98,9 @@ module.exports = class ABModel extends ABModelCore {
             return;
          }
 
-         let jobID = this.AB.jobID();
-         console.log(`${jobID} : normalization begin`);
-         let timeFrom = performance.now();
+         // let jobID = this.AB.jobID();
+         // console.log(`${jobID} : normalization begin`);
+         // let timeFrom = performance.now();
          if (key) {
             // on "update" & "create" we want to normalizeData()
             if (key.indexOf("delete") == -1) {
@@ -110,8 +110,8 @@ module.exports = class ABModel extends ABModelCore {
             // on a findAll we normalize data.data
             this.normalizeData(data.data);
          }
-         let timeTo = performance.now();
-         console.log(`${jobID} : normalization end:  ${timeTo - timeFrom}ms`);
+         // let timeTo = performance.now();
+         // console.log(`${jobID} : normalization end:  ${timeTo - timeFrom}ms`);
 
          context.resolve?.(data);
 

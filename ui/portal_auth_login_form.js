@@ -52,21 +52,6 @@ class PortalAuthLoginForm extends ClassUI {
                                  },
                                  elements: [
                                     {
-                                       id: "portal_auth_login_form_tenantList",
-                                       view: "select",
-                                       // label: "Tenant",
-                                       name: "tenant",
-                                       attributes: {
-                                          "data-cy":
-                                             "portal_auth_login_form_tenantList",
-                                       },
-                                       value: 1,
-                                       options: [
-                                          { id: 1, value: "Master" },
-                                          { id: 2, value: "Release" },
-                                       ],
-                                    },
-                                    {
                                        view: "text",
                                        placeholder: L("Email"),
                                        name: "email",
@@ -232,32 +217,6 @@ class PortalAuthLoginForm extends ClassUI {
 
       // now replace our initial placeholder with our viewable form
       webix.ui(this.ui(), $$("portal_auth_login_container"));
-
-      var siteConfig = this.AB.Config.siteConfig();
-      if (siteConfig) {
-         // replace options in tenant list with siteConfig.tenants:
-         var newOptions = [];
-         (siteConfig.tenants || []).forEach((t) => {
-            var opt = {
-               id: t.uuid,
-               value: t.title || t.key,
-            };
-            newOptions.push(opt);
-         });
-
-         $$("portal_auth_login_form_tenantList").define("options", newOptions);
-         if (newOptions.length == 0) {
-            console.warn("no tenants returned");
-            $$("portal_auth_login_form_tenantList").hide();
-         } else {
-            $$("portal_auth_login_form_tenantList").show();
-         }
-      }
-
-      var tID = this.AB.Tenant.id();
-      if (tID) {
-         $$("portal_auth_login_form_tenantList").define("value", tID);
-      }
 
       this.error(); // hides the default error message.
 

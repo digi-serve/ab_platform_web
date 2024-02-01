@@ -279,7 +279,8 @@ class NetworkRest extends EventEmitter {
                         })
                         .catch((_err) => {
                            this.AB.notify.developer(_err, {
-                              message: "*** NetworkRest._request().catch(): retry failed:",
+                              message:
+                                 "*** NetworkRest._request().catch(): retry failed:",
                            });
                            reject(_err);
                         });
@@ -311,10 +312,11 @@ class NetworkRest extends EventEmitter {
                         return;
                      }
 
-                     this.AB.notify.developer(packet, {
+                     this.AB.notify.developer(new Error(packet.message), {
                         context:
                            "NetworkRest:_request:Error returned from Server (req.ab.error())",
                         data: packet.data,
+                        status: packet.status,
                      });
                      // this.AB.Analytics.logError(packet.data);
                      // this.AB.error(packet.data);
@@ -340,6 +342,10 @@ class NetworkRest extends EventEmitter {
                      this.AB.notify.developer(error, {
                         context:
                            "NetworkRest:_request:Unknown Error returned from server",
+                        err,
+                        response: err.responseText,
+                        text: err.statusText || err.message,
+                        url: error.url,
                      });
                      // this.AB.Analytics.logError(error);
                      // this.AB.error(error);

@@ -3,6 +3,7 @@
  * A network manager for interfacing with our AppBuilder server.
  */
 var EventEmitter = require("events").EventEmitter;
+import performance from "../utils/performance";
 import NetworkRest from "./NetworkRest";
 import NetworkRestSocket from "./NetworkRestSocket";
 // import NetworkRelay from "./NetworkRelay";
@@ -187,6 +188,38 @@ class Network extends EventEmitter {
          }, 250);
       }
       // }
+   }
+
+   /**
+    * Check whether the network is slow
+    * @returns {Boolean}
+    */
+   isNetworkSlow() {
+      return !!this._networkSlow;
+   }
+
+   /**
+    * Register the network speed test worker
+    * @param {Worker} worker
+    * @param {boolean} slow is the current state slow?
+    */
+   registerNetworkTestWorker(worker, slow) {
+      this._networkTestWorker = worker;
+      this._networkSlow = slow;
+      this._networkTestWorker.onmessage = ({ data }) => {
+         if (this._networkSlow !== data) {
+            this._networkSlow = data;
+            this.emit("networkslow", this._networkSlow);
+            // Tell sentry our network speed changed
+            performance.setContext("breadcrumb", {
+               category: "network",
+               message: this._networkSlow
+                  ? "Slow network detected"
+                  : "Network speed restored",
+               level: "info",
+            });
+         }
+      };
    }
 
    /**

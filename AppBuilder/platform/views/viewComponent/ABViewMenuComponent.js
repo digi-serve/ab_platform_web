@@ -165,7 +165,21 @@ module.exports = class ABViewMenuComponent extends ABViewComponent {
 
    onClick(itemId) {
       const $menu = $$(this.ids.menu);
-      const $item = $menu.getMenuItem(itemId);
+      let $item;
+      try {
+         $item = $menu.getMenuItem(itemId);
+      } catch (err) {
+         this.AB.notify.developer(err, {
+            context:
+               "ABViewMenuComponent > onClick error gettint menu / menu item",
+            itemId,
+            menu: {
+               id: this.view.id,
+               settings: this.view.settings,
+            },
+         });
+         return;
+      }
       const baseView = this.view;
 
       // switch tab view

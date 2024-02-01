@@ -1,13 +1,8 @@
 /*Thai (Thailand) locale
  * modified to use Budhist Era Years
  */
-import * as Webix from "../webix.min.js";
 
-if (!window.webix) {
-   window.webix = Webix;
-}
-
-window.webix.i18n.locales["th-TH"] = {
+webix.i18n.locales["th-TH"] = {
    groupDelimiter: ",",
    groupSize: 3,
    decimalDelimiter: ".",

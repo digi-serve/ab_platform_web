@@ -1,0 +1,43 @@
+name: PR Merged
+on:
+  pull_request:
+    types: [closed]
+    branches: [master]
+permissions:
+  contents: write
+jobs:
+  call-get-label:
+    name: Label
+    # Only run if the PR closed by merging and we have a label
+    if: ${{ github.event.pull_request.merged }}
+    uses: digi-serve/.github/.github/workflows/get-pr-release-label.yml@master
+  call-e2e-tests:
+    name: Test
+    needs: [call-get-label]
+    # Only run if the PR closed by merging and we have a label
+    if: ${{ needs.call-get-label.outputs.valid == 'true' }}
+    uses: ./.github/workflows/e2e-tests.yml
+  call-bump-version:
+    name: Version
+    # Only run if tests pass 
+    needs: [ call-get-label, call-e2e-tests ]
+    uses: digi-serve/.github/.github/workflows/bump-version.yml@master
+    with:
+      ref: ${{ github.ref }}
+      type: ${{ needs.call-get-label.outputs.label }}
+  call-create-release:
+    name: Release
+    uses: digi-serve/.github/.github/workflows/create-release.yml@master
+    needs: [call-bump-version]
+    with:
+      tag: v${{ needs.call-bump-version.outputs.new_version }}
+  dispatch-web-update:
+    name: Dipsatch Web Service Update
+    needs: [ call-bump-version, call-get-label ]
+    uses: ./.github/workflows/dispatch-web-update.yml
+    with:
+      type: ${{ needs.call-get-label.outputs.label }}
+      version: ${{ needs.call-bump-version.outputs.new_version }}
+      repo: ab_platform_web
+    secrets:
+      TOKEN: ${{ secrets.PAT }}

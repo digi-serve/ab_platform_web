@@ -6,6 +6,7 @@ import PortalWorkInboxTaskWindow from "./portal_work_inbox_taskWindow.js";
 import PortalWorkUserProfileWindow from "./portal_work_user_profile_window.js";
 import PortalWorkUserSwitcheroo from "./portal_work_user_switcheroo.js";
 import PortalWorkUserQRWindow from "./portal_work_user_qr_window.js";
+import PortalWorkUserMobileQR from "./portal_work_user_mobile_qr.js";
 import PortalAccessLevelManager from "./portal_access_level_manager.js";
 import TranslationTool from "./portal_translation_tool.js";
 import TutorialManager from "./portal_tutorial_manager.js";
@@ -20,57 +21,26 @@ class PortalWork extends ClassUI {
          id: "portal_work",
          rows: [
             {
-               id: "portal_work_no_network_detected",
+               id: "portal_work_network_warning",
                height: 30,
-               css: "portal_work_no_network_detected",
+               css: "portal_work_warning_banner warning_custom_css",
                hidden: true,
                cols: [
+                  { width: 5 },
                   {
-                     width: 5,
-                  },
-                  {
-                     id: "portal_work_no_network_detected_label",
+                     id: "portal_work_network_warning_label",
                      view: "label",
                      align: "center",
                   },
                   {
-                     width: 5,
-                  },
-               ],
-            },
-            {
-               id: "portal_work_server_comunication_disabled_detected",
-               height: 30,
-               css: "portal_work_server_comunication_disabled_detected",
-               hidden: true,
-               cols: [
-                  {
-                     width: 5,
-                  },
-                  {
-                     id: "portal_work_server_comunication_disabled_detected_label",
-                     view: "label",
-                     align: "center",
-                  },
-                  {
-                     id: "portal_work_server_comunication_disabled_detected_queue",
+                     id: "portal_work_network_warning_button",
                      view: "button",
                      align: "center",
                      hidden: true,
-                     width: 40,
+                     width: 100,
                      css: "webix_transparent",
-                     on: {
-                        onItemClick: () => {
-                           // test out network going offline:
-                           // this.AB.Network._testingHack = !this.AB.Network
-                           //    ._testingHack;
-                           this.AB.Network._connectionCheck();
-                        },
-                     },
                   },
-                  {
-                     width: 5,
-                  },
+                  { width: 5 },
                ],
             },
             {
@@ -291,9 +261,13 @@ class PortalWork extends ClassUI {
       // Root Pages.
 
       // Get all our ABApplications and loaded Plugins in allApplications
-      const allApplications = (this.AB.applications() || []).concat(
-         this.AB.plugins() || []
-      );
+      const allApplications = (
+         this.AB.applications(
+            (a) =>
+               a.isWebApp &&
+               a.isAccessibleForRoles(this.AB.Account.rolesAll() ?? [])
+         ) || []
+      ).concat(this.AB.plugins() || []);
 
       // Build out our Navigation Side Bar Menu with our available
       // ABApplications
@@ -307,10 +281,22 @@ class PortalWork extends ClassUI {
       $$("abSidebarMenu").define("data", menu_data);
       this.sidebarResize();
 
+      PortalWorkUserMobileQR.init(AB);
+
       const userMenuOptions = [
          { id: "user_profile", label: L("User Profile"), icon: "user" },
          { id: "user_logout", label: L("Logout"), icon: "ban" },
       ];
+
+      // add in any Mobile App QR Codes:
+      const allMobile = this.AB.applications((a) => a.isMobile);
+      allMobile.forEach((m) => {
+         userMenuOptions.splice(1, 0, {
+            id: m.id, // "pwa_app",
+            label: m.label,
+            icon: m.icon.replace("fa-", ""),
+         });
+      });
 
       if (this.AB.Account.canSwitcheroo()) {
          userMenuOptions.splice(1, 0, {
@@ -322,39 +308,67 @@ class PortalWork extends ClassUI {
 
       if (this.AB.Account.isSwitcherood()) {
          $$("portal_work_switcheroo_user_switched_label").setValue(
-            `<i class="fa-fw fa fa-user-secret"></i> 
+            `<i class="fa-fw fa fa-user-secret"></i>
             ${L('You are viewing this site as "{0}"', [
                this.AB.Account.username(),
             ])}`
          );
          $$("portal_work_switcheroo_user_switched").show();
       }
-
-      $$("portal_work_no_network_detected_label").setValue(
-         `<i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 
-            ${L("No network detected. Work will not be saved.")}`
-      );
-
-      if (navigator.onLine) {
-         $$("portal_work_no_network_detected").hide();
-      } else {
-         $$("portal_work_no_network_detected").show();
-      }
-
-      navigator?.connection?.addEventListener("change", function () {
-         if (navigator.onLine) {
-            $$("portal_work_no_network_detected").hide();
-         } else {
-            $$("portal_work_no_network_detected").show();
-         }
-      });
-
-      $$("portal_work_server_comunication_disabled_detected_label").setValue(
-         `<i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 
+      /** @type {Object.<string, NetworkWarning>} */
+      this.networkWarnings = {
+         /**
+          * @typedef {object} NetworkWarning - define the display & behavior of
+          * a Network Warning
+          * @prop {string} label - warning message to display
+          * @prop {number} priority - 1 is the highest prioirity
+          * @prop {Function} [click] - click hanlder function
+          * @prop {string} [button] - label for the button
+          * @prop {string | number} [value] - to replace in button lable
+          * @prop {string} [css] - custom css to add to the warning ui
+          * @prop {Boolean} [active] - is the warning currently active
+          */
+         no_network: {
+            label: `<i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+            ${L("No network detected. Work will not be saved.")}`,
+            priority: 1,
+         },
+         no_server: {
+            label: `<i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
             ${L(
                "Uh oh...we cannot communicate with our servers, please wait before saving data."
-            )}`
-      );
+            )}`,
+            priority: 2,
+            click: () => this.AB.Network._connectionCheck(),
+            button: `<i class="fa fa-refresh" aria-hidden="true"></i> #value# ${L(
+               "requests"
+            )}`,
+            value: 0,
+         },
+         slow: {
+            label: `<i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+            ${L("Slow Network Detected! This may affect your experience.")}`,
+            priority: 5,
+            click: () => {
+               this.networkWarningClear("slow");
+               this.networkWarnings.slow.disabled = true;
+            },
+            button: `<i class="fa fa-times" aria-hidden="true"></i> ${L(
+               "dismiss"
+            )}`,
+            css: "background: #c98025",
+         },
+      };
+
+      if (!navigator.onLine) this.networkWarningDisplay("no_network");
+
+      window.addEventListener("offline", () => {
+         this.networkWarningDisplay("no_network");
+      });
+
+      window.addEventListener("online", () => {
+         this.networkWarningClear("no_network");
+      });
 
       // document.body.addEventListener(
       //    "offline",
@@ -386,7 +400,7 @@ class PortalWork extends ClassUI {
       }
 
       // This is the User popup menu that opens when you click the user icon in the main nav
-      webix.ui({
+      this.AB.Webix.ui({
          view: "popup",
          id: "userMenu",
          width: 150,
@@ -413,15 +427,21 @@ class PortalWork extends ClassUI {
                         PortalWorkUserQRWindow.show();
                         break;
                      default:
-                        //eslint-disable-next-line
-                        const item = userMenuOptions.filter(
-                           (o) => o.id == id
-                        )[0];
-                        webix.message(
-                           `<b>Not yet implemented</b><br/>
+                        // was this one of our Mobile Apps?
+                        const mobileApp = this.AB.applicationByID(id);
+                        if (mobileApp) {
+                           PortalWorkUserMobileQR.load(mobileApp);
+                           PortalWorkUserMobileQR.show();
+                        } else {
+                           const item = userMenuOptions.filter(
+                              (o) => o.id == id
+                           )[0];
+                           this.AB.Webix.message(
+                              `<b>Not yet implemented</b><br/>
                            Menu item:<i>${item.label}</i><br/>
                            Menu ID:<i>${item.id}</i>`
-                        );
+                           );
+                        }
                   }
                   $$("userMenu").hide();
                },
@@ -540,7 +560,7 @@ class PortalWork extends ClassUI {
       }
 
       if (allPlaceholders.length > 0)
-         webix.ui(
+         this.AB.Webix.ui(
             {
                view: "multiview",
                keepViews: true,
@@ -633,30 +653,24 @@ class PortalWork extends ClassUI {
       allInits.push(PortalWorkInboxTaskWindow.init(this.AB));
 
       // Network and Queued operations Alert
-      const $portalWorkServerComunicationDisabledDetected = $$(
-         "portal_work_server_comunication_disabled_detected"
-      );
-      const $portalWorkServerComunicationDisabledDetectedQueue = $$(
-         "portal_work_server_comunication_disabled_detected_queue"
-      );
-
       this.AB.Network.on("queued", () => {
          const count = this.AB.Network.queueCount();
          if (count > 0) {
-            $portalWorkServerComunicationDisabledDetectedQueue.show();
-            $portalWorkServerComunicationDisabledDetectedQueue.setValue(
-               `<div style="text-align: center; font-size: 12px; color:#FFFFFF">(${count})</div>`
-            );
-            $portalWorkServerComunicationDisabledDetected.show();
+            this.networkWarningDisplay("no_server", count);
          } else {
-            $portalWorkServerComunicationDisabledDetectedQueue.hide();
-            $portalWorkServerComunicationDisabledDetected.hide();
+            this.networkWarningClear("no_server");
          }
       });
       this.AB.Network.on("queue.synced", () => {
-         $portalWorkServerComunicationDisabledDetectedQueue.setValue("");
-         $portalWorkServerComunicationDisabledDetectedQueue.hide();
-         $portalWorkServerComunicationDisabledDetected.hide();
+         this.networkWarningDisplay("no_server", 0);
+         this.networkWarningClear("no_server");
+      });
+
+      if (this.AB.Network.isNetworkSlow()) this.networkWarningDisplay("slow");
+      this.AB.Network.on("networkslow", (isSlow) => {
+         isSlow
+            ? this.networkWarningDisplay("slow")
+            : this.networkWarningClear("slow");
       });
 
       this.emit("ready");
@@ -677,6 +691,63 @@ class PortalWork extends ClassUI {
       });
 
       await Promise.all(allInits);
+   }
+
+   /**
+    * Display a network warning banner. Will not update if a higher priority
+    * warning is already active, but will save the state in case the active
+    * warning is cleared before this one. Can be called without a key to
+    * update/clear exisiting warnings.
+    * @param {string?} key
+    */
+   networkWarningDisplay(key, value) {
+      if (key) this.networkWarnings[key].active = true;
+      if (key && value) this.networkWarnings[key].value = value;
+
+      // get the highest priority active warning
+      let warning;
+      for (const k in this.networkWarnings) {
+         const entry = this.networkWarnings[k];
+         if (!entry.active || entry.disabled) continue;
+         if (!warning || warning.priority > entry.priority) {
+            warning = entry;
+         }
+      }
+      if (!warning) {
+         // No active warnings so hide the banner
+         $$("portal_work_network_warning").hide();
+         return;
+      }
+      $$("portal_work_network_warning_label").setValue(warning.label);
+      const button = $$("portal_work_network_warning_button");
+      if (warning.click) {
+         button.define("click", warning.click);
+         const buttonText = (warning.button ?? "").replaceAll(
+            "#value#",
+            warning.value
+         );
+         button.define("label", buttonText);
+         button.refresh();
+         button.show();
+      } else {
+         button.hide();
+      }
+      warning.css
+         ? this.AB.Webix.html.addStyle(
+              `.warning_custom_css{${warning.css}}`,
+              "warning_custom_css"
+           )
+         : this.AB.Webix.html.removeStyle("warning_custom_css");
+      $$("portal_work_network_warning").show();
+   }
+   /**
+    * Clear a network warning
+    * @param {string} key
+    */
+   networkWarningClear(key) {
+      this.networkWarnings[key].active = false;
+      // Call this.networkWarningDisplay() again in case another warning is still active
+      this.networkWarningDisplay();
    }
 
    /**

@@ -260,7 +260,8 @@ module.exports = class ABFieldList extends ABFieldListCore {
                   node.classList.add("webix_invalid_cell");
 
                   this.AB.notify.developer(err, {
-                     message: "Error updating our entry.",
+                     message:
+                        "ABFieldList:customDisplay(): Error updating our entry.",
                      row: row,
                      values: "",
                      field: this.toObj(),
@@ -300,6 +301,30 @@ module.exports = class ABFieldList extends ABFieldListCore {
       formComponentSetting.common = () => {
          return {
             key: this.settings.isMultiple ? "selectmultiple" : "selectsingle",
+            settings: {
+               options: this.settings.options.map(function (opt) {
+                  return {
+                     id: opt.id,
+                     value: opt.text,
+                     hex: opt.hex,
+                  };
+               }),
+            },
+         };
+      };
+
+      return formComponentSetting;
+   }
+
+   formComponentMobile() {
+      const formComponentSetting = super.formComponent();
+
+      // .common() is used to create the display in the list
+      formComponentSetting.common = () => {
+         return {
+            key: this.settings.isMultiple
+               ? "mobile-selectmultiple"
+               : "mobile-selectsingle",
             settings: {
                options: this.settings.options.map(function (opt) {
                   return {

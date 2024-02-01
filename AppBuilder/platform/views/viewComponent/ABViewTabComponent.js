@@ -207,7 +207,7 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
                   const $sidebar = $$(ids.sidebar);
 
                   // set ids of controller buttons
-                  const collapseNode = $sidebar.$view.querySelector(
+                  const collapseNode = $sidebar?.$view.querySelector(
                      `[webix_tm_id="${ids.collapseMenu}"]`
                   );
 
@@ -217,7 +217,7 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
                         `tab-collapseMenu-${ids.collapseMenu}`
                      );
 
-                  const expandNode = $sidebar.$view.querySelector(
+                  const expandNode = $sidebar?.$view.querySelector(
                      `[webix_tm_id="${ids.expandMenu}"]`
                   );
 
@@ -228,7 +228,7 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
                      );
 
                   baseView.views((view) => {
-                     const node = $sidebar.$view.querySelector(
+                     const node = $sidebar?.$view?.querySelector(
                         `[webix_tm_id="${view.id}_menu"]`
                      );
 
@@ -323,7 +323,7 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
                                  baseView.views((view) => {
                                     const node = $$(
                                        ids.tab
-                                    ).$view.querySelector(
+                                    )?.$view?.querySelector(
                                        `[button_id="${view.id}"]`
                                     );
 

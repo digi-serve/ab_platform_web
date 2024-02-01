@@ -24,6 +24,10 @@ module.exports = class ABViewFormConnectComponent extends (
       return this.view.field();
    }
 
+   get multiselect() {
+      return this.field?.settings.linkType == "many";
+   }
+
    ui() {
       const field = this.field;
       const baseView = this.view;
@@ -39,7 +43,7 @@ module.exports = class ABViewFormConnectComponent extends (
          });
       }
 
-      const multiselect = field.settings.linkType == "many";
+      const multiselect = this.multiselect; // field.settings.linkType == "many";
       const formSettings = form?.settings || {};
       const ids = this.ids;
 
@@ -47,7 +51,8 @@ module.exports = class ABViewFormConnectComponent extends (
          id: ids.formItem,
          view: multiselect ? "multicombo" : "combo",
          name: field.columnName,
-         required: field?.settings?.required || settings?.required || false,
+         required:
+            field?.settings?.required || parseInt(settings?.required) || false,
          // label: field.label,
          // labelWidth: settings.labelWidth,
          dataFieldId: field.id,
@@ -166,6 +171,12 @@ module.exports = class ABViewFormConnectComponent extends (
       const field = this.field;
       const baseView = this.view;
 
+      if (this.multiselect) {
+         if (typeof data == "string") {
+            data = data.split(",");
+         }
+      }
+
       let selectedValues;
       if (Array.isArray(data)) {
          selectedValues = [];
@@ -196,21 +207,22 @@ module.exports = class ABViewFormConnectComponent extends (
       // so it doesn't trigger onChange again
       const $formItem = $$(ids.formItem);
 
-      // for xxx->one connections we need to populate again before setting
-      // values because we need to use the selected values to add options
-      // to the UI
-      if (this?.field?.settings?.linkViaType == "one") {
-         this.busy();
-         await field.getAndPopulateOptions(
-            $formItem,
-            baseView.options,
-            field,
-            baseView.parentFormComponent()
-         );
-         this.ready();
-      }
-
+      // Q: if we don't have a $formItem, is any of the rest valid?
       if ($formItem) {
+         // for xxx->one connections we need to populate again before setting
+         // values because we need to use the selected values to add options
+         // to the UI
+         if (this?.field?.settings?.linkViaType == "one") {
+            this.busy();
+            await field.getAndPopulateOptions(
+               $formItem,
+               baseView.options,
+               field,
+               baseView.parentFormComponent()
+            );
+            this.ready();
+         }
+
          $formItem.blockEvent();
 
          const prepedVals = selectedValues.join
@@ -265,6 +277,9 @@ module.exports = class ABViewFormConnectComponent extends (
    }
 
    async callbackSaveData(saveData) {
+      if (saveData == null) return;
+      else if (!Array.isArray(saveData)) saveData = [saveData];
+
       const ids = this.ids;
       const field = this.field;
 
@@ -292,17 +307,17 @@ module.exports = class ABViewFormConnectComponent extends (
       $formItem.getList().define("data", data);
 
       if (field.settings.linkType === "many") {
-         const currentVals = $formItem.getValue();
-
-         let selectedItems;
-         if (currentVals.indexOf(saveData.id) === -1)
-            selectedItems = currentVals
-               ? `${currentVals},${saveData.id}`
-               : saveData.id;
+         let selectedItems = $formItem.getValue();
+         saveData.forEach((sData) => {
+            if (selectedItems.indexOf(sData.id) === -1)
+               selectedItems = selectedItems
+                  ? `${selectedItems},${sData.id}`
+                  : sData.id;
+         });
 
          $formItem.setValue(selectedItems);
       } else {
-         $formItem.setValue(saveData.id);
+         $formItem.setValue(saveData[0].id);
       }
       // close the popup when we are finished
       // $$(ids.popup)?.close();

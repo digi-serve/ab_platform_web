@@ -1,6 +1,6 @@
 {
   "name": "ab_platform_web",
-  "version": "0.1.0",
+  "version": "1.4.0",
   "description": "AppBuilder runtime environment for the Web client.",
   "main": "index.js",
   "scripts": {
@@ -22,35 +22,55 @@
     "babel-loader": "^8.2.2",
     "clean-webpack-plugin": "^4.0.0",
     "compression-webpack-plugin": "^10.0.0",
+    "critters-webpack-plugin": "^3.0.2",
     "css-loader": "^5.0.1",
+    "css-minimizer-webpack-plugin": "^5.0.1",
     "eslint": "^8.21.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.2.1",
     "esm": "^3.2.25",
     "html-webpack-plugin": "^5.5.0",
     "jsdom": "^20.0.0",
+    "mini-css-extract-plugin": "^2.7.6",
     "mocha": "^9.1.2",
     "prettier": "^2.2.1",
     "sinon": "^14.0.0",
+    "source-map-loader": "^4.0.1",
     "style-loader": "^2.0.0",
     "url-loader": "^4.1.1",
     "webpack": "^5.74.0",
+    "webpack-bundle-analyzer": "^4.10.1",
     "webpack-cli": "^4.10.0",
     "webpack-merge": "^5.8.0"
   },
   "dependencies": {
+    "@sentry/browser": "^7.69.0",
+    "@sentry/webpack-plugin": "^2.7.1",
     "ab-utils": "npm:@digiserve/ab-utils@^1.3.1",
     "atomicjs": "^4.4.1",
+    "bootstrap": "^4.6.2",
     "chai": "^4.3.7",
-    "formiojs": "^4.12.7",
+    "formiojs": "^4.18.0",
     "jszip-utils": "^0.1.0",
     "nanoid": "^3.3.4",
+    "pdfjs-dist": "^3.9.179",
+    "sails.io.js": "^1.2.1",
+    "semver": "^7.5.4",
+    "socket.io-client": "^2.5.0",
     "tinymce": "^5.8.1",
     "uuid": "^8.3.2"
   },
   "sideEffects": [
     "*.css",
     "./js/webix/extras/tinymce.js",
-    "./js/webix/locales/*"
-  ]
+    "./js/webix/locales/*",
+    "./js/webix/componenets/**/*.js",
+    "./js/webix/extras/*.js",
+    "./init/sentry.js"
+  ],
+  "overrides": {
+    "critters-webpack-plugin": {
+      "html-webpack-plugin": "$html-webpack-plugin"
+    }
+  }
 }

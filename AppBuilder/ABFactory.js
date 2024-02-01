@@ -4,7 +4,7 @@ import _ from "lodash";
 import moment from "moment";
 import { nanoid } from "nanoid";
 import { v4 as uuidv4 } from "uuid";
-
+import performance from "../utils/performance";
 import FilterComplex from "./platform/FilterComplex";
 
 //
@@ -37,11 +37,6 @@ import Tenant from "../resources/Tenant.js";
 
 import UISettings from "./uiSettings/config.js";
 // UISettings: detailed settings for our common UI elements
-
-import Webix from "../js/webix/webix.min.js";
-// NOTE: moved to require() because using import with webix.js
-// really messed things up!
-// var Webix = require("../js/webix/webix.js");
 
 class ABValidator {
    constructor(AB) {
@@ -108,7 +103,7 @@ class ABFactory extends ABFactoryCore {
       this.Network = Network;
       this.Storage = Storage;
       this.Tenant = Tenant;
-      this.Webix = Webix;
+      this.Webix = webix;
 
       // Plugin Classes
       this.ClassUI = ClassUI;
@@ -819,20 +814,14 @@ class ABFactory extends ABFactoryCore {
    // }
 
    /**
-    * notify()
     * will send alerts to a group of people. These alerts are usually about
     * configuration errors, or software problems.
-    * @param {string} domain
-    *     which group of people we are sending a notification to.
-    * @param {Error} error
-    *     An error object generated at the point of issue.
-    * @param {json} info
-    *     Additional related information concerning the issue.
+    * @param {string} domain which group of people we are sending a notification to.
+    * @param {Error} error An error object generated at the point of issue.
+    * @param {json} info Additional related information concerning the issue.
     */
    notify(domain, error, info) {
-      console.error("TODO: ABFactory.notify(): pass error off to analytics");
-      console.error(error);
-      console.error(info);
+      performance.notify(domain, error, info);
    }
 
    plugins() {
@@ -846,7 +835,7 @@ class ABFactory extends ABFactoryCore {
    // Utilities
    //
    alert(options) {
-      Webix.alert(options);
+      this.Webix.alert(options);
    }
 
    cloneDeep(value) {

@@ -242,7 +242,8 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
                // if an error was returned
                onFileUploadError: (item, response) => {
                   this.AB.notify.developer(new Error("Error loading file"), {
-                     message: "Error loading file",
+                     message:
+                        "ABFieldFile:onFileUploadError(): Error loading file",
                      response,
                   });
                   webixContainer.hideProgress();
@@ -300,7 +301,8 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
                         node.classList.add("webix_invalid_cell");
 
                         this.AB.notify.developer(err, {
-                           message: "Error updating our entry.",
+                           message:
+                              "ABFieldFile:customEdit(): Error updating our entry.",
                            row: row,
                            values: values,
                         });
@@ -338,6 +340,10 @@ module.exports = class ABFieldFile extends ABFieldFileCore {
     */
    formComponent() {
       return super.formComponent("fieldcustom");
+   }
+
+   formComponentMobile() {
+      return super.formComponent("mobile-file");
    }
 
    detailComponent() {

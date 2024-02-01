@@ -1,0 +1,83 @@
+name: "Update Core Version"
+run-name: Update core to ${{ github.event.client_payload.version }}
+on:
+  repository_dispatch:
+    type: [core_new_version]
+jobs:
+  call-update-sub:
+    name: Update
+    uses: digi-serve/.github/.github/workflows/update-sub-repo.yml@master
+    secrets: 
+      TOKEN:  ${{ secrets.PAT }}
+    with:
+      repository: digi-serve/appbuilder_class_core
+      short_name: core
+      folder: AppBuilder/core
+      version: ${{ github.event.client_payload.version }}
+
+  call-run-cy-test:
+    name: Test
+    needs: call-update-sub
+    uses: ./.github/workflows/e2e-tests.yml
+    with:
+      ref: ${{ needs.call-update-sub.outputs.branch }}
+
+  call-generate-build-meta:
+    name: Meta
+    uses: digi-serve/.github/.github/workflows/generate-build-meta.yml@master
+    with: 
+      version: ${{ github.event.client_payload.version }}
+      identifier: c
+
+  call-bump-version:
+    name: Version
+    if: ${{ github.event.client_payload.type == 'minor' || github.event.client_payload.type == 'patch' }}
+    needs: [ call-update-sub, call-run-cy-test, call-generate-build-meta ]
+    uses: digi-serve/.github/.github/workflows/bump-version.yml@master
+    with:
+      ref: ${{ needs.call-update-sub.outputs.branch }}
+      # Consider core updates as patch
+      type: patch
+      build_meta: ${{ needs.call-generate-build-meta.outputs.build }}
+
+  call-merge-release:
+    name: Merge
+    needs: [ call-update-sub, call-bump-version ]
+    uses: digi-serve/.github/.github/workflows/branch-merge-release.yml@master
+    with: 
+      branch: ${{ needs.call-update-sub.outputs.branch }}
+      tag: v${{ needs.call-bump-version.outputs.new_version }}
+      body: "- core updated to v${{ github.event.client_payload.version }}"
+
+  call-dispatch-runtime-update:
+    name: Dipsatch AB Runtime Update
+    needs: [ call-merge-release, call-bump-version ]
+    uses: ./.github/workflows/dispatch-web-update.yml
+    with:
+      type: patch
+      version: ${{ needs.call-bump-version.outputs.new_version }}
+      repo: ab_platform_web
+    secrets:
+      TOKEN: ${{ secrets.PAT }}
+
+  call-open-pr-fail:
+    name: Tests Failed
+    needs: [ call-update-sub, call-run-cy-test ]
+    if: ${{ failure() && github.event.client_payload.type != 'major' }}
+    uses: digi-serve/.github/.github/workflows/open-pr.yml@master
+    with: 
+      branch: ${{ needs.call-update-sub.outputs.branch }}
+      title: Update core to ${{ github.event.client_payload.version }} (from GitHub Actions Workflow)
+      body: Automatic update failed. Check the [E2E tests](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
+      release_notes: "- core updated to ${{ github.event.client_payload.version }}"
+  
+  call-open-pr-major:
+    name: Major Change
+    needs: [ call-update-sub ]
+    if: ${{ github.event.client_payload.type == 'major' }}
+    uses: digi-serve/.github/.github/workflows/open-pr.yml@master
+    with: 
+      branch: ${{ needs.call-update-sub.outputs.branch }}
+      title: Update core to ${{ github.event.client_payload.version }} (from GitHub Actions Workflow)
+      body: This is a major core update. Please review and merge when ready.
+      release_notes: "- core updated to ${{ github.event.client_payload.version }}"

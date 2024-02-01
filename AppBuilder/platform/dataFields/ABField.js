@@ -179,7 +179,7 @@ module.exports = class ABField extends ABFieldCore {
     * @return {Promise}
     *						.resolve( {this} )
     */
-   async save() {
+   async save(skipMigrate = false) {
       let isAdd = false;
       // if this is our initial save()
       if (!this.id) {
@@ -231,7 +231,7 @@ module.exports = class ABField extends ABFieldCore {
       // but not connectObject fields:
       // ABFieldConnect.migrateXXX() gets called from the UI popupNewDataField
       // in order to handle the timings of the 2 fields that need to be created
-      if (!this.isConnection) {
+      if (!this.isConnection && !skipMigrate) {
          const fnMigrate = isAdd ? this.migrateCreate() : this.migrateUpdate();
          await fnMigrate;
       }
@@ -381,7 +381,7 @@ module.exports = class ABField extends ABFieldCore {
       // NOTE: what is being returned here needs to mimic an ABView CLASS.
       // primarily the .common() and .newInstance() methods.
 
-      return {
+      let FC = {
          // .common() is used to create the display in the list
          common: () => {
             return {
@@ -405,7 +405,7 @@ module.exports = class ABField extends ABFieldCore {
             // 		 this and return an actual Form Component.
 
             // store object id and field id to field component
-            const values = this.formComponent().common();
+            const values = FC.common();
             values.settings = values.settings || {};
             values.settings.objectId = this.object.id;
             values.settings.fieldId = this.id;
@@ -421,6 +421,7 @@ module.exports = class ABField extends ABFieldCore {
             return ABFieldPlaceholder;
          },
       };
+      return FC;
    }
 
    /**

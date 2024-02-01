@@ -59,9 +59,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
       }
       // Remove default button from array, then we will add it to be the last item later (.push)
       else {
-         this._views = this.views(
-            (v) => !(v instanceof ABViewFormButton) && !v.settings.isDefault
-         );
+         this._views = this.views((v) => v.id != defaultButton.id);
       }
 
       // Calculate position Y of the default button
@@ -192,6 +190,9 @@ module.exports = class ABViewForm extends ABViewFormCore {
          }
       );
 
+      if (allVals.translations?.length > 0)
+         formVals.translations = allVals.translations;
+
       return formVals;
    }
 
@@ -205,7 +206,6 @@ module.exports = class ABViewForm extends ABViewFormCore {
     * @return {boolean} isValid
     */
    validateData($formView, object, formVals) {
-      let isValid = true;
       let list = "";
 
       // validate required fields
@@ -216,14 +216,37 @@ module.exports = class ABViewForm extends ABViewFormCore {
       ).map((fComp) => fComp.field());
 
       // validate data
-      let validator;
-      if (isValid) {
-         validator = object.isValidData(formVals);
-         isValid = validator.pass();
-      }
+      const validator = object.isValidData(formVals);
+      let isValid = validator.pass();
 
       // $$($formView).validate();
       $formView.validate();
+      /**
+       * helper function to fix the webix ui after adding an validation error
+       * message.
+       * @param {string} col - field.columnName
+       */
+      const fixInvalidMessageUI = (col) => {
+         const $forminput = $formView.elements[col];
+         if (!$forminput) return;
+         // Y position
+         const height = $forminput.$height;
+         if (height < 56) {
+            $forminput.define("height", 60);
+            $forminput.resize();
+         }
+
+         // X position
+         const domInvalidMessage = $forminput.$view.getElementsByClassName(
+            "webix_inp_bottom_label"
+         )[0];
+         if (!domInvalidMessage?.style["margin-left"]) {
+            domInvalidMessage.style.marginLeft = `${
+               this.settings.labelWidth ??
+               ABViewFormPropertyComponentDefaults.labelWidth
+            }px`;
+         }
+      };
 
       // Display required messages
       requiredFields.forEach((f) => {
@@ -236,27 +259,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
             isValid = false;
 
             // Fix position of invalid message
-            const $forminput = $formView.elements[f.columnName];
-            if ($forminput) {
-               // Y position
-               const height = $forminput.$height;
-               if (height < 56) {
-                  $forminput.define("height", 60);
-                  $forminput.resize();
-               }
-
-               // X position
-               const domInvalidMessage =
-                  $forminput.$view.getElementsByClassName(
-                     "webix_inp_bottom_label"
-                  )[0];
-               if (!domInvalidMessage?.style["margin-left"]) {
-                  domInvalidMessage.style.marginLeft = `${
-                     this.settings.labelWidth ??
-                     ABViewFormPropertyComponentDefaults.labelWidth
-                  }px`;
-               }
-            }
+            fixInvalidMessageUI(f.columnName);
          }
       });
 
@@ -272,6 +275,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
             validator.errors.forEach((err) => {
                $formView.markInvalid(err.name, err.message);
                list += `<li>${err.name}: ${err.message}</li>`;
+               fixInvalidMessageUI(err.name);
             });
 
             saveButton?.disable();
@@ -313,12 +317,6 @@ module.exports = class ABViewForm extends ABViewFormCore {
       // if this function returns false, then it will not go on.
       if (!this._callbacks?.onBeforeSaveData?.()) return;
 
-      // form validate
-      if (!$formView || !$formView.validate()) {
-         // TODO : error message
-         return;
-      }
-
       $formView.clearValidation();
 
       // get ABDatacollection
@@ -332,6 +330,9 @@ module.exports = class ABViewForm extends ABViewFormCore {
       // get ABModel
       const model = dv.model;
       if (model == null) return;
+
+      // show progress icon
+      $formView.showProgress?.({ type: "icon" });
 
       // get update data
       const formVals = this.getFormValues(
@@ -398,6 +399,9 @@ module.exports = class ABViewForm extends ABViewFormCore {
          $formView?.hideProgress?.();
       };
 
+      // Load data of DCs that use in record rules
+      await this.loadDcDataOfRecordRules();
+
       // wait for our Record Rules to be ready before we continue.
       await this.recordRulesReady();
 
@@ -407,11 +411,9 @@ module.exports = class ABViewForm extends ABViewFormCore {
       // validate data
       if (!this.validateData($formView, obj, formVals)) {
          // console.warn("Data is invalid.");
+         $formView.hideProgress?.();
          return;
       }
-
-      // show progress icon
-      $formView.showProgress?.({ type: "icon" });
 
       let newFormVals;
       // {obj}
@@ -466,7 +468,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
       try {
          this.doSubmitRules(newFormVals);
       } catch (errs) {
-         this.AB.notify.developer(err, {
+         this.AB.notify.developer(errs, {
             message: "Error processing Submit Rules.",
             view: this.toObj(),
             newFormVals: newFormVals,
@@ -492,6 +494,30 @@ module.exports = class ABViewForm extends ABViewFormCore {
       if (childComponent && $$(childComponent.ui.id)) {
          $$(childComponent.ui.id).focus();
       }
+   }
+
+   async loadDcDataOfRecordRules() {
+      const tasks = [];
+
+      (this.settings?.recordRules ?? []).forEach((rule) => {
+         (rule?.actionSettings?.valueRules?.fieldOperations ?? []).forEach(
+            (op) => {
+               if (op.valueType !== "exist") return;
+
+               const pullDataDC = this.AB.datacollectionByID(op.value);
+
+               if (
+                  pullDataDC?.dataStatus ===
+                  pullDataDC.dataStatusFlag.notInitial
+               )
+                  tasks.push(pullDataDC.loadData());
+            }
+         );
+      });
+
+      await Promise.all(tasks)
+
+      return true;
    }
 
    get viewComponents() {

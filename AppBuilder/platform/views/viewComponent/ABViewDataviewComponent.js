@@ -10,8 +10,7 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
          idBase || `ABViewDataview_${baseView.id}`,
          Object.assign(
             {
-               scrollview: "",
-               dataFlexView: "",
+               dataview: "",
             },
             ids
          )
@@ -21,31 +20,28 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
    }
 
    ui() {
+      // NOTE: need to initial the detail component here
+      // because its dom width & height values are used .template function
+      this.initDetailComponent();
+
       const ids = this.ids;
       const _ui = super.ui([
          {
-            id: ids.scrollview,
-            view: "scrollview",
+            id: ids.dataview,
+            view: "dataview",
             scroll: "y",
-            body: {
-               id: ids.dataFlexView,
-               view: "flexlayout",
-               paddingX: 15,
-               paddingY: 19,
-               type: "space",
-               cols: [],
-            },
+            sizeToContent: true,
+            css: "borderless transparent",
+            xCount: this.settings.xCount,
+            template: (item) => this.itemTemplate(item),
             on: {
-               onAfterScroll: async () => {
-                  const pos = $$(ids.scrollview).getScrollState();
-
-                  await this.scroll(pos);
+               onAfterRender: () => {
+                  this.applyClickEvent();
+                  this.addCyAttribute();
                },
             },
          },
       ]);
-
-      delete _ui.type;
 
       return _ui;
    }
@@ -53,344 +49,267 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
    async init(AB) {
       await super.init(AB);
 
-      const ids = this.ids;
       const dc = this.datacollection;
-
       if (!dc) return;
 
-      const dataView = $$(ids.dataFlexView);
-
-      // initial the link page helper
+      // Initial the link page helper
       this.linkPage = this.linkPageHelper.component();
       this.linkPage.init({
          view: this.view,
          datacollection: dc,
       });
 
-      // if (dc.datacollectionLink && dc.fieldLink) {
-      //    dc.bind(dataView, dc.datacollectionLink, dc.fieldLink);
-      // } else {
-      //    dc.bind(dataView);
-      // }
-      // track all flexlayout component IDs on the data collectino so we can notify them of changes
-      dc.attachFlexlayout(dataView);
-      dc.on("initializingData", () => {
-         this.busy();
-      });
-      dc.on("initializedData", () => {
-         this.ready();
-      });
-      dc.on("loadData", () => {
-         this.emptyView();
-         this.renderData();
-      });
-      dc.on("update", () => {
-         this.emptyView();
-         this.renderData();
-      });
-      dc.on("delete", () => {
-         this.emptyView();
-         this.renderData();
-      });
-      dc.on("create", () => {
-         this.emptyView();
-         this.renderData();
-      });
+      const ids = this.ids;
+      const $dataView = $$(ids.dataview);
+      AB.Webix.extend($dataView, AB.Webix.ProgressBar);
+      dc.bind($dataView);
 
-      // this.eventClear();
-      //
-      // this.eventAdd({
-      //    emitter: dc,
-      //    eventName: "loadData",
-      //    listener: () => {
-      //       com.renderData();
-      //    },
-      // });
+      window.addEventListener("resize", () => {
+         clearTimeout(this._resizeEvent);
+         this._resizeEvent = setTimeout(() => {
+            this.resize($dataView.getParentView());
+            delete this._resizeEvent;
+         }, 20);
+      });
    }
 
    onShow() {
       super.onShow();
 
-      const dc = this.datacollection;
-
-      if (!dc) return;
-
-      if (dc.dataStatus === dc.dataStatusFlag.initialized) this.renderData();
+      this.resize();
    }
 
-   get yPosition() {
-      return this._yPosition ?? 0;
+   resize(base_element) {
+      const $dataview = $$(this.ids.dataview);
+      $dataview.resize();
+
+      const item_width = this.getItemWidth(base_element);
+      $dataview.customize({ width: item_width });
+      $dataview.getTopParentView?.().resize?.();
+
    }
 
-   set yPosition(pos) {
-      this._yPosition = pos;
+   initDetailComponent() {
+      const detailUI = this.getDetailUI();
+      this._detail_ui = this.AB.Webix.ui(detailUI);
+
+      // 2 - Always allow access to components inside data view
+      this.detailComponent.init(null, 2);
    }
 
-   busy() {
-      const ids = this.ids;
-      const Layout = $$(ids.dataFlexView);
-      const Scroll = $$(ids.scrollview);
-
-      // editor mode doesn't load this ui
-      if (!Scroll || !Layout) return;
-
-      Layout.disable();
-
-      const abWebix = this.AB.Webix;
-
-      if (!Scroll.showProgress) abWebix.extend(Scroll, abWebix.ProgressBar);
-
-      Scroll.showProgress({ type: "icon" });
-   }
-
-   ready() {
-      const ids = this.ids;
-      const Layout = $$(ids.dataFlexView);
-      const Scroll = $$(ids.scrollview);
-
-      // editor mode doesn't load this ui
-      if (!Scroll || !Layout) return;
-
-      Layout.enable();
-
-      const AB = this.AB;
-
-      if (Scroll && !Scroll.hideProgress)
-         AB.Webix.extend(Scroll, AB.Webix.ProgressBar);
-
-      Scroll.hideProgress();
-   }
-
-   renderData() {
-      const ids = this.ids;
+   getDetailUI() {
+      const detailCom = this.detailComponent;
       const editPage = this.settings.editPage;
       const detailsPage = this.settings.detailsPage;
-      const records = [];
-      const dc = this.datacollection;
 
-      if (!dc) {
-         this.ready();
+      const _ui = detailCom.ui();
+      // adjust the UI to make sure it will look like a "card"
+      _ui.type = "clean";
+      _ui.css = "ab-detail-view";
 
-         return;
+      if (detailsPage || editPage) {
+         _ui.css += ` ab-detail-hover ab-record-#itemId#`;
+
+         if (detailsPage) _ui.css += " ab-detail-page";
+         if (editPage) _ui.css += " ab-edit-page";
       }
 
-      const Layout = $$(ids.dataFlexView) || $$(ids.component);
+      return _ui;
+   }
 
-      if (!Layout || isNaN(Layout.$width)) {
-         this.ready();
+   itemTemplate(item) {
+      const detailCom = this.detailComponent;
+      const $dataview = $$(this.ids.dataview);
+      const $detail_item = this._detail_ui;
 
-         return;
+      // Mock up data to initialize height of item
+      if (!item || !Object.keys(item).length) {
+         item = item ?? {};
+         this.datacollection?.datasource?.fields().forEach((f) => {
+            switch (f.key) {
+               case "string":
+               case "LongText":
+                  item[f.columnName] = "Lorem Ipsum";
+                  break;
+               case "date":
+               case "datetime":
+                  item[f.columnName] = new Date();
+                  break;
+               case "number":
+                  item[f.columnName] = 7;
+                  break;
+            }
+         });
+      }
+      detailCom.displayData(item);
+
+      const itemWidth =
+         $dataview.data.count() > 0
+            ? $dataview.type.width
+            : ($detail_item.$width - 20) / this.settings.xCount;
+
+      const itemHeight =
+         $dataview.data.count() > 0
+            ? $dataview.type.height
+            : $detail_item.getChildViews()?.[0]?.$height;
+
+      const tmp_dom = document.createElement("div");
+      tmp_dom.appendChild($detail_item.$view);
+
+      $detail_item.define("width", itemWidth - 24);
+      $detail_item.define("height", itemHeight + 15);
+      $detail_item.adjust();
+
+      // Add cy attributes
+      this.addCyItemAttributes(tmp_dom, item);
+
+      return tmp_dom.innerHTML.replace(/#itemId#/g, item.id);
+   }
+
+   getItemWidth(base_element) {
+      const $dataview = $$(this.ids.dataview);
+
+      let currElem = base_element ?? $dataview;
+      let parentWidth = currElem?.$width;
+      while (currElem) {
+         if (
+            currElem.config.view == "scrollview" ||
+            currElem.config.view == "layout"
+         )
+            parentWidth =
+               currElem?.$width < parentWidth ? currElem?.$width : parentWidth;
+
+         currElem = currElem?.getParentView?.();
       }
 
+      if (!parentWidth)
+         parentWidth = $dataview?.getParentView?.().$width || window.innerWidth;
+
+      if (parentWidth > window.innerWidth)
+         parentWidth = window.innerWidth;
+
+      // check if the browser window minus webix default padding is the same as the parent window
+      // if so we need to check to see if there is a sidebar and reduce the usable space by the
+      // width of the sidebar
+      if (window.innerWidth - 19 <= parentWidth) {
+         const $sidebar = this.getTabSidebar();
+         if ($sidebar) {
+            parentWidth -= $sidebar.$width;
+         }
+      }
+
+      const recordWidth = Math.floor(parentWidth / this.settings.xCount);
+
+      return recordWidth;
+   }
+
+   getTabSidebar() {
+      const $dataview = $$(this.ids.dataview);
+      let $sidebar;
+      let currElem = $dataview;
+      while (currElem && !$sidebar) {
+         $sidebar = (currElem.getChildViews?.() ?? []).filter(
+            (item) => item?.config?.view == "sidebar"
+         )[0];
+
+         currElem = currElem?.getParentView?.();
+      }
+
+      return $sidebar;
+   }
+
+   applyClickEvent() {
+      const editPage = this.settings.editPage;
+      const detailsPage = this.settings.detailsPage;
+      if (!detailsPage && !editPage) return;
+
+      const $dataview = $$(this.ids.dataview);
+      if (!$dataview) return;
+
+      $dataview.$view.onclick = (e) => {
+         let clicked = false;
+         let divs = e.path ?? [];
+
+         // NOTE: Some web browser clients do not support .path
+         if (!divs.length) {
+            divs.push(e.target);
+            divs.push(e.target.parentNode);
+         }
+
+         if (editPage) {
+            for (let p of divs) {
+               if (
+                  p.className &&
+                  p.className.indexOf("webix_accordionitem_header") > -1
+               ) {
+                  clicked = true;
+                  p.parentNode.parentNode.classList.forEach((c) => {
+                     if (c.indexOf("ab-record-") > -1) {
+                        // var record = parseInt(c.replace("ab-record-", ""));
+                        const record = c.replace("ab-record-", "");
+                        this.linkPage.changePage(editPage, record);
+                        // com.logic.toggleTab(detailsTab, ids.component);
+                     }
+                  });
+                  break;
+               }
+            }
+         }
+
+         if (detailsPage && !clicked) {
+            for (let p of divs) {
+               if (
+                  p.className &&
+                  p.className.indexOf("webix_accordionitem") > -1
+               ) {
+                  p.parentNode.parentNode.classList.forEach((c) => {
+                     if (c.indexOf("ab-record-") > -1) {
+                        // var record = parseInt(c.replace("ab-record-", ""));
+                        const record = c.replace("ab-record-", "");
+                        this.linkPage.changePage(detailsPage, record);
+                        // com.logic.toggleTab(detailsTab, ids.component);
+                     }
+                  });
+
+                  break;
+               }
+            }
+         }
+      };
+   }
+
+   addCyAttribute() {
       const baseView = this.view;
-      const xCount = parseInt(this.settings.xCount);
-      const recordWidth = Math.floor(
-         (Layout.$width - 20 - xCount * 20) / xCount
-      );
+      const $dataview = $$(this.ids.dataview);
+      const name = (baseView.name ?? "").replace(".dataview", "");
 
-      const rows = dc.getData();
-
-      // if this amount of data is already parsed just skip the rest.
-      if (Layout.currentLength === rows.length) {
-         this.ready();
-
-         return;
-      }
-
-      Layout.currentLength = rows.length;
-
-      // store total of rows
-      this._startPos = Layout.getChildViews ? Layout.getChildViews().length : 0;
-
-      let stopPos = rows.length;
-
-      if (dc.settings.loadAll || this._startPos === 0) stopPos = rows.length;
-      else if (rows.length - this._startPos > 20) stopPos = this._startPos + 20;
-
-      for (let i = this._startPos; i < stopPos; i++) {
-         // get the components configuation
-         const detailCom = new ABViewDetailComponent(baseView, rows[i].id);
-         const _ui = detailCom.ui();
-
-         // adjust the UI to make sure it will look like a "card"
-         _ui.type = "space";
-         _ui.css = "ab-detail-view";
-
-         if (detailsPage || editPage) {
-            _ui.css += ` ab-detail-hover ab-record-${rows[i].id}`;
-
-            if (detailsPage) _ui.css += " ab-detail-page";
-
-            if (editPage) _ui.css += " ab-edit-page";
-         }
-
-         _ui.paddingX = 10;
-         _ui.paddingY = 6;
-         _ui.minWidth = recordWidth - 10;
-         _ui.maxWidth = recordWidth;
-
-         if (Layout.addView) {
-            Layout.addView(_ui, -1);
-            detailCom.init(null, 2); // 2 - Always allow access to components inside data view
-            setTimeout(detailCom.displayData(rows[i]), 0);
-         } else records.push(_ui);
-      }
-
-      if (records.length) {
-         const flexlayout = {
-            id: ids.dataFlexView,
-            view: "flexlayout",
-            paddingX: 15,
-            paddingY: 19,
-            type: "space",
-            cols: records,
-         };
-
-         this.AB.Webix.ui(flexlayout, $$(ids.scrollview), $$(ids.dataFlexView));
-
-         for (let j = this._startPos; j < stopPos; j++) {
-            const detailCom = new ABViewDetailComponent(baseView, rows[j].id);
-
-            detailCom.init(null, 2); // 2 - Always allow access to components inside data view
-            setTimeout(detailCom.displayData(rows[j]), 0);
-         }
-      }
-
-      if ($$(ids.scrollview)) {
-         $$(ids.scrollview).scrollTo(0, this.yPosition);
-
-         if (detailsPage || editPage) {
-            Layout.$view.onclick = (e) => {
-               let clicked = false;
-               let divs = e.path ?? [];
-
-               // NOTE: Some web browser clients do not support .path
-               if (!divs.length) {
-                  divs.push(e.target);
-                  divs.push(e.target.parentNode);
-               }
-
-               if (editPage) {
-                  for (let p of divs) {
-                     if (
-                        p.className &&
-                        p.className.indexOf("webix_accordionitem_header") > -1
-                     ) {
-                        clicked = true;
-                        p.parentNode.parentNode.classList.forEach((c) => {
-                           if (c.indexOf("ab-record-") > -1) {
-                              // var record = parseInt(c.replace("ab-record-", ""));
-                              const record = c.replace("ab-record-", "");
-                              this.linkPage.changePage(editPage, record);
-                              // com.logic.toggleTab(detailsTab, ids.component);
-                           }
-                        });
-                        break;
-                     }
-                  }
-               }
-
-               if (detailsPage && !clicked) {
-                  for (let p of divs) {
-                     if (
-                        p.className &&
-                        p.className.indexOf("webix_accordionitem") > -1
-                     ) {
-                        p.parentNode.parentNode.classList.forEach((c) => {
-                           if (c.indexOf("ab-record-") > -1) {
-                              // var record = parseInt(c.replace("ab-record-", ""));
-                              const record = c.replace("ab-record-", "");
-                              this.linkPage.changePage(detailsPage, record);
-                              // com.logic.toggleTab(detailsTab, ids.component);
-                           }
-                        });
-
-                        break;
-                     }
-                  }
-               }
-            };
-         }
-      }
-
-      //Add data-cy attributes for cypress tests
-      const name = baseView.name.replace(".dataview", "");
-
-      Layout.$view.setAttribute(
+      $dataview.$view.setAttribute(
          "data-cy",
          `dataview container ${name} ${baseView.id}`
       );
-
-      Layout.getChildViews().forEach((child, i) => {
-         const uuid = rows[i + this._startPos]["uuid"];
-         const view = child.$view;
-
-         view
-            .querySelector(".webix_accordionitem_body")
-            ?.setAttribute(
-               "data-cy",
-               `dataview item ${name} ${uuid} ${baseView.id}`
-            );
-         view
-            .querySelector(".webix_accordionitem_button")
-            ?.setAttribute(
-               "data-cy",
-               `dataview item button ${name} ${uuid} ${baseView.id}`
-            );
-      });
-
-      this.ready();
    }
 
-   emptyView() {
-      const ids = this.ids;
-      const flexlayout = {
-         id: ids.dataFlexView,
-         view: "flexlayout",
-         type: "clean",
-         padding: 10,
-         css: { background: "#ebedf0 !important" },
-         cols: [],
-      };
-
-      this.AB.Webix.ui(flexlayout, $$(ids.scrollview), $$(ids.dataFlexView));
+   addCyItemAttributes(dom, item) {
+      const baseView = this.view;
+      const uuid = item.uuid;
+      const name = (baseView.name ?? "").replace(".dataview", "");
+      dom.querySelector(".webix_accordionitem_body")?.setAttribute(
+         "data-cy",
+         `dataview item ${name} ${uuid} ${baseView.id}`
+      );
+      dom.querySelector(".webix_accordionitem_button")?.setAttribute(
+         "data-cy",
+         `dataview item button ${name} ${uuid} ${baseView.id}`
+      );
    }
 
-   /**
-    * @method scroll
-    * @param pos - {
-    * 					x: {integer},
-    * 					y: {integer}
-    * 				}
-    */
-   async scroll(pos) {
-      const ids = this.ids;
-      const Layout = $$(ids.dataFlexView);
-      const Scroll = $$(ids.scrollview);
-      const loadWhen = 40;
-      const y = pos.y;
-      const maxYPos = Layout.$height - Scroll.$height;
-
-      if (maxYPos - y <= loadWhen) {
-         if (this.loadMoreTimer) return;
-
-         this.yPosition = y;
-
-         const dc = this.datacollection;
-
-         if (!dc) return;
-
-         if (Layout.getChildViews().length >= dc.totalCount) return;
-
-         // loading cursor
-         this.busy();
-
-         await dc.loadData(Layout.getChildViews().length || 0);
-
-         this.loadMoreTimer = setTimeout(() => {
-            this.loadMoreTimer = null;
-         }, 1100);
-      }
+   get detailComponent() {
+      return (this._detailComponent =
+         this._detailComponent ??
+         new ABViewDetailComponent(
+            this.view,
+            `${this.ids.component}_detail_view`
+         ));
    }
 
    get linkPageHelper() {

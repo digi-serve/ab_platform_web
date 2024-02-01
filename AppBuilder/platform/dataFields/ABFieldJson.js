@@ -50,6 +50,10 @@ module.exports = class ABFieldJson extends ABFieldJsonCore {
       return formComponentSetting;
    }
 
+   formComponentMobile() {
+      return super.formComponent("mobile-fieldreadonly");
+   }
+
    detailComponent() {
       const detailComponentSetting = super.detailComponent();
 

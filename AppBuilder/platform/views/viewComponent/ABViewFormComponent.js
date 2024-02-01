@@ -121,7 +121,6 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
       this.initCallbacks(options);
       this.initEvents();
       this.initValidationRules();
-      this.loadDcDataOfRecordRules();
 
       const abWebix = this.AB.Webix;
       const $form = $$(this.ids.form);
@@ -171,7 +170,7 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
                   field?.linkViaOneValues
                ) {
                   delete field.linkViaOneValues;
-                  if (rowData[field.columnName]) {
+                  if (rowData?.[field.columnName]) {
                      if (Array.isArray(rowData[field.columnName])) {
                         let valArray = [];
                         rowData[field.columnName].forEach((v) => {
@@ -342,25 +341,9 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
       });
    }
 
-   loadDcDataOfRecordRules() {
-      (this.settings?.recordRules ?? []).forEach((rule) => {
-         (rule?.actionSettings?.valueRules?.fieldOperations ?? []).forEach(
-            (op) => {
-               if (op.valueType !== "exist") return;
-
-               const pullDataDC = this.AB.datacollectionByID(op.value);
-
-               if (
-                  pullDataDC &&
-                  pullDataDC.dataStatus === pullDataDC.dataStatusFlag.notInitial
-               )
-                  pullDataDC.loadData();
-            }
-         );
-      });
-   }
-
    async onShow(data) {
+      this.saveButton?.disable();
+
       this._showed = true;
 
       const baseView = this.view;
@@ -396,6 +379,13 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
       this.focusOnFirst();
 
       if ($form) $form.adjust();
+
+      // Load data of DCs that are use in record rules here
+      // no need to wait until they are done. (Let the save button enable)
+      // It will be re-check again when saving.
+      baseView.loadDcDataOfRecordRules();
+
+      this.saveButton?.enable();
    }
 
    async displayData(rowData) {
@@ -411,6 +401,12 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
             (comp instanceof ABViewFormTextbox &&
                comp.settings.type === "rich") ||
             (comp instanceof ABViewFormJson && comp.settings.type === "filter")
+      );
+
+      const normalFields = baseView.fieldComponents(
+         (comp) =>
+            comp instanceof ABViewFormItem &&
+            !(comp instanceof ABViewFormCustom)
       );
 
       // Set default values
@@ -434,20 +430,14 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
             comp?.refresh?.(defaultRowData);
          });
 
-         const normalFields = baseView.fieldComponents(
-            (comp) =>
-               comp instanceof ABViewFormItem &&
-               !(comp instanceof ABViewFormCustom)
-         );
-
          normalFields.forEach((f) => {
+            if (f.key === "button") return;
+
             const field = f.field();
             if (!field) return;
 
             const comp = baseView.viewComponents[f.id];
             if (!comp) return;
-
-            if (f.key === "button") return;
 
             const colName = field.columnName;
 
@@ -470,7 +460,7 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
       }
 
       // Populate value to custom fields
-      else
+      else {
          customFields.forEach((f) => {
             const comp = baseView.viewComponents[f.id];
             if (!comp) return;
@@ -482,6 +472,19 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
 
             comp?.refresh?.(rowData);
          });
+
+         normalFields.forEach((f) => {
+            if (f.key === "button") return;
+
+            const field = f.field();
+            if (!field) return;
+
+            const comp = baseView.viewComponents[f.id];
+            if (!comp) return;
+
+            field.setValue($$(comp.ids.formItem), rowData);
+         });
+      }
 
       this.timerId = null;
    }
@@ -542,5 +545,12 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
 
       if (childComponent && $$(childComponent.ids.formItem))
          $$(childComponent.ids.formItem).focus();
+   }
+
+   get saveButton() {
+      return $$(this.ids.form)?.queryView({
+         view: "button",
+         type: "form",
+      });
    }
 };

@@ -219,6 +219,13 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       return super.formComponent("connect");
    }
 
+   formComponentMobile() {
+      if (this.settings.linkType == "many") {
+         return super.formComponent("mobile-selectmultiple");
+      }
+      return super.formComponent("mobile-selectsingle");
+   }
+
    detailComponent() {
       const detailComponentSetting = super.detailComponent();
 
@@ -237,8 +244,27 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
     *
     * @return {Promise}
     */
-   getOptions(whereClause, term, sort, editor) {
+   async getOptions(whereClause, term, sort, editor) {
       const theEditor = editor;
+
+      if (theEditor) {
+         // PREVENT: repeatly refresh data too often
+         if (theEditor._getOptionsThrottle) {
+            clearTimeout(theEditor._getOptionsThrottle);
+            // NOTE: remove variables that reference the Promise and Resolve to let GC cleans up.
+            // https://dev.to/xnimorz/js-promises-3-garbage-collection-and-memory-leaks-2oi7?fbclid=IwAR1wqgNz2KqchaM7eRkclR6YWHT01eva4y5IWpnaY0in6BrxmTAtpNCnEXM
+            delete theEditor._timeToPullData;
+            delete theEditor._getOptionsResolve;
+         }
+         theEditor._timeToPullData = await new Promise((resolve) => {
+            theEditor._getOptionsResolve = resolve;
+            theEditor._getOptionsThrottle = setTimeout(() => {
+               resolve(true);
+            }, 100);
+         });
+         if (!theEditor._timeToPullData) return;
+      }
+
       return new Promise((resolve, reject) => {
          let haveResolved = false;
          // {bool}
@@ -428,10 +454,12 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                      opt.value = opt.text;
                   });
 
+                  // 8/10/2023 - We are not actually using this (see line 338) - If we need to store
+                  // user data in local storage we should encrypt it.
                   // cache options if not a xxx->one connection
-                  if (this?.settings?.linkViaType != "one") {
-                     this.AB.Storage.set(storageID, this._options);
-                  }
+                  // if (this?.settings?.linkViaType != "one") {
+                  //    this.AB.Storage.set(storageID, this._options);
+                  // }
                   return respond(this._options);
                } catch (err) {
                   this.AB.notify.developer(err, {
@@ -466,7 +494,11 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                vals.push(val.id);
             } else {
                let itemObj = this.getItemFromVal(val);
-               vals.push(itemObj.id);
+               if (itemObj && itemObj.id) {
+                  vals.push(itemObj.id);
+               } else {
+                  vals.push(val);
+               }
             }
          });
       } else {
@@ -476,6 +508,8 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             let itemObj = this.getItemFromVal(value);
             if (itemObj && itemObj.id) {
                vals.push(itemObj.id);
+            } else {
+               vals.push(value);
             }
          }
       }
@@ -502,6 +536,8 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
    }
 
    getAndPopulateOptions(editor, options, field, form) {
+      if (!editor) return Promise.resolve([]);
+
       const theEditor = editor;
       // if editor has options and is xxx->one store the options on the field
       if (
@@ -554,14 +590,34 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
                   if (parentValue) {
                      if (value.filterColumn) {
-                        if (
-                           field.object
-                              .fieldByID(value.filterValue.config.dataFieldId)
-                              .getItemFromVal(parentValue)
-                        ) {
-                           newVal = field.object
-                              .fieldByID(value.filterValue.config.dataFieldId)
-                              .getItemFromVal(parentValue)[value.filterColumn];
+                        const filterField = field.object.fieldByID(
+                           value.filterValue.config.dataFieldId
+                        );
+                        let valItem;
+
+                        // When options does not load yet, then pull select value from DC
+                        if (!filterField._options?.length) {
+                           const linkedField =
+                              (form.datacollection.datasource?.fields(
+                                 (f) =>
+                                    f.id == value.value ||
+                                    f.columnName == value.value
+                              ) ?? [])[0];
+
+                           if (linkedField) {
+                              // Get values from DC
+                              const formVals = form.datacollection?.getCursor();
+
+                              valItem =
+                                 formVals[linkedField.relationName()] ??
+                                 formVals[value.value];
+                           }
+                        } else {
+                           valItem = filterField.getItemFromVal(parentValue);
+                        }
+
+                        if (valItem) {
+                           newVal = valItem[value.filterColumn];
                         } else {
                            newVal = parentValue;
                         }
@@ -585,18 +641,20 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          );
       }
 
-      const handlerOptionData = (data) => {
-         if (theEditor.$destructed) {
-            this.removeListener("option.data", handlerOptionData);
-            return;
-         }
-         this.populateOptions(theEditor, data, field, form, true);
-      };
+      if (!this.handlerOptionData) {
+         this.handlerOptionData = (data) => {
+            if (theEditor.$destructed) {
+               this.removeListener("option.data", this.handlerOptionData);
+               return;
+            }
+            this.populateOptions(theEditor, data, field, form, true);
+         };
+      }
 
       // try to make sure we don't continually add up listeners.
-      this.removeListener("option.data", handlerOptionData).once(
+      this.removeListener("option.data", this.handlerOptionData).once(
          "option.data",
-         handlerOptionData
+         this.handlerOptionData
       );
 
       return new Promise((resolve, reject) => {
@@ -621,10 +679,46 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       if (addCy) {
          this.populateOptionsDataCy(theEditor, field, form);
       }
-      if (theEditor.getValue && theEditor.getValue()) {
-         theEditor.setValue(theEditor.getValue());
-         // } else if (this._selectedData && this._selectedData.length) {
-         //    theEditor.setValue(this.editFormat(this._selectedData));
+      if (theEditor.getValue?.() && data?.length) {
+         let currVal = theEditor.getValue();
+         // in a multiselect environment, the current val can be an encoded string:
+         // "id1,id2".  Break this into an array:
+         if (field.linkType() == "many" && typeof currVal == "string") {
+            currVal = currVal.split(",");
+         }
+         if (!Array.isArray(currVal)) {
+            currVal = [currVal];
+         }
+
+         let selectedVals = [];
+         currVal.forEach((cVal) => {
+            // Check exists item
+            const isExists = data.some((d) => d.id == cVal);
+
+            if (isExists) {
+               selectedVals.push(cVal);
+            }
+
+            // if we couldn't find it by it's .id, then check to see
+            // if there is a custom index (.indexField  .indexField2)
+            // that does match.
+            // Select option item from custom index value
+            if (
+               !isExists &&
+               field.isConnection &&
+               (field.indexField || field.indexField2)
+            ) {
+               const selectedItem = data.filter(
+                  (d) =>
+                     d[field.indexField?.columnName ?? ""] == cVal ||
+                     d[field.indexField2?.columnName ?? ""] == cVal
+               )[0];
+
+               if (selectedItem) selectedVals.push(selectedItem.id);
+            }
+         });
+
+         theEditor.setValue(selectedVals);
       }
       theEditor.unblockEvent();
    }

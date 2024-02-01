@@ -4,6 +4,7 @@
  * and outlines the basic Network interface.
  */
 
+import performance from "../utils/performance";
 import NetworkRest from "./NetworkRest";
 
 const listSocketEvents = [
@@ -48,15 +49,12 @@ class NetworkRestSocket extends NetworkRest {
                      let model = obj.model();
                      if (ev != "ab.datacollection.delete") {
                         let jobID = this.AB.jobID();
-                        console.log(`${jobID} : ${ev}:normalization begin`);
-                        let timeFrom = performance.now();
+                        performance.mark(`${ev}:normalization`, {
+                           op: "function",
+                           data: { jobID },
+                        });
                         model.normalizeData(data.data);
-                        let timeTo = performance.now();
-                        console.log(
-                           `${jobID} : ${ev}:normalization end:  ${
-                              timeTo - timeFrom
-                           }ms`
-                        );
+                        performance.measure(`${ev}:normalization`);
                      }
                   }
                }
@@ -79,6 +77,29 @@ class NetworkRestSocket extends NetworkRest {
    }
 
    salSend(params) {
+      let route, query;
+      try {
+         // Extract paramitized route (ex: `/app_builder/model/:ID`) for performance tracking
+         [, route, query] = params.url.match(
+            /https?:\/\/[^/]+(\/[^?]+)\??(.*)/
+         );
+         route = route.replace(/\b[a-fA-F\d-]{36}\b/g, ":ID");
+         performance.mark(route, {
+            op: "websocket.client",
+            data: {
+               http: {
+                  query: query || undefined,
+                  method: params.method,
+               },
+               url: params.url,
+            },
+         });
+      } catch (err) {
+         this.AB.notify.developer(err, {
+            context: `salSend() create performance.mark`,
+         });
+      }
+
       return new Promise((resolve, reject) => {
          params.method = params.method.toLowerCase();
 
@@ -117,12 +138,14 @@ class NetworkRestSocket extends NetworkRest {
                }
 
                if (typeof data == "string") {
+                  performance.mark("JSON.parse", { op: "serialize" });
                   data = JSON.parse(data);
+                  performance.measure("JSON.parse");
                }
 
                // Got a JSON response but was the service response an error?
                // this would be a strange case where the .statusCode < 400
-               if (data.status && data.status == "error") {
+               if (data?.status == "error") {
                   // make sure to reject an err.responseText = data
                   reject({
                      status: jwres.statusCode,
@@ -131,6 +154,7 @@ class NetworkRestSocket extends NetworkRest {
                }
                // Success!
                else {
+                  performance.measure(route);
                   resolve(data);
                }
             }
