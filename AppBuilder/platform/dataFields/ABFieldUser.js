@@ -175,8 +175,18 @@ module.exports = class ABFieldUser extends ABFieldUserCore {
 
    setValue(item, rowData) {
       let val = rowData[this.columnName];
-      // Select "[Current user]" to update
-      if (val == "ab-current-user") val = this.AB.Account.username();
+
+      if (this.linkType() == "many") {
+         // val should be an array.
+         // if any of those contain "ab-current-user" replace it:
+         val = val.map((v) =>
+            v == "ab-current-user" ? this.AB.Account.username() : v
+         );
+      } else {
+         // val is a single entry string
+         // Select "[Current user]" to update
+         if (val == "ab-current-user") val = this.AB.Account.username();
+      }
 
       rowData[this.columnName] = val;
 
@@ -212,5 +222,35 @@ module.exports = class ABFieldUser extends ABFieldUserCore {
 
          return options;
       });
+   }
+
+   pullRelationValues(row) {
+      let values = super.pullRelationValues(row);
+      // remember, our .id == .username
+
+      if (Array.isArray(values)) {
+         values = values.map((v) => {
+            v.id = v.username || v.id;
+            return v;
+         });
+      } else {
+         values.id = values.username || values.id;
+      }
+
+      return values;
+   }
+
+   pullRecordRelationValues(record) {
+      let data = super.pullRecordRelationValues(record);
+      if (Array.isArray(data)) {
+         data = data.map((d) => {
+            d.id = d.username ?? d.id;
+            return d;
+         });
+      } else {
+         data.id = data.username || data.id;
+      }
+
+      return data;
    }
 };
