@@ -16,9 +16,6 @@ const L = (...params) => AB.Multilingual.label(...params);
 // let PopupRecordRule = null;
 // let PopupSubmitRule = null;
 
-////
-//// LEFT OFF HERE: Review and Refactor
-////
 const ABViewFormPropertyComponentDefaults = ABViewFormCore.defaultValues();
 
 module.exports = class ABViewForm extends ABViewFormCore {
@@ -515,7 +512,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
          );
       });
 
-      await Promise.all(tasks)
+      await Promise.all(tasks);
 
       return true;
    }
