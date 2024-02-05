@@ -49,14 +49,12 @@ function errorPopup(error) {
 function no_socket_trigger(model, key, data) {
    // If we do not have socket updates available, then trigger an
    // update event with this data.
-   // ## NOTE: attempting to see performance difference
-   // ## if we reduce our socket updates
-   // if (model.AB.Network.type() != "socket") {
-   model.AB.emit(key, {
-      objectId: model.object.id,
-      data,
-   });
-   // }
+   if (model.AB.Network.type() != "socket") {
+      model.AB.emit(key, {
+         objectId: model.object.id,
+         data,
+      });
+   }
 }
 
 module.exports = class ABModel extends ABModelCore {
