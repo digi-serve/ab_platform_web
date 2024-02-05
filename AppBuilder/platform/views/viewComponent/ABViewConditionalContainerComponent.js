@@ -88,6 +88,12 @@ module.exports = class ABViewConditionalContainerComponent extends (
             eventName: "changeCursor",
             listener: (...p) => this.displayView(...p),
          });
+
+         baseView.eventAdd({
+            emitter: dc,
+            eventName: "cursorStale",
+            listener: (...p) => this.displayView(...p),
+         });
       }
 
       this.displayView();
