@@ -83,16 +83,12 @@ module.exports = class ABViewConditionalContainerComponent extends (
             listener: () => this.displayView(), // Q? does this need to remain empty param?
          });
 
-         baseView.eventAdd({
-            emitter: dc,
-            eventName: "changeCursor",
-            listener: (...p) => this.displayView(...p),
-         });
-
-         baseView.eventAdd({
-            emitter: dc,
-            eventName: "cursorStale",
-            listener: (...p) => this.displayView(...p),
+         ["changeCursor", "cursorStale"].forEach((key) => {
+            baseView.eventAdd({
+               emitter: dc,
+               eventName: key,
+               listener: (...p) => this.displayView(...p),
+            });
          });
       }
 

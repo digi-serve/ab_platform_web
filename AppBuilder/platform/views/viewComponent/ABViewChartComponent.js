@@ -19,23 +19,28 @@ module.exports = class ABViewChartComponent extends ABViewContainerComponent {
       if (dc) {
          const eventNames = [
             "changeCursor",
+            "cursorStale",
             "create",
             "update",
             "delete",
             "initializedData",
          ];
 
-         if (
-            dc.datacollectionLink &&
-            !("changeCursor" in (dc.datacollectionLink._events ?? []))
-         )
-            baseView.eventAdd({
-               emitter: dc.datacollectionLink,
-               eventName: "changeCursor",
-               listener: () => {
-                  baseView.refreshData();
-               },
-            });
+         ["changeCursor", "cursorStale"].forEach((key) => {
+            // QUESTION: is this a problem if the check !(key in (...)) finds
+            // an event that some OTHER widget has added and not this one?
+            if (
+               dc.datacollectionLink &&
+               !(key in (dc.datacollectionLink._events ?? []))
+            )
+               baseView.eventAdd({
+                  emitter: dc.datacollectionLink,
+                  eventName: key,
+                  listener: () => {
+                     baseView.refreshData();
+                  },
+               });
+         });
 
          eventNames.forEach((evtName) => {
             baseView.eventAdd({

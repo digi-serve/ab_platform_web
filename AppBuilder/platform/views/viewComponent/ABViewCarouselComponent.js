@@ -143,8 +143,10 @@ export default class ABViewCarouselComponent extends ABViewComponent {
       dv.on("initializedData", this._handler_ready);
 
       if (this.settings.filterByCursor) {
-         dv.removeListener("changeCursor", this._handler_doOnShow);
-         dv.on("changeCursor", this._handler_doOnShow);
+         ["changeCursor", "cursorStale"].forEach((key) => {
+            dv.removeListener(key, this._handler_doOnShow);
+            dv.on(key, this._handler_doOnShow);
+         });
       }
 
       const baseView = this.view;
@@ -213,7 +215,9 @@ export default class ABViewCarouselComponent extends ABViewComponent {
       dv.removeListener("initializedData", this._handler_ready);
 
       if (this.settings.filterByCursor)
-         dv.removeListener("changeCursor", this._handler_doOnShow);
+         ["changeCursor", "cursorStale"].forEach((key) => {
+            dv.removeListener(key, this._handler_doOnShow);
+         });
 
       this.filterUI.removeListener("filter.data", this._handler_doOnShow);
    }
