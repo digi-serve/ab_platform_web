@@ -97,7 +97,7 @@ class Bootstrap extends EventEmitter {
             const $uiWarning = document.getElementById(
                "preload_network_warning"
             );
-            networkIsSlow ? $uiWarning.show() : $uiWarning.hide();
+            $uiWarning.hidden = !networkIsSlow;
             // Tell sentry our network speed changed
             performance.setContext("breadcrumb", {
                category: "network",
