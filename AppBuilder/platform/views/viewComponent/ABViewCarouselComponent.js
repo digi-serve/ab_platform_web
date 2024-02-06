@@ -226,9 +226,9 @@ export default class ABViewCarouselComponent extends ABViewComponent {
             <link rel="preload" href="${
                row.src
             }" as="image" fetchpriotity="low"/>
-            <img src="${
-               row.src
-            }" class="content" ondragstart="return false" loading="lazy" />
+            <img id="${this.ids.component}-${row.id}" src="${
+            row.src
+         }" class="content" ondragstart="return false" loading="lazy" />
             ${
                settings.showLabel
                   ? `<div class="ab-carousel-image-title">${
@@ -247,6 +247,12 @@ export default class ABViewCarouselComponent extends ABViewComponent {
                   ? `<span ab-row-id="${row.id}" class="ab-carousel-edit webix_icon fa fa-pencil"></span>`
                   : ""
             }
+               <span ab-row-id="${row.id}" ab-img-file="${
+            row.imgFile
+         }" class="webix_icon ab-carousel-rotate-left fa fa-rotate-left"></span>
+               <span ab-row-id="${row.id}" ab-img-file="${
+            row.imgFile
+         }" class="webix_icon ab-carousel-rotate-right fa fa-rotate-right"></span>
                <span class="webix_icon ab-carousel-fullscreen fa fa-arrows-alt"></span>
                <span style="display: none;" class="webix_icon ab-carousel-exit-fullscreen fa fa-times"></span>
             </div>
@@ -343,6 +349,7 @@ export default class ABViewCarouselComponent extends ABViewComponent {
             const imgData = {
                id: r.id,
                src: `/file/${imgFile}`,
+               imgFile,
             };
 
             // label of row data
@@ -412,7 +419,7 @@ export default class ABViewCarouselComponent extends ABViewComponent {
          const detailsPage = settings.detailsPage;
 
          // if (detailsPage || editPage) {
-         $carousel.$view.onclick = (e) => {
+         $carousel.$view.onclick = async (e) => {
             if (e.target.className) {
                if (e.target.className.indexOf("ab-carousel-edit") > -1) {
                   abWebix.html.removeCss($carousel.getNode(), "fullscreen");
@@ -450,6 +457,18 @@ export default class ABViewCarouselComponent extends ABViewComponent {
                         ],
                      },
                   });
+               } else if (
+                  e.target.className.indexOf("ab-carousel-rotate-left") > -1
+               ) {
+                  const rowId = e.target.getAttribute("ab-row-id");
+                  const imgFile = e.target.getAttribute("ab-img-file");
+                  this.rotateImage(rowId, imgFile, field, "left");
+               } else if (
+                  e.target.className.indexOf("ab-carousel-rotate-right") > -1
+               ) {
+                  const rowId = e.target.getAttribute("ab-row-id");
+                  const imgFile = e.target.getAttribute("ab-img-file");
+                  this.rotateImage(rowId, imgFile, field, "right");
                }
             }
          };
@@ -458,5 +477,22 @@ export default class ABViewCarouselComponent extends ABViewComponent {
 
    showFilterPopup($view) {
       this.filterUI.showPopup($view);
+   }
+
+   async rotateImage(rowId, imgFile, field, direction = "right") {
+      this.busy();
+
+      // call api to rotate
+      if (direction == "left") await field.rotateLeft(imgFile);
+      else await field.rotateRight(imgFile);
+
+      // refresh image
+      const imgElm = document.getElementById(`${this.ids.component}-${rowId}`);
+      if (imgElm) {
+         const newImgElm = imgElm.cloneNode(true);
+         imgElm.parentNode.replaceChild(newImgElm, imgElm);
+      }
+
+      this.ready();
    }
 }
