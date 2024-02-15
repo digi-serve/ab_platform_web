@@ -1,8 +1,11 @@
+const path = require("path");
+const APP = path.resolve(__dirname);
 const { merge } = require("webpack-merge");
 const common = require("./webpack.common.js");
 const CompressionPlugin = require("compression-webpack-plugin");
 const Critters = require("critters-webpack-plugin");
 const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const { sentryWebpackPlugin } = require("@sentry/webpack-plugin");
 const webpack = require("webpack");
@@ -18,6 +21,20 @@ module.exports = merge(common, {
       ],
    },
    plugins: [
+      new HtmlWebpackPlugin({
+         template: "./webpack/index.ejs",
+         filename: path.join(APP, "..", "web", "assets", "index.html"),
+         inject: "body",
+         minify: {
+            collapseWhitespace: true,
+            keepClosingSlash: true,
+            removeComments: true,
+            removeRedundantAttributes: true,
+            removeScriptTypeAttributes: false,
+            removeStyleLinkTypeAttributes: true,
+            useShortDoctype: true,
+         },
+      }),
       new CompressionPlugin({
          exclude: /index\.ejs/,
       }),
