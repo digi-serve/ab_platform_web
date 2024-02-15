@@ -150,7 +150,7 @@ export default class ABViewGridComponent extends ABViewComponent {
 
    detatch() {
       this.view.filterHelper.removeAllListeners("filter.data");
-      ["changeCursor", "cursorStale"].forEach((key) => {
+      ["changeCursor", "cursorStale", "cursorSelect"].forEach((key) => {
          this.datacollection?.removeListener(key, this.handler_select);
       });
    }
@@ -1587,7 +1587,7 @@ export default class ABViewGridComponent extends ABViewComponent {
       const dv = this.datacollection;
 
       if (dv)
-         ["changeCursor", "cursorStale"].forEach((key) => {
+         ["changeCursor", "cursorStale", "cursorSelect"].forEach((key) => {
             this.eventAdd({
                emitter: dv,
                eventName: key,
