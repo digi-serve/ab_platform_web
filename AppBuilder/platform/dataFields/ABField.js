@@ -483,7 +483,7 @@ module.exports = class ABField extends ABFieldCore {
 
    async getDbInfo() {
       return this.AB.Network.get({
-         url: `/information/object/${this.object.id}/field/${this.id}`,
+         url: `/definition/info/object/${this.object.id}/field/${this.id}`,
       });
    }
 };
