@@ -47,7 +47,7 @@ module.exports = merge(common, {
          ),
       }),
       new Critters({
-         pruneSource: true,
+         pruneSource: false,
          preload: "swap",
       }),
       sentryWebpackPlugin({
