@@ -242,6 +242,7 @@ module.exports = class ABModel extends ABModelCore {
             });
       }).then((newVal) => {
          no_socket_trigger(this, "ab.datacollection.create", newVal);
+         return newVal;
       });
    }
 
@@ -268,9 +269,10 @@ module.exports = class ABModel extends ABModelCore {
             errorPopup(err);
             reject(err);
          });
-      }).then(() => {
+      }).then((res) => {
          // properly issue the delete
          no_socket_trigger(this, "ab.datacollection.delete", id);
+         return res;
       });
    }
 
@@ -545,6 +547,7 @@ module.exports = class ABModel extends ABModelCore {
       }).then((newVal) => {
          // properly issue the update
          no_socket_trigger(this, "ab.datacollection.update", newVal);
+         return newVal;
       });
    }
 
