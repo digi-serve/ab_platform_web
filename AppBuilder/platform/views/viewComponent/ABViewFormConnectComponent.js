@@ -24,6 +24,10 @@ module.exports = class ABViewFormConnectComponent extends (
       return this.view.field();
    }
 
+   get multiselect() {
+      return this.field?.settings.linkType == "many";
+   }
+
    ui() {
       const field = this.field;
       const baseView = this.view;
@@ -39,7 +43,7 @@ module.exports = class ABViewFormConnectComponent extends (
          });
       }
 
-      const multiselect = field.settings.linkType == "many";
+      const multiselect = this.multiselect; // field.settings.linkType == "many";
       const formSettings = form?.settings || {};
       const ids = this.ids;
 
@@ -166,6 +170,12 @@ module.exports = class ABViewFormConnectComponent extends (
       const ids = this.ids;
       const field = this.field;
       const baseView = this.view;
+
+      if (this.multiselect) {
+         if (typeof data == "string") {
+            data = data.split(",");
+         }
+      }
 
       let selectedValues;
       if (Array.isArray(data)) {

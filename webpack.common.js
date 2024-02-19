@@ -1,6 +1,5 @@
 const path = require("path");
 const APP = path.resolve(__dirname);
-const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 
 module.exports = {
@@ -28,11 +27,6 @@ module.exports = {
       ],
    },
    plugins: [
-      new HtmlWebpackPlugin({
-         template: "./webpack/index.ejs",
-         filename: path.join(APP, "..", "web", "assets", "index.html"),
-         inject: "body",
-      }),
       new CleanWebpackPlugin({
          cleanOnceBeforeBuildPatterns: [
             "*.js",

@@ -641,4 +641,16 @@ module.exports = class ABFieldImage extends ABFieldImageCore {
       if (this.uploadInProgress)
          validator.addError(this.columnName, L("Image still uploading"));
    }
+
+   rotateLeft(imgFile) {
+      return this.AB.Network.put({
+         url: `/image/rotate/${imgFile}?direction=left`,
+      });
+   }
+
+   rotateRight(imgFile) {
+      return this.AB.Network.put({
+         url: `/image/rotate/${imgFile}?direction=right`,
+      });
+   }
 };
