@@ -208,9 +208,8 @@ class Bootstrap extends EventEmitter {
 
       if (!window.AB) window.AB = this.AB;
       // Make our Factory Global.
-      // Transition: we still have some UI code that depends on accessing
-      // our Factory as a Global var.  So until those are rewritten we will
-      // make our factory Global.
+      // NOTE: our tests are expecting to access our ABFactory this way.
+
       this.AB.Network.registerNetworkTestWorker(
          networkTestWorker,
          networkIsSlow
