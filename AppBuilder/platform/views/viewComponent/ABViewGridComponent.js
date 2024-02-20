@@ -2078,7 +2078,7 @@ export default class ABViewGridComponent extends ABViewComponent {
          if (!$DataTable) return;
 
          if (!id) $DataTable.unselect();
-         else if (id && $DataTable.exists(id)) {
+         else if ($DataTable.exists(id)) {
             $DataTable.select(id, false);
             $DataTable.showItem(id);
          } else $DataTable.select(null, false);
