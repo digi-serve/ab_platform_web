@@ -251,7 +251,9 @@ export default class ABViewCarouselComponent extends ABViewComponent {
                   ? `<span ab-row-id="${row.id}" class="ab-carousel-edit webix_icon fa fa-pencil"></span>`
                   : ""
             }
-               <span ab-row-id="${row.id}" ab-img-file="${
+            <span class="webix_icon ab-carousel-zoom-in fa fa-search-plus"></span>
+            <span class="webix_icon ab-carousel-zoom-out fa fa-search-minus"></span>
+                  <span ab-row-id="${row.id}" ab-img-file="${
             row.imgFile
          }" class="webix_icon ab-carousel-rotate-left fa fa-rotate-left"></span>
                <span ab-row-id="${row.id}" ab-img-file="${
@@ -473,6 +475,14 @@ export default class ABViewCarouselComponent extends ABViewComponent {
                   const rowId = e.target.getAttribute("ab-row-id");
                   const imgFile = e.target.getAttribute("ab-img-file");
                   this.rotateImage(rowId, imgFile, field, "right");
+               } else if (
+                  e.target.className.indexOf("ab-carousel-zoom-in") > -1
+               ) {
+                  this.zoom("in");
+               } else if (
+                  e.target.className.indexOf("ab-carousel-zoom-out") > -1
+               ) {
+                  this.zoom("out");
                }
             }
          };
@@ -498,5 +508,24 @@ export default class ABViewCarouselComponent extends ABViewComponent {
       }
 
       this.ready();
+   }
+
+   zoom(inOrOut = "in") {
+      const imgContainer = document.getElementsByClassName(
+         "ab-carousel-image-container"
+      )[0];
+      if (!imgContainer) return;
+
+      const imgElem = imgContainer.getElementsByTagName("img")[0];
+      if (!imgElem) return;
+
+      const step = 15;
+      const height = parseInt(
+         (imgElem.style.height || 100).toString().replace("%", "")
+      );
+      const newHeight = inOrOut == "in" ? height + step : height - step;
+      imgElem.style.height = `${newHeight}%`;
+
+      imgContainer.style.overflow = newHeight > 100 ? "auto" : "";
    }
 }

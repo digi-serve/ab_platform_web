@@ -480,4 +480,10 @@ module.exports = class ABField extends ABFieldCore {
       let message = `${this.fieldKey()}[${this.label}]: ${msg}`;
       this._warnings.push({ message, data });
    }
+
+   async getDbInfo() {
+      return this.AB.Network.get({
+         url: `/definition/info/object/${this.object.id}/field/${this.id}`,
+      });
+   }
 };

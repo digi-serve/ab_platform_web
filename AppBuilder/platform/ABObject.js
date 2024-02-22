@@ -769,4 +769,10 @@ module.exports = class ABObject extends ABObjectCore {
       );
       return this.AB.isUUID(text);
    }
+
+   async getDbInfo() {
+      return this.AB.Network.get({
+         url: `/definition/info/object/${this.id}`,
+      });
+   }
 };
