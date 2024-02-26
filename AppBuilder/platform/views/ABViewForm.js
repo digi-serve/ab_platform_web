@@ -543,4 +543,40 @@ module.exports = class ABViewForm extends ABViewFormCore {
          // TODO: scan submitRules for warnings.
       }
    }
+
+   /**
+    * @method deleteData
+    * delete data in to database
+    * @param $formView - webix's form element
+    *
+    * @return {Promise}
+    */
+   async deleteData($formView) {
+      // get ABDatacollection
+      const dc = this.datacollection;
+      if (dc == null) return;
+
+      // get ABObject
+      const obj = dc.datasource;
+      if (obj == null) return;
+
+      // get ABModel
+      const model = dc.model;
+      if (model == null) return;
+
+      // get update data
+      const formVals = $formView.getValues();
+
+      if (formVals?.id) {
+         const result = await model.delete(formVals.id);
+
+         // clear form
+         if (result) {
+            dc.setCursor(null);
+            $formView.clear();
+         }
+
+         return result;
+      }
+   }
 };
