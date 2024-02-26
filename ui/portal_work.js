@@ -10,6 +10,7 @@ import PortalWorkUserMobileQR from "./portal_work_user_mobile_qr.js";
 import PortalAccessLevelManager from "./portal_access_level_manager.js";
 import TranslationTool from "./portal_translation_tool.js";
 import TutorialManager from "./portal_tutorial_manager.js";
+import ABFactory from "../AppBuilder/ABFactory.js";
 
 class PortalWork extends ClassUI {
    constructor() {
@@ -227,6 +228,15 @@ class PortalWork extends ClassUI {
                            css: "appDevDesigns",
                            height: 110,
                         },
+                        {
+                           id: "portal_work_privacy_policy",
+                           view: "template",
+                           template:
+                              '<a href="#link#" target="_blank">#label#</a>',
+                           css: "policyLink",
+                           height: 30,
+                           hidden: true,
+                        },
                      ],
                   },
                   {
@@ -239,6 +249,7 @@ class PortalWork extends ClassUI {
       };
    }
 
+   /** @param{ABFactory} AB */
    async init(AB) {
       this.AB = AB;
 
@@ -276,6 +287,15 @@ class PortalWork extends ClassUI {
       for (let i = 0; i < allApplications.length; i++) {
          // TODO: implement Sorting on these before building UI
          menu_data.push(this.uiSideBarMenuEntry(allApplications[i]));
+      }
+
+      let { privacyPolicy, relay } = this.AB.Config.siteConfig();
+      if (privacyPolicy) {
+         $$("portal_work_privacy_policy").setValues({
+            label: L("Privacy Policy"),
+            link: privacyPolicy,
+         });
+         $$("portal_work_privacy_policy").show();
       }
 
       $$("abSidebarMenu").define("data", menu_data);
@@ -388,8 +408,6 @@ class PortalWork extends ClassUI {
       // );
 
       // Only add the QR Code option if the relay service is enabled
-      const { relay } = this.AB.Config.siteConfig();
-
       if (relay) {
          // Insert at userMenuOptions[2] so logout is still last
          userMenuOptions.splice(2, 0, {
