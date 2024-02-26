@@ -11,6 +11,15 @@
    background-repeat: no-repeat;
    background-position: center;
 }
+.policyLink {
+   background-color: rgb(68, 68, 68);
+   border-width: 0px !important;
+   margin-top: 0px !important;
+}
+.policyLink > div > a {
+   color: #BBB;
+   text-decoration: none;
+}
 .mainSidebar.webix_sidebar.webix_dark .webix_sidebar_icon {
    margin-right: 15px;
    color: rgba(255, 255, 255, 0.4);
