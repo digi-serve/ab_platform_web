@@ -499,8 +499,8 @@ export default class ABViewCarouselComponent extends ABViewComponent {
       // refresh image
       const imgElm = document.getElementById(`${this.ids.component}-${rowId}`);
       if (imgElm) {
-         const newImgElm = imgElm.cloneNode(true);
-         imgElm.parentNode.replaceChild(newImgElm, imgElm);
+         await fetch(imgElm.src, { cache: "reload", mode: "no-cors" });
+         imgElm.src = `${imgElm.src}#${new Date().getTime()}`;
       }
 
       this.ready();
