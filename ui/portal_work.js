@@ -10,7 +10,6 @@ import PortalWorkUserMobileQR from "./portal_work_user_mobile_qr.js";
 import PortalAccessLevelManager from "./portal_access_level_manager.js";
 import TranslationTool from "./portal_translation_tool.js";
 import TutorialManager from "./portal_tutorial_manager.js";
-import ABFactory from "../AppBuilder/ABFactory.js";
 
 class PortalWork extends ClassUI {
    constructor() {
@@ -232,7 +231,7 @@ class PortalWork extends ClassUI {
                            id: "portal_work_privacy_policy",
                            view: "template",
                            template:
-                              '<a href="#link#" target="_blank">#label#</a>',
+                              '<a href="#link#" target="_blank" class="policyMenu">#label#</a>',
                            css: "policyLink",
                            height: 30,
                            hidden: true,
@@ -249,7 +248,7 @@ class PortalWork extends ClassUI {
       };
    }
 
-   /** @param{ABFactory} AB */
+   /** @param {import('../AppBuilder/ABFactory.js').default} AB */
    async init(AB) {
       this.AB = AB;
 
