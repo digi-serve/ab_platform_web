@@ -2,7 +2,7 @@ name: Merging Rules
 on:
    # Run on pull requests into the #master branch
    pull_request:
-      branches: [master]
+      branches: [periodOfTime]
 
 permissions:
    contents: write
