@@ -65,7 +65,7 @@ class PortalWorkUserProfileWindow extends ClassUI {
                         $$(ids.component).hide();
                      },
                      onAfterRender() {
-                        ClassUI.CYPRESS_REF(this);
+                        ClassUI.CYPRESS_REF(this, "user-profile-close");
                      },
                   },
                },
@@ -198,6 +198,14 @@ class PortalWorkUserProfileWindow extends ClassUI {
                                     name: "tenant",
                                     value: "",
                                     css: "formText",
+                                    on: {
+                                       onAfterRender: function () {
+                                          ClassUI.CYPRESS_REF(
+                                             this,
+                                             "user_profile_tenant"
+                                          );
+                                       },
+                                    },
                                  },
                               ],
                            },
@@ -218,6 +226,14 @@ class PortalWorkUserProfileWindow extends ClassUI {
                                     name: "username",
                                     value: "",
                                     css: "formText",
+                                    on: {
+                                       onAfterRender: function () {
+                                          ClassUI.CYPRESS_REF(
+                                             this,
+                                             "user_profile_username"
+                                          );
+                                       },
+                                    },
                                  },
                               ],
                            },
@@ -239,6 +255,14 @@ class PortalWorkUserProfileWindow extends ClassUI {
                                     name: "email",
                                     value: "",
                                     css: "formText",
+                                    on: {
+                                       onAfterRender: function () {
+                                          ClassUI.CYPRESS_REF(
+                                             this,
+                                             "user_profile_email"
+                                          );
+                                       },
+                                    },
                                  },
                                  {
                                     id: ids.editModeEmail,
@@ -399,6 +423,14 @@ class PortalWorkUserProfileWindow extends ClassUI {
                                     name: "language",
                                     value: "",
                                     css: "formText",
+                                    on: {
+                                       onAfterRender: function () {
+                                          ClassUI.CYPRESS_REF(
+                                             this,
+                                             "user_profile_language"
+                                          );
+                                       },
+                                    },
                                  },
                                  {
                                     id: ids.editModeLanguage,
