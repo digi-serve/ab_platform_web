@@ -365,7 +365,11 @@ module.exports = class ABField extends ABFieldCore {
          val = rowData;
       }
 
-      item.setValue(val);
+      try {
+         item.setValue(val);
+      } catch (err) {
+         // this error is fine because we handled it already
+      }
    }
 
    /**
