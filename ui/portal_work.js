@@ -64,6 +64,9 @@ class PortalWork extends ClassUI {
                      width: 30,
                      css: "webix_transparent",
                      on: {
+                        onAfterRender: function () {
+                           ClassUI.CYPRESS_REF(this, "switcheroo_clear_button");
+                        },
                         onItemClick: () => {
                            PortalWorkUserSwitcheroo.switcherooClear();
                            $$("portal_work_switcheroo_user_switched").hide();
