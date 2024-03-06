@@ -11,6 +11,18 @@
    background-repeat: no-repeat;
    background-position: center;
 }
+.policyLink {
+   background-color: rgb(68, 68, 68);
+   border-width: 0px !important;
+   margin-top: 0px !important;
+}
+a.policyMenu {
+   color: #BBB;
+   text-decoration: none;
+}
+a.policyAuth {
+   color: #475466;
+}
 .mainSidebar.webix_sidebar.webix_dark .webix_sidebar_icon {
    margin-right: 15px;
    color: rgba(255, 255, 255, 0.4);
@@ -415,7 +427,7 @@ input[type="text"].selectivity-multiple-input {
 .bg_gray {
    background-color: #ebedf0;
 }
-.webix_dark .webix_sidebar {
+.noBackground, .webix_dark .webix_sidebar {
    background-color: transparent;
 }
 .webix_dark .webix_view {
