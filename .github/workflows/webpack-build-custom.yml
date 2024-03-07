@@ -14,6 +14,9 @@ on:
         type: choice
         options: [ update, dev ]
 
+permissions:
+  contents: write
+
 jobs:
   webpack-build:
     name: Webpack Build
@@ -40,6 +43,8 @@ jobs:
          - name: Webpack build
            run: npm run build:${{ inputs.build_type }}
            working-directory: ./ab_platform_web
+           env:
+             SENTRY_AUTH_TOKEN: ${{ vars.SENTRY_AUTH_TOKEN }}
 
          - name: Commit
            uses: EndBug/add-and-commit@v9
