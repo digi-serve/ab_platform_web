@@ -1,0 +1,50 @@
+name: Webpack Build Custom
+
+# Manually trigger
+on:
+  workflow_dispatch:
+    inputs:
+      target_branch:
+        description: What is the branch name to build (digiserve/ab_service_web)
+        type: string
+        required: true
+      build_type:
+        description: Which build type
+        default: update
+        type: choice
+        options: [ update, dev ]
+
+jobs:
+  webpack-build:
+    name: Webpack Build
+    runs-on: ubuntu-latest
+    steps:
+         - name: Pull code
+           uses: actions/checkout@v3
+           with:
+              path: ab_platform_web
+              submodules: true
+              ref: ${{ inputs.ref }}
+
+         - name: Pull ab_service_web
+           uses: actions/checkout@v3
+           with:
+              path: web
+              repository: digi-serve/ab_service_web
+              token: ${{ secrets.GITHUB_TOKEN }}
+
+         - name: Install dependencies
+           run: npm install
+           working-directory: ./ab_platform_web
+
+         - name: Webpack build
+           run: npm run build:${{ inputs.build_type }}
+           working-directory: ./ab_platform_web
+
+         - name: Commit
+           uses: EndBug/add-and-commit@v9
+           with:
+            cwd: ./web
+            message: Update ab_platform_web
+            new_branch: ${{ inputs.target_branch }}
+            default_author: github_actions
