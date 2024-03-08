@@ -190,6 +190,9 @@ module.exports = class ABViewForm extends ABViewFormCore {
       if (allVals.translations?.length > 0)
          formVals.translations = allVals.translations;
 
+      // give the Object a final chance to review the data being handled.
+      obj.formCleanValues(formVals);
+
       return formVals;
    }
 

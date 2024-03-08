@@ -775,4 +775,19 @@ module.exports = class ABObject extends ABObjectCore {
          url: `/definition/info/object/${this.id}`,
       });
    }
+
+   /**
+    * @method formCleanValues()
+    * perform a final review of the data a form will try to submit for
+    * this object.  The lets individual fields have a chance to update or
+    * remove values before they are sent.
+    * @param {obj} rowData
+    *        The {data} a form has collected and is about to save.
+    * @return {undefined}
+    */
+   formCleanValues(rowData) {
+      this.fields().forEach((f) => {
+         f.formCleanData(rowData);
+      });
+   }
 };
