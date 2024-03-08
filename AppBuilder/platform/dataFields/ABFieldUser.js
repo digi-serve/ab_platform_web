@@ -178,6 +178,9 @@ module.exports = class ABFieldUser extends ABFieldUserCore {
 
       if (this.linkType() == "many") {
          // val should be an array.
+         if (!Array.isArray(val)) {
+            val = [val];
+         }
          // if any of those contain "ab-current-user" replace it:
          val = val.map((v) =>
             v == "ab-current-user" ? this.AB.Account.username() : v
