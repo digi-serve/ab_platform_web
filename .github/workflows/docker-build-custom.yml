@@ -42,7 +42,7 @@ jobs:
           run: npm run build:${{ inputs.build_type }}
           working-directory: ./ab_platform_web
           env:
-            SENTRY_AUTH_TOKEN: ${{ vars.SENTRY_AUTH_TOKEN }}
+            SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
         # Docker
         - name: Set up QEMU
