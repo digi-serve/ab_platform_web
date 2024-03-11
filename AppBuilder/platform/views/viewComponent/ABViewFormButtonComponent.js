@@ -147,7 +147,7 @@ module.exports = class ABViewFormButton extends ABViewFormItemComponent {
       else {
          const noPopupFilter = (p) => p.settings && p.settings.type != "popup";
 
-         const pageCurr = this.pageParent();
+         const pageCurr = this.view.pageParent();
          if (pageCurr) {
             const pageParent = pageCurr.pageParent(noPopupFilter) ?? pageCurr;
 
