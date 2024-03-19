@@ -90,7 +90,20 @@ module.exports = class ABViewCSVExporterComponent extends ABViewComponent {
    downloadCsvFile() {
       let url = `/appbuilder/csv-export/${this.view.id}`;
 
-      const where = this.clientFilter.getValue();
+      const where = {
+         glue: "and",
+         rules: [],
+      };
+
+      const whereWidget = this.view.settings?.where;
+      if ((whereWidget?.rules ?? []).length) {
+         where.rules.push(whereWidget);
+      }
+
+      const whereClient = this.clientFilter.getValue();
+      if ((whereClient?.rules ?? []).length) {
+         where.rules.push(whereClient);
+      }
 
       if ((where?.rules || []).length) {
          let qsWhere = JSON.stringify(where);
