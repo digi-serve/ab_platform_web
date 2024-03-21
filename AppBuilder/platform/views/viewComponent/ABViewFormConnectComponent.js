@@ -133,23 +133,42 @@ module.exports = class ABViewFormConnectComponent extends (
             },
          };
 
-         _ui = {
-            inputId: ids.formItem,
-            rows: [
-               {
-                  cols: [
-                     {
-                        view: "label",
-                        label: field.label,
-                        width: formSettings.labelWidth,
-                        align: "left",
-                     },
-                     apcUI,
-                     _ui,
-                  ],
-               },
-            ],
-         };
+         if (_ui.labelPosition == "top") {
+            debugger;
+            _ui = {
+               inputId: ids.formItem,
+               rows: [
+                  {
+                     view: "label",
+                     label: field.label,
+                     // width: formSettings.labelWidth,
+                     align: "left",
+                  },
+                  {
+                     height: 38,
+                     cols: [apcUI, _ui],
+                  },
+               ],
+            };
+         } else {
+            _ui = {
+               inputId: ids.formItem,
+               rows: [
+                  {
+                     cols: [
+                        {
+                           view: "label",
+                           label: field.label,
+                           width: formSettings.labelWidth,
+                           align: "left",
+                        },
+                        apcUI,
+                        _ui,
+                     ],
+                  },
+               ],
+            };
+         }
 
          _ui = super.ui(_ui);
       } else {
