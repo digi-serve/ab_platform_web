@@ -150,7 +150,9 @@ export default class ABViewGridComponent extends ABViewComponent {
 
    detatch() {
       this.view.filterHelper.removeAllListeners("filter.data");
-      this.datacollection?.removeListener("changeCursor", this.handler_select);
+      ["changeCursor", "cursorStale", "cursorSelect"].forEach((key) => {
+         this.datacollection?.removeListener(key, this.handler_select);
+      });
    }
 
    /**
@@ -1585,10 +1587,12 @@ export default class ABViewGridComponent extends ABViewComponent {
       const dv = this.datacollection;
 
       if (dv)
-         this.eventAdd({
-            emitter: dv,
-            eventName: "changeCursor",
-            listener: this.handler_select.bind(this),
+         ["changeCursor", "cursorStale", "cursorSelect"].forEach((key) => {
+            this.eventAdd({
+               emitter: dv,
+               eventName: key,
+               listener: this.handler_select.bind(this),
+            });
          });
    }
 
@@ -2064,14 +2068,23 @@ export default class ABViewGridComponent extends ABViewComponent {
     *        rowData.id should match an existing entry.
     */
    selectRow(rowData) {
-      const $DataTable = this.getDataTable();
+      let id = rowData?.id ?? rowData;
+      if (this.__timeout_selectRow) {
+         console.log("Duplicate selectRow():", id);
+         clearTimeout(this.__timeout_selectRow);
+      }
+      this.__timeout_selectRow = setTimeout(() => {
+         const $DataTable = this.getDataTable();
+         if (!$DataTable) return;
 
-      if (!$DataTable) return;
+         if (!id) $DataTable.unselect();
+         else if ($DataTable.exists(id)) {
+            $DataTable.select(id, false);
+            $DataTable.showItem(id);
+         } else $DataTable.select(null, false);
 
-      if (!rowData) $DataTable.unselect();
-      else if (rowData?.id && $DataTable.exists(rowData.id))
-         $DataTable.select(rowData.id, false);
-      else $DataTable.select(null, false);
+         this.__timeout_selectRow = null;
+      }, 15);
    }
 
    /**

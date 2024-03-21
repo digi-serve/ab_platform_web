@@ -818,11 +818,15 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          $list.refresh();
       }
 
-      item.setValue(
-         Array.isArray(val)
-            ? val.map((e) => e.id ?? e.uuid ?? e).join(",")
-            : val.id ?? val.uuid ?? val
-      );
+      // try to prevent form flicker:
+      // Only reset the value if the value changes:
+      let currVal = item.getValue();
+      let newVal = Array.isArray(val)
+         ? val.map((e) => e.id ?? e.uuid ?? e).join(",")
+         : val.id ?? val.uuid ?? val;
+      if (currVal != newVal) {
+         item.setValue(newVal);
+      }
    }
 
    /**

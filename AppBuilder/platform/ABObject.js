@@ -719,11 +719,13 @@ module.exports = class ABObject extends ABObjectCore {
       // report both OUR warnings, and any warnings from any of our fields
       var allWarnings = super.warningsAll();
       this.fields().forEach((f) => {
-         allWarnings = allWarnings.concat(f.warnings());
+         if (!f) return;
+         allWarnings = allWarnings.concat(f?.warnings());
       });
 
       this.indexes().forEach((i) => {
-         allWarnings = allWarnings.concat(i.warnings());
+         if (!i) return;
+         allWarnings = allWarnings.concat(i?.warnings());
       });
 
       return allWarnings.filter((w) => w);
@@ -747,11 +749,11 @@ module.exports = class ABObject extends ABObjectCore {
       });
 
       allFields.forEach((f) => {
-         f.warningsEval();
+         f?.warningsEval();
       });
 
       this.indexes().forEach((i) => {
-         i.warningsEval();
+         i?.warningsEval();
       });
    }
 
@@ -766,5 +768,11 @@ module.exports = class ABObject extends ABObjectCore {
          "ABObject.isUuid(): is depreciated.  directly reference AB.Rules.isUUID() instead."
       );
       return this.AB.isUUID(text);
+   }
+
+   async getDbInfo() {
+      return this.AB.Network.get({
+         url: `/definition/info/object/${this.id}`,
+      });
    }
 };

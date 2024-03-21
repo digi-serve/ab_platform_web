@@ -612,19 +612,26 @@ module.exports = class ABViewFormConnectComponent extends (
 
       $node.refresh();
 
-      this.busy();
-      await field.getAndPopulateOptions(
-         // $node,
-         $formItem,
-         baseView.options,
-         field,
-         baseView.parentFormComponent()
-      );
-      this.ready();
-
       // Add data-cy attributes
       const dataCy = `${field.key} ${field.columnName} ${field.id} ${baseView.parent.id}`;
       node.setAttribute("data-cy", dataCy);
+
+      this.busy();
+      try {
+         await field.getAndPopulateOptions(
+            // $node,
+            $formItem,
+            baseView.options,
+            field,
+            baseView.parentFormComponent()
+         );
+      } catch (err) {
+         this.AB.notify.developer(err, {
+            context:
+               "ABViewFormConnectComponent > onShow() error calling field.getAndPopulateOptions",
+         });
+      }
+      this.ready();
 
       // Need to refresh selected values when they are custom index
       this._onChange($formItem.getValue());

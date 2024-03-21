@@ -82,6 +82,12 @@ if (!myClass) {
                            value: L("Switch"),
                            css: "webix_primary",
                            on: {
+                              onAfterRender: function () {
+                                 ClassUI.CYPRESS_REF(
+                                    this,
+                                    "switcheroo_switch_button"
+                                 );
+                              },
                               onItemClick: () => {
                                  const userID = $$(ids.list).getValue();
 
@@ -177,12 +183,15 @@ if (!myClass) {
                      template: (obj) => {
                         if (obj.id === switchedUserID)
                            return `<i class='fa-fw fa fa-user-secret'></i> ${obj.value}`;
-                        return obj.value;
+                        return `<span data-cy="switcheroo_option_${obj.value}">${obj.value}</span>`;
                      },
                   },
                   data: userList,
                },
                on: {
+                  onAfterRender: function () {
+                     ClassUI.CYPRESS_REF(this, "switcheroo_user_list");
+                  },
                   onItemClick: (id) => {
                      $$(id).setValue("");
                   },

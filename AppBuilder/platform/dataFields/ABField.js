@@ -365,7 +365,11 @@ module.exports = class ABField extends ABFieldCore {
          val = rowData;
       }
 
-      item.setValue(val);
+      try {
+         item.setValue(val);
+      } catch (err) {
+         // this error is fine because we handled it already
+      }
    }
 
    /**
@@ -479,5 +483,11 @@ module.exports = class ABField extends ABFieldCore {
    warningsMessage(msg, data = {}) {
       let message = `${this.fieldKey()}[${this.label}]: ${msg}`;
       this._warnings.push({ message, data });
+   }
+
+   async getDbInfo() {
+      return this.AB.Network.get({
+         url: `/definition/info/object/${this.object.id}/field/${this.id}`,
+      });
    }
 };
