@@ -134,7 +134,6 @@ module.exports = class ABViewFormConnectComponent extends (
          };
 
          if (_ui.labelPosition == "top") {
-            debugger;
             _ui = {
                inputId: ids.formItem,
                rows: [
