@@ -170,15 +170,23 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
                   field?.linkViaOneValues
                ) {
                   delete field.linkViaOneValues;
-                  if (rowData?.[field.columnName]) {
-                     if (Array.isArray(rowData[field.columnName])) {
-                        let valArray = [];
-                        rowData[field.columnName].forEach((v) => {
-                           valArray.push(v[field.object.PK()]);
+                  const relationVals =
+                     rowData?.[field.relationName()] ??
+                     rowData?.[field.columnName];
+                  if (relationVals) {
+                     if (Array.isArray(relationVals)) {
+                        const valArray = [];
+                        relationVals.forEach((v) => {
+                           valArray.push(
+                              field.getRelationValue(v, { forUpdate: true })
+                           );
                         });
                         field.linkViaOneValues = valArray.join();
                      } else {
-                        field.linkViaOneValues = rowData[field.columnName];
+                        field.linkViaOneValues = field.getRelationValue(
+                           relationVals,
+                           { forUpdate: true }
+                        );
                      }
                   }
                }
