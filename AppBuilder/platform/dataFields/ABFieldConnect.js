@@ -822,8 +822,8 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       // Only reset the value if the value changes:
       let currVal = item.getValue();
       let newVal = Array.isArray(val)
-         ? val.map((e) => e.id ?? e.uuid ?? e).join(",")
-         : val.id ?? val.uuid ?? val;
+         ? val.map((e) => this.getRelationValue(e, { forUpdate: true }) ?? e.id ?? e.uuid ?? e).join(",")
+         : this.getRelationValue(val, { forUpdate: true }) ?? val.id ?? val.uuid ?? val;
       if (currVal != newVal) {
          item.setValue(newVal);
       }
