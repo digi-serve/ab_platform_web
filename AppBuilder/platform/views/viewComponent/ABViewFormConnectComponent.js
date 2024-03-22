@@ -134,6 +134,7 @@ module.exports = class ABViewFormConnectComponent extends (
          };
 
          if (_ui.labelPosition == "top") {
+            _ui.labelPosition = "left";
             _ui = {
                inputId: ids.formItem,
                rows: [
@@ -144,7 +145,6 @@ module.exports = class ABViewFormConnectComponent extends (
                      align: "left",
                   },
                   {
-                     height: 38,
                      cols: [apcUI, _ui],
                   },
                ],
