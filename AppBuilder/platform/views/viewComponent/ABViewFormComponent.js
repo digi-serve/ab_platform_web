@@ -228,27 +228,29 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
          },
       });
 
-      this.eventAdd({
-         emitter: dc,
-         eventName: "ab.datacollection.update",
-         listener: (msg, data) => {
-            if (!data?.objectId) return;
+      // I think this case is currently handled by the DC.[changeCursor, cursorStale]
+      // events:
+      // this.eventAdd({
+      //    emitter: dc,
+      //    eventName: "ab.datacollection.update",
+      //    listener: (msg, data) => {
+      //       if (!data?.objectId) return;
 
-            const object = dc.datasource;
+      //       const object = dc.datasource;
 
-            if (!object) return;
+      //       if (!object) return;
 
-            if (
-               object.id === data.objectId ||
-               object.fields((f) => f.settings.linkObject === data.objectId)
-                  .length > 0
-            ) {
-               const currData = dc.getCursor();
+      //       if (
+      //          object.id === data.objectId ||
+      //          object.fields((f) => f.settings.linkObject === data.objectId)
+      //             .length > 0
+      //       ) {
+      //          const currData = dc.getCursor();
 
-               if (currData) this.displayData(currData);
-            }
-         },
-      });
+      //          if (currData) this.displayData(currData);
+      //       }
+      //    },
+      // });
 
       // bind the cursor event of the parent DC
       const linkDv = dc.datacollectionLink;

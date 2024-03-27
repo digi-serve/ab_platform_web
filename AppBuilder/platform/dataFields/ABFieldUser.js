@@ -175,9 +175,19 @@ module.exports = class ABFieldUser extends ABFieldUserCore {
 
    setValue(item, rowData) {
       let val = rowData[this.columnName];
+      if (val === "") {
+         // this means this value isn't set.
+         // can we remove this from the data?
+         delete rowData[this.columnName];
+         super.setValue(item, rowData);
+         return;
+      }
 
       if (this.linkType() == "many") {
          // val should be an array.
+         if (!Array.isArray(val)) {
+            val = [val];
+         }
          // if any of those contain "ab-current-user" replace it:
          val = val.map((v) =>
             v == "ab-current-user" ? this.AB.Account.username() : v
