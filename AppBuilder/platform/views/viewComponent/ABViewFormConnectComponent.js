@@ -141,7 +141,7 @@ module.exports = class ABViewFormConnectComponent extends (
                   {
                      view: "label",
                      label: field.label,
-                     // width: formSettings.labelWidth,
+                     // height: 22,
                      align: "left",
                   },
                   {
