@@ -199,6 +199,11 @@ export default class ABViewGridPopupMassUpdate extends ClassUI {
                         values: vals,
                      })
                      .then(() => {
+                        // Update webix.datatable
+                        (updatedRowIds ?? []).forEach((rowId) => {
+                           $datatable.updateItem(rowId, vals);
+                        });
+
                         // Anything we need to do after we are done.
                         update_button.enable();
                         this.hide();
