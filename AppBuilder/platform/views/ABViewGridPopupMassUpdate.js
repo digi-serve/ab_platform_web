@@ -181,6 +181,8 @@ export default class ABViewGridPopupMassUpdate extends ClassUI {
          if (!fieldInfo) return;
 
          vals[fieldInfo.columnName] = item.value;
+         if (fieldInfo.isConnection)
+            vals[fieldInfo.relationName()] = vals[fieldInfo.columnName];
       });
 
       if (updatedRowIds.length > 0) {
@@ -198,7 +200,7 @@ export default class ABViewGridPopupMassUpdate extends ClassUI {
                         rowIds: updatedRowIds,
                         values: vals,
                      })
-                     .then(() => {
+                     .then((result) => {
                         // Update webix.datatable
                         (updatedRowIds ?? []).forEach((rowId) => {
                            $datatable.updateItem(rowId, vals);

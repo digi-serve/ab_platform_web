@@ -1373,10 +1373,11 @@ export default class ABViewGridComponent extends ABViewComponent {
             const ab = this.AB;
 
             try {
-               await CurrentObject.model().update(item.id, item);
+               const result = await CurrentObject.model().update(item.id, item);
 
                if ($DataTable.exists(editor.row)) {
-                  $DataTable.updateItem(editor.row, item);
+                  // $DataTable.updateItem(editor.row, item);
+                  $DataTable.updateItem(editor.row, result);
                   $DataTable.clearSelection();
                   $DataTable.refresh(editor.row);
                }

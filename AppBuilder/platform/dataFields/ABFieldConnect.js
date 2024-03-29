@@ -74,7 +74,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             selectedData = data.map(function (d) {
                // display label in format
                if (d) {
-                  d.text = d.text || linkedObject.displayData(d);
+                  d.text = d.text || d.value || linkedObject.displayData(d);
                   d.value = d.text;
                }
 
@@ -83,7 +83,9 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          } else if (data.id || data.uuid) {
             selectedData = data;
             selectedData.text =
-               selectedData.text || linkedObject.displayData(selectedData);
+               selectedData.text ||
+               selectedData.value ||
+               linkedObject.displayData(selectedData);
             selectedData.value = selectedData.text;
          } else if (typeof data == "string") {
             selectedData = { text: data };
