@@ -6,38 +6,32 @@ let L = (...params) => AB.Multilingual.label(...params);
 
 module.exports = class ABComponent extends ABEmitter {
    /**
-    * @param {object} App
-    *      ?what is this?
-    * @param {string} idBase
-    *      Identifier for this component
+    * @param {object} App ?what is this?
+    * @param {string} idBase Identifier for this component
+    * @param {import("../ABFactory").default} AB ABFactory instance
     */
    constructor(App, idBase, AB) {
       super();
 
+      this.AB = AB;
       // Transition Code:
       // make sure we have an this.AB
-      if (App && App.AB) {
+      if (!AB && App?.AB) {
          this.AB = App.AB;
       }
 
-      // passed in AB will override
-      if (AB) {
-         this.AB = AB;
-         // {ABFactory} AB
-      }
-
       if (!App) {
-         if (AB._App) {
-            App = AB._App;
+         if (this.AB._App) {
+            App = this.AB._App;
          } else {
             App = {
-               uuid: AB.Webix.uid(),
+               uuid: this.AB.Webix.uid(),
 
                /*
                 * AB
                 * the {ABFactory} for our interface.
                 */
-               AB: AB,
+               AB: this.AB,
 
                /*
                 * actions:
@@ -51,7 +45,7 @@ module.exports = class ABComponent extends ABEmitter {
                 * config
                 * webix configuration settings for our current browser
                 */
-               config: AB.UISettings.config(),
+               config: this.AB.UISettings.config(),
 
                /*
                 * custom
@@ -63,7 +57,7 @@ module.exports = class ABComponent extends ABEmitter {
                 * Icons
                 * this will provide you with the list of avaialbe font awesome 4.7.0 icons to use in interface building
                 */
-               icons: AB.UISettings.icons,
+               icons: this.AB.UISettings.icons,
 
                Label: L,
 
@@ -140,16 +134,16 @@ module.exports = class ABComponent extends ABEmitter {
                   return `${key}${this.uuid}`;
                },
             };
-            AB._App = App;
+            this.AB._App = App;
          }
       }
 
       if (!App.custom) {
-         if (!AB.custom) {
+         if (!this.AB.custom) {
             var componentManager = new CustomComponentManager();
             componentManager.initComponents(App);
          } else {
-            App.custom = AB.custom;
+            App.custom = this.AB.custom;
          }
       }
 
