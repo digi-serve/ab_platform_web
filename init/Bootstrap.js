@@ -19,8 +19,8 @@ import initUser from "../init/initUser.js";
 
 // import JSZipUtils from "jszip-utils/dist/jszip-utils.min.js";
 
-import Selectivity from "../js/selectivity/selectivity.min.js";
-import selectivityCSS from "../js/selectivity/selectivity.min.css";
+// import Selectivity from "../js/selectivity/selectivity.min.js";
+// import selectivityCSS from "../js/selectivity/selectivity.min.css";
 
 import UI from "../ui/ui.js";
 import ErrorNoDefsUI from "../ui/error_noDefs.js";
@@ -58,13 +58,10 @@ class Bootstrap extends EventEmitter {
       });
    }
 
-   async init(ab) {
-      // We rerun init after a sucessful login, at that point we already have AB.
-      // This means we can use `AB.Network` over the fetch API when loading
-      // config again. This prevents the session from being reset, which was
-      // happening inconsitently.
-      if (ab) this.AB = ab;
-
+   /**
+    * @param {Promise} webixLoading - so we know when webix is finished loading
+    */
+   async init(webixLoading) {
       const loadABFactory = import(
          /* webpackChunkName: "AB" */
          /* webpackPrefetch: true */
@@ -183,6 +180,7 @@ class Bootstrap extends EventEmitter {
          networkIsSlow
       );
       await this.AB.init();
+      await webixLoading;
       // NOTE: special case: User has no Roles defined.
       // direct them to our special ErrorNoDefsUI
       if (userInfo && userInfo.roles.length == 0) {
