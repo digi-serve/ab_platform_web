@@ -1975,16 +1975,13 @@ export default class ABViewGridComponent extends ABViewComponent {
       // find our last displayed column (that isn't one we added);
       let lastCol = null;
 
-      for (let i = columnHeaders.length - 1; i >= 0; i--)
-         if (!lastCol) {
-            const col = columnHeaders[i];
-
-            if (!col.hidden && addedColumns.indexOf(col.id) === -1) {
-               lastCol = col;
-
-               break;
-            }
+      for (let i = columnHeaders.length - 1; i >= 0; i--) {
+         const col = columnHeaders[i];
+         if (!col.hidden && addedColumns.indexOf(col.id) === -1) {
+            lastCol = col;
+            break;
          }
+      }
 
       if (lastCol) {
          lastCol.fillspace = true;
