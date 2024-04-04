@@ -366,11 +366,11 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                // new, updated or deleted records that should or should not appear
                return false;
                // Get Local Storage unless xxx->one connected field
-               if (this?.settings?.linkViaType != "one") {
-                  // We store the .findAll() results locally and return that for a
-                  // quick response:
-                  return await this.AB.Storage.get(storageID);
-               }
+               // if (this?.settings?.linkViaType != "one") {
+               //    // We store the .findAll() results locally and return that for a
+               //    // quick response:
+               //    return await this.AB.Storage.get(storageID);
+               // }
             })
             .then(async (storedOptions) => {
                if (storedOptions) {
@@ -822,8 +822,19 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       // Only reset the value if the value changes:
       let currVal = item.getValue();
       let newVal = Array.isArray(val)
-         ? val.map((e) => this.getRelationValue(e, { forUpdate: true }) ?? e.id ?? e.uuid ?? e).join(",")
-         : this.getRelationValue(val, { forUpdate: true }) ?? val.id ?? val.uuid ?? val;
+         ? val
+              .map(
+                 (e) =>
+                    this.getRelationValue(e, { forUpdate: true }) ??
+                    e.id ??
+                    e.uuid ??
+                    e
+              )
+              .join(",")
+         : this.getRelationValue(val, { forUpdate: true }) ??
+           val.id ??
+           val.uuid ??
+           val;
       if (currVal != newVal) {
          item.setValue(newVal);
       }
