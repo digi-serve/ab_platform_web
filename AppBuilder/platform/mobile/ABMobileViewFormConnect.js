@@ -35,8 +35,10 @@ module.exports = class ABMobileViewFormConnect extends (
       );
 
       this.__filterComponent.setValue(
-         this.settings.filterConditions ??
+         this.settings.filterConditions
+         /* ??
             ABViewFormConnectPropertyComponentDefaults.filterConditions
+         */
       );
    }
 

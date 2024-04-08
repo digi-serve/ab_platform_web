@@ -23,12 +23,12 @@ module.exports = class ABCustomEditList {
       var labels = {
          common: App.labels,
 
-         component: {}
+         component: {},
       };
 
       // internal list of Webix IDs to reference our UI components.
       var ids = {
-         component: App.unique(this.key)
+         component: App.unique(this.key),
       };
 
       // Our webix UI definition:
@@ -40,28 +40,28 @@ module.exports = class ABCustomEditList {
             body: {
                borderless: true,
                select: true,
-               template: function(obj, common) {
+               template: function (obj, common) {
                   return (
                      "<span>" +
                      (obj.$count ? "<b>" + obj.value + "</b>" : obj.value) +
                      "</span>"
                   );
                },
-               ready: function() {
+               ready: function () {
                   this.openAll();
                },
                on: {
-                  onAfterSelect: function(id, e) {
+                  onAfterSelect: function (id, e) {
                      if (this.getItem(id).$count) {
                         this.getParentView().setMasterValue("");
                         this.show(
                            $$(this.getParentView().config.master).getInputNode()
                         );
                      }
-                  }
-               }
-            }
-         }
+                  },
+               },
+            },
+         },
       };
       this.view = this.key;
 

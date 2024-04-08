@@ -2,7 +2,7 @@ const ABViewComponent = require("./ABViewComponent").default;
 const ABFieldCalculate = require("../../dataFields/ABFieldCalculate");
 const ABFieldFormula = require("../../dataFields/ABFieldFormula");
 const ABFieldNumber = require("../../dataFields/ABFieldNumber");
-
+/* global pivot */
 module.exports = class ABViewPivotComponent extends ABViewComponent {
    constructor(baseView, idBase, ids) {
       super(

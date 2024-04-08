@@ -210,6 +210,5 @@ module.exports = class ABViewChart extends ABViewChartCore {
             `can't resolve value field[${this.settings.columnValue}]`
          );
       }
-
    }
 };

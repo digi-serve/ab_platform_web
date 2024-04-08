@@ -168,7 +168,10 @@ export default class ABViewGridPopupMassUpdate extends ClassUI {
       $datatable.data.each(function (row) {
          if (
             row &&
-            row.hasOwnProperty("appbuilder_select_item") &&
+            Object.prototype.hasOwnProperty.call(
+               row,
+               "appbuilder_select_item"
+            ) &&
             row.appbuilder_select_item == 1
          ) {
             updatedRowIds.push(row.id);

@@ -21,17 +21,17 @@ module.exports = class ABCustomActiveList {
       var labels = {
          common: App.labels,
 
-         component: {}
+         component: {},
       };
 
       // internal list of Webix IDs to reference our UI components.
       var ids = {
-         component: App.unique(this.key)
+         component: App.unique(this.key),
       };
 
       // Our webix UI definition:
       var _ui = {
-         name: this.key
+         name: this.key,
       };
       this.view = this.key;
 
