@@ -21,20 +21,20 @@ module.exports = class ABCustomFocusableTemplate {
       var labels = {
          common: App.labels,
 
-         component: {}
+         component: {},
       };
 
       // internal list of Webix IDs to reference our UI components.
       var ids = {
-         component: App.unique(this.key)
+         component: App.unique(this.key),
       };
 
       // Our webix UI definition:
       var _ui = {
          name: this.key,
-         focus: function() {
+         focus: function () {
             return false;
-         }
+         },
       };
       this.view = this.key;
 

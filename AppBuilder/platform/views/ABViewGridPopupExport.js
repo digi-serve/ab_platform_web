@@ -173,8 +173,10 @@ export default class ABWorkObjectPopupExport extends ClassUI {
 
       // If there are checked items, then export them only
       // Otherwise export all items
-      const noCheckedRow = _grid.data.find({appbuilder_select_item: 1}).length < 1;
-      const filterRow = (row) => noCheckedRow || row?.appbuilder_select_item == 1;
+      const noCheckedRow =
+         _grid.data.find({ appbuilder_select_item: 1 }).length < 1;
+      const filterRow = (row) =>
+         noCheckedRow || row?.appbuilder_select_item == 1;
 
       switch (name) {
          case "CSV":
@@ -184,7 +186,7 @@ export default class ABWorkObjectPopupExport extends ClassUI {
                filename:
                   _filename || (_currentObject ? _currentObject.label : null),
                columns: columns,
-               filter: filterRow
+               filter: filterRow,
             });
             break;
          case "Excel":
@@ -195,7 +197,7 @@ export default class ABWorkObjectPopupExport extends ClassUI {
                   _filename || (_currentObject ? _currentObject.label : null),
                columns: columns,
                filterHTML: true,
-               filter: filterRow
+               filter: filterRow,
             });
             break;
          case "PDF":
@@ -203,7 +205,7 @@ export default class ABWorkObjectPopupExport extends ClassUI {
                filename:
                   _filename || (_currentObject ? _currentObject.label : null),
                filterHTML: true,
-               filter: filterRow
+               filter: filterRow,
             });
             break;
          case "PNG":

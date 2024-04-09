@@ -2,6 +2,7 @@
  * Network.js
  * A network manager for interfacing with our AppBuilder server.
  */
+/* global Connection */
 var EventEmitter = require("events").EventEmitter;
 import performance from "../utils/performance";
 import NetworkRest from "./NetworkRest";

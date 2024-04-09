@@ -10,7 +10,7 @@ export default {
       return new Promise((resolve, reject) => {
          const L = (...params) => BS.AB.Multilingual.label(...params);
 
-         io.socket.on("disconnect", function() {
+         io.socket.on("disconnect", function () {
             const body = document.querySelector("body");
             body.insertAdjacentHTML(
                "afterbegin",

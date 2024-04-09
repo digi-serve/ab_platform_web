@@ -36,6 +36,4 @@ module.exports = class ABViewChartLineComponent extends (
          // width: settings.chartWidth,
       });
    }
-
-
 };
