@@ -83,23 +83,23 @@ module.exports = class ABFieldString extends ABFieldStringCore {
       return formComponentSetting;
    }
 
-   formComponentMobile() {
-      // NOTE: what is being returned here needs to mimic an ABView CLASS.
-      // primarily the .common() and .newInstance() methods.
-      const formComponentSetting = super.formComponent();
+   // formComponentMobile() {
+   //    // NOTE: what is being returned here needs to mimic an ABView CLASS.
+   //    // primarily the .common() and .newInstance() methods.
+   //    const formComponentSetting = super.formComponent();
 
-      // .common() is used to create the display in the list
-      formComponentSetting.common = () => {
-         return {
-            key: "mobile-textbox",
-            settings: {
-               type: "single",
-            },
-         };
-      };
+   //    // .common() is used to create the display in the list
+   //    formComponentSetting.common = () => {
+   //       return {
+   //          key: "mobile-textbox",
+   //          settings: {
+   //             type: "single",
+   //          },
+   //       };
+   //    };
 
-      return formComponentSetting;
-   }
+   //    return formComponentSetting;
+   // }
 
    /**
     * @method formComponentMobile

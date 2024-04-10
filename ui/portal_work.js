@@ -446,7 +446,7 @@ class PortalWork extends ClassUI {
                         PortalWorkUserQRWindow.init(AB);
                         PortalWorkUserQRWindow.show();
                         break;
-                     default:
+                     default: {
                         // was this one of our Mobile Apps?
                         const mobileApp = this.AB.applicationByID(id);
                         if (mobileApp) {
@@ -462,6 +462,7 @@ class PortalWork extends ClassUI {
                            Menu ID:<i>${item.id}</i>`
                            );
                         }
+                     }
                   }
                   $$("userMenu").hide();
                },

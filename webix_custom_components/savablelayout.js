@@ -22,33 +22,33 @@ module.exports = class ABCustomSavableLayout {
       var labels = {
          common: App.labels,
 
-         component: {}
+         component: {},
       };
 
       // internal list of Webix IDs to reference our UI components.
       var ids = {
-         component: App.unique(ComponentKey)
+         component: App.unique(ComponentKey),
       };
 
       // Our webix UI definition:
       var _ui = {
          name: ComponentKey,
 
-         getState: function() {
+         getState: function () {
             var store = new webix.TreeCollection();
             webix.extend(
                store,
                {
                   name: "EditorState",
-                  $init: function() {
+                  $init: function () {
                      // overwrite .serialize to export element format
-                     this.serialize = function(e, t) {
+                     this.serialize = function (e, t) {
                         var rootId = this.getFirstId();
                         var rootItem = this.getItem(rootId);
 
                         return _logic.normalize(this, rootItem);
                      };
-                  }
+                  },
                },
                true
             );
@@ -62,7 +62,7 @@ module.exports = class ABCustomSavableLayout {
             return result;
          },
 
-         setState: function(state, prefix) {
+         setState: function (state, prefix) {
             var views = state ? state.rows || state.cols || [] : [];
 
             // rebuild layout
@@ -87,7 +87,7 @@ module.exports = class ABCustomSavableLayout {
             });
          },
 
-         destroyView: function(deleteView) {
+         destroyView: function (deleteView) {
             if (typeof deleteView == "string") {
                deleteView = $$(deleteView);
             }
@@ -96,7 +96,7 @@ module.exports = class ABCustomSavableLayout {
 
             var parent = deleteView.getParentView();
             parent.removeView(deleteView);
-         }
+         },
       };
       this.view = ComponentKey;
 
@@ -109,11 +109,11 @@ module.exports = class ABCustomSavableLayout {
           * @param elem {Object} the webix element
           * @param parentId {integer - nullable} id of parent id
           */
-         saveChildren: function(store, elem, parentId) {
+         saveChildren: function (store, elem, parentId) {
             var vals = {};
 
             // get required properties
-            ["id", "viewId", "rows", "cols"].forEach(function(propName) {
+            ["id", "viewId", "rows", "cols"].forEach(function (propName) {
                if (propName in elem.config)
                   vals[propName] = elem.config[propName];
             });
@@ -123,7 +123,7 @@ module.exports = class ABCustomSavableLayout {
 
             // get sub-children
             if (elem && elem.getChildViews) {
-               elem.getChildViews().forEach(function(e) {
+               elem.getChildViews().forEach(function (e) {
                   // call sub-children
                   _logic.saveChildren(store, e, elem.config.id);
                });
@@ -138,7 +138,7 @@ module.exports = class ABCustomSavableLayout {
           * @param store {webix.TreeCollection}
           * @param item {object}
           */
-         normalize: function(store, item) {
+         normalize: function (store, item) {
             var result = {};
 
             if (item.viewId) {
@@ -149,7 +149,7 @@ module.exports = class ABCustomSavableLayout {
             var children = [];
             store.data.eachChild(
                item.id,
-               function(subitem) {
+               function (subitem) {
                   var subResult = _logic.normalize(store, subitem);
                   children.push(subResult);
                },
@@ -167,7 +167,7 @@ module.exports = class ABCustomSavableLayout {
             }
 
             return result;
-         }
+         },
       };
       this._logic = _logic;
 

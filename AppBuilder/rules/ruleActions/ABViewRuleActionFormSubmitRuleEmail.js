@@ -587,9 +587,10 @@ module.exports = class ABViewRuleActionFormSubmitRuleEmail extends (
                         // field
                         if (rec.emailType == "field") {
                            var emailFieldUrl = rec.value.split("|")[1]; // linkFieldId|emailFieldUrl
-                           var emailField = this.queryObject.application.urlResolve(
-                              emailFieldUrl
-                           );
+                           var emailField =
+                              this.queryObject.application.urlResolve(
+                                 emailFieldUrl
+                              );
                            if (emailField) {
                               // Pull email source object
                               if (emailField.object.id == this.queryObject.id) {
@@ -640,9 +641,8 @@ module.exports = class ABViewRuleActionFormSubmitRuleEmail extends (
                            var dcId = dvIdAndFieldId.split("|")[0];
                            var fieldId = dvIdAndFieldId.split("|")[1];
 
-                           var dcQuery = this.currentForm.AB.datacollectionByID(
-                              dcId
-                           );
+                           var dcQuery =
+                              this.currentForm.AB.datacollectionByID(dcId);
                            if (!dcQuery) return next();
 
                            var field = dcQuery.datasource.fieldByID(fieldId);

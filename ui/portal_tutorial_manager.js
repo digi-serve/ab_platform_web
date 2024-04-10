@@ -356,9 +356,7 @@ class PortalTutorialManager extends ClassUI {
          let currentTutorial = this.AB.hints((h) => {
             return h.id == id;
          })[0];
-         let active = currentTutorial?.settings.hasOwnProperty("active")
-            ? currentTutorial.settings.active
-            : "1";
+         let active = currentTutorial?.settings?.active ?? "1";
          return {
             view: "form",
             id: "stepform" + id,

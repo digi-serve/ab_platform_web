@@ -78,28 +78,15 @@ module.exports = class ABDataCollection extends ABDataCollectionCore {
       //// Now connect our platform hub to our Object Triggers:
 
       // events
-      this.AB.on("ab.datacollection.create", (data) => {
-         // debugger;
-         this.emit("ab.datacollection.create", data);
-      });
-
-      this.AB.on("ab.datacollection.update", (data) => {
-         // debugger;
-         this.emit("ab.datacollection.update", data);
-      });
-
-      // We are subscribing to notifications from the server that an item may
-      // be stale and needs updating
-      // We will improve this later and verify that it needs updating before
-      // attempting the update on the client side
-      this.AB.on("ab.datacollection.stale", (data) => {
-         // debugger;
-         this.emit("ab.datacollection.stale", data);
-      });
-
-      this.AB.on("ab.datacollection.delete", (data) => {
-         // debugger;
-         this.emit("ab.datacollection.delete", data);
+      [
+         "ab.datacollection.create",
+         "ab.datacollection.update",
+         "ab.datacollection.stale",
+         "ab.datacollection.delete",
+      ].forEach((key) => {
+         this.AB.on(key, (data) => {
+            this.emit(key, data);
+         });
       });
 
       this.bindParentDc();
