@@ -254,9 +254,11 @@ export default class ABViewGridComponent extends ABViewComponent {
                   this.onAfterSelect(data, preserve);
                }
             },
-            onBeforeEditStart: function (id) {
-               if (this.getItem(id) !== "appbuilder_select_item") return false;
-            },
+            // onBeforeEditStart: function (/*id*/) {
+            //    // Not sure what this is suposed to check, but this condition
+            //    // will always be false.
+            //    if (!this.getItem(id) == "appbuilder_select_item") return false;
+            // },
             onCheck: function (row, col, val) {
                // Update checkbox data
                if (col == "appbuilder_select_item") {
