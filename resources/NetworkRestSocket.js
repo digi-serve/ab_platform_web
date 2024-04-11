@@ -105,6 +105,10 @@ class NetworkRestSocket extends NetworkRest {
       console.warn(JSON.stringify(HashSocketJobs, null, 4));
    }
 
+   socketLogClear() {
+      HashSocketJobs = {};
+   }
+
    ////
    //// Network Utilities
    ////

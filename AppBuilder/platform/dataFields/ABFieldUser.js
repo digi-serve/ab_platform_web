@@ -236,15 +236,19 @@ module.exports = class ABFieldUser extends ABFieldUserCore {
 
    pullRelationValues(row) {
       let values = super.pullRelationValues(row);
-      // remember, our .id == .username
 
+      // remember, our .id == .username
       if (Array.isArray(values)) {
+         // prevent any null or undefined:
+         values = values.filter((v) => v);
          values = values.map((v) => {
             v.id = v.username || v.id;
             return v;
          });
       } else {
-         values.id = values.username || values.id;
+         if (values) {
+            values.id = values.username || values.id;
+         }
       }
 
       return values;
