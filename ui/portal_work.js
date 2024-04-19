@@ -58,6 +58,14 @@ class PortalWork extends ClassUI {
                      align: "center",
                   },
                   {
+                     id: "portal_work_switcheroo_user_switched_loading",
+                     view: "label",
+                     hidden: true,
+                     align: "center",
+                     width: 30,
+                     label: '<i class="fa fa-refresh fa-spin" aria-hidden="true"></i>',
+                  },
+                  {
                      view: "button",
                      value: '<div style="text-align: center; font-size: 12px; color:#FFFFFF"><i class="fa-fw fa fa-times"></i></div>',
                      align: "center",
@@ -67,8 +75,10 @@ class PortalWork extends ClassUI {
                         onAfterRender: function () {
                            ClassUI.CYPRESS_REF(this, "switcheroo_clear_button");
                         },
-                        onItemClick: () => {
-                           PortalWorkUserSwitcheroo.switcherooClear();
+                        onItemClick: async () => {
+                           this.busy();
+                           await PortalWorkUserSwitcheroo.switcherooClear();
+                           this.ready();
                            $$("portal_work_switcheroo_user_switched").hide();
                         },
                      },
@@ -1116,6 +1126,14 @@ class PortalWork extends ClassUI {
             },
          },
       });
+   }
+
+   busy() {
+      $$("portal_work_switcheroo_user_switched_loading")?.show();
+   }
+
+   ready() {
+      $$("portal_work_switcheroo_user_switched_loading")?.hide();
    }
 }
 
