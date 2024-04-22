@@ -854,7 +854,7 @@ class ABFactory extends ABFactoryCore {
          console.error(message);
       }
 
-      if (rest && rest.length > 0) {
+      if (rest.length > 0) {
          rest.forEach((r) => {
             if (r instanceof Error) {
                emitData.error = r;

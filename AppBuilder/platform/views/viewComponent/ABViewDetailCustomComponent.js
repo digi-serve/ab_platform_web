@@ -32,7 +32,7 @@ module.exports = class ABViewDetailCustomComponent extends (
    }
 
    onShow() {
-      super.onShow;
+      super.onShow();
 
       const baseView = this.view;
       const field = baseView.field();

@@ -365,7 +365,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                // were reporting not seeing the correct options list with either
                // new, updated or deleted records that should or should not appear
                return false;
-               // // Get Local Storage unless xxx->one connected field
+               // Get Local Storage unless xxx->one connected field
                // if (this?.settings?.linkViaType != "one") {
                //    // We store the .findAll() results locally and return that for a
                //    // quick response:
