@@ -17,6 +17,31 @@ global.navigator = {
 global.$$ = webixElement;
 global.webix = webix;
 global.gantt = webixGantt;
+class Stub {
+   constructor() {}
+}
+global.pivot = {
+   services: { Backend: Stub },
+   views: { table: Stub },
+};
+global.reports = {
+   services: { Backend: Stub, Local: Stub },
+   views: {
+      editor: Stub,
+      "editor/common": Stub,
+      "editor/data": Stub,
+      table: Stub,
+      toolbar: Stub,
+   },
+};
+global.scheduler = {
+   services: { Backend: Stub },
+   views: {
+      "bars/nav": Stub,
+      "bars/navpopup": Stub,
+      "modes/day/multiday": Stub,
+   },
+};
 
 // These normally get set by Webpack
 global.WEBPACK_MODE = "development";
