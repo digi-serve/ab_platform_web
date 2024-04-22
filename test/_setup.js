@@ -17,3 +17,8 @@ global.navigator = {
 global.$$ = webixElement;
 global.webix = webix;
 global.gantt = webixGantt;
+
+// These normally get set by Webpack
+global.WEBPACK_MODE = "development";
+global.SENTRY_DSN = false;
+global.VERSION = "";
