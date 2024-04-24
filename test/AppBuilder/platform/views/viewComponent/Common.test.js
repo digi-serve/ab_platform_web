@@ -70,7 +70,7 @@ class BaseView {
 }
 
 // TEST
-describe.only("ABViewCoponent* - Common tests", function () {
+describe("ABViewCoponent* - Common tests", function () {
    describe(".ui() returns ui with correct id", function () {
       // Run a test for each viewComponent
       for (const key in viewComponents) {
