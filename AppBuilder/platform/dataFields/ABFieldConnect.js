@@ -781,19 +781,24 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
    }
 
    getValue(item) {
+      let val = item.getValue();
       var multiselect = this.settings.linkType == "many";
       if (multiselect) {
          let vals = [];
-         if (item.getValue()) {
-            let val = item.getValue().split(",");
+         if (val) {
+            val = val.split(",");
             val.forEach((record) => {
-               vals.push(item.getList().getItem(record));
+               // make sure we are returning the .uuid values and
+               // not full {Record} values.
+               vals.push(this.getRelationValue(item.getList().getItem(record)));
             });
          }
+
          return vals;
       } else {
-         if (item.getValue()) {
-            return item.getList().getItem(item.getValue());
+         if (val) {
+            // return just the .uuid and not the full {Record}
+            return this.getRelationValue(item.getList().getItem(val));
          } else {
             return "";
          }
