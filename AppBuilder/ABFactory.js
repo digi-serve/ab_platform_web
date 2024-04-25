@@ -901,6 +901,10 @@ class ABFactory extends ABFactoryCore {
       });
    }
 
+   isNil(value) {
+      return _.isNil(value);
+   }
+
    /**
     * @method rules.isUUID
     * evaluate a given value to see if it matches the format of a uuid
