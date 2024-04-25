@@ -44,7 +44,7 @@ module.exports = class ABViewDetailComponent extends ABViewContainerComponent {
 
          if (currData) this.displayData(currData);
 
-         ["changeCursor", "cursorStale"].forEach((key) => {
+         ["changeCursor", "cursorStale", "collectionEmpty"].forEach((key) => {
             this.eventAdd({
                emitter: dv,
                eventName: key,
