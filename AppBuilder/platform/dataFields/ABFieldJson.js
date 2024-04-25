@@ -68,7 +68,9 @@ module.exports = class ABFieldJson extends ABFieldJsonCore {
 
    setValue(item, rowData) {
       super.setValue(item, rowData, "");
-      item.config.value = rowData[this.columnName];
+      if (item) {
+         item.config.value = rowData[this.columnName];
+      }
    }
 
    /**
