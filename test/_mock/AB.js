@@ -1,3 +1,5 @@
+import webix from "./webix";
+
 const EventEmitter = require("events").EventEmitter;
 
 export default class AB {
@@ -21,6 +23,24 @@ export default class AB {
       this._App = {
          Label: () => {},
          unique: () => {},
+      };
+      this.UISettings = {
+         config: () => {
+            return {};
+         },
+      };
+      this.Webix = webix;
+   }
+
+   applicationNew() {}
+
+   datacollectionByID() {
+      return {
+         datasource: {
+            fieldByID: () => {
+               return { title: "" };
+            },
+         },
       };
    }
 

@@ -193,12 +193,11 @@ export default class ABViewDataFilterComponent extends ABViewComponent {
    }
 
    ui() {
-      if (this.settings.viewType == "advanced") {
-         if (!this?.settings?.dataviewID) return { height: 1 };
-      } else {
-         if (!this?.settings?.dataviewID || !this?.settings?.field)
-            return { height: 1 };
-      }
+      if (
+         !this.settings?.dataviewID ||
+         (this.settings?.viewType !== "advanced" && !this.settings?.field)
+      )
+         return { height: 1, id: this.ids.component };
 
       const ui =
          this.settings.viewType == "advanced"

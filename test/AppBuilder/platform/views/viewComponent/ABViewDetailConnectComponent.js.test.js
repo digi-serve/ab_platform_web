@@ -12,6 +12,16 @@ function getTarget() {
 }
 
 describe("ABViewDetailConnectComponent item widget", function () {
+   let sandbox;
+
+   beforeEach(function () {
+      sandbox = sinon.createSandbox();
+   });
+
+   afterEach(function () {
+      sandbox.restore();
+   });
+
    it(".ui - should return UI json that has properly .id", function () {
       const target = getTarget();
       const result = target.ui();
@@ -26,7 +36,7 @@ describe("ABViewDetailConnectComponent item widget", function () {
       const stubWebixElem = sinon
          .stub(global, "$$")
          .callsFake(() => mockWebixElem);
-      const spySetValues = sinon.spy(mockWebixElem, "setValues");
+      const spySetValues = sandbox.spy(mockWebixElem, "setValues");
 
       const input = [
          { id: "ID", text: "TEXT" },
@@ -35,9 +45,8 @@ describe("ABViewDetailConnectComponent item widget", function () {
       ];
       target.setValue(input);
 
-      assert.equal(true, stubWebixElem.calledWith(target.ids.component));
-      assert.equal(
-         true,
+      assert(stubWebixElem.calledWith(target.ids.detailItem));
+      assert(
          spySetValues.calledOnceWith({
             display: input
                .map(
@@ -47,7 +56,5 @@ describe("ABViewDetailConnectComponent item widget", function () {
                .join(""),
          })
       );
-
-      stubWebixElem.restore();
    });
 });

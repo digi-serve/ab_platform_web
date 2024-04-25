@@ -11,22 +11,32 @@ function getTarget() {
    return new ABViewDetailCheckboxComponent(detailCheckboxView);
 }
 
-function getMockStuffs(target) {
-   const mockWebixElem = global.$$(target.ids.component);
-   const stubWebixElem = sinon
-      .stub(global, "$$")
-      .callsFake(() => mockWebixElem);
-   const spySetValues = sinon.spy(mockWebixElem, "setValues");
-
-   return { mockWebixElem, stubWebixElem, spySetValues };
-}
-
 describe("ABViewDetailCheckboxComponent item widget", function () {
+   let sandbox;
+
+   function getMockStuffs(target) {
+      const mockWebixElem = global.$$(target.ids.component);
+      const stubWebixElem = sandbox
+         .stub(global, "$$")
+         .callsFake(() => mockWebixElem);
+      const spySetValues = sinon.spy(mockWebixElem, "setValues");
+
+      return { mockWebixElem, stubWebixElem, spySetValues };
+   }
+
+   beforeEach(function () {
+      sandbox = sinon.createSandbox();
+   });
+
+   afterEach(function () {
+      sandbox.restore();
+   });
+
    it(".ui - should return UI json that has properly .id", function () {
       const target = getTarget();
       const result = target.ui();
 
-      assert.equal(true, result != null);
+      assert(result != null);
       assert.equal(target.ids.component, result.id);
    });
 
@@ -37,16 +47,13 @@ describe("ABViewDetailCheckboxComponent item widget", function () {
       const input = true;
       target.setValue(input);
 
-      assert.equal(true, stubWebixElem.calledWith(target.ids.component));
-      assert.equal(
-         true,
+      assert(stubWebixElem.calledWith(target.ids.detailItem));
+      assert(
          spySetValues.calledOnceWith({
             display:
                '<span class="check webix_icon fa fa-check-square-o"></span>',
          })
       );
-
-      stubWebixElem.restore();
    });
 
    it(".setValue - should display un-checked icon when the parameter is false", function () {
@@ -56,14 +63,11 @@ describe("ABViewDetailCheckboxComponent item widget", function () {
       const input = false;
       target.setValue(input);
 
-      assert.equal(true, stubWebixElem.calledWith(target.ids.component));
-      assert.equal(
-         true,
+      assert(stubWebixElem.calledWith(target.ids.detailItem));
+      assert(
          spySetValues.calledOnceWith({
             display: '<span class="check webix_icon fa fa-square-o"></span>',
          })
       );
-
-      stubWebixElem.restore();
    });
 });
