@@ -15,6 +15,7 @@ module.exports = class ABViewDetailComponent extends ABViewContainerComponent {
       // details functions to work when clicked
       return {
          type: "form",
+         id: this.ids.component,
          borderless: true,
          rows: [
             {
