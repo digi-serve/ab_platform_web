@@ -31,6 +31,14 @@ class Network extends EventEmitter {
       // {int} _queueCount
       // the # of network operations currently queued, pending Network
       // reconnect.
+
+      this.cachJobResponse = {};
+      // { jobID : { jobResponse } }
+      // hash of the queued jobResponses for network requests that are in 
+      // our queue.  
+      // We need to keep our own cache that isn't serialized so that once
+      // we complete the request, we can resume the resolve() promise chains
+
    }
 
    init(AB) {
@@ -339,9 +347,12 @@ class Network extends EventEmitter {
             })
             .then((queue) => {
                queue = queue || [];
-               queue.push({ data, jobResponse });
+               let jID = this.AB.jobID();
+               this.cachJobResponse[jID] = jobResponse;
+               queue.push({ data, jobResponse:jID });
                this.AB.log(
                   `:::: ${queue.length} request${
+
                      queue.length > 1 ? "s" : ""
                   } queued`
                );
@@ -409,10 +420,12 @@ class Network extends EventEmitter {
                   } else {
                      var entry = queue.shift();
                      var params = entry.data;
-                     var job = entry.jobResponse;
+                     let job = this.cachJobResponse[entry.jobResponse];
+                     // var job = entry.jobResponse;
                      this._network
                         .resend(params, job)
                         .then(() => {
+                           delete this.cachJobResponse[entry.jobResponse];
                            processRequest(cb);
                         })
                         .catch((err) => {
@@ -442,6 +455,7 @@ class Network extends EventEmitter {
             // Clear queue contents
             //
             .then(() => {
+               this.cachJobResponse = {};
                this._queueCount = 0;
                return this.AB.Storage.set(refQueue, []);
             })
