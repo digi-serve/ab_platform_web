@@ -139,6 +139,7 @@ module.exports = class ABViewFormButton extends ABViewFormItemComponent {
 
       // clear cursor of DC
       dc?.setCursor(null);
+      dc?.setStaticCursor(); // unless it should be static
 
       cancelButton?.getFormView?.().clear();
 
