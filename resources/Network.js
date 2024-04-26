@@ -34,11 +34,10 @@ class Network extends EventEmitter {
 
       this.cachJobResponse = {};
       // { jobID : { jobResponse } }
-      // hash of the queued jobResponses for network requests that are in 
-      // our queue.  
+      // hash of the queued jobResponses for network requests that are in
+      // our queue.
       // We need to keep our own cache that isn't serialized so that once
       // we complete the request, we can resume the resolve() promise chains
-
    }
 
    init(AB) {
@@ -349,10 +348,9 @@ class Network extends EventEmitter {
                queue = queue || [];
                let jID = this.AB.jobID();
                this.cachJobResponse[jID] = jobResponse;
-               queue.push({ data, jobResponse:jID });
+               queue.push({ data, jobResponse: jID });
                this.AB.log(
                   `:::: ${queue.length} request${
-
                      queue.length > 1 ? "s" : ""
                   } queued`
                );
@@ -413,6 +411,24 @@ class Network extends EventEmitter {
                // default to [] if not found
                queue = queue || [];
 
+               let hasResponded = false;
+               let resCount = 0;
+               let resNumber = queue.length;
+
+               let done = (res, rej, err) => {
+                  if (!hasResponded) {
+                     if (err) {
+                        rej(err);
+                        hasResponded = true;
+                        return;
+                     }
+                     resCount++;
+                     if (resCount >= resNumber) {
+                        hasResponded = true;
+                        res();
+                     }
+                  }
+               };
                // recursively process each pending queue request
                var processRequest = (cb) => {
                   if (queue.length == 0) {
@@ -426,7 +442,8 @@ class Network extends EventEmitter {
                         .resend(params, job)
                         .then(() => {
                            delete this.cachJobResponse[entry.jobResponse];
-                           processRequest(cb);
+                           // processRequest(cb);
+                           cb();
                         })
                         .catch((err) => {
                            // if the err was due to a network connection error
@@ -435,18 +452,20 @@ class Network extends EventEmitter {
                               return;
                            }
                            // otherwise, try the next
-                           processRequest(cb);
+                           // processRequest(cb);
                         });
+                     processRequest(cb);
                   }
                };
 
                return new Promise((res, rej) => {
                   processRequest((err) => {
-                     if (err) {
-                        rej(err);
-                     } else {
-                        res();
-                     }
+                     done(res, rej, err);
+                     // if (err) {
+                     //    rej(err);
+                     // } else {
+                     //    res();
+                     // }
                   });
                });
             })
