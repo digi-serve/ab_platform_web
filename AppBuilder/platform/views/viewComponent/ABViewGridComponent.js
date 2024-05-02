@@ -298,9 +298,12 @@ export default class ABViewGridComponent extends ABViewComponent {
             },
             onBeforeEditStop: function (state, editor) {
                // Check if data loading is complete
+               const oldValue = state.old;
                let newValue = state.value;
                if (!Array.isArray(newValue)) newValue = [newValue];
                if (
+                  oldValue != null &&
+                  oldValue != "" &&
                   // If options does not load completely, then Webix returns state.value as ['', '', '']
                   newValue.filter((val) => val != null && val != "").length <
                      1 &&
@@ -1367,7 +1370,7 @@ export default class ABViewGridComponent extends ABViewComponent {
          }
 
       if (state.value !== state.old) {
-         const item = $DataTable.getItem(editor.row);
+         const item = $DataTable?.getItem(editor.row);
 
          item[editor.column] = state.value;
 
