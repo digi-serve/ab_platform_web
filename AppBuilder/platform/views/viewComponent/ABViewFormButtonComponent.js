@@ -137,8 +137,11 @@ module.exports = class ABViewFormButton extends ABViewFormItemComponent {
       // get ABDatacollection
       const dc = form.datacollection;
 
-      // clear cursor of DC
-      dc?.setCursor(null);
+      // clear cursor of DC if not set to follow another
+      if (!dc?.isCursorFollow) {
+         dc?.setCursor(null);
+      }
+      // dc?.setStaticCursor(); // unless it should be static
 
       cancelButton?.getFormView?.().clear();
 
