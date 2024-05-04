@@ -792,7 +792,9 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                   // make sure we are returning the .uuid values and
                   // not full {Record} values.
                   vals.push(
-                     this.getRelationValue(item.getList().getItem(record))
+                     this.getRelationValue(item.getList().getItem(record), {
+                        forUpdate: true,
+                     })
                   );
                });
             }
