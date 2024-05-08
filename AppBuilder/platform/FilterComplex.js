@@ -171,7 +171,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
             isNotCondition: L("is not"),
             isEmpty: L("is empty"),
             isNotEmpty: L("is not empty"),
-
+            isCurrentDateCondition: L("is current date"),
             beforeCondition: L("is before"),
             afterCondition: L("is after"),
             onOrBeforeCondition: L("is on or before"),
@@ -356,6 +356,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
                case "is_not_empty":
                case "checked":
                case "unchecked":
+               case "is_current_date":
                   // There are only a few rules that don't need a
                   // value
                   break;
@@ -540,7 +541,9 @@ module.exports = class FilterComplex extends FilterComplexCore {
             break;
          case "date":
          case "datetime":
-            result = ["datepicker", "daterangepicker"];
+            result = ["datepicker", "daterangepicker"]
+               .concat(this.uiNoneValue())
+               .concat(this.uiUserValue(field));
             break;
          case "list":
             result = this.uiListValue(field);
