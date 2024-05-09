@@ -379,7 +379,7 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
          }
 
          // pull data of current cursor
-         await dc.waitReady();
+         // await dc.waitReady();
          const rowData = dc.getCursor();
 
          if ($form) dc.bind($form);
