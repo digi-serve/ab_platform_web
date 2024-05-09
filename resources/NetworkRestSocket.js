@@ -40,6 +40,7 @@ function socketDataLog(AB, key, data) {
    let length = "??";
    try {
       length = JSON.stringify(data).length;
+      data.__length = length;
    } catch (e) {
       console.log(e);
       //
@@ -85,9 +86,24 @@ function blacklistKey(AB, ev, data) {
    }
 
    if (data.data) {
+      let PK = "uuid";
       let obj = AB.objectByID(data.objectId);
-      let PK = obj.PK();
+      if (obj) {
+         PK = obj.PK();
+      }
       parts.push(data.data[PK] || data.data.id);
+   }
+
+   if (data.__length) {
+      parts.push(data.__length);
+   } else {
+      let length = "??";
+      try {
+         length = JSON.stringify(data).length;
+      } catch (e) {
+         // ignore
+      }
+      parts.push(length);
    }
 
    return parts.join("-");
@@ -97,7 +113,7 @@ function blacklistKey(AB, ev, data) {
  * @function isBlacklisted()
  * return True/False if a given key is already blacklisted.
  * @param {string} key
- *        the blacklistKey() we are checking
+ *        the () we are checking
  * @return {bool}
  */
 function isBlacklisted(key) {
