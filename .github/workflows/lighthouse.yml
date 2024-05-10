@@ -35,7 +35,7 @@ jobs:
            run: mv web ab_service_web
 
          - name: Install AppBuilder
-           uses: digi-serve/ab-install-action@v1
+           uses: digi-serve/ab-install-action@v1.1.0
            with:
               repository: digi-serve/ab_service_web
 
