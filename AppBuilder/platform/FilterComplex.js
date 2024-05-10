@@ -543,7 +543,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
          case "datetime":
             result = ["datepicker", "daterangepicker"]
                .concat(this.uiNoneValue())
-               .concat(this.uiUserValue(field));
+               .concat(this.uiContextValue(field));
             break;
          case "list":
             result = this.uiListValue(field);
