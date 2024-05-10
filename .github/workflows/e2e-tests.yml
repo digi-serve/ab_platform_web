@@ -62,12 +62,12 @@ jobs:
            run: pm2 start ./logs.js -- --toFile logs/ABServices.log
            working-directory: ./ab
 
-         #Run test
-         - name: Wait for AB
-           uses: ifaxity/wait-on-action@v1
-           with:
-              resource: http://localhost:8080
-              timeout: 300000
+         # #Run test
+         # - name: Wait for AB
+         #   uses: ifaxity/wait-on-action@v1
+         #   with:
+         #      resource: http://localhost:8080
+         #      timeout: 300000
 
          - name: Run Cypress Tests
            run: npm run test:e2e:app -- --browser chrome
