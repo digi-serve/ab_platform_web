@@ -510,6 +510,11 @@ export default class AB_Work_Object_Workspace_PopupSortFields extends ClassUI {
             let aValue = a[by],
                bValue = b[by];
 
+            if (field.key == "list") {
+               aValue = dir.indexOf(aValue);
+               bValue = dir.indexOf(bValue);
+            }
+
             if (Array.isArray(aValue)) {
                aValue = (aValue || [])
                   .map((item) => item.text || item)
@@ -523,7 +528,7 @@ export default class AB_Work_Object_Workspace_PopupSortFields extends ClassUI {
             }
 
             if (aValue != bValue) {
-               if (dir == "asc") {
+               if (dir == "asc" || field.key == "list") {
                   result = aValue > bValue ? 1 : -1;
                } else {
                   result = aValue < bValue ? 1 : -1;
