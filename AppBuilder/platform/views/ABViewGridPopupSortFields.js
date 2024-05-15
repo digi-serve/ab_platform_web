@@ -43,7 +43,6 @@ export default class AB_Work_Object_Workspace_PopupSortFields extends ClassUI {
       return {
          view: "form",
          id: this.ids.form,
-         // autoheight: true,
          borderless: true,
          elements: [
             {
@@ -75,6 +74,11 @@ export default class AB_Work_Object_Workspace_PopupSortFields extends ClassUI {
          // autoheight:true,
          width: 600,
          body: this.uiForm(),
+         on: {
+            onShow: () => {
+               this.onShow();
+            },
+         },
       };
    }
 
@@ -84,8 +88,7 @@ export default class AB_Work_Object_Workspace_PopupSortFields extends ClassUI {
          this.AB = AB;
       }
 
-      // if popup does not already exist add it
-      if (!$$(this.ids.component)) webix.ui(this.ui());
+      (this.AB.Webix ?? webix).ui(this.ui());
    }
 
    /**
@@ -106,7 +109,7 @@ export default class AB_Work_Object_Workspace_PopupSortFields extends ClassUI {
       var listFields = this.getFieldList(true);
       sort_form.addView(
          {
-            id: "sort" + webix.uid(),
+            id: `sort_${viewIndex + 1}`,
             cols: [
                {
                   view: "combo",
@@ -119,22 +122,7 @@ export default class AB_Work_Object_Workspace_PopupSortFields extends ClassUI {
                      },
                   },
                },
-               {
-                  view: "segmented",
-                  width: 200,
-                  options: [
-                     {
-                        id: "",
-                        value: L("Please select field"),
-                     },
-                  ],
-                  on: {
-                     onChange: (/* newv, oldv */) => {
-                        // 'asc' or 'desc' values
-                        this.triggerOnChange();
-                     },
-                  },
-               },
+               this._valueElement(),
                {
                   view: "button",
                   css: "webix_danger",
@@ -163,10 +151,16 @@ export default class AB_Work_Object_Workspace_PopupSortFields extends ClassUI {
       }
       // select direction
       if (dir) {
-         var segmentButton = sort_form
-            .getChildViews()
-            [viewIndex].getChildViews()[1];
-         segmentButton.setValue(dir);
+         var dirElem = sort_form.getChildViews()[viewIndex].getChildViews()[1];
+         dirElem.setValue?.(dir);
+
+         // [ABFieldList] Sorting following order
+         dirElem.sort?.((a, b) => {
+            return (dir ?? "").indexOf(a.id ?? a) >
+               (dir ?? "").indexOf(b.id ?? b)
+               ? 1
+               : -1;
+         });
       }
    }
 
@@ -184,7 +178,7 @@ export default class AB_Work_Object_Workspace_PopupSortFields extends ClassUI {
          listFields = [];
 
       var allFields = this.CurrentObject.fields();
-      if (allFields.length == 0) return listFields;
+      if (!allFields || !allFields.length) return listFields;
 
       // Get all fields include hidden fields
       allFields.forEach((f) => {
@@ -261,7 +255,11 @@ export default class AB_Work_Object_Workspace_PopupSortFields extends ClassUI {
             if (childViews.length - 1 <= index) return false;
 
             var fieldId = cView.getChildViews()[0].getValue();
-            var dir = cView.getChildViews()[1].getValue();
+            const dirElem = cView.getChildViews()[1];
+            var dir =
+               dirElem?.getValue?.() ??
+               dirElem?.data?.getRange?.()?.map((opt) => opt.id) ?? // Select list field type
+               "";
             sortFields.push({
                key: fieldId,
                dir: dir,
@@ -314,8 +312,13 @@ export default class AB_Work_Object_Workspace_PopupSortFields extends ClassUI {
             break;
       }
 
-      sortDir.define("options", options);
-      sortDir.refresh();
+      if (chosenField.key == "list") {
+         AB.Webix.ui(this._valueListElement(chosenField), sortDir);
+      } else {
+         const valElem = this._valueElement();
+         valElem.options = options;
+         AB.Webix.ui(valElem, sortDir);
+      }
 
       // if (columnConfig.settings.supportMultilingual)
       //    isMulti = columnConfig.settings.supportMultilingual;
@@ -346,7 +349,11 @@ export default class AB_Work_Object_Workspace_PopupSortFields extends ClassUI {
       if (sorts == null || sorts.length == 0) {
          this.clickAddNewSort();
       }
-      $$(this.ids.component).show(view, options);
+
+      const $popup = $$(this.ids.component);
+      $popup?.blockEvent();
+      $popup?.show(view, options);
+      $popup?.unblockEvent();
    }
 
    /**
@@ -367,13 +374,15 @@ export default class AB_Work_Object_Workspace_PopupSortFields extends ClassUI {
          childViews.forEach(function (cView, index) {
             if (childViews.length - 1 <= index) return false;
 
-            var fieldId = cView.getChildViews()[0].getValue(),
+            let fieldId = cView.getChildViews()[0].getValue(),
                // fieldObj = $.grep(listFields, function (f) { return f.id == fieldId });
-               fieldObj = listFields.find((f) => f.id == fieldId);
+               fieldObj = listFields.filter((f) => {
+                  return f.id == fieldId;
+               });
 
-            if (fieldObj) {
+            if (fieldObj.length > 0) {
                // Add selected field to list
-               selectedFields.push(fieldObj);
+               selectedFields.push(fieldObj[0]);
             } else {
                // Add condition to remove
                removeChildViews.push(cView);
@@ -383,7 +392,7 @@ export default class AB_Work_Object_Workspace_PopupSortFields extends ClassUI {
 
       // Remove filter conditions when column is deleted
       if (!ignoreRemoveViews) {
-         removeChildViews.forEach(function (cView) {
+         removeChildViews.forEach((cView /*, index */) => {
             sort_form.removeView(cView);
          });
       }
@@ -392,19 +401,17 @@ export default class AB_Work_Object_Workspace_PopupSortFields extends ClassUI {
       childViews = sort_form.getChildViews();
       if (childViews.length > 1) {
          // Ignore 'Add new sort' button
-         childViews.forEach(function (cView, index) {
+         childViews.forEach((cView, index) => {
             if (childViews.length - 1 <= index) return false;
 
-            var fieldId = cView.getChildViews()[0].getValue(),
+            let fieldId = cView.getChildViews()[0].getValue(),
                // fieldObj = $.grep(listFields, function (f) { return f.id == fieldId }),
-               fieldObj = listFields.filter(function (f) {
+               fieldObj = listFields.filter((f) => {
                   return f.id == fieldId;
                });
 
             // var selectedFieldsExcludeCurField = $(selectedFields).not(fieldObj);
-            var selectedFieldsExcludeCurField = selectedFields.filter(function (
-               x
-            ) {
+            var selectedFieldsExcludeCurField = selectedFields.filter((x) => {
                if (Array.isArray(fieldObj) && fieldObj.indexOf(x) !== -1) {
                   return false;
                }
@@ -412,7 +419,7 @@ export default class AB_Work_Object_Workspace_PopupSortFields extends ClassUI {
             });
 
             // var enableFields = $(listFields).not(selectedFieldsExcludeCurField).get();
-            var enableFields = listFields.filter(function (x) {
+            var enableFields = listFields.filter((x) => {
                if (
                   Array.isArray(selectedFieldsExcludeCurField) &&
                   selectedFieldsExcludeCurField.indexOf(x) !== -1
@@ -489,7 +496,11 @@ export default class AB_Work_Object_Workspace_PopupSortFields extends ClassUI {
             if (childViews.length - 1 <= index || result != 0) return;
 
             const fieldId = cView.getChildViews()[0].getValue();
-            const dir = cView.getChildViews()[1].getValue();
+            const dirElem = cView.getChildViews()[1];
+            const dir =
+               dirElem?.getValue?.() ??
+               dirElem?.data?.getRange?.()?.map((opt) => opt.id) ?? // Select list field type
+               "";
 
             const field = this.CurrentObject.fieldByID(fieldId);
             if (!field) return;
@@ -499,11 +510,14 @@ export default class AB_Work_Object_Workspace_PopupSortFields extends ClassUI {
             let aValue = a[by],
                bValue = b[by];
 
+            if (field.key == "list") {
+               aValue = dir.indexOf(aValue);
+               bValue = dir.indexOf(bValue);
+            }
+
             if (Array.isArray(aValue)) {
                aValue = (aValue || [])
-                  .map(function (item) {
-                     return item.text || item;
-                  })
+                  .map((item) => item.text || item)
                   .join(" ");
             }
 
@@ -514,7 +528,7 @@ export default class AB_Work_Object_Workspace_PopupSortFields extends ClassUI {
             }
 
             if (aValue != bValue) {
-               if (dir == "asc") {
+               if (dir == "asc" || field.key == "list") {
                   result = aValue > bValue ? 1 : -1;
                } else {
                   result = aValue < bValue ? 1 : -1;
@@ -524,5 +538,46 @@ export default class AB_Work_Object_Workspace_PopupSortFields extends ClassUI {
       }
 
       return result;
+   }
+
+   _valueElement() {
+      return {
+         view: "segmented",
+         width: 200,
+         options: [
+            {
+               id: "",
+               value: L("Please select field"),
+            },
+         ],
+         on: {
+            onChange: (/* newv, oldv */) => {
+               // 'asc' or 'desc' values
+               this.triggerOnChange();
+            },
+         },
+      };
+   }
+
+   _valueListElement(field) {
+      return {
+         view: "list",
+         template: "<div class='webix_drag_handle'></div> #text#",
+         type: {
+            height: 35,
+         },
+         height: 150,
+         select: true,
+         drag: "order",
+         data: field.options(),
+         on: {
+            onChange: () => {
+               this.triggerOnChange();
+            },
+            onAfterDrop: () => {
+               this.triggerOnChange();
+            },
+         },
+      };
    }
 }
