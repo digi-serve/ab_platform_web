@@ -33,7 +33,7 @@ export default class AB_Work_Object_Workspace_PopupSortFields extends ClassUI {
 
       if (!L) {
          L = (...params) => {
-            return this.AB.Multilingual.label(...params);
+            return (this.AB ?? AB).Multilingual.label(...params);
          };
       }
    }
