@@ -19,6 +19,8 @@ export default class AB_Work_Object_Workspace_PopupSortFields extends ClassUI {
          form: `${idBase}_popupSort_form`,
       });
 
+      this.AB = AB;
+
       this.CurrentObject = null;
       // {ABObject}
       // The current ABObject we are working with.
@@ -33,7 +35,7 @@ export default class AB_Work_Object_Workspace_PopupSortFields extends ClassUI {
 
       if (!L) {
          L = (...params) => {
-            return (this.AB ?? AB).Multilingual.label(...params);
+            return this.AB.Multilingual.label(...params);
          };
       }
    }
