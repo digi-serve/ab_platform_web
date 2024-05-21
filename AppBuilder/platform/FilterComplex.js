@@ -100,15 +100,40 @@ function _toExternal(cond, fields = []) {
             values.push(cond.condition.filter);
       }
 
-      cond.value = values
-         .map((v) => {
-            // Convert date format
-            if (field && (field.key == "date" || field.key == "datetime"))
-               return field.exportValue(new Date(v));
+      if (cond.rule === "is_current_date") {
+         let now = new Date();
+         let year = now.getFullYear();
+         let month = now.getMonth();
+         let date = now.getDate();
 
-            return v;
-         })
-         .join(",");
+         let startOfDay = new Date(year, month, date, 0, 0, 0);
+         let endOfDay = new Date(year, month, date, 23, 59, 59);
+
+         // Convert to UTC by subtracting the timezone offset
+         let startOfDayUTC = new Date(
+            startOfDay.getTime() + startOfDay.getTimezoneOffset() * 60000
+         );
+         let endOfDayUTC = new Date(
+            endOfDay.getTime() + endOfDay.getTimezoneOffset() * 60000
+         );
+         let formatDate = (date) => {
+            let isoString = date.toISOString();
+            return `${isoString.slice(0, 10)} ${isoString.slice(11, 19)}`;
+         };
+         cond.value = formatDate(startOfDayUTC).concat(
+            "|",
+            formatDate(endOfDayUTC)
+         );
+      } else {
+         cond.value = values
+            .map((v) => {
+               // Convert date format
+               if (field && (field.key === "date" || field.key === "datetime"))
+                  return field.exportValue(new Date(v));
+               return v;
+            })
+            .join(",");
+      }
 
       delete cond.field;
       delete cond.type;
