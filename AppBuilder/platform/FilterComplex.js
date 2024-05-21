@@ -351,7 +351,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
       let isComplete = true;
       // start optimistically.
 
-      if (cond.glue) {
+      if (cond?.glue) {
          (cond.rules ?? []).forEach((r) => {
             isComplete = isComplete && this.isConditionComplete(r);
          });

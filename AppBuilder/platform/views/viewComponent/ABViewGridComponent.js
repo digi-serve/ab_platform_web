@@ -297,7 +297,21 @@ export default class ABViewGridComponent extends ABViewComponent {
                }
             },
             onBeforeEditStop: function (state, editor) {
-               // console.warn("!! ToDo: onBeforeEditStop()");
+               // Check if data loading is complete
+               const oldValue = state.old;
+               let newValue = state.value;
+               if (!Array.isArray(newValue)) newValue = [newValue];
+               if (
+                  oldValue != null &&
+                  oldValue != "" &&
+                  // If options does not load completely, then Webix returns state.value as ['', '', '']
+                  newValue.filter((val) => val != null && val != "").length <
+                     1 &&
+                  // Check if no data load to the option
+                  editor.getPopup?.().getList?.().data?.find({}).length < 1
+               ) {
+                  return false;
+               }
             },
             onAfterEditStop: (state, editor, ignoreUpdate) => {
                if (this.validationError == false)
@@ -1356,7 +1370,7 @@ export default class ABViewGridComponent extends ABViewComponent {
          }
 
       if (state.value !== state.old) {
-         const item = $DataTable.getItem(editor.row);
+         const item = $DataTable?.getItem(editor.row);
 
          item[editor.column] = state.value;
 
