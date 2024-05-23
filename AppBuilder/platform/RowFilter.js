@@ -254,6 +254,10 @@ module.exports = class RowFilter extends RowFilterCore {
                               value: L("next ... days"),
                               id: "next_days",
                            },
+                           {
+                              value: L("is current date"),
+                              id: "is_current_date",
+                           },
                         ]
                            .concat(instance.queryFieldOptions)
                            .concat(instance.recordRuleOptions),
@@ -868,6 +872,7 @@ module.exports = class RowFilter extends RowFilterCore {
             case "greater_or_equal_current":
             case "is_empty":
             case "is_not_empty":
+            case "is_current_date":
                // clear and disable the value field
                $viewCond.$$(ids.inputValue).showBatch("empty");
                _logic.onChange();
