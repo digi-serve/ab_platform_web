@@ -6,6 +6,7 @@ import { nanoid } from "nanoid";
 import { v4 as uuidv4 } from "uuid";
 import performance from "../utils/performance";
 import FilterComplex from "./platform/FilterComplex";
+import SortPopup from "./platform/views/ABViewGridPopupSortFields";
 
 //
 // Our Common Resources
@@ -111,6 +112,7 @@ class ABFactory extends ABFactoryCore {
       // additional Class definitions
       this.Class.FilterComplex = FilterComplex;
       this.Class.ABViewManager = ABViewManager;
+      this.Class.SortPopup = SortPopup;
 
       // Temp placeholders until Resources are implemented:
       this.Analytics = {
