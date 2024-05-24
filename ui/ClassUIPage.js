@@ -489,7 +489,7 @@ class ClassUIPage extends ClassUI {
                // }
                this.pageComponents[showPageID].onShow();
                if (viewId) {
-                  $$(viewId).show();
+                  $$(viewId)?.show();
                }
             }
          }, 60);
