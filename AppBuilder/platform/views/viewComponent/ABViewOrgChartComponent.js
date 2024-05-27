@@ -7,6 +7,10 @@ module.exports = class ABViewOrgChartComponent extends (
       super(baseView, idBase || `ABViewOrgChart_${baseView.id}`, ids);
    }
 
+   ui() {
+      return super.ui();
+   }
+
    async init(AB, accessLevel) {
       await super.init(AB, accessLevel);
 
