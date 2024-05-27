@@ -197,18 +197,18 @@ module.exports = class ABViewOrgChart extends ABViewOrgChartCore {
    warningsEval() {
       super.warningsEval();
 
-      let labelField = this.labelField();
-      if (!labelField) {
-         this.warningsMessage(
-            `can't resolve label field[${this.settings.columnLabel}]`
-         );
-      }
+      // let labelField = this.labelField();
+      // if (!labelField) {
+      //    this.warningsMessage(
+      //       `can't resolve label field[${this.settings.columnLabel}]`
+      //    );
+      // }
 
-      let valueField = this.valueField();
-      if (!valueField) {
-         this.warningsMessage(
-            `can't resolve value field[${this.settings.columnValue}]`
-         );
-      }
+      // let valueField = this.valueField();
+      // if (!valueField) {
+      //    this.warningsMessage(
+      //       `can't resolve value field[${this.settings.columnValue}]`
+      //    );
+      // }
    }
 };

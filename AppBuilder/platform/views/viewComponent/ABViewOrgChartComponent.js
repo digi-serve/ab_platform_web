@@ -59,7 +59,7 @@ module.exports = class ABViewOrgChartComponent extends (
          });
       }
 
-      baseView.refreshData();
+      // baseView.refreshData();
    }
 
    onShow() {
