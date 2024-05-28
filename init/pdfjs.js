@@ -4,8 +4,6 @@
  * size of the app.
  */
 
-import "pdfjs-dist/build/pdf.worker";
-// import pdfjs from "pdfjs-dist/webpack";
-const pdfjs = require("pdfjs-dist/webpack");
+import * as pdfjs from "pdfjs-dist/webpack.mjs";
 
 export default pdfjs;
