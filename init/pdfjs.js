@@ -4,16 +4,6 @@
  * size of the app.
  */
 
-import "pdfjs-dist/build/pdf.worker.mjs";
-// import pdfjs from "pdfjs-dist/webpack";
-const pdfjs = require("pdfjs-dist/webpack.mjs");
+import * as pdfjs from "pdfjs-dist/webpack.mjs";
 
 export default pdfjs;
-
-// import * as pdfjsLib from "pdfjs-dist";
-// import * as pdfWorker from "pdfjs-dist/build/pdf.worker.mjs";
-
-// // Setting worker path to worker bundle.
-// pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
-
-// export { pdfjsLib };
