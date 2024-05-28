@@ -168,7 +168,8 @@ module.exports = class ABObject extends ABObjectCore {
       var validator = this.AB.Validation.validator();
       this.fields().forEach((f) => {
          // check if value was passed, if so validate it
-         if (data.hasOwnProperty(f.columnName)) f.isValidData(data, validator);
+         if (Object.prototype.hasOwnProperty.call(data, f.columnName))
+            f.isValidData(data, validator);
       });
 
       return validator;
@@ -719,11 +720,13 @@ module.exports = class ABObject extends ABObjectCore {
       // report both OUR warnings, and any warnings from any of our fields
       var allWarnings = super.warningsAll();
       this.fields().forEach((f) => {
-         allWarnings = allWarnings.concat(f.warnings());
+         if (!f) return;
+         allWarnings = allWarnings.concat(f?.warnings());
       });
 
       this.indexes().forEach((i) => {
-         allWarnings = allWarnings.concat(i.warnings());
+         if (!i) return;
+         allWarnings = allWarnings.concat(i?.warnings());
       });
 
       return allWarnings.filter((w) => w);
@@ -747,11 +750,11 @@ module.exports = class ABObject extends ABObjectCore {
       });
 
       allFields.forEach((f) => {
-         f.warningsEval();
+         f?.warningsEval();
       });
 
       this.indexes().forEach((i) => {
-         i.warningsEval();
+         i?.warningsEval();
       });
    }
 
@@ -771,6 +774,21 @@ module.exports = class ABObject extends ABObjectCore {
    async getDbInfo() {
       return this.AB.Network.get({
          url: `/definition/info/object/${this.id}`,
+      });
+   }
+
+   /**
+    * @method formCleanValues()
+    * perform a final review of the data a form will try to submit for
+    * this object.  The lets individual fields have a chance to update or
+    * remove values before they are sent.
+    * @param {obj} rowData
+    *        The {data} a form has collected and is about to save.
+    * @return {undefined}
+    */
+   formCleanValues(rowData) {
+      this.fields().forEach((f) => {
+         f.formCleanData(rowData);
       });
    }
 };

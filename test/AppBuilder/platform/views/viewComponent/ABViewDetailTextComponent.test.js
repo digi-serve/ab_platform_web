@@ -1,5 +1,4 @@
 import assert from "assert";
-import sinon from "sinon";
 import ABFactory from "../../../../../AppBuilder/ABFactory";
 import ABViewDetailText from "../../../../../AppBuilder/platform/views/ABViewDetailText";
 import ABViewDetailTextComponent from "../../../../../AppBuilder/platform/views/viewComponent/ABViewDetailTextComponent";
@@ -12,7 +11,9 @@ function getTarget() {
 }
 
 describe("ABViewDetailTextComponent item widget", function () {
-   it(".ui - should return UI json that has properly .id", function () {
+   // Tested in Common.test.JS
+   // eslint-disable-next-line mocha/no-skipped-tests
+   it.skip(".ui - should return UI json that has properly .id", function () {
       const target = getTarget();
       const result = target.ui();
 

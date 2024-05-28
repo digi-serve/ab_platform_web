@@ -15,6 +15,7 @@ module.exports = class ABViewDetailComponent extends ABViewContainerComponent {
       // details functions to work when clicked
       return {
          type: "form",
+         id: this.ids.component,
          borderless: true,
          rows: [
             {
@@ -43,10 +44,12 @@ module.exports = class ABViewDetailComponent extends ABViewContainerComponent {
 
          if (currData) this.displayData(currData);
 
-         this.eventAdd({
-            emitter: dv,
-            eventName: "changeCursor",
-            listener: (...p) => this.displayData(...p),
+         ["changeCursor", "cursorStale", "collectionEmpty"].forEach((key) => {
+            this.eventAdd({
+               emitter: dv,
+               eventName: key,
+               listener: (...p) => this.displayData(...p),
+            });
          });
 
          this.eventAdd({

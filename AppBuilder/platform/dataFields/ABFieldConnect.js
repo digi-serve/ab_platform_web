@@ -366,11 +366,11 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                // new, updated or deleted records that should or should not appear
                return false;
                // Get Local Storage unless xxx->one connected field
-               if (this?.settings?.linkViaType != "one") {
-                  // We store the .findAll() results locally and return that for a
-                  // quick response:
-                  return await this.AB.Storage.get(storageID);
-               }
+               // if (this?.settings?.linkViaType != "one") {
+               //    // We store the .findAll() results locally and return that for a
+               //    // quick response:
+               //    return await this.AB.Storage.get(storageID);
+               // }
             })
             .then(async (storedOptions) => {
                if (storedOptions) {
@@ -781,19 +781,28 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
    }
 
    getValue(item) {
+      let val = item.getValue();
       var multiselect = this.settings.linkType == "many";
       if (multiselect) {
          let vals = [];
-         if (item.getValue()) {
-            let val = item.getValue().split(",");
+         if (val) {
+            val = val.split(",");
             val.forEach((record) => {
-               vals.push(item.getList().getItem(record));
+               // make sure we are returning the .uuid values and
+               // not full {Record} values.
+               vals.push(
+                  this.getRelationValue(item.getList().getItem(record), {
+                     forUpdate: true,
+                  })
+               );
             });
          }
+
          return vals;
       } else {
-         if (item.getValue()) {
-            return item.getList().getItem(item.getValue());
+         if (val) {
+            // return just the .uuid and not the full {Record}
+            return this.getRelationValue(item.getList().getItem(val));
          } else {
             return "";
          }
@@ -818,11 +827,26 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          $list.refresh();
       }
 
-      item.setValue(
-         Array.isArray(val)
-            ? val.map((e) => e.id ?? e.uuid ?? e).join(",")
-            : val.id ?? val.uuid ?? val
-      );
+      // try to prevent form flicker:
+      // Only reset the value if the value changes:
+      let currVal = item.getValue();
+      let newVal = Array.isArray(val)
+         ? val
+              .map(
+                 (e) =>
+                    this.getRelationValue(e, { forUpdate: true }) ??
+                    e.id ??
+                    e.uuid ??
+                    e
+              )
+              .join(",")
+         : this.getRelationValue(val, { forUpdate: true }) ??
+           val.id ??
+           val.uuid ??
+           val;
+      if (currVal != newVal) {
+         item.setValue(newVal);
+      }
    }
 
    /**

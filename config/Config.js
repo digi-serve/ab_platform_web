@@ -175,6 +175,19 @@ class Config {
       return null;
    }
 
+   /**
+    * @typedef SiteConfig
+    * @property {Object} appbuilder
+    * @property {number} appbuilder.networkNumRetries
+    * @property {"socket"|"rest"|"relay"} appbuilder.networkType
+    * @property {string} appbuilder.urlCoreServer
+    * @property {boolean} [relay] whether relay is enabled on the server
+    * @property {Object} [storage]
+    * @property {boolean} storage.encrypted
+    * @property {Array<{uuid: string, key: string}>} [tenants]
+    * @property {string} [privacyPolicy]
+    */
+   /** @returns {SiteConfig} */
    siteConfig() {
       if (this._config && this._config.site) {
          return this._config.site;
@@ -208,7 +221,7 @@ class Config {
 
    /**
     * Information about the current user
-    * @returns {User}
+    * @returns {User|null}
     */
    userConfig() {
       return this._configUser?.user ?? null;

@@ -21,12 +21,12 @@ module.exports = class ABCustomNumberText {
       var labels = {
          common: App.labels,
 
-         component: {}
+         component: {},
       };
 
       // internal list of Webix IDs to reference our UI components.
       var ids = {
-         component: App.unique(this.key)
+         component: App.unique(this.key),
       };
 
       // Our webix UI definition:
@@ -34,16 +34,16 @@ module.exports = class ABCustomNumberText {
          name: this.key,
 
          defaults: {
-            css: "webix_el_text"
+            css: "webix_el_text",
          },
 
          // override this function to return number value type
-         $getValue: function() {
+         $getValue: function () {
             var val = this.getInputNode().value;
             if (val) return JSON.parse(val);
             // Convert to number
             else return "";
-         }
+         },
       };
       this.view = this.key;
 

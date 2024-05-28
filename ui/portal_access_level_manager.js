@@ -42,8 +42,7 @@ class PortalAccessLevelManager extends ClassUI {
                         view: "label",
                         align: "center",
                         height: 200,
-                        label:
-                           "<div style='display: block; font-size: 180px; background-color: #666; color: transparent; text-shadow: 0px 1px 1px rgba(255,255,255,0.5); -webkit-background-clip: text; -moz-background-clip: text; background-clip: text;' class='fa fa-unlock-alt'></div>",
+                        label: "<div style='display: block; font-size: 180px; background-color: #666; color: transparent; text-shadow: 0px 1px 1px rgba(255,255,255,0.5); -webkit-background-clip: text; -moz-background-clip: text; background-clip: text;' class='fa fa-unlock-alt'></div>",
                      },
                      {
                         view: "label",
@@ -144,9 +143,8 @@ class PortalAccessLevelManager extends ClassUI {
                               id: "role_popup_options_add",
                               css: "webix_primary",
                               click: () => {
-                                 const role = $$(
-                                    "role_popup_options"
-                                 ).getValue();
+                                 const role =
+                                    $$("role_popup_options").getValue();
                                  if ($$(`amp_accordionitem_${role}`)) {
                                     $$(`amp_accordionitem_${role}`).show();
                                     $$("amp_accordion").config.roles.push(role);
@@ -340,9 +338,8 @@ class PortalAccessLevelManager extends ClassUI {
                            });
 
                            $$(`amp_accordionitem_${role}`).hide();
-                           const itemToRemove = $$(
-                              "amp_accordion"
-                           ).config.roles.indexOf(role);
+                           const itemToRemove =
+                              $$("amp_accordion").config.roles.indexOf(role);
                            if (itemToRemove > -1) {
                               $$("amp_accordion").config.roles.splice(
                                  itemToRemove,

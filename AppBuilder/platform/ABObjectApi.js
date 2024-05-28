@@ -46,7 +46,7 @@ module.exports = class ABObjectApi extends ABObjectApiCore {
 
          pendingModelCreate.push(model.create(data));
 
-         if (pendingModelCreate % insertDataMax === 0)
+         if (pendingModelCreate.length % insertDataMax === 0)
             await Promise.all(pendingModelCreate);
       }
 

@@ -23,6 +23,32 @@ module.exports = class ABViewFormButton extends ABViewFormItemComponent {
          _ui.cols.push({});
       }
 
+      // delete button
+      if (settings.includeDelete) {
+         _ui.cols.push(
+            {
+               view: "button",
+               autowidth: true,
+               value: settings.deleteLabel || this.label("Delete"),
+               css: "webix_danger",
+               click: function () {
+                  self.onDelete(this);
+               },
+               on: {
+                  onAfterRender: function () {
+                     this.getInputNode().setAttribute(
+                        "data-cy",
+                        `button delete ${form.id}`
+                     );
+                  },
+               },
+            },
+            {
+               width: 10,
+            }
+         );
+      }
+
       // cancel button
       if (settings.includeCancel) {
          _ui.cols.push(
@@ -121,7 +147,7 @@ module.exports = class ABViewFormButton extends ABViewFormItemComponent {
       else {
          const noPopupFilter = (p) => p.settings && p.settings.type != "popup";
 
-         const pageCurr = this.pageParent();
+         const pageCurr = this.view.pageParent();
          if (pageCurr) {
             const pageParent = pageCurr.pageParent(noPopupFilter) ?? pageCurr;
 
@@ -181,5 +207,30 @@ module.exports = class ABViewFormButton extends ABViewFormItemComponent {
                });
             }
          });
+   }
+
+   onDelete(deleteButton) {
+      this.AB.Webix.confirm({
+         title: this.label("Delete data"),
+         text: this.label("Do you want to delete this data?"),
+         callback: async (confirm) => {
+            if (!confirm) return;
+
+            deleteButton.disable?.();
+
+            try {
+               // get form component
+               const form = this.view.parentFormComponent();
+               const $formView = deleteButton.getFormView();
+
+               // delete a record row
+               await form.deleteData($formView);
+            } catch (err) {
+               console.error(err);
+            } finally {
+               deleteButton.enable?.();
+            }
+         },
+      });
    }
 };

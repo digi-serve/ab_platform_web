@@ -40,30 +40,88 @@ const field = {
    getFormat: sinon.fake(),
 };
 
-const baseView = {
-   id: "base",
-   AB: new AB(),
-   settings: {},
-   detailComponent: sinon.fake.returns({
-      settings: {},
-   }),
-   field: sinon.fake.returns(field),
-   getCurrentUserId: sinon.fake(),
-   getUserData: sinon.fake(),
-   parentFormComponent: sinon.fake(),
-   superComponent: sinon.fake.returns({ ui: sinon.fake.returns({}) }),
-   views: sinon.fake.returns([]),
-   viewsSortByPosition: sinon.fake.returns([]),
-};
+class BaseView {
+   constructor(settings = {}) {
+      this.id = "base";
+      this.AB = new AB();
+      this.settings = settings;
+      (this.detailComponent = sinon.fake.returns({
+         settings: {},
+      })),
+         (this.field = sinon.fake.returns(field));
+      this.getCurrentUserId = sinon.fake();
+      this.getUserData = sinon.fake();
+      this.linkPageHelper = { component: () => {} };
+      this.filterHelper = {
+         on: () => {},
+         externalSearchText: () => {},
+         removeAllListeners: () => {},
+         ui: () => {},
+      };
+      this.parentFormComponent = sinon.fake();
+      this.superComponent = sinon.fake.returns({ ui: sinon.fake.returns({}) });
+      this.views = sinon.fake.returns([]);
+      this.viewsSortByPosition = sinon.fake.returns([]);
+   }
+
+   static defaultValues() {
+      return {};
+   }
+}
 
 // TEST
-describe("ABViewCoponent* - Common tests", () => {
-   describe(".ui() returns ui with correct id", () => {
+describe("ABViewCoponent* - Common tests", function () {
+   describe(".ui() returns ui with correct id", function () {
       // Run a test for each viewComponent
       for (const key in viewComponents) {
-         it(key, async () => {
+         it(key, async function () {
             const { default: Component } = await viewComponents[key];
-            const component = new Component(baseView);
+            let baseview;
+            switch (key) {
+               case "ABViewConditionalContainerComponent":
+                  baseview = new BaseView();
+                  baseview.views = () => [
+                     {
+                        name: "If",
+                        component: () => {
+                           return { ui: () => {} };
+                        },
+                     },
+                     {
+                        name: "Else",
+                        component: () => {
+                           return { ui: () => {} };
+                        },
+                     },
+                  ];
+                  break;
+               case "ABViewGridComponent":
+                  baseview = new BaseView({
+                     gridFilter: {},
+                     summaryColumns: [],
+                     countColumns: [],
+                  });
+                  break;
+               case "ABViewFormReadonlyComponent":
+               case "ABViewFormTreeComponent":
+                  baseview = new BaseView();
+                  baseview.parentFormComponent = () => {
+                     return {};
+                  };
+                  break;
+               case "ABViewSchedulerComponent":
+                  baseview = new BaseView({
+                     dataviewFields: {},
+                     calendarDataviewFields: {},
+                     timeline: {},
+                     export: {},
+                  });
+                  break;
+               default:
+                  baseview = new BaseView();
+                  break;
+            }
+            const component = new Component(baseview);
             const ui = component.ui();
             assert.property(
                ui,

@@ -12,16 +12,15 @@ const EventEmitter = events.EventEmitter;
 import Config from "../config/Config.js";
 
 import initConfig from "../init/initConfig.js";
-import initConnectListerner from "../init/initConnectListerner.js";
+import "../init/initConnectListerner.js";
 import initDiv from "../init/initDiv.js";
-import initDefinitions from "../init/initDefinitions.js";
 import initUser from "../init/initUser.js";
 // import initResources from "../init/initResources.js";
 
 // import JSZipUtils from "jszip-utils/dist/jszip-utils.min.js";
 
-import Selectivity from "../js/selectivity/selectivity.min.js";
-import selectivityCSS from "../js/selectivity/selectivity.min.css";
+// import Selectivity from "../js/selectivity/selectivity.min.js";
+// import selectivityCSS from "../js/selectivity/selectivity.min.css";
 
 import UI from "../ui/ui.js";
 import ErrorNoDefsUI from "../ui/error_noDefs.js";
@@ -29,7 +28,7 @@ import ErrorNoDefsUI from "../ui/error_noDefs.js";
 import performance from "../utils/performance.js";
 
 class Bootstrap extends EventEmitter {
-   constructor(definitions) {
+   constructor() {
       super();
       this.setMaxListeners(0);
 
@@ -59,13 +58,10 @@ class Bootstrap extends EventEmitter {
       });
    }
 
-   async init(ab) {
-      // We rerun init after a sucessful login, at that point we already have AB.
-      // This means we can use `AB.Network` over the fetch API when loading
-      // config again. This prevents the session from being reset, which was
-      // happening inconsitently.
-      if (ab) this.AB = ab;
-
+   /**
+    * @param {Promise} webixLoading - so we know when webix is finished loading
+    */
+   async init(webixLoading) {
       const loadABFactory = import(
          /* webpackChunkName: "AB" */
          /* webpackPrefetch: true */
@@ -134,6 +130,19 @@ class Bootstrap extends EventEmitter {
          performance.setContext("user", {
             id: userInfo.id,
          });
+      } else {
+         let { options: tenantConfig } = Config.tenantConfig();
+         tenantConfig =
+            typeof tenantConfig === "string"
+               ? JSON.parse(tenantConfig)
+               : tenantConfig;
+         // If no user and tenant isn't using local auth start
+         // the external auth workflow:
+         if (tenantConfig.authType !== "login") {
+            window.location.assign("/auth/login");
+            return;
+         }
+         // Keep going if the tenant is using local auth
       }
       // 2.5) Load any plugins
       performance.mark("loadPlugins", { op: "function" });
@@ -143,50 +152,6 @@ class Bootstrap extends EventEmitter {
          this.addPlugin(p);
       });
       performance.measure("loadPlugins");
-
-      // Make sure the BootStrap Object is available globally
-      // window.__ABBS = this;
-      /*
-      // Listen 'disconnect' event
-      initConnectListerner.init(this);
-
-      const allPluginsLoaded = [];
-      const tenantInfo = Config.tenantConfig();
-
-      if (tenantInfo) {
-         performance.setContext("tenant", tenantInfo);
-         performance.setContext("tags", { tenant: tenantInfo.id });
-         const plugins = Config.plugins() || [];
-
-         // Short Term Fix: Don't load ABDesigner for non builders (need a way
-         // to assign plugins to users/roles);
-         const designerIndex = plugins.indexOf("ABDesigner.js");
-         if (designerIndex > -1) {
-            const builderRoles = [
-               "6cc04894-a61b-4fb5-b3e5-b8c3f78bd331",
-               "e1be4d22-1d00-4c34-b205-ef84b8334b19",
-            ];
-            const userBuilderRoles = userInfo?.roles.filter(
-               (role) => builderRoles.indexOf(role.uuid) > -1
-            ).length;
-            // Remove if no builder roles
-            if (userBuilderRoles < 1 || userInfo == null) {
-               plugins.splice(designerIndex, 1);
-            }
-         }
-         plugins.forEach((p) => {
-            preloadMessage(`plugin (${p})`);
-            performance.mark(`plugin:${p}`, { op: "resource.script" });
-            const loading = loadScript(tenantInfo.id, p).then(() =>
-               performance.measure(`plugin:${p}`)
-            );
-            allPluginsLoaded.push(loading);
-         });
-      }
-      const pluginsLoading = Promise.all(allPluginsLoaded).then(() =>
-         performance.measure("loadPlugins")
-      );
-*/
 
       // 3) Now we have enough info, to create an instance of our
       //    {ABFactory} that drives the rest of the AppBuilder objects
@@ -208,20 +173,21 @@ class Bootstrap extends EventEmitter {
 
       if (!window.AB) window.AB = this.AB;
       // Make our Factory Global.
-      // Transition: we still have some UI code that depends on accessing
-      // our Factory as a Global var.  So until those are rewritten we will
-      // make our factory Global.
+      // NOTE: our tests are expecting to access our ABFactory this way.
+
       this.AB.Network.registerNetworkTestWorker(
          networkTestWorker,
          networkIsSlow
       );
       await this.AB.init();
+      await webixLoading;
       // NOTE: special case: User has no Roles defined.
       // direct them to our special ErrorNoDefsUI
       if (userInfo && userInfo.roles.length == 0) {
          performance.measure("createABFactory");
          ErrorNoDefsUI.init(this.AB);
          ErrorNoDefsUI.attach();
+         ErrorNoDefsUI.show();
          if (Config.userReal()) {
             ErrorNoDefsUI.switcherooUser(Config.userConfig());
          }
@@ -319,26 +285,3 @@ class Bootstrap extends EventEmitter {
 }
 
 export default new Bootstrap();
-
-function loadScript(tenant, p) {
-   return new Promise((resolve, reject) => {
-      const cb = () => resolve();
-
-      // Adding the script tag to the head as suggested before
-      const head = document.head;
-      const script = document.createElement("script");
-      script.type = "text/javascript";
-      script.src = `/plugin/${tenant || "??"}/${p}`;
-
-      // Then bind the event to the callback function.
-      // There are several events for cross browser compatibility.
-      script.onreadystatechange = cb;
-      script.onload = cb;
-      script.onerror = () => {
-         reject(new Error(`Error loading plugin ${p}`));
-      };
-
-      // Fire the loading
-      head.appendChild(script);
-   });
-}

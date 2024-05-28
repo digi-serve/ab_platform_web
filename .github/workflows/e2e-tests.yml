@@ -64,7 +64,7 @@ jobs:
 
          #Run test
          - name: Wait for AB
-           uses: ifaxity/wait-on-action@v1
+           uses: ifaxity/wait-on-action@v1.1.0
            with:
               resource: http://localhost:8080
               timeout: 300000

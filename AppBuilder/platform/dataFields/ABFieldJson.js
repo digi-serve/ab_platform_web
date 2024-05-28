@@ -68,6 +68,25 @@ module.exports = class ABFieldJson extends ABFieldJsonCore {
 
    setValue(item, rowData) {
       super.setValue(item, rowData, "");
-      item.config.value = rowData[this.columnName];
+      if (item) {
+         item.config.value = rowData[this.columnName];
+      }
+   }
+
+   /**
+    * @method formCleanData()
+    * Review the data a form is about to submit and change/remove it as
+    * appropriate.
+    * @param {obj} rowData
+    *        The {data} a form has collected and is about to save.
+    * @return {undefined}
+    */
+   formCleanData(rowData) {
+      let val = rowData[this.columnName];
+      if (val === "") {
+         // "" isn't a valid json value, so just remove the data and
+         // let the DB handle the default value.
+         delete rowData[this.columnName];
+      }
    }
 };

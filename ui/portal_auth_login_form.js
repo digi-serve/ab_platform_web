@@ -1,5 +1,4 @@
 import ClassUI from "./ClassUI.js";
-import Bootstrap from "../init/Bootstrap.js";
 
 class PortalAuthLoginForm extends ClassUI {
    constructor() {
@@ -190,6 +189,22 @@ class PortalAuthLoginForm extends ClassUI {
                               },
                            ],
                         },
+                        {},
+                        {
+                           cols: [
+                              { width: 20 },
+                              {
+                                 id: "auth_privacy_policy",
+                                 view: "template",
+                                 template:
+                                    '#pretext# <a href="#link#" target="_blank" class="policyAuth">#label#</a>',
+                                 css: "policyLink noBackground",
+                                 height: 30,
+                                 hidden: true,
+                              },
+                              { width: 20 },
+                           ],
+                        },
                      ],
                   },
                   {},
@@ -212,6 +227,7 @@ class PortalAuthLoginForm extends ClassUI {
       }
    }
 
+   /** @param {import('../AppBuilder/ABFactory.js').default} AB */
    init(AB) {
       this.AB = AB;
 
@@ -269,6 +285,16 @@ class PortalAuthLoginForm extends ClassUI {
             }
          }
       });
+      const { privacyPolicy } = this.AB.Config.siteConfig();
+      if (privacyPolicy) {
+         const L = this.AB.Label();
+         $$("auth_privacy_policy").setValues({
+            label: L("Privacy Policy"),
+            pretext: L("By signing in you agree to our"),
+            link: privacyPolicy,
+         });
+         $$("auth_privacy_policy").show();
+      }
 
       return Promise.resolve();
    }

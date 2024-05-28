@@ -23,17 +23,17 @@ module.exports = class ABCustomDateTimePicker {
       var labels = {
          common: App.labels,
 
-         component: {}
+         component: {},
       };
 
       // internal list of Webix IDs to reference our UI components.
       var ids = {
-         component: App.unique(this.key)
+         component: App.unique(this.key),
       };
 
       // Our webix UI definition:
       var _ui = {
-         name: App.unique("custom_datetimepicker") // keep this unique for this App instance.
+         name: App.unique("custom_datetimepicker"), // keep this unique for this App instance.
       };
       this.view = this.key;
 
@@ -51,13 +51,13 @@ module.exports = class ABCustomDateTimePicker {
             view: "calendar",
             icons: true,
             borderless: true,
-            timepicker: true
-         }
+            timepicker: true,
+         },
       };
 
       webix.editors.datetime = webix.extend(
          {
-            popupType: "datetime"
+            popupType: "datetime",
          },
          webix.editors.date
       );

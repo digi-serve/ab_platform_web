@@ -131,7 +131,7 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
    }
 
    async onShow() {
-      super.onShow;
+      super.onShow();
 
       const tasks = [];
 

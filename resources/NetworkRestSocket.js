@@ -25,6 +25,43 @@ const listSocketEvents = [
 // The io.socket.* events we are listening for that relate to our datacollection
 // maintainence.
 
+function socketDataSave(key, length) {
+   if (!HashSocketJobs[key]) {
+      HashSocketJobs[key] = {
+         packets: 0,
+         length: 0,
+      };
+   }
+
+   HashSocketJobs[key].packets++;
+   HashSocketJobs[key].length += length;
+}
+function socketDataLog(AB, key, data) {
+   let length = "??";
+   try {
+      length = JSON.stringify(data).length;
+   } catch (e) {
+      console.log(e);
+      //
+   }
+
+   if (data.objectId) {
+      let obj = AB.objectByID(data.objectId);
+      console.warn(`socket: ${key} ${obj.label ?? obj.name}(${length})`, data);
+   } else {
+      console.warn(`socket: ${key} (${length})`, data);
+   }
+
+   if (data.jobID) {
+      socketDataSave(data.jobID, length);
+      socketDataSave(`${data.jobID}-${key}`, length);
+   }
+}
+
+let HashSocketJobs = {
+   /* jobID : { #packets, length } */
+};
+
 class NetworkRestSocket extends NetworkRest {
    constructor(parent) {
       // {Network} parent
@@ -38,6 +75,8 @@ class NetworkRestSocket extends NetworkRest {
       // Pass the io.socket.on(*) events to our AB factory.
       listSocketEvents.forEach((ev) => {
          io.socket.on(ev, (data) => {
+            socketDataLog(this.AB, ev, data);
+
             // check if the ev contains 'datacollection'
             // and do a single normalizeData() on the incoming data here
             // before sending it off to be processed.
@@ -67,6 +106,14 @@ class NetworkRestSocket extends NetworkRest {
    //
    // Interface API
    //
+
+   socketLog() {
+      console.warn(JSON.stringify(HashSocketJobs, null, 4));
+   }
+
+   socketLogClear() {
+      HashSocketJobs = {};
+   }
 
    ////
    //// Network Utilities

@@ -61,7 +61,7 @@ module.exports = class ABMobilePage extends ABMobilePageCore {
             pg.removeAllListeners("definition.updated");
          });
       } catch (e) {
-         debugger;
+         // debugger;
          console.error(e);
       }
 

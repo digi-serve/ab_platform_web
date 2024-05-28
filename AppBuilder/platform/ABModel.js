@@ -115,9 +115,9 @@ module.exports = class ABModel extends ABModelCore {
 
          context.resolve?.(data);
 
-         if (key) {
-            no_socket_trigger(this, key, data);
-         }
+         // if (key) {
+         //    no_socket_trigger(this, key, data);
+         // }
       };
    }
 
@@ -234,10 +234,15 @@ module.exports = class ABModel extends ABModelCore {
                key: jobID,
                context: { resolve, reject },
             }
-         ).catch((err) => {
-            errorPopup(err);
-            reject(err);
-         });
+         )
+            .then((newVal) => {})
+            .catch((err) => {
+               errorPopup(err);
+               reject(err);
+            });
+      }).then((newVal) => {
+         no_socket_trigger(this, "ab.datacollection.create", newVal);
+         return newVal;
       });
    }
 
@@ -257,12 +262,17 @@ module.exports = class ABModel extends ABModelCore {
             },
             {
                key: jobID,
+               id,
                context: { resolve, reject },
             }
          ).catch((err) => {
             errorPopup(err);
             reject(err);
          });
+      }).then((res) => {
+         // properly issue the delete
+         no_socket_trigger(this, "ab.datacollection.delete", id);
+         return res;
       });
    }
 
@@ -534,6 +544,10 @@ module.exports = class ABModel extends ABModelCore {
                errorPopup(err);
                reject(err);
             });
+      }).then((newVal) => {
+         // properly issue the update
+         no_socket_trigger(this, "ab.datacollection.update", newVal);
+         return newVal;
       });
    }
 

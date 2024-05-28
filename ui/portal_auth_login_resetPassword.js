@@ -112,20 +112,19 @@ class PortalAuthLoginResetPassword extends ClassUI {
                                                       "portal_auth_login_reset_password_form"
                                                    ).validate()
                                                 ) {
-                                                   let password = $$(
-                                                      "password-new"
-                                                   ).getValue();
+                                                   let password =
+                                                      $$(
+                                                         "password-new"
+                                                      ).getValue();
                                                    this.AB.Network.post(
                                                       {
-                                                         url:
-                                                            "/auth/password/reset",
+                                                         url: "/auth/password/reset",
                                                          data: {
                                                             password,
                                                          },
                                                       },
                                                       {
-                                                         key:
-                                                            "portal_auth_password_reset",
+                                                         key: "portal_auth_password_reset",
                                                          context: {},
                                                       }
                                                    ).catch((err) => {

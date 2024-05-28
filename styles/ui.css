@@ -11,6 +11,18 @@
    background-repeat: no-repeat;
    background-position: center;
 }
+.policyLink {
+   background-color: rgb(68, 68, 68);
+   border-width: 0px !important;
+   margin-top: 0px !important;
+}
+a.policyMenu {
+   color: #BBB;
+   text-decoration: none;
+}
+a.policyAuth {
+   color: #475466;
+}
 .mainSidebar.webix_sidebar.webix_dark .webix_sidebar_icon {
    margin-right: 15px;
    color: rgba(255, 255, 255, 0.4);
@@ -86,7 +98,6 @@ label {
 .webix_multicombo_tag,
 .webix_multicombo_value {
    box-shadow: inset 0px 1px 1px rgba(0, 0, 0, 0.3);
-   padding: 0 9pt;
    border-bottom: 1px solid #fff;
    margin: 3px 3px 1px;
    max-height: 27px;
@@ -119,15 +130,8 @@ label {
 .webix_multicombo_delete:hover {
    transform: scale(1.1);
 }
-.webix_multicombo_delete {
-   margin-right: -7pt;
-}
 .webix_multicombo_delete.clear-combo-value {
-   margin-right: -5px;
-   position: relative;
-   right: 9px;
    transition: all 0.2s ease-in-out;
-   top: 13px;
 }
 .webix_multicombo_value {
    display: flex;
@@ -415,7 +419,7 @@ input[type="text"].selectivity-multiple-input {
 .bg_gray {
    background-color: #ebedf0;
 }
-.webix_dark .webix_sidebar {
+.noBackground, .webix_dark .webix_sidebar {
    background-color: transparent;
 }
 .webix_dark .webix_view {

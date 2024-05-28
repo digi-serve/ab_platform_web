@@ -6,6 +6,7 @@ import { nanoid } from "nanoid";
 import { v4 as uuidv4 } from "uuid";
 import performance from "../utils/performance";
 import FilterComplex from "./platform/FilterComplex";
+import SortPopup from "./platform/views/ABViewGridPopupSortFields";
 
 //
 // Our Common Resources
@@ -111,6 +112,7 @@ class ABFactory extends ABFactoryCore {
       // additional Class definitions
       this.Class.FilterComplex = FilterComplex;
       this.Class.ABViewManager = ABViewManager;
+      this.Class.SortPopup = SortPopup;
 
       // Temp placeholders until Resources are implemented:
       this.Analytics = {
@@ -854,7 +856,7 @@ class ABFactory extends ABFactoryCore {
          console.error(message);
       }
 
-      if (rest && rest.length > 0) {
+      if (rest.length > 0) {
          rest.forEach((r) => {
             if (r instanceof Error) {
                emitData.error = r;
@@ -899,6 +901,10 @@ class ABFactory extends ABFactoryCore {
       rest.forEach((r) => {
          console.log(r);
       });
+   }
+
+   isNil(value) {
+      return _.isNil(value);
    }
 
    /**

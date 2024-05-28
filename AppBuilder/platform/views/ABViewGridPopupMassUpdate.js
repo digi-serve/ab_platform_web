@@ -168,7 +168,10 @@ export default class ABViewGridPopupMassUpdate extends ClassUI {
       $datatable.data.each(function (row) {
          if (
             row &&
-            row.hasOwnProperty("appbuilder_select_item") &&
+            Object.prototype.hasOwnProperty.call(
+               row,
+               "appbuilder_select_item"
+            ) &&
             row.appbuilder_select_item == 1
          ) {
             updatedRowIds.push(row.id);
@@ -199,6 +202,11 @@ export default class ABViewGridPopupMassUpdate extends ClassUI {
                         values: vals,
                      })
                      .then(() => {
+                        // Update webix.datatable
+                        (updatedRowIds ?? []).forEach((rowId) => {
+                           $datatable.updateItem(rowId, vals);
+                        });
+
                         // Anything we need to do after we are done.
                         update_button.enable();
                         this.hide();

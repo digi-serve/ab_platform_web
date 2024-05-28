@@ -511,7 +511,7 @@ module.exports = class ABViewRuleActionFormRecordRuleUpdateConnected extends (
 
          // FIX: make sure qbCond root element has a 'glue'
          if (qbCond) {
-            qbCond.glue = qbCond.glue || "and";
+            qbCond.glue = qbCond?.glue || "and";
          }
       }
       settings.qbCondition = qbCond;

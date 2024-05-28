@@ -100,15 +100,6 @@ module.exports = class ABWorkObjectKanBan extends ABViewComponent {
       this.AB = AB;
    }
 
-   /**
-    * @method CurrentObject()
-    * A helper to return the current ABObject we are working with.
-    * @return {ABObject}
-    */
-   get CurrentObject() {
-      return this.AB.objectByID(this.CurrentObjectID);
-   }
-
    objectLoad(object) {
       this.CurrentObjectID = object.id;
    }

@@ -569,8 +569,8 @@ module.exports = class ABViewTabComponent extends ABViewComponent {
             vc.component.onShow();
 
          if (settings.stackTabs && vc?.view?.id === viewId) {
-            $$(viewId).show(false, false);
-            $sidebar.select(`${viewId}_menu`);
+            $$(viewId)?.show(false, false);
+            $sidebar?.select(`${viewId}_menu`);
          }
       });
    }

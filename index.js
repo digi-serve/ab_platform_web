@@ -19,7 +19,7 @@ import Bootstrap from "./init/Bootstrap.js";
 // Bootstrap is responsible for initializing the platform.
 
 // Import webix dynamically so we load it before we load other files that need it
-import(
+const webixLoading = import(
    /* webpackChunkName: "webix" */
    /* webpackPreload: true */
    "./js/webix/webix.min.js"
@@ -32,12 +32,12 @@ import(
       /* webpackPreload: true */
       "./js/webix/webixResources"
    );
+});
 
-   // __AB_preload should be created by our /config/preload script that gets
-   // loaded on the initial page load.
-   await window.__AB_preload;
-
-   Bootstrap.init().catch((err) => {
+// __AB_preload should be created by our /config/preload script that gets
+// loaded on the initial page load.
+window.__AB_preload.then(() => {
+   Bootstrap.init(webixLoading).catch((err) => {
       // This is a known error that has already been handled.
       if (err.code == "ENODEFS") return;
 

@@ -86,7 +86,6 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
       const item_width = this.getItemWidth(base_element);
       $dataview.customize({ width: item_width });
       $dataview.getTopParentView?.().resize?.();
-
    }
 
    initDetailComponent() {
@@ -185,8 +184,7 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
       if (!parentWidth)
          parentWidth = $dataview?.getParentView?.().$width || window.innerWidth;
 
-      if (parentWidth > window.innerWidth)
-         parentWidth = window.innerWidth;
+      if (parentWidth > window.innerWidth) parentWidth = window.innerWidth;
 
       // check if the browser window minus webix default padding is the same as the parent window
       // if so we need to check to see if there is a sidebar and reduce the usable space by the
