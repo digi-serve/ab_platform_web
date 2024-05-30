@@ -1,7 +1,7 @@
 /*Thai (Thailand) locale
  * modified to use Budhist Era Years
  */
-
+ 
 webix.i18n.locales["th-TH"] = {
    groupDelimiter: ",",
    groupSize: 3,
@@ -27,7 +27,8 @@ webix.i18n.locales["th-TH"] = {
       else if (typeof date == "string") return date;
 
       const format = webix.Date.dateToStr(
-         `%j %F ${date.getFullYear() + 543} %G:%i`
+         // `%j %F ${date.getFullYear() + 543} %G:%i`
+         `%d/%m/${date.getFullYear() + 543} %G:%i`
       );
       return format(date);
    },
