@@ -182,17 +182,16 @@ export default class ABViewComponent extends ClassUI {
 
       if (!dc) return;
 
-      // ABViewDocXBuilderComponents can send back [dc,...]
-      if (!Array.isArray(dc)) {
+      if (Array.isArray(dc)) {
+         dc.forEach((item) => {
+            if (item.dataStatus === item.dataStatusFlag.notInitial)
+               // load data when a widget is showing
+               item.loadData();
+         });
+      } else {
          if (dc.dataStatus === dc.dataStatusFlag.notInitial)
             // load data when a widget is showing
             dc.loadData();
-      } else {
-         dc.forEach((d) => {
-            if (d.dataStatus === d.dataStatusFlag.notInitial)
-               // load data when a widget is showing
-               d.loadData();
-         });
       }
    }
 }
