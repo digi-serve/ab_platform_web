@@ -64,4 +64,10 @@ module.exports = merge(common, {
          new CssMinimizerPlugin(),
       ],
    },
+   resolve: {
+      fallback: {
+         path: false,
+         fs: false,
+      },
+   },
 });

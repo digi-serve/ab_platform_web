@@ -2,6 +2,7 @@ const Docxtemplater = require("../../../../js/docxtemplater.v3.0.12.min.js");
 const ImageModule = require("../../../../js/docxtemplater-image-module.v3.0.2.min.js");
 const JSZipUtils = require("jszip-utils/dist/jszip-utils.min.js");
 const JSZip = require("../../../../js/jszip.min.js");
+const sizeOf = require("image-size");
 
 const ABFieldConnect = require("../../dataFields/ABFieldConnect");
 const ABFieldImage = require("../../dataFields/ABFieldImage");
@@ -557,9 +558,7 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
 
                      return false;
                   });
-
-                  return defaultVal;
-               } else return defaultVal;
+               }
             } else {
                let obj = dc.datasource;
 
@@ -593,7 +592,19 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
                   imageField.settings.imageHeight
                )
                   defaultVal[1] = imageField.settings.imageHeight;
+            }
+            // Find aspect ratio image dimensions
+            try {
+               var img = new Uint8Array(imgBuffer);
+               var image = sizeOf(img);
+               var ratio = Math.min(
+                  defaultVal[0] / image.width,
+                  defaultVal[1] / image.height
+               );
 
+               return [image.width * ratio, image.height * ratio];
+            } catch (err) {
+               // if invalid image, then should return 0, 0 sizes
                return defaultVal;
             }
          },
