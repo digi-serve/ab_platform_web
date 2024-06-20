@@ -182,8 +182,16 @@ export default class ABViewComponent extends ClassUI {
 
       if (!dc) return;
 
-      if (dc.dataStatus === dc.dataStatusFlag.notInitial)
-         // load data when a widget is showing
-         dc.loadData();
+      if (Array.isArray(dc)) {
+         dc.forEach((item) => {
+            if (item.dataStatus === item.dataStatusFlag.notInitial)
+               // load data when a widget is showing
+               item.loadData();
+         });
+      } else {
+         if (dc.dataStatus === dc.dataStatusFlag.notInitial)
+            // load data when a widget is showing
+            dc.loadData();
+      }
    }
 }
