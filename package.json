@@ -54,11 +54,11 @@
     "formiojs": "^4.18.0",
     "jszip-utils": "^0.1.0",
     "nanoid": "^3.3.4",
-    "pdfjs-dist": "^3.9.179",
+    "pdfjs-dist": "^4.2.67",
     "sails.io.js": "^1.2.1",
     "semver": "^7.6.2",
-    "socket.io-client": "^2.5.0",
-    "tinymce": "^5.10.6",
+    "socket.io-client": "^4.7.5",
+    "tinymce": "^7.2.0",
     "uuid": "^8.3.2"
   },
   "sideEffects": [
