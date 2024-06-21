@@ -374,7 +374,7 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
          // {
          //    fieldName: {Object} or [Array]
          // }
-         val = data[field.columnName];
+         val = data[this.AB.rules.toFieldRelationFormat(field.columnName)];
 
          if (val?.forEach)
             val.forEach((v) => {
