@@ -1,6 +1,6 @@
 {
   "name": "ab_platform_web",
-  "version": "1.6.1+c20200",
+  "version": "1.7.5+c20202",
   "description": "AppBuilder runtime environment for the Web client.",
   "main": "index.js",
   "scripts": {
@@ -52,6 +52,7 @@
     "bootstrap": "^4.6.2",
     "chai": "^4.3.7",
     "formiojs": "^4.18.0",
+    "image-size": "^1.1.1",
     "jszip-utils": "^0.1.0",
     "nanoid": "^3.3.4",
     "pdfjs-dist": "^3.9.179",

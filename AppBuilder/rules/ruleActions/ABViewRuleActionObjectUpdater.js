@@ -918,7 +918,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
          var field = this.getUpdateObjectField(op.fieldID);
          if (!field) return;
 
-         var value = op.value;
+         let value = op?.value?.id ?? op?.value;
 
          switch (value) {
             case "ab-current-user":
