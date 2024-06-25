@@ -116,8 +116,11 @@ module.exports = class ABViewContainerComponent extends ABViewComponent {
          // }
 
          // Create a new row
-         if (v.position.y == null || v.position.y !== curRowIndex) {
-            curRowIndex = v.position.y || rows.length;
+         if (
+            (v.position.y ?? v.position.dy) == null ||
+            (v.position.y ?? v.position.dy) !== curRowIndex
+         ) {
+            curRowIndex = v.position.y ?? v.position.dy ?? rows.length;
             curColIndex = 0;
 
             const rowNew = {
@@ -133,14 +136,12 @@ module.exports = class ABViewContainerComponent extends ABViewComponent {
                      ? parseInt(settings.gravity[i])
                      : defaultSettings.gravity,
                });
-
             rows.push(rowNew);
          }
-
          // Get the last row
          const rowIndx = rows.length - 1;
          const curRow = rows[rowIndx];
-         const newPos = v.position.x ?? 0;
+         const newPos = v.position.x ?? v.position.dx ?? 0;
          const mapKey = `${rowIndx}-${newPos}`;
 
          let getGrav = 1;
