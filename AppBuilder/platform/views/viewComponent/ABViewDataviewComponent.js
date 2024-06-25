@@ -77,7 +77,7 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
    onShow() {
       super.onShow();
 
-      // this.resize();
+      this.resize();
    }
 
    resize(base_element) {
