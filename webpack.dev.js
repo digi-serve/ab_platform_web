@@ -28,4 +28,10 @@ module.exports = merge(common, {
          SENTRY_DSN: JSON.stringify(undefined),
       }),
    ],
+   resolve: {
+      fallback: {
+         path: false,
+         fs: false,
+      },
+   },
 });

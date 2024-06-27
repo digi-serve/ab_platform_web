@@ -918,7 +918,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
          var field = this.getUpdateObjectField(op.fieldID);
          if (!field) return;
 
-         var value = op.value;
+         let value = op?.value?.id ?? op?.value;
 
          switch (value) {
             case "ab-current-user":
@@ -1283,11 +1283,18 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
 
       // make sure UI is updated:
       // set our updateObject
-      if (settings.updateObjectURL) {
-         var updateObject = this.currentForm.application.urlResolve(
-            settings.updateObjectURL
+      if (settings.updateObjectID) {
+         this.updateObject = this.currentForm.AB.objectByID(
+            settings.updateObjectID
          );
-         this.updateObject = updateObject;
+      } else {
+         // DEPRECIATED method of resolving objects .urlResolve()
+         if (settings.updateObjectURL) {
+            var updateObject = this.currentForm.application.urlResolve(
+               settings.updateObjectURL
+            );
+            this.updateObject = updateObject;
+         }
       }
 
       // if we have a display component, then populate it:

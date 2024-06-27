@@ -2,6 +2,7 @@ const Docxtemplater = require("../../../../js/docxtemplater.v3.0.12.min.js");
 const ImageModule = require("../../../../js/docxtemplater-image-module.v3.0.2.min.js");
 const JSZipUtils = require("jszip-utils/dist/jszip-utils.min.js");
 const JSZip = require("../../../../js/jszip.min.js");
+const sizeOf = require("image-size");
 
 const ABFieldConnect = require("../../dataFields/ABFieldConnect");
 const ABFieldImage = require("../../dataFields/ABFieldImage");
@@ -173,7 +174,7 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
    async renderFile() {
       this.busy();
 
-      const reportValues = this.getReportData();
+      const reportValues = await this.getReportData();
 
       // console.log("DOCX data: ", reportValues);
 
@@ -199,8 +200,9 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
       this.ready();
    }
 
-   getReportData() {
+   async getReportData() {
       const result = {};
+      const tasks = [];
 
       // Get current cursor
       const datacollections = this.view.datacollections;
@@ -209,120 +211,189 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
       datacollections
          .filter((dc) => dc?.datasource)
          .forEach(async (dc) => {
-            const obj = dc.datasource;
-            const objModel = obj.model();
-            const dcCursor = dc.getCursor();
-            const dcValues = [];
-            // const dataList = [];
+            tasks.push(
+               new Promise((resolve, reject) => {
+                  const obj = dc.datasource;
+                  const objModel = obj.model();
+                  const dcValues = [];
 
-            // merge cursor to support dc and tree cursor in the report
-            // if (dcCursor) {
-            //    const treeCursor = dc.getCursor(true);
+                  // pull the defined sort values
+                  let sorts = dc.settings.objectWorkspace.sortFields || [];
 
-            //    dataList.push(this.AB.merge({}, dcCursor, treeCursor));
-            // } else {
-            //    dataList.push(...this.AB.cloneDeep(dc.getData()));
-            // }
-
-            let where = {};
-            if (dcCursor) {
-               where = {
-                  glue: "and",
-                  rules: [
-                     {
-                        key: obj.PK(),
-                        rule: "equals",
-                        value: dcCursor[obj.PK()],
-                     },
-                  ],
-               };
-            } else {
-               where = this.AB.merge(
-                  where,
-                  dc.settings?.objectWorkspace?.filterConditions ?? {}
-               );
-            }
-
-            // Pull data that have full relation values.
-            // NOTE: When get data from DataCollection, those data is pruned.
-            const dataList = (
-               await objModel.findAll({
-                  disableMinifyRelation: true,
-                  populate: true,
-                  skip: 0,
-                  where,
-               })
-            ).data;
-
-            // update property names to column labels to match format names in docx file
-            const mlFields = obj.multilingualFields();
-
-            dataList.forEach((data) => {
-               let resultData;
-
-               // For support label of columns every languages
-               obj.fields().forEach((f) => {
-                  const fieldLabels = [];
-
-                  // Query Objects
-                  if (obj instanceof ABObjectQuery) {
-                     if (typeof f.object.translations === "string")
-                        f.object.translations = JSON.parse(
-                           f.object.translations
-                        );
-
-                     if (typeof f.translations === "string")
-                        f.translations = JSON.parse(f.translations);
-
-                     (f.object.translations || []).forEach((objTran) => {
-                        const fieldTran = (f.translations || []).filter(
-                           (fieldTran) =>
-                              fieldTran.language_code === objTran.language_code
-                        )[0];
-
-                        if (!fieldTran) return;
-
-                        const objectLabel = objTran.label;
-                        const fieldLabel = fieldTran.label;
-
-                        // Replace alias with label of object
-                        fieldLabels.push(`${objectLabel}.${fieldLabel}`);
-                     });
-                  }
-                  // Normal Objects
-                  else if (typeof f.translations === "string")
-                     f.translations = JSON.parse(f.translations);
-
-                  f.translations.forEach((tran) => {
-                     fieldLabels.push(tran.label);
-                  });
-
-                  resultData = Object.assign(
-                     resultData ?? {},
-                     this.setReportValues(data, f, fieldLabels, mlFields) ?? {}
+                  // pull filter conditions
+                  let wheres = this.AB.cloneDeep(
+                     dc.settings.objectWorkspace.filterConditions ?? {}
                   );
+                  // if we pass new wheres with a reload use them instead
+                  if (dc.__reloadWheres) {
+                     wheres = dc.__reloadWheres;
+                  }
+                  wheres.glue = wheres.glue || "and";
+                  wheres.rules = wheres.rules || [];
 
-                  // Keep ABObject into .scope of DOCX templater
-                  resultData._object = obj;
-               });
+                  const __additionalWheres = {
+                     glue: "and",
+                     rules: [],
+                  };
 
-               dcValues.push(resultData);
-            });
+                  // add the filterCond from user filters if there are rules to add
+                  if (dc?.__filterCond?.rules?.length > 0) {
+                     __additionalWheres.rules.push(dc?.__filterCond);
+                  }
 
-            // If data sources have more than 1 or the result data more than 1 items, then add label of data source
-            const datacollectionData =
-               dcValues.length > 1 ? dcValues : dcValues[0];
+                  // Filter by a selected cursor of a link DC
+                  let linkRule = dc.ruleLinkedData();
+                  if (!dc.settings.loadAll && linkRule) {
+                     __additionalWheres.rules.push(linkRule);
+                  }
+                  // pull data rows following the follow data collection
+                  else if (dc.datacollectionFollow) {
+                     const followCursor = dc.datacollectionFollow.getCursor();
+                     // store the PK as a variable
+                     let PK = dc.datasource.PK();
+                     // if the datacollection we are following is a query
+                     // add "BASE_OBJECT." to the PK so we can select the
+                     // right value to report the cursor change to
+                     if (dc.datacollectionFollow.settings.isQuery) {
+                        PK = "BASE_OBJECT." + PK;
+                     }
+                     if (followCursor) {
+                        wheres = {
+                           glue: "and",
+                           rules: [
+                              {
+                                 key: dc.datasource.PK(),
+                                 rule: "equals",
+                                 value: followCursor[PK],
+                              },
+                           ],
+                        };
+                     }
+                     // Set no return rows
+                     else {
+                        wheres = {
+                           glue: "and",
+                           rules: [
+                              {
+                                 key: this.datasource.PK(),
+                                 rule: "equals",
+                                 value: "NO RESULT ROW",
+                              },
+                           ],
+                        };
+                     }
+                  }
 
-            if (
-               isDcLabelAdded ||
-               (Array.isArray(datacollectionData) &&
-                  datacollectionData.length > 1)
-            )
-               (dc.translations || []).forEach((tran) => {
-                  result[tran.label] = datacollectionData;
-               });
-            else Object.assign(result, datacollectionData);
+                  // Combine setting & program filters
+                  if (__additionalWheres.rules.length) {
+                     if (wheres.rules.length) {
+                        __additionalWheres.rules.unshift(wheres);
+                     }
+                     wheres = __additionalWheres;
+                  }
+
+                  // remove any null in the .rules
+                  // if (wheres?.rules?.filter) wheres.rules = wheres.rules.filter((r) => r);
+                  wheres = obj.whereCleanUp(wheres);
+
+                  // Pull data that have full relation values.
+                  // NOTE: When get data from DataCollection, those data is pruned.
+                  objModel
+                     .findAll({
+                        where: wheres || {},
+                        skip: 0,
+                        sort: sorts,
+                        populate: true,
+                     })
+                     .then((dataList) => {
+                        // update property names to column labels to match format names in docx file
+                        const mlFields = obj.multilingualFields();
+
+                        dataList?.data.forEach((data) => {
+                           let resultData;
+
+                           // For support label of columns every languages
+                           obj.fields().forEach((f) => {
+                              const fieldLabels = [];
+
+                              // Query Objects
+                              if (obj instanceof ABObjectQuery) {
+                                 if (typeof f.object.translations === "string")
+                                    f.object.translations = JSON.parse(
+                                       f.object.translations
+                                    );
+
+                                 if (typeof f.translations === "string")
+                                    f.translations = JSON.parse(f.translations);
+
+                                 (f.object.translations || []).forEach(
+                                    (objTran) => {
+                                       const fieldTran = (
+                                          f.translations || []
+                                       ).filter(
+                                          (fieldTran) =>
+                                             fieldTran.language_code ===
+                                             objTran.language_code
+                                       )[0];
+
+                                       if (!fieldTran) return;
+
+                                       const objectLabel = objTran.label;
+                                       const fieldLabel = fieldTran.label;
+
+                                       // Replace alias with label of object
+                                       fieldLabels.push(
+                                          `${objectLabel}.${fieldLabel}`
+                                       );
+                                    }
+                                 );
+                              }
+                              // Normal Objects
+                              else if (typeof f.translations === "string")
+                                 f.translations = JSON.parse(f.translations);
+
+                              f.translations.forEach((tran) => {
+                                 fieldLabels.push(tran.label);
+                              });
+
+                              resultData = Object.assign(
+                                 resultData ?? {},
+                                 this.setReportValues(
+                                    data,
+                                    f,
+                                    fieldLabels,
+                                    mlFields
+                                 ) ?? {}
+                              );
+
+                              // Keep ABObject into .scope of DOCX templater
+                              resultData._object = obj;
+                           });
+
+                           dcValues.push(resultData);
+                        });
+
+                        // If data sources have more than 1 or the result data more than 1 items, then add label of data source
+                        const datacollectionData =
+                           dcValues.length > 1 ? dcValues : dcValues[0];
+
+                        if (
+                           isDcLabelAdded ||
+                           (Array.isArray(datacollectionData) &&
+                              datacollectionData.length > 1)
+                        )
+                           (dc.translations || []).forEach((tran) => {
+                              result[tran.label] = datacollectionData;
+                           });
+                        else Object.assign(result, datacollectionData);
+
+                        resolve();
+                     });
+               })
+            );
          });
+
+      await Promise.all(tasks);
 
       return result;
    }
@@ -352,7 +423,7 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
          // {
          //    fieldName: {Object} or [Array]
          // }
-         val = data[field.columnName];
+         val = data[this.AB.rules.toFieldRelationFormat(field.columnName)];
 
          if (val?.forEach)
             val.forEach((v) => {
@@ -536,9 +607,7 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
 
                      return false;
                   });
-
-                  return defaultVal;
-               } else return defaultVal;
+               }
             } else {
                let obj = dc.datasource;
 
@@ -572,7 +641,19 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
                   imageField.settings.imageHeight
                )
                   defaultVal[1] = imageField.settings.imageHeight;
+            }
+            // Find aspect ratio image dimensions
+            try {
+               var img = new Uint8Array(imgBuffer);
+               var image = sizeOf(img);
+               var ratio = Math.min(
+                  defaultVal[0] / image.width,
+                  defaultVal[1] / image.height
+               );
 
+               return [image.width * ratio, image.height * ratio];
+            } catch (err) {
+               // if invalid image, then should return 0, 0 sizes
                return defaultVal;
             }
          },
