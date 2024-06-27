@@ -300,7 +300,6 @@ module.exports = class ABViewPDFImporterComponent extends ABViewComponent {
             "../../../../init/pdfjs"
          )
       ).default;
-
       this.ready();
    }
 
