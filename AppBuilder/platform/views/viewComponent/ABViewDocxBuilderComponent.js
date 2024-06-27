@@ -215,51 +215,95 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
                new Promise((resolve, reject) => {
                   const obj = dc.datasource;
                   const objModel = obj.model();
-                  const dcCursor = dc.getCursor();
                   const dcValues = [];
-                  // const dataList = [];
 
-                  // merge cursor to support dc and tree cursor in the report
-                  // if (dcCursor) {
-                  //    const treeCursor = dc.getCursor(true);
+                  // pull the defined sort values
+                  let sorts = dc.settings.objectWorkspace.sortFields || [];
 
-                  //    dataList.push(this.AB.merge({}, dcCursor, treeCursor));
-                  // } else {
-                  //    dataList.push(...this.AB.cloneDeep(dc.getData()));
-                  // }
-
-                  let where = {};
-                  if (dcCursor) {
-                     where = {
-                        glue: "and",
-                        rules: [
-                           {
-                              key: obj.PK(),
-                              rule: "equals",
-                              value: dcCursor[obj.PK()],
-                           },
-                        ],
-                     };
-                  } else {
-                     where = this.AB.merge(
-                        where,
-                        dc.settings?.objectWorkspace?.filterConditions ?? {}
-                     );
+                  // pull filter conditions
+                  let wheres = this.AB.cloneDeep(
+                     dc.settings.objectWorkspace.filterConditions ?? {}
+                  );
+                  // if we pass new wheres with a reload use them instead
+                  if (dc.__reloadWheres) {
+                     wheres = dc.__reloadWheres;
                   }
+                  wheres.glue = wheres.glue || "and";
+                  wheres.rules = wheres.rules || [];
+
+                  const __additionalWheres = {
+                     glue: "and",
+                     rules: [],
+                  };
 
                   // add the filterCond from user filters if there are rules to add
                   if (dc?.__filterCond?.rules?.length > 0) {
-                     where.rules.push(dc?.__filterCond);
+                     __additionalWheres.rules.push(dc?.__filterCond);
                   }
+
+                  // Filter by a selected cursor of a link DC
+                  let linkRule = dc.ruleLinkedData();
+                  if (!dc.settings.loadAll && linkRule) {
+                     __additionalWheres.rules.push(linkRule);
+                  }
+                  // pull data rows following the follow data collection
+                  else if (dc.datacollectionFollow) {
+                     const followCursor = dc.datacollectionFollow.getCursor();
+                     // store the PK as a variable
+                     let PK = dc.datasource.PK();
+                     // if the datacollection we are following is a query
+                     // add "BASE_OBJECT." to the PK so we can select the
+                     // right value to report the cursor change to
+                     if (dc.datacollectionFollow.settings.isQuery) {
+                        PK = "BASE_OBJECT." + PK;
+                     }
+                     if (followCursor) {
+                        wheres = {
+                           glue: "and",
+                           rules: [
+                              {
+                                 key: dc.datasource.PK(),
+                                 rule: "equals",
+                                 value: followCursor[PK],
+                              },
+                           ],
+                        };
+                     }
+                     // Set no return rows
+                     else {
+                        wheres = {
+                           glue: "and",
+                           rules: [
+                              {
+                                 key: this.datasource.PK(),
+                                 rule: "equals",
+                                 value: "NO RESULT ROW",
+                              },
+                           ],
+                        };
+                     }
+                  }
+
+                  // Combine setting & program filters
+                  if (__additionalWheres.rules.length) {
+                     if (wheres.rules.length) {
+                        __additionalWheres.rules.unshift(wheres);
+                     }
+                     wheres = __additionalWheres;
+                  }
+
+                  // remove any null in the .rules
+                  // if (wheres?.rules?.filter) wheres.rules = wheres.rules.filter((r) => r);
+                  wheres = obj.whereCleanUp(wheres);
 
                   // Pull data that have full relation values.
                   // NOTE: When get data from DataCollection, those data is pruned.
                   objModel
                      .findAll({
-                        disableMinifyRelation: true,
-                        populate: true,
+                        where: wheres || {},
                         skip: 0,
-                        where,
+                        sort: sorts,
+                        populate: true,
                      })
                      .then((dataList) => {
                         // update property names to column labels to match format names in docx file
