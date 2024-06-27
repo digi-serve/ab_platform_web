@@ -161,7 +161,11 @@ export default class ABViewDataFilterComponent extends ABViewComponent {
                               relative: true,
                               disabled: true,
                               on: {
-                                 onChange: (id) => this.applyConnectFilter(id),
+                                 onChange: (id) => {
+                                    this.applyConnectFilter(
+                                       $$(this.ids.filter).getList().getItem(id)
+                                    );
+                                 },
                               },
                            },
                            {
@@ -286,15 +290,33 @@ export default class ABViewDataFilterComponent extends ABViewComponent {
       this.updateUI();
    }
 
-   applyConnectFilter(connectId) {
+   applyConnectFilter(rowData) {
+      let connectedVal = rowData?.id ?? null;
+
+      if (
+         connectedVal &&
+         this.field.settings?.isCustomFK &&
+         this.field.settings?.isSource
+      ) {
+         connectedVal =
+            (this.field.indexField
+               ? rowData[this.field.indexField.columnName]
+               : null) ?? // custom index
+            (this.field.indexField2
+               ? rowData[this.field.indexField2.columnName]
+               : null) ?? // custom index 2
+            rowData.id ??
+            rowData;
+      }
+
       let filterRule = [];
-      if (connectId) {
+      if (connectedVal) {
          $$(this.ids.reset).show();
          filterRule = [
             {
                key: this.field.id,
                rule: "equals",
-               value: connectId,
+               value: connectedVal,
             },
          ];
       } else {
