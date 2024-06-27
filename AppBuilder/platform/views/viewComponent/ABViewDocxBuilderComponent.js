@@ -179,7 +179,7 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
       // console.log("DOCX data: ", reportValues);
 
       // Download images
-      const images = await this.downloadImages();
+      const images = await this.downloadImages(reportValues);
 
       // Download the template file
       const contentTemplateFile = await this.downloadTemplateFile();
@@ -495,7 +495,7 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
       return result;
    }
 
-   async downloadImages() {
+   async downloadImages(reportValues) {
       const images = {};
       const tasks = [];
       const addDownloadTask = (fieldImage, data = []) => {
@@ -529,18 +529,18 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
          .forEach((dc) => {
             const obj = dc.datasource;
 
-            let currCursor = dc.getCursor();
+            // let currCursor = dc.getCursor();
 
-            if (currCursor) {
-               // Current cursor
-               const treeCursor = dc.getCursor(true);
+            // if (currCursor) {
+            //    // Current cursor
+            //    const treeCursor = dc.getCursor(true);
 
-               currCursor = [this.AB.merge({}, currCursor, treeCursor)];
-            } // List of data
-            else currCursor = dc.getData();
+            //    currCursor = [this.AB.merge({}, currCursor, treeCursor)];
+            // } // List of data
+            // else currCursor = dc.getData();
 
             obj.fields((f) => f instanceof ABFieldImage).forEach((f) => {
-               addDownloadTask(f, currCursor);
+               addDownloadTask(f, reportValues[dc.label] || [reportValues]);
             });
          });
 
