@@ -21,6 +21,9 @@ module.exports = class ABViewOrgChartComponent extends ABViewComponent {
          {
             view: "template",
             template: `<div id="${ids.chartDom}"></div>`,
+            css: {
+               position: "relative",
+            },
          },
       ]);
 
@@ -61,18 +64,17 @@ module.exports = class ABViewOrgChartComponent extends ABViewComponent {
 
       this.busy();
       await this.loadOrgChartJs();
-      await this.displayOrgChart();
+      const chartData = await this.pullData();
+      this.displayOrgChart(chartData);
       this.ready();
    }
 
-   async displayOrgChart() {
+   async displayOrgChart(chartData) {
       const baseView = this.view;
-      const data = await this.pullData();
-
       const orgchart = new this.OrgChart({
-         data,
+         data: chartData,
          direction: baseView.settings.direction,
-         depth: baseView.settings.depth,
+         // depth: baseView.settings.depth,
          pan: baseView.settings.pan,
          zoom: baseView.settings.zoom,
          // visibleLevel: baseView.settings.visibleLevel,
@@ -95,6 +97,8 @@ module.exports = class ABViewOrgChartComponent extends ABViewComponent {
          chartDom.innerHTML = "";
          chartDom.appendChild(orgchart);
       }
+
+      this._setColor();
    }
 
    async pullData() {
@@ -103,25 +107,97 @@ module.exports = class ABViewOrgChartComponent extends ABViewComponent {
       const cursor = dc?.getCursor();
       if (!cursor) return null;
 
-      const valueField = view.valueField();
-      const descriptionField = view.descriptionField();
+      const valueFields = view.valueFields();
+      // const descriptionField = view.descriptionField?.();
 
-      const chartData = {};
-      chartData.name = dc.datasource.displayData(cursor);
-      chartData.description = "";
-      chartData.children = (cursor[valueField?.relationName()] ?? []).map(
-         (f) => {
-            return {
-               name: valueField.datasourceLink.displayData(f),
-               description:
-                  descriptionField.format(f) ??
-                  f[descriptionField.columnName] ??
-                  "",
-            };
-         }
-      );
+      const chartData = {
+         name: dc?.datasource?.displayData(cursor) ?? "",
+         description: "",
+         // description:
+         //    descriptionField?.format?.(f) ??
+         //    f[descriptionField?.columnName] ??
+         //    "",
+         _rawData: cursor,
+      };
+      let parentChartData = [chartData];
+      let currChildren;
+
+      // console.log("Start: ", JSON.stringify(chartData));
+
+      valueFields.forEach((field, index) => {
+         // const nextField = valueFields[index + 1];
+
+         let _tempParentChartData = [];
+
+         parentChartData.forEach(async (chartItem) => {
+            const rawData = chartItem?._rawData;
+            currChildren = rawData?.[field?.relationName()];
+
+            // Pull data from the server
+            if (!currChildren) {
+               const objLink = field.object;
+               const where = {
+                  glue: "and",
+                  rules: [],
+               };
+               where.rules.push({
+                  key: objLink.PK(),
+                  rule: "equals",
+                  value: rawData[objLink.PK()],
+               });
+               const returnData = await objLink
+                  .model()
+                  .findAll({ where, populate: true });
+               chartItem._rawData = returnData?.data[0];
+               currChildren = chartItem._rawData?.[field?.relationName()];
+            }
+
+            if (currChildren?.length) {
+               chartItem.children = currChildren.map((childData) => {
+                  return {
+                     name: field.datasourceLink.displayData(childData),
+                     description: "",
+                     _rawData: childData,
+                  };
+               });
+            }
+
+            _tempParentChartData = _tempParentChartData.concat(
+               chartItem.children
+            );
+         });
+
+         parentChartData = _tempParentChartData;
+      });
 
       return chartData;
+   }
+
+   _setColor() {
+      const view = this.view;
+      let doms = document.querySelectorAll(`org-chart`);
+      doms.forEach((dom) => {
+         dom.style.backgroundImage = "none";
+      });
+
+      doms = document.querySelectorAll(`
+         org-chart .verticalNodes>td::before,
+         org-chart .verticalNodes ul>li::before,
+         org-chart .verticalNodes ul>li::after,
+         org-chart .node .content,
+         org-chart tr.lines .topLine,
+         org-chart tr.lines .rightLine,
+         org-chart tr.lines .leftLine`);
+      doms.forEach((dom) => {
+         dom.style.borderColor = view.settings.color;
+      });
+
+      doms = document.querySelectorAll(`
+         org-chart tr.lines .downLine,
+         org-chart .node .title`);
+      doms.forEach((dom) => {
+         dom.style.backgroundColor = view.settings.color;
+      });
    }
 
    busy() {
