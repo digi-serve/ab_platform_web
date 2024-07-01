@@ -64,13 +64,15 @@ module.exports = class ABViewOrgChartComponent extends ABViewComponent {
 
       this.busy();
       await this.loadOrgChartJs();
-      const chartData = await this.pullData();
-      this.displayOrgChart(chartData);
+      await this.pullData();
+      this.displayOrgChart();
       this.ready();
    }
 
-   async displayOrgChart(chartData) {
+   async displayOrgChart() {
       const baseView = this.view;
+      const chartData = this.AB.cloneDeep(this.chartData);
+
       const orgchart = new this.OrgChart({
          data: chartData,
          direction: baseView.settings.direction,
@@ -98,7 +100,9 @@ module.exports = class ABViewOrgChartComponent extends ABViewComponent {
          chartDom.appendChild(orgchart);
       }
 
-      this._setColor();
+      setTimeout(() => {
+         this._setColor();
+      }, 100);
    }
 
    async pullData() {
@@ -110,26 +114,24 @@ module.exports = class ABViewOrgChartComponent extends ABViewComponent {
       const valueFields = view.valueFields();
       // const descriptionField = view.descriptionField?.();
 
-      const chartData = {
-         name: dc?.datasource?.displayData(cursor) ?? "",
-         description: "",
-         // description:
-         //    descriptionField?.format?.(f) ??
-         //    f[descriptionField?.columnName] ??
-         //    "",
-         _rawData: cursor,
-      };
+      const chartData = this.chartData;
+      chartData.name = dc?.datasource?.displayData(cursor) ?? "";
+      chartData.description = "";
+      // description:
+      //    descriptionField?.format?.(f) ??
+      //    f[descriptionField?.columnName] ??
+      //    "",
+      chartData._rawData = cursor;
+
       let parentChartData = [chartData];
       let currChildren;
 
-      // console.log("Start: ", JSON.stringify(chartData));
-
-      valueFields.forEach((field, index) => {
-         // const nextField = valueFields[index + 1];
-
+      valueFields.forEach((field) => {
          let _tempParentChartData = [];
 
          parentChartData.forEach(async (chartItem) => {
+            if (!chartItem) return;
+
             const rawData = chartItem?._rawData;
             currChildren = rawData?.[field?.relationName()];
 
@@ -150,15 +152,18 @@ module.exports = class ABViewOrgChartComponent extends ABViewComponent {
                   .findAll({ where, populate: true });
                chartItem._rawData = returnData?.data[0];
                currChildren = chartItem._rawData?.[field?.relationName()];
+
+               this.displayOrgChart();
             }
 
+            chartItem.children = [];
             if (currChildren?.length) {
-               chartItem.children = currChildren.map((childData) => {
-                  return {
+               currChildren.forEach((childData) => {
+                  chartItem.children.push({
                      name: field.datasourceLink.displayData(childData),
                      description: "",
                      _rawData: childData,
-                  };
+                  });
                });
             }
 
@@ -169,8 +174,13 @@ module.exports = class ABViewOrgChartComponent extends ABViewComponent {
 
          parentChartData = _tempParentChartData;
       });
+   }
 
-      return chartData;
+   get chartData() {
+      if (this._chartData == null) {
+         this._chartData = {};
+      }
+      return this._chartData;
    }
 
    _setColor() {
