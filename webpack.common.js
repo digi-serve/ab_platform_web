@@ -75,6 +75,13 @@ module.exports = {
                chunks: "all",
                reuseExistingChunk: true,
             },
+            orgchart: {
+               test: /[\\/]js[\\/]orgchart-webcomponents.js/,
+               filename: "orgchart.[name].[contenthash].js",
+               chunks: "all",
+               reuseExistingChunk: true,
+               priority: 10,
+            },
          },
       },
    },
