@@ -102,7 +102,7 @@ module.exports = class ABViewOrgChartComponent extends ABViewComponent {
 
       setTimeout(() => {
          this._setColor();
-      }, 100);
+      }, 1);
    }
 
    async pullData() {
