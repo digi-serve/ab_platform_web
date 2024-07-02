@@ -32,7 +32,8 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
             scroll: "y",
             sizeToContent: true,
             css: "borderless transparent",
-            xCount: this.settings.xCount,
+            xCount: this.settings.xCount != 1 ? this.settings.xCount : 0,
+            height: this.settings.height,
             template: (item) => this.itemTemplate(item),
             on: {
                onAfterRender: () => {
