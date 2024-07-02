@@ -1283,11 +1283,18 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
 
       // make sure UI is updated:
       // set our updateObject
-      if (settings.updateObjectURL) {
-         var updateObject = this.currentForm.application.urlResolve(
-            settings.updateObjectURL
+      if (settings.updateObjectID) {
+         this.updateObject = this.currentForm.AB.objectByID(
+            settings.updateObjectID
          );
-         this.updateObject = updateObject;
+      } else {
+         // DEPRECIATED method of resolving objects .urlResolve()
+         if (settings.updateObjectURL) {
+            var updateObject = this.currentForm.application.urlResolve(
+               settings.updateObjectURL
+            );
+            this.updateObject = updateObject;
+         }
       }
 
       // if we have a display component, then populate it:

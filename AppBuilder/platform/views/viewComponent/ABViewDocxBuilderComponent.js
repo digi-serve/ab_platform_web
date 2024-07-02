@@ -179,7 +179,7 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
       // console.log("DOCX data: ", reportValues);
 
       // Download images
-      const images = await this.downloadImages();
+      const images = await this.downloadImages(reportValues);
 
       // Download the template file
       const contentTemplateFile = await this.downloadTemplateFile();
@@ -217,20 +217,18 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
                   const objModel = obj.model();
                   const dcCursor = dc.getCursor();
                   const dcValues = [];
-                  // const dataList = [];
 
-                  // merge cursor to support dc and tree cursor in the report
-                  // if (dcCursor) {
-                  //    const treeCursor = dc.getCursor(true);
+                  // pull the defined sort values
+                  let sorts = dc.settings.objectWorkspace.sortFields || [];
 
-                  //    dataList.push(this.AB.merge({}, dcCursor, treeCursor));
-                  // } else {
-                  //    dataList.push(...this.AB.cloneDeep(dc.getData()));
-                  // }
-
-                  let where = {};
+                  // pull filter conditions
+                  let wheres = this.AB.cloneDeep(
+                     dc.settings.objectWorkspace.filterConditions ?? {}
+                  );
+                  // if there is a selected cursor set the filter here
                   if (dcCursor) {
-                     where = {
+                     // if there is a selected cursor set the filter here
+                     wheres = {
                         glue: "and",
                         rules: [
                            {
@@ -240,21 +238,86 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
                            },
                         ],
                      };
-                  } else {
-                     where = this.AB.merge(
-                        where,
-                        dc.settings?.objectWorkspace?.filterConditions ?? {}
-                     );
+                  } else if (dc.__reloadWheres) {
+                     // if we pass new wheres with a reload use them instead
+                     wheres = dc.__reloadWheres;
                   }
+                  wheres.glue = wheres.glue || "and";
+                  wheres.rules = wheres.rules || [];
+
+                  const __additionalWheres = {
+                     glue: "and",
+                     rules: [],
+                  };
+
+                  // add the filterCond from user filters if there are rules to add
+                  if (dc?.__filterCond?.rules?.length > 0) {
+                     __additionalWheres.rules.push(dc?.__filterCond);
+                  }
+
+                  // Filter by a selected cursor of a link DC
+                  let linkRule = dc.ruleLinkedData();
+                  if (!dc.settings.loadAll && linkRule) {
+                     __additionalWheres.rules.push(linkRule);
+                  }
+                  // pull data rows following the follow data collection
+                  else if (dc.datacollectionFollow) {
+                     const followCursor = dc.datacollectionFollow.getCursor();
+                     // store the PK as a variable
+                     let PK = dc.datasource.PK();
+                     // if the datacollection we are following is a query
+                     // add "BASE_OBJECT." to the PK so we can select the
+                     // right value to report the cursor change to
+                     if (dc.datacollectionFollow.settings.isQuery) {
+                        PK = "BASE_OBJECT." + PK;
+                     }
+                     if (followCursor) {
+                        wheres = {
+                           glue: "and",
+                           rules: [
+                              {
+                                 key: dc.datasource.PK(),
+                                 rule: "equals",
+                                 value: followCursor[PK],
+                              },
+                           ],
+                        };
+                     }
+                     // Set no return rows
+                     else {
+                        wheres = {
+                           glue: "and",
+                           rules: [
+                              {
+                                 key: this.datasource.PK(),
+                                 rule: "equals",
+                                 value: "NO RESULT ROW",
+                              },
+                           ],
+                        };
+                     }
+                  }
+
+                  // Combine setting & program filters
+                  if (__additionalWheres.rules.length) {
+                     if (wheres.rules.length) {
+                        __additionalWheres.rules.unshift(wheres);
+                     }
+                     wheres = __additionalWheres;
+                  }
+
+                  // remove any null in the .rules
+                  // if (wheres?.rules?.filter) wheres.rules = wheres.rules.filter((r) => r);
+                  wheres = obj.whereCleanUp(wheres);
 
                   // Pull data that have full relation values.
                   // NOTE: When get data from DataCollection, those data is pruned.
                   objModel
                      .findAll({
-                        disableMinifyRelation: true,
-                        populate: true,
+                        where: wheres || {},
                         skip: 0,
-                        where,
+                        sort: sorts,
+                        populate: true,
                      })
                      .then((dataList) => {
                         // update property names to column labels to match format names in docx file
@@ -432,7 +495,7 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
       return result;
    }
 
-   async downloadImages() {
+   async downloadImages(reportValues) {
       const images = {};
       const tasks = [];
       const addDownloadTask = (fieldImage, data = []) => {
@@ -466,18 +529,18 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
          .forEach((dc) => {
             const obj = dc.datasource;
 
-            let currCursor = dc.getCursor();
+            // let currCursor = dc.getCursor();
 
-            if (currCursor) {
-               // Current cursor
-               const treeCursor = dc.getCursor(true);
+            // if (currCursor) {
+            //    // Current cursor
+            //    const treeCursor = dc.getCursor(true);
 
-               currCursor = [this.AB.merge({}, currCursor, treeCursor)];
-            } // List of data
-            else currCursor = dc.getData();
+            //    currCursor = [this.AB.merge({}, currCursor, treeCursor)];
+            // } // List of data
+            // else currCursor = dc.getData();
 
             obj.fields((f) => f instanceof ABFieldImage).forEach((f) => {
-               addDownloadTask(f, currCursor);
+               addDownloadTask(f, reportValues[dc.label] || [reportValues]);
             });
          });
 
