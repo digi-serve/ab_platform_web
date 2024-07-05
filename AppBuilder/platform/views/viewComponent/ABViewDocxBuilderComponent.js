@@ -499,6 +499,9 @@ module.exports = class ABViewDocxBuilderComponent extends ABViewComponent {
       const images = {};
       const tasks = [];
       const addDownloadTask = (fieldImage, data = []) => {
+         if (Array.isArray(data) == false) {
+            data = [data];
+         }
          data.forEach((d) => {
             const imageVal = fieldImage.format(d);
 
