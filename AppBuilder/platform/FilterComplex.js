@@ -752,19 +752,91 @@ module.exports = class FilterComplex extends FilterComplexCore {
    }
 
    uiQueryFieldValue(field) {
+      // return [
+      //    {
+      //       batch: "queryField",
+      //       view: "combo",
+      //       placeholder: this.labels.component.inQueryFieldQueryPlaceholder,
+      //       options: this.queries(
+      //          (q) => this._Object == null || q.id != this._Object.id
+      //       ).map((q) => {
+      //          return {
+      //             id: q.id,
+      //             value: q.label,
+      //          };
+      //       }),
+      //    },
+      // ];
+      let _this = this;
+      let qfDC = new webix.DataCollection();
       return [
          {
             batch: "queryField",
-            view: "combo",
-            placeholder: this.labels.component.inQueryFieldQueryPlaceholder,
-            options: this.queries(
-               (q) => this._Object == null || q.id != this._Object.id
-            ).map((q) => {
-               return {
-                  id: q.id,
-                  value: q.label,
-               };
-            }),
+            rows: [
+               {
+                  id: `${this.ui.id}_queryField_query`,
+                  view: "combo",
+                  placeholder:
+                     this.labels.component.inQueryFieldQueryPlaceholder,
+                  options: this.queries(
+                     (q) => this._Object == null || q.id != this._Object.id
+                  ).map((q) => {
+                     return {
+                        id: q.id,
+                        value: q.label,
+                     };
+                  }),
+                  on: {
+                     onChange: function (newValue, oldValue) {
+                        // Here "this" is the combo box
+                        // _this is our FilterComplex object
+
+                        let query = _this.AB.queryByID(newValue);
+                        if (query) {
+                           // let fieldChooser =
+                           //    this.getParentView().getChildViews()[1];
+                           let fieldOptions = [];
+                           query
+                              .fields((f) => {
+                                 return !f.isConnection;
+                              })
+                              .forEach((f) => {
+                                 fieldOptions.push({
+                                    id: f.id,
+                                    value: `${f.object.label}.${f.label}`,
+                                 });
+                              });
+                           // fieldChooser.define("options", fieldOptions);
+                           // fieldChooser.refresh();
+                           qfDC.clearAll();
+                           qfDC.parse(fieldOptions);
+                        }
+                     },
+                     onAfterRender: function () {
+                        let here = true;
+                        debugger;
+                     },
+                     onBeforeShow: function () {
+                        let here = true;
+                        debugger;
+                     },
+                  },
+               },
+               {
+                  id: `${this.ui.id}_queryField_field`,
+                  view: "combo",
+                  placeholder:
+                     this.labels.component.inQueryFieldFieldPlaceholder,
+                  // options: [
+                  //    {
+                  //       id: "choose",
+                  //       value: this.labels.component
+                  //          .inQueryFieldQueryPlaceholder,
+                  //    },
+                  // ],
+                  options: { data: qfDC },
+               },
+            ],
          },
       ];
    }
