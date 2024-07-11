@@ -752,19 +752,62 @@ module.exports = class FilterComplex extends FilterComplexCore {
    }
 
    uiQueryFieldValue(field) {
+      // ABQuery Options
+      const qOpts = this.queries(
+         (q) => this._Object == null || q.id != this._Object.id
+      ).map((q) => {
+         return {
+            id: q.id,
+            value: q.label,
+         };
+      });
+
+      const refreshFieldOption = ($queryOpt, queryId) => {
+         const options = [];
+
+         // Get all queries fields
+         const Query = this.queries((q) => q.id == queryId)[0];
+         if (Query) {
+            Query.fields((f) => !f.isConnection).forEach((q) => {
+               options.push({
+                  id: q.id,
+                  value: `${q.object.label}.${q.label}`,
+               });
+            });
+         }
+
+         // Update UI
+         if ($queryOpt) {
+            const $queryContainer = $queryOpt.getParentView();
+            const $fieldOption = $queryContainer.getChildViews()[1];
+            $fieldOption?.define("options", options);
+            $fieldOption?.refresh();
+         }
+      };
+
       return [
          {
             batch: "queryField",
-            view: "combo",
-            placeholder: this.labels.component.inQueryFieldQueryPlaceholder,
-            options: this.queries(
-               (q) => this._Object == null || q.id != this._Object.id
-            ).map((q) => {
-               return {
-                  id: q.id,
-                  value: q.label,
-               };
-            }),
+            view: "layout",
+            rows: [
+               {
+                  view: "combo",
+                  placeholder:
+                     this.labels.component.inQueryFieldQueryPlaceholder,
+                  options: qOpts,
+                  on: {
+                     onChange: function (qVal) {
+                        refreshFieldOption(this, qVal);
+                     },
+                  },
+               },
+               {
+                  view: "combo",
+                  placeholder: L("Choose a Field"),
+                  options: [],
+               },
+            ],
+            borderless: true,
          },
       ];
    }
