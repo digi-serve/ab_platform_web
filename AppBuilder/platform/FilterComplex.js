@@ -40,7 +40,7 @@ function _toInternal(cond, fields = []) {
       };
 
       if (Array.isArray(cond.value)) cond.includes = cond.value;
-      else cond.includes = cond.value?.split?.(",") ?? [];
+      else cond.includes = cond.value?.split?.(/,|:/) ?? [];
 
       if (field?.key == "date" || field?.key == "datetime") {
          cond.condition.filter = cond.condition.filter
@@ -138,17 +138,11 @@ function _toExternal(cond, fields = []) {
             formatDate(endOfDayUTC)
          );
       } else if (
-         cond.rule == "in_query_field" ||
-         cond.rule == "not_in_query_field"
+         cond.rule === "in_query_field" ||
+         cond.rule === "not_in_query_field"
       ) {
-         const queryOptId = _uiQueryOptionId(cond.key);
-         const fieldOptId = _uiFieldOptionId(cond.key);
-         const selectedQueryId = $$(queryOptId)?.getValue();
-         const selectedFieldId = $$(fieldOptId)?.getValue();
-
-         if (selectedQueryId && selectedFieldId) {
-            cond.value = `${selectedQueryId}:${selectedFieldId}`;
-         }
+         cond.value =
+            cond.includes?.length == 2 ? cond.includes.join(":") : null;
       } else {
          cond.value = values
             .map((v) => {
@@ -528,16 +522,41 @@ module.exports = class FilterComplex extends FilterComplexCore {
       const $el = $$(this.ids.querybuilder);
       if (!$el) return;
 
+      const _this = this;
+      const $filterView = $el.$app.require("jet-views", "filter");
+
+      if (!this._fnBaseGetValue)
+         this._fnBaseGetValue = $filterView.prototype.GetValue;
+      $filterView.prototype.GetValue = function () {
+         const rule = _this._fnBaseGetValue.call(this);
+
+         if (
+            rule.condition.type == "in_query_field" ||
+            rule.condition.type == "not_in_query_field"
+         ) {
+            const queryOptId = _uiQueryOptionId(rule.field);
+            const fieldOptId = _uiFieldOptionId(rule.field);
+            const selectedQueryId = $$(queryOptId)?.getValue();
+            const selectedFieldId = $$(fieldOptId)?.getValue();
+
+            if (selectedQueryId && selectedFieldId) {
+               rule.includes = [selectedQueryId, selectedFieldId];
+            }
+         }
+
+         return rule;
+      };
+
       // window.query.views.filter.prototype.CreateFilter = (
-      $el.$app.require("jet-views", "filter").prototype.CreateFilter = async (
+      $filterView.prototype.CreateFilter = async function (
          fieldId,
          type,
          format,
          conditions,
          place
-      ) => {
-         let value = null; // TODO
-         let inputs = this.uiValue(fieldId, value);
+      ) {
+         let value = null;
+         let inputs = _this.uiValue(fieldId, value);
 
          let ui = {
             id: place.config.id,
@@ -559,8 +578,18 @@ module.exports = class FilterComplex extends FilterComplexCore {
 
          let filter = webix.ui(ui, place);
 
+         if (
+            conditions.filter(
+               (cond) =>
+                  cond.id == "in_query_field" || cond.id == "not_in_query_field"
+            ).length &&
+            filter.config.value?.includes?.length == 2
+         ) {
+            // TODO
+         }
+
          // let data = [];
-         // const $query = $$(this.ids.querybuilder);
+         // const $query = $$(_this.ids.querybuilder);
          // if ($query) {
          //    data = await $query.$app.getService("backend").data(fieldId);
          //    data = await $query.getService("backend").data(fieldId);
