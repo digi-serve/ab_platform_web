@@ -565,9 +565,9 @@ module.exports = class FilterComplex extends FilterComplexCore {
          let filter = webix.ui(ui, place);
 
          // NOTE: Need this to have filter.config.value?.includes value
-         let data = [];
+         // let data = [];
          if ($el) {
-            data = await $el.$app.getService("backend").data(fieldId);
+            await $el.$app.getService("backend").data(fieldId);
             // data = await $query.getService("backend").data(fieldId);
          }
          // filter.parse(data);
