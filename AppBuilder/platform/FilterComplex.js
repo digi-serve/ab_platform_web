@@ -50,19 +50,6 @@ function _toInternal(cond, fields = []) {
          cond.includes = cond.includes.map((v) => AB.rules.toDate(v));
       }
 
-      // if (cond.rule == "in_query_field" || cond.rule == "not_in_query_field") {
-      //    const queryOptId = _uiQueryOptionId(cond.key);
-      //    const fieldOptId = _uiFieldOptionId(cond.key);
-      //    const $queryOpt = $$(queryOptId);
-      //    const $fieldOpt = $$(fieldOptId);
-      //    const vals = cond.value?.split?.(":") ?? null;
-
-      //    if (vals?.length > 1 && $queryOpt && $fieldOpt) {
-      //       $queryOpt.setValue(vals[0]);
-      //       $queryOpt.setValue(vals[1]);
-      //    }
-      // }
-
       delete cond.key;
       delete cond.rule;
       delete cond.value;
@@ -555,8 +542,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
          conditions,
          place
       ) {
-         let value = null;
-         let inputs = _this.uiValue(fieldId, value);
+         let inputs = _this.uiValue(fieldId);
 
          let ui = {
             id: place.config.id,
@@ -578,6 +564,15 @@ module.exports = class FilterComplex extends FilterComplexCore {
 
          let filter = webix.ui(ui, place);
 
+         // NOTE: Need this to have filter.config.value?.includes value
+         let data = [];
+         if ($el) {
+            data = await $el.$app.getService("backend").data(fieldId);
+            // data = await $query.getService("backend").data(fieldId);
+         }
+         // filter.parse(data);
+
+         // Populate options of "in_query_field" and "not_in_query_field"
          if (
             conditions.filter(
                (cond) =>
@@ -585,16 +580,20 @@ module.exports = class FilterComplex extends FilterComplexCore {
             ).length &&
             filter.config.value?.includes?.length == 2
          ) {
-            // TODO
+            // inputs = _this.uiValue(fieldId, filter.config.value.includes);
+            // filter.define("inputs", inputs);
+            const queryOptId = _uiQueryOptionId(fieldId);
+            const fieldOptId = _uiFieldOptionId(fieldId);
+            const $queryOpt = $$(queryOptId);
+            const $fieldOpt = $$(fieldOptId);
+            const vals = filter.config.value?.includes ?? [];
+            if (vals?.length > 1 && $queryOpt && $fieldOpt) {
+               $queryOpt.setValue(vals[0]);
+               $fieldOpt.setValue(vals[1]);
+               $queryOpt.refresh();
+               $fieldOpt.refresh();
+            }
          }
-
-         // let data = [];
-         // const $query = $$(_this.ids.querybuilder);
-         // if ($query) {
-         //    data = await $query.$app.getService("backend").data(fieldId);
-         //    data = await $query.getService("backend").data(fieldId);
-         // }
-         // filter.parse(data);
 
          return filter;
       };
@@ -858,10 +857,9 @@ module.exports = class FilterComplex extends FilterComplexCore {
       let queryId;
       let fieldId;
       let fieldOptions = [];
-      if (defaultValue?.indexOf(":") > -1) {
-         const vals = defaultValue.split(":");
-         queryId = vals[0];
-         fieldId = vals[1];
+      if (defaultValue?.length == 2) {
+         queryId = defaultValue[0];
+         fieldId = defaultValue[1];
 
          fieldOptions = pullFieldOption(queryId);
       }
