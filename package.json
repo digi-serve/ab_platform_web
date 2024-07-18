@@ -1,6 +1,6 @@
 {
   "name": "ab_platform_web",
-  "version": "1.7.17+c20205",
+  "version": "1.7.18+c20206",
   "description": "AppBuilder runtime environment for the Web client.",
   "main": "index.js",
   "scripts": {
