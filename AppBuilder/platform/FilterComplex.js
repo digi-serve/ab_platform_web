@@ -40,7 +40,7 @@ function _toInternal(cond, fields = []) {
       };
 
       if (Array.isArray(cond.value)) cond.includes = cond.value;
-      else cond.includes = cond.value?.split?.(",") ?? [];
+      else cond.includes = cond.value?.split?.(/,|:/) ?? [];
 
       if (field?.key == "date" || field?.key == "datetime") {
          cond.condition.filter = cond.condition.filter
@@ -124,6 +124,12 @@ function _toExternal(cond, fields = []) {
             "|",
             formatDate(endOfDayUTC)
          );
+      } else if (
+         cond.rule === "in_query_field" ||
+         cond.rule === "not_in_query_field"
+      ) {
+         cond.value =
+            cond.includes?.length == 2 ? cond.includes.join(":") : null;
       } else {
          cond.value = values
             .map((v) => {
@@ -146,6 +152,14 @@ function _toExternal(cond, fields = []) {
          _toExternal(r, fields);
       });
    }
+}
+
+function _uiQueryOptionId(fieldId) {
+   return `byQueryField-query-option-${fieldId}`;
+}
+
+function _uiFieldOptionId(fieldId) {
+   return `byQueryField-field-option-${fieldId}`;
 }
 
 module.exports = class FilterComplex extends FilterComplexCore {
@@ -495,25 +509,50 @@ module.exports = class FilterComplex extends FilterComplexCore {
       const $el = $$(this.ids.querybuilder);
       if (!$el) return;
 
+      const _this = this;
+      const $filterView = $el.$app.require("jet-views", "filter");
+
+      if (!this._fnBaseGetValue)
+         this._fnBaseGetValue = $filterView.prototype.GetValue;
+      $filterView.prototype.GetValue = function () {
+         const rule = _this._fnBaseGetValue.call(this);
+
+         if (
+            rule.condition.type == "in_query_field" ||
+            rule.condition.type == "not_in_query_field"
+         ) {
+            const queryOptId = _uiQueryOptionId(rule.field);
+            const fieldOptId = _uiFieldOptionId(rule.field);
+            const selectedQueryId = $$(queryOptId)?.getValue();
+            const selectedFieldId = $$(fieldOptId)?.getValue();
+
+            if (selectedQueryId && selectedFieldId) {
+               rule.includes = [selectedQueryId, selectedFieldId];
+            }
+         }
+
+         return rule;
+      };
+
       // window.query.views.filter.prototype.CreateFilter = (
-      $el.$app.require("jet-views", "filter").prototype.CreateFilter = (
-         field,
+      $filterView.prototype.CreateFilter = async function (
+         fieldId,
          type,
          format,
          conditions,
          place
-      ) => {
-         let inputs = this.uiValue(field);
+      ) {
+         let inputs = _this.uiValue(fieldId);
 
          let ui = {
             id: place.config.id,
             view: "filter",
             localId: "filter",
             conditions: conditions,
-            field: field,
+            field: fieldId,
             mode: type,
             template: function (o) {
-               let str = o[field];
+               let str = o[fieldId];
                let parser =
                   format ?? (type == "date" ? webix.i18n.dateFormatStr : null);
                if (parser) str = parser(str);
@@ -525,18 +564,42 @@ module.exports = class FilterComplex extends FilterComplexCore {
 
          let filter = webix.ui(ui, place);
 
+         // NOTE: Need this to have filter.config.value?.includes value
          // let data = [];
-         // const $query = $$(this.ids.querybuilder);
-         // if ($query) {
-         //    data = $query.app.getService("backend").data(field);
-         // }
+         if ($el) {
+            await $el.$app.getService("backend").data(fieldId);
+            // data = await $query.getService("backend").data(fieldId);
+         }
          // filter.parse(data);
+
+         // Populate options of "in_query_field" and "not_in_query_field"
+         if (
+            conditions.filter(
+               (cond) =>
+                  cond.id == "in_query_field" || cond.id == "not_in_query_field"
+            ).length &&
+            filter.config.value?.includes?.length == 2
+         ) {
+            // inputs = _this.uiValue(fieldId, filter.config.value.includes);
+            // filter.define("inputs", inputs);
+            const queryOptId = _uiQueryOptionId(fieldId);
+            const fieldOptId = _uiFieldOptionId(fieldId);
+            const $queryOpt = $$(queryOptId);
+            const $fieldOpt = $$(fieldOptId);
+            const vals = filter.config.value?.includes ?? [];
+            if (vals?.length > 1 && $queryOpt && $fieldOpt) {
+               $queryOpt.setValue(vals[0]);
+               $fieldOpt.setValue(vals[1]);
+               $queryOpt.refresh();
+               $fieldOpt.refresh();
+            }
+         }
 
          return filter;
       };
    }
 
-   uiValue(fieldColumnName) {
+   uiValue(fieldColumnName, defaultValue = null) {
       let result;
 
       // Special case: this_object
@@ -601,7 +664,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
       } else if (field?.key != "connectObject") {
          result = (result ?? [])
             .concat(this.uiTextValue(field))
-            .concat(this.uiQueryFieldValue(field))
+            .concat(this.uiQueryFieldValue(field, defaultValue))
             .concat(this.uiContextValue(field));
       }
       // Special case: from Process builder
@@ -751,20 +814,86 @@ module.exports = class FilterComplex extends FilterComplexCore {
       ];
    }
 
-   uiQueryFieldValue(field) {
+   uiQueryFieldValue(field, defaultValue) {
+      // ABQuery Options
+      const qOpts = this.queries(
+         (q) => this._Object == null || q.id != this._Object.id
+      ).map((q) => {
+         return {
+            id: q.id,
+            value: q.label,
+         };
+      });
+
+      const pullFieldOption = (queryId) => {
+         const options = [];
+
+         // Get fields of the query
+         const Query = this.AB.queryByID(queryId);
+         if (Query) {
+            Query.fields((f) => !f.isConnection).forEach((q) => {
+               options.push({
+                  id: q.id,
+                  value: `${q.object.label}.${q.label}`,
+               });
+            });
+         }
+
+         return options;
+      };
+
+      const refreshFieldOption = ($queryOpt, queryId) => {
+         const options = pullFieldOption(queryId);
+
+         // Update UI
+         if ($queryOpt) {
+            const $queryContainer = $queryOpt.getParentView();
+            const $fieldOption = $queryContainer.getChildViews()[1];
+            $fieldOption?.define("options", options);
+            $fieldOption?.refresh();
+         }
+      };
+
+      let queryId;
+      let fieldId;
+      let fieldOptions = [];
+      if (defaultValue?.length == 2) {
+         queryId = defaultValue[0];
+         fieldId = defaultValue[1];
+
+         fieldOptions = pullFieldOption(queryId);
+      }
+
       return [
          {
             batch: "queryField",
-            view: "combo",
-            placeholder: this.labels.component.inQueryFieldQueryPlaceholder,
-            options: this.queries(
-               (q) => this._Object == null || q.id != this._Object.id
-            ).map((q) => {
-               return {
-                  id: q.id,
-                  value: q.label,
-               };
-            }),
+            view: "form",
+            borderless: true,
+            padding: 0,
+            elements: [
+               {
+                  id: _uiQueryOptionId(field?.id),
+                  name: "query",
+                  view: "combo",
+                  placeholder:
+                     this.labels.component.inQueryFieldQueryPlaceholder,
+                  options: qOpts,
+                  value: queryId,
+                  on: {
+                     onChange: function (qVal) {
+                        refreshFieldOption(this, qVal);
+                     },
+                  },
+               },
+               {
+                  id: _uiFieldOptionId(field?.id),
+                  name: "field",
+                  view: "combo",
+                  placeholder: L("Choose a Field"),
+                  options: fieldOptions,
+                  value: fieldId,
+               },
+            ],
          },
       ];
    }
