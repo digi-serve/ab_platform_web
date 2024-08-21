@@ -1841,8 +1841,8 @@ export default class ABViewGridComponent extends ABViewComponent {
 
             // now we can push the rules into the hash
             complexValidations[f.columnName].push({
-               filters: $$(f.view).getFilterHelper(),
-               values: $DataTable.getSelectedItem(),
+               filters: f.filter.getValue(),
+               values: $DataTable.getSelectedItem[f.columnName],
                invalidMessage: f.invalidMessage,
             });
          });
@@ -1867,10 +1867,21 @@ export default class ABViewGridComponent extends ABViewComponent {
                   });
 
                   // for the case of "this_object" conditions:
-                  if (data.uuid) newData["this_object"] = data.uuid;
+                  if (data.uuid) {
+                     newData["this_object"] = data.uuid;
+                     data["this_object"] = data.uuid;
+                  }
 
                   // use helper funtion to check if valid
-                  const ruleValid = filter.filters(newData);
+                  // const ruleValid = filter.filters(newData);
+                  const filterComplex = ab.filterComplexNew(
+                     `rule-validate-${key}`
+                  );
+                  filterComplex.fieldsLoad(
+                     CurrentObject.fields(),
+                     CurrentObject
+                  );
+                  const ruleValid = filterComplex.isValid(data, filter.filters);
 
                   // if invalid we need to tell the field
                   if (!ruleValid) {
