@@ -1372,7 +1372,6 @@ export default class ABViewGridComponent extends ABViewComponent {
       if (state.value !== state.old) {
          const item = $DataTable?.getItem(editor.row);
          const CurrentObject = this.datacollection.datasource;
-         const abWebix = this.AB.Webix;
 
          item[editor.column] = state.value;
 
@@ -1385,7 +1384,7 @@ export default class ABViewGridComponent extends ABViewComponent {
             f.settings.maxLength &&
             state.value.length > f.settings.maxLength
          ) {
-            abWebix.alert({
+            this.AB.alert({
                title: this.label("Limit max length"),
                text: this.label(
                   "You can enter a maximum of " +
