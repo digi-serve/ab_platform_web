@@ -283,6 +283,19 @@ module.exports = class ABModel extends ABModelCore {
    async findAll(cond) {
       cond = cond || {};
 
+      let rules = cond.where.rules;
+      while (rules?.length) {
+         let nestedRules = [];
+         rules.forEach((rule) => {
+            if (rule.rule === "is_current_date")
+               rule.value = this.AB.getCurrentDateValue();
+            else if (rule.rules?.length)
+               nestedRules = nestedRules.concat(rule.rules);
+         });
+
+         rules = nestedRules;
+      }
+
       // 		// prepare our condition:
       // 		var newCond = {};
 
