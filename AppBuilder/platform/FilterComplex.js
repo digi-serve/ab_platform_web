@@ -101,7 +101,7 @@ function _toExternal(cond, fields = []) {
       }
 
       if (cond.rule === "is_current_date") {
-         cond.value = AB.getCurrentDateValue();
+         cond.value = AB.rules.getUTCDayTimeRange();
       } else if (
          cond.rule === "in_query_field" ||
          cond.rule === "not_in_query_field"
