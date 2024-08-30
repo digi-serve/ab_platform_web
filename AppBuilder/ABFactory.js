@@ -509,6 +509,42 @@ class ABFactory extends ABFactoryCore {
          addDate: (date, number, unit) => {
             return moment(date).add(number, unit).toDate();
          },
+
+         /**
+          * Get today's UTC time range in "YYYY-MM-DD HH:MM:SS" format.
+          *
+          * It converts the start and end of today to UTC to keep things consistent
+          * across time zones. Handy when you need to deal with dates in different regions.
+          *
+          * @returns {string} UTC time range for today.
+          */
+
+         getUTCDayTimeRange: () => {
+            let now = new Date();
+            let year = now.getFullYear();
+            let month = now.getMonth();
+            let date = now.getDate();
+            let startOfDay = new Date(year, month, date, 0, 0, 0);
+            let endOfDay = new Date(year, month, date, 23, 59, 59);
+
+            // Convert to UTC by subtracting the timezone offset
+            let startOfDayUTC = new Date(
+               startOfDay.getTime() + startOfDay.getTimezoneOffset() * 60000
+            );
+            let endOfDayUTC = new Date(
+               endOfDay.getTime() + endOfDay.getTimezoneOffset() * 60000
+            );
+
+            //  Format the date in "YYYY-MM-DD HH:MM:SS" format
+            let formatDate = (date) => {
+               let isoString = date.toISOString();
+               return `${isoString.slice(0, 10)} ${isoString.slice(11, 19)}`;
+            };
+            return formatDate(startOfDayUTC).concat(
+               "|",
+               formatDate(endOfDayUTC)
+            );
+         },
       };
       (Object.keys(platformRules) || []).forEach((k) => {
          this.rules[k] = platformRules[k];
