@@ -163,6 +163,7 @@ class PortalAuthLoginForm extends ClassUI {
                                           {
                                              view: "button",
                                              label: L("Forgot password?"),
+                                             id: "portal_auth_login_forgot",
                                              css: "webix_transparent",
                                              click: () => {
                                                 this.emit("request.reset");
@@ -170,6 +171,11 @@ class PortalAuthLoginForm extends ClassUI {
                                                 // $$("password_reset_email").show();
                                              },
                                              width: 150,
+                                             on: {
+                                                onAfterRender() {
+                                                   ClassUI.CYPRESS_REF(this);
+                                                },
+                                             },
                                           },
                                           {},
                                        ],
