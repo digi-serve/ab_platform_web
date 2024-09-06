@@ -75,6 +75,10 @@ class PortalAuthLoginResetPassword extends ClassUI {
                                        ),
                                        validateEvent: "blur",
                                        bottomPadding: 20,
+                                       attributes: {
+                                          "data-cy":
+                                             "portal_reset_password_new",
+                                       },
                                     },
                                     {
                                        id: "password-confirm",
@@ -92,6 +96,10 @@ class PortalAuthLoginResetPassword extends ClassUI {
                                        ),
                                        validateEvent: "blur",
                                        bottomPadding: 20,
+                                       attributes: {
+                                          "data-cy":
+                                             "portal_reset_password_confirm",
+                                       },
                                     },
                                     {
                                        margin: 10,
@@ -103,6 +111,7 @@ class PortalAuthLoginResetPassword extends ClassUI {
                                              view: "button",
                                              label: L("Save"),
                                              type: "form",
+                                             id: "portal_reset_password_submit",
                                              css: "webix_primary",
                                              width: 150,
                                              hotkey: "enter",
@@ -131,6 +140,11 @@ class PortalAuthLoginResetPassword extends ClassUI {
                                                       console.log(err);
                                                    });
                                                 }
+                                             },
+                                             on: {
+                                                onAfterRender() {
+                                                   ClassUI.CYPRESS_REF(this);
+                                                },
                                              },
                                           },
                                           {},
