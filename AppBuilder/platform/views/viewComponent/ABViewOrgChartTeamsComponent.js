@@ -72,13 +72,15 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
    async displayOrgChart() {
       const baseView = this.view;
       const chartData = this.AB.cloneDeep(this.chartData);
+      const draggable = baseView.settings.draggable == 1;
 
       const orgchart = new this.OrgChart({
          data: chartData,
          direction: baseView.settings.direction,
          // depth: baseView.settings.depth,
-         pan: baseView.settings.pan,
-         zoom: baseView.settings.zoom,
+         pan: baseView.settings.pan == 1,
+         zoom: baseView.settings.zoom == 1,
+         draggable,
          // visibleLevel: baseView.settings.visibleLevel,
 
          exportButton: baseView.settings.export,
@@ -92,6 +94,26 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          // },
          nodeContent: "description",
       });
+
+      if (draggable) {
+         // On drop update the parent (dropZone) of the node
+         orgchart.addEventListener("nodedropped.orgchart", (event) => {
+            const dragNode = JSON.parse(
+               event.detail.draggedNode.dataset.source
+            );
+            const dropNode = JSON.parse(event.detail.dropZone.dataset.source);
+            const dragRecord = dragNode._rawData;
+            const dropID = dropNode._rawData.id;
+
+            const linkField = this.getSettingField("teamLink");
+            const parent = this.AB.definitionByID(
+               linkField.settings.linkColumn
+            );
+            dragRecord[parent.columnName] = dropID;
+
+            this.datacollection.model.update(dragRecord.id, dragRecord);
+         });
+      }
 
       const chartDom = document.querySelector(`#${this.ids.chartDom}`);
       if (chartDom) {
@@ -120,13 +142,8 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       }
       if (!topNode) return null;
 
-      const teamLink = this.AB.definitionByID(
-         view.settings.teamLink
-      )?.columnName;
-
-      const teamName = this.AB.definitionByID(
-         view.settings.teamName
-      )?.columnName;
+      const teamLink = this.getSettingField("teamLink").columnName;
+      const teamName = this.getSettingField("teamName").columnName;
 
       const chartData = this.chartData;
       chartData.name = topNode[teamName] ?? "";
@@ -162,6 +179,15 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          this._chartData = {};
       }
       return this._chartData;
+   }
+
+   /**
+    * Get the ABField from settings
+    * @param {string} setting key in this.view.settings - should be an id for an
+    * ABField
+    */
+   getSettingField(setting) {
+      return this.AB.definitionByID(this.view.settings[setting]);
    }
 
    _setColor() {
