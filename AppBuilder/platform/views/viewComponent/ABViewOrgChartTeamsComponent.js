@@ -108,92 +108,53 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
    async pullData() {
       const view = this.view;
       const dc = view.datacollection;
+      await dc?.waitForDataCollectionToInitialize(dc);
 
-      const cursor = dc?.getCursor();
-      if (!cursor) return null;
+      let topNode = dc?.getCursor();
+      if (view.settings.topTeam) {
+         const topNodeColumn = this.AB.definitionByID(
+            view.settings.topTeam
+         ).columnName;
+         const topFromFeild = dc.getData((e) => e[topNodeColumn] === 1)[0];
+         topNode = topFromFeild ? topFromFeild : topNode;
+      }
+      if (!topNode) return null;
 
-      // TODO refactor props to only support one field (self linking)
-      const valueField = view.valueFields()[0].columnName;
-      // const descriptionField = view.descriptionField?.();
+      const teamLink = this.AB.definitionByID(
+         view.settings.teamLink
+      )?.columnName;
+
+      const teamName = this.AB.definitionByID(
+         view.settings.teamName
+      )?.columnName;
 
       const chartData = this.chartData;
-      (chartData.name = cursor.Name), (chartData.description = "...");
+      chartData.name = topNode[teamName] ?? "";
+      chartData.description = "...";
       // description:
       //    descriptionField?.format?.(f) ??
       //    f[descriptionField?.columnName] ??
       //    "",
-      chartData._rawData = cursor;
+      chartData._rawData = topNode;
 
       function pullChildData(node) {
+         console.log(node.name, node._rawData[teamLink]);
          node.children = [];
-         node._rawData[valueField].forEach((id) => {
+         node._rawData[teamLink].forEach((id) => {
             const childData = dc.getData((e) => e.id === id)[0];
             const child = {
-               name: childData.Name,
+               name: childData[teamName],
                description: "...",
                _rawData: childData,
             };
-            if (childData[valueField].length > 0) {
+            if (childData[teamLink].length > 0) {
                pullChildData(child);
             }
             node.children.push(child);
          });
          return;
       }
-
       pullChildData(chartData);
-      //
-      // let parentChartData = [chartData];
-      // let currChildren;
-      //
-      // valueFields.forEach((field) => {
-      //    let _tempParentChartData = [];
-      //
-      //    parentChartData.forEach(async (chartItem) => {
-      //       if (!chartItem) return;
-      //
-      //       const rawData = chartItem?._rawData;
-      //       currChildren = rawData?.[field?.relationName()];
-      //
-      //       // Pull data from the server
-      //       if (!currChildren) {
-      //          const objLink = field.object;
-      //          const where = {
-      //             glue: "and",
-      //             rules: [],
-      //          };
-      //          where.rules.push({
-      //             key: objLink.PK(),
-      //             rule: "equals",
-      //             value: rawData[objLink.PK()],
-      //          });
-      //          const returnData = await objLink
-      //             .model()
-      //             .findAll({ where, populate: true });
-      //          chartItem._rawData = returnData?.data[0];
-      //          currChildren = chartItem._rawData?.[field?.relationName()];
-      //
-      //          this.displayOrgChart();
-      //       }
-      //
-      //       chartItem.children = [];
-      //       if (currChildren?.length) {
-      //          currChildren.forEach((childData) => {
-      //             chartItem.children.push({
-      //                name: field.datasourceLink.displayData(childData),
-      //                description: "",
-      //                _rawData: childData,
-      //             });
-      //          });
-      //       }
-      //
-      //       _tempParentChartData = _tempParentChartData.concat(
-      //          chartItem.children
-      //       );
-      //    });
-      //
-      //    parentChartData = _tempParentChartData;
-      // });
    }
 
    get chartData() {
