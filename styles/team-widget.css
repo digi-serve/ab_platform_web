@@ -1,0 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=Jomhuria&display=swap');
+
+org-chart .node {
+  display: inline-block;
+  position: relative;
+  margin: 5px;
+  padding: 5px;
+  border: 2px dashed transparent;
+  text-align: center;
+  width: 164px;
+}
+
+org-chart .node .title {
+   text-overflow: ellipsis;
+   white-space: nowrap;
+   display: flex;
+   flex-direction: row;
+   justify-content: center;
+   align-items: center;
+   padding: 6px 69px;
+   gap: 10px;
+   background: #EF3340;
+   border-radius: 15px;
+   width: 154px;
+   height: 32px;
+   font-family: 'Jomhuria', sans-serif;
+   font-style: normal;
+   font-weight: 400;
+   font-size: 24px;
+   line-height: 24px;
+   color: #FFFFFF;
+   flex: none;
+   order: 0;
+   flex-grow: 0;
+   position: relative;
+   z-index: 1;
+}
+
+org-chart .node .content {
+   position: relative;
+   top: -15px;
+   width: 154px;
+   min-height: 60px;
+   background: #EEEEEE;
+   border-radius: 0 0 15px 15px;
+}
+
+org-chart tr.lines .topLine {
+  border-top: 2px solid black;
+}
+
+org-chart tr.lines .rightLine {
+  border-right: 1px solid black;
+  float: none;
+  border-radius: 0;
+}
+
+org-chart tr.lines .leftLine {
+  border-left: 1px solid black;
+  float: none;
+  border-radius: 0;
+}
+
+org-chart tr.lines .downLine {
+  background-color: black;
+  margin: 0 auto;
+  height: 20px;
+  width: 2px;
+  float: none;
+}
+
+
+.team-leader-section {
+   width: 154px;
+   min-height: 35px;
+   left: 0px;
+   top: 14px;
+   background: #1A3E72;
+}
+
