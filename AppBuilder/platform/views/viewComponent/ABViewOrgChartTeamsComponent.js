@@ -52,6 +52,10 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             /* webpackPrefetch: true */
             "../../../../styles/orgchart-webcomponents.css"
          ),
+         import(
+            /* webpackPrefetch: true */
+            "../../../../styles/team-widget.css"
+         ),
       ]);
 
       this.OrgChart = orgChartLoader.default;
@@ -78,20 +82,25 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          data: chartData,
          direction: baseView.settings.direction,
          // depth: baseView.settings.depth,
-         pan: baseView.settings.pan == 1,
-         zoom: baseView.settings.zoom == 1,
+         chartContainer: `#${this.ids.chartDom}`,
+         pan: true, // baseView.settings.pan == 1,
+         zoom: true, //baseView.settings.zoom == 1,
          draggable,
          // visibleLevel: baseView.settings.visibleLevel,
 
          exportButton: baseView.settings.export,
          exportFilename: baseView.settings.exportFilename,
+         createNode: ($node /*, data*/) => {
+            // remove built in icon
+            $node.querySelector(".title > i")?.remove();
+            // customize
+            const $content = $node.querySelector(".content");
+            $content.innerHTML = "";
+            const $leaderSection = document.createElement("div");
+            $leaderSection.classList.add("team-leader-section");
+            $content.append($leaderSection);
+         },
 
-         // ajaxURLs: {
-         //    children: function (nodeData) {
-         //       console.info("nodeData: ", nodeData);
-         //       return null;
-         //    },
-         // },
          nodeContent: "description",
       });
 
@@ -147,11 +156,6 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
 
       const chartData = this.chartData;
       chartData.name = topNode[teamName] ?? "";
-      chartData.description = "...";
-      // description:
-      //    descriptionField?.format?.(f) ??
-      //    f[descriptionField?.columnName] ??
-      //    "",
       chartData._rawData = topNode;
 
       function pullChildData(node) {
@@ -191,6 +195,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
    }
 
    _setColor() {
+      return;
       const view = this.view;
       let doms = document.querySelectorAll(`org-chart`);
       doms.forEach((dom) => {
