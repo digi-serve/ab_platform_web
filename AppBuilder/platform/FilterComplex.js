@@ -106,6 +106,15 @@ function _toExternal(cond, fields = []) {
       ) {
          cond.value =
             cond.includes?.length == 2 ? cond.includes.join(":") : null;
+      } else {
+         cond.value = values
+            .map((v) => {
+               // Convert date format
+               if (field && (field.key === "date" || field.key === "datetime"))
+                  return field.exportValue(new Date(v));
+               return v;
+            })
+            .join(",");
       }
 
       delete cond.field;
