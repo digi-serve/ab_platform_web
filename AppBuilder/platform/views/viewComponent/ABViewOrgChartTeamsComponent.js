@@ -9,6 +9,9 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             {
                chartView: "",
                chartDom: "",
+               teamForm: "",
+               teamFormPopup: "",
+               teamFormTitle: "",
             },
             ids
          )
@@ -87,10 +90,11 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          zoom: true, //baseView.settings.zoom == 1,
          draggable,
          // visibleLevel: baseView.settings.visibleLevel,
-
+         parentNodeSymbol: false,
          exportButton: baseView.settings.export,
          exportFilename: baseView.settings.exportFilename,
          createNode: ($node /*, data*/) => {
+            $node.onclick = (e) => this.nodeClick(e);
             // remove built in icon
             $node.querySelector(".title > i")?.remove();
             // customize
@@ -103,6 +107,8 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
 
          nodeContent: "description",
       });
+
+      this.__orgchart = orgchart;
 
       if (draggable) {
          // On drop update the parent (dropZone) of the node
@@ -129,11 +135,8 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          chartDom.textContent = "";
          chartDom.innerHTML = "";
          chartDom.appendChild(orgchart);
+         this.toolbarUi(chartDom);
       }
-
-      setTimeout(() => {
-         this._setColor();
-      }, 1);
    }
 
    async pullData() {
@@ -156,26 +159,30 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
 
       const chartData = this.chartData;
       chartData.name = topNode[teamName] ?? "";
+      chartData.id = this.teamNodeID(topNode.id);
       chartData._rawData = topNode;
 
-      function pullChildData(node) {
+      const maxDepth = 10; // prevent inifinite loop
+      function pullChildData(node, prefixFn, depth = 0) {
+         if (depth >= maxDepth) return;
          console.log(node.name, node._rawData[teamLink]);
          node.children = [];
          node._rawData[teamLink].forEach((id) => {
             const childData = dc.getData((e) => e.id === id)[0];
             const child = {
                name: childData[teamName],
+               id: prefixFn(id),
                description: "...",
                _rawData: childData,
             };
             if (childData[teamLink].length > 0) {
-               pullChildData(child);
+               pullChildData(child, prefixFn, depth + 1);
             }
             node.children.push(child);
          });
          return;
       }
-      pullChildData(chartData);
+      pullChildData(chartData, this.teamNodeID);
    }
 
    get chartData() {
@@ -194,32 +201,161 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       return this.AB.definitionByID(this.view.settings[setting]);
    }
 
-   _setColor() {
-      return;
-      const view = this.view;
-      let doms = document.querySelectorAll(`org-chart`);
-      doms.forEach((dom) => {
-         dom.style.backgroundImage = "none";
-      });
+   nodeClick(event) {
+      // if (this.tool === "add") {
+      const recordID = this.teamRecordID(event.currentTarget.id);
+      this.teamForm("Add", { __parentID: recordID });
+      // this.addChildNode(event);
+      // }
+   }
 
-      doms = document.querySelectorAll(`
-         org-chart .verticalNodes>td::before,
-         org-chart .verticalNodes ul>li::before,
-         org-chart .verticalNodes ul>li::after,
-         org-chart .node .content,
-         org-chart tr.lines .topLine,
-         org-chart tr.lines .rightLine,
-         org-chart tr.lines .leftLine`);
-      doms.forEach((dom) => {
-         dom.style.borderColor = view.settings.color;
-      });
+   async teamAddChild(values) {
+      const { id } = await this.datacollection.model.create(values);
 
-      doms = document.querySelectorAll(`
-         org-chart tr.lines .downLine,
-         org-chart .node .title`);
-      doms.forEach((dom) => {
-         dom.style.backgroundColor = view.settings.color;
-      });
+      const linkField = this.AB.definitionByID(
+         this.getSettingField("teamLink").settings.linkColumn
+      ).columnName;
+      const nameField = this.getSettingField("teamName").columnName;
+      const parent = document.querySelector(
+         `#${this.teamNodeID(values[linkField])}`
+      );
+      const hasChild = parent.parentNode.colSpan > 1;
+      const newChild = {
+         name: values[nameField],
+         id: this.teamNodeID(id),
+         relationship: hasChild ? "110" : "100",
+      };
+      // Need to add differently if the node already has child nodes
+      if (hasChild) {
+         const sibling = this.closest(parent, (el) => el.nodeName === "TABLE")
+            .querySelector(".nodes")
+            .querySelector(".node");
+         this.__orgchart.addSiblings(sibling, { siblings: [newChild] });
+      } else {
+         this.__orgchart.addChildren(parent, {
+            children: [newChild],
+         });
+      }
+   }
+
+   teamForm(mode, values) {
+      let $teamFormPopup = $$(this.ids.teamFormPopup);
+      const linkField = this.AB.definitionByID(
+         this.getSettingField("teamLink").settings.linkColumn
+      ).columnName;
+      if (!$teamFormPopup) {
+         const nameField = this.getSettingField("teamName");
+         $teamFormPopup = webix.ui({
+            view: "popup",
+            id: this.ids.teamFormPopup,
+            close: true,
+            position: "center",
+            body: {
+               rows: [
+                  {
+                     view: "toolbar",
+                     id: "myToolbar",
+                     cols: [
+                        {
+                           view: "label",
+                           label: `Edit Team`,
+                           align: "left",
+                           id: this.ids.teamFormTitle,
+                        },
+                        {
+                           view: "button",
+                           value: "X",
+                           align: "right",
+                           click: () => $teamFormPopup.hide(),
+                        },
+                     ],
+                  },
+                  {
+                     view: "form",
+                     id: this.ids.teamForm,
+                     elements: [
+                        {
+                           view: "text",
+                           label: nameField.label ?? nameField.columnName,
+                           name: nameField.columnName,
+                        },
+                        { view: "text", name: "id", hidden: true },
+                        { view: "text", name: linkField, hidden: true },
+                        {
+                           view: "button",
+                           value: "Add",
+                           css: "webix_primary",
+                           click: () => {
+                              const values = $$(this.ids.teamForm).getValues();
+                              if (values.id) {
+                                 //TODO
+                              } else {
+                                 this.teamAddChild(values);
+                              }
+                              $teamFormPopup.hide();
+                           },
+                        },
+                     ],
+                  },
+               ],
+            },
+         });
+      }
+      if (values.__parentID) {
+         values[linkField] = values.__parentID;
+         delete values.__parentID;
+      }
+      $$(this.ids.teamFormTitle).define("label", `${mode} Team`);
+      $$(this.ids.teamForm).setValues(values);
+      $teamFormPopup.show();
+   }
+
+   /**
+    * generate a id for the team dom node based on it's record id
+    * @param {string} id record id
+    */
+   teamNodeID(id) {
+      return `teamnode_${id}`;
+   }
+
+   /**
+    * extract the record id from the team dom node id
+    * @param {string} id dom node id
+    */
+   teamRecordID(id) {
+      return id.split("_")[1];
+   }
+
+   /**
+    * Create toolbar ui
+    * @param {HTMLElement} dom node
+    */
+   toolbarUi(dom) {
+      const toolbar = document.createElement("div");
+      toolbar.classList.add("team-chart-toolbar");
+      const button = document.createElement("button");
+      button.classList.add("team-chart-toolbar");
+      button.textContent = "add";
+      button.onclick(() => (this.tool = "add"));
+      toolbar.appendChild(button);
+      dom.appendChild(toolbar);
+   }
+
+   // UTIL
+
+   /**
+    * Recursively finds the closest ancestor element that matches the provided function.
+    * @param {Element} el - The starting element.
+    * @param {Function} fn - The function to test against.
+    * @return {Element|null} The closest matching ancestor element or null if no match is found.
+    */
+   closest(el, fn) {
+      return (
+         el &&
+         (fn(el) && el !== document.querySelector(`#${this.ids.chartDom}`)
+            ? el
+            : this.closest(el.parentNode, fn))
+      );
    }
 
    busy() {
