@@ -217,6 +217,9 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       } else if (this.tool === "edit") {
          const [values] = this.datacollection.getData((e) => e.id === recordID);
          this.teamForm("Edit", values);
+      } else if (this.tool === "delete") {
+         const [values] = this.datacollection.getData((e) => e.id === recordID);
+         this.teamDelete(values);
       }
    }
 
@@ -259,6 +262,34 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       // @TODO check for active assignment
       // if (hasActiveAssignment) return false;
       return true;
+   }
+
+   teamCanDelete(values) {
+      const canInactive = this.getSettingField("teamCanInactivate").columnName;
+      if (!values[canInactive]) return false;
+      const children = this.getSettingField("teamLink").columnName;
+      if (values[children].length > 0) return false;
+      // @TODO check for any assignment
+      // if (hasAssignment) return false;
+      return true;
+   }
+
+   teamDelete(values) {
+      if (!this.teamCanDelete(values)) {
+         this.AB.Webix.message({
+            text: "This team cannot be deleted",
+            type: "error",
+            expire: 1001,
+         });
+         return;
+      }
+      this.AB.Webix.confirm({
+         text: "This can't be undone, are you sure?",
+      }).then(() => {
+         this.datacollection.model.delete(values.id);
+         const nodeID = this.teamNodeID(values.id);
+         this.__orgchart.removeNodes(document.querySelector(`#${nodeID}`));
+      });
    }
 
    teamEdit(values) {
