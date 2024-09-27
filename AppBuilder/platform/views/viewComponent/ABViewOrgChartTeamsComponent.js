@@ -11,7 +11,9 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                chartDom: "",
                teamForm: "",
                teamFormPopup: "",
+               teamFormSubmit: "",
                teamFormTitle: "",
+               teamFormInactive: "",
             },
             ids
          )
@@ -156,6 +158,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
 
       const teamLink = this.getSettingField("teamLink").columnName;
       const teamName = this.getSettingField("teamName").columnName;
+      const teamInactive = this.getSettingField("teamInactive").columnName;
 
       const chartData = this.chartData;
       chartData.name = topNode[teamName] ?? "";
@@ -165,10 +168,12 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const maxDepth = 10; // prevent inifinite loop
       function pullChildData(node, prefixFn, depth = 0) {
          if (depth >= maxDepth) return;
-         console.log(node.name, node._rawData[teamLink]);
          node.children = [];
          node._rawData[teamLink].forEach((id) => {
             const childData = dc.getData((e) => e.id === id)[0];
+            // Don't show inactive teams
+            // @TODO this should be a default filter option
+            if (childData[teamInactive]) return;
             const child = {
                name: childData[teamName],
                id: prefixFn(id),
@@ -180,6 +185,10 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             }
             node.children.push(child);
          });
+         // sort children alphabetically
+         node.children = node.children.sort((a, b) =>
+            a.name > b.name ? 1 : -1
+         );
          return;
       }
       pullChildData(chartData, this.teamNodeID);
@@ -202,11 +211,13 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
    }
 
    nodeClick(event) {
-      // if (this.tool === "add") {
       const recordID = this.teamRecordID(event.currentTarget.id);
-      this.teamForm("Add", { __parentID: recordID });
-      // this.addChildNode(event);
-      // }
+      if (this.tool === "add") {
+         this.teamForm("Add", { __parentID: recordID });
+      } else if (this.tool === "edit") {
+         const [values] = this.datacollection.getData((e) => e.id === recordID);
+         this.teamForm("Edit", values);
+      }
    }
 
    async teamAddChild(values) {
@@ -238,8 +249,36 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       }
    }
 
+   teamCanInactivate(values) {
+      const isInactive = this.getSettingField("teamInactive").columnName;
+      if (values[isInactive]) return true; // Allow activating inactive teams
+      const canInactive = this.getSettingField("teamCanInactivate").columnName;
+      if (!values[canInactive]) return false;
+      const children = this.getSettingField("teamLink").columnName;
+      if (values[children].length > 0) return false;
+      // @TODO check for active assignment
+      // if (hasActiveAssignment) return false;
+      return true;
+   }
+
+   teamEdit(values) {
+      this.datacollection.model.update(values.id, values).catch((err) => {
+         //TODO
+      });
+      const nodeID = this.teamNodeID(values.id);
+      const node = document.querySelector(`#${nodeID}`);
+      const inactive = this.getSettingField("teamInactive").columnName;
+      // @TODO this will need to check against active filters
+      if (values[inactive]) {
+         this.__orgchart.removeNodes(node);
+      }
+      const nameCol = this.getSettingField("teamName").columnName;
+      node.querySelector(".title").innerHTML = values[nameCol];
+   }
+
    teamForm(mode, values) {
       let $teamFormPopup = $$(this.ids.teamFormPopup);
+      const inactive = this.getSettingField("teamInactive").columnName;
       const linkField = this.AB.definitionByID(
          this.getSettingField("teamLink").settings.linkColumn
       ).columnName;
@@ -279,18 +318,25 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                            label: nameField.label ?? nameField.columnName,
                            name: nameField.columnName,
                         },
+                        {
+                           view: "switch",
+                           id: this.ids.teamFormInactive,
+                           name: inactive,
+                           label: "Inactive",
+                        },
                         { view: "text", name: "id", hidden: true },
                         { view: "text", name: linkField, hidden: true },
                         {
                            view: "button",
+                           id: this.ids.teamFormSubmit,
                            value: "Add",
                            css: "webix_primary",
                            click: () => {
                               const values = $$(this.ids.teamForm).getValues();
-                              if (values.id) {
-                                 //TODO
-                              } else {
+                              if (this.tool === "add") {
                                  this.teamAddChild(values);
+                              } else if (this.tool === "edit") {
+                                 this.teamEdit(values);
                               }
                               $teamFormPopup.hide();
                            },
@@ -306,7 +352,15 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          delete values.__parentID;
       }
       $$(this.ids.teamFormTitle).define("label", `${mode} Team`);
+      $$(this.ids.teamFormTitle).refresh();
+      $$(this.ids.teamFormSubmit).setValue(mode);
       $$(this.ids.teamForm).setValues(values);
+      this.teamCanInactivate(values)
+         ? $$(this.ids.teamFormInactive).enable()
+         : $$(this.ids.teamFormInactive).disable();
+      if (mode === "Edit") {
+         // Check if we can inactivate
+      }
       $teamFormPopup.show();
    }
 
@@ -333,15 +387,15 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
    toolbarUi(dom) {
       const toolbar = document.createElement("div");
       toolbar.classList.add("team-chart-toolbar");
-      const button = document.createElement("button");
-      button.classList.add("team-chart-toolbar");
-      button.textContent = "add";
-      button.onclick(() => (this.tool = "add"));
-      toolbar.appendChild(button);
+      ["add", "edit", "delete"].forEach((m) => {
+         const button = document.createElement("button");
+         button.classList.add("team-chart-button");
+         button.textContent = m;
+         button.onclick = () => (this.tool = m);
+         toolbar.appendChild(button);
+      });
       dom.appendChild(toolbar);
    }
-
-   // UTIL
 
    /**
     * Recursively finds the closest ancestor element that matches the provided function.
