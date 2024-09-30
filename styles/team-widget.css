@@ -41,8 +41,16 @@ org-chart .node .content {
    top: -15px;
    width: 154px;
    min-height: 60px;
-   background: #EEEEEE;
    border-radius: 0 0 15px 15px;
+   display: flex;
+   flex-direction: column;
+   align-items: flex-end;
+   flex-wrap: nowrap;
+   gap: 4px;
+   margin: 0 auto;
+   background: #dddddd;
+   overflow: hidden;
+   box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
 }
 
 org-chart tr.lines .topLine {
@@ -76,5 +84,62 @@ org-chart tr.lines .downLine {
    left: 0px;
    top: 14px;
    background: #1A3E72;
+   display: flex;
+   align-self: stretch;
+   flex-wrap: nowrap;
+   gap: 5px;
+   /* position: relative; */
+}
+
+.team-member-section {
+   display: flex;
+   flex-direction: column;
+   align-items: flex-end;
+   flex-wrap: nowrap;
+   gap: 4px;
+   /* position: relative; */
+   width: 154px;
+   min-height: 21px;
+}
+
+.team-button-section {
+   display: flex;
+   flex-direction: row;
+   padding: 3px;
+   gap: 6px;
+   justify-content: flex-end;
+}
+
+.team-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 28px;
+  height: 10px;
+  padding: 2px 4px;
+  background: #1A3E72;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 8px;
+  color: white;
+}
+
+.team-chart-toolbar {
+   display: flex;
+   flex-direction: row;
+   align-items: flex-start;
+   padding: 17px 24px;
+   gap: 10px;
+
+   width: 254px;
+   background: #FFFFFF;
+   box-shadow: 0px -1px 4px rgba(0, 0, 0, 0.25);
+   border-radius: 20px;
+}
+
+.team-chart-button {
+
 }
 

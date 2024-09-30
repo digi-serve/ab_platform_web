@@ -95,16 +95,36 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          parentNodeSymbol: false,
          exportButton: baseView.settings.export,
          exportFilename: baseView.settings.exportFilename,
-         createNode: ($node /*, data*/) => {
-            $node.onclick = (e) => this.nodeClick(e);
+         createNode: ($node, { id }) => {
             // remove built in icon
             $node.querySelector(".title > i")?.remove();
             // customize
             const $content = $node.querySelector(".content");
             $content.innerHTML = "";
-            const $leaderSection = document.createElement("div");
-            $leaderSection.classList.add("team-leader-section");
-            $content.append($leaderSection);
+            const $leaderSection = element("div", "team-leader-section");
+            const $memberSection = element("div", "team-member-section");
+            const $buttons = element("div", "team-button-section");
+            const $editButton = element("div", "team-button");
+            $editButton.append(element("i", "fa fa-pencil"));
+            const $addButton = element("div", "team-button");
+            $addButton.append(element("i", "fa fa-plus"));
+            $buttons.append($editButton, $addButton);
+            const dataID = this.teamRecordID(id);
+            const values = this.datacollection.getData(
+               (e) => e.id === dataID
+            )[0];
+            $addButton.onclick = () => {
+               this.teamForm("Add", { __parentID: dataID });
+            };
+            $editButton.onclick = () => this.teamForm("Edit", values);
+
+            if (this.teamCanDelete(values)) {
+               const $deleteButton = element("div", "team-button");
+               $deleteButton.append(element("i", "fa fa-trash"));
+               $deleteButton.onclick = () => this.teamDelete(values);
+               $buttons.append($deleteButton);
+            }
+            $content.append($leaderSection, $memberSection, $buttons);
          },
 
          nodeContent: "description",
@@ -208,19 +228,6 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
     */
    getSettingField(setting) {
       return this.AB.definitionByID(this.view.settings[setting]);
-   }
-
-   nodeClick(event) {
-      const recordID = this.teamRecordID(event.currentTarget.id);
-      if (this.tool === "add") {
-         this.teamForm("Add", { __parentID: recordID });
-      } else if (this.tool === "edit") {
-         const [values] = this.datacollection.getData((e) => e.id === recordID);
-         this.teamForm("Edit", values);
-      } else if (this.tool === "delete") {
-         const [values] = this.datacollection.getData((e) => e.id === recordID);
-         this.teamDelete(values);
-      }
    }
 
    async teamAddChild(values) {
@@ -364,10 +371,10 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                            css: "webix_primary",
                            click: () => {
                               const values = $$(this.ids.teamForm).getValues();
-                              if (this.tool === "add") {
-                                 this.teamAddChild(values);
-                              } else if (this.tool === "edit") {
+                              if (values.id) {
                                  this.teamEdit(values);
+                              } else {
+                                 this.teamAddChild(values);
                               }
                               $teamFormPopup.hide();
                            },
@@ -455,3 +462,15 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       $chartView?.hideProgress?.();
    }
 };
+
+/**
+ * Creates a new HTML element with the given type and classes.
+ * @param {string} type - The type of the HTML element to create.
+ * @param {string} classes - A space-separated list of classes to add to the element.
+ * @returns {Element} The newly created HTML element.
+ */
+function element(type, classes) {
+   const elem = document.createElement(type);
+   elem.classList.add(...classes.split(" "));
+   return elem;
+}
