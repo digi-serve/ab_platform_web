@@ -290,7 +290,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          });
          return;
       }
-      this.AB.Webix.confirm({
+      return this.AB.Webix.confirm({
          text: "This can't be undone, are you sure?",
       }).then(() => {
          this.datacollection.model.delete(values.id);
@@ -416,23 +416,6 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
     */
    teamRecordID(id) {
       return id.split("_")[1];
-   }
-
-   /**
-    * Create toolbar ui
-    * @param {HTMLElement} dom node
-    */
-   toolbarUi(dom) {
-      const toolbar = document.createElement("div");
-      toolbar.classList.add("team-chart-toolbar");
-      ["add", "edit", "delete"].forEach((m) => {
-         const button = document.createElement("button");
-         button.classList.add("team-chart-button");
-         button.textContent = m;
-         button.onclick = () => (this.tool = m);
-         toolbar.appendChild(button);
-      });
-      dom.appendChild(toolbar);
    }
 
    /**
