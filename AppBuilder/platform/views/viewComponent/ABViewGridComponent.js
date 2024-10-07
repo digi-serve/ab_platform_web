@@ -1379,9 +1379,9 @@ export default class ABViewGridComponent extends ABViewComponent {
          $DataTable.removeCellCss(item.id, editor.column, "webix_invalid_cell");
 
          //maxlength field
-         const f = CurrentObject.fieldByID(editor.config.fieldID);
+         const f = CurrentObject.fieldByID(editor.config?.fieldID);
          if (
-            f.settings.maxLength &&
+            f?.settings.maxLength &&
             state.value.length > f.settings.maxLength
          ) {
             this.AB.alert({
