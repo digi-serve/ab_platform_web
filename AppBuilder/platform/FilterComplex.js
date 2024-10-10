@@ -36,20 +36,19 @@ function _toInternal(cond, fields = []) {
 
       cond.condition = {
          type: cond.rule,
-         // filter: cond.value,
+         filter: cond.value,
       };
 
       // if (Array.isArray(cond.value)) cond.includes = cond.value;
       // else cond.includes = cond.value?.split?.(/,|:/) ?? [];
 
       if (field?.key == "date" || field?.key == "datetime") {
-         cond.condition.filter;
-         // cond.condition.filter = cond.condition.filter
-         //    ? AB.rules.toDate(cond.condition.filter)
-         //    : null;
+         cond.condition.filter = cond.condition.filter
+            ? AB.rules.toDate(cond.condition.filter)
+            : null;
+
          // cond.includes = cond.includes.map((v) => AB.rules.toDate(v));
       }
-
       delete cond.key;
       delete cond.rule;
       delete cond.value;
