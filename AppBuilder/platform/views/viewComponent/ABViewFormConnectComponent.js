@@ -243,6 +243,9 @@ module.exports = class ABViewFormConnectComponent extends (
 
          $formItem.blockEvent();
 
+         // store the user's selected option in local storage.
+         field.saveSelect(selectedValues);
+
          const prepedVals = selectedValues.join
             ? selectedValues.join()
             : selectedValues;
