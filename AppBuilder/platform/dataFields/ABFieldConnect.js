@@ -665,15 +665,17 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             "",
             options?.sort ?? "",
             theEditor
-         ).then((data) => {
-            this.populateOptions(theEditor, data, field, form, true);
+         ).then(async (data) => {
+            await this.populateOptions(theEditor, data, field, form, true);
             resolve(data);
          });
       });
    }
 
-   populateOptions(theEditor, data, field, form, addCy) {
+   async populateOptions(theEditor, data, field, form, addCy) {
       if (theEditor == null || theEditor.$destructed) return;
+
+      await this._sortByRecent(data);
 
       theEditor.blockEvent();
       theEditor.getList().clearAll();
@@ -898,5 +900,58 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             }
          );
       }
+   }
+
+   get _recentStorageId() {
+      return `${this.id}_recent_selected`;
+   }
+
+   /**
+    * @method saveSelect
+    * This function stores the user's selected option in local storage.
+    * It ensures that the user's recent selection is saved, allowing the system
+    * to retrieve it and provide a more personalized experience during future visits.
+    * @param {Array} selectedItems
+    * @return {Promise}
+    */
+   async saveSelect(selectedItems) {
+      if (!selectedItems) return;
+
+      if (!Array.isArray(selectedItems)) selectedItems = [selectedItems];
+
+      let recentSelected =
+         (await this.AB.Storage.get(this._recentStorageId)) ?? [];
+
+      selectedItems.forEach((item) => {
+         if (item == null) return;
+
+         const itemId = item.uuid ?? item.id ?? item;
+         recentSelected = recentSelected.filter((id) => id != itemId);
+         recentSelected.unshift(itemId);
+      });
+
+      return this.AB.Storage.set(this._recentStorageId, recentSelected);
+   }
+
+   /**
+    * @method _sortByRecent
+    * This function sorts the options based on the user's most recently selected item, which is retrieved from local storage.
+    *
+    * @param {Array} options
+    */
+   async _sortByRecent(options) {
+      if (!options?.length) return options;
+
+      const recentSelected = await this.AB.Storage.get(this._recentStorageId);
+      if (!recentSelected?.length) return options;
+
+      if (!Array.isArray(options)) options = [options];
+
+      options.sort((a, b) => {
+         const aId = a.uuid ?? a.id ?? a;
+         const bId = b.uuid ?? b.id ?? b;
+
+         return recentSelected.indexOf(bId) - recentSelected.indexOf(aId);
+      });
    }
 };
