@@ -153,39 +153,49 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
       if (!dc) return;
 
       // listen DC events
-      this.eventAdd({
-         emitter: dc,
-         eventName: "changeCursor",
-         listener: (rowData) => {
-            const baseView = this.view;
-            const linkViaOneConnection = baseView.fieldComponents(
-               (comp) => comp instanceof ABViewFormConnect
-            );
-            // clear previous xxx->one selections and add new from
-            // cursor change
-            linkViaOneConnection.forEach((f) => {
-               const field = f.field();
-               if (
-                  field?.settings?.linkViaType == "one" &&
-                  field?.linkViaOneValues
-               ) {
-                  delete field.linkViaOneValues;
-                  if (rowData?.[field.columnName]) {
-                     if (Array.isArray(rowData[field.columnName])) {
-                        let valArray = [];
-                        rowData[field.columnName].forEach((v) => {
-                           valArray.push(v[field.object.PK()]);
-                        });
-                        field.linkViaOneValues = valArray.join();
-                     } else {
-                        field.linkViaOneValues = rowData[field.columnName];
+      ["changeCursor", "cursorStale"].forEach((key) => {
+         this.eventAdd({
+            emitter: dc,
+            eventName: key,
+            listener: (rowData) => {
+               const baseView = this.view;
+               const linkViaOneConnection = baseView.fieldComponents(
+                  (comp) => comp instanceof ABViewFormConnect
+               );
+               // clear previous xxx->one selections and add new from
+               // cursor change
+               linkViaOneConnection.forEach((f) => {
+                  const field = f.field();
+                  if (
+                     field?.settings?.linkViaType == "one" &&
+                     field?.linkViaOneValues
+                  ) {
+                     delete field.linkViaOneValues;
+                     const relationVals =
+                        rowData?.[field.relationName()] ??
+                        rowData?.[field.columnName];
+                     if (relationVals) {
+                        if (Array.isArray(relationVals)) {
+                           const valArray = [];
+                           relationVals.forEach((v) => {
+                              valArray.push(
+                                 field.getRelationValue(v, { forUpdate: true })
+                              );
+                           });
+                           field.linkViaOneValues = valArray.join(",");
+                        } else {
+                           field.linkViaOneValues = field.getRelationValue(
+                              relationVals,
+                              { forUpdate: true }
+                           );
+                        }
                      }
                   }
-               }
-            });
+               });
 
-            this.displayData(rowData);
-         },
+               this.displayData(rowData);
+            },
+         });
       });
 
       const ids = this.ids;
@@ -218,39 +228,43 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
          },
       });
 
-      this.eventAdd({
-         emitter: dc,
-         eventName: "ab.datacollection.update",
-         listener: (msg, data) => {
-            if (!data?.objectId) return;
+      // I think this case is currently handled by the DC.[changeCursor, cursorStale]
+      // events:
+      // this.eventAdd({
+      //    emitter: dc,
+      //    eventName: "ab.datacollection.update",
+      //    listener: (msg, data) => {
+      //       if (!data?.objectId) return;
 
-            const object = dc.datasource;
+      //       const object = dc.datasource;
 
-            if (!object) return;
+      //       if (!object) return;
 
-            if (
-               object.id === data.objectId ||
-               object.fields((f) => f.settings.linkObject === data.objectId)
-                  .length > 0
-            ) {
-               const currData = dc.getCursor();
+      //       if (
+      //          object.id === data.objectId ||
+      //          object.fields((f) => f.settings.linkObject === data.objectId)
+      //             .length > 0
+      //       ) {
+      //          const currData = dc.getCursor();
 
-               if (currData) this.displayData(currData);
-            }
-         },
-      });
+      //          if (currData) this.displayData(currData);
+      //       }
+      //    },
+      // });
 
       // bind the cursor event of the parent DC
       const linkDv = dc.datacollectionLink;
 
       if (linkDv)
          // update the value of link field when data of the parent dc is changed
-         this.eventAdd({
-            emitter: linkDv,
-            eventName: "changeCursor",
-            listener: (rowData) => {
-               this.displayParentData(rowData);
-            },
+         ["changeCursor", "cursorStale"].forEach((key) => {
+            this.eventAdd({
+               emitter: linkDv,
+               eventName: key,
+               listener: (rowData) => {
+                  this.displayParentData(rowData);
+               },
+            });
          });
    }
 
@@ -365,6 +379,7 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
          }
 
          // pull data of current cursor
+         // await dc.waitReady();
          const rowData = dc.getCursor();
 
          if ($form) dc.bind($form);

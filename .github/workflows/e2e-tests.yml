@@ -64,7 +64,9 @@ jobs:
 
          #Run test
          - name: Wait for AB
-           uses: ifaxity/wait-on-action@v1
+           # Skipping the wait step. Cypress has a bit of wait time built in. It might be enough.
+           if: false
+           uses: ifaxity/wait-on-action@v1.1.0
            with:
               resource: http://localhost:8080
               timeout: 300000
@@ -73,13 +75,13 @@ jobs:
            run: npm run test:e2e:app -- --browser chrome
            working-directory: ./ab
 
-         - uses: actions/upload-artifact@v2
+         - uses: actions/upload-artifact@v4
            if: failure()
            with:
               name: cypress-screenshots
               path: ./ab/test/e2e/cypress/screenshots
 
-         - uses: actions/upload-artifact@v2
+         - uses: actions/upload-artifact@v4
            if: failure()
            with:
               name: ABServices.log

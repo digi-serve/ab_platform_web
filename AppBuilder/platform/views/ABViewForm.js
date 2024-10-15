@@ -16,9 +16,6 @@ const L = (...params) => AB.Multilingual.label(...params);
 // let PopupRecordRule = null;
 // let PopupSubmitRule = null;
 
-////
-//// LEFT OFF HERE: Review and Refactor
-////
 const ABViewFormPropertyComponentDefaults = ABViewFormCore.defaultValues();
 
 module.exports = class ABViewForm extends ABViewFormCore {
@@ -192,6 +189,9 @@ module.exports = class ABViewForm extends ABViewFormCore {
 
       if (allVals.translations?.length > 0)
          formVals.translations = allVals.translations;
+
+      // give the Object a final chance to review the data being handled.
+      obj.formCleanValues(formVals);
 
       return formVals;
    }
@@ -515,7 +515,7 @@ module.exports = class ABViewForm extends ABViewFormCore {
          );
       });
 
-      await Promise.all(tasks)
+      await Promise.all(tasks);
 
       return true;
    }
@@ -541,6 +541,42 @@ module.exports = class ABViewForm extends ABViewFormCore {
 
       if (this.settings.submitRules) {
          // TODO: scan submitRules for warnings.
+      }
+   }
+
+   /**
+    * @method deleteData
+    * delete data in to database
+    * @param $formView - webix's form element
+    *
+    * @return {Promise}
+    */
+   async deleteData($formView) {
+      // get ABDatacollection
+      const dc = this.datacollection;
+      if (dc == null) return;
+
+      // get ABObject
+      const obj = dc.datasource;
+      if (obj == null) return;
+
+      // get ABModel
+      const model = dc.model;
+      if (model == null) return;
+
+      // get update data
+      const formVals = $formView.getValues();
+
+      if (formVals?.id) {
+         const result = await model.delete(formVals.id);
+
+         // clear form
+         if (result) {
+            dc.setCursor(null);
+            $formView.clear();
+         }
+
+         return result;
       }
    }
 };

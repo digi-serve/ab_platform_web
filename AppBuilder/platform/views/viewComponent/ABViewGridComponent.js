@@ -150,7 +150,9 @@ export default class ABViewGridComponent extends ABViewComponent {
 
    detatch() {
       this.view.filterHelper.removeAllListeners("filter.data");
-      this.datacollection?.removeListener("changeCursor", this.handler_select);
+      ["changeCursor", "cursorStale", "cursorSelect"].forEach((key) => {
+         this.datacollection?.removeListener(key, this.handler_select);
+      });
    }
 
    /**
@@ -252,9 +254,11 @@ export default class ABViewGridComponent extends ABViewComponent {
                   this.onAfterSelect(data, preserve);
                }
             },
-            onBeforeEditStart: function (id) {
-               if (!this.getItem(id) == "appbuilder_select_item") return false;
-            },
+            // onBeforeEditStart: function (/*id*/) {
+            //    // Not sure what this is suposed to check, but this condition
+            //    // will always be false.
+            //    if (!this.getItem(id) == "appbuilder_select_item") return false;
+            // },
             onCheck: function (row, col, val) {
                // Update checkbox data
                if (col == "appbuilder_select_item") {
@@ -293,7 +297,21 @@ export default class ABViewGridComponent extends ABViewComponent {
                }
             },
             onBeforeEditStop: function (state, editor) {
-               // console.warn("!! ToDo: onBeforeEditStop()");
+               // Check if data loading is complete
+               const oldValue = state.old;
+               let newValue = state.value;
+               if (!Array.isArray(newValue)) newValue = [newValue];
+               if (
+                  oldValue != null &&
+                  oldValue != "" &&
+                  // If options does not load completely, then Webix returns state.value as ['', '', '']
+                  newValue.filter((val) => val != null && val != "").length <
+                     1 &&
+                  // Check if no data load to the option
+                  editor.getPopup?.().getList?.().data?.find({}).length < 1
+               ) {
+                  return false;
+               }
             },
             onAfterEditStop: (state, editor, ignoreUpdate) => {
                if (this.validationError == false)
@@ -1327,7 +1345,7 @@ export default class ABViewGridComponent extends ABViewComponent {
          (!state.old && state.value === "") ||
          (state.old === "" && state.value === "")
       ) {
-         $DataTable.clearSelection();
+         $DataTable?.clearSelection();
 
          return false;
       }
@@ -1352,14 +1370,34 @@ export default class ABViewGridComponent extends ABViewComponent {
          }
 
       if (state.value !== state.old) {
-         const item = $DataTable.getItem(editor.row);
+         const item = $DataTable?.getItem(editor.row);
+         const CurrentObject = this.datacollection.datasource;
 
          item[editor.column] = state.value;
 
          $DataTable.removeCellCss(item.id, editor.column, "webix_invalid");
          $DataTable.removeCellCss(item.id, editor.column, "webix_invalid_cell");
 
-         const CurrentObject = this.datacollection.datasource;
+         //maxlength field
+         const f = CurrentObject.fieldByID(editor.config.fieldID);
+         if (
+            f.settings.maxLength &&
+            state.value.length > f.settings.maxLength
+         ) {
+            this.AB.alert({
+               title: this.label("Limit max length"),
+               text: this.label(
+                  "You can enter a maximum of " +
+                     f.settings.maxLength +
+                     " characters"
+               ),
+            });
+            $DataTable.addCellCss(item.id, editor.column, "webix_invalid_cell");
+            $DataTable.refresh(editor.row);
+            $DataTable.clearSelection();
+            return false;
+         }
+
          const validator = CurrentObject.isValidData(item);
 
          if (validator.pass()) {
@@ -1585,10 +1623,12 @@ export default class ABViewGridComponent extends ABViewComponent {
       const dv = this.datacollection;
 
       if (dv)
-         this.eventAdd({
-            emitter: dv,
-            eventName: "changeCursor",
-            listener: this.handler_select.bind(this),
+         ["changeCursor", "cursorStale", "cursorSelect"].forEach((key) => {
+            this.eventAdd({
+               emitter: dv,
+               eventName: key,
+               listener: this.handler_select.bind(this),
+            });
          });
    }
 
@@ -1821,8 +1861,8 @@ export default class ABViewGridComponent extends ABViewComponent {
 
             // now we can push the rules into the hash
             complexValidations[f.columnName].push({
-               filters: $$(f.view).getFilterHelper(),
-               values: $DataTable.getSelectedItem(),
+               filters: f.filter.getValue(),
+               values: $DataTable.getSelectedItem[f.columnName],
                invalidMessage: f.invalidMessage,
             });
          });
@@ -1847,10 +1887,21 @@ export default class ABViewGridComponent extends ABViewComponent {
                   });
 
                   // for the case of "this_object" conditions:
-                  if (data.uuid) newData["this_object"] = data.uuid;
+                  if (data.uuid) {
+                     newData["this_object"] = data.uuid;
+                     data["this_object"] = data.uuid;
+                  }
 
                   // use helper funtion to check if valid
-                  const ruleValid = filter.filters(newData);
+                  // const ruleValid = filter.filters(newData);
+                  const filterComplex = ab.filterComplexNew(
+                     `rule-validate-${key}`
+                  );
+                  filterComplex.fieldsLoad(
+                     CurrentObject.fields(),
+                     CurrentObject
+                  );
+                  const ruleValid = filterComplex.isValid(data, filter.filters);
 
                   // if invalid we need to tell the field
                   if (!ruleValid) {
@@ -1971,16 +2022,13 @@ export default class ABViewGridComponent extends ABViewComponent {
       // find our last displayed column (that isn't one we added);
       let lastCol = null;
 
-      for (let i = columnHeaders.length - 1; i >= 0; i--)
-         if (!lastCol) {
-            const col = columnHeaders[i];
-
-            if (!col.hidden && addedColumns.indexOf(col.id) === -1) {
-               lastCol = col;
-
-               break;
-            }
+      for (let i = columnHeaders.length - 1; i >= 0; i--) {
+         const col = columnHeaders[i];
+         if (!col.hidden && addedColumns.indexOf(col.id) === -1) {
+            lastCol = col;
+            break;
          }
+      }
 
       if (lastCol) {
          lastCol.fillspace = true;
@@ -2064,14 +2112,23 @@ export default class ABViewGridComponent extends ABViewComponent {
     *        rowData.id should match an existing entry.
     */
    selectRow(rowData) {
-      const $DataTable = this.getDataTable();
+      let id = rowData?.id ?? rowData;
+      if (this.__timeout_selectRow) {
+         console.log("Duplicate selectRow():", id);
+         clearTimeout(this.__timeout_selectRow);
+      }
+      this.__timeout_selectRow = setTimeout(() => {
+         const $DataTable = this.getDataTable();
+         if (!$DataTable) return;
 
-      if (!$DataTable) return;
+         if (!id) $DataTable.unselect();
+         else if ($DataTable.exists(id)) {
+            $DataTable.select(id, false);
+            $DataTable.showItem(id);
+         } else $DataTable.select(null, false);
 
-      if (!rowData) $DataTable.unselect();
-      else if (rowData?.id && $DataTable.exists(rowData.id))
-         $DataTable.select(rowData.id, false);
-      else $DataTable.select(null, false);
+         this.__timeout_selectRow = null;
+      }, 15);
    }
 
    /**

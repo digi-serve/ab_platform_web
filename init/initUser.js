@@ -5,7 +5,7 @@ export default {
       try {
          let configData = {
             user: window.__AB_Config_User,
-            userReal: window.__AB_Config_User_real,
+            userReal: window.__AB_Config_User_Real,
          };
          BS.Config.configUser(configData);
       } catch (err) {

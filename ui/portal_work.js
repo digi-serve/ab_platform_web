@@ -58,14 +58,27 @@ class PortalWork extends ClassUI {
                      align: "center",
                   },
                   {
+                     id: "portal_work_switcheroo_user_switched_loading",
+                     view: "label",
+                     hidden: true,
+                     align: "center",
+                     width: 30,
+                     label: '<i class="fa fa-refresh fa-spin" aria-hidden="true"></i>',
+                  },
+                  {
                      view: "button",
                      value: '<div style="text-align: center; font-size: 12px; color:#FFFFFF"><i class="fa-fw fa fa-times"></i></div>',
                      align: "center",
                      width: 30,
                      css: "webix_transparent",
                      on: {
-                        onItemClick: () => {
-                           PortalWorkUserSwitcheroo.switcherooClear();
+                        onAfterRender: function () {
+                           ClassUI.CYPRESS_REF(this, "switcheroo_clear_button");
+                        },
+                        onItemClick: async () => {
+                           this.busy();
+                           await PortalWorkUserSwitcheroo.switcherooClear();
+                           this.ready();
                            $$("portal_work_switcheroo_user_switched").hide();
                         },
                      },
@@ -227,6 +240,15 @@ class PortalWork extends ClassUI {
                            css: "appDevDesigns",
                            height: 110,
                         },
+                        {
+                           id: "portal_work_privacy_policy",
+                           view: "template",
+                           template:
+                              '<a href="#link#" target="_blank" class="policyMenu">#label#</a>',
+                           css: "policyLink",
+                           height: 30,
+                           hidden: true,
+                        },
                      ],
                   },
                   {
@@ -239,6 +261,7 @@ class PortalWork extends ClassUI {
       };
    }
 
+   /** @param {import('../AppBuilder/ABFactory.js').default} AB */
    async init(AB) {
       this.AB = AB;
 
@@ -276,6 +299,15 @@ class PortalWork extends ClassUI {
       for (let i = 0; i < allApplications.length; i++) {
          // TODO: implement Sorting on these before building UI
          menu_data.push(this.uiSideBarMenuEntry(allApplications[i]));
+      }
+
+      let { privacyPolicy, relay } = this.AB.Config.siteConfig();
+      if (privacyPolicy) {
+         $$("portal_work_privacy_policy").setValues({
+            label: L("Privacy Policy"),
+            link: privacyPolicy,
+         });
+         $$("portal_work_privacy_policy").show();
       }
 
       $$("abSidebarMenu").define("data", menu_data);
@@ -388,8 +420,6 @@ class PortalWork extends ClassUI {
       // );
 
       // Only add the QR Code option if the relay service is enabled
-      const { relay } = this.AB.Config.siteConfig();
-
       if (relay) {
          // Insert at userMenuOptions[2] so logout is still last
          userMenuOptions.splice(2, 0, {
@@ -426,7 +456,7 @@ class PortalWork extends ClassUI {
                         PortalWorkUserQRWindow.init(AB);
                         PortalWorkUserQRWindow.show();
                         break;
-                     default:
+                     default: {
                         // was this one of our Mobile Apps?
                         const mobileApp = this.AB.applicationByID(id);
                         if (mobileApp) {
@@ -442,6 +472,7 @@ class PortalWork extends ClassUI {
                            Menu ID:<i>${item.id}</i>`
                            );
                         }
+                     }
                   }
                   $$("userMenu").hide();
                },
@@ -1095,6 +1126,14 @@ class PortalWork extends ClassUI {
             },
          },
       });
+   }
+
+   busy() {
+      $$("portal_work_switcheroo_user_switched_loading")?.show();
+   }
+
+   ready() {
+      $$("portal_work_switcheroo_user_switched_loading")?.hide();
    }
 }
 

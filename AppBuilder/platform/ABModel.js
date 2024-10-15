@@ -115,9 +115,9 @@ module.exports = class ABModel extends ABModelCore {
 
          context.resolve?.(data);
 
-         if (key) {
-            no_socket_trigger(this, key, data);
-         }
+         // if (key) {
+         //    no_socket_trigger(this, key, data);
+         // }
       };
    }
 
@@ -234,10 +234,15 @@ module.exports = class ABModel extends ABModelCore {
                key: jobID,
                context: { resolve, reject },
             }
-         ).catch((err) => {
-            errorPopup(err);
-            reject(err);
-         });
+         )
+            .then((newVal) => {})
+            .catch((err) => {
+               errorPopup(err);
+               reject(err);
+            });
+      }).then((newVal) => {
+         no_socket_trigger(this, "ab.datacollection.create", newVal);
+         return newVal;
       });
    }
 
@@ -257,12 +262,17 @@ module.exports = class ABModel extends ABModelCore {
             },
             {
                key: jobID,
+               id,
                context: { resolve, reject },
             }
          ).catch((err) => {
             errorPopup(err);
             reject(err);
          });
+      }).then((res) => {
+         // properly issue the delete
+         no_socket_trigger(this, "ab.datacollection.delete", id);
+         return res;
       });
    }
 
@@ -272,6 +282,20 @@ module.exports = class ABModel extends ABModelCore {
     */
    async findAll(cond) {
       cond = cond || {};
+
+      // scan the rules and convert any is_current_date rules to UTC daytime range.
+      let rules = cond.where?.rules;
+      while (rules?.length) {
+         let nestedRules = [];
+         rules.forEach((rule) => {
+            if (rule.rule === "is_current_date")
+               rule.value = this.AB.rules.getUTCDayTimeRange();
+            else if (rule.rules?.length)
+               nestedRules = nestedRules.concat(rule.rules);
+         });
+
+         rules = nestedRules;
+      }
 
       // 		// prepare our condition:
       // 		var newCond = {};
@@ -534,6 +558,10 @@ module.exports = class ABModel extends ABModelCore {
                errorPopup(err);
                reject(err);
             });
+      }).then((newVal) => {
+         // properly issue the update
+         no_socket_trigger(this, "ab.datacollection.update", newVal);
+         return newVal;
       });
    }
 

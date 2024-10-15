@@ -918,7 +918,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
          var field = this.getUpdateObjectField(op.fieldID);
          if (!field) return;
 
-         var value = op.value;
+         let value = op?.value?.id ?? op?.value;
 
          switch (value) {
             case "ab-current-user":
@@ -991,15 +991,15 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                // and using that value.
                // TODO: rename to 'select-cursor'
                case "select-one":
-               default:
-                  value = clonedDataCollection.getCursor(); // dataView.getItem(dataView.getCursor());
+               default: // dataView.getItem(dataView.getCursor());
+                  value = clonedDataCollection.getCursor();
 
                   if (value) {
                      // NOTE: webix documentation issue: .getCursor() is supposed to return
                      // the .id of the item.  However it seems to be returning the {obj}
 
                      if (op.valueType == "exist") {
-                        var fieldWithValue =
+                        let fieldWithValue =
                            clonedDataCollection.datasource.fieldByID(
                               op.queryField
                            );
@@ -1076,8 +1076,8 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                         // case: datacollection is a query
                         // our field is a pointer to an object. we want to pull out that object
                         // from the query data.
-                        case "query":
-                           var fieldWithValue =
+                        case "query": {
+                           let fieldWithValue =
                               clonedDataCollection.datasource.fieldByID(
                                  op.queryField
                               );
@@ -1101,6 +1101,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                            );
 
                            break;
+                        }
                      }
 
                      currRow = clonedDataCollection.getNextRecord(currRow);
@@ -1138,7 +1139,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
                         clonedDataCollection.sourceType == "query" ||
                         (op.valueType == "exist" && op.queryField)
                      ) {
-                        fieldWithValue =
+                        let fieldWithValue =
                            clonedDataCollection.datasource.fieldByID(
                               op.queryField
                            );
@@ -1282,11 +1283,18 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
 
       // make sure UI is updated:
       // set our updateObject
-      if (settings.updateObjectURL) {
-         var updateObject = this.currentForm.application.urlResolve(
-            settings.updateObjectURL
+      if (settings.updateObjectID) {
+         this.updateObject = this.currentForm.AB.objectByID(
+            settings.updateObjectID
          );
-         this.updateObject = updateObject;
+      } else {
+         // DEPRECIATED method of resolving objects .urlResolve()
+         if (settings.updateObjectURL) {
+            var updateObject = this.currentForm.application.urlResolve(
+               settings.updateObjectURL
+            );
+            this.updateObject = updateObject;
+         }
       }
 
       // if we have a display component, then populate it:

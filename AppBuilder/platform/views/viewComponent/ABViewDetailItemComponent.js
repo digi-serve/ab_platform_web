@@ -1,6 +1,30 @@
 const ABViewComponent = require("./ABViewComponent").default;
 
-const SAFE_HTML_TAGS = ["abbr", "acronym", "b", "blockquote", "br", "code", "div", "em", "i", "li", "ol", "p", "span", "strong", "table", "td", "tr", "ul", "h1", "h2", "h3", "h4", "h5"];
+const SAFE_HTML_TAGS = [
+   "abbr",
+   "acronym",
+   "b",
+   "blockquote",
+   "br",
+   "code",
+   "div",
+   "em",
+   "i",
+   "li",
+   "ol",
+   "p",
+   "span",
+   "strong",
+   "table",
+   "td",
+   "tr",
+   "ul",
+   "h1",
+   "h2",
+   "h3",
+   "h4",
+   "h5",
+];
 
 module.exports = class ABViewDetailItemComponent extends ABViewComponent {
    constructor(baseView, idBase, ids) {
@@ -94,15 +118,19 @@ module.exports = class ABViewDetailItemComponent extends ABViewComponent {
 
       switch (field?.key) {
          case "string":
-         case "LongText":
+         case "LongText": {
             const strVal = val
                // Sanitize all of HTML tags
                .replace(/[<]/gm, "&lt;")
                // Allow safe HTML tags
-               .replace(new RegExp(`(&lt;(\/)?(${SAFE_HTML_TAGS.join("|")}))`, "gm"), "<$2$3");
+               .replace(
+                  new RegExp(`(&lt;(/)?(${SAFE_HTML_TAGS.join("|")}))`, "gm"),
+                  "<$2$3"
+               );
 
             $detailItem.setValues({ display: strVal });
             break;
+         }
          default:
             $detailItem.setValues({ display: val });
             break;

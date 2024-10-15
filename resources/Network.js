@@ -2,6 +2,7 @@
  * Network.js
  * A network manager for interfacing with our AppBuilder server.
  */
+/* global Connection */
 var EventEmitter = require("events").EventEmitter;
 import performance from "../utils/performance";
 import NetworkRest from "./NetworkRest";
@@ -30,6 +31,13 @@ class Network extends EventEmitter {
       // {int} _queueCount
       // the # of network operations currently queued, pending Network
       // reconnect.
+
+      this.cachJobResponse = {};
+      // { jobID : { jobResponse } }
+      // hash of the queued jobResponses for network requests that are in
+      // our queue.
+      // We need to keep our own cache that isn't serialized so that once
+      // we complete the request, we can resume the resolve() promise chains
    }
 
    init(AB) {
@@ -338,7 +346,9 @@ class Network extends EventEmitter {
             })
             .then((queue) => {
                queue = queue || [];
-               queue.push({ data, jobResponse });
+               let jID = this.AB.jobID();
+               this.cachJobResponse[jID] = jobResponse;
+               queue.push({ data, jobResponse: jID });
                this.AB.log(
                   `:::: ${queue.length} request${
                      queue.length > 1 ? "s" : ""
@@ -401,6 +411,24 @@ class Network extends EventEmitter {
                // default to [] if not found
                queue = queue || [];
 
+               let hasResponded = false;
+               let resCount = 0;
+               let resNumber = queue.length;
+
+               let done = (res, rej, err) => {
+                  if (!hasResponded) {
+                     if (err) {
+                        rej(err);
+                        hasResponded = true;
+                        return;
+                     }
+                     resCount++;
+                     if (resCount >= resNumber) {
+                        hasResponded = true;
+                        res();
+                     }
+                  }
+               };
                // recursively process each pending queue request
                var processRequest = (cb) => {
                   if (queue.length == 0) {
@@ -408,11 +436,14 @@ class Network extends EventEmitter {
                   } else {
                      var entry = queue.shift();
                      var params = entry.data;
-                     var job = entry.jobResponse;
+                     let job = this.cachJobResponse[entry.jobResponse];
+                     // var job = entry.jobResponse;
                      this._network
                         .resend(params, job)
                         .then(() => {
-                           processRequest(cb);
+                           delete this.cachJobResponse[entry.jobResponse];
+                           // processRequest(cb);
+                           cb();
                         })
                         .catch((err) => {
                            // if the err was due to a network connection error
@@ -421,18 +452,20 @@ class Network extends EventEmitter {
                               return;
                            }
                            // otherwise, try the next
-                           processRequest(cb);
+                           // processRequest(cb);
                         });
+                     processRequest(cb);
                   }
                };
 
                return new Promise((res, rej) => {
                   processRequest((err) => {
-                     if (err) {
-                        rej(err);
-                     } else {
-                        res();
-                     }
+                     done(res, rej, err);
+                     // if (err) {
+                     //    rej(err);
+                     // } else {
+                     //    res();
+                     // }
                   });
                });
             })
@@ -441,6 +474,7 @@ class Network extends EventEmitter {
             // Clear queue contents
             //
             .then(() => {
+               this.cachJobResponse = {};
                this._queueCount = 0;
                return this.AB.Storage.set(refQueue, []);
             })

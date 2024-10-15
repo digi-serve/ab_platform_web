@@ -4,7 +4,7 @@
  * and outlines the basic Network interface.
  */
 
-/* global navigator Connection */
+/* global Connection */
 // import Account from "./Account";
 // import analytics from "./Analytics";
 // import EventEmitter from "eventemitter2";
@@ -302,7 +302,9 @@ class NetworkRest extends EventEmitter {
                   if (err.responseText) {
                      try {
                         packet = JSON.parse(err.responseText);
-                     } catch (e) {}
+                     } catch (e) {
+                        /* ignore */
+                     }
                   }
                   // if this is an req.ab.error() response:
                   if (packet && packet.status == "error") {

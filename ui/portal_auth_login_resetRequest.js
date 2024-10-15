@@ -90,6 +90,9 @@ class PortalAuthLoginResetRequest extends ClassUI {
                                                 "Please enter a valid email."
                                              ),
                                              validateEvent: "blur",
+                                             attributes: {
+                                                "data-cy": "portal_reset_request_email",
+                                             },
                                           },
                                           {
                                              rows: [
@@ -98,6 +101,7 @@ class PortalAuthLoginResetRequest extends ClassUI {
                                                    icon: "fa fa-paper-plane",
                                                    type: "icon",
                                                    css: "webix_primary",
+                                                   id: "portal_reset_request_send",
                                                    autowidth: true,
                                                    hotkey: "enter",
                                                    click() {
@@ -135,6 +139,11 @@ class PortalAuthLoginResetRequest extends ClassUI {
                                                             console.log(err);
                                                          });
                                                       }
+                                                   },
+                                                   on: {
+                                                      onAfterRender() {
+                                                         ClassUI.CYPRESS_REF(this);
+                                                      },
                                                    },
                                                 },
                                                 {},

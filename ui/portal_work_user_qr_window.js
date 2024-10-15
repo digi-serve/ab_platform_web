@@ -81,16 +81,17 @@ class PortalWorkUserQRWindow extends ClassUI {
                   borderless: true,
                   autoheight: true,
                   autowidth: true,
-                  template:
-                     `<img src='/relay/user-qr' class='${this.classQrImageDom}' style='margin: 10px auto 20px;display:block;' />`,
+                  template: `<img src='/relay/user-qr' class='${this.classQrImageDom}' style='margin: 10px auto 20px;display:block;' />`,
                   on: {
                      onAfterRender: () => {
-                        const $img = $$("qr-code-image").$view.getElementsByClassName(this.classQrImageDom)[0];
+                        const $img = $$(
+                           "qr-code-image"
+                        ).$view.getElementsByClassName(this.classQrImageDom)[0];
                         $img.onload = () => {
                            $$("qr-code-image").adjust();
                         };
-                     }
-                  }
+                     },
+                  },
                },
 
                {

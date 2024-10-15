@@ -27,6 +27,4 @@ module.exports = class ABViewChartPieComponent extends (
          // width: settings.chartWidth,
       });
    }
-
-
 };

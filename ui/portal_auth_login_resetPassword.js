@@ -75,6 +75,10 @@ class PortalAuthLoginResetPassword extends ClassUI {
                                        ),
                                        validateEvent: "blur",
                                        bottomPadding: 20,
+                                       attributes: {
+                                          "data-cy":
+                                             "portal_reset_password_new",
+                                       },
                                     },
                                     {
                                        id: "password-confirm",
@@ -92,6 +96,10 @@ class PortalAuthLoginResetPassword extends ClassUI {
                                        ),
                                        validateEvent: "blur",
                                        bottomPadding: 20,
+                                       attributes: {
+                                          "data-cy":
+                                             "portal_reset_password_confirm",
+                                       },
                                     },
                                     {
                                        margin: 10,
@@ -103,6 +111,7 @@ class PortalAuthLoginResetPassword extends ClassUI {
                                              view: "button",
                                              label: L("Save"),
                                              type: "form",
+                                             id: "portal_reset_password_submit",
                                              css: "webix_primary",
                                              width: 150,
                                              hotkey: "enter",
@@ -112,26 +121,30 @@ class PortalAuthLoginResetPassword extends ClassUI {
                                                       "portal_auth_login_reset_password_form"
                                                    ).validate()
                                                 ) {
-                                                   let password = $$(
-                                                      "password-new"
-                                                   ).getValue();
+                                                   let password =
+                                                      $$(
+                                                         "password-new"
+                                                      ).getValue();
                                                    this.AB.Network.post(
                                                       {
-                                                         url:
-                                                            "/auth/password/reset",
+                                                         url: "/auth/password/reset",
                                                          data: {
                                                             password,
                                                          },
                                                       },
                                                       {
-                                                         key:
-                                                            "portal_auth_password_reset",
+                                                         key: "portal_auth_password_reset",
                                                          context: {},
                                                       }
                                                    ).catch((err) => {
                                                       console.log(err);
                                                    });
                                                 }
+                                             },
+                                             on: {
+                                                onAfterRender() {
+                                                   ClassUI.CYPRESS_REF(this);
+                                                },
                                              },
                                           },
                                           {},

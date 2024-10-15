@@ -18,6 +18,12 @@ class Multilingual extends MLClass {
       this._missingLabelID = false;
       this._missingLabels = {};
       this._pluginLabelsMissing = {};
+
+      this.isLabelUpdateEnabled = false;
+      // {bool}
+      // we can only update labels on the server if this is enabled.
+      // Only on a Developers environment should we enable this:
+      // javascript console: > window.AB.Multilingual.enableLabelUpdates();
    }
 
    init(AB) {
@@ -36,6 +42,10 @@ class Multilingual extends MLClass {
 
    currentLanguage() {
       return this.AB.Account.language();
+   }
+
+   enableLabelUpdates() {
+      this.isLabelUpdateEnabled = true;
    }
 
    label(key, altText, values = [], postMissing = true) {
@@ -126,6 +136,8 @@ class Multilingual extends MLClass {
    }
 
    postMissingLabel(key, altText) {
+      if (!this.isLabelUpdateEnabled) return;
+
       if (this._missingLabelID) {
          clearTimeout(this._missingLabelID);
       }

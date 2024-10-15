@@ -23,17 +23,17 @@ module.exports = class ABCustomTimePicker {
       var labels = {
          common: App.labels,
 
-         component: {}
+         component: {},
       };
 
       // internal list of Webix IDs to reference our UI components.
       var ids = {
-         component: App.unique(this.key)
+         component: App.unique(this.key),
       };
 
       // Our webix UI definition:
       var _ui = {
-         name: App.unique("custom_timepicker") // keep this unique for this App instance.
+         name: App.unique("custom_timepicker"), // keep this unique for this App instance.
       };
       this.view = this.key;
 
@@ -48,13 +48,13 @@ module.exports = class ABCustomTimePicker {
             view: "calendar",
             width: 220,
             height: 200,
-            type: "time"
-         }
+            type: "time",
+         },
       };
 
       webix.editors.time = webix.extend(
          {
-            popupType: "time"
+            popupType: "time",
          },
          webix.editors.date
       );

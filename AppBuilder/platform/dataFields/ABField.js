@@ -365,7 +365,11 @@ module.exports = class ABField extends ABFieldCore {
          val = rowData;
       }
 
-      item.setValue(val);
+      try {
+         item.setValue(val);
+      } catch (err) {
+         // this error is fine because we handled it already
+      }
    }
 
    /**
@@ -485,5 +489,17 @@ module.exports = class ABField extends ABFieldCore {
       return this.AB.Network.get({
          url: `/definition/info/object/${this.object.id}/field/${this.id}`,
       });
+   }
+
+   /**
+    * @method formCleanData()
+    * Review the data a form is about to submit and change/remove it as
+    * appropriate.
+    * @param {obj} rowData
+    *        The {data} a form has collected and is about to save.
+    * @return {undefined}
+    */
+   formCleanData(rowData) {
+      // default is to just leave data as is.
    }
 };

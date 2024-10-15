@@ -26,10 +26,10 @@ module.exports = {
    root: true,
 
    // extending recommended config and config derived from eslint-config-prettier
-   extends: ["eslint:recommended", "prettier"],
+   extends: ["eslint:recommended", "prettier", "plugin:mocha/recommended"],
 
    // activating eslint-plugin-prettier (--fix stuff)
-   plugins: ["prettier"],
+   plugins: ["prettier", "mocha"],
 
    rules: {
       // customizing prettier rules (unfortunately not many of them are customizable)
