@@ -127,44 +127,208 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const contentDisplayedFields = settings.contentDisplayedFields;
       const contentDisplayedFieldsKeys = Object.keys(contentDisplayedFields);
       const orgchart = new this.OrgChart({
+         // createNode: async ($node, data) => {
+         //    const nodeWidth = 300;
+         //    const nodeStyle = $node.style;
+         //    nodeStyle["width"] = `${nodeWidth}px`;
+         //    const $contentNode = $node.children.item(1);
+         //    $contentNode.innerHTML = "";
+         //    const contentNodeStyle = $contentNode.style;
+
+         //    //  Team content buckets
+         //    contentNodeStyle["height"] = `${
+         //       // TODO (Guy): Fix the number later.
+         //       contentGroupOptionsLength * 150
+         //    }px`;
+         //    const groupBorderWidth = 5;
+         //    contentNodeStyle["width"] = `${nodeWidth - 2 * groupBorderWidth}px`;
+         //    const averageHeight = 100 / contentGroupOptionsLength;
+         //    const currentNodeDataRecordPK = data._rawData[nodeObjPK];
+         //    for (const group of contentGroupOptions) {
+         //       const $group = document.createElement("div");
+         //       $contentNode.appendChild($group);
+         //       const groupStyle = $group.style;
+         //       groupStyle["height"] = `${averageHeight}%`;
+         //       groupStyle["borderStyle"] = "solid";
+         //       groupStyle["borderWidth"] = `${groupBorderWidth}px`;
+         //       const groupColor = group.hex;
+         //       groupStyle["borderColor"] = groupColor;
+         //       const $groupTitle = document.createElement("div");
+         //       const groupTitleStyle = $groupTitle.style;
+         //       groupTitleStyle["backgroundColor"] = groupColor;
+         //       groupTitleStyle["height"] = "20%";
+         //       const groupText = group.text;
+         //       $groupTitle.appendChild(document.createTextNode(groupText));
+         //       $group.appendChild($groupTitle);
+         //       const $groupContent = document.createElement("div");
+         //       $group.appendChild($groupContent);
+         //       const groupContentStyle = $groupContent.style;
+         //       groupContentStyle["overflow"] = "auto";
+         //       groupContentStyle["height"] = "80%";
+         //       let contentDataRecordIndex = 0;
+         //       while (
+         //          contentDataRecordIndex < contentDataRecords.length &&
+         //          contentDataRecords.length > 0
+         //       ) {
+         //          const contentDataRecord =
+         //             contentDataRecords[contentDataRecordIndex];
+         //          if (
+         //             contentDataRecord[contentFieldLinkColumnName] !==
+         //                currentNodeDataRecordPK ||
+         //             contentDataRecord[contentGroupByFieldColumnName] !==
+         //                groupText
+         //          ) {
+         //             contentDataRecordIndex++;
+         //             continue;
+         //          }
+         //          contentDataRecords.splice(contentDataRecordIndex, 1);
+         //          const contentDataRecordPK = contentDataRecord[contentObjPK];
+         //          const rowDataID = `${currentNodeDataRecordPK}.${contentDataRecordPK}`;
+         //          const $rowData = document.createElement("div");
+         //          $groupContent.appendChild($rowData);
+         //          $rowData.setAttribute("id", rowDataID);
+         //          draggable && $rowData.setAttribute("draggable", "true");
+         //          const rowDataStyle = $rowData.style;
+         //          rowDataStyle["borderStyle"] = "solid";
+         //          rowDataStyle["borderColor"] = "black";
+         //          let currentDataRecords = [];
+         //          let currentField = null;
+         //          for (let j = 0; j < contentDisplayedFieldsKeys.length; j++) {
+         //             const displayedFieldKey = contentDisplayedFieldsKeys[j];
+         //             const [atDisplay, objID] = displayedFieldKey.split(".");
+         //             const displayedObj = AB.objectByID(objID);
+         //             const displayedObjPK = displayedObj.PK();
+         //             const displayedField = displayedObj.fieldByID(
+         //                contentDisplayedFields[displayedFieldKey]
+         //             );
+         //             switch (objID) {
+         //                case contentObjID:
+         //                   currentDataRecords = [contentDataRecord];
+         //                   break;
+         //                default:
+         //                   if (currentField == null) break;
+         //                   if (currentDataRecords.length > 0) {
+         //                      const currentFieldColumnName =
+         //                         currentField.columnName;
+         //                      const currentDataPKs = [];
+         //                      do {
+         //                         const currentFieldData =
+         //                            currentDataRecords.pop()[
+         //                               currentFieldColumnName
+         //                            ];
+         //                         if (Array.isArray(currentFieldData)) {
+         //                            if (currentFieldData.length > 0)
+         //                               currentDataPKs.push(...currentFieldData);
+         //                         } else if (currentFieldData != null)
+         //                            currentDataPKs.push(currentFieldData);
+         //                      } while (currentDataRecords.length > 0);
+         //                      currentDataRecords = (
+         //                         await displayedObj.model().findAll({
+         //                            where: {
+         //                               glue: "and",
+         //                               rules: [
+         //                                  {
+         //                                     key: displayedObj.PK(),
+         //                                     rule: "in",
+         //                                     value: currentDataPKs,
+         //                                  },
+         //                               ],
+         //                            },
+         //                            populate: true,
+         //                         })
+         //                      ).data;
+         //                   }
+         //                   break;
+         //             }
+         //             if (
+         //                contentDisplayedFieldsKeys[j + 1]?.split(".")[0] ===
+         //                atDisplay
+         //             ) {
+         //                currentField = displayedField;
+         //                continue;
+         //             }
+         //             const $currentDisplay = document.createElement("div");
+         //             $rowData.appendChild($currentDisplay);
+         //             const displayedFieldColumnName = displayedField.columnName;
+         //             while (currentDataRecords.length > 0) {
+         //                const $currentDisplayData =
+         //                   document.createElement("div");
+         //                $currentDisplay.appendChild($currentDisplayData);
+         //                const currentDataRecord = currentDataRecords.pop();
+         //                $currentDisplayData.setAttribute(
+         //                   "id",
+         //                   `${atDisplay}.${rowDataID}.${currentDataRecord[displayedObjPK]}`
+         //                );
+         //                $currentDisplayData.appendChild(
+         //                   document.createTextNode(
+         //                      currentDataRecord[displayedFieldColumnName]
+         //                   )
+         //                );
+         //             }
+         //             currentField = null;
+         //          }
+         //       }
+         //    }
+         // },
+         data: chartData,
+         direction: baseView.settings.direction,
+         // depth: baseView.settings.depth,
+         chartContainer: `#${this.ids.chartDom}`,
+         pan: true, // baseView.settings.pan == 1,
+         zoom: true, //baseView.settings.zoom == 1,
+         draggable,
+         // visibleLevel: baseView.settings.visibleLevel,
+         parentNodeSymbol: false,
+         exportButton: baseView.settings.export,
+         exportFilename: baseView.settings.exportFilename,
          createNode: async ($node, data) => {
+            // remove built in icon
+            $node.querySelector(".title > i")?.remove();
+            // customize
+            // const $content = $node.querySelector(".content");
+            // $content.innerHTML = "";
+            // debugger;
             const nodeWidth = 300;
-            const nodeStyle = $node.style;
-            nodeStyle["width"] = `${nodeWidth}px`;
+            // const nodeStyle = $node.style;
+            // nodeStyle["width"] = `${nodeWidth}px`;
             const $contentNode = $node.children.item(1);
             $contentNode.innerHTML = "";
-            const contentNodeStyle = $contentNode.style;
+            // const contentNodeStyle = $contentNode.style;
 
-            //  Team content buckets
-            contentNodeStyle["height"] = `${
-               // TODO (Guy): Fix the number later.
-               contentGroupOptionsLength * 150
-            }px`;
+            // //  Team content buckets
+            // contentNodeStyle["height"] = `${
+            //    // TODO (Guy): Fix the number later.
+            //    contentGroupOptionsLength * 150
+            // }px`;
             const groupBorderWidth = 5;
-            contentNodeStyle["width"] = `${nodeWidth - 2 * groupBorderWidth}px`;
+            // contentNodeStyle["width"] = `${nodeWidth - 2 * groupBorderWidth}px`;
             const averageHeight = 100 / contentGroupOptionsLength;
             const currentNodeDataRecordPK = data._rawData[nodeObjPK];
             for (const group of contentGroupOptions) {
-               const $group = document.createElement("div");
+               const $group = element("div", "team-group-section");
                $contentNode.appendChild($group);
                const groupStyle = $group.style;
-               groupStyle["height"] = `${averageHeight}%`;
-               groupStyle["borderStyle"] = "solid";
-               groupStyle["borderWidth"] = `${groupBorderWidth}px`;
+               // groupStyle["height"] = `${averageHeight}%`;
+               // groupStyle["borderStyle"] = "solid";
+               // groupStyle["borderWidth"] = `${groupBorderWidth}px`;
                const groupColor = group.hex;
                groupStyle["borderColor"] = groupColor;
                const $groupTitle = document.createElement("div");
-               const groupTitleStyle = $groupTitle.style;
-               groupTitleStyle["backgroundColor"] = groupColor;
-               groupTitleStyle["height"] = "20%";
+               // const groupTitleStyle = $groupTitle.style;
+               // groupTitleStyle["backgroundColor"] = groupColor;
+               // groupTitleStyle["height"] = "20%";
                const groupText = group.text;
-               $groupTitle.appendChild(document.createTextNode(groupText));
+               // $groupTitle.setAttribute(
+               //    "id",
+               //    `${currentNodeDataRecordPK}.${groupText}`
+               // );
+               // $groupTitle.appendChild(document.createTextNode(groupText));
                $group.appendChild($groupTitle);
                const $groupContent = document.createElement("div");
                $group.appendChild($groupContent);
-               const groupContentStyle = $groupContent.style;
-               groupContentStyle["overflow"] = "auto";
-               groupContentStyle["height"] = "80%";
+               // const groupContentStyle = $groupContent.style;
+               // groupContentStyle["overflow"] = "auto";
+               // groupContentStyle["height"] = "80%";
                let contentDataRecordIndex = 0;
                while (
                   contentDataRecordIndex < contentDataRecords.length &&
@@ -188,9 +352,9 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                   $groupContent.appendChild($rowData);
                   $rowData.setAttribute("id", rowDataID);
                   draggable && $rowData.setAttribute("draggable", "true");
-                  const rowDataStyle = $rowData.style;
-                  rowDataStyle["borderStyle"] = "solid";
-                  rowDataStyle["borderColor"] = "black";
+                  // const rowDataStyle = $rowData.style;
+                  // rowDataStyle["borderStyle"] = "solid";
+                  // rowDataStyle["borderColor"] = "black";
                   let currentDataRecords = [];
                   let currentField = null;
                   for (let j = 0; j < contentDisplayedFieldsKeys.length; j++) {
@@ -269,33 +433,16 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                   }
                }
             }
-         },
-         data: chartData,
-         direction: baseView.settings.direction,
-         // depth: baseView.settings.depth,
-         chartContainer: `#${this.ids.chartDom}`,
-         pan: true, // baseView.settings.pan == 1,
-         zoom: true, //baseView.settings.zoom == 1,
-         draggable,
-         // visibleLevel: baseView.settings.visibleLevel,
-         parentNodeSymbol: false,
-         exportButton: baseView.settings.export,
-         exportFilename: baseView.settings.exportFilename,
-         createNode: ($node, { id }) => {
-            // remove built in icon
-            $node.querySelector(".title > i")?.remove();
-            // customize
-            const $content = $node.querySelector(".content");
-            $content.innerHTML = "";
-            const $leaderSection = element("div", "team-leader-section");
-            const $memberSection = element("div", "team-member-section");
+            // const $leaderSection = element("div", "team-leader-section");
+            // const $memberSection = element("div", "team-member-section");
+            // debugger;
             const $buttons = element("div", "team-button-section");
             const $editButton = element("div", "team-button");
             $editButton.append(element("i", "fa fa-pencil"));
             const $addButton = element("div", "team-button");
             $addButton.append(element("i", "fa fa-plus"));
             $buttons.append($editButton, $addButton);
-            const dataID = this.teamRecordID(id);
+            const dataID = this.teamRecordID(data.id);
             const values = this.datacollection.getData(
                (e) => e.id === dataID
             )[0];
@@ -303,14 +450,14 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                this.teamForm("Add", { __parentID: dataID });
             };
             $editButton.onclick = () => this.teamForm("Edit", values);
-
             if (this.teamCanDelete(values)) {
                const $deleteButton = element("div", "team-button");
                $deleteButton.append(element("i", "fa fa-trash"));
                $deleteButton.onclick = () => this.teamDelete(values);
                $buttons.append($deleteButton);
             }
-            $content.append($leaderSection, $memberSection, $buttons);
+            // $contentNode.append($leaderSection, $memberSection, $buttons);
+            $contentNode.appendChild($buttons);
          },
 
          nodeContent: "description",
@@ -349,7 +496,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          chartDom.textContent = "";
          chartDom.innerHTML = "";
          chartDom.appendChild(orgchart);
-         this.toolbarUi(chartDom);
+         // this.toolbarUi(chartDom);
       }
    }
 
