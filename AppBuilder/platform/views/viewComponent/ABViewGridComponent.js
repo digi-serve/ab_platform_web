@@ -267,6 +267,12 @@ export default class ABViewGridComponent extends ABViewComponent {
                   self.toggleUpdateDelete();
                } else {
                   if (settings.isEditable) {
+                     // get the field related to this col
+                     const currObject = self.datacollection.datasource;
+                     const selectField = currObject.fields(
+                        (f) => f.columnName === col
+                     )[0];
+
                      // if the colum is not the select item column move on to
                      // the next step to save
                      const state = {
@@ -275,7 +281,7 @@ export default class ABViewGridComponent extends ABViewComponent {
                      const editor = {
                         row: row,
                         column: col,
-                        config: null,
+                        config: { fieldID: selectField?.id ?? null },
                      };
 
                      self.onAfterEditStop(state, editor);
