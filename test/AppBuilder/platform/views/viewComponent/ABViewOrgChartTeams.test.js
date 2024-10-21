@@ -15,7 +15,8 @@ describe("ABViewDetailCheckboxComponent item widget", function () {
       const AB = new ABFactory();
       const application = AB.applicationNew({});
       sinon.stub(AB, "definitionByID").returns({});
-      const view = new ABViewOrgChartTeams({}, application);
+      const settings = { strategyColors: { ops: "#111111", slm: "#222222" } };
+      const view = new ABViewOrgChartTeams({ settings }, application);
       teamChart = new ABViewOrgChartTeamsComponent(view);
       modelCreate = sinon.fake.resolves({ id: "new" });
       teamChart.datacollection = { model: {} };
@@ -37,6 +38,23 @@ describe("ABViewDetailCheckboxComponent item widget", function () {
       sandbox.restore();
    });
 
+   it(".generateStrategyCss adds css rules", function () {
+      teamChart.generateStrategyCss();
+      const css = document.getElementsByTagName("style")[0].innerHTML;
+      assert.include(
+         css,
+         "org-chart .strategy-external .title{background:#989898 !important;}"
+      );
+      assert.include(
+         css,
+         "org-chart .strategy-ops .title{background:#111111 !important;}"
+      );
+      assert.include(
+         css,
+         "org-chart .strategy-slm .title{background:#222222 !important;}"
+      );
+   });
+
    it(".pullData prepares data for org-chart", async function () {
       const dc = {};
       sinon.stub(teamChart.view, "datacollection").get(() => dc);
@@ -46,6 +64,7 @@ describe("ABViewDetailCheckboxComponent item widget", function () {
          id: "1",
          teamName: "One",
          teamLink: ["2", "3", "7"],
+         teamStrategy__relation: { strategyCode: "test" },
       });
       const data = (id, teamName, teamLink = []) => [
          {
@@ -94,6 +113,7 @@ describe("ABViewDetailCheckboxComponent item widget", function () {
          expected(6, "Six")
       );
       assert.include(teamChart.chartData.children[0], expected(7, "Seven"));
+      assert.equal(teamChart.chartData.className, "strategy-test");
    });
 
    describe(".teamAddChild", function () {
