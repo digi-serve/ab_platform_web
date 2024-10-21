@@ -72,6 +72,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       super.onShow();
 
       this.busy();
+      this.generateStrategyCss();
       await this.loadOrgChartJs();
       await this.pullData();
       this.displayOrgChart();
@@ -157,7 +158,6 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          chartDom.textContent = "";
          chartDom.innerHTML = "";
          chartDom.appendChild(orgchart);
-         this.toolbarUi(chartDom);
       }
    }
 
@@ -179,10 +179,15 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const teamLink = this.getSettingField("teamLink").columnName;
       const teamName = this.getSettingField("teamName").columnName;
       const teamInactive = this.getSettingField("teamInactive").columnName;
+      const strategy = this.getSettingField("teamStrategy").columnName;
+      const strategyCode = this.getSettingField("strategyCode").columnName;
 
       const chartData = this.chartData;
       chartData.name = topNode[teamName] ?? "";
       chartData.id = this.teamNodeID(topNode.id);
+      chartData.className = `strategy-${
+         topNode[`${strategy}__relation`]?.[strategyCode]
+      }`;
       chartData._rawData = topNode;
 
       const maxDepth = 10; // prevent inifinite loop
@@ -194,12 +199,17 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             // Don't show inactive teams
             // @TODO this should be a default filter option
             if (childData[teamInactive]) return;
+            const strategyClass = `strategy-${
+               childData[`${strategy}__relation`]?.[strategyCode]
+            }`;
             const child = {
                name: childData[teamName],
                id: prefixFn(id),
-               description: "...",
+               className: strategyClass,
                _rawData: childData,
             };
+            if (child.name === "External Support")
+               child.className = `strategy-external`;
             if (childData[teamLink].length > 0) {
                pullChildData(child, prefixFn, depth + 1);
             }
@@ -228,6 +238,21 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
     */
    getSettingField(setting) {
       return this.AB.definitionByID(this.view.settings[setting]);
+   }
+
+   generateStrategyCss() {
+      const css = [
+         "org-chart .strategy-external .title{background:#989898 !important;}",
+      ];
+      const colors = this.settings.strategyColors;
+      for (let key in colors) {
+         css.push(
+            `org-chart .strategy-${key} .title{background:${colors[key]} !important;}`
+         );
+      }
+      const style = document.createElement("style");
+      style.innerHTML = css.join("");
+      document.getElementsByTagName("head")[0].appendChild(style);
    }
 
    async teamAddChild(values) {
@@ -314,7 +339,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       node.querySelector(".title").innerHTML = values[nameCol];
    }
 
-   teamForm(mode, values) {
+   async teamForm(mode, values) {
       let $teamFormPopup = $$(this.ids.teamFormPopup);
       const inactive = this.getSettingField("teamInactive").columnName;
       const linkField = this.AB.definitionByID(
@@ -322,6 +347,10 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       ).columnName;
       if (!$teamFormPopup) {
          const nameField = this.getSettingField("teamName");
+         const [strategyField] = this.datacollection.datasource.fields(
+            (f) => f.id == this.view.settings["teamStrategy"]
+         );
+         const strategyOptions = await strategyField.getOptions();
          $teamFormPopup = webix.ui({
             view: "popup",
             id: this.ids.teamFormPopup,
@@ -355,6 +384,13 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                            view: "text",
                            label: nameField.label ?? nameField.columnName,
                            name: nameField.columnName,
+                        },
+                        {
+                           view: "richselect",
+                           label:
+                              strategyField.label ?? strategyField.columnName,
+                           name: strategyField.columnName,
+                           options: strategyOptions.map(fieldToOption),
                         },
                         {
                            view: "switch",
@@ -456,4 +492,11 @@ function element(type, classes) {
    const elem = document.createElement(type);
    elem.classList.add(...classes.split(" "));
    return elem;
+}
+
+function fieldToOption(f) {
+   return {
+      id: f.id,
+      value: f.text,
+   };
 }
