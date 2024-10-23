@@ -9,6 +9,8 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             {
                chartView: "",
                chartDom: "",
+               filterPopup: "",
+               filterForm: "",
                teamForm: "",
                teamFormPopup: "",
                teamFormSubmit: "",
@@ -96,12 +98,18 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          parentNodeSymbol: false,
          exportButton: baseView.settings.export,
          exportFilename: baseView.settings.exportFilename,
-         createNode: ($node, { id }) => {
+         createNode: ($node, { id, filteredOut }) => {
             // remove built in icon
             $node.querySelector(".title > i")?.remove();
             // customize
             const $content = $node.querySelector(".content");
             $content.innerHTML = "";
+            if (filteredOut) {
+               // This node doesn't pass the filter, but it's children do so
+               // simplify the display.
+               $content.style.display = "none";
+               return;
+            }
             const $leaderSection = element("div", "team-leader-section");
             const $memberSection = element("div", "team-member-section");
             const $buttons = element("div", "team-button-section");
@@ -157,11 +165,12 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       if (chartDom) {
          chartDom.textContent = "";
          chartDom.innerHTML = "";
+         this.initFilter(chartDom);
          chartDom.appendChild(orgchart);
       }
    }
 
-   async pullData() {
+   async pullData(filters = {}) {
       const view = this.view;
       const dc = view.datacollection;
       await dc?.waitForDataCollectionToInitialize(dc);
@@ -197,28 +206,49 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          node._rawData[teamLink].forEach((id) => {
             const childData = dc.getData((e) => e.id === id)[0];
             // Don't show inactive teams
-            // @TODO this should be a default filter option
-            if (childData[teamInactive]) return;
-            const strategyClass = `strategy-${
-               childData[`${strategy}__relation`]?.[strategyCode]
-            }`;
+            if (filters?.inactive !== 1 && childData[teamInactive]) return;
+            const code = childData[`${strategy}__relation`]?.[strategyCode];
+            const strategyClass = `strategy-${code}`;
             const child = {
                name: childData[teamName],
                id: prefixFn(id),
                className: strategyClass,
                _rawData: childData,
             };
+            // Apply filters (match using or)
+            if (filters.strategy || filters.teamName) {
+               child.filteredOut = true;
+               if (filters.strategy !== "" && filters.strategy === code) {
+                  child.filteredOut = false;
+               }
+               if (
+                  filters.teamName !== "" &&
+                  child.name
+                     .toLowerCase()
+                     .includes(filters.teamName.toLowerCase())
+               ) {
+                  child.filteredOut = false;
+               }
+            }
             if (child.name === "External Support")
                child.className = `strategy-external`;
             if (childData[teamLink].length > 0) {
                pullChildData(child, prefixFn, depth + 1);
             }
-            node.children.push(child);
+            // If this node is filtered we still need it if it has children
+            // that pass
+            if (!child.filteredOut || child.children?.length > 0) {
+               node.children.push(child);
+            }
          });
-         // sort children alphabetically
-         node.children = node.children.sort((a, b) =>
-            a.name > b.name ? 1 : -1
-         );
+         if (node.children.length === 0) {
+            delete node.children;
+         } else {
+            // sort children alphaetically
+            node.children = node.children.sort((a, b) =>
+               a.name > b.name ? 1 : -1
+            );
+         }
          return;
       }
       pullChildData(chartData, this.teamNodeID);
@@ -229,6 +259,69 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          this._chartData = {};
       }
       return this._chartData;
+   }
+
+   initFilter(domNode) {
+      const filterButton = document.createElement("button");
+      filterButton.innerHTML = `<i class="fa fa-filter"></i> Filter`;
+      filterButton.classList.add("filter-button");
+      filterButton.onclick = () => this.filterWindow(filterButton);
+      domNode.append(filterButton);
+   }
+
+   async filterWindow(buttonNode) {
+      let $popup = $$(this.ids.filterPopup);
+      if (!$popup) {
+         const [strategyField] = this.datacollection.datasource.fields(
+            (f) => f.id == this.view.settings["teamStrategy"]
+         );
+         const strategyOptions = await strategyField.getOptions();
+
+         $popup = webix.ui({
+            view: "popup",
+            css: "filter-popup",
+            id: this.ids.filterPopup,
+            body: {
+               view: "form",
+               id: this.ids.filterForm,
+               elements: [
+                  {
+                     view: "text",
+                     label: this.label("Team Name"),
+                     labelWidth: 90,
+                     name: "teamName",
+                     clear: true,
+                  },
+                  {
+                     view: "combo",
+                     label: this.label("Strategy"),
+                     labelWidth: 90,
+                     options: strategyOptions.map((f) => f.text),
+                     name: "strategy",
+                     clear: "replace",
+                  },
+                  {
+                     view: "checkbox",
+                     name: "inactive",
+                     labelRight: this.label("Show Inactive Teams"),
+                     labelWidth: 0,
+                  },
+                  {
+                     view: "button",
+                     label: this.label("Apply"),
+                     click: () => this.filterApply(),
+                  },
+               ],
+            },
+         });
+      }
+      $popup.show(buttonNode);
+   }
+
+   filterApply() {
+      $$(this.ids.filterPopup).hide();
+      const filters = $$(this.ids.filterForm).getValues();
+      this.pullData(filters).then(() => this.displayOrgChart());
    }
 
    /**
