@@ -201,7 +201,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
 
       const maxDepth = 10; // prevent inifinite loop
       const self = this;
-      function pullChildData(node, prefixFn, depth = 0) {
+      function pullChildData(node, depth = 0) {
          if (depth >= maxDepth) return;
          node.children = [];
          node._rawData[teamLink].forEach((id) => {
@@ -352,7 +352,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       document.getElementsByTagName("head")[0].appendChild(style);
    }
 
-   async teamAddChild(values) {
+   async teamAddChild(values, strategy) {
       const { id } = await this.datacollection.model.create(values);
 
       const linkField = this.AB.definitionByID(
@@ -367,6 +367,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          name: values[nameField],
          id: this.teamNodeID(id),
          relationship: hasChild ? "110" : "100",
+         className: `strategy-${strategy.text}`,
       };
       // Need to add differently if the node already has child nodes
       if (hasChild) {
@@ -375,9 +376,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             .querySelector(".node");
          this.__orgchart.addSiblings(sibling, { siblings: [newChild] });
       } else {
-         this.__orgchart.addChildren(parent, {
-            children: [newChild],
-         });
+         this.__orgchart.addChildren(parent, { children: [newChild] });
       }
    }
 
@@ -421,12 +420,20 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       });
    }
 
-   teamEdit(values) {
+   teamEdit(values, strategy) {
       this.datacollection.model.update(values.id, values).catch((err) => {
          //TODO
       });
       const nodeID = this.teamNodeID(values.id);
       const node = document.querySelector(`#${nodeID}`);
+      const currentStrategy = node.classList.value.match(/strategy-\S+/)[0];
+      const newStrategy = `strategy-${strategy.text}`;
+      if (currentStrategy !== newStrategy) {
+         node.classList.remove(currentStrategy);
+         node.classList.add(newStrategy);
+      }
+
+      console.log(node.classList);
       const inactive = this.getSettingField("teamInactive").columnName;
       // @TODO this will need to check against active filters
       if (values[inactive]) {
@@ -504,10 +511,14 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                            css: "webix_primary",
                            click: () => {
                               const values = $$(this.ids.teamForm).getValues();
+                              const strategy = strategyOptions.find(
+                                 (f) =>
+                                    f.id === values[strategyField.columnName]
+                              );
                               if (values.id) {
-                                 this.teamEdit(values);
+                                 this.teamEdit(values, strategy);
                               } else {
-                                 this.teamAddChild(values);
+                                 this.teamAddChild(values, strategy);
                               }
                               $teamFormPopup.hide();
                            },
