@@ -200,6 +200,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       chartData._rawData = topNode;
 
       const maxDepth = 10; // prevent inifinite loop
+      const self = this;
       function pullChildData(node, prefixFn, depth = 0) {
          if (depth >= maxDepth) return;
          node.children = [];
@@ -211,29 +212,15 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             const strategyClass = `strategy-${code}`;
             const child = {
                name: childData[teamName],
-               id: prefixFn(id),
+               id: self.teamNodeID(id),
                className: strategyClass,
                _rawData: childData,
             };
-            // Apply filters (match using or)
-            if (filters.strategy || filters.teamName) {
-               child.filteredOut = true;
-               if (filters.strategy !== "" && filters.strategy === code) {
-                  child.filteredOut = false;
-               }
-               if (
-                  filters.teamName !== "" &&
-                  child.name
-                     .toLowerCase()
-                     .includes(filters.teamName.toLowerCase())
-               ) {
-                  child.filteredOut = false;
-               }
-            }
+            child.filteredOut = self.filterTeam(filters, child, code);
             if (child.name === "External Support")
                child.className = `strategy-external`;
             if (childData[teamLink].length > 0) {
-               pullChildData(child, prefixFn, depth + 1);
+               pullChildData(child, depth + 1);
             }
             // If this node is filtered we still need it if it has children
             // that pass
@@ -251,7 +238,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          }
          return;
       }
-      pullChildData(chartData, this.teamNodeID);
+      pullChildData(chartData);
    }
 
    get chartData() {
@@ -322,6 +309,23 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       $$(this.ids.filterPopup).hide();
       const filters = $$(this.ids.filterForm).getValues();
       this.pullData(filters).then(() => this.displayOrgChart());
+   }
+
+   filterTeam(filters, team, code) {
+      // Apply filters (match using or)
+      if (filters.strategy || filters.teamName) {
+         let filter = true;
+         if (filters.strategy !== "" && filters.strategy === code) {
+            filter = false;
+         }
+         if (
+            filters.teamName !== "" &&
+            team.name.toLowerCase().includes(filters.teamName.toLowerCase())
+         ) {
+            filter = false;
+         }
+         return filter;
+      }
    }
 
    /**
