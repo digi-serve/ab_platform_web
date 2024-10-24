@@ -116,6 +116,36 @@ describe("ABViewDetailCheckboxComponent item widget", function () {
       assert.equal(teamChart.chartData.className, "strategy-test");
    });
 
+   it(".filterTeam()", function () {
+      [
+         {
+            filters: {},
+            result: undefined,
+         },
+         {
+            filters: { strategy: "OPS", teamName: "" },
+            result: false,
+         },
+         {
+            filters: { strategy: "SLM", teamName: "" },
+            result: true,
+         },
+         {
+            filters: { strategy: "SLM", teamName: "X" },
+            result: false,
+         },
+         {
+            filters: { teamName: "Y" },
+            result: true,
+         },
+      ].forEach((c) => {
+         assert.equal(
+            teamChart.filterTeam(c.filters, { name: "Team X" }, "OPS"),
+            c.result
+         );
+      });
+   });
+
    describe(".teamAddChild", function () {
       const values = { teamName: "Test" };
 
