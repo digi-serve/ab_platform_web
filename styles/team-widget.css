@@ -108,6 +108,7 @@ org-chart tr.lines .downLine {
    padding: 3px;
    gap: 6px;
    justify-content: flex-end;
+   margin-right: 5px;
 }
 
 .team-button {
@@ -162,4 +163,23 @@ org-chart tr.lines .downLine {
    border-radius: 10px;
    background: #FFF;
    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+}
+
+.active-text {
+   color: #ffffff;
+   font-family: 'Jomhuria', sans-serif;
+   height: 6.5px;
+   font-size: 8px;
+   font-weight: 400;
+   text-align: center;
+}
+
+.is-active {
+   background: #4bc90f;
+   cursor: default;
+}
+
+.is-inactive {
+   background: grey;
+   cursor: default;
 }

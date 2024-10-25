@@ -20,6 +20,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             ids
          )
       );
+      this.__filters = {};
    }
 
    ui() {
@@ -98,7 +99,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          parentNodeSymbol: false,
          exportButton: baseView.settings.export,
          exportFilename: baseView.settings.exportFilename,
-         createNode: ($node, { id, filteredOut }) => {
+         createNode: ($node, { id, filteredOut, isInactive }) => {
             // remove built in icon
             $node.querySelector(".title > i")?.remove();
             // customize
@@ -132,6 +133,14 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                $deleteButton.append(element("i", "fa fa-trash"));
                $deleteButton.onclick = () => this.teamDelete(values);
                $buttons.append($deleteButton);
+            }
+            if (this.__filters.inactive && this.__filters.inactive === 1) {
+               const activeClass = isInactive ? "is-inactive" : "is-active";
+               const $active = element("div", `team-button ${activeClass}`);
+               const $span = element("span", "active-text");
+               $span.innerHTML = isInactive ? "INACTIVE" : "ACTIVE";
+               $active.append($span);
+               $buttons.append($active);
             }
             $content.append($leaderSection, $memberSection, $buttons);
          },
@@ -170,7 +179,8 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       }
    }
 
-   async pullData(filters = {}) {
+   async pullData() {
+      const filters = this.__filters;
       const view = this.view;
       const dc = view.datacollection;
       await dc?.waitForDataCollectionToInitialize(dc);
@@ -197,6 +207,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       chartData.className = `strategy-${
          topNode[`${strategy}__relation`]?.[strategyCode]
       }`;
+      chartData.isInactive = topNode[teamInactive];
       chartData._rawData = topNode;
 
       const maxDepth = 10; // prevent inifinite loop
@@ -214,6 +225,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                name: childData[teamName],
                id: self.teamNodeID(id),
                className: strategyClass,
+               isInactive: childData[teamInactive],
                _rawData: childData,
             };
             child.filteredOut = self.filterTeam(filters, child, code);
@@ -307,8 +319,8 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
 
    filterApply() {
       $$(this.ids.filterPopup).hide();
-      const filters = $$(this.ids.filterForm).getValues();
-      this.pullData(filters).then(() => this.displayOrgChart());
+      this.__filters = $$(this.ids.filterForm).getValues();
+      this.pullData().then(() => this.displayOrgChart());
    }
 
    filterTeam(filters, team, code) {
@@ -369,6 +381,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          relationship: hasChild ? "110" : "100",
          className: `strategy-${strategy.text}`,
       };
+
       // Need to add differently if the node already has child nodes
       if (hasChild) {
          const sibling = this.closest(parent, (el) => el.nodeName === "TABLE")
@@ -426,17 +439,19 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       });
       const nodeID = this.teamNodeID(values.id);
       const node = document.querySelector(`#${nodeID}`);
-      const currentStrategy = node.classList.value.match(/strategy-\S+/)[0];
+      const currentStrategy = node.classList?.value?.match(/strategy-\S+/)[0];
       const newStrategy = `strategy-${strategy.text}`;
       if (currentStrategy !== newStrategy) {
-         node.classList.remove(currentStrategy);
-         node.classList.add(newStrategy);
+         node.classList?.remove(currentStrategy);
+         node.classList?.add(newStrategy);
       }
 
-      console.log(node.classList);
       const inactive = this.getSettingField("teamInactive").columnName;
-      // @TODO this will need to check against active filters
-      if (values[inactive]) {
+      if (
+         this.__filters.inactive &&
+         this.__filters.inactive === 0 &&
+         values[inactive]
+      ) {
          this.__orgchart.removeNodes(node);
       }
       const nameCol = this.getSettingField("teamName").columnName;
