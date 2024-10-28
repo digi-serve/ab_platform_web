@@ -74,7 +74,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       this.busy();
       await this.loadOrgChartJs();
       await this.pullData();
-      this.displayOrgChart();
+      await this.displayOrgChart();
       this.ready();
    }
 
@@ -84,7 +84,10 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const chartData = AB.cloneDeep(this.chartData);
       const settings = baseView.settings;
       const draggable = settings.draggable === 1;
-      const nodeObj = baseView.datacollection?.datasource;
+      const dropContentToCreate = settings.$dropContentToCreate === 1;
+      const nodeDC = baseView.datacollection;
+      const nodeModel = baseView.datacollection.model;
+      const nodeObj = nodeDC?.datasource;
       const nodeObjPK = nodeObj.PK();
       const contentField = nodeObj.fieldByID(settings.contentField);
       const contentFieldColumnName = contentField.columnName;
@@ -111,6 +114,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      rule: "in",
                      value: contentDataRecordPKs,
                   },
+                  JSON.parse(settings.contentFieldFilter),
                ],
             },
             populate: true,
@@ -126,45 +130,90 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const contentObjID = contentObj.id;
       const contentDisplayedFields = settings.contentDisplayedFields;
       const contentDisplayedFieldsKeys = Object.keys(contentDisplayedFields);
+      const contentModel = contentObj.model();
       const orgchart = new this.OrgChart({
+         data: chartData,
+         direction: baseView.settings.direction,
+         // depth: baseView.settings.depth,
+         chartContainer: `#${this.ids.chartDom}`,
+         pan: true, // baseView.settings.pan == 1,
+         zoom: true, //baseView.settings.zoom == 1,
+         draggable,
+         // visibleLevel: baseView.settings.visibleLevel,
+         parentNodeSymbol: false,
+         exportButton: baseView.settings.export,
+         exportFilename: baseView.settings.exportFilename,
          createNode: async ($node, data) => {
-            const nodeWidth = 300;
-            const nodeStyle = $node.style;
-            nodeStyle["width"] = `${nodeWidth}px`;
+            // remove built in icon
+            $node.querySelector(".title > i")?.remove();
+
+            // customize
             const $contentNode = $node.children.item(1);
             $contentNode.innerHTML = "";
-            const contentNodeStyle = $contentNode.style;
-
-            //  Team content buckets
-            contentNodeStyle["height"] = `${
-               // TODO (Guy): Fix the number later.
-               contentGroupOptionsLength * 150
-            }px`;
-            const groupBorderWidth = 5;
-            contentNodeStyle["width"] = `${nodeWidth - 2 * groupBorderWidth}px`;
-            const averageHeight = 100 / contentGroupOptionsLength;
+            const averageHeight = 80 / contentGroupOptionsLength;
             const currentNodeDataRecordPK = data._rawData[nodeObjPK];
+            const $nodeSpacer = element("div", "spacer");
+            $contentNode.appendChild($nodeSpacer);
+            $nodeSpacer.style.backgroundColor = contentGroupOptions[0].hex;
             for (const group of contentGroupOptions) {
-               const $group = document.createElement("div");
+               const $group = element("div", "team-group-section");
                $contentNode.appendChild($group);
                const groupStyle = $group.style;
                groupStyle["height"] = `${averageHeight}%`;
-               groupStyle["borderStyle"] = "solid";
-               groupStyle["borderWidth"] = `${groupBorderWidth}px`;
                const groupColor = group.hex;
-               groupStyle["borderColor"] = groupColor;
-               const $groupTitle = document.createElement("div");
-               const groupTitleStyle = $groupTitle.style;
-               groupTitleStyle["backgroundColor"] = groupColor;
-               groupTitleStyle["height"] = "20%";
+               groupStyle["backgroundColor"] = groupColor;
+               const $groupTitle = element("div", "team-group-title");
+               // const groupTitleStyle = $groupTitle.style;
+               // groupTitleStyle["backgroundColor"] = groupColor;
+               // groupTitleStyle["height"] = "20%";
                const groupText = group.text;
-               $groupTitle.appendChild(document.createTextNode(groupText));
-               $group.appendChild($groupTitle);
-               const $groupContent = document.createElement("div");
+               // $groupTitle.setAttribute(
+               //    "id",
+               //    `${currentNodeDataRecordPK}.${groupText}`
+               // );
+               // $groupTitle.appendChild(document.createTextNode(groupText));
+               // $group.appendChild($groupTitle);
+               const $groupContent = element("div", "team-group-content");
                $group.appendChild($groupContent);
-               const groupContentStyle = $groupContent.style;
-               groupContentStyle["overflow"] = "auto";
-               groupContentStyle["height"] = "80%";
+               if (draggable) {
+                  $group.addEventListener("drop", async (event) => {
+                     const elementID = event.dataTransfer.getData("element-id");
+                     if (elementID.includes("teamnode")) return;
+                     const draggedContentDataRecord = JSON.parse(
+                        document.getElementById(elementID).dataset.source
+                     );
+                     if (dropContentToCreate) {
+                        // Trigger a process manager.
+                        await contentModel.update(
+                           draggedContentDataRecord.id,
+                           draggedContentDataRecord
+                        );
+                        delete draggedContentDataRecord["id"];
+                        delete draggedContentDataRecord["uuid"];
+                        delete draggedContentDataRecord["created_at"];
+                        delete draggedContentDataRecord["updated_at"];
+                        draggedContentDataRecord[contentFieldLinkColumnName] =
+                           currentNodeDataRecordPK;
+                        draggedContentDataRecord[
+                           contentGroupByFieldColumnName
+                        ] = groupText;
+                        await contentModel.create(draggedContentDataRecord);
+                     } else {
+                        draggedContentDataRecord[contentFieldLinkColumnName] =
+                           currentNodeDataRecordPK;
+                        draggedContentDataRecord[
+                           contentGroupByFieldColumnName
+                        ] = groupText;
+                        await contentModel.update(
+                           draggedContentDataRecord.id,
+                           draggedContentDataRecord
+                        );
+                     }
+
+                     // TODO (Guy): This is refreshing the whole chart.
+                     await this.onShow();
+                  });
+               }
                let contentDataRecordIndex = 0;
                while (
                   contentDataRecordIndex < contentDataRecords.length &&
@@ -182,15 +231,30 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      continue;
                   }
                   contentDataRecords.splice(contentDataRecordIndex, 1);
+                  for (const key in contentDataRecord)
+                     key.includes("__relation") &&
+                        delete contentDataRecord[key];
                   const contentDataRecordPK = contentDataRecord[contentObjPK];
                   const rowDataID = `${currentNodeDataRecordPK}.${contentDataRecordPK}`;
-                  const $rowData = document.createElement("div");
+                  const $rowData = element("div", "team-group-record");
+                  $rowData.setAttribute(
+                     "data-source",
+                     JSON.stringify(contentDataRecord)
+                  );
                   $groupContent.appendChild($rowData);
                   $rowData.setAttribute("id", rowDataID);
-                  draggable && $rowData.setAttribute("draggable", "true");
+                  if (draggable) {
+                     $rowData.setAttribute("draggable", "true");
+                     $rowData.addEventListener("dragstart", (e) => {
+                        e.dataTransfer.setData("element-id", e.target.id);
+                        e.target.style.opacity = "0.5";
+                     });
+                     $rowData.addEventListener("dragend", (e) => {
+                        e.target.style.opacity = "1";
+                     });
+                  }
                   const rowDataStyle = $rowData.style;
-                  rowDataStyle["borderStyle"] = "solid";
-                  rowDataStyle["borderColor"] = "black";
+                  rowDataStyle["borderColor"] = "#EF3340";
                   let currentDataRecords = [];
                   let currentField = null;
                   for (let j = 0; j < contentDisplayedFieldsKeys.length; j++) {
@@ -247,12 +311,17 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                         currentField = displayedField;
                         continue;
                      }
-                     const $currentDisplay = document.createElement("div");
+                     const $currentDisplay = element(
+                        "div",
+                        "team-group-record-display"
+                     );
                      $rowData.appendChild($currentDisplay);
                      const displayedFieldColumnName = displayedField.columnName;
                      while (currentDataRecords.length > 0) {
-                        const $currentDisplayData =
-                           document.createElement("div");
+                        const $currentDisplayData = element(
+                           "div",
+                           "team-group-record-display-data"
+                        );
                         $currentDisplay.appendChild($currentDisplayData);
                         const currentDataRecord = currentDataRecords.pop();
                         $currentDisplayData.setAttribute(
@@ -269,33 +338,15 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                   }
                }
             }
-         },
-         data: chartData,
-         direction: baseView.settings.direction,
-         // depth: baseView.settings.depth,
-         chartContainer: `#${this.ids.chartDom}`,
-         pan: true, // baseView.settings.pan == 1,
-         zoom: true, //baseView.settings.zoom == 1,
-         draggable,
-         // visibleLevel: baseView.settings.visibleLevel,
-         parentNodeSymbol: false,
-         exportButton: baseView.settings.export,
-         exportFilename: baseView.settings.exportFilename,
-         createNode: ($node, { id }) => {
-            // remove built in icon
-            $node.querySelector(".title > i")?.remove();
-            // customize
-            const $content = $node.querySelector(".content");
-            $content.innerHTML = "";
-            const $leaderSection = element("div", "team-leader-section");
-            const $memberSection = element("div", "team-member-section");
+            // const $leaderSection = element("div", "team-leader-section");
+            // const $memberSection = element("div", "team-member-section");
             const $buttons = element("div", "team-button-section");
             const $editButton = element("div", "team-button");
             $editButton.append(element("i", "fa fa-pencil"));
             const $addButton = element("div", "team-button");
             $addButton.append(element("i", "fa fa-plus"));
             $buttons.append($editButton, $addButton);
-            const dataID = this.teamRecordID(id);
+            const dataID = this.teamRecordID(data.id);
             const values = this.datacollection.getData(
                (e) => e.id === dataID
             )[0];
@@ -303,14 +354,14 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                this.teamForm("Add", { __parentID: dataID });
             };
             $editButton.onclick = () => this.teamForm("Edit", values);
-
             if (this.teamCanDelete(values)) {
                const $deleteButton = element("div", "team-button");
                $deleteButton.append(element("i", "fa fa-trash"));
                $deleteButton.onclick = () => this.teamDelete(values);
                $buttons.append($deleteButton);
             }
-            $content.append($leaderSection, $memberSection, $buttons);
+            // $contentNode.append($leaderSection, $memberSection, $buttons);
+            $contentNode.appendChild($buttons);
          },
 
          nodeContent: "description",
@@ -320,12 +371,12 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
 
       if (draggable) {
          // On drop update the parent (dropZone) of the node
-         orgchart.addEventListener("nodedropped.orgchart", (event) => {
-            const dragNode = JSON.parse(
-               event.detail.draggedNode.dataset.source
-            );
-            debugger;
-            const dropNode = JSON.parse(event.detail.dropZone.dataset.source);
+         orgchart.addEventListener("nodedropped.orgchart", async (event) => {
+            const eventDetail = event.detail;
+            const $draggedNode = eventDetail.draggedNode;
+            if (!$draggedNode.getAttribute("id").includes("teamnode")) return;
+            const dragNode = JSON.parse($draggedNode.dataset.source);
+            const dropNode = JSON.parse(eventDetail.dropZone.dataset.source);
             const dragRecord = dragNode._rawData;
             const dropID = dropNode._rawData.id;
 
@@ -334,22 +385,21 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                linkField.settings.linkColumn
             );
             dragRecord[parent.columnName] = dropID;
-
-            this.datacollection.model.update(dragRecord.id, dragRecord);
+            await nodeModel.update(dragRecord.id, dragRecord);
          });
       }
       const chartDom = document.querySelector(`#${this.ids.chartDom}`);
-      const orgchartStyle = orgchart.style;
-      orgchartStyle["overflow"] = "auto";
-      let $currentNode = chartDom;
-      while ($currentNode.style["height"] === "")
-         $currentNode = $currentNode.parentNode;
-      orgchartStyle["height"] = $currentNode.style["height"];
+      // const orgchartStyle = orgchart.style;
+      // orgchartStyle["overflow"] = "auto";
+      // let $currentNode = chartDom;
+      // while ($currentNode.style["height"] === "")
+      //    $currentNode = $currentNode.parentNode;
+      // orgchartStyle["height"] = $currentNode.style["height"];
       if (chartDom) {
          chartDom.textContent = "";
          chartDom.innerHTML = "";
          chartDom.appendChild(orgchart);
-         this.toolbarUi(chartDom);
+         // this.toolbarUi(chartDom);
       }
    }
 
@@ -372,7 +422,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const teamName = this.getSettingField("teamName").columnName;
       const teamInactive = this.getSettingField("teamInactive").columnName;
 
-      const chartData = this.chartData;
+      const chartData = (this._chartData = {});
       chartData.name = topNode[teamName] ?? "";
       chartData.id = this.teamNodeID(topNode.id);
       chartData._rawData = topNode;

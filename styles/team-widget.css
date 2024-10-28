@@ -1,105 +1,117 @@
-@import url('https://fonts.googleapis.com/css2?family=Jomhuria&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Jomhuria&display=swap");
 
 org-chart .node {
-  display: inline-block;
-  position: relative;
-  margin: 5px;
-  padding: 5px;
-  border: 2px dashed transparent;
-  text-align: center;
-  width: 164px;
+   position: relative;
+   border: 2px dashed transparent;
+   text-align: center;
+   justify-content: center;
+   width: 325px !important;
+   height: 250px;
+   font-family: "Jomhuria", sans-serif;
+   font-style: normal;
+   font-weight: 200;
+   font-size: 16px;
+   color: #000000;
+}
+
+org-chart .node .spacer {
+   border: none;
+   width: 100%;
+   height: 10%;
 }
 
 org-chart .node .title {
-   text-overflow: ellipsis;
-   white-space: nowrap;
+   position: relative;
    display: flex;
    flex-direction: row;
    justify-content: center;
    align-items: center;
-   padding: 6px 69px;
-   gap: 10px;
-   background: #EF3340;
+   background: #ef3340;
    border-radius: 15px;
-   width: 154px;
-   height: 32px;
-   font-family: 'Jomhuria', sans-serif;
-   font-style: normal;
+   width: 100%;
+   height: 15%;
    font-weight: 400;
-   font-size: 24px;
-   line-height: 24px;
-   color: #FFFFFF;
-   flex: none;
-   order: 0;
-   flex-grow: 0;
-   position: relative;
+   font-size: 32px;
+   color: #ffffff;
    z-index: 1;
 }
 
 org-chart .node .content {
    position: relative;
-   top: -15px;
-   width: 154px;
-   min-height: 60px;
+   top: -7.5%;
+   width: 100%;
+   height: 85%;
    border-radius: 0 0 15px 15px;
    display: flex;
    flex-direction: column;
-   align-items: flex-end;
-   flex-wrap: nowrap;
-   gap: 4px;
    margin: 0 auto;
    background: #dddddd;
-   overflow: hidden;
    box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
 }
 
 org-chart tr.lines .topLine {
-  border-top: 2px solid black;
+   border-top: 2px solid black;
 }
 
 org-chart tr.lines .rightLine {
-  border-right: 1px solid black;
-  float: none;
-  border-radius: 0;
+   border-right: 1px solid black;
+   float: none;
+   border-radius: 0;
 }
 
 org-chart tr.lines .leftLine {
-  border-left: 1px solid black;
-  float: none;
-  border-radius: 0;
+   border-left: 1px solid black;
+   float: none;
+   border-radius: 0;
 }
 
 org-chart tr.lines .downLine {
-  background-color: black;
-  margin: 0 auto;
-  height: 20px;
-  width: 2px;
-  float: none;
+   background-color: black;
+   margin: 0 auto;
+   height: 20px;
+   width: 2px;
+   float: none;
 }
 
-
-.team-leader-section {
-   width: 154px;
-   min-height: 35px;
-   left: 0px;
-   top: 14px;
-   background: #1A3E72;
-   display: flex;
-   align-self: stretch;
-   flex-wrap: nowrap;
-   gap: 5px;
-   /* position: relative; */
+.team-group-section {
+   width: 100%;
+   padding: 2%;
 }
 
-.team-member-section {
+.team-group-title {
+  width: 100%;
+}
+
+.team-group-content {
+   height: 80%;
+   width: 100%;
    display: flex;
    flex-direction: column;
-   align-items: flex-end;
-   flex-wrap: nowrap;
-   gap: 4px;
-   /* position: relative; */
-   width: 154px;
-   min-height: 21px;
+   gap: 5%;
+   overflow: auto;
+}
+
+.team-group-record {
+   width: 100%;
+   border-width: 1%;
+   border-style: solid;
+   border-radius: 5px;
+   background: #ffffff;
+   display: flex;
+   flex-direction: row;
+   justify-content: center;
+}
+
+.team-group-record-display {
+
+}
+
+.team-group-record-display-data {
+
+}
+
+.team-group-record:hover {
+  background-color: yellow;
 }
 
 .team-button-section {
@@ -111,19 +123,19 @@ org-chart tr.lines .downLine {
 }
 
 .team-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  width: 28px;
-  height: 10px;
-  padding: 2px 4px;
-  background: #1A3E72;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 8px;
-  color: white;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   gap: 2px;
+   width: 28px;
+   height: 10px;
+   padding: 2px 4px;
+   background: #1a3e72;
+   border: none;
+   border-radius: 5px;
+   cursor: pointer;
+   font-size: 8px;
+   color: white;
 }
 
 .team-chart-toolbar {
@@ -134,12 +146,10 @@ org-chart tr.lines .downLine {
    gap: 10px;
 
    width: 254px;
-   background: #FFFFFF;
+   background: #ffffff;
    box-shadow: 0px -1px 4px rgba(0, 0, 0, 0.25);
    border-radius: 20px;
 }
 
 .team-chart-button {
-
 }
-
