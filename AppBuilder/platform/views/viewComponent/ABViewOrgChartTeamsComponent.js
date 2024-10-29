@@ -88,7 +88,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const chartData = AB.cloneDeep(this.chartData);
       const settings = baseView.settings;
       const draggable = settings.draggable === 1;
-      const dropContentToCreate = settings.$dropContentToCreate === 1;
+      const dropContentToCreate = settings.dropContentToCreate === 1;
       const nodeDC = baseView.datacollection;
       const nodeModel = baseView.datacollection.model;
       const nodeObj = nodeDC?.datasource;
@@ -221,7 +221,9 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      }
 
                      // TODO (Guy): This is refreshing the whole chart.
-                     await this.onShow();
+                     setTimeout(async () => {
+                        await this.onShow();
+                     }, 1000);
                   });
                }
                let contentDataRecordIndex = 0;
