@@ -15,7 +15,8 @@ describe("ABViewDetailCheckboxComponent item widget", function () {
       const AB = new ABFactory();
       const application = AB.applicationNew({});
       sinon.stub(AB, "definitionByID").returns({});
-      const view = new ABViewOrgChartTeams({}, application);
+      const settings = { strategyColors: { ops: "#111111", slm: "#222222" } };
+      const view = new ABViewOrgChartTeams({ settings }, application);
       teamChart = new ABViewOrgChartTeamsComponent(view);
       modelCreate = sinon.fake.resolves({ id: "new" });
       teamChart.datacollection = { model: {} };
@@ -37,6 +38,23 @@ describe("ABViewDetailCheckboxComponent item widget", function () {
       sandbox.restore();
    });
 
+   it(".generateStrategyCss adds css rules", function () {
+      teamChart.generateStrategyCss();
+      const css = document.getElementsByTagName("style")[0].innerHTML;
+      assert.include(
+         css,
+         "org-chart .strategy-external .title{background:#989898 !important;}"
+      );
+      assert.include(
+         css,
+         "org-chart .strategy-ops .title{background:#111111 !important;}"
+      );
+      assert.include(
+         css,
+         "org-chart .strategy-slm .title{background:#222222 !important;}"
+      );
+   });
+
    it(".pullData prepares data for org-chart", async function () {
       const dc = {};
       sinon.stub(teamChart.view, "datacollection").get(() => dc);
@@ -46,6 +64,7 @@ describe("ABViewDetailCheckboxComponent item widget", function () {
          id: "1",
          teamName: "One",
          teamLink: ["2", "3", "7"],
+         teamStrategy__relation: { strategyCode: "test" },
       });
       const data = (id, teamName, teamLink = []) => [
          {
@@ -94,6 +113,37 @@ describe("ABViewDetailCheckboxComponent item widget", function () {
          expected(6, "Six")
       );
       assert.include(teamChart.chartData.children[0], expected(7, "Seven"));
+      assert.equal(teamChart.chartData.className, "strategy-test");
+   });
+
+   it(".filterTeam()", function () {
+      [
+         {
+            filters: {},
+            result: undefined,
+         },
+         {
+            filters: { strategy: "OPS", teamName: "" },
+            result: false,
+         },
+         {
+            filters: { strategy: "SLM", teamName: "" },
+            result: true,
+         },
+         {
+            filters: { strategy: "SLM", teamName: "X" },
+            result: false,
+         },
+         {
+            filters: { teamName: "Y" },
+            result: true,
+         },
+      ].forEach((c) => {
+         assert.equal(
+            teamChart.filterTeam(c.filters, { name: "Team X" }, "OPS"),
+            c.result
+         );
+      });
    });
 
    describe(".teamAddChild", function () {
@@ -111,23 +161,33 @@ describe("ABViewDetailCheckboxComponent item widget", function () {
 
       it("adds a team node as child", async function () {
          selectorStub.returns({ parentNode: { colSpan: 0 } });
-         await teamChart.teamAddChild(values);
+         await teamChart.teamAddChild(values, { text: "1" });
          assert(modelCreate.calledOnce);
          assert(teamChart.__orgchart.addChildren.calledOnce);
          assert.deepEqual(
             teamChart.__orgchart.addChildren.lastArg.children[0],
-            { relationship: "100", name: "Test", id: "teamnode_new" }
+            {
+               relationship: "100",
+               name: "Test",
+               id: "teamnode_new",
+               className: "strategy-1",
+            }
          );
       });
 
       it("adds a team node as sibling", async function () {
          selectorStub.returns({ parentNode: { colSpan: 2 } });
-         await teamChart.teamAddChild(values);
+         await teamChart.teamAddChild(values, { text: "1" });
          assert(modelCreate.calledOnce);
          assert(teamChart.__orgchart.addSiblings.calledOnce);
          assert.deepEqual(
             teamChart.__orgchart.addSiblings.lastArg.siblings[0],
-            { relationship: "110", name: "Test", id: "teamnode_new" }
+            {
+               relationship: "110",
+               name: "Test",
+               id: "teamnode_new",
+               className: "strategy-1",
+            }
          );
       });
    });
@@ -220,7 +280,7 @@ describe("ABViewDetailCheckboxComponent item widget", function () {
       selectorStub.returnsThis();
 
       const values = { id: "update", teamName: "update" };
-      teamChart.teamEdit(values);
+      teamChart.teamEdit(values, {});
       assert(
          teamChart.datacollection.model.update.calledOnceWith("update", values)
       );

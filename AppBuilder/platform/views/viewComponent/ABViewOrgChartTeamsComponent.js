@@ -9,6 +9,8 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             {
                chartView: "",
                chartDom: "",
+               filterPopup: "",
+               filterForm: "",
                teamForm: "",
                teamFormPopup: "",
                teamFormSubmit: "",
@@ -18,6 +20,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             ids
          )
       );
+      this.__filters = {};
    }
 
    ui() {
@@ -72,6 +75,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       super.onShow();
 
       this.busy();
+      this.generateStrategyCss();
       await this.loadOrgChartJs();
       await this.pullData();
       await this.displayOrgChart();
@@ -148,16 +152,22 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             $node.querySelector(".title > i")?.remove();
 
             // customize
-            const $contentNode = $node.children.item(1);
-            $contentNode.innerHTML = "";
+            const $content = $node.children.item(1);
+            $content.innerHTML = "";
+            if (data.filteredOut) {
+               // This node doesn't pass the filter, but it's children do so
+               // simplify the display.
+               $content.style.display = "none";
+               return;
+            }
             const averageHeight = 80 / contentGroupOptionsLength;
             const currentNodeDataRecordPK = data._rawData[nodeObjPK];
             const $nodeSpacer = element("div", "spacer");
-            $contentNode.appendChild($nodeSpacer);
+            $content.appendChild($nodeSpacer);
             $nodeSpacer.style.backgroundColor = contentGroupOptions[0].hex;
             for (const group of contentGroupOptions) {
                const $group = element("div", "team-group-section");
-               $contentNode.appendChild($group);
+               $content.appendChild($group);
                const groupStyle = $group.style;
                groupStyle["height"] = `${averageHeight}%`;
                const groupColor = group.hex;
@@ -338,9 +348,8 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                   }
                }
             }
-            // const $leaderSection = element("div", "team-leader-section");
-            // const $memberSection = element("div", "team-member-section");
             const $buttons = element("div", "team-button-section");
+            $content.appendChild($buttons);
             const $editButton = element("div", "team-button");
             $editButton.append(element("i", "fa fa-pencil"));
             const $addButton = element("div", "team-button");
@@ -360,8 +369,15 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                $deleteButton.onclick = () => this.teamDelete(values);
                $buttons.append($deleteButton);
             }
-            // $contentNode.append($leaderSection, $memberSection, $buttons);
-            $contentNode.appendChild($buttons);
+            if (this.__filters.inactive && this.__filters.inactive === 1) {
+               const isInactive = data.isInactive;
+               const activeClass = isInactive ? "is-inactive" : "is-active";
+               const $active = element("div", `team-button ${activeClass}`);
+               const $span = element("span", "active-text");
+               $span.innerHTML = isInactive ? "INACTIVE" : "ACTIVE";
+               $active.append($span);
+               $buttons.append($active);
+            }
          },
 
          nodeContent: "description",
@@ -398,12 +414,13 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       if (chartDom) {
          chartDom.textContent = "";
          chartDom.innerHTML = "";
+         this.initFilter(chartDom);
          chartDom.appendChild(orgchart);
-         // this.toolbarUi(chartDom);
       }
    }
 
    async pullData() {
+      const filters = this.__filters;
       const view = this.view;
       const dc = view.datacollection;
       await dc?.waitForDataCollectionToInitialize(dc);
@@ -421,39 +438,63 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const teamLink = this.getSettingField("teamLink").columnName;
       const teamName = this.getSettingField("teamName").columnName;
       const teamInactive = this.getSettingField("teamInactive").columnName;
+      const strategy = this.getSettingField("teamStrategy").columnName;
+      const strategyCode = this.getSettingField("strategyCode").columnName;
 
       const chartData = (this._chartData = {});
       chartData.name = topNode[teamName] ?? "";
       chartData.id = this.teamNodeID(topNode.id);
+      chartData.className = `strategy-${
+         topNode[`${strategy}__relation`]?.[strategyCode]
+      }`;
+      chartData.isInactive = topNode[teamInactive];
       chartData._rawData = topNode;
 
       const maxDepth = 10; // prevent inifinite loop
-      function pullChildData(node, prefixFn, depth = 0) {
+      const self = this;
+      function pullChildData(node, depth = 0) {
          if (depth >= maxDepth) return;
          node.children = [];
          node._rawData[teamLink].forEach((id) => {
             const childData = dc.getData((e) => e.id === id)[0];
             // Don't show inactive teams
-            // @TODO this should be a default filter option
-            if (childData[teamInactive] || childData == null) return;
+            if (
+               (filters?.inactive !== 1 && childData[teamInactive]) ||
+               childData == null
+            )
+               return;
+            const code = childData[`${strategy}__relation`]?.[strategyCode];
+            const strategyClass = `strategy-${code}`;
             const child = {
                name: childData[teamName],
-               id: prefixFn(id),
-               description: "...",
+               id: self.teamNodeID(id),
+               className: strategyClass,
+               isInactive: childData[teamInactive],
                _rawData: childData,
             };
+            child.filteredOut = self.filterTeam(filters, child, code);
+            if (child.name === "External Support")
+               child.className = `strategy-external`;
             if (childData[teamLink].length > 0) {
-               pullChildData(child, prefixFn, depth + 1);
+               pullChildData(child, depth + 1);
             }
-            node.children.push(child);
+            // If this node is filtered we still need it if it has children
+            // that pass
+            if (!child.filteredOut || child.children?.length > 0) {
+               node.children.push(child);
+            }
          });
-         // sort children alphabetically
-         node.children = node.children.sort((a, b) =>
-            a.name > b.name ? 1 : -1
-         );
+         if (node.children.length === 0) {
+            delete node.children;
+         } else {
+            // sort children alphaetically
+            node.children = node.children.sort((a, b) =>
+               a.name > b.name ? 1 : -1
+            );
+         }
          return;
       }
-      pullChildData(chartData, this.teamNodeID);
+      pullChildData(chartData);
    }
 
    get chartData() {
@@ -461,6 +502,86 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          this._chartData = {};
       }
       return this._chartData;
+   }
+
+   initFilter(domNode) {
+      const filterButton = document.createElement("button");
+      filterButton.innerHTML = `<i class="fa fa-filter"></i> Filter`;
+      filterButton.classList.add("filter-button");
+      filterButton.onclick = () => this.filterWindow(filterButton);
+      domNode.append(filterButton);
+   }
+
+   async filterWindow(buttonNode) {
+      let $popup = $$(this.ids.filterPopup);
+      if (!$popup) {
+         const [strategyField] = this.datacollection.datasource.fields(
+            (f) => f.id == this.view.settings["teamStrategy"]
+         );
+         const strategyOptions = await strategyField.getOptions();
+
+         $popup = webix.ui({
+            view: "popup",
+            css: "filter-popup",
+            id: this.ids.filterPopup,
+            body: {
+               view: "form",
+               id: this.ids.filterForm,
+               elements: [
+                  {
+                     view: "text",
+                     label: this.label("Team Name"),
+                     labelWidth: 90,
+                     name: "teamName",
+                     clear: true,
+                  },
+                  {
+                     view: "combo",
+                     label: this.label("Strategy"),
+                     labelWidth: 90,
+                     options: strategyOptions.map((f) => f.text),
+                     name: "strategy",
+                     clear: "replace",
+                  },
+                  {
+                     view: "checkbox",
+                     name: "inactive",
+                     labelRight: this.label("Show Inactive Teams"),
+                     labelWidth: 0,
+                  },
+                  {
+                     view: "button",
+                     label: this.label("Apply"),
+                     click: () => this.filterApply(),
+                  },
+               ],
+            },
+         });
+      }
+      $popup.show(buttonNode);
+   }
+
+   filterApply() {
+      $$(this.ids.filterPopup).hide();
+      this.__filters = $$(this.ids.filterForm).getValues();
+      this.pullData().then(() => this.displayOrgChart());
+   }
+
+   filterTeam(filters, team, code) {
+      // Apply filters (match using or)
+      if (filters.strategy || filters.teamName) {
+         let filter = true;
+         if (filters.strategy !== "" && filters.strategy === code) {
+            filter = false;
+         }
+         if (
+            filters.teamName !== "" &&
+            team.name.toLowerCase().includes(filters.teamName.toLowerCase())
+         ) {
+            filter = false;
+         }
+         return filter;
+      }
    }
 
    /**
@@ -472,7 +593,22 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       return this.AB.definitionByID(this.view.settings[setting]);
    }
 
-   async teamAddChild(values) {
+   generateStrategyCss() {
+      const css = [
+         "org-chart .strategy-external .title{background:#989898 !important;}",
+      ];
+      const colors = this.settings.strategyColors;
+      for (let key in colors) {
+         css.push(
+            `org-chart .strategy-${key} .title{background:${colors[key]} !important;}`
+         );
+      }
+      const style = document.createElement("style");
+      style.innerHTML = css.join("");
+      document.getElementsByTagName("head")[0].appendChild(style);
+   }
+
+   async teamAddChild(values, strategy) {
       const { id } = await this.datacollection.model.create(values);
 
       const linkField = this.AB.definitionByID(
@@ -487,7 +623,9 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          name: values[nameField],
          id: this.teamNodeID(id),
          relationship: hasChild ? "110" : "100",
+         className: `strategy-${strategy.text}`,
       };
+
       // Need to add differently if the node already has child nodes
       if (hasChild) {
          const sibling = this.closest(parent, (el) => el.nodeName === "TABLE")
@@ -495,9 +633,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             .querySelector(".node");
          this.__orgchart.addSiblings(sibling, { siblings: [newChild] });
       } else {
-         this.__orgchart.addChildren(parent, {
-            children: [newChild],
-         });
+         this.__orgchart.addChildren(parent, { children: [newChild] });
       }
    }
 
@@ -541,22 +677,32 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       });
    }
 
-   teamEdit(values) {
+   teamEdit(values, strategy) {
       this.datacollection.model.update(values.id, values).catch((err) => {
          //TODO
       });
       const nodeID = this.teamNodeID(values.id);
       const node = document.querySelector(`#${nodeID}`);
+      const currentStrategy = node.classList?.value?.match(/strategy-\S+/)[0];
+      const newStrategy = `strategy-${strategy.text}`;
+      if (currentStrategy !== newStrategy) {
+         node.classList?.remove(currentStrategy);
+         node.classList?.add(newStrategy);
+      }
+
       const inactive = this.getSettingField("teamInactive").columnName;
-      // @TODO this will need to check against active filters
-      if (values[inactive]) {
+      if (
+         this.__filters.inactive &&
+         this.__filters.inactive === 0 &&
+         values[inactive]
+      ) {
          this.__orgchart.removeNodes(node);
       }
       const nameCol = this.getSettingField("teamName").columnName;
       node.querySelector(".title").innerHTML = values[nameCol];
    }
 
-   teamForm(mode, values) {
+   async teamForm(mode, values) {
       let $teamFormPopup = $$(this.ids.teamFormPopup);
       const inactive = this.getSettingField("teamInactive").columnName;
       const linkField = this.AB.definitionByID(
@@ -564,6 +710,10 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       ).columnName;
       if (!$teamFormPopup) {
          const nameField = this.getSettingField("teamName");
+         const [strategyField] = this.datacollection.datasource.fields(
+            (f) => f.id == this.view.settings["teamStrategy"]
+         );
+         const strategyOptions = await strategyField.getOptions();
          $teamFormPopup = webix.ui({
             view: "popup",
             id: this.ids.teamFormPopup,
@@ -599,6 +749,13 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                            name: nameField.columnName,
                         },
                         {
+                           view: "richselect",
+                           label:
+                              strategyField.label ?? strategyField.columnName,
+                           name: strategyField.columnName,
+                           options: strategyOptions.map(fieldToOption),
+                        },
+                        {
                            view: "switch",
                            id: this.ids.teamFormInactive,
                            name: inactive,
@@ -613,10 +770,14 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                            css: "webix_primary",
                            click: () => {
                               const values = $$(this.ids.teamForm).getValues();
+                              const strategy = strategyOptions.find(
+                                 (f) =>
+                                    f.id === values[strategyField.columnName]
+                              );
                               if (values.id) {
-                                 this.teamEdit(values);
+                                 this.teamEdit(values, strategy);
                               } else {
-                                 this.teamAddChild(values);
+                                 this.teamAddChild(values, strategy);
                               }
                               $teamFormPopup.hide();
                            },
@@ -698,4 +859,11 @@ function element(type, classes) {
    const elem = document.createElement(type);
    elem.classList.add(...classes.split(" "));
    return elem;
+}
+
+function fieldToOption(f) {
+   return {
+      id: f.id,
+      value: f.text,
+   };
 }
