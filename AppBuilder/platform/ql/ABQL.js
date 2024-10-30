@@ -590,8 +590,8 @@ class ABQL extends ABQLCore {
                      view: "button",
                      label: displayLabel,
                      on: {
-                        onItemClick: () => {
-                           Filter.popUp($$(this.ids.shorthand), null, {
+                        onItemClick: function () {
+                           Filter.popUp(this.$view, null, {
                               pos: "center",
                            });
                         },
