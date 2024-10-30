@@ -135,11 +135,12 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const contentDisplayedFields = settings.contentDisplayedFields;
       const contentDisplayedFieldsKeys = Object.keys(contentDisplayedFields);
       const contentModel = contentObj.model();
+      const ids = this.ids;
       const orgchart = new this.OrgChart({
          data: chartData,
          direction: baseView.settings.direction,
          // depth: baseView.settings.depth,
-         chartContainer: `#${this.ids.chartDom}`,
+         chartContainer: `#${ids.chartDom}`,
          pan: true, // baseView.settings.pan == 1,
          zoom: true, //baseView.settings.zoom == 1,
          draggable,
@@ -192,6 +193,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      const draggedContentDataRecord = JSON.parse(
                         document.getElementById(elementID).dataset.source
                      );
+                     orgchart.innerHTML = "";
                      if (dropContentToCreate) {
                         // Trigger a process manager.
                         await contentModel.update(
@@ -406,18 +408,37 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             await nodeModel.update(dragRecord.id, dragRecord);
          });
       }
-      const chartDom = document.querySelector(`#${this.ids.chartDom}`);
-      // const orgchartStyle = orgchart.style;
-      // orgchartStyle["overflow"] = "auto";
-      // let $currentNode = chartDom;
-      // while ($currentNode.style["height"] === "")
-      //    $currentNode = $currentNode.parentNode;
-      // orgchartStyle["height"] = $currentNode.style["height"];
+      const chartDom = document.querySelector(`#${ids.chartDom}`);
       if (chartDom) {
          chartDom.textContent = "";
          chartDom.innerHTML = "";
          this.initFilter(chartDom);
-         chartDom.appendChild(orgchart);
+          const $chartContent = AB.Webix.ui({cols: [{
+            view: "template",
+         },{
+            view: "tabview",
+            width: 450,
+            cells: [
+              {
+                header: "Placed",
+                body: {
+                  id: "listView",
+                  view: "list", 
+                  // list config
+                }
+              },
+              {
+                header: "Unplaced",
+                body: {
+                  id: "listView",
+                  view: "list", 
+                  // list config
+                }
+              }
+            ]
+          }]}).$view;
+          $chartContent.children[0].children[0].appendChild(orgchart)
+         chartDom.appendChild($chartContent);
       }
    }
 
