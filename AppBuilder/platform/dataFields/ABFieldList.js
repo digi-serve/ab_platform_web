@@ -461,8 +461,9 @@ function _getSelectedOptions(field, rowData = {}) {
       if (field.settings) {
          result = (field.settings.options || []).filter((opt) => {
             return (
-               (result || []).filter((v) => (opt.id || opt) == (v.id || v))
-                  .length > 0
+               (result || []).filter(
+                  (v) => opt && v && (opt.id || opt) == (v.id || v)
+               ).length > 0
             );
          });
       }
