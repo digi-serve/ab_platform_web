@@ -82,6 +82,7 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
 
    resize(base_element) {
       const $dataview = $$(this.ids.dataview);
+      if (!$dataview) return;
       $dataview.resize();
 
       const item_width = this.getItemWidth(base_element);
