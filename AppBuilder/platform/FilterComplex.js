@@ -494,6 +494,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
          this._fnBaseGetValue = $filterView.prototype.GetValue;
       $filterView.prototype.GetValue = function () {
          const rule = _this._fnBaseGetValue.call(this);
+         if (!rule) return;
 
          if (
             rule.condition.type == "in_query_field" ||
