@@ -82,7 +82,14 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
 
    resize(base_element) {
       const $dataview = $$(this.ids.dataview);
-      if (!$dataview) return;
+      if (!$dataview) {
+         // Not sure if its a problem so notify
+         this.AB.notify.developer(
+            new Error("Resize called on missing dataview component"),
+            { context: "ABViewDataviewComponent.resize()", ids: this.ids }
+         );
+         return;
+      }
       $dataview.resize();
 
       const item_width = this.getItemWidth(base_element);
