@@ -589,11 +589,13 @@ class ABQL extends ABQLCore {
                      id: this.ids.shorthand,
                      view: "button",
                      label: displayLabel,
-                     click() {
-                        Filter.popUp(this.$view, null, {
-                           pos: "center",
-                        });
-                     }
+                     on: {
+                        onItemClick: function () {
+                           Filter.popUp(this.$view, null, {
+                              pos: "center",
+                           });
+                        },
+                     },
                   },
                   // have a hidden field to contain the condition
                   // value we will parse out later
