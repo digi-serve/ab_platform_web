@@ -494,6 +494,13 @@ module.exports = class FilterComplex extends FilterComplexCore {
          this._fnBaseGetValue = $filterView.prototype.GetValue;
       $filterView.prototype.GetValue = function () {
          const rule = _this._fnBaseGetValue.call(this);
+         if (!rule) {
+            // Not sure if its a problem, so report in case it is.
+            this.AB.notify.developer(new Error("No rule found"), {
+               context: "No rule from $filterView.GetValue()",
+            });
+            return;
+         }
 
          if (
             rule.condition.type == "in_query_field" ||
