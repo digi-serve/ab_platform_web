@@ -1,0 +1,185 @@
+@import url('https://fonts.googleapis.com/css2?family=Jomhuria&display=swap');
+
+org-chart .node {
+  display: inline-block;
+  position: relative;
+  margin: 5px;
+  padding: 5px;
+  border: 2px dashed transparent;
+  text-align: center;
+  width: 164px;
+}
+
+org-chart .node .title {
+   text-overflow: ellipsis;
+   white-space: nowrap;
+   display: flex;
+   flex-direction: row;
+   justify-content: center;
+   align-items: center;
+   padding: 6px 69px;
+   gap: 10px;
+   background: #EF3340;
+   border-radius: 15px;
+   width: 154px;
+   height: 32px;
+   font-family: 'Jomhuria', sans-serif;
+   font-style: normal;
+   font-weight: 400;
+   font-size: 24px;
+   line-height: 24px;
+   color: #FFFFFF;
+   flex: none;
+   order: 0;
+   flex-grow: 0;
+   position: relative;
+   z-index: 1;
+}
+
+org-chart .node .content {
+   position: relative;
+   top: -15px;
+   width: 154px;
+   min-height: 60px;
+   border-radius: 0 0 15px 15px;
+   display: flex;
+   flex-direction: column;
+   align-items: flex-end;
+   flex-wrap: nowrap;
+   gap: 4px;
+   margin: 0 auto;
+   background: #dddddd;
+   overflow: hidden;
+   box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
+}
+
+org-chart tr.lines .topLine {
+  border-top: 2px solid black;
+}
+
+org-chart tr.lines .rightLine {
+  border-right: 1px solid black;
+  float: none;
+  border-radius: 0;
+}
+
+org-chart tr.lines .leftLine {
+  border-left: 1px solid black;
+  float: none;
+  border-radius: 0;
+}
+
+org-chart tr.lines .downLine {
+  background-color: black;
+  margin: 0 auto;
+  height: 20px;
+  width: 2px;
+  float: none;
+}
+
+
+.team-leader-section {
+   width: 154px;
+   min-height: 35px;
+   left: 0px;
+   top: 14px;
+   background: #1A3E72;
+   display: flex;
+   align-self: stretch;
+   flex-wrap: nowrap;
+   gap: 5px;
+   /* position: relative; */
+}
+
+.team-member-section {
+   display: flex;
+   flex-direction: column;
+   align-items: flex-end;
+   flex-wrap: nowrap;
+   gap: 4px;
+   /* position: relative; */
+   width: 154px;
+   min-height: 21px;
+}
+
+.team-button-section {
+   display: flex;
+   flex-direction: row;
+   padding: 3px;
+   gap: 6px;
+   justify-content: flex-end;
+   margin-right: 5px;
+}
+
+.team-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 28px;
+  height: 10px;
+  padding: 2px 4px;
+  background: #1A3E72;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 8px;
+  color: white;
+}
+
+.team-chart-toolbar {
+   display: flex;
+   flex-direction: row;
+   align-items: flex-start;
+   padding: 17px 24px;
+   gap: 10px;
+
+   width: 254px;
+   background: #FFFFFF;
+   box-shadow: 0px -1px 4px rgba(0, 0, 0, 0.25);
+   border-radius: 20px;
+}
+
+.filter-button {
+   border-radius: 10px;
+   background: #FFF;
+   box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+   color: #2F27CE;
+   font-family: Roboto;
+   font-size: 20px;
+   font-style: normal;
+   font-weight: 400;
+   line-height: normal;
+   padding: 7px 15px;
+   position: absolute;
+}
+
+.filter-button:hover {
+   background: #2F27CE;
+   color: #FFF;
+}
+
+.filter-popup {
+   border-radius: 10px;
+   background: #FFF;
+   box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+}
+
+.active-text {
+   color: #ffffff;
+   font-family: 'Jomhuria', sans-serif;
+   height: 6.5px;
+   font-size: 8px;
+   font-weight: 400;
+   text-align: center;
+}
+
+.is-active {
+   background: #4bc90f;
+   cursor: default;
+}
+
+.is-inactive {
+   background: grey;
+   cursor: default;
+}
