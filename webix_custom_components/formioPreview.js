@@ -34,6 +34,10 @@ module.exports = class ABCustomFormIOPreview extends ABLazyCustomComponent {
             var formComponents = config.formComponents ?? {};
             var formData = config.formData ?? {};
             const component = $$(config.id);
+
+            // JOHNNY: we now have formio designs where we need to pull out
+            // more than just an .id from connected fields. Let's no longer
+            // do this:
             // // we need to find out when we are passing an array of objects and reduce it down to an array of IDs
             // for (var data in formData) {
             //    if (
