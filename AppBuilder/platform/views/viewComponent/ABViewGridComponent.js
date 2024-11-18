@@ -1345,7 +1345,7 @@ export default class ABViewGridComponent extends ABViewComponent {
          (!state.old && state.value === "") ||
          (state.old === "" && state.value === "")
       ) {
-         $DataTable.clearSelection();
+         $DataTable?.clearSelection();
 
          return false;
       }

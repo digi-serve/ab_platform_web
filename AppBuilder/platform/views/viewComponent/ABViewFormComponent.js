@@ -496,6 +496,15 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
 
             const comp = baseView.viewComponents[f.id];
             if (!comp) return;
+            //
+            if (f.key === "datepicker") {
+               // Not sure why, but the local format isn't applied correctly
+               // without a timeout here
+               setTimeout(() => {
+                  field.setValue($$(comp.ids.formItem), rowData);
+               }, 200);
+               return;
+            }
 
             field.setValue($$(comp.ids.formItem), rowData);
          });
