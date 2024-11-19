@@ -348,8 +348,15 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                         editContentFieldToCreateNew,
                      ).columnName;
                   if (
-                     newFormData[editContentFieldToCreateNewColumnName] !==
-                     contentDataRecord[editContentFieldToCreateNewColumnName]
+                     JSON.stringify(
+                        newFormData[editContentFieldToCreateNewColumnName] ??
+                           "",
+                     ) !== 
+                     JSON.stringify(
+                        contentDataRecord[
+                           editContentFieldToCreateNewColumnName
+                        ] ?? "",
+                     )
                   ) {
                      this.__orgchart.innerHTML = "";
                      delete newFormData["id"];
@@ -403,8 +410,8 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             on: {
                onHide() {
                   this.destructor();
-               }
-            }
+               },
+            },
          }).show();
          $$(ids.contentFormData).setValues(contentDataRecord);
       };
