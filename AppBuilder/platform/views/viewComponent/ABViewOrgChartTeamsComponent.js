@@ -387,7 +387,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                            value: "X",
                            align: "right",
                            click: () => {
-                              $contentForm.hide();
+                              $$(ids.contentForm).hide();
                            },
                         },
                      ],
