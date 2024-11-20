@@ -11,6 +11,8 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                chartDom: "",
                filterPopup: "",
                filterForm: "",
+               contentForm: "",
+               contentFormData: "",
                teamForm: "",
                teamFormPopup: "",
                teamFormSubmit: "",
@@ -85,6 +87,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
    async displayOrgChart() {
       const baseView = this.view;
       const AB = this.AB;
+      const L = AB.Label();
       const chartData = AB.cloneDeep(this.chartData);
       const settings = baseView.settings;
       const showGroupTitle = settings.showGroupTitle === 1;
@@ -197,12 +200,13 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             updatedData[contentGroupByFieldColumnName] = newGroupText;
             await contentModel.create(updatedData);
          } else {
+            delete updatedData["created_at"];
+            delete updatedData["updated_at"];
+            delete updatedData["properties"];
             if (dropContentToCreate) {
                updatedData = JSON.parse(updatedData);
                delete updatedData["id"];
                delete updatedData["uuid"];
-               delete updatedData["created_at"];
-               delete updatedData["updated_at"];
                updatedData[contentFieldLinkColumnName] = newNodeDataPK;
                updatedData[contentGroupByFieldColumnName] = newGroupText;
                await contentModel.create(updatedData);
@@ -217,6 +221,199 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          // setTimeout(async () => {
          //    await this.onShow();
          // }, 1000);
+      };
+      const editContentFieldsToCreateNew =
+         settings.editContentFieldsToCreateNew;
+      const showContentForm = async (contentDataRecord) => {
+         const rules = {};
+         const contentFormElements = await Promise.all(
+            contentObj.fields().map(async (field) => {
+               const fieldKey = field.key;
+               const fieldName = field.columnName;
+
+               // TODO (Guy): Add validators.
+               rules[fieldName] = () => true;
+               const fieldLabel = field.label;
+               const settings = field.settings;
+               switch (fieldKey) {
+                  case "boolean":
+                     return {
+                        view: "checkbox",
+                        name: fieldName,
+                        label: fieldLabel,
+                     };
+                  case "number":
+                     return {
+                        view: "counter",
+                        name: fieldName,
+                        label: fieldLabel,
+                        type: "number",
+                     };
+                  case "list":
+                     return {
+                        view:
+                           (settings.isMultiple === 1 && "muticombo") ||
+                           "combo",
+                        name: fieldName,
+                        label: fieldLabel,
+                        options: settings.options.map((option) => ({
+                           id: option.id,
+                           value: option.text,
+                        })),
+                     };
+                  case "user":
+                  case "connectObject":
+                     const fieldLinkObj = field.datasourceLink;
+
+                     // TODO (Guy): Fix pulling all connections.
+                     const options = (
+                        await fieldLinkObj.model().findAll()
+                     ).data.map((e) => ({
+                        id: e.id,
+                        value: fieldLinkObj.displayData(e),
+                     }));
+                     return field.linkType() === "one"
+                        ? {
+                             view: "combo",
+                             name: fieldName,
+                             label: fieldLabel,
+                             options,
+                          }
+                        : {
+                             view: "multicombo",
+                             name: fieldName,
+                             label: fieldLabel,
+                             stringResult: false,
+                             labelAlign: "left",
+                             options,
+                          };
+                  case "date":
+                  case "datetime":
+                     return {
+                        view: "datepicker",
+                        name: fieldName,
+                        label: fieldLabel,
+                        timepicker: fieldKey === "datetime",
+                        width: 300,
+                     };
+                  case "file":
+                  case "image":
+                     // TODO (Guy): Add logic
+                     return {
+                        // view: "",
+                        name: fieldName,
+                        label: fieldLabel,
+                     };
+                  // case "json":
+                  // case "LongText":
+                  // case "string":
+                  // case "email":
+                  default:
+                     return {
+                        view: "text",
+                        name: fieldName,
+                        label: fieldLabel,
+                     };
+               }
+            }),
+         );
+         contentFormElements.push({
+            view: "button",
+            value: L("Submit"),
+            css: "webix_primary",
+            click: async () => {
+               const $contentFormData = $$(ids.contentFormData);
+               if (!$contentFormData.validate()) return;
+               const newFormData = $contentFormData.getValues();
+               let isDataChanged = false;
+               for (const key in newFormData)
+                  if (
+                     JSON.stringify(newFormData[key]) !==
+                     JSON.stringify(contentDataRecord[key])
+                  ) {
+                     isDataChanged = true;
+                     break;
+                  }
+               const $contentForm = $$(ids.contentForm);
+               if (!isDataChanged) {
+                  $contentForm.hide();
+                  return;
+               }
+               delete newFormData["created_at"];
+               delete newFormData["updated_at"];
+               delete newFormData["properties"];
+               for (const editContentFieldToCreateNew of editContentFieldsToCreateNew) {
+                  const editContentFieldToCreateNewColumnName =
+                     contentObj.fieldByID(
+                        editContentFieldToCreateNew,
+                     ).columnName;
+                  if (
+                     JSON.stringify(
+                        newFormData[editContentFieldToCreateNewColumnName] ??
+                           "",
+                     ) !== 
+                     JSON.stringify(
+                        contentDataRecord[
+                           editContentFieldToCreateNewColumnName
+                        ] ?? "",
+                     )
+                  ) {
+                     this.__orgchart.innerHTML = "";
+                     delete newFormData["id"];
+                     delete newFormData["uuid"];
+                     await contentModel.create(newFormData);
+                     $contentForm.hide();
+                     await this.onShow();
+                     return;
+                  }
+               }
+               this.__orgchart.innerHTML = "";
+               await contentModel.update(newFormData.id, newFormData);
+               $contentForm.hide();
+               await this.onShow();
+            },
+         });
+         AB.Webix.ui({
+            view: "popup",
+            id: ids.contentForm,
+            close: true,
+            position: "center",
+            body: {
+               rows: [
+                  {
+                     view: "toolbar",
+                     id: "myToolbar",
+                     cols: [
+                        {
+                           view: "label",
+                           label: L("Edit Content"),
+                           align: "left",
+                        },
+                        {
+                           view: "button",
+                           value: "X",
+                           align: "right",
+                           click: () => {
+                              $$(ids.contentForm).hide();
+                           },
+                        },
+                     ],
+                  },
+                  {
+                     view: "form",
+                     id: ids.contentFormData,
+                     elements: contentFormElements,
+                     rules,
+                  },
+               ],
+            },
+            on: {
+               onHide() {
+                  this.destructor();
+               },
+            },
+         }).show();
+         $$(ids.contentFormData).setValues(contentDataRecord);
       };
       const orgchart = new this.OrgChart({
          data: chartData,
@@ -299,7 +496,9 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      JSON.stringify(contentDataRecord),
                   );
                   $groupContent.appendChild($rowData);
-
+                  $rowData.addEventListener("click", async () => {
+                     await showContentForm(contentDataRecord);
+                  });
                   if (draggable) {
                      $rowData.setAttribute("draggable", "true");
                      $rowData.addEventListener("dragstart", fnContentDragStart);
@@ -369,28 +568,14 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      );
                      $rowData.appendChild($currentDisplay);
                      const displayedFieldColumnName = displayedField.columnName;
-                     while (currentDataRecords.length > 0) {
-                        const $currentDisplayData = element(
-                           "div",
-                           "team-group-record-display-data",
-                        );
-                        $currentDisplay.appendChild($currentDisplayData);
-                        const currentDataRecord = currentDataRecords.pop();
-                        $currentDisplayData.setAttribute("data-obj-id", objID);
-                        $currentDisplayData.setAttribute(
-                           "data-field-id",
-                           displayedField.id,
-                        );
-                        $currentDisplayData.setAttribute(
-                           "data-pk",
-                           currentDataRecord[displayedObjPK],
-                        );
-                        $currentDisplayData.appendChild(
+                     while (currentDataRecords.length > 0)
+                        $currentDisplay.appendChild(
                            document.createTextNode(
-                              currentDataRecord[displayedFieldColumnName],
+                              currentDataRecords.pop()[
+                                 displayedFieldColumnName
+                              ],
                            ),
                         );
-                     }
                      currentField = null;
                   }
                }
