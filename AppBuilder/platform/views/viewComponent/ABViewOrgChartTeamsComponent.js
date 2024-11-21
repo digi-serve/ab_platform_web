@@ -67,9 +67,12 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             "../../../../styles/team-widget.css"
          ),
       ]);
-
-      this.OrgChart = orgChartLoader.default;
-
+      const OrgChart = (this.OrgChart = orgChartLoader.default);
+      const _oldOnDragStart = OrgChart.prototype._onDragStart;
+      OrgChart.prototype._onDragStart = (event) => {
+         event.dataTransfer.setData("isnode", 1)
+         _oldOnDragStart.call(this.__orgchart, event);
+      };
       this.ready();
    }
 
@@ -104,7 +107,11 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const contentObjPK = contentObj?.PK();
       const contentDataRecordPKs = [];
       const contentDataRecords = [];
-      if (contentField != null && contentObj != null) {
+      if (
+         Object.keys(chartData).length > 0 &&
+         contentField != null &&
+         contentObj != null
+      ) {
          const getContentDataRecordPKs = (node) => {
             const contentFieldData = node._rawData[contentFieldColumnName];
             if (Array.isArray(contentFieldData))
@@ -177,6 +184,8 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          // event.target.style.opacity = "1";
       };
       const fnContentDrop = async (event) => {
+         const dataTransfer = event.dataTransfer;
+         if (dataTransfer.getData("isnode") == 1) return;
          event.stopPropagation();
          if (contentFieldLinkColumnName == null) return;
          const $group = event.currentTarget;
@@ -184,7 +193,6 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          const newNodeDataPK = JSON.parse(
             $group.parentElement.parentElement.dataset.source,
          )._rawData[nodeObjPK];
-         const dataTransfer = event.dataTransfer;
          let updatedData = dataTransfer.getData("source");
          this.__orgchart.innerHTML = "";
          if (updatedData === "") {
@@ -351,7 +359,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      JSON.stringify(
                         newFormData[editContentFieldToCreateNewColumnName] ??
                            "",
-                     ) !== 
+                     ) !==
                      JSON.stringify(
                         contentDataRecord[
                            editContentFieldToCreateNewColumnName
@@ -437,7 +445,6 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             if (data.filteredOut || contentGroupOptionsLength === 0) {
                // This node doesn't pass the filter, but it's children do so
                // simplify the display.
-               $node.style.height = "";
                $content.style.display = "none";
                return;
             }
@@ -634,12 +641,19 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       if (chartDom) {
          chartDom.textContent = "";
          chartDom.innerHTML = "";
-         this.initFilter(chartDom);
          const ui = {
             cols: [
                {
-                  view: "template",
-                  scroll: "auto",
+                  rows: [
+                     {
+                        view: "template",
+                        height: 50,
+                     },
+                     {
+                        view: "template",
+                        scroll: "auto",
+                     },
+                  ],
                },
             ],
          };
@@ -711,8 +725,10 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             });
          }
          const $chartContent = AB.Webix.ui(ui).$view;
-         $chartContent.children[0].children[0].appendChild(orgchart);
          chartDom.appendChild($chartContent);
+         const $chartContentLayout = $chartContent.children[0];
+         this.initFilter($chartContentLayout.children[0].children[0]);
+         $chartContentLayout.children[1].children[0].appendChild(orgchart);
       }
    }
 
@@ -721,7 +737,6 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const view = this.view;
       const dc = view.datacollection;
       await dc?.waitForDataCollectionToInitialize(dc);
-
       let topNode = dc?.getCursor();
       if (view.settings.topTeam) {
          const topNodeColumn = this.AB.definitionByID(
@@ -731,13 +746,11 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          topNode = topFromFeild ? topFromFeild : topNode;
       }
       if (!topNode) return null;
-
       const teamLink = this.getSettingField("teamLink").columnName;
       const teamName = this.getSettingField("teamName").columnName;
       const teamInactive = this.getSettingField("teamInactive").columnName;
       const strategy = this.getSettingField("teamStrategy").columnName;
       const strategyCode = this.getSettingField("strategyCode").columnName;
-
       const chartData = (this._chartData = {});
       chartData.name = topNode[teamName] ?? "";
       chartData.id = this.teamNodeID(topNode.id);
@@ -746,7 +759,6 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       }`;
       chartData.isInactive = topNode[teamInactive];
       chartData._rawData = topNode;
-
       const maxDepth = 10; // prevent inifinite loop
       const self = this;
       function pullChildData(node, depth = 0) {
