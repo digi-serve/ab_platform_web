@@ -6,7 +6,7 @@ org-chart .node {
    text-align: center;
    justify-content: center;
    width: 325px !important;
-   height: 250px;
+   /* height: 250px; */
    font-family: "Jomhuria", sans-serif;
    font-style: normal;
    font-weight: 200;
