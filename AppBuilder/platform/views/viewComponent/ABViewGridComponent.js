@@ -267,6 +267,12 @@ export default class ABViewGridComponent extends ABViewComponent {
                   self.toggleUpdateDelete();
                } else {
                   if (settings.isEditable) {
+                     // get the field related to this col
+                     const currObject = self.datacollection.datasource;
+                     const selectField = currObject.fields(
+                        (f) => f.columnName === col
+                     )[0];
+
                      // if the colum is not the select item column move on to
                      // the next step to save
                      const state = {
@@ -275,7 +281,7 @@ export default class ABViewGridComponent extends ABViewComponent {
                      const editor = {
                         row: row,
                         column: col,
-                        config: null,
+                        config: { fieldID: selectField?.id ?? null },
                      };
 
                      self.onAfterEditStop(state, editor);
@@ -1350,6 +1356,8 @@ export default class ABViewGridComponent extends ABViewComponent {
          return false;
       }
 
+      const CurrentObject = this.datacollection.datasource;
+
       if (editor.config)
          switch (editor.config.editor) {
             case "number":
@@ -1369,9 +1377,23 @@ export default class ABViewGridComponent extends ABViewComponent {
             // code block
          }
 
-      if (state.value !== state.old) {
+      // lets make sure we are comparing things properly:
+      // reduce newValue and oldValue down to PK if they were objects
+      let newVal = state.value;
+      if (newVal) {
+         newVal = newVal[CurrentObject.PK()] || newVal;
+      }
+      let oldVal = state.old;
+      if (oldVal) {
+         oldVal = oldVal[CurrentObject.PK()] || oldVal;
+      }
+
+      // NOTE: != vs !== :
+      // want to handle when newVal = "3" and oldVal = 3
+      // that is why we don't use !== so that we convert the values into
+      // the same case.
+      if (newVal != oldVal) {
          const item = $DataTable?.getItem(editor.row);
-         const CurrentObject = this.datacollection.datasource;
 
          item[editor.column] = state.value;
 
