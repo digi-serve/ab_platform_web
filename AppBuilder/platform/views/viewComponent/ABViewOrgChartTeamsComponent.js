@@ -19,8 +19,8 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                teamFormTitle: "",
                teamFormInactive: "",
             },
-            ids,
-         ),
+            ids
+         )
       );
       this.__filters = {};
    }
@@ -70,21 +70,25 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const OrgChart = (this.OrgChart = orgChartLoader.default);
       const _oldOnDragStart = OrgChart.prototype._onDragStart;
       OrgChart.prototype._onDragStart = (event) => {
-         event.dataTransfer.setData("isnode", 1)
+         event.dataTransfer.setData("isnode", 1);
          _oldOnDragStart.call(this.__orgchart, event);
       };
       this.ready();
    }
 
    async onShow() {
+      this.AB.performance.mark("TeamChart.onShow");
       super.onShow();
-
       this.busy();
       this.generateStrategyCss();
-      await this.loadOrgChartJs();
-      await this.pullData();
+      this.AB.performance.mark("TeamChart.load");
+      await Promise.all([this.loadOrgChartJs(), this.pullData()]);
+      this.AB.performance.measure("TeamChart.load");
+      this.AB.performance.mark("TeamChart.display");
       await this.displayOrgChart();
+      this.AB.performance.measure("TeamChart.display");
       this.ready();
+      this.AB.performance.measure("TeamChart.onShow");
    }
 
    async displayOrgChart() {
@@ -112,6 +116,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          contentField != null &&
          contentObj != null
       ) {
+         this.AB.performance.mark("loadAssignments");
          const getContentDataRecordPKs = (node) => {
             const contentFieldData = node._rawData[contentFieldColumnName];
             if (Array.isArray(contentFieldData))
@@ -137,13 +142,21 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                   },
                   populate: true,
                })
-            ).data,
+            ).data
          );
+         this.AB.performance.measure("loadAssignments");
       }
       const contentGroupByField = contentObj?.fieldByID(
-         settings.contentGroupByField,
+         settings.contentGroupByField
       );
-      const contentGroupOptions = contentGroupByField?.settings.options || [];
+      this.AB.performance.mark("loadAssigmentType");
+      const { data: contentGroupOptions } = await this.AB.objectByID(
+         contentGroupByField?.settings.linkObject
+      )
+         .model()
+         .findAll();
+      this.AB.performance.measure("loadAssigmentType");
+      this.AB.performance.mark("misc");
       const contentGroupOptionsLength = contentGroupOptions.length;
       const contentGroupByFieldColumnName = contentGroupByField?.columnName;
       const contentFieldLinkColumnName = contentFieldLink?.columnName;
@@ -167,7 +180,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                dataTransfer.setData("dataPK", dataset.pk);
                dataTransfer.setData(
                   "contentLinkedFieldId",
-                  dataset.contentLinkedFieldId,
+                  dataset.contentLinkedFieldId
                );
                break;
             default:
@@ -191,14 +204,14 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          const $group = event.currentTarget;
          const newGroupText = $group.dataset.text;
          const newNodeDataPK = JSON.parse(
-            $group.parentElement.parentElement.dataset.source,
+            $group.parentElement.parentElement.dataset.source
          )._rawData[nodeObjPK];
          let updatedData = dataTransfer.getData("source");
          this.__orgchart.innerHTML = "";
          if (updatedData === "") {
             const dataPK = dataTransfer.getData("dataPK");
             const contentLinkedFieldID = dataTransfer.getData(
-               "contentLinkedFieldId",
+               "contentLinkedFieldId"
             );
             const contentLinkedField =
                contentObj.fieldByID(contentLinkedFieldID);
@@ -208,11 +221,11 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             updatedData[contentGroupByFieldColumnName] = newGroupText;
             await contentModel.create(updatedData);
          } else {
+            updatedData = JSON.parse(updatedData);
             delete updatedData["created_at"];
             delete updatedData["updated_at"];
             delete updatedData["properties"];
             if (dropContentToCreate) {
-               updatedData = JSON.parse(updatedData);
                delete updatedData["id"];
                delete updatedData["uuid"];
                updatedData[contentFieldLinkColumnName] = newNodeDataPK;
@@ -323,7 +336,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                         label: fieldLabel,
                      };
                }
-            }),
+            })
          );
          contentFormElements.push({
             view: "button",
@@ -353,17 +366,16 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                for (const editContentFieldToCreateNew of editContentFieldsToCreateNew) {
                   const editContentFieldToCreateNewColumnName =
                      contentObj.fieldByID(
-                        editContentFieldToCreateNew,
+                        editContentFieldToCreateNew
                      ).columnName;
                   if (
                      JSON.stringify(
-                        newFormData[editContentFieldToCreateNewColumnName] ??
-                           "",
+                        newFormData[editContentFieldToCreateNewColumnName] ?? ""
                      ) !==
                      JSON.stringify(
                         contentDataRecord[
                            editContentFieldToCreateNewColumnName
-                        ] ?? "",
+                        ] ?? ""
                      )
                   ) {
                      this.__orgchart.innerHTML = "";
@@ -423,6 +435,8 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          }).show();
          $$(ids.contentFormData).setValues(contentDataRecord);
       };
+      this.AB.performance.measure("misc");
+      this.AB.performance.mark("createOrgChart");
       const orgchart = new this.OrgChart({
          data: chartData,
          direction: baseView.settings.direction,
@@ -459,9 +473,12 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                $content.appendChild($group);
                const groupStyle = $group.style;
                groupStyle["height"] = `${averageHeight}%`;
-               const groupColor = group.hex;
+               // TODO: should this be a config option
+               const groupColor =
+                  group.name === "Leader" ? "#003366" : "#DDDDDD";
                groupStyle["backgroundColor"] = groupColor;
-               const groupText = group.text;
+               // TODO: should this be a config option
+               const groupText = group.name;
                $group.setAttribute("data-text", groupText);
                if (showGroupTitle) {
                   const $groupTitle = element("div", "team-group-title");
@@ -485,10 +502,10 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                   const contentDataRecord =
                      contentDataRecords[contentDataRecordIndex];
                   if (
-                     contentDataRecord[contentFieldLinkColumnName] !==
+                     contentDataRecord[contentFieldLinkColumnName] !=
                         currentNodeDataRecordPK ||
-                     contentDataRecord[contentGroupByFieldColumnName] !==
-                        groupText
+                     contentDataRecord[contentGroupByFieldColumnName] !=
+                        group.id
                   ) {
                      contentDataRecordIndex++;
                      continue;
@@ -500,7 +517,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                   const $rowData = element("div", "team-group-record");
                   $rowData.setAttribute(
                      "data-source",
-                     JSON.stringify(contentDataRecord),
+                     JSON.stringify(contentDataRecord)
                   );
                   $groupContent.appendChild($rowData);
                   $rowData.addEventListener("click", async () => {
@@ -521,7 +538,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      const displayedObj = AB.objectByID(objID);
                      const displayedObjPK = displayedObj.PK();
                      const displayedField = displayedObj.fieldByID(
-                        contentDisplayedFields[displayedFieldKey],
+                        contentDisplayedFields[displayedFieldKey]
                      );
                      switch (objID) {
                         case contentObjID:
@@ -571,17 +588,15 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      }
                      const $currentDisplay = element(
                         "div",
-                        "team-group-record-display",
+                        "team-group-record-display"
                      );
                      $rowData.appendChild($currentDisplay);
                      const displayedFieldColumnName = displayedField.columnName;
                      while (currentDataRecords.length > 0)
                         $currentDisplay.appendChild(
                            document.createTextNode(
-                              currentDataRecords.pop()[
-                                 displayedFieldColumnName
-                              ],
-                           ),
+                              currentDataRecords.pop()[displayedFieldColumnName]
+                           )
                         );
                      currentField = null;
                   }
@@ -596,7 +611,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             $buttons.append($editButton, $addButton);
             const dataID = this.teamRecordID(data.id);
             const values = this.datacollection.getData(
-               (e) => e.id === dataID,
+               (e) => e.id === dataID
             )[0];
             $addButton.onclick = () => {
                this.teamForm("Add", { __parentID: dataID });
@@ -620,18 +635,19 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          },
          nodeContent: "description",
       });
+      this.AB.performance.measure("createOrgChart");
       this.__orgchart = orgchart;
       if (draggable) {
          // On drop update the parent (dropZone) of the node
          orgchart.addEventListener("nodedropped.orgchart", async (event) => {
             const eventDetail = event.detail;
             const dragedRecord = JSON.parse(
-               eventDetail.draggedNode.dataset.source,
+               eventDetail.draggedNode.dataset.source
             )._rawData;
             dragedRecord[
                // Parent node definition.
                this.AB.definitionByID(
-                  this.getSettingField("teamLink").settings.linkColumn,
+                  this.getSettingField("teamLink").settings.linkColumn
                ).columnName
             ] = JSON.parse(eventDetail.dropZone.dataset.source)._rawData.id;
             await nodeModel.update(dragedRecord.id, dragedRecord);
@@ -665,7 +681,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                await dc.waitForDataCollectionToInitialize(dc);
                const panelObj = dc.datasource;
                const contentFieldID = panelObj.connectFields(
-                  (field) => field.datasourceLink.id === contentObjID,
+                  (field) => field.datasourceLink.id === contentObjID
                )[0].fieldLink.id;
                dataPanelUIs.push({
                   header: dataPanelDCs[key],
@@ -685,7 +701,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                               for (const $itemElement of $itemElements) {
                                  $itemElement.setAttribute(
                                     "data-content-linked-field-id",
-                                    contentFieldID,
+                                    contentFieldID
                                  );
                                  $itemElement.setAttribute(
                                     "data-pk",
@@ -693,18 +709,18 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                                        (e) =>
                                           e.id ===
                                           $itemElement.getAttribute(
-                                             "webix_l_id",
-                                          ),
-                                    )[0][panelObj.PK()],
+                                             "webix_l_id"
+                                          )
+                                    )[0][panelObj.PK()]
                                  );
                                  $itemElement.setAttribute("draggable", "true");
                                  $itemElement.addEventListener(
                                     "dragstart",
-                                    fnContentDragStart,
+                                    fnContentDragStart
                                  );
                                  $itemElement.addEventListener(
                                     "dragend",
-                                    fnContentDragEnd,
+                                    fnContentDragEnd
                                  );
                               }
                            });
@@ -732,6 +748,9 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       }
    }
 
+   /**
+    * load the data and format it for display
+    */
    async pullData() {
       const filters = this.__filters;
       const view = this.view;
@@ -740,7 +759,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       let topNode = dc?.getCursor();
       if (view.settings.topTeam) {
          const topNodeColumn = this.AB.definitionByID(
-            view.settings.topTeam,
+            view.settings.topTeam
          ).columnName;
          const topFromFeild = dc.getData((e) => e[topNodeColumn] === 1)[0];
          topNode = topFromFeild ? topFromFeild : topNode;
@@ -749,31 +768,37 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const teamLink = this.getSettingField("teamLink").columnName;
       const teamName = this.getSettingField("teamName").columnName;
       const teamInactive = this.getSettingField("teamInactive").columnName;
-      const strategy = this.getSettingField("teamStrategy").columnName;
+      const strategyField = this.getSettingField("teamStrategy").columnName;
       const strategyCode = this.getSettingField("strategyCode").columnName;
       const chartData = (this._chartData = {});
       chartData.name = topNode[teamName] ?? "";
       chartData.id = this.teamNodeID(topNode.id);
       chartData.className = `strategy-${
-         topNode[`${strategy}__relation`]?.[strategyCode]
+         topNode[`${strategyField}__relation`]?.[strategyCode]
       }`;
       chartData.isInactive = topNode[teamInactive];
       chartData._rawData = topNode;
       const maxDepth = 10; // prevent inifinite loop
       const self = this;
+      /**
+       * Recursive function to prepare child node data
+       * @param {object} node the current node
+       * @param {number} [depth=0] a count of how many times we have recursed
+       */
       function pullChildData(node, depth = 0) {
          if (depth >= maxDepth) return;
          node.children = [];
          node._rawData[teamLink].forEach((id) => {
-            const childData = dc.getData((e) => e.id === id)[0];
+            const childData = dc.getData((e) => e.id == id)[0];
             // Don't show inactive teams
             if (
-               (filters?.inactive !== 1 && childData[teamInactive]) ||
-               childData == null
+               !childData ||
+               (filters?.inactive !== 1 && childData[teamInactive])
             )
                return;
-            const code = childData[`${strategy}__relation`]?.[strategyCode];
-            const strategyClass = `strategy-${code}`;
+            const strategy = childData[`${strategyField}__relation`];
+
+            const strategyClass = `strategy-${strategy[strategyCode]}`;
             const child = {
                name: childData[teamName],
                id: self.teamNodeID(id),
@@ -781,7 +806,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                isInactive: childData[teamInactive],
                _rawData: childData,
             };
-            child.filteredOut = self.filterTeam(filters, child, code);
+            child.filteredOut = self.filterTeam(filters, child, strategy.id);
             if (child.name === "External Support")
                child.className = `strategy-external`;
             if (childData[teamLink].length > 0) {
@@ -798,7 +823,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          } else {
             // sort children alphaetically
             node.children = node.children.sort((a, b) =>
-               a.name > b.name ? 1 : -1,
+               a.name > b.name ? 1 : -1
             );
          }
          return;
@@ -813,6 +838,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       return this._chartData;
    }
 
+   /** Add the filter button to the UI */
    initFilter(domNode) {
       const filterButton = document.createElement("button");
       filterButton.innerHTML = `<i class="fa fa-filter"></i> Filter`;
@@ -821,11 +847,12 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       domNode.append(filterButton);
    }
 
+   /** Display the filter UI (popup) **/
    async filterWindow(buttonNode) {
       let $popup = $$(this.ids.filterPopup);
       if (!$popup) {
          const [strategyField] = this.datacollection.datasource.fields(
-            (f) => f.id == this.view.settings["teamStrategy"],
+            (f) => f.id == this.view.settings["teamStrategy"]
          );
          const strategyOptions = await strategyField.getOptions();
 
@@ -880,7 +907,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       // Apply filters (match using or)
       if (filters.strategy || filters.teamName) {
          let filter = true;
-         if (filters.strategy !== "" && filters.strategy === code) {
+         if (filters.strategy !== "" && filters.strategy == code) {
             filter = false;
          }
          if (
@@ -909,7 +936,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const colors = this.settings.strategyColors;
       for (let key in colors) {
          css.push(
-            `org-chart .strategy-${key} .title{background:${colors[key]} !important;}`,
+            `org-chart .strategy-${key} .title{background:${colors[key]} !important;}`
          );
       }
       const style = document.createElement("style");
@@ -921,11 +948,11 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const { id } = await this.datacollection.model.create(values);
 
       const linkField = this.AB.definitionByID(
-         this.getSettingField("teamLink").settings.linkColumn,
+         this.getSettingField("teamLink").settings.linkColumn
       ).columnName;
       const nameField = this.getSettingField("teamName").columnName;
       const parent = document.querySelector(
-         `#${this.teamNodeID(values[linkField])}`,
+         `#${this.teamNodeID(values[linkField])}`
       );
       const hasChild = parent.parentNode.colSpan > 1;
       const newChild = {
@@ -1015,12 +1042,12 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       let $teamFormPopup = $$(this.ids.teamFormPopup);
       const inactive = this.getSettingField("teamInactive").columnName;
       const linkField = this.AB.definitionByID(
-         this.getSettingField("teamLink").settings.linkColumn,
+         this.getSettingField("teamLink").settings.linkColumn
       ).columnName;
       if (!$teamFormPopup) {
          const nameField = this.getSettingField("teamName");
          const [strategyField] = this.datacollection.datasource.fields(
-            (f) => f.id == this.view.settings["teamStrategy"],
+            (f) => f.id == this.view.settings["teamStrategy"]
          );
          const strategyOptions = await strategyField.getOptions();
          $teamFormPopup = webix.ui({
@@ -1081,7 +1108,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                               const values = $$(this.ids.teamForm).getValues();
                               const strategy = strategyOptions.find(
                                  (f) =>
-                                    f.id === values[strategyField.columnName],
+                                    f.id === values[strategyField.columnName]
                               );
                               if (values.id) {
                                  this.teamEdit(values, strategy);
