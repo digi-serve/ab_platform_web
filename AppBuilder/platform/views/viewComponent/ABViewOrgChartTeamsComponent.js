@@ -77,14 +77,18 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
    }
 
    async onShow() {
+      this.AB.performance.mark("TeamChart.onShow");
       super.onShow();
-
       this.busy();
       this.generateStrategyCss();
-      await this.loadOrgChartJs();
-      await this.pullData();
+      this.AB.performance.mark("TeamChart.load");
+      await Promise.all([this.loadOrgChartJs(), this.pullData()]);
+      this.AB.performance.measure("TeamChart.load");
+      this.AB.performance.mark("TeamChart.display");
       await this.displayOrgChart();
+      this.AB.performance.measure("TeamChart.display");
       this.ready();
+      this.AB.performance.measure("TeamChart.onShow");
    }
 
    async displayOrgChart() {
@@ -112,6 +116,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          contentField != null &&
          contentObj != null
       ) {
+         this.AB.performance.mark("loadAssignments");
          const getContentDataRecordPKs = (node) => {
             const contentFieldData = node._rawData[contentFieldColumnName];
             if (Array.isArray(contentFieldData))
@@ -139,15 +144,19 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                })
             ).data
          );
+         this.AB.performance.measure("loadAssignments");
       }
       const contentGroupByField = contentObj?.fieldByID(
          settings.contentGroupByField
       );
+      this.AB.performance.mark("loadAssigmentType");
       const { data: contentGroupOptions } = await this.AB.objectByID(
          contentGroupByField?.settings.linkObject
       )
          .model()
          .findAll();
+      this.AB.performance.measure("loadAssigmentType");
+      this.AB.performance.mark("misc");
       const contentGroupOptionsLength = contentGroupOptions.length;
       const contentGroupByFieldColumnName = contentGroupByField?.columnName;
       const contentFieldLinkColumnName = contentFieldLink?.columnName;
@@ -212,11 +221,11 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             updatedData[contentGroupByFieldColumnName] = newGroupText;
             await contentModel.create(updatedData);
          } else {
+            updatedData = JSON.parse(updatedData);
             delete updatedData["created_at"];
             delete updatedData["updated_at"];
             delete updatedData["properties"];
             if (dropContentToCreate) {
-               updatedData = JSON.parse(updatedData);
                delete updatedData["id"];
                delete updatedData["uuid"];
                updatedData[contentFieldLinkColumnName] = newNodeDataPK;
@@ -426,6 +435,8 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          }).show();
          $$(ids.contentFormData).setValues(contentDataRecord);
       };
+      this.AB.performance.measure("misc");
+      this.AB.performance.mark("createOrgChart");
       const orgchart = new this.OrgChart({
          data: chartData,
          direction: baseView.settings.direction,
@@ -624,6 +635,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          },
          nodeContent: "description",
       });
+      this.AB.performance.measure("createOrgChart");
       this.__orgchart = orgchart;
       if (draggable) {
          // On drop update the parent (dropZone) of the node
@@ -736,6 +748,9 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       }
    }
 
+   /**
+    * load the data and format it for display
+    */
    async pullData() {
       const filters = this.__filters;
       const view = this.view;
@@ -765,6 +780,11 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       chartData._rawData = topNode;
       const maxDepth = 10; // prevent inifinite loop
       const self = this;
+      /**
+       * Recursive function to prepare child node data
+       * @param {object} node the current node
+       * @param {number} [depth=0] a count of how many times we have recursed
+       */
       function pullChildData(node, depth = 0) {
          if (depth >= maxDepth) return;
          node.children = [];
@@ -818,6 +838,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       return this._chartData;
    }
 
+   /** Add the filter button to the UI */
    initFilter(domNode) {
       const filterButton = document.createElement("button");
       filterButton.innerHTML = `<i class="fa fa-filter"></i> Filter`;
@@ -826,6 +847,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       domNode.append(filterButton);
    }
 
+   /** Display the filter UI (popup) **/
    async filterWindow(buttonNode) {
       let $popup = $$(this.ids.filterPopup);
       if (!$popup) {
