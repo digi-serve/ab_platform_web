@@ -48,7 +48,14 @@ function socketDataLog(AB, key, data) {
 
    if (data.objectId) {
       let obj = AB.objectByID(data.objectId);
-      console.warn(`socket: ${key} ${obj.label ?? obj.name}(${length})`, data);
+      if (!obj) {
+         console.warn(`socket: ${key} unkown object (${length})`, data);
+      } else {
+         console.warn(
+            `socket: ${key} ${obj.label ?? obj.name}(${length})`,
+            data
+         );
+      }
    } else {
       console.warn(`socket: ${key} (${length})`, data);
    }
