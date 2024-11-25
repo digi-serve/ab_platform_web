@@ -353,7 +353,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                this.__orgchart.innerHTML = "";
                await contentModel.update(newFormData.id, newFormData);
                $contentForm.hide();
-               await this.refreshs();
+               await this.refresh();
             },
          });
          AB.Webix.ui({
