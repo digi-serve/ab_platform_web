@@ -114,11 +114,13 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          settings.contentGroupByField
       );
       this.AB.performance.mark("loadAssigmentType");
-      const { data: contentGroupOptions } = await this.AB.objectByID(
+      const contentGroupObj = this.AB.objectByID(
          contentGroupByField?.settings.linkObject
       )
+      const { data: contentGroupOptions } = await contentGroupObj
          .model()
          .findAll();
+      const groupObjPKColumeName = contentGroupObj.PK();
       this.AB.performance.measure("loadAssigmentType");
       this.AB.performance.mark("misc");
       const contentGroupOptionsLength = contentGroupOptions.length;
@@ -166,7 +168,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          event.stopPropagation();
          if (contentFieldLinkColumnName == null) return;
          const $group = event.currentTarget;
-         const newGroupText = $group.dataset.text;
+         const newGroupDataPK = $group.dataset.pk;
          const newNodeDataPK = JSON.parse(
             $group.parentElement.parentElement.dataset.source
          )._rawData[nodeObjPK];
@@ -182,7 +184,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             updatedData = {};
             updatedData[contentLinkedField.columnName] = dataPK;
             updatedData[contentFieldLinkColumnName] = newNodeDataPK;
-            updatedData[contentGroupByFieldColumnName] = newGroupText;
+            updatedData[contentGroupByFieldColumnName] = newGroupDataPK;
             await contentModel.create(updatedData);
          } else {
             updatedData = JSON.parse(updatedData);
@@ -193,11 +195,11 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                delete updatedData["id"];
                delete updatedData["uuid"];
                updatedData[contentFieldLinkColumnName] = newNodeDataPK;
-               updatedData[contentGroupByFieldColumnName] = newGroupText;
+               updatedData[contentGroupByFieldColumnName] = newGroupDataPK;
                await contentModel.create(updatedData);
             } else {
                updatedData[contentFieldLinkColumnName] = newNodeDataPK;
-               updatedData[contentGroupByFieldColumnName] = newGroupText;
+               updatedData[contentGroupByFieldColumnName] = newGroupDataPK;
                await contentModel.update(updatedData.id, updatedData);
             }
          }
@@ -441,7 +443,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                groupStyle["backgroundColor"] = groupColor;
                // TODO: should this be a config option
                const groupText = group.name;
-               $group.setAttribute("data-text", groupText);
+               $group.setAttribute("data-pk", group[groupObjPKColumeName]);
                if (showGroupTitle) {
                   const $groupTitle = element("div", "team-group-title");
                   const groupTitleStyle = $groupTitle.style;
@@ -498,7 +500,6 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      const displayedFieldKey = contentDisplayedFieldsKeys[j];
                      const [atDisplay, objID] = displayedFieldKey.split(".");
                      const displayedObj = AB.objectByID(objID);
-                     const displayedObjPK = displayedObj.PK();
                      const displayedField = displayedObj.fieldByID(
                         contentDisplayedFields[displayedFieldKey]
                      );
