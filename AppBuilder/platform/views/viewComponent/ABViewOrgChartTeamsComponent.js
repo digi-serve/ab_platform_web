@@ -650,10 +650,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                   header: dataPanelDCs[key],
                   body: {
                      view: "list",
-                     template: `${panelObj
-                        .fields()
-                        .map((field) => `#${field.columnName}#`)
-                        .join(" ")}`,
+                     template: (data) => panelObj.displayData(data),
                      css: { overflow: "auto" },
                      data: dc.getData(),
                      on: {
