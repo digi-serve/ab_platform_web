@@ -31,7 +31,7 @@ module.exports = class ABViewDetailComponent extends ABViewContainerComponent {
       try {
          const dataCy = `Detail ${baseView.name?.split(".")[0]} ${baseView.id}`;
 
-         $$(this.ids.component).$view.setAttribute("data-cy", dataCy);
+         $$(this.ids.component)?.$view.setAttribute("data-cy", dataCy);
       } catch (e) {
          console.warn("Problem setting data-cy", e);
       }
