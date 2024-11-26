@@ -610,7 +610,8 @@ module.exports = class FilterComplex extends FilterComplexCore {
                .concat(this.uiUserValue(field))
                .concat(this.uiDataCollectionValue(field))
                .concat(this.uiContextValue(field))
-               .concat(this.uiNoneValue());
+               .concat(this.uiNoneValue())
+               .concat(this.uiQueryFieldValue(field, defaultValue));
             break;
          case "date":
          case "datetime":
