@@ -37,7 +37,7 @@ export default class ABViewDataSelectComponent extends ABViewComponent {
       await this.dc.waitForDataCollectionToInitialize(this.dc);
       const labelField = this.AB.definitionByID(
          this.settings.labelField
-      ).columnName;
+      )?.columnName;
       const options = this.dc
          .getData()
          .map((o) => ({ id: o.id, value: o[labelField] }));
