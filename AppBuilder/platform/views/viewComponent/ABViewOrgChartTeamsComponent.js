@@ -91,6 +91,17 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       this.AB.performance.measure("TeamChart.display");
       this.ready();
       this.AB.performance.measure("TeamChart.onShow");
+      if (this.settings.entityDatacollection) {
+         this.entityDC = this.AB.datacollectionByID(
+            this.settings.entityDatacollection
+         );
+         if (!this._entityChangeListener) {
+            // Reload the Chart if our Entity changes
+            this._entityChangeListener = this.entityDC.on("changeCursor", () =>
+               this.refresh()
+            );
+         }
+      }
    }
 
    async displayOrgChart() {
@@ -116,7 +127,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       this.AB.performance.mark("loadAssigmentType");
       const contentGroupObj = this.AB.objectByID(
          contentGroupByField?.settings.linkObject
-      )
+      );
       const { data: contentGroupOptions } = await contentGroupObj
          .model()
          .findAll();
@@ -162,6 +173,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const fnContentDragEnd = (event) => {
          // event.target.style.opacity = "1";
       };
+
       const fnContentDrop = async (event) => {
          const dataTransfer = event.dataTransfer;
          if (dataTransfer.getData("isnode") == 1) return;
@@ -185,6 +197,13 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             updatedData[contentLinkedField.columnName] = dataPK;
             updatedData[contentFieldLinkColumnName] = newNodeDataPK;
             updatedData[contentGroupByFieldColumnName] = newGroupDataPK;
+            if (this.entityDC) {
+               const entityLink = this.entityDC?.datasource.connectFields(
+                  (f) => f.settings.linkObject === contentObj.id
+               )[0].id;
+               const entityCol = this.AB.definitionByID(entityLink).columnName;
+               updatedData[entityCol] = this.entityDC.getCursor();
+            }
             await contentModel.create(updatedData);
          } else {
             updatedData = JSON.parse(updatedData);
@@ -976,6 +995,19 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
    }
 
    async teamAddChild(values, strategy) {
+      // Add the entity value
+      if (this.entityDC) {
+         const connection = this.entityDC.datasource.connectFields(
+            (f) => f.settings.linkObject === this.datacollection.datasource.id
+         )[0];
+         if (connection) {
+            const entity = this.entityDC.getCursor();
+            const cName = this.AB.definitionByID(
+               connection.settings.linkColumn
+            ).columnName;
+            values[cName] = entity;
+         }
+      }
       const { id } = await this.datacollection.model.create(values);
 
       const linkField = this.AB.definitionByID(
