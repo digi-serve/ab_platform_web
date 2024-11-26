@@ -25,7 +25,7 @@ export default class ABViewDataSelectComponent extends ABViewComponent {
             },
          },
       ]);
-      -delete _ui.type;
+      delete _ui.type;
 
       return _ui;
    }
@@ -33,6 +33,9 @@ export default class ABViewDataSelectComponent extends ABViewComponent {
    async init(AB) {
       await super.init(AB);
       this.dc = AB.datacollectionByID(this.settings.dataviewID);
+   }
+
+   async onShow() {
       if (!this.dc) return;
       await this.dc.waitForDataCollectionToInitialize(this.dc);
       const labelField = this.AB.definitionByID(
