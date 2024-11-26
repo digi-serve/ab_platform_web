@@ -423,9 +423,14 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                   whereRels.glue = "or";
                   whereRels.rules = [];
 
+                  // make sure values are unique:
+                  let valHash = {};
                   values.split(",").forEach((v) => {
+                     valHash[v] = v;
+                  });
+                  Object.keys(valHash).forEach((v) => {
                      whereRels.rules.push({
-                        key: "uuid",
+                        key: linkedObj.PK(),
                         rule: "equals",
                         value: v,
                      });
