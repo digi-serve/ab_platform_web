@@ -116,7 +116,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       this.AB.performance.mark("loadAssigmentType");
       const contentGroupObj = this.AB.objectByID(
          contentGroupByField?.settings.linkObject
-      )
+      );
       const { data: contentGroupOptions } = await contentGroupObj
          .model()
          .findAll();
@@ -650,7 +650,10 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                   header: dataPanelDCs[key],
                   body: {
                      view: "list",
-                     template: (data) => panelObj.displayData(data),
+                     template: (data) =>
+                        `<div style="text-align: center;">${panelObj.displayData(
+                           data
+                        )}</div>`,
                      css: { overflow: "auto" },
                      data: dc.getData(),
                      on: {
