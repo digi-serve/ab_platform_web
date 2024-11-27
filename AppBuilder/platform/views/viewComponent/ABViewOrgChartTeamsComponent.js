@@ -1346,7 +1346,8 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             values[cName] = entity;
          }
       }
-      const { id } = await this.datacollection.model.create(values);
+      const _rawData = await this.datacollection.model.create(values);
+      const id = _rawData.id;
 
       const linkField = this.AB.definitionByID(
          this.getSettingField("teamLink").settings.linkColumn
@@ -1355,12 +1356,18 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const parent = document.querySelector(
          `#${this.teamNodeID(values[linkField])}`
       );
+
+      const strategyLink = this.getSettingField("teamStrategy").columnName;
+      const strategyField = this.getSettingField("strategyCode").columnName;
+      const strategyCode = _rawData[`${strategyLink}__relation`][strategyField];
+
       const hasChild = parent.parentNode.colSpan > 1;
       const newChild = {
          name: values[nameField],
          id: this.teamNodeID(id),
          relationship: hasChild ? "110" : "100",
-         className: `strategy-${strategy.text}`,
+         className: `strategy-${strategyCode}`,
+         _rawData,
       };
 
       // Need to add differently if the node already has child nodes
@@ -1414,14 +1421,19 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       });
    }
 
-   teamEdit(values, strategy) {
-      this.datacollection.model.update(values.id, values).catch((err) => {
+   async teamEdit(values, strategy) {
+      const strategyLink = this.getSettingField("teamStrategy").columnName;
+      const strategyField = this.getSettingField("strategyCode").columnName;
+      const strategyCode = strategy[strategyField];
+      values[strategyLink] = strategyCode;
+
+      await this.datacollection.model.update(values.id, values).catch((err) => {
          //TODO
       });
       const nodeID = this.teamNodeID(values.id);
       const node = document.querySelector(`#${nodeID}`);
       const currentStrategy = node.classList?.value?.match(/strategy-\S+/)[0];
-      const newStrategy = `strategy-${strategy.text}`;
+      const newStrategy = `strategy-${strategyCode}`;
       if (currentStrategy !== newStrategy) {
          node.classList?.remove(currentStrategy);
          node.classList?.add(newStrategy);
