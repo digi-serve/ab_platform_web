@@ -330,7 +330,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                   const editContentFieldToCreateNewColumnName =
                      contentObj.fieldByID(
                         editContentFieldToCreateNew
-                     ).columnName;
+                     )?.columnName;
                   if (
                      JSON.stringify(
                         newFormData[editContentFieldToCreateNewColumnName] ?? ""
@@ -733,16 +733,167 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const teamInactive = this.getSettingField("teamInactive").columnName;
       const strategyField = this.getSettingField("teamStrategy").columnName;
       const strategyCode = this.getSettingField("strategyCode").columnName;
+      const self = this;
+      const contentField = dc?.datasource.fieldByID(settings.contentField);
+      const contentFieldColumnName = contentField?.columnName;
+      const contentObj = contentField?.fieldLink?.object;
+      const contentObjPK = contentObj.PK();
+      const contentFieldFilter = JSON.parse(settings.contentFieldFilter);
+      const contentDisplayedFields = settings.contentDisplayedFields;
+      const contentDisplayFieldKeys = Object.keys(contentDisplayedFields);
+      const contentDisplayedFieldFilters =
+         settings.contentDisplayedFieldFilters;
+      const contentDataRecords = (this._cachedContentDataRecords = []);
+      let isContentFiltered = false;
+
+      // TODO (Guy): Now, this approch is having so many requests.
+      this.AB.performance.mark("loadFilteredContent");
+      for (const key in contentDisplayedFieldFilters) {
+         const [filterAtDisplay, filterObjID, filterFieldID, isFiltered] =
+            key.split(".");
+         const filterValue = filters[key];
+         const contentAtDisplayFieldKeys = [contentDisplayFieldKeys.shift()];
+         let currentAtDisplayFieldKey = contentAtDisplayFieldKeys[0];
+         while (
+            filterAtDisplay === currentAtDisplayFieldKey[0] &&
+            contentDisplayedFields[currentAtDisplayFieldKey] !==
+               filterFieldID &&
+            contentDisplayFieldKeys.length > 0
+         ) {
+            currentAtDisplayFieldKey = contentDisplayFieldKeys.shift();
+            contentAtDisplayFieldKeys.push(currentAtDisplayFieldKey);
+         }
+         if (
+            isFiltered != 1 ||
+            typeof filterValue !== "string" ||
+            filterValue === "" ||
+            contentAtDisplayFieldKeys.length === 0
+         )
+            continue;
+         contentAtDisplayFieldKeys.pop();
+         const contentAtDisplayFieldKeysLength =
+            contentAtDisplayFieldKeys.length;
+         let filterObj = AB.objectByID(filterObjID);
+         const getContentDataRecords = async (obj, filterRule) => {
+            switch (obj.fieldByID(filterRule.key)?.key) {
+               case "connectObject":
+               case "user":
+                  break;
+               default:
+                  const dataRecords = (
+                     await obj.model().findAll({
+                        where: {
+                           glue: "and",
+                           rules: [filterRule, contentFieldFilter],
+                        },
+                        populate: true,
+                     })
+                  ).data;
+                  for (const dataRecord of dataRecords) {
+                     if (
+                        contentDataRecords.findIndex(
+                           (contentDataRecord) =>
+                              contentDataRecord.id === dataRecord.id
+                        ) > -1
+                     )
+                        continue;
+                     contentDataRecords.push(dataRecord);
+                  }
+                  isContentFiltered = true;
+                  break;
+            }
+         };
+         if (contentAtDisplayFieldKeysLength === 0) {
+            await getContentDataRecords(filterObj, {
+               key: filterFieldID,
+               rule: "contains",
+               value: filterValue,
+            });
+            continue;
+         }
+         const prevDisplayFieldKey =
+            contentAtDisplayFieldKeys[contentAtDisplayFieldKeysLength - 1];
+         const prevContentDisplayLinkedField =
+            (prevDisplayFieldKey !== "" &&
+               AB.objectByID(prevDisplayFieldKey.split(".")[1]).fieldByID(
+                  contentDisplayedFields[prevDisplayFieldKey]
+               )?.fieldLink) ||
+            null;
+         let filteredRecordDataPKs = (
+            await filterObj.model().findAll({
+               where: {
+                  glue: "and",
+                  rules: [
+                     {
+                        key: filterFieldID,
+                        rule: "contains",
+                        value: filterValue,
+                     },
+                  ],
+               },
+               populate: true,
+            })
+         ).data.flatMap(
+            (record) => record[prevContentDisplayLinkedField.columnName]
+         );
+         while (contentAtDisplayFieldKeys.length > 1) {
+            if (filteredRecordDataPKs.length === 0) break;
+            filterObj = AB.objectByID(
+               contentAtDisplayFieldKeys.pop().split(".")[1]
+            );
+            const filterObjPK = filterObj.PK();
+            filteredRecordDataPKs = (
+               await filterObj.model().findAll({
+                  where: {
+                     glue: "and",
+                     rules: [
+                        {
+                           key: filterObjPK,
+                           rule: "in",
+                           value: filteredRecordDataPKs,
+                        },
+                     ],
+                  },
+                  populate: true,
+               })
+            ).data.map((record) => record[filterObjPK]);
+         }
+         if (filteredRecordDataPKs.length === 0) continue;
+         filterObj = AB.objectByID(
+            contentAtDisplayFieldKeys.pop().split(".")[1]
+         );
+         await getContentDataRecords(filterObj, {
+            key: filterObj.PK(),
+            rule: "in",
+            value: filteredRecordDataPKs,
+         });
+         isContentFiltered = true;
+      }
+      this.AB.performance.measure("loadFilteredContent");
+      const contentDataRecordPKs = [];
       const chartData = (this._chartData = {});
       chartData.name = topNode[teamName] ?? "";
       chartData.id = this.teamNodeID(topNode.id);
-      chartData.className = `strategy-${
-         topNode[`${strategyField}__relation`]?.[strategyCode]
-      }`;
+      const topNodeStrategy = topNode[`${strategyField}__relation`];
+      chartData.className = `strategy-${topNodeStrategy?.[strategyCode]}`;
+      const topNodeStrategyID = topNodeStrategy.id;
       chartData.isInactive = topNode[teamInactive];
       chartData._rawData = topNode;
+      const topNodeContentFieldData = topNode[contentFieldColumnName];
+      if (!isContentFiltered) {
+         if (Array.isArray(topNodeContentFieldData))
+            contentDataRecordPKs.push(...topNodeContentFieldData);
+         else contentDataRecordPKs.push(topNodeContentFieldData);
+      }
+      chartData.filteredOut = isContentFiltered
+         ? self.filterTeam(
+              filters,
+              chartData,
+              topNodeStrategyID,
+              topNodeContentFieldData
+           )
+         : self.filterTeam(filters, chartData, topNodeStrategyID);
       const maxDepth = 10; // prevent inifinite loop
-      const self = this;
       /**
        * Recursive function to prepare child node data
        * @param {object} node the current node
@@ -760,16 +911,28 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             )
                return;
             const strategy = childData[`${strategyField}__relation`];
-
-            const strategyClass = `strategy-${strategy[strategyCode]}`;
             const child = {
                name: childData[teamName],
                id: self.teamNodeID(id),
-               className: strategyClass,
+               className: `strategy-${strategy[strategyCode]}`,
                isInactive: childData[teamInactive],
                _rawData: childData,
             };
-            child.filteredOut = self.filterTeam(filters, child, strategy.id);
+            const childContentFieldData = childData[contentFieldColumnName];
+            if (!isContentFiltered) {
+               if (Array.isArray(childContentFieldData))
+                  contentDataRecordPKs.push(...childContentFieldData);
+               else contentDataRecordPKs.push(childContentFieldData);
+            }
+            const strategyID = strategy.id;
+            child.filteredOut = isContentFiltered
+               ? self.filterTeam(
+                    filters,
+                    child,
+                    strategyID,
+                    childContentFieldData
+                 )
+               : self.filterTeam(filters, child, strategyID);
             if (child.name === "External Support")
                child.className = `strategy-external`;
             if (childData[teamLink].length > 0) {
@@ -792,27 +955,14 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          return;
       }
       pullChildData(chartData);
-      const contentField = dc?.datasource.fieldByID(settings.contentField);
       if (contentField == null) return;
-      const contentFieldColumnName = contentField?.columnName;
-      const contentObj = contentField?.fieldLink?.object;
-      const contentDataRecordPKs = [];
-      const contentDataRecords = (this._cachedContentDataRecords = []);
       if (
          Object.keys(chartData).length > 0 &&
          contentField != null &&
-         contentObj != null
+         contentObj != null &&
+         !isContentFiltered
       ) {
          this.AB.performance.mark("loadAssignments");
-         const getContentDataRecordPKs = (node) => {
-            const contentFieldData = node._rawData[contentFieldColumnName];
-            if (Array.isArray(contentFieldData))
-               contentDataRecordPKs.push(...contentFieldData);
-            else contentDataRecordPKs.push(contentFieldData);
-            const children = node.children || [];
-            for (const child of children) getContentDataRecordPKs(child);
-         };
-         getContentDataRecordPKs(chartData);
          contentDataRecords.push(
             ...(
                await contentObj.model().findAll({
@@ -820,11 +970,11 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      glue: "and",
                      rules: [
                         {
-                           key: contentObj.PK(),
+                           key: contentObjPK,
                            rule: "in",
                            value: contentDataRecordPKs,
                         },
-                        JSON.parse(settings.contentFieldFilter),
+                        contentFieldFilter,
                      ],
                   },
                   populate: true,
@@ -934,9 +1084,9 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       await this.refresh();
    }
 
-   filterTeam(filters, team, code) {
+   filterTeam(filters, team, code, contentFieldData) {
       // Apply filters (match using or)
-      if (filters.strategy || filters.teamName) {
+      if (filters.strategy || filters.teamName || contentFieldData != null) {
          let filter = true;
          if (filters.strategy !== "" && filters.strategy == code) {
             filter = false;
@@ -944,6 +1094,21 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          if (
             filters.teamName !== "" &&
             team.name.toLowerCase().includes(filters.teamName.toLowerCase())
+         ) {
+            filter = false;
+         }
+         const contentObjPK = this.view.datacollection?.datasource
+            .fieldByID(this.settings.contentField)
+            ?.fieldLink?.object.PK();
+         if (
+            this._cachedContentDataRecords.findIndex((contentDataRecord) => {
+               if (Array.isArray(contentFieldData))
+                  return (
+                     contentFieldData.indexOf(contentDataRecord[contentObjPK]) >
+                     -1
+                  );
+               return contentFieldData === contentDataRecord[contentObjPK];
+            }) > -1
          ) {
             filter = false;
          }
