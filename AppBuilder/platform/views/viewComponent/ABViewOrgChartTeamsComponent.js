@@ -420,6 +420,9 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const contentDataRecords = this._cachedContentDataRecords;
       this.AB.performance.measure("misc");
       this.AB.performance.mark("createOrgChart");
+      const contentDisplayedFieldTypes = settings.contentDisplayedFieldTypes;
+      const contentDisplayedFieldMappingData =
+         settings.contentDisplayedFieldMappingData;
       const orgchart = new this.OrgChart({
          data: chartData,
          direction: baseView.settings.direction,
@@ -445,7 +448,8 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                $content.style.display = "none";
                return;
             }
-            $node.style.height = "250px";
+            $node.style.height = "300px";
+            // $node.style.minHeight = "400px";
             const averageHeight = 80 / contentGroupOptionsLength;
             const currentNodeDataRecordPK = data._rawData[nodeObjPK];
             const $nodeSpacer = element("div", "spacer");
@@ -519,9 +523,10 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      const displayedFieldKey = contentDisplayedFieldsKeys[j];
                      const [atDisplay, objID] = displayedFieldKey.split(".");
                      const displayedObj = AB.objectByID(objID);
-                     const displayedField = displayedObj.fieldByID(
-                        contentDisplayedFields[displayedFieldKey]
-                     );
+                     const displayedFieldID =
+                        contentDisplayedFields[displayedFieldKey];
+                     const displayedField =
+                        displayedObj.fieldByID(displayedFieldID);
                      switch (objID) {
                         case contentObjID:
                            currentDataRecords = [contentDataRecord];
@@ -574,12 +579,139 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      );
                      $rowData.appendChild($currentDisplay);
                      const displayedFieldColumnName = displayedField.columnName;
-                     while (currentDataRecords.length > 0)
-                        $currentDisplay.appendChild(
-                           document.createTextNode(
-                              currentDataRecords.pop()[displayedFieldColumnName]
-                           )
-                        );
+                     const contentDisplayedFieldTypePrefix = `${displayedFieldKey}.${displayedFieldID}`;
+                     const contentDisplayedFieldMappingDataObj = JSON.parse(
+                        contentDisplayedFieldMappingData?.[
+                           contentDisplayedFieldTypePrefix
+                        ] || null
+                     ) || {};
+                     if (
+                        contentDisplayedFieldTypes[
+                           `${contentDisplayedFieldTypePrefix}.0`
+                        ] != null
+                     ) {
+                        currentField = null;
+                        continue;
+                     }
+                     switch (
+                        contentDisplayedFieldTypes[
+                           `${contentDisplayedFieldTypePrefix}.1`
+                        ]
+                     ) {
+                        case "icon":
+                           // TODO (Guy): Add logic.
+                           break;
+                        case "image":
+                           while (currentDataRecords.length > 0) {
+                              const currentDataRecordValue =
+                                 currentDataRecords.pop()[
+                                    displayedFieldColumnName
+                                 ];
+                              const $img = document.createElement("img");
+                              $currentDisplay.appendChild($img);
+                              $img.setAttribute(
+                                 "src",
+                                 contentDisplayedFieldMappingDataObj[
+                                    currentDataRecordValue
+                                 ] ?? currentDataRecordValue
+                              );
+                           }
+                           break;
+                        case "svg":
+                           while (currentDataRecords.length > 0) {
+                              const currentDataRecord =
+                                 currentDataRecords.pop();
+                              const currentDataRecordID = currentDataRecord.id;
+                              const currentDataRecordValue =
+                                 currentDataRecord[displayedFieldColumnName];
+                              const $div = element(
+                                 "div",
+                                 "team-group-record-display-svg"
+                              );
+                              $currentDisplay.appendChild($div);
+                              const SVG_NS = "http://www.w3.org/2000/svg";
+                              const X_LINK_NS = "http://www.w3.org/1999/xlink";
+                              const $svg = document.createElementNS(
+                                 SVG_NS,
+                                 "svg"
+                              );
+                              $div.appendChild($svg);
+                              $svg.setAttribute("width", "20");
+                              $svg.setAttribute("height", "20");
+                              $svg.setAttribute("viewBox", "0 0 6 6");
+                              $svg.setAttribute("fill", "none");
+                              $svg.setAttribute("xmlns", SVG_NS);
+                              $svg.setAttribute("xmlns:xlink", X_LINK_NS);
+                              const $rect = document.createElementNS(
+                                 SVG_NS,
+                                 "rect"
+                              );
+                              const $defs = document.createElementNS(
+                                 SVG_NS,
+                                 "defs"
+                              );
+                              $svg.append($rect, $defs);
+                              $rect.setAttribute("width", "6");
+                              $rect.setAttribute("height", "6");
+                              const patternID = `display-svg.pattern.${currentDataRecordID}`;
+                              $rect.setAttribute("fill", `url(#${patternID})`);
+                              const $pattern = document.createElementNS(
+                                 SVG_NS,
+                                 "pattern"
+                              );
+                              const $image = document.createElementNS(
+                                 SVG_NS,
+                                 "image"
+                              );
+                              $defs.append($pattern, $image);
+                              $pattern.id = patternID;
+                              $pattern.setAttributeNS(
+                                 null,
+                                 "patternContentUnits",
+                                 "objectBoundingBox"
+                              );
+                              $pattern.setAttribute("width", "1");
+                              $pattern.setAttribute("height", "1");
+                              const imageID = `display-svg.image.${currentDataRecordID}`;
+                              $image.id = imageID;
+                              $image.setAttribute("width", "512");
+                              $image.setAttribute("height", "512");
+                              $image.setAttributeNS(
+                                 X_LINK_NS,
+                                 "xlink:href",
+                                 contentDisplayedFieldMappingDataObj[
+                                    currentDataRecordValue
+                                 ] ?? currentDataRecordValue
+                              );
+                              const $use = document.createElementNS(
+                                 SVG_NS,
+                                 "use"
+                              );
+                              $pattern.appendChild($use);
+                              $use.setAttributeNS(
+                                 X_LINK_NS,
+                                 "xlink:href",
+                                 `#${imageID}`
+                              );
+                              $use.setAttribute("transform", "scale(0.002)");
+                           }
+                           break;
+                        default:
+                           while (currentDataRecords.length > 0) {
+                              const currentDataRecordValue =
+                                 currentDataRecords.pop()[
+                                    displayedFieldColumnName
+                                 ];
+                              $currentDisplay.appendChild(
+                                 document.createTextNode(
+                                    contentDisplayedFieldMappingDataObj[
+                                       currentDataRecordValue
+                                    ] ?? currentDataRecordValue
+                                 )
+                              );
+                           }
+                           break;
+                     }
                      currentField = null;
                   }
                }
@@ -593,7 +725,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             $buttons.append($editButton, $addButton);
             const dataID = this.teamRecordID(data.id);
             const values = this.datacollection.getData(
-               (e) => e.id === dataID
+               (e) => e.id == dataID
             )[0];
             $addButton.onclick = () => {
                this.teamForm("Add", { __parentID: dataID });
@@ -663,7 +795,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                await dc.waitForDataCollectionToInitialize(dc);
                const panelObj = dc.datasource;
                const contentFieldID = panelObj.connectFields(
-                  (field) => field.datasourceLink.id === contentObjID
+                  (field) => field.datasourceLink.id == contentObjID
                )[0].fieldLink.id;
                dataPanelUIs.push({
                   header: dataPanelDCs[key],
@@ -689,7 +821,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                                     "data-pk",
                                     dc.getData(
                                        (e) =>
-                                          e.id ===
+                                          e.id ==
                                           $itemElement.getAttribute(
                                              "webix_l_id"
                                           )
@@ -812,7 +944,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      if (
                         contentDataRecords.findIndex(
                            (contentDataRecord) =>
-                              contentDataRecord.id === dataRecord.id
+                              contentDataRecord.id == dataRecord.id
                         ) > -1
                      )
                         continue;
@@ -855,8 +987,10 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          ).data.flatMap(
             (record) => record[prevContentDisplayLinkedField.columnName]
          );
-         while (contentAtDisplayFieldKeys.length > 1) {
-            if (filteredRecordDataPKs.length === 0) break;
+         while (
+            contentAtDisplayFieldKeys.length > 1 &&
+            filteredRecordDataPKs.length > 0
+         ) {
             filterObj = AB.objectByID(
                contentAtDisplayFieldKeys.pop().split(".")[1]
             );
@@ -1126,7 +1260,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      contentFieldData.indexOf(contentDataRecord[contentObjPK]) >
                      -1
                   );
-               return contentFieldData === contentDataRecord[contentObjPK];
+               return contentFieldData == contentDataRecord[contentObjPK];
             }) > -1
          ) {
             filter = false;
