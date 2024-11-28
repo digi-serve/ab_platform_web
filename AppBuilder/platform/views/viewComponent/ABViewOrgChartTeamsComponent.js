@@ -22,7 +22,9 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             ids
          )
       );
-      this.__filters = {};
+      this.__filters = {
+         inactive: 0,
+      };
       this._chartData = null;
       this._cachedContentDataRecords = null;
    }
@@ -1387,7 +1389,14 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const canInactive = this.getSettingField("teamCanInactivate").columnName;
       if (!values[canInactive]) return false;
       const children = this.getSettingField("teamLink").columnName;
-      if (values[children].length > 0) return false;
+      if (
+         values[children].some(
+            (c) =>
+               this.datacollection.getData((r) => r.id == c)[0]?.[isInactive] ==
+               false
+         )
+      )
+         return false;
       // @TODO check for active assignment
       // if (hasActiveAssignment) return false;
       return true;
@@ -1425,8 +1434,8 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const strategyLink = this.getSettingField("teamStrategy").columnName;
       const strategyField = this.getSettingField("strategyCode").columnName;
       const strategyCode = strategy[strategyField];
-      values[strategyLink] = strategyCode;
-
+      values[strategyLink] = strategy.id;
+      delete values[`${strategyLink}__relation`];
       await this.datacollection.model.update(values.id, values).catch((err) => {
          //TODO
       });
@@ -1440,11 +1449,9 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       }
 
       const inactive = this.getSettingField("teamInactive").columnName;
-      if (
-         this.__filters.inactive &&
-         this.__filters.inactive === 0 &&
-         values[inactive]
-      ) {
+      // Remove inactive node from display, unless the filter setting to show
+      // inctive nodes is on.
+      if (this.__filters?.inactive !== 1 && values[inactive] === 1) {
          this.__orgchart.removeNodes(node);
       }
       const nameCol = this.getSettingField("teamName").columnName;
