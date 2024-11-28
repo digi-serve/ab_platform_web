@@ -6,7 +6,7 @@ org-chart .node {
    text-align: center;
    justify-content: center;
    width: 325px !important;
-   /* height: 250px; */
+   /* height: 600px !important; */
    font-family: "Jomhuria", sans-serif;
    font-style: normal;
    font-weight: 200;
@@ -79,7 +79,7 @@ org-chart tr.lines .downLine {
 }
 
 .team-group-title {
-  width: 100%;
+   width: 100%;
 }
 
 .team-group-content {
@@ -103,15 +103,27 @@ org-chart tr.lines .downLine {
 }
 
 .team-group-record-display {
-
 }
 
-.team-group-record-display-data {
+.team-group-record-display > img {
+   width: 60px;
+   height: 60px;
+}
 
+.team-group-record-display-svg {
+   width: 30px;
+   height: 30px;
+   padding: 5px;
+   background-color: skyblue;
+   border-radius: 10px;
+}
+.team-group-record-display-svg svg {
+   height: 20px;
+   width: 20px;
 }
 
 .team-group-record:hover {
-  background-color: yellow;
+   background-color: yellow;
 }
 
 .team-button-section {
@@ -154,9 +166,9 @@ org-chart tr.lines .downLine {
 
 .filter-button {
    border-radius: 10px;
-   background: #FFF;
+   background: #fff;
    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
-   color: #2F27CE;
+   color: #2f27ce;
    font-family: Roboto;
    font-size: 20px;
    font-style: normal;
@@ -167,19 +179,19 @@ org-chart tr.lines .downLine {
 }
 
 .filter-button:hover {
-   background: #2F27CE;
-   color: #FFF;
+   background: #2f27ce;
+   color: #fff;
 }
 
 .filter-popup {
    border-radius: 10px;
-   background: #FFF;
+   background: #fff;
    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
 }
 
 .active-text {
    color: #ffffff;
-   font-family: 'Jomhuria', sans-serif;
+   font-family: "Jomhuria", sans-serif;
    height: 6.5px;
    font-size: 8px;
    font-weight: 400;
