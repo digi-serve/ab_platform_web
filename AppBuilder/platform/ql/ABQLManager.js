@@ -5,10 +5,8 @@
  * AppBuilder.
  *
  */
-
 const ABQLManagerCore = require("../../core/ql/ABQLManagerCore.js");
 const ABQLRootObject = require("./ABQLRootObject.js");
-
 const ABQLManager = {
    /**
     * @method fromAttributes()
@@ -60,7 +58,6 @@ const ABQLManager = {
       return {
          ui: (id) => {
             rootOP = rootOP ?? new ABQLRootObject({}, task, AB);
-
             const ids = ABQLManager.ids(id);
             const ui = {
                rows: [
@@ -70,10 +67,8 @@ const ABQLManager = {
                   },
                ],
             };
-
             rootOP.uiAddParams(id, ui);
             rootOP.uiAddNext(id, ui);
-
             return ui;
          },
          init: (id) => {},
@@ -96,39 +91,30 @@ const ABQLManager = {
    parse: (id, task, AB) => {
       const ids = ABQLManager.ids(id);
       const root = $$(ids.root);
-
       if (!root) {
          console.warn("ABQLManager.parse(): unable to find root element");
-
          return;
       }
 
       // get all the input rows
       const rows = root.getParentView().getChildViews();
-
       const parseCurrent = (rows, options, prevOP) => {
          if (rows.length === 0) return null;
-
          const row = rows.shift();
 
          // get which operation was selected
          // find the operation selector (skip any indents)
          const views = row.getChildViews();
-
          let selector = views.shift();
-
          while (!selector?.getValue) selector = views.shift();
-
          const value = selector.getValue();
 
          // figure out the QLOP object
          const OP = options.find((o) => {
             return o.key === value || o.key === ABQLRootObject.key;
          });
-
          if (OP) {
             let currOP = null;
-
             if (prevOP) currOP = new OP({}, prevOP, task, AB);
             else currOP = new OP({}, task, AB);
 
@@ -141,23 +127,13 @@ const ABQLManager = {
                currOP.object = prevOP.object;
                currOP.objectID = currOP.object?.id ?? null;
             }
-
-            const nextRow = parseCurrent(
-               rows,
-               currOP.constructor.NextQLOps,
-               currOP
-            );
-
+            const nextRow = parseCurrent(rows, currOP.NextQLOps, currOP);
             currOP.next = nextRow;
-
             return currOP;
          }
-
          return null;
       };
-
       const operation = parseCurrent(rows, ABQLManagerCore.QLOps, null);
-
       return operation;
    },
 };

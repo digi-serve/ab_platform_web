@@ -9,7 +9,6 @@
  */
 
 const ABQLRootObjectCore = require("../../core/ql/ABQLRootObjectCore.js");
-
 class ABQLObject extends ABQLRootObjectCore {
    // constructor(attributes, task, application) {
    //     // NOTE: keep this so we can insert the prevOp === null

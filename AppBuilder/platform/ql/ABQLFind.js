@@ -6,14 +6,6 @@
  *
  */
 const ABQLFindCore = require("../../core/ql/ABQLFindCore.js");
-
-class ABQLFind extends ABQLFindCore {
-   // constructor(attributes, prevOP, task, application) {
-   //     super(attributes, ParameterDefinitions, prevOP, task, application);
-   // }
-   ///
-   /// Instance Methods
-   ///
-}
+class ABQLFind extends ABQLFindCore {}
 
 module.exports = ABQLFind;

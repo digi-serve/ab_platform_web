@@ -5,9 +5,7 @@
  * in, so that this data can be made available to other Process Tasks.
  *
  */
-
 const ABQLSetSaveCore = require("../../core/ql/ABQLSetSaveCore.js");
-
 class ABQLSetSave extends ABQLSetSaveCore {
    // constructor(attributes, prevOP, task, application) {
    //     super(attributes, [], prevOP, task, application);

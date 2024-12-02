@@ -40,9 +40,7 @@ pluck("relationships"):
 	]
  *
  */
-
 const ABQLSetPluckCore = require("../../core/ql/ABQLSetPluckCore.js");
-
 class ABQLSetPluck extends ABQLSetPluckCore {
    // constructor(attributes, prevOP, task, application) {
    //     super(attributes, [], prevOP, task, application);
@@ -68,15 +66,18 @@ class ABQLSetPluck extends ABQLSetPluckCore {
          this.field = this.object.fieldByID(this.fieldID);
 
          // v2 method:
-         // if (this.field && this.field.isConnected) {
-         if (this.field && this.field.key === "connectObject") {
-            this.objectOut = this.field.datasourceLink;
-            this.objectOutID = this.objectOut.id;
+         switch (this.field?.key) {
+            case "connectObject":
+               this.objectOut = this.field.datasourceLink;
+               this.objectOutID = this.objectOut.id;
 
-            // ?? is this correct?
-            // if we already have created a .next operation, and we have
-            // just changed our .object, pass that information forward.
-            if (this.next) this.next.object = this.objectOut;
+               // ?? is this correct?
+               // if we already have created a .next operation, and we have
+               // just changed our .object, pass that information forward.
+               if (this.next) this.next.object = this.objectOut;
+               break;
+            default:
+               break;
          }
       }
    }
@@ -101,7 +102,6 @@ class ABQLSetPluck extends ABQLSetPluckCore {
     */
    parseRow(row, id) {
       super.parseRow(row, id);
-
       this.fieldID = this.params.fieldID;
 
       // we now have to build backwards from the current fieldID to set our
