@@ -5,9 +5,7 @@
  * in, so that this data can be made available to other Process Tasks.
  *
  */
-
 const ABQLRowSaveCore = require("../../core/ql/ABQLRowSaveCore.js");
-
 class ABQLRowSave extends ABQLRowSaveCore {
    paramChanged(pDef, id) {
       super.paramChanged(pDef);

@@ -1,5 +1,4 @@
 const ABQLRowPluckCore = require("../../core/ql/ABQLRowPluckCore.js");
-
 class ABQLRowPluck extends ABQLRowPluckCore {
    /*
     * @method paramChanged()

@@ -112,7 +112,12 @@ function _toExternal(cond, fields = []) {
          cond.value = values
             .map((v) => {
                // Convert date format
-               if (field && (field.key === "date" || field.key === "datetime"))
+               if (
+                  v?.length > 0 &&
+                  typeof v === "string" &&
+                  field &&
+                  (field.key === "date" || field.key === "datetime")
+               )
                   return field.exportValue(new Date(v));
                return v;
             })
