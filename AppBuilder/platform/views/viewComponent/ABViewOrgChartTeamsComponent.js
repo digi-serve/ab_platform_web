@@ -121,6 +121,12 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          settings.contentField
       )?.fieldLink;
       const contentObj = contentFieldLink?.object;
+      const contentDateStartFieldColumnName = contentObj?.fieldByID(
+         settings.contentFieldDateStart
+      )?.columnName;
+      const contentDateEndFieldColumnName = contentObj?.fieldByID(
+         settings.contentFieldDateEnd
+      )?.columnName;
       const contentGroupByField = contentObj?.fieldByID(
          settings.contentGroupByField
       );
@@ -185,16 +191,27 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             $group.parentElement.parentElement.dataset.source
          )._rawData[nodeObjPK];
          let updatedData = dataTransfer.getData("source");
-         this.__orgchart.innerHTML = "";
+         const orgchart = this.__orgchart;
          if (updatedData === "") {
             const dataPK = dataTransfer.getData("dataPK");
             const contentLinkedFieldID = dataTransfer.getData(
                "contentLinkedFieldId"
             );
-            const contentLinkedField =
-               contentObj.fieldByID(contentLinkedFieldID);
+            const contentLinkedFieldColumnName =
+               contentObj.fieldByID(contentLinkedFieldID).columnName;
+            const pendingPromises = [];
+            const newDate = new Date();
+            orgchart.querySelectorAll(".team-group-record").forEach((e) => {
+               const contentData = JSON.parse(e.dataset.source);
+               contentData[contentDateEndFieldColumnName] = newDate;
+               contentData[contentLinkedFieldColumnName] === dataPK &&
+                  pendingPromises.push(
+                     contentModel.update(contentData.id, contentData)
+                  );
+            });
             updatedData = {};
-            updatedData[contentLinkedField.columnName] = dataPK;
+            updatedData[contentDateStartFieldColumnName] = newDate;
+            updatedData[contentLinkedFieldColumnName] = dataPK;
             updatedData[contentFieldLinkColumnName] = newNodeDataPK;
             updatedData[contentGroupByFieldColumnName] = newGroupDataPK;
             if (this.entityDC) {
@@ -204,18 +221,29 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                const entityCol = this.AB.definitionByID(entityLink).columnName;
                updatedData[entityCol] = this.entityDC.getCursor();
             }
-            await contentModel.create(updatedData);
+            pendingPromises.push(contentModel.create(updatedData));
+            await Promise.all(pendingPromises);
          } else {
+            orgchart.innerHTML = "";
             updatedData = JSON.parse(updatedData);
             delete updatedData["created_at"];
             delete updatedData["updated_at"];
             delete updatedData["properties"];
             if (dropContentToCreate) {
+               const pendingPromises = [];
+               updatedData[contentDateEndFieldColumnName] = new Date();
+               pendingPromises.push(
+                  contentModel.update(updatedData.id, updatedData)
+               );
+               updatedData[contentDateStartFieldColumnName] =
+                  updatedData[contentDateEndFieldColumnName];
                delete updatedData["id"];
                delete updatedData["uuid"];
+               delete updatedData[contentDateEndFieldColumnName];
                updatedData[contentFieldLinkColumnName] = newNodeDataPK;
                updatedData[contentGroupByFieldColumnName] = newGroupDataPK;
-               await contentModel.create(updatedData);
+               pendingPromises.push(contentModel.create(updatedData));
+               await Promise.all(pendingPromises);
             } else {
                updatedData[contentFieldLinkColumnName] = newNodeDataPK;
                updatedData[contentGroupByFieldColumnName] = newGroupDataPK;
@@ -361,9 +389,19 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      )
                   ) {
                      this.__orgchart.innerHTML = "";
+                     const pendingPromises = [];
+                     const oldData = {};
+                     oldData[contentDateEndFieldColumnName] = new Date();
+                     pendingPromises.push(
+                        contentModel.update(newFormData.id, oldData)
+                     );
+                     newFormData[contentDateStartFieldColumnName] =
+                        oldData[contentDateEndFieldColumnName];
                      delete newFormData["id"];
                      delete newFormData["uuid"];
-                     await contentModel.create(newFormData);
+                     delete newFormData[contentDateEndFieldColumnName];
+                     pendingPromises.push(contentModel.create(newFormData));
+                     await Promise.all(pendingPromises);
                      $contentForm.hide();
                      await this.refresh();
                      return;
@@ -580,11 +618,12 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      $rowData.appendChild($currentDisplay);
                      const displayedFieldColumnName = displayedField.columnName;
                      const contentDisplayedFieldTypePrefix = `${displayedFieldKey}.${displayedFieldID}`;
-                     const contentDisplayedFieldMappingDataObj = JSON.parse(
-                        contentDisplayedFieldMappingData?.[
-                           contentDisplayedFieldTypePrefix
-                        ] || null
-                     ) || {};
+                     const contentDisplayedFieldMappingDataObj =
+                        JSON.parse(
+                           contentDisplayedFieldMappingData?.[
+                              contentDisplayedFieldTypePrefix
+                           ] || null
+                        ) || {};
                      if (
                         contentDisplayedFieldTypes[
                            `${contentDisplayedFieldTypePrefix}.0`

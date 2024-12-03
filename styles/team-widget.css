@@ -116,6 +116,7 @@ org-chart tr.lines .downLine {
    padding: 5px;
    background-color: skyblue;
    border-radius: 10px;
+   display: inline-block;
 }
 .team-group-record-display-svg svg {
    height: 20px;
