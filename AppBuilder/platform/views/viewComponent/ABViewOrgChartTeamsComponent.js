@@ -149,6 +149,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const contentDisplayedFields = settings.contentDisplayedFields;
       const contentDisplayedFieldsKeys = Object.keys(contentDisplayedFields);
       const contentModel = contentObj?.model();
+      const strategyColors = settings.strategyColors;
       const ids = this.ids;
       const callAfterRender = (callback) => {
          requestAnimationFrame(() => {
@@ -420,21 +421,26 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             id: ids.contentForm,
             close: true,
             position: "center",
+            css: { "border-radius": "10px" },
             body: {
+               width: 450,
                rows: [
                   {
                      view: "toolbar",
                      id: "myToolbar",
+                     css: "webix_dark",
                      cols: [
                         {
                            view: "label",
                            label: L("Edit Content"),
-                           align: "left",
+                           align: "center",
                         },
                         {
                            view: "button",
                            value: "X",
+                           width: 60,
                            align: "right",
+                           css: "webix_transparent",
                            click: () => {
                               $$(ids.contentForm).hide();
                            },
@@ -494,16 +500,23 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             const currentNodeDataRecordPK = data._rawData[nodeObjPK];
             const $nodeSpacer = element("div", "spacer");
             $content.appendChild($nodeSpacer);
-            $nodeSpacer.style.backgroundColor = contentGroupOptions[0].hex;
+            const nodeSpacerStyle = $nodeSpacer.style;
+            nodeSpacerStyle.backgroundColor = "";
+            const strategyColor =
+               strategyColors[$node.classList.item(1).replace("strategy-", "")];
             for (const group of contentGroupOptions) {
                const $group = element("div", "team-group-section");
                $content.appendChild($group);
                const groupStyle = $group.style;
                groupStyle["height"] = `${averageHeight}%`;
+
                // TODO: should this be a config option
                const groupColor =
                   group.name === "Leader" ? "#003366" : "#DDDDDD";
                groupStyle["backgroundColor"] = groupColor;
+               nodeSpacerStyle.backgroundColor === "" &&
+                  (nodeSpacerStyle.backgroundColor = groupColor);
+
                // TODO: should this be a config option
                const groupText = group.name;
                $group.setAttribute("data-pk", group[groupObjPKColumeName]);
@@ -547,6 +560,8 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      JSON.stringify(contentDataRecord)
                   );
                   $groupContent.appendChild($rowData);
+                  const rowDataStyle = $rowData.style;
+                  rowDataStyle["borderColor"] = strategyColor;
                   $rowData.addEventListener("click", async () => {
                      await showContentForm(contentDataRecord);
                   });
@@ -555,10 +570,20 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      $rowData.addEventListener("dragstart", fnContentDragStart);
                      $rowData.addEventListener("dragend", fnContentDragEnd);
                   }
-                  const rowDataStyle = $rowData.style;
-                  rowDataStyle["borderColor"] = "#EF3340";
                   let currentDataRecords = [];
                   let currentField = null;
+
+                  // TODO (Guy): Now we are hardcoding for each display
+                  const hardcodedDisplays = [
+                     element("div", "display-block"),
+                     element("div", "display-block"),
+                     element("div", "display-block display-block-right"),
+                  ];
+                  const $hardcodedSpecialDisplay = element(
+                     "div",
+                     "team-group-record-display"
+                  );
+                  let currentDisplayIndex = 0;
                   for (let j = 0; j < contentDisplayedFieldsKeys.length; j++) {
                      const displayedFieldKey = contentDisplayedFieldsKeys[j];
                      const [atDisplay, objID] = displayedFieldKey.split(".");
@@ -617,7 +642,34 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                         "div",
                         "team-group-record-display"
                      );
-                     $rowData.appendChild($currentDisplay);
+
+                     // TODO (Guy): Now we are hardcoding for each display.
+                     // $rowData.appendChild($currentDisplay);
+                     switch (currentDisplayIndex) {
+                        case 0:
+                           hardcodedDisplays[0].appendChild($currentDisplay);
+                           break;
+                        case 1:
+                           hardcodedDisplays[2].appendChild($currentDisplay);
+                           break;
+                        case 2:
+                           hardcodedDisplays[1].appendChild(
+                              $hardcodedSpecialDisplay
+                           );
+                           $hardcodedSpecialDisplay.appendChild(
+                              $currentDisplay
+                           );
+                           break;
+                        case 3:
+                           $hardcodedSpecialDisplay.appendChild(
+                              $currentDisplay
+                           );
+                           break;
+                        default:
+                           hardcodedDisplays[1].appendChild($currentDisplay);
+                           break;
+                     }
+                     currentDisplayIndex++;
                      const displayedFieldColumnName = displayedField.columnName;
                      const contentDisplayedFieldTypePrefix = `${displayedFieldKey}.${displayedFieldID}`;
                      const contentDisplayedFieldMappingDataObj =
@@ -630,10 +682,8 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                         contentDisplayedFieldTypes[
                            `${contentDisplayedFieldTypePrefix}.0`
                         ] != null
-                     ) {
-                        currentField = null;
-                        continue;
-                     }
+                     )
+                        $currentDisplay.style.display = "none";
                      switch (
                         contentDisplayedFieldTypes[
                            `${contentDisplayedFieldTypePrefix}.1`
@@ -665,20 +715,13 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                               const currentDataRecordID = currentDataRecord.id;
                               const currentDataRecordValue =
                                  currentDataRecord[displayedFieldColumnName];
-                              const $div = element(
-                                 "div",
-                                 "team-group-record-display-svg"
-                              );
-                              $currentDisplay.appendChild($div);
                               const SVG_NS = "http://www.w3.org/2000/svg";
                               const X_LINK_NS = "http://www.w3.org/1999/xlink";
                               const $svg = document.createElementNS(
                                  SVG_NS,
                                  "svg"
                               );
-                              $div.appendChild($svg);
-                              $svg.setAttribute("width", "20");
-                              $svg.setAttribute("height", "20");
+                              $currentDisplay.appendChild($svg);
                               $svg.setAttribute("viewBox", "0 0 6 6");
                               $svg.setAttribute("fill", "none");
                               $svg.setAttribute("xmlns", SVG_NS);
@@ -754,6 +797,41 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                            break;
                      }
                      currentField = null;
+                  }
+
+                  // TODO (Guy): Now we are hardcoding for each display.
+                  const hardcodedDisplaysLength = hardcodedDisplays.length;
+                  for (let i = 0; i < hardcodedDisplaysLength; i++) {
+                     const $hardcodedDisplay = hardcodedDisplays[i];
+                     $rowData.appendChild($hardcodedDisplay);
+                     const children = $hardcodedDisplay.children;
+                     let isShown = false;
+                     let j = 0;
+                     switch (i) {
+                        case 1:
+                           const child = children.item(j);
+                           const grandChildren = child.children;
+                           const grandChildrenLength = grandChildren.length;
+                           for (; j < grandChildrenLength; j++)
+                              if (grandChildren[j].style.display !== "none") {
+                                 isShown = true;
+                                 break;
+                              }
+                           if (isShown) continue;
+                           child.style.display = "none";
+                           j = 1;
+                           break;
+                        default:
+                           break;
+                     }
+                     const childrenLength = children.length;
+                     const hardcodedDisplayStyle = $hardcodedDisplay.style;
+                     for (; j < childrenLength; j++)
+                        if (children.item(j).style.display !== "none") {
+                           isShown = true;
+                           break;
+                        }
+                     !isShown && (hardcodedDisplayStyle.display = "none");
                   }
                }
             }
@@ -1070,7 +1148,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       chartData.id = this.teamNodeID(topNode.id);
       const topNodeStrategy = topNode[`${strategyField}__relation`];
       chartData.className = `strategy-${topNodeStrategy?.[strategyCode]}`;
-      const topNodeStrategyID = topNodeStrategy.id;
+      const topNodeStrategyID = topNodeStrategy?.id;
       chartData.isInactive = topNode[teamInactive];
       chartData._rawData = topNode;
       const topNodeContentFieldData = topNode[contentFieldColumnName];
@@ -1108,7 +1186,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             const child = {
                name: childData[teamName],
                id: self.teamNodeID(id),
-               className: `strategy-${strategy[strategyCode]}`,
+               className: `strategy-${strategy?.[strategyCode]}`,
                isInactive: childData[teamInactive],
                _rawData: childData,
             };
@@ -1118,7 +1196,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                   contentDataRecordPKs.push(...childContentFieldData);
                else contentDataRecordPKs.push(childContentFieldData);
             }
-            const strategyID = strategy.id;
+            const strategyID = strategy?.id;
             child.filteredOut = isContentFiltered
                ? self.filterTeam(
                     filters,
@@ -1475,22 +1553,26 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             id: this.ids.teamFormPopup,
             close: true,
             position: "center",
+            css: { "border-radius": "10px" },
             body: {
                rows: [
                   {
                      view: "toolbar",
                      id: "myToolbar",
+                     css: "webix_dark",
                      cols: [
                         {
                            view: "label",
                            label: `Edit Team`,
-                           align: "left",
+                           align: "center",
                            id: this.ids.teamFormTitle,
                         },
                         {
                            view: "button",
                            value: "X",
                            align: "right",
+                           width: 60,
+                           css: "webix_transparent",
                            click: () => $teamFormPopup.hide(),
                         },
                      ],
