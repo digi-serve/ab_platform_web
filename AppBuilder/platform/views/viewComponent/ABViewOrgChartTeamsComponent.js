@@ -258,10 +258,15 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       };
       const editContentFieldsToCreateNew =
          settings.editContentFieldsToCreateNew;
+      const setEditableContentFields = settings.setEditableContentFields;
+      const contentEditableFields = contentObj.fields(
+         (field) => setEditableContentFields.indexOf(field.id) > -1
+      );
       const showContentForm = async (contentDataRecord) => {
          const rules = {};
+         const labelWidth = 200;
          const contentFormElements = await Promise.all(
-            contentObj.fields().map(async (field) => {
+            contentEditableFields.map(async (field) => {
                const fieldKey = field.key;
                const fieldName = field.columnName;
 
@@ -275,12 +280,14 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                         view: "checkbox",
                         name: fieldName,
                         label: fieldLabel,
+                        labelWidth,
                      };
                   case "number":
                      return {
                         view: "counter",
                         name: fieldName,
                         label: fieldLabel,
+                        labelWidth,
                         type: "number",
                      };
                   case "list":
@@ -290,6 +297,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                            "combo",
                         name: fieldName,
                         label: fieldLabel,
+                        labelWidth,
                         options: settings.options.map((option) => ({
                            id: option.id,
                            value: option.text,
@@ -311,12 +319,14 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                              view: "combo",
                              name: fieldName,
                              label: fieldLabel,
+                             labelWidth,
                              options,
                           }
                         : {
                              view: "multicombo",
                              name: fieldName,
                              label: fieldLabel,
+                             labelWidth,
                              stringResult: false,
                              labelAlign: "left",
                              options,
@@ -327,8 +337,8 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                         view: "datepicker",
                         name: fieldName,
                         label: fieldLabel,
+                        labelWidth,
                         timepicker: fieldKey === "datetime",
-                        width: 300,
                      };
                   case "file":
                   case "image":
@@ -337,6 +347,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                         // view: "",
                         name: fieldName,
                         label: fieldLabel,
+                        labelWidth,
                      };
                   // case "json":
                   // case "LongText":
@@ -347,6 +358,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                         view: "text",
                         name: fieldName,
                         label: fieldLabel,
+                        labelWidth,
                      };
                }
             })
@@ -423,7 +435,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             position: "center",
             css: { "border-radius": "10px" },
             body: {
-               width: 450,
+               width: 600,
                rows: [
                   {
                      view: "toolbar",
@@ -432,7 +444,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      cols: [
                         {
                            view: "label",
-                           label: L("Edit Content"),
+                           label: `${L("Edit")} ${contentObj.label}`,
                            align: "center",
                         },
                         {
