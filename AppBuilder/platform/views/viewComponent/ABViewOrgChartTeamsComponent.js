@@ -1647,9 +1647,12 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                               {
                                  view: "template",
                                  id: this.ids.teamFormSubmit,
-                                 template: "#value#",
+                                 template: `<button class="team-form-button" #disabled#>${this.label(
+                                    "Submit"
+                                 )}</button>`,
+                                 data: { disabled: "disabled" },
+                                 borderless: true,
                                  height: 31,
-                                 css: "team-form-button",
                                  onClick: {
                                     "team-form-button": () => {
                                        const values = $$(
@@ -1673,6 +1676,22 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                            ],
                         },
                      ],
+                     on: {
+                        onChange: () => {
+                           const values = $$(this.ids.teamForm).getValues();
+                           const valid =
+                              !!values[strategyField.columnName] &&
+                              !!values[nameField.columnName];
+                           if (valid)
+                              $$(this.ids.teamFormSubmit).setValues({
+                                 disabled: "",
+                              });
+                           else
+                              $$(this.ids.teamFormSubmit).setValues({
+                                 disabled: "disabled",
+                              });
+                        },
+                     },
                   },
                ],
             },
@@ -1685,8 +1704,11 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       $$(this.ids.teamFormTitle).setValues({
          value: `${this.label(mode)} Team`,
       });
-      $$(this.ids.teamFormSubmit).setValues({ value: this.label("Submit") });
       $$(this.ids.teamForm).setValues(values);
+      $$(this.ids.teamFormSubmit).setValues({
+         disabled: "disabled",
+      });
+
       this.teamCanInactivate(values)
          ? $$(this.ids.teamFormInactive).enable()
          : $$(this.ids.teamFormInactive).disable();
