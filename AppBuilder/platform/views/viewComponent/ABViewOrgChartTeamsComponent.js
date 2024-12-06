@@ -99,8 +99,12 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          );
          if (!this._entityChangeListener) {
             // Reload the Chart if our Entity changes
-            this._entityChangeListener = this.entityDC.on("changeCursor", () =>
-               this.refresh()
+            this._entityChangeListener = this.entityDC.on(
+               "changeCursor",
+               () => {
+                  delete this.entitySrategyOptions;
+                  this.refresh();
+               }
             );
          }
       }
@@ -1547,7 +1551,27 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          const [strategyField] = this.datacollection.datasource.fields(
             (f) => f.id == this.view.settings["teamStrategy"]
          );
-         const strategyOptions = await strategyField.getOptions();
+         if (!this.entityStategyOptions) {
+            const strategyObj = this.AB.objectByID(
+               strategyField.settings.linkObject
+            );
+            const entityLink = strategyObj.connectFields(
+               (f) => f.settings.linkObject === this.entityDC.datasource.id
+            )[0];
+            const cond = {
+               glue: "and",
+               rules: [
+                  {
+                     key: entityLink.columnName,
+                     value: this.entityDC.getCursor().id,
+                     rule: "equals",
+                  },
+               ],
+            };
+            this.entitySrategyOptions = await strategyField.getOptions(cond);
+         }
+         const strategyOptions = this.entitySrategyOptions;
+
          $teamFormPopup = webix.ui({
             view: "popup",
             id: this.ids.teamFormPopup,
