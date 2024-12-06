@@ -63,6 +63,10 @@ module.exports = class ABFieldTextFormula extends ABFieldTextFormulaCore {
       return null;
    }
 
+   formComponentMobile() {
+      return null;
+   }
+
    detailComponent() {
       const detailComponentSetting = super.detailComponent();
 
