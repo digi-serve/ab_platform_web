@@ -178,7 +178,7 @@ org-chart tr.lines .downLine {
    border-radius: 5px;
    cursor: pointer;
    font-size: 8px;
-   color: white;
+   color: white !important;
 }
 
 .team-chart-toolbar {
@@ -236,4 +236,18 @@ org-chart tr.lines .downLine {
 .is-inactive {
    background: grey;
    cursor: default;
+}
+
+.team-form-button {
+   text-align: center;
+   font-weight: 400;
+   font-size: 17px;
+   font-family: "Roboto" sans-serif;
+   color: white;
+   background: #1a3e72;
+   border-radius: 10px;
+}
+
+.team-form-button:hover {
+   background: #0e2341;
 }

@@ -1577,26 +1577,39 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             id: this.ids.teamFormPopup,
             close: true,
             position: "center",
-            css: { "border-radius": "10px" },
+            css: { "border-radius": "15px" },
             body: {
+               type: "clean",
                rows: [
                   {
                      view: "toolbar",
                      id: "myToolbar",
-                     css: "webix_dark",
+                     borderless: true,
+                     css: {
+                        background: "#1a3e72",
+                     },
                      cols: [
+                        { width: 5 },
                         {
-                           view: "label",
-                           label: `Edit Team`,
+                           view: "template",
+                           template: "#value#",
                            align: "center",
+                           height: 40,
+                           css: {
+                              "font-weight": 400,
+                              "font-size": "32px",
+                              "font-family": `"Jomhuria", sans-serif`,
+                              color: "white",
+                              background: "transparent",
+                              border: "none",
+                           },
                            id: this.ids.teamFormTitle,
                         },
                         {
-                           view: "button",
-                           value: "X",
+                           view: "icon",
+                           icon: "fa fa-times",
                            align: "right",
                            width: 60,
-                           css: "webix_transparent",
                            click: () => $teamFormPopup.hide(),
                         },
                      ],
@@ -1604,11 +1617,13 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                   {
                      view: "form",
                      id: this.ids.teamForm,
+                     borderless: true,
                      elements: [
                         {
                            view: "text",
                            label: nameField.label ?? nameField.columnName,
                            name: nameField.columnName,
+                           required: true,
                         },
                         {
                            view: "richselect",
@@ -1616,6 +1631,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                               strategyField.label ?? strategyField.columnName,
                            name: strategyField.columnName,
                            options: strategyOptions.map(fieldToOption),
+                           required: true,
                         },
                         {
                            view: "switch",
@@ -1626,23 +1642,35 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                         { view: "text", name: "id", hidden: true },
                         { view: "text", name: linkField, hidden: true },
                         {
-                           view: "button",
-                           id: this.ids.teamFormSubmit,
-                           value: "Add",
-                           css: "webix_primary",
-                           click: () => {
-                              const values = $$(this.ids.teamForm).getValues();
-                              const strategy = strategyOptions.find(
-                                 (f) =>
-                                    f.id === values[strategyField.columnName]
-                              );
-                              if (values.id) {
-                                 this.teamEdit(values, strategy);
-                              } else {
-                                 this.teamAddChild(values, strategy);
-                              }
-                              $teamFormPopup.hide();
-                           },
+                           cols: [
+                              {},
+                              {
+                                 view: "template",
+                                 id: this.ids.teamFormSubmit,
+                                 template: "#value#",
+                                 height: 31,
+                                 css: "team-form-button",
+                                 onClick: {
+                                    "team-form-button": () => {
+                                       const values = $$(
+                                          this.ids.teamForm
+                                       ).getValues();
+                                       const strategy = strategyOptions.find(
+                                          (f) =>
+                                             f.id ===
+                                             values[strategyField.columnName]
+                                       );
+                                       if (values.id) {
+                                          this.teamEdit(values, strategy);
+                                       } else {
+                                          this.teamAddChild(values, strategy);
+                                       }
+                                       $teamFormPopup.hide();
+                                    },
+                                 },
+                              },
+                              {},
+                           ],
                         },
                      ],
                   },
@@ -1654,9 +1682,10 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          values[linkField] = values.__parentID;
          delete values.__parentID;
       }
-      $$(this.ids.teamFormTitle).define("label", `${mode} Team`);
-      $$(this.ids.teamFormTitle).refresh();
-      $$(this.ids.teamFormSubmit).setValue(mode);
+      $$(this.ids.teamFormTitle).setValues({
+         value: `${this.label(mode)} Team`,
+      });
+      $$(this.ids.teamFormSubmit).setValues({ value: this.label("Submit") });
       $$(this.ids.teamForm).setValues(values);
       this.teamCanInactivate(values)
          ? $$(this.ids.teamFormInactive).enable()
