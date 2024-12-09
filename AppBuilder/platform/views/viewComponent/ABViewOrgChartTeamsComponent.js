@@ -266,106 +266,102 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          const rules = {};
          const labelWidth = 200;
          const contentFormElements = await Promise.all(
-            contentEditableFields
-               .filter(
-                  (field) => contentDataRecord[field.columnName] !== undefined
-               )
-               .map(async (field) => {
-                  const fieldKey = field.key;
-                  const fieldName = field.columnName;
+            contentEditableFields.map(async (field) => {
+               const fieldKey = field.key;
+               const fieldName = field.columnName;
 
-                  // TODO (Guy): Add validators.
-                  rules[fieldName] = () => true;
-                  const fieldLabel = field.label;
-                  const settings = field.settings;
-                  switch (fieldKey) {
-                     case "boolean":
-                        return {
-                           view: "checkbox",
-                           name: fieldName,
-                           label: fieldLabel,
-                           labelWidth,
-                        };
-                     case "number":
-                        return {
-                           view: "counter",
-                           name: fieldName,
-                           label: fieldLabel,
-                           labelWidth,
-                           type: "number",
-                        };
-                     case "list":
-                        return {
-                           view:
-                              (settings.isMultiple === 1 && "muticombo") ||
-                              "combo",
-                           name: fieldName,
-                           label: fieldLabel,
-                           labelWidth,
-                           options: settings.options.map((option) => ({
-                              id: option.id,
-                              value: option.text,
-                           })),
-                        };
-                     case "user":
-                     case "connectObject":
-                        const fieldLinkObj = field.datasourceLink;
+               // TODO (Guy): Add validators.
+               rules[fieldName] = () => true;
+               const fieldLabel = field.label;
+               const settings = field.settings;
+               switch (fieldKey) {
+                  case "boolean":
+                     return {
+                        view: "checkbox",
+                        name: fieldName,
+                        label: fieldLabel,
+                        labelWidth,
+                     };
+                  case "number":
+                     return {
+                        view: "counter",
+                        name: fieldName,
+                        label: fieldLabel,
+                        labelWidth,
+                        type: "number",
+                     };
+                  case "list":
+                     return {
+                        view:
+                           (settings.isMultiple === 1 && "muticombo") ||
+                           "combo",
+                        name: fieldName,
+                        label: fieldLabel,
+                        labelWidth,
+                        options: settings.options.map((option) => ({
+                           id: option.id,
+                           value: option.text,
+                        })),
+                     };
+                  case "user":
+                  case "connectObject":
+                     const fieldLinkObj = field.datasourceLink;
 
-                        // TODO (Guy): Fix pulling all connections.
-                        const options = (
-                           await fieldLinkObj.model().findAll()
-                        ).data.map((e) => ({
-                           id: e.id,
-                           value: fieldLinkObj.displayData(e),
-                        }));
-                        return field.linkType() === "one"
-                           ? {
-                                view: "combo",
-                                name: fieldName,
-                                label: fieldLabel,
-                                labelWidth,
-                                options,
-                             }
-                           : {
-                                view: "multicombo",
-                                name: fieldName,
-                                label: fieldLabel,
-                                labelWidth,
-                                stringResult: false,
-                                labelAlign: "left",
-                                options,
-                             };
-                     case "date":
-                     case "datetime":
-                        return {
-                           view: "datepicker",
-                           name: fieldName,
-                           label: fieldLabel,
-                           labelWidth,
-                           timepicker: fieldKey === "datetime",
-                        };
-                     case "file":
-                     case "image":
-                        // TODO (Guy): Add logic
-                        return {
-                           // view: "",
-                           name: fieldName,
-                           label: fieldLabel,
-                           labelWidth,
-                        };
-                     // case "json":
-                     // case "LongText":
-                     // case "string":
-                     // case "email":
-                     default:
-                        return {
-                           view: "text",
-                           name: fieldName,
-                           label: fieldLabel,
-                           labelWidth,
-                        };
-                  }
-               })
+                     // TODO (Guy): Fix pulling all connections.
+                     const options = (
+                        await fieldLinkObj.model().findAll()
+                     ).data.map((e) => ({
+                        id: e.id,
+                        value: fieldLinkObj.displayData(e),
+                     }));
+                     return field.linkType() === "one"
+                        ? {
+                             view: "combo",
+                             name: fieldName,
+                             label: fieldLabel,
+                             labelWidth,
+                             options,
+                          }
+                        : {
+                             view: "multicombo",
+                             name: fieldName,
+                             label: fieldLabel,
+                             labelWidth,
+                             stringResult: false,
+                             labelAlign: "left",
+                             options,
+                          };
+                  case "date":
+                  case "datetime":
+                     return {
+                        view: "datepicker",
+                        name: fieldName,
+                        label: fieldLabel,
+                        labelWidth,
+                        timepicker: fieldKey === "datetime",
+                     };
+                  case "file":
+                  case "image":
+                     // TODO (Guy): Add logic
+                     return {
+                        // view: "",
+                        name: fieldName,
+                        label: fieldLabel,
+                        labelWidth,
+                     };
+                  // case "json":
+                  // case "LongText":
+                  // case "string":
+                  // case "email":
+                  default:
+                     return {
+                        view: "text",
+                        name: fieldName,
+                        label: fieldLabel,
+                        labelWidth,
+                     };
+               }
+            })
          );
          contentFormElements.push({
             view: "button",
@@ -391,6 +387,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                         newFormData[key] = newValue?.toString();
                         break;
                      default:
+                        newFormData[key] = newValue;
                         break;
                   }
                   if (
