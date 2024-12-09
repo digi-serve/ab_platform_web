@@ -244,7 +244,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
     *
     * @return {Promise}
     */
-   async getOptions(whereClause, term, sort, editor) {
+   async getOptions(whereClause, term, sort, editor, populate = false) {
       const theEditor = editor;
 
       if (theEditor) {
@@ -383,7 +383,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                   return linkedModel.findAll({
                      where: where,
                      sort: sort,
-                     populate: false,
+                     populate,
                   });
                };
 

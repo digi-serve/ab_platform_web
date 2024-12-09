@@ -239,6 +239,7 @@ org-chart tr.lines .downLine {
 }
 
 .team-form-button {
+   padding: 3px 10px;
    text-align: center;
    font-weight: 400;
    font-size: 17px;
@@ -250,4 +251,8 @@ org-chart tr.lines .downLine {
 
 .team-form-button:hover {
    background: #0e2341;
+}
+
+.team-form-button:disabled {
+   background: #AAA;
 }
