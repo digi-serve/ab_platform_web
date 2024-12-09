@@ -102,7 +102,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             this._entityChangeListener = this.entityDC.on(
                "changeCursor",
                () => {
-                  delete this.entitySrategyOptions;
+                  $$(this.ids.teamFormPopup)?.destructor();
                   this.refresh();
                }
             );
@@ -1582,26 +1582,37 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          const [strategyField] = this.datacollection.datasource.fields(
             (f) => f.id == this.view.settings["teamStrategy"]
          );
-         if (!this.entityStategyOptions) {
-            const strategyObj = this.AB.objectByID(
-               strategyField.settings.linkObject
-            );
-            const entityLink = strategyObj.connectFields(
-               (f) => f.settings.linkObject === this.entityDC.datasource.id
-            )[0];
-            const cond = {
-               glue: "and",
-               rules: [
-                  {
-                     key: entityLink.columnName,
-                     value: this.entityDC.getCursor().id,
-                     rule: "equals",
-                  },
-               ],
+         const strategyObj = this.AB.objectByID(
+            strategyField.settings.linkObject
+         );
+         const entityLink = strategyObj.connectFields(
+            (f) => f.settings.linkObject === this.entityDC.datasource.id
+         )[0];
+         const cond = {
+            glue: "and",
+            rules: [
+               {
+                  key: entityLink.columnName,
+                  value: this.entityDC.getCursor().id,
+                  rule: "equals",
+               },
+            ],
+         };
+         const subCol = this.getSettingField("subStrategy").columnName;
+         this.entitySrategyOptions = await strategyField.getOptions(
+            cond,
+            null,
+            null,
+            null,
+            [subCol]
+         );
+
+         const strategyOptions = this.entitySrategyOptions.map((o) => {
+            return {
+               id: o.id,
+               value: o[`${subCol}__relation`].name,
             };
-            this.entitySrategyOptions = await strategyField.getOptions(cond);
-         }
-         const strategyOptions = this.entitySrategyOptions;
+         });
 
          $teamFormPopup = webix.ui({
             view: "popup",
@@ -1661,7 +1672,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                            label:
                               strategyField.label ?? strategyField.columnName,
                            name: strategyField.columnName,
-                           options: strategyOptions.map(fieldToOption),
+                           options: strategyOptions,
                            required: true,
                         },
                         {
