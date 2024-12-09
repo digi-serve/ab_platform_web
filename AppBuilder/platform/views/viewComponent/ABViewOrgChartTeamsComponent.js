@@ -1182,8 +1182,8 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       chartData.name = topNode[teamName] ?? "";
       chartData.id = this.teamNodeID(topNode.id);
       const topNodeStrategy = topNode[`${strategyField}__relation`];
-      chartData.className = `strategy-${topNodeStrategy?.[strategyCode]}`;
-      const topNodeStrategyID = topNodeStrategy?.id;
+      const topNodeCode = topNodeStrategy?.[strategyCode];
+      chartData.className = `strategy-${topNodeCode}`;
       chartData.isInactive = topNode[teamInactive];
       chartData._rawData = topNode;
       const topNodeContentFieldData = topNode[contentFieldColumnName];
@@ -1196,10 +1196,10 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          ? self.filterTeam(
               filters,
               chartData,
-              topNodeStrategyID,
+              topNodeCode,
               topNodeContentFieldData
            )
-         : self.filterTeam(filters, chartData, topNodeStrategyID);
+         : self.filterTeam(filters, chartData, topNodeCode);
       const maxDepth = 10; // prevent inifinite loop
       /**
        * Recursive function to prepare child node data
@@ -1218,10 +1218,11 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             )
                return;
             const strategy = childData[`${strategyField}__relation`];
+            const code = strategy?.[strategyCode];
             const child = {
                name: childData[teamName],
                id: self.teamNodeID(id),
-               className: `strategy-${strategy?.[strategyCode]}`,
+               className: `strategy-${code}`,
                isInactive: childData[teamInactive],
                _rawData: childData,
             };
@@ -1231,15 +1232,10 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                   contentDataRecordPKs.push(...childContentFieldData);
                else contentDataRecordPKs.push(childContentFieldData);
             }
-            const strategyID = strategy?.id;
+
             child.filteredOut = isContentFiltered
-               ? self.filterTeam(
-                    filters,
-                    child,
-                    strategyID,
-                    childContentFieldData
-                 )
-               : self.filterTeam(filters, child, strategyID);
+               ? self.filterTeam(filters, child, code, childContentFieldData)
+               : self.filterTeam(filters, child, code);
             if (child.name === "External Support")
                child.className = `strategy-external`;
             if (childData[teamLink].length > 0) {
@@ -1317,15 +1313,18 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
 
    /** Display the filter UI (popup) **/
    async filterWindow(buttonNode) {
-      const AB = this.AB;
       const contentDisplayedFieldFilters =
          this.settings.contentDisplayedFieldFilters;
       let $popup = $$(this.ids.filterPopup);
       if (!$popup) {
-         const [strategyField] = this.datacollection.datasource.fields(
-            (f) => f.id == this.view.settings["teamStrategy"]
-         );
-         const strategyOptions = await strategyField.getOptions();
+         const strategyID =
+            this.getSettingField("teamStrategy").settings.linkObject;
+         const strategyObj = this.AB.objectByID(strategyID);
+         const strategyCodeFieldID = this.getSettingField("strategyCode").id;
+         const strategyCodeField = strategyObj.fields(
+            (f) => f.id === strategyCodeFieldID
+         )[0];
+         const strategyOptions = await strategyCodeField.getOptions();
 
          $popup = webix.ui({
             view: "popup",
@@ -1333,6 +1332,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             id: this.ids.filterPopup,
             body: {
                view: "form",
+               borderless: true,
                id: this.ids.filterForm,
                elements: [
                   {
@@ -1346,7 +1346,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      view: "combo",
                      label: this.label("Strategy"),
                      labelWidth: 90,
-                     options: strategyOptions.map((f) => f.text),
+                     options: strategyOptions.map(fieldToOption),
                      name: "strategy",
                      clear: "replace",
                   },
@@ -1374,9 +1374,15 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      return contentDisplayedFieldFilterViews;
                   })(),
                   {
-                     view: "button",
-                     label: this.label("Apply"),
-                     click: () => this.filterApply(),
+                     cols: [
+                        {},
+                        {
+                           view: "icon",
+                           icon: "fa fa-check",
+                           css: "filter-apply",
+                           click: () => this.filterApply(),
+                        },
+                     ],
                   },
                ],
             },
