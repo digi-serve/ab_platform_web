@@ -33,6 +33,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const ids = this.ids;
       const _ui = super.ui([
          {
+            id: ids.chartView,
             view: "template",
             template: `<div id="${ids.chartDom}"></div>`,
             css: {
@@ -78,6 +79,44 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          _oldOnDragStart.call(this.__orgchart, event);
       };
       this.ready();
+      // SKELETON CHART
+      const orgchart = new OrgChart({
+         data: { title: "", children: [{}, {}] },
+         chartContainer: `#${this.ids.chartDom}`,
+         nodeContent: "title",
+         createNode: ($node) => {
+            // __AUTO_GENERATED_PRINT_VAR_START__
+            console.log("loadOrgChartJs#(anon) node:", $node); // __AUTO_GENERATED_PRINT_VAR_END__
+            $node.querySelector(".title").remove();
+            $node.querySelector(".content").innerHTML = "";
+
+            $node.classList.add("team-node-skeleton");
+         },
+      });
+      const chartDom = document.querySelector(`#${this.ids.chartDom}`);
+      chartDom.textContent = "";
+      chartDom.innerHTML = "";
+      const ui = {
+         cols: [
+            {
+               rows: [
+                  {
+                     view: "template",
+                     height: 50,
+                  },
+                  {
+                     view: "template",
+                     scroll: "auto",
+                  },
+               ],
+            },
+         ],
+      };
+      const $chartContent = AB.Webix.ui(ui).$view;
+      chartDom.appendChild($chartContent);
+      const $chartContentLayout = $chartContent.children[0];
+      $chartContentLayout.children[1].children[0].appendChild(orgchart);
+      this.loadContentData()
    }
 
    async onShow() {
