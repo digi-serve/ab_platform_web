@@ -20,6 +20,7 @@ export default class ABViewDataSelectComponent extends ABViewComponent {
             id: this.ids.select,
             on: {
                onChange: (n, o) => {
+                  if (!o) return;
                   if (n !== o) this.cursorChange(n);
                },
             },
