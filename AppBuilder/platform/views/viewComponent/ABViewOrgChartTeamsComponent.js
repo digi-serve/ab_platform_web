@@ -78,15 +78,12 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          event.dataTransfer.setData("isnode", 1);
          _oldOnDragStart.call(this.__orgchart, event);
       };
-      this.ready();
       // SKELETON CHART
       const orgchart = new OrgChart({
          data: { title: "", children: [{}, {}] },
          chartContainer: `#${this.ids.chartDom}`,
          nodeContent: "title",
          createNode: ($node) => {
-            // __AUTO_GENERATED_PRINT_VAR_START__
-            console.log("loadOrgChartJs#(anon) node:", $node); // __AUTO_GENERATED_PRINT_VAR_END__
             $node.querySelector(".title").remove();
             $node.querySelector(".content").innerHTML = "";
 
@@ -157,7 +154,6 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const settings = baseView.settings;
       const showGroupTitle = settings.showGroupTitle === 1;
       const draggable = settings.draggable === 1;
-      const dropContentToCreate = settings.dropContentToCreate === 1;
       const nodeDC = baseView.datacollection;
       const nodeModel = baseView.datacollection.model;
       const nodeObj = nodeDC?.datasource;
@@ -199,106 +195,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             requestAnimationFrame(callback);
          });
       };
-      const fnContentDragStart = (event) => {
-         event.stopPropagation();
-         const $eventTarget = event.target;
-         const dataset = $eventTarget.dataset;
-         const dataTransfer = event.dataTransfer;
-         switch ($eventTarget.className) {
-            case "webix_list_item":
-               dataTransfer.setData("dataPK", dataset.pk);
-               dataTransfer.setData(
-                  "contentLinkedFieldId",
-                  dataset.contentLinkedFieldId
-               );
-               break;
-            default:
-               dataTransfer.setData("source", dataset.source);
-               break;
-         }
-         // $eventTarget.style.opacity = "0.5";
-      };
-      const fnContentDragOver = (event) => {
-         event.preventDefault();
-         event.stopPropagation();
-      };
-      const fnContentDragEnd = (event) => {
-         // event.target.style.opacity = "1";
-      };
 
-      const fnContentDrop = async (event) => {
-         const dataTransfer = event.dataTransfer;
-         if (dataTransfer.getData("isnode") == 1) return;
-         event.stopPropagation();
-         if (contentFieldLinkColumnName == null) return;
-         const $group = event.currentTarget;
-         const newGroupDataPK = $group.dataset.pk;
-         const newNodeDataPK = JSON.parse(
-            $group.parentElement.parentElement.dataset.source
-         )._rawData[nodeObjPK];
-         let updatedData = dataTransfer.getData("source");
-         const orgchart = this.__orgchart;
-         if (updatedData === "") {
-            const dataPK = dataTransfer.getData("dataPK");
-            const contentLinkedFieldID = dataTransfer.getData(
-               "contentLinkedFieldId"
-            );
-            const contentLinkedFieldColumnName =
-               contentObj.fieldByID(contentLinkedFieldID).columnName;
-            const pendingPromises = [];
-            const newDate = new Date();
-            orgchart.querySelectorAll(".team-group-record").forEach((e) => {
-               const contentData = JSON.parse(e.dataset.source);
-               contentData[contentDateEndFieldColumnName] = newDate;
-               contentData[contentLinkedFieldColumnName] === dataPK &&
-                  pendingPromises.push(
-                     contentModel.update(contentData.id, contentData)
-                  );
-            });
-            updatedData = {};
-            updatedData[contentDateStartFieldColumnName] = newDate;
-            updatedData[contentLinkedFieldColumnName] = dataPK;
-            updatedData[contentFieldLinkColumnName] = newNodeDataPK;
-            updatedData[contentGroupByFieldColumnName] = newGroupDataPK;
-            if (this.entityDC) {
-               const entityLink = this.entityDC?.datasource.connectFields(
-                  (f) => f.settings.linkObject === contentObj.id
-               )[0].id;
-               const entityCol = this.AB.definitionByID(entityLink).columnName;
-               updatedData[entityCol] = this.entityDC.getCursor();
-            }
-            pendingPromises.push(contentModel.create(updatedData));
-            await Promise.all(pendingPromises);
-         } else {
-            orgchart.innerHTML = "";
-            updatedData = JSON.parse(updatedData);
-            delete updatedData["created_at"];
-            delete updatedData["updated_at"];
-            delete updatedData["properties"];
-            if (dropContentToCreate) {
-               const pendingPromises = [];
-               updatedData[contentDateEndFieldColumnName] = new Date();
-               pendingPromises.push(
-                  contentModel.update(updatedData.id, updatedData)
-               );
-               updatedData[contentDateStartFieldColumnName] =
-                  updatedData[contentDateEndFieldColumnName];
-               delete updatedData["id"];
-               delete updatedData["uuid"];
-               delete updatedData[contentDateEndFieldColumnName];
-               updatedData[contentFieldLinkColumnName] = newNodeDataPK;
-               updatedData[contentGroupByFieldColumnName] = newGroupDataPK;
-               pendingPromises.push(contentModel.create(updatedData));
-               await Promise.all(pendingPromises);
-            } else {
-               updatedData[contentFieldLinkColumnName] = newNodeDataPK;
-               updatedData[contentGroupByFieldColumnName] = newGroupDataPK;
-               await contentModel.update(updatedData.id, updatedData);
-            }
-         }
-         // TODO (Guy): This is refreshing the whole chart.
-         await this.refresh();
-      };
       const editContentFieldsToCreateNew =
          settings.editContentFieldsToCreateNew;
       const setEditableContentFields = settings.setEditableContentFields;
@@ -602,8 +499,8 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                const $groupContent = element("div", "team-group-content");
                $group.appendChild($groupContent);
                if (draggable) {
-                  $group.addEventListener("dragover", fnContentDragOver);
-                  $group.addEventListener("drop", fnContentDrop);
+                  $group.addEventListener("dragover", this.fnContentDragOver);
+                  $group.addEventListener("drop", (e) => this.fnContentDrop(e));
                }
                let contentDataRecordIndex = 0;
                while (
@@ -627,6 +524,10 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                         delete contentDataRecord[key];
                   const $rowData = element("div", "team-group-record");
                   $rowData.setAttribute(
+                     "id",
+                     this.contentNodeID(contentDataRecord.id)
+                  );
+                  $rowData.setAttribute(
                      "data-source",
                      JSON.stringify(contentDataRecord)
                   );
@@ -638,8 +539,14 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                   });
                   if (draggable) {
                      $rowData.setAttribute("draggable", "true");
-                     $rowData.addEventListener("dragstart", fnContentDragStart);
-                     $rowData.addEventListener("dragend", fnContentDragEnd);
+                     $rowData.addEventListener(
+                        "dragstart",
+                        this.fnContentDragStart
+                     );
+                     $rowData.addEventListener(
+                        "dragend",
+                        this.fnContentDragEnd
+                     );
                   }
                   let currentDataRecords = [];
                   let currentField = null;
@@ -1020,11 +927,10 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                                  $itemElement.setAttribute("draggable", "true");
                                  $itemElement.addEventListener(
                                     "dragstart",
-                                    fnContentDragStart
+                                    this.fnContentDragStart
                                  );
-                                 $itemElement.addEventListener(
-                                    "dragend",
-                                    fnContentDragEnd
+                                 $itemElement.addEventListener("dragend", (e) =>
+                                    this.fnContentDragEnd(e)
                                  );
                               }
                            });
@@ -1062,9 +968,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       await dc?.waitForDataCollectionToInitialize(dc);
       let topNode = dc?.getCursor();
       if (settings.topTeam) {
-         const topNodeColumn = this.AB.definitionByID(
-            settings.topTeam
-         ).columnName;
+         const topNodeColumn = this.getSettingField("topTeam").columnName;
          const topFromFeild = dc.getData((e) => e[topNodeColumn] === 1)[0];
          topNode = topFromFeild ? topFromFeild : topNode;
       }
@@ -1800,6 +1704,149 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          // Check if we can inactivate
       }
       $teamFormPopup.show();
+   }
+
+   // DRAG EVENTS
+   fnContentDragStart(event) {
+      event.stopPropagation();
+      const $eventTarget = event.target;
+      const dataset = $eventTarget.dataset;
+      const dataTransfer = event.dataTransfer;
+      switch ($eventTarget.className) {
+         case "webix_list_item":
+            dataTransfer.setData("dataPK", dataset.pk);
+            dataTransfer.setData(
+               "contentLinkedFieldId",
+               dataset.contentLinkedFieldId
+            );
+            break;
+         default:
+            dataTransfer.setData("source", dataset.source);
+            dataTransfer.setData("text/plain", $eventTarget.id);
+            break;
+      }
+      // $eventTarget.style.opacity = "0.5";
+   }
+   fnContentDragOver(event) {
+      event.preventDefault();
+      event.stopPropagation();
+   }
+
+   fnContentDragEnd(event) {
+      // event.target.style.opacity = "1";
+   }
+
+   async fnContentDrop(event) {
+      const settings = this.view.settings;
+      const dropContentToCreate = settings.dropContentToCreate === 1;
+      const nodeObj = this.view.datacollection?.datasource;
+      const nodeObjPK = nodeObj.PK();
+      const contentFieldLink = nodeObj.fieldByID(
+         settings.contentField
+      )?.fieldLink;
+      const contentObj = contentFieldLink?.object;
+      const contentDateStartFieldColumnName = contentObj?.fieldByID(
+         settings.contentFieldDateStart
+      )?.columnName;
+      const contentDateEndFieldColumnName = contentObj?.fieldByID(
+         settings.contentFieldDateEnd
+      )?.columnName;
+      const contentGroupByField = contentObj?.fieldByID(
+         settings.contentGroupByField
+      );
+      const contentGroupByFieldColumnName = contentGroupByField?.columnName;
+      const contentFieldLinkColumnName = contentFieldLink?.columnName;
+      const contentModel = contentObj?.model();
+
+      const dataTransfer = event.dataTransfer;
+      if (dataTransfer.getData("isnode") == 1) return;
+      event.stopPropagation();
+      if (contentFieldLinkColumnName == null) return;
+      const $group = event.currentTarget;
+      const newGroupDataPK = $group.dataset.pk;
+      const newNodeDataPK = JSON.parse(
+         $group.parentElement.parentElement.dataset.source
+      )._rawData[nodeObjPK];
+      let updatedData = dataTransfer.getData("source");
+      const orgchart = this.__orgchart;
+      if (updatedData === "") {
+         const dataPK = dataTransfer.getData("dataPK");
+         const contentLinkedFieldID = dataTransfer.getData(
+            "contentLinkedFieldId"
+         );
+         const contentLinkedFieldColumnName =
+            contentObj.fieldByID(contentLinkedFieldID).columnName;
+         const pendingPromises = [];
+         const newDate = new Date();
+         orgchart.querySelectorAll(".team-group-record").forEach((e) => {
+            const contentData = JSON.parse(e.dataset.source);
+            contentData[contentDateEndFieldColumnName] = newDate;
+            contentData[contentLinkedFieldColumnName] === dataPK &&
+               pendingPromises.push(
+                  contentModel.update(contentData.id, contentData)
+               );
+         });
+         updatedData = {};
+         updatedData[contentDateStartFieldColumnName] = newDate;
+         updatedData[contentLinkedFieldColumnName] = dataPK;
+         updatedData[contentFieldLinkColumnName] = newNodeDataPK;
+         updatedData[contentGroupByFieldColumnName] = newGroupDataPK;
+         if (this.entityDC) {
+            const entityLink = this.entityDC?.datasource.connectFields(
+               (f) => f.settings.linkObject === contentObj.id
+            )[0].id;
+            const entityCol = this.AB.definitionByID(entityLink).columnName;
+            updatedData[entityCol] = this.entityDC.getCursor();
+         }
+         pendingPromises.push(contentModel.create(updatedData));
+         await Promise.all(pendingPromises);
+      } else {
+         updatedData = JSON.parse(updatedData);
+         // Move the child node to the target
+         const dragged = document.querySelector(
+            `#${this.contentNodeID(updatedData.id)}`
+         );
+         dragged.parentNode.removeChild(dragged);
+         $group.querySelector(".team-group-content").appendChild(dragged);
+         // Save the data
+         delete updatedData["created_at"];
+         delete updatedData["updated_at"];
+         delete updatedData["properties"];
+         if (dropContentToCreate) {
+            const pendingPromises = [];
+            updatedData[contentDateEndFieldColumnName] = new Date();
+            pendingPromises.push(
+               contentModel.update(updatedData.id, updatedData)
+            );
+            updatedData[contentDateStartFieldColumnName] =
+               updatedData[contentDateEndFieldColumnName];
+            delete updatedData["id"];
+            delete updatedData["uuid"];
+            delete updatedData[contentDateEndFieldColumnName];
+            updatedData[contentFieldLinkColumnName] = newNodeDataPK;
+            updatedData[contentGroupByFieldColumnName] = newGroupDataPK;
+            pendingPromises.push(contentModel.create(updatedData));
+            await Promise.all(pendingPromises);
+         } else {
+            updatedData[contentFieldLinkColumnName] = newNodeDataPK;
+            updatedData[contentGroupByFieldColumnName] = newGroupDataPK;
+            await contentModel.update(updatedData.id, updatedData);
+         }
+
+         return;
+      }
+      // TODO (Guy): This is refreshing the whole chart.
+      await this.refresh();
+   }
+
+   // HELPERS
+
+   /**
+    * generate a id for the assignment dom node based on it's record id
+    * @param {string} id record id
+    */
+   contentNodeID(id) {
+      return `contentnode_${id}`;
    }
 
    /**
