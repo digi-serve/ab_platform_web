@@ -1274,7 +1274,23 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                            rule: "in",
                            value: contentDataRecordPKs,
                         },
-                        contentFieldFilter,
+                        {
+                           glue: "or",
+                           rules:
+                              (contentFieldFilter.rules?.length > 0 && [
+                                 contentFieldFilter,
+
+                                 // TODO (Guy): Hardcode date end filter.
+                                 {
+                                    key: contentObj?.fieldByID(
+                                       settings.contentFieldDateEnd
+                                    )?.id,
+                                    rule: "is_null",
+                                    value: "",
+                                 },
+                              ]) ||
+                              [],
+                        },
                      ],
                   },
                   populate: true,
