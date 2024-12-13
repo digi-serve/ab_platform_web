@@ -386,8 +386,8 @@ module.exports = class FilterComplex extends FilterComplexCore {
                   }
                   // and it needs to reference a valid DC
                   if (isComplete) {
-                     let obj = this.AB.datacollectionByID(cond.value);
-                     if (!obj) {
+                     let dc = this.AB.datacollectionByID(cond.value);
+                     if (!dc) {
                         isComplete = false;
                      }
                   }
@@ -401,9 +401,32 @@ module.exports = class FilterComplex extends FilterComplexCore {
                   }
                   // and it needs to reference a valid query
                   if (isComplete) {
-                     let obj = this.AB.queryByID(cond.value);
-                     if (!obj) {
+                     let query = this.AB.queryByID(cond.value);
+                     if (!query) {
                         isComplete = false;
+                     }
+                  }
+                  break;
+
+               case "in_query_field":
+               case "not_in_query_field":
+                  // a value needs to exist
+                  if (!cond.value || cond.value == "") {
+                     isComplete = false;
+                  }
+                  // and it needs to reference a valid query
+                  if (isComplete) {
+                     let queryId = cond.value.split(":")[0],
+                        fieldId = cond.value.split(":")[1];
+                     let query = this.AB.queryByID(queryId);
+                     if (!query) {
+                        isComplete = false;
+                     } else {
+                        // and a valid field
+                        let field = query.fieldByID(fieldId);
+                        if (!field) {
+                           isComplete = false;
+                        }
                      }
                   }
                   break;
