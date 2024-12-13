@@ -378,6 +378,36 @@ module.exports = class FilterComplex extends FilterComplexCore {
                   // value
                   break;
 
+               case "in_data_collection":
+               case "not_in_data_collection":
+                  // a value needs to exist
+                  if (!cond.value || cond.value == "") {
+                     isComplete = false;
+                  }
+                  // and it needs to reference a valid DC
+                  if (isComplete) {
+                     let obj = this.AB.datacollectionByID(cond.value);
+                     if (!obj) {
+                        isComplete = false;
+                     }
+                  }
+                  break;
+
+               case "in_query":
+               case "not_in_query":
+                  // a value needs to exist
+                  if (!cond.value || cond.value == "") {
+                     isComplete = false;
+                  }
+                  // and it needs to reference a valid query
+                  if (isComplete) {
+                     let obj = this.AB.queryByID(cond.value);
+                     if (!obj) {
+                        isComplete = false;
+                     }
+                  }
+                  break;
+
                default:
                   // The rest do need a .value
                   if (!cond.value || cond.value == "") {
