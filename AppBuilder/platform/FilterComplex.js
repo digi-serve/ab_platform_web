@@ -526,7 +526,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
          const rule = _this._fnBaseGetValue.call(this);
          if (!rule) {
             // Not sure if its a problem, so report in case it is.
-            this.AB.notify.developer(new Error("No rule found"), {
+            _this.AB.notify.developer(new Error("No rule found"), {
                context: "No rule from $filterView.GetValue()",
             });
             return;
