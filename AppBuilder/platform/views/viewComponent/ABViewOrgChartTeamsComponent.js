@@ -370,6 +370,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                const contentFieldID = panelObj.connectFields(
                   (field) => field.datasourceLink.id == contentObjID
                )[0].fieldLink.id;
+               const self = this;
                dataPanelUIs.push({
                   header: dataPanelDCs[key],
                   body: {
@@ -403,10 +404,10 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                                  $itemElement.setAttribute("draggable", "true");
                                  $itemElement.addEventListener(
                                     "dragstart",
-                                    this.fnContentDragStart
+                                    (e) => self.fnContentDragStart(e)
                                  );
                                  $itemElement.addEventListener("dragend", (e) =>
-                                    this.fnContentDragEnd(e)
+                                    self.fnContentDragEnd(e)
                                  );
                               }
                            });
@@ -1674,19 +1675,17 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const $eventTarget = event.target;
       const dataset = $eventTarget.dataset;
       const dataTransfer = event.dataTransfer;
+      const data = {};
       switch ($eventTarget.className) {
          case "webix_list_item":
-            dataTransfer.setData("dataPK", dataset.pk);
-            dataTransfer.setData(
-               "contentLinkedFieldId",
-               dataset.contentLinkedFieldId
-            );
+            data.pk = dataset.pk;
+            data.contentLinkedFieldID = dataset.contentLinkedFieldId;
             break;
          default:
-            dataTransfer.setData("source", dataset.source);
-            dataTransfer.setData("text/plain", $eventTarget.id);
+            data.source = dataset.source;
             break;
       }
+      dataTransfer.setData("text/plain", JSON.stringify(data));
       // $eventTarget.style.opacity = "0.5";
    }
    fnContentDragOver(event) {
@@ -1721,7 +1720,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const contentModel = contentObj?.model();
 
       const dataTransfer = event.dataTransfer;
-      if (dataTransfer.getData("isnode") == 1) return;
+      // if (dataTransfer.getData("isnode") == 1) return;
       event.stopPropagation();
       if (contentFieldLinkColumnName == null) return;
       const $group = event.currentTarget;
@@ -1729,13 +1728,14 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const newNodeDataPK = JSON.parse(
          $group.parentElement.parentElement.dataset.source
       )._rawData[nodeObjPK];
-      let updatedData = dataTransfer.getData("source");
+      let {
+         source: updatedData,
+         pk: dataPK,
+         contentLinkedFieldID,
+      } = JSON.parse(dataTransfer.getData("text/plain"));
       const orgchart = this.__orgchart;
-      if (updatedData === "") {
-         const dataPK = dataTransfer.getData("dataPK");
-         const contentLinkedFieldID = dataTransfer.getData(
-            "contentLinkedFieldId"
-         );
+      if (!updatedData) {
+         // This is a drop from Employee list (new assignment)
          const contentLinkedFieldColumnName =
             contentObj.fieldByID(contentLinkedFieldID).columnName;
          const pendingPromises = [];
@@ -1753,6 +1753,9 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          updatedData[contentLinkedFieldColumnName] = dataPK;
          updatedData[contentFieldLinkColumnName] = newNodeDataPK;
          updatedData[contentGroupByFieldColumnName] = newGroupDataPK;
+         this.contentRecordUI(updatedData, "grey").then(($record) =>
+            $group.querySelector(".team-group-content").appendChild($record)
+         );
          if (this.entityDC) {
             const entityLink = this.entityDC?.datasource.connectFields(
                (f) => f.settings.linkObject === contentObj.id
@@ -1763,7 +1766,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          pendingPromises.push(contentModel.create(updatedData));
          await Promise.all(pendingPromises);
       } else {
-         updatedData = JSON.parse(updatedData);
+         // This is move form another team node
          // Move the child node to the target
          const dragged = document.querySelector(
             `#${this.contentNodeID(updatedData.id)}`
@@ -1794,11 +1797,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             updatedData[contentGroupByFieldColumnName] = newGroupDataPK;
             await contentModel.update(updatedData.id, updatedData);
          }
-
-         return;
       }
-      // TODO (Guy): This is refreshing the whole chart.
-      await this.refresh();
    }
 
    // HELPERS
