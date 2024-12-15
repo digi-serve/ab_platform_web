@@ -262,15 +262,20 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       };
       const editContentFieldsToCreateNew =
          settings.editContentFieldsToCreateNew;
-      const setEditableContentFields = settings.setEditableContentFields;
-      const contentEditableFields = contentObj.fields(
-         (field) => setEditableContentFields.indexOf(field.id) > -1
-      );
       const showContentForm = async (contentDataRecord) => {
          const rules = {};
          const labelWidth = 200;
          const contentFormElements = await Promise.all(
-            contentEditableFields.map(async (field) => {
+            settings.setEditableContentFields.map(async (fieldID) => {
+               const field = contentObj.fields(
+                  (field) => field.id === fieldID
+               )[0];
+               if (field == null)
+                  return {
+                     view: "label",
+                     label: this.label("Missing Field"),
+                     labelWidth,
+                  };
                const fieldKey = field.key;
                const fieldName = field.columnName;
 
