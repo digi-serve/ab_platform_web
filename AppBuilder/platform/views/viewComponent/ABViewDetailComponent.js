@@ -70,7 +70,7 @@ module.exports = class ABViewDetailComponent extends ABViewContainerComponent {
                const currCursor = dv.getCursor();
 
                if (currCursor?.id === updatedRow.id)
-                  this.displayData(updatedRow);
+                  this.displayData(updatedRow, true);
             },
          });
       }
@@ -78,7 +78,7 @@ module.exports = class ABViewDetailComponent extends ABViewContainerComponent {
       super.onShow();
    }
 
-   displayData(rowData = {}) {
+   displayData(rowData = {}, recalculate = false) {
       const views = (this.view.views() || []).sort((a, b) => {
          if (!a?.field?.() || !b?.field?.()) return 0;
 
@@ -197,11 +197,13 @@ module.exports = class ABViewDetailComponent extends ABViewContainerComponent {
                      //    uuid:  "0cb52669-d626-4c9d-85ea-2d931751d0ce"
                      //    value: "LABEL"
                      // }
-                     const needRecalculate = false;
 
-                     val = field.format(rowData, needRecalculate);
+                     val = field.format(rowData, recalculate);
                   }
+                  break;
 
+               case "calculate":
+                  val = field.format(rowData, recalculate);
                   break;
 
                default:
