@@ -210,11 +210,12 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             const newDate = new Date();
             orgchart.querySelectorAll(".team-group-record").forEach((e) => {
                const contentData = JSON.parse(e.dataset.source);
-               contentData[contentDateEndFieldColumnName] = newDate;
-               contentData[contentLinkedFieldColumnName] === dataPK &&
+               if (contentData[contentLinkedFieldColumnName] === dataPK) {
+                  contentData[contentDateEndFieldColumnName] = newDate;
                   pendingPromises.push(
                      contentModel.update(contentData.id, contentData)
                   );
+               }
             });
             updatedData = {};
             updatedData[contentDateStartFieldColumnName] = newDate;
@@ -1048,6 +1049,30 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const contentObj = contentField?.fieldLink?.object;
       const contentObjPK = contentObj.PK();
       const contentFieldFilter = JSON.parse(settings.contentFieldFilter);
+      const parsedContentFilterRules = [
+         // TODO (Guy): Hardcode date start filter.
+         {
+            key: contentObj?.fieldByID(settings.contentFieldDateStart)?.id,
+            rule: "is_not_null",
+            value: "",
+         },
+         {
+            glue: "or",
+            rules:
+               (contentFieldFilter.rules?.length > 0 && [
+                  contentFieldFilter,
+
+                  // TODO (Guy): Hardcode date end filter.
+                  {
+                     key: contentObj?.fieldByID(settings.contentFieldDateEnd)
+                        ?.id,
+                     rule: "is_null",
+                     value: "",
+                  },
+               ]) ||
+               [],
+         },
+      ];
       const contentDisplayedFields = settings.contentDisplayedFields;
       const contentDisplayFieldKeys = Object.keys(contentDisplayedFields);
       const contentDisplayedFieldFilters =
@@ -1093,7 +1118,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      await obj.model().findAll({
                         where: {
                            glue: "and",
-                           rules: [filterRule, contentFieldFilter],
+                           rules: [filterRule, ...parsedContentFilterRules],
                         },
                         populate: true,
                      })
@@ -1281,23 +1306,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                            rule: "in",
                            value: contentDataRecordPKs,
                         },
-                        {
-                           glue: "or",
-                           rules:
-                              (contentFieldFilter.rules?.length > 0 && [
-                                 contentFieldFilter,
-
-                                 // TODO (Guy): Hardcode date end filter.
-                                 {
-                                    key: contentObj?.fieldByID(
-                                       settings.contentFieldDateEnd
-                                    )?.id,
-                                    rule: "is_null",
-                                    value: "",
-                                 },
-                              ]) ||
-                              [],
-                        },
+                        ...parsedContentFilterRules,
                      ],
                   },
                   populate: true,
