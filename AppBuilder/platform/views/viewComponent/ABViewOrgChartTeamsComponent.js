@@ -378,7 +378,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          );
          contentFormElements.push({
             view: "button",
-            value: L("Submit"),
+            value: L("Save"),
             css: "webix_primary",
             click: async () => {
                const $contentFormData = $$(ids.contentFormData);
@@ -1715,7 +1715,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                                  view: "template",
                                  id: this.ids.teamFormSubmit,
                                  template: `<button class="team-form-button" #disabled#>${this.label(
-                                    "Submit"
+                                    "Save"
                                  )}</button>`,
                                  data: { disabled: "disabled" },
                                  borderless: true,
