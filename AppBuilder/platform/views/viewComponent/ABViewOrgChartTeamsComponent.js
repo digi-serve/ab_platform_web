@@ -29,6 +29,29 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       this._cachedContentDataRecords = null;
    }
 
+   _parseFormValueByType(oldFormData, newFormData) {
+      for (const key in newFormData) {
+         const oldValue = oldFormData[key];
+         const newValue = newFormData[key];
+         switch (typeof oldValue) {
+            case "boolean":
+               if (newValue == 0) newFormData[key] = false;
+               else newFormData[key] = true;
+               break;
+            case "number":
+               newFormData[key] = parseInt(newValue);
+               break;
+            case "string":
+               newFormData[key] = newValue?.toString();
+               break;
+            default:
+               newFormData[key] = newValue;
+               break;
+         }
+      }
+      return newFormData;
+   }
+
    ui() {
       const ids = this.ids;
       const _ui = super.ui([
@@ -210,7 +233,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             const newDate = new Date();
             orgchart.querySelectorAll(".team-group-record").forEach((e) => {
                const contentData = JSON.parse(e.dataset.source);
-               if (contentData[contentLinkedFieldColumnName] === dataPK) {
+               if (contentData[contentLinkedFieldColumnName] == dataPK) {
                   contentData[contentDateEndFieldColumnName] = newDate;
                   pendingPromises.push(
                      contentModel.update(contentData.id, contentData)
@@ -219,9 +242,12 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             });
             updatedData = {};
             updatedData[contentDateStartFieldColumnName] = newDate;
-            updatedData[contentLinkedFieldColumnName] = dataPK;
-            updatedData[contentFieldLinkColumnName] = newNodeDataPK;
-            updatedData[contentGroupByFieldColumnName] = newGroupDataPK;
+            updatedData[contentLinkedFieldColumnName] =
+               parseInt(dataPK) || dataPK;
+            updatedData[contentFieldLinkColumnName] =
+               parseInt(newNodeDataPK) || newNodeDataPK;
+            updatedData[contentGroupByFieldColumnName] =
+               parseInt(newGroupDataPK) || newGroupDataPK;
             if (this.entityDC) {
                const entityLink = this.entityDC?.datasource.connectFields(
                   (f) => f.settings.linkObject === contentObj.id
@@ -384,32 +410,19 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             click: async () => {
                const $contentFormData = $$(ids.contentFormData);
                if (!$contentFormData.validate()) return;
-               const newFormData = $contentFormData.getValues();
+               const newFormData = this._parseFormValueByType(
+                  contentDataRecord,
+                  $contentFormData.getValues()
+               );
                let isDataChanged = false;
-               for (const key in newFormData) {
-                  const oldValue = contentDataRecord[key];
-                  const newValue = newFormData[key];
-                  switch (typeof oldValue) {
-                     case "boolean":
-                        if (newValue == 0) newFormData[key] = false;
-                        else newFormData[key] = true;
-                        break;
-                     case "number":
-                        newFormData[key] = parseInt(newValue);
-                        break;
-                     case "string":
-                        newFormData[key] = newValue?.toString();
-                        break;
-                     default:
-                        newFormData[key] = newValue;
-                        break;
-                  }
+               for (const key in newFormData)
                   if (
                      JSON.stringify(newFormData[key]) !==
                      JSON.stringify(contentDataRecord[key])
-                  )
+                  ) {
                      isDataChanged = true;
-               }
+                     break;
+                  }
                const $contentForm = $$(ids.contentForm);
                $contentForm.blockEvent();
                $contentForm.destructor();
