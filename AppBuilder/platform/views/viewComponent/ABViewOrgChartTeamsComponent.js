@@ -238,6 +238,8 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             delete updatedData["properties"];
             if (dropContentToCreate) {
                const pendingPromises = [];
+
+               // TODO (Guy): Force update Date End with a current date.
                updatedData[contentDateEndFieldColumnName] = new Date();
                pendingPromises.push(
                   contentModel.update(updatedData.id, updatedData)
@@ -257,6 +259,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                await contentModel.update(updatedData.id, updatedData);
             }
          }
+
          // TODO (Guy): This is refreshing the whole chart.
          await this.refresh();
       };
@@ -265,6 +268,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const showContentForm = async (contentDataRecord) => {
          const rules = {};
          const labelWidth = 200;
+         const orgchart = this.__orgchart;
          const contentFormElements = await Promise.all(
             settings.setEditableContentFields.map(async (fieldID) => {
                const field = contentObj.fields(
@@ -406,10 +410,9 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      isDataChanged = true;
                }
                const $contentForm = $$(ids.contentForm);
-               if (!isDataChanged) {
-                  $contentForm.hide();
-                  return;
-               }
+               $contentForm.hide();
+               if (!isDataChanged) return;
+               orgchart.innerHTML = "";
                delete newFormData["created_at"];
                delete newFormData["updated_at"];
                delete newFormData["properties"];
@@ -428,7 +431,6 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                         ] ?? ""
                      )
                   ) {
-                     this.__orgchart.innerHTML = "";
                      const pendingPromises = [];
                      const oldData = {};
                      oldData[contentDateEndFieldColumnName] = new Date();
@@ -442,14 +444,11 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      delete newFormData[contentDateEndFieldColumnName];
                      pendingPromises.push(contentModel.create(newFormData));
                      await Promise.all(pendingPromises);
-                     $contentForm.hide();
                      await this.refresh();
                      return;
                   }
                }
-               this.__orgchart.innerHTML = "";
                await contentModel.update(newFormData.id, newFormData);
-               $contentForm.hide();
                await this.refresh();
             },
          });
@@ -479,7 +478,9 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                            align: "right",
                            css: "webix_transparent",
                            click: () => {
-                              $$(ids.contentForm).hide();
+                              const $contentForm = $$(ids.contentForm);
+                              $contentForm.blockEvent();
+                              $contentForm.destructor();
                            },
                         },
                      ],
