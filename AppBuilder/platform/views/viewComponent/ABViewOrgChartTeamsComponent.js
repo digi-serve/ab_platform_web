@@ -410,7 +410,8 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      isDataChanged = true;
                }
                const $contentForm = $$(ids.contentForm);
-               $contentForm.hide();
+               $contentForm.blockEvent();
+               $contentForm.destructor();
                if (!isDataChanged) return;
                orgchart.innerHTML = "";
                delete newFormData["created_at"];
