@@ -547,8 +547,6 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                $content.style.display = "none";
                return;
             }
-            $node.style.height = "300px";
-            // $node.style.minHeight = "400px";
             const averageHeight = 80 / contentGroupOptionsLength;
             const currentNodeDataRecordPK = data._rawData[nodeObjPK];
             const $nodeSpacer = element("div", "spacer");
@@ -577,7 +575,6 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                   const $groupTitle = element("div", "team-group-title");
                   const groupTitleStyle = $groupTitle.style;
                   groupTitleStyle["backgroundColor"] = groupColor;
-                  groupTitleStyle["height"] = "20%";
                   $groupTitle.appendChild(document.createTextNode(groupText));
                   $group.appendChild($groupTitle);
                }
@@ -918,6 +915,39 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                $active.append($span);
                $buttons.append($active);
             }
+            callAfterRender(() => {
+               const groupHeightThreshold = (246.5 * averageHeight) / 100;
+               const groupSections = $node.querySelectorAll(
+                  ".team-group-section"
+               );
+               let isOverflow = false;
+               for (const $groupSection of groupSections)
+                  if (
+                     $groupSection.getBoundingClientRect().height >
+                     groupHeightThreshold
+                  ) {
+                     isOverflow = true;
+                     break;
+                  }
+               if (!isOverflow) {
+                  $node.style.height = "300px";
+                  return;
+               }
+               groupSections.forEach(($groupSection) => {
+                  const groupHeight =
+                     $groupSection.getBoundingClientRect().height;
+                  const groupStyle = $groupSection.style;
+                  groupStyle.height =
+                     (groupHeight < groupHeightThreshold &&
+                        `${groupHeightThreshold}px`) ||
+                     `${groupHeight}px`;
+               });
+               const nodeChildren = $node.children;
+               nodeChildren.item(0).style.height = "43.5px";
+               const $content = nodeChildren.item(1);
+               $content.style.top = "-22.5px";
+               $content.children.item(0).style.height = "24.65px";
+            });
          },
          nodeContent: "description",
       });
