@@ -29,6 +29,29 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       this._cachedContentDataRecords = null;
    }
 
+   _parseFormValueByType(oldFormData, newFormData) {
+      for (const key in newFormData) {
+         const oldValue = oldFormData[key];
+         const newValue = newFormData[key];
+         switch (typeof oldValue) {
+            case "boolean":
+               if (newValue == 0) newFormData[key] = false;
+               else newFormData[key] = true;
+               break;
+            case "number":
+               newFormData[key] = parseInt(newValue);
+               break;
+            case "string":
+               newFormData[key] = newValue?.toString();
+               break;
+            default:
+               newFormData[key] = newValue;
+               break;
+         }
+      }
+      return newFormData;
+   }
+
    ui() {
       const ids = this.ids;
       const _ui = super.ui([
@@ -210,17 +233,21 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             const newDate = new Date();
             orgchart.querySelectorAll(".team-group-record").forEach((e) => {
                const contentData = JSON.parse(e.dataset.source);
-               contentData[contentDateEndFieldColumnName] = newDate;
-               contentData[contentLinkedFieldColumnName] === dataPK &&
+               if (contentData[contentLinkedFieldColumnName] == dataPK) {
+                  contentData[contentDateEndFieldColumnName] = newDate;
                   pendingPromises.push(
                      contentModel.update(contentData.id, contentData)
                   );
+               }
             });
             updatedData = {};
             updatedData[contentDateStartFieldColumnName] = newDate;
-            updatedData[contentLinkedFieldColumnName] = dataPK;
-            updatedData[contentFieldLinkColumnName] = newNodeDataPK;
-            updatedData[contentGroupByFieldColumnName] = newGroupDataPK;
+            updatedData[contentLinkedFieldColumnName] =
+               parseInt(dataPK) || dataPK;
+            updatedData[contentFieldLinkColumnName] =
+               parseInt(newNodeDataPK) || newNodeDataPK;
+            updatedData[contentGroupByFieldColumnName] =
+               parseInt(newGroupDataPK) || newGroupDataPK;
             if (this.entityDC) {
                const entityLink = this.entityDC?.datasource.connectFields(
                   (f) => f.settings.linkObject === contentObj.id
@@ -238,6 +265,8 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             delete updatedData["properties"];
             if (dropContentToCreate) {
                const pendingPromises = [];
+
+               // TODO (Guy): Force update Date End with a current date.
                updatedData[contentDateEndFieldColumnName] = new Date();
                pendingPromises.push(
                   contentModel.update(updatedData.id, updatedData)
@@ -257,20 +286,27 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                await contentModel.update(updatedData.id, updatedData);
             }
          }
+
          // TODO (Guy): This is refreshing the whole chart.
          await this.refresh();
       };
       const editContentFieldsToCreateNew =
          settings.editContentFieldsToCreateNew;
-      const setEditableContentFields = settings.setEditableContentFields;
-      const contentEditableFields = contentObj.fields(
-         (field) => setEditableContentFields.indexOf(field.id) > -1
-      );
       const showContentForm = async (contentDataRecord) => {
          const rules = {};
          const labelWidth = 200;
+         const orgchart = this.__orgchart;
          const contentFormElements = await Promise.all(
-            contentEditableFields.map(async (field) => {
+            settings.setEditableContentFields.map(async (fieldID) => {
+               const field = contentObj.fields(
+                  (field) => field.id === fieldID
+               )[0];
+               if (field == null)
+                  return {
+                     view: "label",
+                     label: this.label("Missing Field"),
+                     labelWidth,
+                  };
                const fieldKey = field.key;
                const fieldName = field.columnName;
 
@@ -369,42 +405,29 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          );
          contentFormElements.push({
             view: "button",
-            value: L("Submit"),
+            value: L("Save"),
             css: "webix_primary",
             click: async () => {
                const $contentFormData = $$(ids.contentFormData);
                if (!$contentFormData.validate()) return;
-               const newFormData = $contentFormData.getValues();
+               const newFormData = this._parseFormValueByType(
+                  contentDataRecord,
+                  $contentFormData.getValues()
+               );
                let isDataChanged = false;
-               for (const key in newFormData) {
-                  const oldValue = contentDataRecord[key];
-                  const newValue = newFormData[key];
-                  switch (typeof oldValue) {
-                     case "boolean":
-                        if (newValue == 0) newFormData[key] = false;
-                        else newFormData[key] = true;
-                        break;
-                     case "number":
-                        newFormData[key] = parseInt(newValue);
-                        break;
-                     case "string":
-                        newFormData[key] = newValue?.toString();
-                        break;
-                     default:
-                        newFormData[key] = newValue;
-                        break;
-                  }
+               for (const key in newFormData)
                   if (
                      JSON.stringify(newFormData[key]) !==
                      JSON.stringify(contentDataRecord[key])
-                  )
+                  ) {
                      isDataChanged = true;
-               }
+                     break;
+                  }
                const $contentForm = $$(ids.contentForm);
-               if (!isDataChanged) {
-                  $contentForm.hide();
-                  return;
-               }
+               $contentForm.blockEvent();
+               $contentForm.destructor();
+               if (!isDataChanged) return;
+               orgchart.innerHTML = "";
                delete newFormData["created_at"];
                delete newFormData["updated_at"];
                delete newFormData["properties"];
@@ -423,7 +446,6 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                         ] ?? ""
                      )
                   ) {
-                     this.__orgchart.innerHTML = "";
                      const pendingPromises = [];
                      const oldData = {};
                      oldData[contentDateEndFieldColumnName] = new Date();
@@ -437,14 +459,11 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      delete newFormData[contentDateEndFieldColumnName];
                      pendingPromises.push(contentModel.create(newFormData));
                      await Promise.all(pendingPromises);
-                     $contentForm.hide();
                      await this.refresh();
                      return;
                   }
                }
-               this.__orgchart.innerHTML = "";
                await contentModel.update(newFormData.id, newFormData);
-               $contentForm.hide();
                await this.refresh();
             },
          });
@@ -474,7 +493,9 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                            align: "right",
                            css: "webix_transparent",
                            click: () => {
-                              $$(ids.contentForm).hide();
+                              const $contentForm = $$(ids.contentForm);
+                              $contentForm.blockEvent();
+                              $contentForm.destructor();
                            },
                         },
                      ],
@@ -526,8 +547,6 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                $content.style.display = "none";
                return;
             }
-            $node.style.height = "300px";
-            // $node.style.minHeight = "400px";
             const averageHeight = 80 / contentGroupOptionsLength;
             const currentNodeDataRecordPK = data._rawData[nodeObjPK];
             const $nodeSpacer = element("div", "spacer");
@@ -556,7 +575,6 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                   const $groupTitle = element("div", "team-group-title");
                   const groupTitleStyle = $groupTitle.style;
                   groupTitleStyle["backgroundColor"] = groupColor;
-                  groupTitleStyle["height"] = "20%";
                   $groupTitle.appendChild(document.createTextNode(groupText));
                   $group.appendChild($groupTitle);
                }
@@ -897,6 +915,39 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                $active.append($span);
                $buttons.append($active);
             }
+            callAfterRender(() => {
+               const groupHeightThreshold = (246.5 * averageHeight) / 100;
+               const groupSections = $node.querySelectorAll(
+                  ".team-group-section"
+               );
+               let isOverflow = false;
+               for (const $groupSection of groupSections)
+                  if (
+                     $groupSection.getBoundingClientRect().height >
+                     groupHeightThreshold
+                  ) {
+                     isOverflow = true;
+                     break;
+                  }
+               if (!isOverflow) {
+                  $node.style.height = "300px";
+                  return;
+               }
+               groupSections.forEach(($groupSection) => {
+                  const groupHeight =
+                     $groupSection.getBoundingClientRect().height;
+                  const groupStyle = $groupSection.style;
+                  groupStyle.height =
+                     (groupHeight < groupHeightThreshold &&
+                        `${groupHeightThreshold}px`) ||
+                     `${groupHeight}px`;
+               });
+               const nodeChildren = $node.children;
+               nodeChildren.item(0).style.height = "43.5px";
+               const $content = nodeChildren.item(1);
+               $content.style.top = "-22.5px";
+               $content.children.item(0).style.height = "24.65px";
+            });
          },
          nodeContent: "description",
       });
@@ -1041,6 +1092,30 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const contentObj = contentField?.fieldLink?.object;
       const contentObjPK = contentObj.PK();
       const contentFieldFilter = JSON.parse(settings.contentFieldFilter);
+      const parsedContentFilterRules = [
+         // TODO (Guy): Hardcode date start filter.
+         {
+            key: contentObj?.fieldByID(settings.contentFieldDateStart)?.id,
+            rule: "is_not_null",
+            value: "",
+         },
+         {
+            glue: "or",
+            rules:
+               (contentFieldFilter.rules?.length > 0 && [
+                  contentFieldFilter,
+
+                  // TODO (Guy): Hardcode date end filter.
+                  {
+                     key: contentObj?.fieldByID(settings.contentFieldDateEnd)
+                        ?.id,
+                     rule: "is_null",
+                     value: "",
+                  },
+               ]) ||
+               [],
+         },
+      ];
       const contentDisplayedFields = settings.contentDisplayedFields;
       const contentDisplayFieldKeys = Object.keys(contentDisplayedFields);
       const contentDisplayedFieldFilters =
@@ -1086,7 +1161,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      await obj.model().findAll({
                         where: {
                            glue: "and",
-                           rules: [filterRule, contentFieldFilter],
+                           rules: [filterRule, ...parsedContentFilterRules],
                         },
                         populate: true,
                      })
@@ -1274,7 +1349,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                            rule: "in",
                            value: contentDataRecordPKs,
                         },
-                        contentFieldFilter,
+                        ...parsedContentFilterRules,
                      ],
                   },
                   populate: true,
@@ -1693,7 +1768,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                                  view: "template",
                                  id: this.ids.teamFormSubmit,
                                  template: `<button class="team-form-button" #disabled#>${this.label(
-                                    "Submit"
+                                    "Save"
                                  )}</button>`,
                                  data: { disabled: "disabled" },
                                  borderless: true,
