@@ -113,22 +113,16 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       chartDom.appendChild($chartContent);
       const $chartContentLayout = $chartContent.children[0];
       $chartContentLayout.children[1].children[0].appendChild(orgchart);
-      this.loadContentData()
    }
 
    async onShow() {
       this.AB.performance.mark("TeamChart.onShow");
+      this.AB.performance.mark("TeamChart.load");
+      const loadingJS = this.loadOrgChartJs();
+      const loadingData = this.pullData();
       super.onShow();
       this.busy();
       this.generateStrategyCss();
-      this.AB.performance.mark("TeamChart.load");
-      await Promise.all([this.loadOrgChartJs(), this.pullData()]);
-      this.AB.performance.measure("TeamChart.load");
-      this.AB.performance.mark("TeamChart.display");
-      await this.displayOrgChart();
-      this.AB.performance.measure("TeamChart.display");
-      this.ready();
-      this.AB.performance.measure("TeamChart.onShow");
       if (this.settings.entityDatacollection) {
          this.entityDC = this.AB.datacollectionByID(
             this.settings.entityDatacollection
@@ -144,8 +138,9 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             );
          }
       }
-      this.loadContentData();
-      await Promise.all([this.loadOrgChartJs(), this.pullData()]);
+      // const loadingContent =
+      this.loadContentDisplayData();
+      await Promise.all([loadingJS, loadingData, this.entityDC.waitReady()]);
       this.AB.performance.measure("TeamChart.load");
       this.AB.performance.mark("TeamChart.display");
       await this.displayOrgChart();
@@ -442,7 +437,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const filters = this.__filters;
       const settings = this.view.settings;
       const dc = this.view.datacollection;
-      await dc?.waitForDataCollectionToInitialize(dc);
+      await dc?.waitReady(dc);
       let topNode = dc?.getCursor();
       if (settings.topTeam) {
          const topNodeColumn = this.getSettingField("topTeam").columnName;
@@ -703,6 +698,25 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          );
          this.AB.performance.measure("loadAssignments");
       }
+   }
+
+   /**
+    * creates a datacollection to hold the content data linked to the current
+    * enitity;
+    */
+   loadContentData() {
+      const contentObj = this.contentObject();
+      const connectField = contentObj.connectFields(
+         (f) => f.settings.linkObject === this.entityDC.datasource.id
+      )[0];
+      const contentDC = this.AB.datacollectionNew({
+         datasourceID: contentObj.id,
+         loadAll: true,
+         linkDatacollectionID: this.settings.entityDatacollection,
+         linkFieldID: connectField.id,
+      });
+      this.contentDC = contentDC;
+      return contentDC.init();
    }
 
    contentObject() {
@@ -1431,6 +1445,35 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       $$(this.ids.contentFormData).setValues(contentDataRecord);
    }
 
+   loadContentDisplayData() {
+      const contentID = this.contentObject().id;
+      const displayedObjects = Object.keys(this.settings.contentDisplayedFields)
+         .map((r) => r.split(".")[1])
+         .filter((r) => r != contentID);
+      this.contentDisplayDCs = {};
+      displayedObjects.forEach(async (id) => {
+         const abObj = this.AB.objectByID(id);
+         const connectField = abObj.connectFields(
+            (f) => f.settings.linkObject === this.entityDC.datasource.id
+         )[0];
+         this.contentDisplayDCs[id] = this.AB.datacollectionNew({
+            id,
+            name: id,
+            settings: {
+               datasourceID: id,
+               // loadAll: true,
+               linkDatacollectionID: connectField
+                  ? this.settings.entityDatacollection
+                  : undefined,
+               linkFieldID: connectField?.id,
+               fixSelect: "",
+            },
+         });
+         await this.contentDisplayDCs[id].init();
+         this.contentDisplayDCs[id].loadData();
+      });
+   }
+
    async contentRecordUI(data, color) {
       const $ui = element("div", "team-group-record");
       $ui.setAttribute("id", this.contentNodeID(data.id));
@@ -1467,6 +1510,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          const displayedObj = AB.objectByID(objID);
          const displayedFieldID = contentDisplayedFields[displayedFieldKey];
          const displayedField = displayedObj.fieldByID(displayedFieldID);
+         const displayDC = this.contentDisplayDCs[objID];
          switch (objID) {
             case contentObj.id:
                currentDataRecords = [data];
@@ -1485,21 +1529,23 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      } else if (currentFieldData != null)
                         currentDataPKs.push(currentFieldData);
                   } while (currentDataRecords.length > 0);
-                  currentDataRecords = (
-                     await displayedObj.model().findAll({
-                        where: {
-                           glue: "and",
-                           rules: [
-                              {
-                                 key: displayedObj.PK(),
-                                 rule: "in",
-                                 value: currentDataPKs,
-                              },
-                           ],
-                        },
-                        populate: true,
-                     })
-                  ).data;
+                  currentDataRecords = displayDC.getData((r) => {
+                     return currentDataPKs.some((id) => id == r.id);
+                  });
+                  //    await displayedObj.model().findAll({
+                  //       where: {
+                  //          glue: "and",
+                  //          rules: [
+                  //             {
+                  //                key: displayedObj.PK(),
+                  //                rule: "in",
+                  //                value: currentDataPKs,
+                  //             },
+                  //          ],
+                  //       },
+                  //       populate: true,
+                  //    })
+                  // ).data;
                }
                break;
          }
