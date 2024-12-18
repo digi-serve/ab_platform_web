@@ -9,9 +9,7 @@
  */
 const ABQLCore = require("../../core/ql/ABQLCore.js");
 const RowUpdater = require("../RowUpdater.js").default;
-
 const L = (...params) => AB.Multilingual.label(...params);
-
 class ABQL extends ABQLCore {
    constructor(attributes, parameterDefinitions, prevOP, task, AB) {
       super(attributes, parameterDefinitions, prevOP, task, AB);
@@ -160,6 +158,7 @@ class ABQL extends ABQLCore {
     *        the current webix ui definition we are building.
     */
    uiAddNext(id, ui) {
+      if(this.NextQLOps.length === 0) return;
       const uiRow = this.uiNextRow(id);
 
       // if we have a next operation defined, then add on the ui definitions
@@ -219,9 +218,7 @@ class ABQL extends ABQLCore {
     * @return {obj}
     */
    uiNextRow(id) {
-      const options = this.constructor.NextQLOps.map((op) => {
-         return { id: op.key, value: op.label };
-      });
+      const options = this.NextQLOps.map((op) => ({id: op.key, value: op.label }));
 
       options.unshift({ id: 0, value: L("choose next operation") });
 
@@ -247,7 +244,7 @@ class ABQL extends ABQLCore {
 
                      if (newValue === oldValue) return;
 
-                     const newOP = this.constructor.NextQLOps.find(
+                     const newOP = this.NextQLOps.find(
                         (op) => op.key === newValue
                      );
 
@@ -374,10 +371,11 @@ class ABQL extends ABQLCore {
             // an objectFields parameter returns a select list of fields
             // available on an Object.
             if (this.object)
-               options = this.object.fields().map((f) => {
-                  return { id: f.id, value: f.label, icon: `fa fa-${f.icon}` };
-               });
-
+               options = this.object.fields().map((f) => ({
+                  id: f.id,
+                  value: f.label,
+                  icon: `fa fa-${f.icon}`,
+               }));
             options.unshift({
                id: "_PK",
                value: "[PK]",
@@ -391,17 +389,15 @@ class ABQL extends ABQLCore {
                this.params[pDef.name] = options[0].id;
                this.paramChanged(pDef, id);
             }
-
             paramUI = {
                id: this.ids.objectfields,
                view: "richselect",
                label: L("Field"),
                labelWidth: 70,
                value: this.fieldID,
-               options: options,
+               options,
                on: {
-                  onChange: (newValue, oldValue) => {
-                     // this.params = this.params ?? {};
+                  onChange: (newValue) => {
                      if (newValue !== this.params[pDef.name]) {
                         this.params[pDef.name] = newValue;
                         this.paramChanged(pDef, id);
@@ -409,33 +405,29 @@ class ABQL extends ABQLCore {
                   },
                },
             };
-
             break;
-
          case "objectName":
             // an objectName parameter returns a select list of available
             // objects in this ABFactory.
-            options = this.AB.objects().map((o) => {
-               return { id: o.id, value: o.label };
-            });
-
+            options = this.AB.objects().map((o) => ({
+               id: o.id,
+               value: o.label,
+            }));
             if (!this.objectID && options.length > 0) {
                this.objectID = options[0].id;
                this.params[pDef.name] = this.objectID;
                this.paramChanged(pDef);
             }
-
             paramUI = {
                id: this.ids.objectname,
                view: "select",
                label: L("Data Source"),
                labelWidth: uiConfig.labelWidthLarge,
                value: this.objectID,
-               options: options,
+               options,
                on: {
-                  onChange: (newValue /*, oldValue */) => {
+                  onChange: (newValue) => {
                      this.params = this.params ?? {};
-
                      if (newValue !== this.params[pDef.name]) {
                         this.params[pDef.name] = newValue;
                         this.paramChanged(pDef);
@@ -443,9 +435,7 @@ class ABQL extends ABQLCore {
                   },
                },
             };
-
             break;
-
          case "objectConditions":
             // objectConditions: returns a filter text summary, that when
             // clicked, pops up a Filter Entry Popup.
@@ -551,9 +541,7 @@ class ABQL extends ABQLCore {
 
                this.params = this.params ?? {};
                this.params[pDef.name] = condition;
-
                const shortHand = $$(this.ids.shorthand);
-
                shortHand.define({
                   label: Filter.toShortHand(),
                });
@@ -571,7 +559,6 @@ class ABQL extends ABQLCore {
 
             // create the initial condition value from our inputs.
             initialCond = "";
-
             if (this.params && this.params[pDef.name]) {
                Filter.setValue(this.params[pDef.name]);
                initialCond = JSON.stringify(this.params[pDef.name]);
@@ -582,7 +569,6 @@ class ABQL extends ABQLCore {
             // what we show on the panel, is a text representation
             // of the current condition.
             displayLabel = Filter.toShortHand();
-
             paramUI = {
                rows: [
                   {
@@ -607,9 +593,7 @@ class ABQL extends ABQLCore {
                   },
                ],
             };
-
             break;
-
          case "objectValues":
             // objectValues : shows a condenced textual representation of the
             // field => value changes.  Clicking on the text will show a popup
@@ -624,12 +608,10 @@ class ABQL extends ABQLCore {
             // Set processed data key to value options
             Updater.setExtendedOptions(
                (this.task.process.processDataFields(this.task) ?? []).map(
-                  (item) => {
-                     return {
-                        id: item.key,
-                        value: item.label,
-                     };
-                  }
+                  (item) => ({
+                     id: item.key,
+                     value: item.label,
+                  })
                )
             );
 
@@ -639,7 +621,6 @@ class ABQL extends ABQLCore {
                Updater.setValue(this.params[pDef.name]);
                initialValue = JSON.stringify(this.params[pDef.name]);
             }
-
             popUp = () => {
                // show the RowUpdater in a popup:
                const ui = {
@@ -704,7 +685,6 @@ class ABQL extends ABQLCore {
                if (this.params && this.params[pDef.name])
                   Updater.setValue(this.params[pDef.name]);
             };
-
             paramUI = {
                rows: [
                   // the textual shorthand for these values
@@ -728,9 +708,7 @@ class ABQL extends ABQLCore {
                   },
                ],
             };
-
             break;
-
          case "taskParam":
             paramUI = {
                id: this.ids.taskparam,
@@ -749,10 +727,8 @@ class ABQL extends ABQLCore {
                   },
                },
             };
-
             break;
       }
-
       return paramUI;
    }
 
@@ -767,8 +743,8 @@ class ABQL extends ABQLCore {
     *        row for each operation.
     */
    viewAddNext(id, topView) {
+      if(this.NextQLOps.length === 0) return;
       const uiRow = this.uiNextRow(id);
-
       topView.addView(uiRow);
    }
 
