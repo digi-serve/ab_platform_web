@@ -260,3 +260,19 @@ org-chart tr.lines .downLine {
 .filter-apply > div > button > span {
    color: #2f27ce !important;
 }
+
+@keyframes skeleton {
+   0% { background-color: #ddd; }
+   50%   { background-color: #eee; }
+   100% { background-color: #ddd}
+}
+
+.team-node-skeleton .content {
+   /* background: grey; */
+   border-radius: 15px !important;
+   height: 100px !important;
+   /* width: 325px; */
+   animation-name: skeleton;
+   animation-duration: 2s;
+   animation-iteration-count: infinite;
+}
