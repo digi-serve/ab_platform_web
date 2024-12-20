@@ -528,7 +528,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          // depth: baseView.settings.depth,
          chartContainer: `#${ids.chartDom}`,
          pan: true, // baseView.settings.pan == 1,
-         zoom: true, //baseView.settings.zoom == 1,
+         zoom: false, //baseView.settings.zoom == 1,
          draggable,
          // visibleLevel: baseView.settings.visibleLevel,
          parentNodeSymbol: false,
