@@ -29,6 +29,29 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       this._cachedContentDataRecords = null;
    }
 
+   _parseFormValueByType(oldFormData, newFormData) {
+      for (const key in newFormData) {
+         const oldValue = oldFormData[key];
+         const newValue = newFormData[key];
+         switch (typeof oldValue) {
+            case "boolean":
+               if (newValue == 0) newFormData[key] = false;
+               else newFormData[key] = true;
+               break;
+            case "number":
+               newFormData[key] = parseInt(newValue);
+               break;
+            case "string":
+               newFormData[key] = newValue?.toString();
+               break;
+            default:
+               newFormData[key] = newValue;
+               break;
+         }
+      }
+      return newFormData;
+   }
+
    ui() {
       const ids = this.ids;
       const _ui = super.ui([
@@ -198,7 +221,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          // depth: baseView.settings.depth,
          chartContainer: `#${ids.chartDom}`,
          pan: true, // baseView.settings.pan == 1,
-         zoom: true, //baseView.settings.zoom == 1,
+         zoom: false, //baseView.settings.zoom == 1,
          draggable,
          // visibleLevel: baseView.settings.visibleLevel,
          parentNodeSymbol: false,
@@ -217,8 +240,6 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                $content.style.display = "none";
                return;
             }
-            $node.style.height = "300px";
-            // $node.style.minHeight = "400px";
             const averageHeight = 80 / contentGroupOptionsLength;
             const currentNodeDataRecordPK = data._rawData[nodeObjPK];
             const $nodeSpacer = element("div", "spacer");
@@ -247,7 +268,6 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                   const $groupTitle = element("div", "team-group-title");
                   const groupTitleStyle = $groupTitle.style;
                   groupTitleStyle["backgroundColor"] = groupColor;
-                  groupTitleStyle["height"] = "20%";
                   $groupTitle.appendChild(document.createTextNode(groupText));
                   $group.appendChild($groupTitle);
                }
@@ -314,6 +334,39 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                $active.append($span);
                $buttons.append($active);
             }
+            callAfterRender(() => {
+               const groupHeightThreshold = (246.5 * averageHeight) / 100;
+               const groupSections = $node.querySelectorAll(
+                  ".team-group-section"
+               );
+               let isOverflow = false;
+               for (const $groupSection of groupSections)
+                  if (
+                     $groupSection.getBoundingClientRect().height >
+                     groupHeightThreshold
+                  ) {
+                     isOverflow = true;
+                     break;
+                  }
+               if (!isOverflow) {
+                  $node.style.height = "300px";
+                  return;
+               }
+               groupSections.forEach(($groupSection) => {
+                  const groupHeight =
+                     $groupSection.getBoundingClientRect().height;
+                  const groupStyle = $groupSection.style;
+                  groupStyle.height =
+                     (groupHeight < groupHeightThreshold &&
+                        `${groupHeightThreshold}px`) ||
+                     `${groupHeight}px`;
+               });
+               const nodeChildren = $node.children;
+               nodeChildren.item(0).style.height = "43.5px";
+               const $content = nodeChildren.item(1);
+               $content.style.top = "-22.5px";
+               $content.children.item(0).style.height = "24.65px";
+            });
          },
          nodeContent: "description",
       });
@@ -456,6 +509,30 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const contentObj = contentField?.fieldLink?.object;
       const contentObjPK = contentObj.PK();
       const contentFieldFilter = JSON.parse(settings.contentFieldFilter);
+      const parsedContentFilterRules = [
+         // TODO (Guy): Hardcode date start filter.
+         {
+            key: contentObj?.fieldByID(settings.contentFieldDateStart)?.id,
+            rule: "is_not_null",
+            value: "",
+         },
+         {
+            glue: "or",
+            rules:
+               (contentFieldFilter.rules?.length > 0 && [
+                  contentFieldFilter,
+
+                  // TODO (Guy): Hardcode date end filter.
+                  {
+                     key: contentObj?.fieldByID(settings.contentFieldDateEnd)
+                        ?.id,
+                     rule: "is_null",
+                     value: "",
+                  },
+               ]) ||
+               [],
+         },
+      ];
       const contentDisplayedFields = settings.contentDisplayedFields;
       const contentDisplayFieldKeys = Object.keys(contentDisplayedFields);
       const contentDisplayedFieldFilters =
@@ -501,7 +578,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      await obj.model().findAll({
                         where: {
                            glue: "and",
-                           rules: [filterRule, contentFieldFilter],
+                           rules: [filterRule, ...parsedContentFilterRules],
                         },
                         populate: true,
                      })
@@ -689,7 +766,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                            rule: "in",
                            value: contentDataRecordPKs,
                         },
-                        contentFieldFilter,
+                        ...parsedContentFilterRules,
                      ],
                   },
                   populate: true,
@@ -1133,7 +1210,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                                  view: "template",
                                  id: this.ids.teamFormSubmit,
                                  template: `<button class="team-form-button" #disabled#>${this.label(
-                                    "Submit"
+                                    "Save"
                                  )}</button>`,
                                  data: { disabled: "disabled" },
                                  borderless: true,
@@ -1206,12 +1283,9 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
    async showContentForm(contentDataRecord) {
       const contentObj = this.contentObject();
       const contentModel = contentObj?.model();
-      const setEditableContentFields = this.settings.setEditableContentFields;
-      const contentEditableFields = contentObj.fields(
-         (field) => setEditableContentFields.indexOf(field.id) > -1
+      const editContentFieldsToCreateNew = this.getSettingField(
+         "editContentFieldsToCreateNew"
       );
-      const editContentFieldsToCreateNew =
-         this.settings.editContentFieldsToCreateNew;
       const contentDateStartFieldColumnName = this.getSettingField(
          "contentFieldDateStart"
       )?.columnName;
@@ -1222,141 +1296,139 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const rules = {};
       const labelWidth = 200;
       const contentFormElements = await Promise.all(
-         contentEditableFields.map(async (field) => {
-            const fieldKey = field.key;
-            const fieldName = field.columnName;
+         this.getSettingField("setEditableContentFields").map(
+            async (fieldID) => {
+               const field = contentObj.fields(
+                  (field) => field.id === fieldID
+               )[0];
+               if (field == null)
+                  return {
+                     view: "label",
+                     label: this.label("Missing Field"),
+                     labelWidth,
+                  };
+               const fieldKey = field.key;
+               const fieldName = field.columnName;
 
-            // TODO (Guy): Add validators.
-            rules[fieldName] = () => true;
-            const fieldLabel = field.label;
-            const settings = field.settings;
-            let fieldLinkObj, options;
-            switch (fieldKey) {
-               case "boolean":
-                  return {
-                     view: "checkbox",
-                     name: fieldName,
-                     label: fieldLabel,
-                     labelWidth,
-                  };
-               case "number":
-                  return {
-                     view: "counter",
-                     name: fieldName,
-                     label: fieldLabel,
-                     labelWidth,
-                     type: "number",
-                  };
-               case "list":
-                  return {
-                     view:
-                        (settings.isMultiple === 1 && "muticombo") || "combo",
-                     name: fieldName,
-                     label: fieldLabel,
-                     labelWidth,
-                     options: settings.options.map((option) => ({
-                        id: option.id,
-                        value: option.text,
-                     })),
-                  };
-               case "user":
-               case "connectObject":
-                  fieldLinkObj = field.datasourceLink;
+               // TODO (Guy): Add validators.
+               rules[fieldName] = () => true;
+               const fieldLabel = field.label;
+               const settings = field.settings;
+               switch (fieldKey) {
+                  case "boolean":
+                     return {
+                        view: "checkbox",
+                        name: fieldName,
+                        label: fieldLabel,
+                        labelWidth,
+                     };
+                  case "number":
+                     return {
+                        view: "counter",
+                        name: fieldName,
+                        label: fieldLabel,
+                        labelWidth,
+                        type: "number",
+                     };
+                  case "list":
+                     return {
+                        view:
+                           (settings.isMultiple === 1 && "muticombo") ||
+                           "combo",
+                        name: fieldName,
+                        label: fieldLabel,
+                        labelWidth,
+                        options: settings.options.map((option) => ({
+                           id: option.id,
+                           value: option.text,
+                        })),
+                     };
+                  case "user":
+                  case "connectObject":
+                     const fieldLinkObj = field.datasourceLink;
 
-                  // TODO (Guy): Fix pulling all connections.
-                  options = (await fieldLinkObj.model().findAll()).data.map(
-                     (e) => ({
+                     // TODO (Guy): Fix pulling all connections.
+                     const options = (
+                        await fieldLinkObj.model().findAll()
+                     ).data.map((e) => ({
                         id: e.id,
                         value: fieldLinkObj.displayData(e),
-                     })
-                  );
-                  return field.linkType() === "one"
-                     ? {
-                          view: "combo",
-                          name: fieldName,
-                          label: fieldLabel,
-                          labelWidth,
-                          options,
-                       }
-                     : {
-                          view: "multicombo",
-                          name: fieldName,
-                          label: fieldLabel,
-                          labelWidth,
-                          stringResult: false,
-                          labelAlign: "left",
-                          options,
-                       };
-               case "date":
-               case "datetime":
-                  return {
-                     view: "datepicker",
-                     name: fieldName,
-                     label: fieldLabel,
-                     labelWidth,
-                     timepicker: fieldKey === "datetime",
-                  };
-               case "file":
-               case "image":
-                  // TODO (Guy): Add logic
-                  return {
-                     // view: "",
-                     name: fieldName,
-                     label: fieldLabel,
-                     labelWidth,
-                  };
-               // case "json":
-               // case "LongText":
-               // case "string":
-               // case "email":
-               default:
-                  return {
-                     view: "text",
-                     name: fieldName,
-                     label: fieldLabel,
-                     labelWidth,
-                  };
+                     }));
+                     return field.linkType() === "one"
+                        ? {
+                             view: "combo",
+                             name: fieldName,
+                             label: fieldLabel,
+                             labelWidth,
+                             options,
+                          }
+                        : {
+                             view: "multicombo",
+                             name: fieldName,
+                             label: fieldLabel,
+                             labelWidth,
+                             stringResult: false,
+                             labelAlign: "left",
+                             options,
+                          };
+                  case "date":
+                  case "datetime":
+                     return {
+                        view: "datepicker",
+                        name: fieldName,
+                        label: fieldLabel,
+                        labelWidth,
+                        timepicker: fieldKey === "datetime",
+                     };
+                  case "file":
+                  case "image":
+                     // TODO (Guy): Add logic
+                     return {
+                        // view: "",
+                        name: fieldName,
+                        label: fieldLabel,
+                        labelWidth,
+                     };
+                  // case "json":
+                  // case "LongText":
+                  // case "string":
+                  // case "email":
+                  default:
+                     return {
+                        view: "text",
+                        name: fieldName,
+                        label: fieldLabel,
+                        labelWidth,
+                     };
+               }
             }
-         })
+         )
       );
       contentFormElements.push({
          view: "button",
-         value: this.label("Submit"),
+         value: L("Save"),
          css: "webix_primary",
          click: async () => {
-            const $contentFormData = $$(this.ids.contentFormData);
+            const $contentFormData = $$(ids.contentFormData);
             if (!$contentFormData.validate()) return;
-            const newFormData = $contentFormData.getValues();
+            const newFormData = this._parseFormValueByType(
+               contentDataRecord,
+               $contentFormData.getValues()
+            );
             let isDataChanged = false;
-            for (const key in newFormData) {
-               const oldValue = contentDataRecord[key];
-               const newValue = newFormData[key];
-               switch (typeof oldValue) {
-                  case "boolean":
-                     if (newValue == 0) newFormData[key] = false;
-                     else newFormData[key] = true;
-                     break;
-                  case "number":
-                     newFormData[key] = parseInt(newValue);
-                     break;
-                  case "string":
-                     newFormData[key] = newValue?.toString();
-                     break;
-                  default:
-                     newFormData[key] = newValue;
-                     break;
-               }
+            for (const key in newFormData)
                if (
                   JSON.stringify(newFormData[key]) !==
                   JSON.stringify(contentDataRecord[key])
-               )
+               ) {
                   isDataChanged = true;
-            }
-            const $contentForm = $$(this.ids.contentForm);
-            if (!isDataChanged) {
-               $contentForm.hide();
-               return;
-            }
+                  break;
+               }
+            const $contentForm = $$(ids.contentForm);
+            $contentForm.blockEvent();
+            $contentForm.destructor();
+            if (!isDataChanged) return;
+            orgchart.innerHTML = "";
             delete newFormData["created_at"];
             delete newFormData["updated_at"];
             delete newFormData["properties"];
@@ -1372,7 +1444,6 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                         ""
                   )
                ) {
-                  this.__orgchart.innerHTML = "";
                   const pendingPromises = [];
                   const oldData = {};
                   oldData[contentDateEndFieldColumnName] = new Date();
@@ -1386,20 +1457,17 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                   delete newFormData[contentDateEndFieldColumnName];
                   pendingPromises.push(contentModel.create(newFormData));
                   await Promise.all(pendingPromises);
-                  $contentForm.hide();
                   await this.refresh();
                   return;
                }
             }
-            this.__orgchart.innerHTML = "";
             await contentModel.update(newFormData.id, newFormData);
-            $contentForm.hide();
             await this.refresh();
          },
       });
       AB.Webix.ui({
          view: "popup",
-         id: this.ids.contentForm,
+         id: ids.contentForm,
          close: true,
          position: "center",
          css: { "border-radius": "10px" },
@@ -1413,7 +1481,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                   cols: [
                      {
                         view: "label",
-                        label: `${this.label("Edit")} ${contentObj.label}`,
+                        label: `${L("Edit")} ${contentObj.label}`,
                         align: "center",
                      },
                      {
@@ -1423,14 +1491,16 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                         align: "right",
                         css: "webix_transparent",
                         click: () => {
-                           $$(this.ids.contentForm).hide();
+                           const $contentForm = $$(ids.contentForm);
+                           $contentForm.blockEvent();
+                           $contentForm.destructor();
                         },
                      },
                   ],
                },
                {
                   view: "form",
-                  id: this.ids.contentFormData,
+                  id: ids.contentFormData,
                   elements: contentFormElements,
                   rules,
                },
@@ -1442,7 +1512,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             },
          },
       }).show();
-      $$(this.ids.contentFormData).setValues(contentDataRecord);
+      $$(ids.contentFormData).setValues(contentDataRecord);
    }
 
    loadContentDisplayData() {
@@ -1744,29 +1814,8 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
    }
 
    async fnContentDrop(event) {
-      const settings = this.view.settings;
-      const dropContentToCreate = settings.dropContentToCreate === 1;
-      const nodeObj = this.view.datacollection?.datasource;
-      const nodeObjPK = nodeObj.PK();
-      const contentFieldLink = nodeObj.fieldByID(
-         settings.contentField
-      )?.fieldLink;
-      const contentObj = contentFieldLink?.object;
-      const contentDateStartFieldColumnName = contentObj?.fieldByID(
-         settings.contentFieldDateStart
-      )?.columnName;
-      const contentDateEndFieldColumnName = contentObj?.fieldByID(
-         settings.contentFieldDateEnd
-      )?.columnName;
-      const contentGroupByField = contentObj?.fieldByID(
-         settings.contentGroupByField
-      );
-      const contentGroupByFieldColumnName = contentGroupByField?.columnName;
-      const contentFieldLinkColumnName = contentFieldLink?.columnName;
-      const contentModel = contentObj?.model();
-
       const dataTransfer = event.dataTransfer;
-      // if (dataTransfer.getData("isnode") == 1) return;
+      if (dataTransfer.getData("isnode") == 1) return;
       event.stopPropagation();
       if (contentFieldLinkColumnName == null) return;
       const $group = event.currentTarget;
@@ -1774,34 +1823,33 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const newNodeDataPK = JSON.parse(
          $group.parentElement.parentElement.dataset.source
       )._rawData[nodeObjPK];
-      let {
-         source: updatedData,
-         pk: dataPK,
-         contentLinkedFieldID,
-      } = JSON.parse(dataTransfer.getData("text/plain"));
+      let updatedData = dataTransfer.getData("source");
       const orgchart = this.__orgchart;
-      if (!updatedData) {
-         // This is a drop from Employee list (new assignment)
+      if (updatedData === "") {
+         const dataPK = dataTransfer.getData("dataPK");
+         const contentLinkedFieldID = dataTransfer.getData(
+            "contentLinkedFieldId"
+         );
          const contentLinkedFieldColumnName =
             contentObj.fieldByID(contentLinkedFieldID).columnName;
          const pendingPromises = [];
          const newDate = new Date();
          orgchart.querySelectorAll(".team-group-record").forEach((e) => {
             const contentData = JSON.parse(e.dataset.source);
-            contentData[contentDateEndFieldColumnName] = newDate;
-            contentData[contentLinkedFieldColumnName] === dataPK &&
+            if (contentData[contentLinkedFieldColumnName] == dataPK) {
+               contentData[contentDateEndFieldColumnName] = newDate;
                pendingPromises.push(
                   contentModel.update(contentData.id, contentData)
                );
+            }
          });
          updatedData = {};
          updatedData[contentDateStartFieldColumnName] = newDate;
-         updatedData[contentLinkedFieldColumnName] = dataPK;
-         updatedData[contentFieldLinkColumnName] = newNodeDataPK;
-         updatedData[contentGroupByFieldColumnName] = newGroupDataPK;
-         this.contentRecordUI(updatedData, "grey").then(($record) =>
-            $group.querySelector(".team-group-content").appendChild($record)
-         );
+         updatedData[contentLinkedFieldColumnName] = parseInt(dataPK) || dataPK;
+         updatedData[contentFieldLinkColumnName] =
+            parseInt(newNodeDataPK) || newNodeDataPK;
+         updatedData[contentGroupByFieldColumnName] =
+            parseInt(newGroupDataPK) || newGroupDataPK;
          if (this.entityDC) {
             const entityLink = this.entityDC?.datasource.connectFields(
                (f) => f.settings.linkObject === contentObj.id
@@ -1812,19 +1860,15 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          pendingPromises.push(contentModel.create(updatedData));
          await Promise.all(pendingPromises);
       } else {
-         // This is move form another team node
-         // Move the child node to the target
-         const dragged = document.querySelector(
-            `#${this.contentNodeID(updatedData.id)}`
-         );
-         dragged.parentNode.removeChild(dragged);
-         $group.querySelector(".team-group-content").appendChild(dragged);
-         // Save the data
+         orgchart.innerHTML = "";
+         updatedData = JSON.parse(updatedData);
          delete updatedData["created_at"];
          delete updatedData["updated_at"];
          delete updatedData["properties"];
          if (dropContentToCreate) {
             const pendingPromises = [];
+
+            // TODO (Guy): Force update Date End with a current date.
             updatedData[contentDateEndFieldColumnName] = new Date();
             pendingPromises.push(
                contentModel.update(updatedData.id, updatedData)
@@ -1844,6 +1888,9 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             await contentModel.update(updatedData.id, updatedData);
          }
       }
+
+      // TODO (Guy): This is refreshing the whole chart.
+      await this.refresh();
    }
 
    // HELPERS
