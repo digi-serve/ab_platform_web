@@ -29,6 +29,15 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       this._cachedContentDataRecords = null;
    }
 
+   _parseDataPK(dataPK) {
+      const intDataPk = parseInt(dataPK);
+      return (
+         ((isNaN(intDataPk) || intDataPk.toString().length !== dataPK.length) &&
+            dataPK) ||
+         intDataPk
+      );
+   }
+
    _parseFormValueByType(oldFormData, newFormData) {
       for (const key in newFormData) {
          const oldValue = oldFormData[key];
@@ -101,10 +110,13 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          event.dataTransfer.setData("isnode", 1);
          _oldOnDragStart.call(this.__orgchart, event);
       };
+
+      const ids = this.ids;
+
       // SKELETON CHART
       const orgchart = new OrgChart({
          data: { title: "", children: [{}, {}] },
-         chartContainer: `#${this.ids.chartDom}`,
+         chartContainer: `#${ids.chartDom}`,
          nodeContent: "title",
          createNode: ($node) => {
             $node.querySelector(".title").remove();
@@ -113,7 +125,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             $node.classList.add("team-node-skeleton");
          },
       });
-      const chartDom = document.querySelector(`#${this.ids.chartDom}`);
+      const chartDom = document.querySelector(`#${ids.chartDom}`);
       chartDom.textContent = "";
       chartDom.innerHTML = "";
       const ui = {
@@ -1283,9 +1295,9 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
    async showContentForm(contentDataRecord) {
       const contentObj = this.contentObject();
       const contentModel = contentObj?.model();
-      const editContentFieldsToCreateNew = this.getSettingField(
-         "editContentFieldsToCreateNew"
-      );
+      const settings = this.settings;
+      const editContentFieldsToCreateNew =
+         settings.editContentFieldsToCreateNew;
       const contentDateStartFieldColumnName = this.getSettingField(
          "contentFieldDateStart"
       )?.columnName;
@@ -1295,118 +1307,114 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
 
       const rules = {};
       const labelWidth = 200;
+      const ids = this.ids;
       const contentFormElements = await Promise.all(
-         this.getSettingField("setEditableContentFields").map(
-            async (fieldID) => {
-               const field = contentObj.fields(
-                  (field) => field.id === fieldID
-               )[0];
-               if (field == null)
+         settings.setEditableContentFields.map(async (fieldID) => {
+            const field = contentObj.fields((field) => field.id === fieldID)[0];
+            if (field == null)
+               return {
+                  view: "label",
+                  label: this.label("Missing Field"),
+                  labelWidth,
+               };
+            const fieldKey = field.key;
+            const fieldName = field.columnName;
+
+            // TODO (Guy): Add validators.
+            rules[fieldName] = () => true;
+            const fieldLabel = field.label;
+            const settings = field.settings;
+            switch (fieldKey) {
+               case "boolean":
                   return {
-                     view: "label",
-                     label: this.label("Missing Field"),
+                     view: "checkbox",
+                     name: fieldName,
+                     label: fieldLabel,
                      labelWidth,
                   };
-               const fieldKey = field.key;
-               const fieldName = field.columnName;
+               case "number":
+                  return {
+                     view: "counter",
+                     name: fieldName,
+                     label: fieldLabel,
+                     labelWidth,
+                     type: "number",
+                  };
+               case "list":
+                  return {
+                     view:
+                        (settings.isMultiple === 1 && "muticombo") || "combo",
+                     name: fieldName,
+                     label: fieldLabel,
+                     labelWidth,
+                     options: settings.options.map((option) => ({
+                        id: option.id,
+                        value: option.text,
+                     })),
+                  };
+               case "user":
+               case "connectObject":
+                  const fieldLinkObj = field.datasourceLink;
 
-               // TODO (Guy): Add validators.
-               rules[fieldName] = () => true;
-               const fieldLabel = field.label;
-               const settings = field.settings;
-               switch (fieldKey) {
-                  case "boolean":
-                     return {
-                        view: "checkbox",
-                        name: fieldName,
-                        label: fieldLabel,
-                        labelWidth,
-                     };
-                  case "number":
-                     return {
-                        view: "counter",
-                        name: fieldName,
-                        label: fieldLabel,
-                        labelWidth,
-                        type: "number",
-                     };
-                  case "list":
-                     return {
-                        view:
-                           (settings.isMultiple === 1 && "muticombo") ||
-                           "combo",
-                        name: fieldName,
-                        label: fieldLabel,
-                        labelWidth,
-                        options: settings.options.map((option) => ({
-                           id: option.id,
-                           value: option.text,
-                        })),
-                     };
-                  case "user":
-                  case "connectObject":
-                     const fieldLinkObj = field.datasourceLink;
-
-                     // TODO (Guy): Fix pulling all connections.
-                     const options = (
-                        await fieldLinkObj.model().findAll()
-                     ).data.map((e) => ({
-                        id: e.id,
-                        value: fieldLinkObj.displayData(e),
-                     }));
-                     return field.linkType() === "one"
-                        ? {
-                             view: "combo",
-                             name: fieldName,
-                             label: fieldLabel,
-                             labelWidth,
-                             options,
-                          }
-                        : {
-                             view: "multicombo",
-                             name: fieldName,
-                             label: fieldLabel,
-                             labelWidth,
-                             stringResult: false,
-                             labelAlign: "left",
-                             options,
-                          };
-                  case "date":
-                  case "datetime":
-                     return {
-                        view: "datepicker",
-                        name: fieldName,
-                        label: fieldLabel,
-                        labelWidth,
-                        timepicker: fieldKey === "datetime",
-                     };
-                  case "file":
-                  case "image":
-                     // TODO (Guy): Add logic
-                     return {
-                        // view: "",
-                        name: fieldName,
-                        label: fieldLabel,
-                        labelWidth,
-                     };
-                  // case "json":
-                  // case "LongText":
-                  // case "string":
-                  // case "email":
-                  default:
-                     return {
-                        view: "text",
-                        name: fieldName,
-                        label: fieldLabel,
-                        labelWidth,
-                     };
-               }
+                  // TODO (Guy): Fix pulling all connections.
+                  const options = (
+                     await fieldLinkObj.model().findAll()
+                  ).data.map((e) => ({
+                     id: e.id,
+                     value: fieldLinkObj.displayData(e),
+                  }));
+                  return field.linkType() === "one"
+                     ? {
+                          view: "combo",
+                          name: fieldName,
+                          label: fieldLabel,
+                          labelWidth,
+                          options,
+                       }
+                     : {
+                          view: "multicombo",
+                          name: fieldName,
+                          label: fieldLabel,
+                          labelWidth,
+                          stringResult: false,
+                          labelAlign: "left",
+                          options,
+                       };
+               case "date":
+               case "datetime":
+                  return {
+                     view: "datepicker",
+                     name: fieldName,
+                     label: fieldLabel,
+                     labelWidth,
+                     timepicker: fieldKey === "datetime",
+                  };
+               case "file":
+               case "image":
+                  // TODO (Guy): Add logic
+                  return {
+                     // view: "",
+                     name: fieldName,
+                     label: fieldLabel,
+                     labelWidth,
+                  };
+               // case "json":
+               // case "LongText":
+               // case "string":
+               // case "email":
+               default:
+                  return {
+                     view: "text",
+                     name: fieldName,
+                     label: fieldLabel,
+                     labelWidth,
+                  };
             }
-         )
+         })
       );
       contentFormElements.push({
          view: "button",
-         value: L("Save"),
+         value: this.label("Save"),
          css: "webix_primary",
          click: async () => {
             const $contentFormData = $$(ids.contentFormData);
@@ -1428,7 +1436,6 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             $contentForm.blockEvent();
             $contentForm.destructor();
             if (!isDataChanged) return;
-            orgchart.innerHTML = "";
             delete newFormData["created_at"];
             delete newFormData["updated_at"];
             delete newFormData["properties"];
@@ -1481,7 +1488,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                   cols: [
                      {
                         view: "label",
-                        label: `${L("Edit")} ${contentObj.label}`,
+                        label: `${this.label("Edit")} ${contentObj.label}`,
                         align: "center",
                      },
                      {
@@ -1814,6 +1821,27 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
    }
 
    async fnContentDrop(event) {
+      const settings = this.view.settings;
+      const dropContentToCreate = settings.dropContentToCreate === 1;
+      const nodeObj = this.view.datacollection?.datasource;
+      const nodeObjPK = nodeObj.PK();
+      const contentFieldLink = nodeObj.fieldByID(
+         settings.contentField
+      )?.fieldLink;
+      const contentObj = contentFieldLink?.object;
+      const contentDateStartFieldColumnName = contentObj?.fieldByID(
+         settings.contentFieldDateStart
+      )?.columnName;
+      const contentDateEndFieldColumnName = contentObj?.fieldByID(
+         settings.contentFieldDateEnd
+      )?.columnName;
+      const contentGroupByField = contentObj?.fieldByID(
+         settings.contentGroupByField
+      );
+      const contentGroupByFieldColumnName = contentGroupByField?.columnName;
+      const contentFieldLinkColumnName = contentFieldLink?.columnName;
+      const contentModel = contentObj?.model();
+
       const dataTransfer = event.dataTransfer;
       if (dataTransfer.getData("isnode") == 1) return;
       event.stopPropagation();
@@ -1823,13 +1851,14 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const newNodeDataPK = JSON.parse(
          $group.parentElement.parentElement.dataset.source
       )._rawData[nodeObjPK];
-      let updatedData = dataTransfer.getData("source");
+      let {
+         source: updatedData,
+         pk: dataPK,
+         contentLinkedFieldID,
+      } = JSON.parse(dataTransfer.getData("text/plain"));
       const orgchart = this.__orgchart;
-      if (updatedData === "") {
-         const dataPK = dataTransfer.getData("dataPK");
-         const contentLinkedFieldID = dataTransfer.getData(
-            "contentLinkedFieldId"
-         );
+      if (!updatedData) {
+         // This is a drop from Employee list (new assignment)
          const contentLinkedFieldColumnName =
             contentObj.fieldByID(contentLinkedFieldID).columnName;
          const pendingPromises = [];
@@ -1845,23 +1874,39 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          });
          updatedData = {};
          updatedData[contentDateStartFieldColumnName] = newDate;
-         updatedData[contentLinkedFieldColumnName] = parseInt(dataPK) || dataPK;
+         updatedData[contentLinkedFieldColumnName] = this._parseDataPK(dataPK);
          updatedData[contentFieldLinkColumnName] =
-            parseInt(newNodeDataPK) || newNodeDataPK;
+            this._parseDataPK(newNodeDataPK);
          updatedData[contentGroupByFieldColumnName] =
-            parseInt(newGroupDataPK) || newGroupDataPK;
+            this._parseDataPK(newGroupDataPK);
          if (this.entityDC) {
             const entityLink = this.entityDC?.datasource.connectFields(
                (f) => f.settings.linkObject === contentObj.id
             )[0].id;
             const entityCol = this.AB.definitionByID(entityLink).columnName;
-            updatedData[entityCol] = this.entityDC.getCursor();
+            updatedData[entityCol] = this._parseDataPK(
+               this.entityDC.getCursor()
+            );
          }
-         pendingPromises.push(contentModel.create(updatedData));
+         pendingPromises.push(
+            contentModel.create(updatedData),
+            (async () => {
+               $group
+                  .querySelector(".team-group-content")
+                  .appendChild(await this.contentRecordUI(updatedData, "grey"));
+            })()
+         );
          await Promise.all(pendingPromises);
       } else {
-         orgchart.innerHTML = "";
          updatedData = JSON.parse(updatedData);
+
+         // This is move form another team node
+         // Move the child node to the target
+         const dragged = document.querySelector(
+            `#${this.contentNodeID(updatedData.id)}`
+         );
+         dragged.parentNode.removeChild(dragged);
+         $group.querySelector(".team-group-content").appendChild(dragged);
          delete updatedData["created_at"];
          delete updatedData["updated_at"];
          delete updatedData["properties"];
@@ -1888,9 +1933,6 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             await contentModel.update(updatedData.id, updatedData);
          }
       }
-
-      // TODO (Guy): This is refreshing the whole chart.
-      await this.refresh();
    }
 
    // HELPERS
