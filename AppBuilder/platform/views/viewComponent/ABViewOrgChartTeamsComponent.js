@@ -1308,8 +1308,8 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const rules = {};
       const labelWidth = 200;
       const ids = this.ids;
-      const contentFormElements = await Promise.all(
-         settings.setEditableContentFields.map(async (fieldID) => {
+      const contentFormElements = settings.setEditableContentFields.map(
+         (fieldID) => {
             const field = contentObj.fields((field) => field.id === fieldID)[0];
             if (field == null)
                return {
@@ -1354,22 +1354,34 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                   };
                case "user":
                case "connectObject":
-                  const fieldLinkObj = field.datasourceLink;
-
-                  // TODO (Guy): Fix pulling all connections.
-                  const options = (
-                     await fieldLinkObj.model().findAll()
-                  ).data.map((e) => ({
-                     id: e.id,
-                     value: fieldLinkObj.displayData(e),
-                  }));
+                  const onViewShow = async function () {
+                     const fieldLinkObj = field.datasourceLink;
+                     try {
+                        // TODO (Guy): Add spinner.
+                        this.define(
+                           "options",
+                           (await fieldLinkObj.model().findAll()).data.map(
+                              (e) => ({
+                                 id: e.id,
+                                 value: fieldLinkObj.displayData(e),
+                              })
+                           )
+                        );
+                        this.refresh();
+                     } catch {
+                        // Close popup before response or possily response fail
+                     }
+                  };
                   return field.linkType() === "one"
                      ? {
                           view: "combo",
                           name: fieldName,
                           label: fieldLabel,
                           labelWidth,
-                          options,
+                          options: [],
+                          on: {
+                             onViewShow,
+                          },
                        }
                      : {
                           view: "multicombo",
@@ -1378,7 +1390,10 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                           labelWidth,
                           stringResult: false,
                           labelAlign: "left",
-                          options,
+                          options: [],
+                          on: {
+                             onViewShow,
+                          },
                        };
                case "date":
                case "datetime":
@@ -1410,7 +1425,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      labelWidth,
                   };
             }
-         })
+         }
       );
       contentFormElements.push({
          view: "button",
@@ -1508,6 +1523,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                {
                   view: "form",
                   id: ids.contentFormData,
+                  hidden: true,
                   elements: contentFormElements,
                   rules,
                },
@@ -1519,7 +1535,9 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             },
          },
       }).show();
-      $$(ids.contentFormData).setValues(contentDataRecord);
+      const $contentFormData = $$(ids.contentFormData);
+      $contentFormData.setValues(contentDataRecord);
+      $contentFormData.show();
    }
 
    loadContentDisplayData() {
