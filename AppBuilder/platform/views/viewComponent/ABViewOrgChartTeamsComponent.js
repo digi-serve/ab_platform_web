@@ -166,9 +166,9 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             // Reload the Chart if our Entity changes
             this._entityChangeListener = this.entityDC.on(
                "changeCursor",
-               () => {
+               async () => {
                   $$(this.ids.teamFormPopup)?.destructor();
-                  this.refresh();
+                  await this.refresh();
                }
             );
          }
@@ -1354,8 +1354,51 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                   };
                case "user":
                case "connectObject":
+                  const abWebix = this.AB.Webix;
+                  const fieldLinkObj = field.datasourceLink;
+
+                  // TODO (Guy): Hardcode for the employee field
+                  if (fieldLabel === "NS Employee Record")
+                     return {
+                        view: "text",
+                        label: "Name",
+                        disabled: true,
+                        labelWidth,
+                        on: {
+                           async onViewShow() {
+                              abWebix.extend(this, abWebix.ProgressBar);
+                              this.showProgress({ type: "icon" });
+                              try {
+                                 this.setValue(
+                                    fieldLinkObj.displayData(
+                                       (
+                                          await fieldLinkObj.model().findAll({
+                                             where: {
+                                                glue: "and",
+                                                rules: [
+                                                   {
+                                                      key: fieldLinkObj.PK(),
+                                                      rule: "equals",
+                                                      value: contentDataRecord[
+                                                         fieldName
+                                                      ],
+                                                   },
+                                                ],
+                                             },
+                                          })
+                                       ).data[0]
+                                    )
+                                 );
+                                 this.hideProgress();
+                              } catch {
+                                 // Close popup before response or possily response fail
+                              }
+                           },
+                        },
+                     };
                   const onViewShow = async function () {
-                     const fieldLinkObj = field.datasourceLink;
+                     abWebix.extend(this, abWebix.ProgressBar);
+                     this.showProgress({ type: "icon" });
                      try {
                         // TODO (Guy): Add spinner.
                         this.define(
@@ -1367,7 +1410,9 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                               })
                            )
                         );
-                        this.refresh();
+                        this.hideProgress();
+                        this.enable();
+                        await this.refresh();
                      } catch {
                         // Close popup before response or possily response fail
                      }
@@ -1377,6 +1422,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                           view: "combo",
                           name: fieldName,
                           label: fieldLabel,
+                          disabled: true,
                           labelWidth,
                           options: [],
                           on: {
@@ -1449,6 +1495,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                }
             const $contentForm = $$(ids.contentForm);
             $contentForm.blockEvent();
+            $contentForm.$view.remove();
             $contentForm.destructor();
             if (!isDataChanged) return;
             delete newFormData["created_at"];
@@ -1515,6 +1562,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                         click: () => {
                            const $contentForm = $$(ids.contentForm);
                            $contentForm.blockEvent();
+                           $contentForm.$view.remove();
                            $contentForm.destructor();
                         },
                      },
@@ -1531,6 +1579,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          },
          on: {
             onHide() {
+               this.$view.remove();
                this.destructor();
             },
          },
@@ -1951,6 +2000,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             await contentModel.update(updatedData.id, updatedData);
          }
       }
+      await this.refresh();
    }
 
    // HELPERS
