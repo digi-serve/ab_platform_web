@@ -31,26 +31,24 @@ export default class ABViewDataSelectComponent extends ABViewComponent {
       return _ui;
    }
 
-   async init(AB) {
-      await super.init(AB);
-      this.dc = AB.datacollectionByID(this.settings.dataviewID);
-   }
-
    async onShow() {
-      if (!this.dc) return;
-      await this.dc.waitForDataCollectionToInitialize(this.dc);
+      super.onShow();
+      const dc = this.datacollection;
+      if (!dc) return;
+      await dc.waitReady();
       const labelField = this.AB.definitionByID(
          this.settings.labelField
       )?.columnName;
-      const options = this.dc
+      const options = dc
          .getData()
          .map((o) => ({ id: o.id, value: o[labelField] }));
-      $$(this.ids.select).define("options", options);
-      $$(this.ids.select).refresh();
-      $$(this.ids.select).setValue(this.dc.getCursor().id);
+      const $select = $$(this.ids.select);
+      $select.define("options", options);
+      $select.refresh();
+      $select.setValue(dc.getCursor().id);
    }
 
    cursorChange(n) {
-      this.dc.setCursor(n);
+      this.datacollectio.setCursor(n);
    }
 }
