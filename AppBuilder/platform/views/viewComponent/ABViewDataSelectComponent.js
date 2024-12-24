@@ -49,6 +49,6 @@ export default class ABViewDataSelectComponent extends ABViewComponent {
    }
 
    cursorChange(n) {
-      this.datacollectio.setCursor(n);
+      this.datacollection.setCursor(n);
    }
 }
