@@ -816,8 +816,19 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
 
    async refresh() {
       this.busy();
-      await this.pullData();
-      await this.displayOrgChart();
+      let orgchart = this.__orgchart;
+      if (orgchart != null) {
+         const dataPanStart = orgchart.dataset.panStart;
+         const style = orgchart.getAttribute("style");
+         await this.pullData();
+         await this.displayOrgChart();
+         orgchart = this.__orgchart;
+         orgchart.dataset.panStart = dataPanStart;
+         orgchart.setAttribute("style", style);
+      } else {
+         await this.pullData();
+         await this.displayOrgChart();
+      }
       this.ready();
    }
 
