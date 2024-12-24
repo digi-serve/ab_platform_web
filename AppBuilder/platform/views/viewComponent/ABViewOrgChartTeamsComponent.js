@@ -1462,11 +1462,11 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          click: async () => {
             const $contentFormData = $$(ids.contentFormData);
             if (!$contentFormData.validate()) return;
+            let isDataChanged = false;
             const newFormData = this._parseFormValueByType(
                contentDataRecord,
                $contentFormData.getValues()
             );
-            let isDataChanged = false;
             for (const key in newFormData)
                if (
                   JSON.stringify(newFormData[key]) !==
@@ -1480,40 +1480,53 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             $contentForm.$view.remove();
             $contentForm.destructor();
             if (!isDataChanged) return;
-            delete newFormData["created_at"];
-            delete newFormData["updated_at"];
-            delete newFormData["properties"];
-            for (const editContentFieldToCreateNew of editContentFieldsToCreateNew) {
-               const editContentFieldToCreateNewColumnName =
-                  contentObj.fieldByID(editContentFieldToCreateNew)?.columnName;
-               if (
-                  JSON.stringify(
-                     newFormData[editContentFieldToCreateNewColumnName] ?? ""
-                  ) !==
-                  JSON.stringify(
-                     contentDataRecord[editContentFieldToCreateNewColumnName] ??
-                        ""
-                  )
-               ) {
-                  const pendingPromises = [];
-                  const oldData = {};
-                  oldData[contentDateEndFieldColumnName] = new Date();
-                  pendingPromises.push(
-                     contentModel.update(newFormData.id, oldData)
-                  );
-                  newFormData[contentDateStartFieldColumnName] =
-                     oldData[contentDateEndFieldColumnName];
-                  delete newFormData["id"];
-                  delete newFormData["uuid"];
-                  delete newFormData[contentDateEndFieldColumnName];
-                  pendingPromises.push(contentModel.create(newFormData));
-                  await Promise.all(pendingPromises);
+            webix
+               .confirm({
+                  title: "Title",
+                  ok: "Yes",
+                  cancel: "No",
+                  text: "You are about to confirm. Are you sure?",
+               })
+               .then(async () => {
+                  delete newFormData["created_at"];
+                  delete newFormData["updated_at"];
+                  delete newFormData["properties"];
+                  for (const editContentFieldToCreateNew of editContentFieldsToCreateNew) {
+                     const editContentFieldToCreateNewColumnName =
+                        contentObj.fieldByID(
+                           editContentFieldToCreateNew
+                        )?.columnName;
+                     if (
+                        JSON.stringify(
+                           newFormData[editContentFieldToCreateNewColumnName] ??
+                              ""
+                        ) !==
+                        JSON.stringify(
+                           contentDataRecord[
+                              editContentFieldToCreateNewColumnName
+                           ] ?? ""
+                        )
+                     ) {
+                        const pendingPromises = [];
+                        const oldData = {};
+                        oldData[contentDateEndFieldColumnName] = new Date();
+                        pendingPromises.push(
+                           contentModel.update(newFormData.id, oldData)
+                        );
+                        newFormData[contentDateStartFieldColumnName] =
+                           oldData[contentDateEndFieldColumnName];
+                        delete newFormData["id"];
+                        delete newFormData["uuid"];
+                        delete newFormData[contentDateEndFieldColumnName];
+                        pendingPromises.push(contentModel.create(newFormData));
+                        await Promise.all(pendingPromises);
+                        await this.refresh();
+                        return;
+                     }
+                  }
+                  await contentModel.update(newFormData.id, newFormData);
                   await this.refresh();
-                  return;
-               }
-            }
-            await contentModel.update(newFormData.id, newFormData);
-            await this.refresh();
+               });
          },
       });
       AB.Webix.ui({
