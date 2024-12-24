@@ -151,31 +151,45 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
    }
 
    async onShow() {
-      this.AB.performance.mark("TeamChart.onShow");
-      this.AB.performance.mark("TeamChart.load");
-      const loadingJS = this.loadOrgChartJs();
-      const loadingData = this.pullData();
       super.onShow();
       this.busy();
-      this.generateStrategyCss();
+      this.AB.performance.mark("TeamChart.onShow");
+      this.AB.performance.mark("TeamChart.load");
       if (this.settings.entityDatacollection) {
-         this.entityDC = this.AB.datacollectionByID(
+         const entityDC = (this.entityDC = this.AB.datacollectionByID(
             this.settings.entityDatacollection
-         );
+         ));
          if (!this._entityChangeListener) {
             // Reload the Chart if our Entity changes
-            this._entityChangeListener = this.entityDC.on(
+            this._entityChangeListener = entityDC.on(
                "changeCursor",
                async () => {
+                  debugger;
                   $$(this.ids.teamFormPopup)?.destructor();
                   await this.refresh();
                }
             );
          }
+
+         // TODO (Guy): Figure out later why calling dc.waitReay() won't resolve on entity select widget if we also call it here.
+         await new Promise((resolve) => {
+            const waitEntityDCReady = () => {
+               if (
+                  entityDC.dataStatus !== entityDC.dataStatusFlag.initialized
+               ) {
+                  setTimeout(() => {
+                     waitEntityDCReady();
+                  }, 1000);
+                  return;
+               }
+               resolve();
+            };
+            waitEntityDCReady();
+         });
       }
-      // const loadingContent =
+      this.generateStrategyCss();
       this.loadContentDisplayData();
-      await Promise.all([loadingJS, loadingData, this.entityDC.waitReady()]);
+      await Promise.all([this.loadOrgChartJs(), this.pullData()]);
       this.AB.performance.measure("TeamChart.load");
       this.AB.performance.mark("TeamChart.display");
       await this.displayOrgChart();
@@ -805,8 +819,9 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
     */
    loadContentData() {
       const contentObj = this.contentObject();
+      const entityDC = this.entityDC;
       const connectField = contentObj.connectFields(
-         (f) => f.settings.linkObject === this.entityDC.datasource.id
+         (f) => f.settings.linkObject === entityDC.datasource.id
       )[0];
       const contentDC = this.AB.datacollectionNew({
          datasourceID: contentObj.id,
@@ -1001,13 +1016,15 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
    }
 
    async teamAddChild(values, strategy) {
+      const entityDC = this.entityDC;
+
       // Add the entity value
-      if (this.entityDC) {
-         const connection = this.entityDC.datasource.connectFields(
-            (f) => f.settings.linkObject === this.datacollection.datasource.id
+      if (entityDC) {
+         const connection = entityDC.datasource.connectFields(
+            (f) => f.settings.linkObject === datacollection.datasource.id
          )[0];
          if (connection) {
-            const entity = this.entityDC.getCursor();
+            const entity = entityDC.getCursor();
             const cName = this.AB.definitionByID(
                connection.settings.linkColumn
             ).columnName;
@@ -1139,15 +1156,16 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          const strategyObj = this.AB.objectByID(
             strategyField.settings.linkObject
          );
+         const entityDC = this.entityDC;
          const entityLink = strategyObj.connectFields(
-            (f) => f.settings.linkObject === this.entityDC.datasource.id
+            (f) => f.settings.linkObject === entityDC.datasource.id
          )[0];
          const cond = {
             glue: "and",
             rules: [
                {
                   key: entityLink.columnName,
-                  value: this.entityDC.getCursor().id,
+                  value: entityDC.getCursor().id,
                   rule: "equals",
                },
             ],
@@ -1589,10 +1607,11 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          .map((r) => r.split(".")[1])
          .filter((r) => r != contentID);
       this.contentDisplayDCs = {};
+      const entityDC = this.entityDC;
       displayedObjects.forEach(async (id) => {
          const abObj = this.AB.objectByID(id);
          const connectField = abObj.connectFields(
-            (f) => f.settings.linkObject === this.entityDC.datasource.id
+            (f) => f.settings.linkObject === entityDC.datasource.id
          )[0];
          this.contentDisplayDCs[id] = this.AB.datacollectionNew({
             id,
@@ -1940,14 +1959,13 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             this._parseDataPK(newNodeDataPK);
          updatedData[contentGroupByFieldColumnName] =
             this._parseDataPK(newGroupDataPK);
-         if (this.entityDC) {
-            const entityLink = this.entityDC?.datasource.connectFields(
+         const entityDC = this.entityDC;
+         if (entityDC) {
+            const entityLink = entityDC.datasource.connectFields(
                (f) => f.settings.linkObject === contentObj.id
             )[0].id;
             const entityCol = this.AB.definitionByID(entityLink).columnName;
-            updatedData[entityCol] = this._parseDataPK(
-               this.entityDC.getCursor()
-            );
+            updatedData[entityCol] = this._parseDataPK(entityDC.getCursor());
          }
          pendingPromises.push(
             contentModel.create(updatedData),
