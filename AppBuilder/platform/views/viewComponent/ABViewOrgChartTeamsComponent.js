@@ -27,6 +27,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       };
       this._chartData = null;
       this._cachedContentDataRecords = null;
+      this.contentDisplayDCs = null;
    }
 
    _parseDataPK(dataPK) {
@@ -88,8 +89,6 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
    }
 
    async loadOrgChartJs() {
-      this.busy();
-
       const [orgChartLoader] = await Promise.all([
          import(
             /* webpackPrefetch: true */
@@ -152,49 +151,55 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
 
    async onShow() {
       super.onShow();
-      this.busy();
       this.AB.performance.mark("TeamChart.onShow");
       this.AB.performance.mark("TeamChart.load");
+      this.generateStrategyCss();
+      this.busy();
+      await this.loadOrgChartJs();
       if (this.settings.entityDatacollection) {
          const entityDC = (this.entityDC = this.AB.datacollectionByID(
             this.settings.entityDatacollection
          ));
+         let entityDCReadyResolve = null;
          if (!this._entityChangeListener) {
             // Reload the Chart if our Entity changes
             this._entityChangeListener = entityDC.on(
                "changeCursor",
                async () => {
-                  debugger;
-                  $$(this.ids.teamFormPopup)?.destructor();
                   await this.refresh();
+                  if (entityDCReadyResolve != null) {
+                     entityDCReadyResolve();
+                     entityDCReadyResolve = null;
+                  }
                }
             );
          }
 
          // TODO (Guy): Figure out later why calling dc.waitReay() won't resolve on entity select widget if we also call it here.
-         await new Promise((resolve) => {
-            const waitEntityDCReady = () => {
-               if (
-                  entityDC.dataStatus !== entityDC.dataStatusFlag.initialized
-               ) {
-                  setTimeout(() => {
-                     waitEntityDCReady();
-                  }, 1000);
-                  return;
-               }
-               resolve();
-            };
-            waitEntityDCReady();
-         });
-      }
-      this.generateStrategyCss();
-      this.loadContentDisplayData();
-      await Promise.all([this.loadOrgChartJs(), this.pullData()]);
+         await Promise.all([
+            new Promise((resolve) => {
+               const waitEntityDCReady = () => {
+                  if (
+                     entityDC.dataStatus !== entityDC.dataStatusFlag.initialized
+                  ) {
+                     setTimeout(() => {
+                        waitEntityDCReady();
+                     }, 1000);
+                     return;
+                  }
+                  resolve();
+               };
+               waitEntityDCReady();
+            }),
+            new Promise((resolve) => {
+               entityDCReadyResolve = resolve;
+            }),
+         ]);
+      } else await this.refresh();
+      this.ready();
       this.AB.performance.measure("TeamChart.load");
       this.AB.performance.mark("TeamChart.display");
-      await this.displayOrgChart();
       this.AB.performance.measure("TeamChart.display");
-      this.ready();
       this.AB.performance.measure("TeamChart.onShow");
    }
 
@@ -840,7 +845,8 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
    }
 
    async refresh() {
-      this.busy();
+      $$(this.ids.teamFormPopup)?.destructor();
+      this.loadContentDisplayData();
       let orgchart = this.__orgchart;
       if (orgchart != null) {
          const dataPanStart = orgchart.dataset.panStart;
@@ -854,7 +860,6 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          await this.pullData();
          await this.displayOrgChart();
       }
-      this.ready();
    }
 
    get chartData() {
@@ -1506,6 +1511,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                   text: "You are about to confirm. Are you sure?",
                })
                .then(async () => {
+                  this.busy();
                   delete newFormData["created_at"];
                   delete newFormData["updated_at"];
                   delete newFormData["properties"];
@@ -1539,11 +1545,13 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                         pendingPromises.push(contentModel.create(newFormData));
                         await Promise.all(pendingPromises);
                         await this.refresh();
+                        this.ready();
                         return;
                      }
                   }
                   await contentModel.update(newFormData.id, newFormData);
                   await this.refresh();
+                  this.ready();
                });
          },
       });
@@ -1602,18 +1610,24 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
    }
 
    loadContentDisplayData() {
+      let contentDisplayDCs = this.contentDisplayDCs;
+      if (contentDisplayDCs != null) {
+         for (const key in contentDisplayDCs)
+            contentDisplayDCs[key].reloadData();
+         return;
+      }
       const contentID = this.contentObject().id;
       const displayedObjects = Object.keys(this.settings.contentDisplayedFields)
          .map((r) => r.split(".")[1])
          .filter((r) => r != contentID);
-      this.contentDisplayDCs = {};
+      contentDisplayDCs = this.contentDisplayDCs = {};
       const entityDC = this.entityDC;
       displayedObjects.forEach(async (id) => {
          const abObj = this.AB.objectByID(id);
          const connectField = abObj.connectFields(
             (f) => f.settings.linkObject === entityDC.datasource.id
          )[0];
-         this.contentDisplayDCs[id] = this.AB.datacollectionNew({
+         contentDisplayDCs[id] = this.AB.datacollectionNew({
             id,
             name: id,
             settings: {
@@ -1626,8 +1640,8 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                fixSelect: "",
             },
          });
-         await this.contentDisplayDCs[id].init();
-         this.contentDisplayDCs[id].loadData();
+         contentDisplayDCs[id].init();
+         await contentDisplayDCs[id].loadData();
       });
    }
 
@@ -1686,6 +1700,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      } else if (currentFieldData != null)
                         currentDataPKs.push(currentFieldData);
                   } while (currentDataRecords.length > 0);
+                  await displayDC.waitReady();
                   currentDataRecords = displayDC.getData((r) => {
                      return currentDataPKs.some((id) => id == r.id);
                   });
@@ -1926,6 +1941,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       if (dataTransfer.getData("isnode") == 1) return;
       event.stopPropagation();
       if (contentFieldLinkColumnName == null) return;
+      this.busy();
       const $group = event.currentTarget;
       const newGroupDataPK = $group.dataset.pk;
       const newNodeDataPK = JSON.parse(
@@ -2013,6 +2029,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          }
       }
       await this.refresh();
+      this.ready();
    }
 
    // HELPERS
