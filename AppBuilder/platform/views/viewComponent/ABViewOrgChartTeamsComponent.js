@@ -426,6 +426,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             for (const key in dataPanelDCs) {
                const dc = AB.datacollectionByID(key.split(".")[1]);
                await dc.waitForDataCollectionToInitialize(dc);
+               await dc.reloadData();
                const panelObj = dc.datasource;
                const contentFieldID = panelObj.connectFields(
                   (field) => field.datasourceLink.id == contentObjID
@@ -440,7 +441,16 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                            data
                         )}</div>`,
                      css: { overflow: "auto" },
-                     data: dc.getData(),
+                     // TODO (Guy): Force to sort by firstName. the DC sort setting work but after calling DC.parse() in DC.queuedParse() method the sort is messy.
+                     data: dc.getData().sort((a, b) => {
+                        if (a.firstName < b.firstName) {
+                           return -1;
+                        }
+                        if (a.firstName > b.firstName) {
+                           return 1;
+                        }
+                        return 0;
+                     }),
                      on: {
                         onAfterRender() {
                            callAfterRender(() => {
