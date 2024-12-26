@@ -204,6 +204,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
    }
 
    async displayOrgChart() {
+      const self = this;
       const baseView = this.view;
       const AB = this.AB;
       const chartData = AB.cloneDeep(this.chartData);
@@ -424,6 +425,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          chartDom.textContent = "";
          chartDom.innerHTML = "";
          const ui = {
+            hidden: true,
             cols: [
                {
                   rows: [
@@ -440,18 +442,17 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             ],
          };
          if (settings.showDataPanel === 1) {
-            const dataPanelUIs = [];
             const dataPanelDCs = settings.dataPanelDCs;
+            const cells = [];
             for (const key in dataPanelDCs) {
                const dc = AB.datacollectionByID(key.split(".")[1]);
-               await dc.waitForDataCollectionToInitialize(dc);
-               await dc.reloadData();
+               const $dc = dc.$dc;
                const panelObj = dc.datasource;
                const contentFieldID = panelObj.connectFields(
                   (field) => field.datasourceLink.id == contentObjID
                )[0].fieldLink.id;
-               const self = this;
-               dataPanelUIs.push({
+               const DC_OFFSET = 20;
+               cells.push({
                   header: dataPanelDCs[key],
                   body: {
                      view: "list",
@@ -459,47 +460,76 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                         `<div style="text-align: center;">${panelObj.displayData(
                            data
                         )}</div>`,
-                     css: { overflow: "auto" },
-                     // TODO (Guy): Force to sort by firstName. the DC sort setting work but after calling DC.parse() in DC.queuedParse() method the sort is messy.
-                     data: dc.getData().sort((a, b) => {
-                        if (a.firstName < b.firstName) {
-                           return -1;
-                        }
-                        if (a.firstName > b.firstName) {
-                           return 1;
-                        }
-                        return 0;
-                     }),
+                     css: { overflow: "auto", "max-height": "85%" },
+                     data: [],
                      on: {
-                        onAfterRender() {
-                           callAfterRender(() => {
-                              const $itemElements =
-                                 this.$view.children.item(0).children;
-                              for (const $itemElement of $itemElements) {
-                                 $itemElement.setAttribute(
-                                    "data-content-linked-field-id",
-                                    contentFieldID
-                                 );
-                                 $itemElement.setAttribute(
-                                    "data-pk",
-                                    dc.getData(
-                                       (e) =>
-                                          e.id ==
-                                          $itemElement.getAttribute(
-                                             "webix_l_id"
-                                          )
-                                    )[0][panelObj.PK()]
-                                 );
-                                 $itemElement.setAttribute("draggable", "true");
-                                 $itemElement.addEventListener(
-                                    "dragstart",
-                                    (e) => self.fnContentDragStart(e)
-                                 );
-                                 $itemElement.addEventListener("dragend", (e) =>
-                                    self.fnContentDragEnd(e)
-                                 );
-                              }
-                           });
+                        onViewShow(prevCount = 0) {
+                           (async () => {
+                              await dc.waitReady();
+                              this.define(
+                                 "data",
+                                 // TODO (Guy): Force to sort by firstName. the DC sort setting work but after calling DC.parse() in DC.queuedParse() method the sort is messy.
+                                 dc.getData().sort((a, b) => {
+                                    if (a.firstName < b.firstName) {
+                                       return -1;
+                                    }
+                                    if (a.firstName > b.firstName) {
+                                       return 1;
+                                    }
+                                    return 0;
+                                 })
+                              );
+                              this.refresh();
+                              callAfterRender(() => {
+                                 const $itemElements =
+                                    this.$view.children.item(0).children;
+                                 const itemElementsLength =
+                                    $itemElements.length;
+                                 let count = 0;
+                                 while (count < itemElementsLength) {
+                                    const $itemElement = $itemElements.item(
+                                       count++
+                                    );
+                                    $itemElement.setAttribute(
+                                       "data-content-linked-field-id",
+                                       contentFieldID
+                                    );
+                                    $itemElement.setAttribute(
+                                       "data-pk",
+                                       dc.getData(
+                                          (e) =>
+                                             e.id ==
+                                             $itemElement.getAttribute(
+                                                "webix_l_id"
+                                             )
+                                       )[0][panelObj.PK()]
+                                    );
+                                    $itemElement.setAttribute(
+                                       "draggable",
+                                       "true"
+                                    );
+                                    $itemElement.addEventListener(
+                                       "dragstart",
+                                       (e) => self.fnContentDragStart(e)
+                                    );
+                                    $itemElement.addEventListener(
+                                       "dragend",
+                                       (e) => self.fnContentDragEnd(e)
+                                    );
+                                 }
+                                 if (count < DC_OFFSET || count === prevCount)
+                                    return;
+                                 (async () => {
+                                    const RECORD_LIMIT = 20;
+                                    await dc.loadData(
+                                       RECORD_LIMIT *
+                                          parseInt(count / RECORD_LIMIT),
+                                       RECORD_LIMIT
+                                    );
+                                    this.callEvent("onViewShow", [count]);
+                                 })();
+                              });
+                           })();
                         },
                      },
                   },
@@ -513,10 +543,12 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                   type: "bottom",
                   css: "webix_dark",
                },
-               cells: dataPanelUIs,
+               cells,
             });
          }
-         const $chartContent = AB.Webix.ui(ui).$view;
+         const $orgChartTeams = AB.Webix.ui(ui);
+         $orgChartTeams.show();
+         const $chartContent = $orgChartTeams.$view;
          chartDom.appendChild($chartContent);
          const $chartContentLayout = $chartContent.children[0];
          this.initFilter($chartContentLayout.children[0].children[0]);
