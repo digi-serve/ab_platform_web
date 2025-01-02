@@ -248,7 +248,6 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             return;
          }
          const settings = this.settings;
-         const averageHeight = 80 / contentGroupOptionsLength;
          const $nodeSpacer = element("div", "spacer");
          $content.appendChild($nodeSpacer);
          const nodeSpacerStyle = $nodeSpacer.style;
@@ -257,7 +256,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             const $group = element("div", "team-group-section");
             $content.appendChild($group);
             const groupStyle = $group.style;
-            groupStyle["height"] = `${averageHeight}%`;
+            groupStyle["minHeight"] = `${225 / contentGroupOptionsLength}px`;
 
             // TODO: should this be a config option
             const groupColor = group.name === "Leader" ? "#003366" : "#DDDDDD";
@@ -378,41 +377,6 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       };
       this._fnRefresh = async () => {
          await this.refresh();
-      };
-      this._fnResizeTeamNode = async ($teamNode) => {
-         const contentGroupDC = this._contentGroupDC;
-         await this._waitDCReady(contentGroupDC);
-         const groupHeightThreshold =
-            (246.5 * contentGroupDC.getData().length) / 100;
-         const groupSections = $teamNode.querySelectorAll(
-            ".team-group-section"
-         );
-         let isOverflow = false;
-         for (const $groupSection of groupSections)
-            if (
-               $groupSection.getBoundingClientRect().height >
-               groupHeightThreshold
-            ) {
-               isOverflow = true;
-               break;
-            }
-         if (!isOverflow) {
-            $teamNode.style.height = "300px";
-            return;
-         }
-         groupSections.forEach(($groupSection) => {
-            const groupHeight = $groupSection.getBoundingClientRect().height;
-            const groupStyle = $groupSection.style;
-            groupStyle.height =
-               (groupHeight < groupHeightThreshold &&
-                  `${groupHeightThreshold}px`) ||
-               `${groupHeight}px`;
-         });
-         const nodeChildren = $teamNode.children;
-         nodeChildren.item(0).style.height = "43.5px";
-         const $content = nodeChildren.item(1);
-         $content.style.top = "-22.5px";
-         $content.children.item(0).style.height = "24.65px";
       };
       this._fnShowContentForm = (event) => {
          const contentDC = this._contentDC;
@@ -897,7 +861,6 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                )
             );
       })();
-      // await this._callAfterRender(this._fnResizeTeamNode, $teamNode);
    }
 
    async _createUIContentRecord(data, color) {
