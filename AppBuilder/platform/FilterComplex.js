@@ -40,15 +40,15 @@ function _toInternal(cond, fields = []) {
       };
 
       if (Array.isArray(cond.value)) cond.includes = cond.value;
-      else cond.includes = cond.value?.split?.(/,|:/) ?? [];
+      // else cond.includes = cond.value?.split?.(/,|:/) ?? [];
 
-      if (field?.key == "date" || field?.key == "datetime") {
-         cond.condition.filter = cond.condition.filter
-            ? AB.rules.toDate(cond.condition.filter)
-            : null;
-
-         cond.includes = cond.includes.map((v) => AB.rules.toDate(v));
-      }
+      // if (field?.key == "date" || field?.key == "datetime") {
+      //    cond.condition.filter = cond.condition.filter
+      //       ? AB.rules.toDate(cond.condition.filter)
+      //       : null;
+      //
+      //    cond.includes = cond.includes.map((v) => AB.rules.toDate(v));
+      // }
 
       delete cond.key;
       delete cond.rule;
@@ -87,7 +87,7 @@ function _toExternal(cond, fields = []) {
       cond.rule = cond.condition.type;
 
       let values =
-         cond.includes.map((v) => (v instanceof Date ? v.toISOString() : v)) ??
+         cond.includes?.map((v) => (v instanceof Date ? v.toISOString() : v)) ??
          [];
 
       // Convert multi-values to a string
@@ -505,6 +505,11 @@ module.exports = class FilterComplex extends FilterComplexCore {
 
    fieldsLoad(fields = [], object = null) {
       super.fieldsLoad(fields, object);
+      // Format date types
+      fields.forEach((f) => {
+         if (f.type === "date")
+            f.format = (v) => this.AB.Webix.il8n.dateFormatStr(v);
+      });
       this.uiInit();
    }
 
