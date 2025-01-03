@@ -47,6 +47,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       this._promiseInit = new Promise((resolve) => {
          this._resolveInit = resolve;
       });
+      this._promisePageData = null;
       this._contentDC = null;
       this._contentGroupDC = null;
       this._contentDisplayDCs = [];
@@ -342,38 +343,114 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          this.ready();
          await this.refresh();
       };
-      this._fnPageData = async (dc, callback) => {
-         this._initDC(dc);
+      this._fnPageContentCallback = (
+         contentRecords,
+         isContentDone,
+         contentDC,
+         resolve
+      ) => {
+         const linkedContentFieldColumnName = this.AB.definitionByID(
+            this.getSettingField("contentField").settings.linkColumn
+         ).columnName;
+         for (const contentRecord of contentRecords) {
+            const $teamNode = document.getElementById(
+               this.teamNodeID(contentRecord[linkedContentFieldColumnName])
+            );
+            if ($teamNode == null) continue;
+            this._addContentRecordToGroup($teamNode, contentRecord);
+         }
+
+         // TODO (Guy): Hardcode data panel DCs for Employee.
+         $$(this.ids.dataPanel)
+            .getChildViews()[1]
+            .getChildViews()
+            .forEach(($childView) => $childView.callEvent("onViewShow"));
+         if (isContentDone) resolve();
+         else
+            this._callPagingEvent(
+               contentDC,
+               this._fnPageContentCallback,
+               resolve
+            );
+      };
+      this._fnPageContentDisplayCallback = (
+         contentDisplayRecords,
+         isContentDisplayDone,
+         contentDisplayDC,
+         resolve
+      ) => {
+         const contentDC = this._contentDC;
+         this._fnPageContentCallback(
+            contentDC.getData(),
+            true,
+            contentDC,
+            () => {}
+         );
+         if (isContentDisplayDone) resolve();
+         else
+            this._callPagingEvent(
+               contentDisplayDC,
+               this._fnPageContentDisplayCallback,
+               resolve
+            );
+      };
+      this._fnPageData = async (dc, callback, resolve) => {
          await this._waitDCReady(dc);
          let records = dc.getData();
          try {
-            if (records.length < DC_OFFSET) {
-               await dc.loadData();
-
-               // TODO (Guy): There was some delays before patching DC imcoming data.
-               await new Promise((resolve) => {
-                  setTimeout(resolve, 500);
-               });
-               records = dc.getData();
-            }
-            if (records.length < DC_OFFSET) throw null;
-            if ((records.length - DC_OFFSET) % RECORD_LIMIT > 0) throw null;
-            await dc.loadData(
-               RECORD_LIMIT * parseInt(records.length / RECORD_LIMIT),
-               RECORD_LIMIT
-            );
-
-            // TODO (Guy): There was some delays before patching DC imcoming data.
-            await new Promise((resolve) => {
-               setTimeout(resolve, 500);
-            });
+            if (
+               records.length < DC_OFFSET ||
+               (records.length - DC_OFFSET) % RECORD_LIMIT > 0
+            )
+               throw null;
+            try {
+               await dc.loadData(
+                  RECORD_LIMIT * parseInt(records.length / RECORD_LIMIT),
+                  RECORD_LIMIT
+               );
+            } catch {}
             if (dc.getData().length === records.length) throw null;
             records = dc.getData();
             if ((records.length - DC_OFFSET) % RECORD_LIMIT > 0) throw null;
-            callback && (await callback(records, false, dc));
+            callback && (await callback(records, false, dc, resolve));
          } catch {
-            callback && (await callback(records, true, dc));
+            callback && (await callback(records, true, dc, resolve));
          }
+      };
+      this._fnPageTeamCallback = async (
+         teamRecords,
+         isTeamDone,
+         teamDC,
+         resolve
+      ) => {
+         const contentFieldColumnName =
+            this.getSettingField("contentField").columnName;
+         const contentDC = this._contentDC;
+         const contentRecordPK = contentDC.datasource.PK();
+         for (const teamRecord of teamRecords) {
+            const teamNodeID = this.teamNodeID(teamRecord.id);
+            let $teamNode = document.getElementById(teamNodeID);
+            if ($teamNode == null) {
+               await this.teamAddChild(teamRecord, false);
+               $teamNode = document.getElementById(teamNodeID);
+               if ($teamNode == null) continue;
+            }
+            const contentRecords = contentDC.getData(
+               (contentRecord) =>
+                  teamRecord[contentFieldColumnName].indexOf(
+                     contentRecord[contentRecordPK]
+                  ) > -1
+            );
+            for (const contentRecord of contentRecords)
+               this._addContentRecordToGroup($teamNode, contentRecord);
+         }
+         if (isTeamDone) resolve();
+         else
+            this._callPagingEvent(
+               this.datacollection,
+               this._fnPageTeamCallback,
+               resolve
+            );
       };
       this._fnRefresh = async () => {
          await this.refresh();
@@ -1109,6 +1186,10 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       });
    }
 
+   _callPagingEvent(dc, callback, resolve) {
+      this.emit("pageData", dc, callback, resolve);
+   }
+
    _initDC(dc) {
       if (dc.dataStatus === dc.dataStatusFlag.notInitial) {
          dc.init();
@@ -1117,67 +1198,54 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
    }
 
    _pageData() {
-      const ids = this.ids;
-      const settings = this.settings;
-      const teamDC = this.datacollection;
-      const teamObj = teamDC.datasource;
-      const dataPanelDCs = this._dataPanelDCs;
-      const contentField = teamObj.fieldByID(settings.contentField);
-      const contentFieldColumnName = contentField.columnName;
-      const linkedContentFieldColumnName = contentField.fieldLink.columnName;
-      const contentDC = this._contentDC;
-      const contentRecordPK = contentDC.datasource.PK();
-      const contentDisplayDCs = this._contentDisplayDCs;
-      const teamCallback = async (teamRecords, isTeamDone) => {
-         for (const teamRecord of teamRecords) {
-            const teamNodeID = this.teamNodeID(teamRecord.id);
-            let $teamNode = document.getElementById(teamNodeID);
-            if ($teamNode == null) {
-               await this.teamAddChild(teamRecord, false);
-               $teamNode = document.getElementById(teamNodeID);
-               if ($teamNode == null) continue;
-            }
-            const contentRecords = contentDC.getData(
-               (contentRecord) =>
-                  teamRecord[contentFieldColumnName].indexOf(
-                     contentRecord[contentRecordPK]
-                  ) > -1
-            );
-            for (const contentRecord of contentRecords)
-               this._addContentRecordToGroup($teamNode, contentRecord);
-         }
-         !isTeamDone && this.emit(teamDC, teamCallback);
-      };
-      const contentCallback = (contentRecords, isContentDone) => {
-         for (const contentRecord of contentRecords) {
-            const $teamNode = document.getElementById(
-               this.teamNodeID(contentRecord[linkedContentFieldColumnName])
-            );
-            if ($teamNode == null) continue;
-            this._addContentRecordToGroup($teamNode, contentRecord);
-         }
-
-         // TODO (Guy): Hardcode data panel DCs for Employee.
-         $$(ids.dataPanel)
-            .getChildViews()[1]
-            .getChildViews()
-            .forEach(($childView) => $childView.callEvent("onViewShow"));
-         !isContentDone && this.emit("pageData", contentDC, contentCallback);
-      };
-      const contentDisplayCallback = (
-         contentDisplayRecords,
-         isContentDisplayDone,
-         contentDisplayDC
-      ) => {
-         contentCallback(contentDC.getData(), true);
-         !isContentDisplayDone &&
-            this.emit("pageData", contentDisplayDC, contentDisplayCallback);
-      };
-      this.emit("pageData", teamDC, teamCallback);
-      this.emit("pageData", contentDC, contentCallback);
-      contentDisplayDCs.forEach((contentDisplayDC) => {
-         this.emit("pageData", contentDisplayDC, contentDisplayCallback);
+      if (this._promisePageData != null) return;
+      let resolvePageData = null;
+      this._promisePageData = new Promise((resolve) => {
+         resolvePageData = resolve;
       });
+      const teamDC = this.datacollection;
+      const contentDC = this._contentDC;
+      (async () => {
+         try {
+            await Promise.all([
+               new Promise((resolve) => {
+                  this._callPagingEvent(
+                     teamDC,
+                     this._fnPageTeamCallback,
+                     resolve
+                  );
+               }),
+               new Promise((resolve) => {
+                  this._callPagingEvent(
+                     contentDC,
+                     this._fnPageContentCallback,
+                     resolve
+                  );
+               }),
+               ...this._contentDisplayDCs
+                  .filter(
+                     (contentDisplayDC) =>
+                        contentDisplayDC !== teamDC &&
+                        contentDisplayDC !== contentDC
+                  )
+                  .map(
+                     (contentDisplayDC) =>
+                        new Promise((resolve) => {
+                           this._callPagingEvent(
+                              contentDisplayDC,
+                              this._fnPageContentDisplayCallback,
+                              resolve
+                           );
+                        })
+                  ),
+            ]);
+         } catch (err) {
+            // TODO (Guy): The paging error.
+            console.error(err);
+         }
+         resolvePageData();
+         this._promisePageData = null;
+      })();
    }
 
    _parseDataPK(dataPK) {
@@ -1213,24 +1281,26 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
    }
 
    async _reloadAllDC() {
+      await this._promisePageData;
       const teamDC = this.datacollection;
-      const teamDCID = teamDC.id;
       const contentDC = this._contentDC;
-      const contentObjID = contentDC.datasource.id;
       await Promise.all([
          this._reloadDCData(teamDC),
-         ...this._dataPanelDCs
-            .map((dataPanelDC) => this._reloadDCData(dataPanelDC))
-            .this._reloadDCData(contentDC),
-         ...this._contentDisplayDCs.filter(
-            (contentDisplayDC) =>
-               contentDisplayDC.datasource.id !== contentObjID ||
-               contentDisplayDC.id !== teamDCID
+         ...this._dataPanelDCs.map((dataPanelDC) =>
+            this._reloadDCData(dataPanelDC)
          ),
+         this._reloadDCData(contentDC),
+         ...this._contentDisplayDCs
+            .filter(
+               (contentDisplayDC) =>
+                  contentDisplayDC !== teamDC && contentDisplayDC !== contentDC
+            )
+            .map((contentDisplayDC) => this._reloadDCData(contentDisplayDC)),
       ]);
    }
 
    async _reloadDCData(dc) {
+      await this._promisePageData;
       if (dc.dataStatus === dc.dataStatusFlag.initializing)
          await this._waitDCReady(dc);
       dc.clearAll();
@@ -1299,7 +1369,6 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                ).datasource.id
          );
          const contentDC = this._contentDC;
-
          const header = dataPanelDCs[key];
          if (_dataPanelDC == null)
             cells.push({
@@ -1323,81 +1392,75 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                   css: { overflow: "auto", "max-height": "85%" },
                   data: [],
                   on: {
-                     onViewShow() {
-                        (async () => {
-                           await self._waitDCReady(_dataPanelDC);
-                           const contentLinkedField = panelObj.connectFields(
-                              (field) => field.datasourceLink.id == contentObjID
-                           )[0].fieldLink;
-                           const contentLinkedFieldColumnName =
-                              contentLinkedField.columnName;
-                           this.clearAll();
-                           this.define(
-                              "data",
-                              // _dataPanelDC.getData()
-                              // TODO (Guy): Hardcode Employee DC.
-                              _dataPanelDC
-                                 .getData((panelRecord) =>
-                                    header === "Unassigned"
-                                       ? contentDC.getData(
-                                            (contentRecord) =>
-                                               contentRecord[
-                                                  contentLinkedFieldColumnName
-                                               ] == panelRecord.id
-                                         )[0] == null
-                                       : contentDC.getData(
-                                            (contentRecord) =>
-                                               contentRecord[
-                                                  contentLinkedFieldColumnName
-                                               ] == panelRecord.id
-                                         )[0] != null
-                                 )
-                                 .sort((a, b) => {
-                                    if (a.firstName < b.firstName) {
-                                       return -1;
-                                    }
-                                    if (a.firstName > b.firstName) {
-                                       return 1;
-                                    }
-                                    return 0;
-                                 })
-                           );
-                           await self._callAfterRender(() => {
-                              const $itemElements =
-                                 this.$view.children.item(0).children;
-                              const itemElementsLength = $itemElements.length;
-                              const contentFieldID = contentLinkedField.id;
-                              let count = 0;
-                              while (count < itemElementsLength) {
-                                 const $itemElement = $itemElements.item(
-                                    count++
-                                 );
-                                 $itemElement.setAttribute(
-                                    "data-content-linked-field-id",
-                                    contentFieldID
-                                 );
-                                 $itemElement.setAttribute(
-                                    "data-pk",
-                                    _dataPanelDC.getData(
-                                       (e) =>
-                                          e.id ==
-                                          $itemElement.getAttribute(
-                                             "webix_l_id"
-                                          )
-                                    )[0][panelObj.PK()]
-                                 );
-                                 $itemElement.setAttribute("draggable", "true");
-                                 $itemElement.addEventListener(
-                                    "dragstart",
-                                    self._fnContentDragStart
-                                 );
-                                 $itemElement.addEventListener(
-                                    "dragend",
-                                    self._fnContentDragEnd
-                                 );
-                              }
-                           });
-                        })();
+                     async onViewShow() {
+                        await self._waitDCReady(_dataPanelDC);
+                        const contentLinkedField = panelObj.connectFields(
+                           (field) => field.datasourceLink.id == contentObjID
+                        )[0].fieldLink;
+                        const contentLinkedFieldColumnName =
+                           contentLinkedField.columnName;
+                        this.clearAll();
+                        this.define(
+                           "data",
+                           // _dataPanelDC.getData()
+                           // TODO (Guy): Hardcode Employee DC.
+                           _dataPanelDC
+                              .getData((panelRecord) =>
+                                 header === "Unassigned"
+                                    ? contentDC.getData(
+                                         (contentRecord) =>
+                                            contentRecord[
+                                               contentLinkedFieldColumnName
+                                            ] == panelRecord.id
+                                      )[0] == null
+                                    : contentDC.getData(
+                                         (contentRecord) =>
+                                            contentRecord[
+                                               contentLinkedFieldColumnName
+                                            ] == panelRecord.id
+                                      )[0] != null
+                              )
+                              .sort((a, b) => {
+                                 if (a.firstName < b.firstName) {
+                                    return -1;
+                                 }
+                                 if (a.firstName > b.firstName) {
+                                    return 1;
+                                 }
+                                 return 0;
+                              })
+                        );
+                        await self._callAfterRender(() => {
+                           const $itemElements =
+                              this.$view.children.item(0).children;
+                           const itemElementsLength = $itemElements.length;
+                           const contentFieldID = contentLinkedField.id;
+                           let count = 0;
+                           while (count < itemElementsLength) {
+                              const $itemElement = $itemElements.item(count++);
+                              $itemElement.setAttribute(
+                                 "data-content-linked-field-id",
+                                 contentFieldID
+                              );
+                              $itemElement.setAttribute(
+                                 "data-pk",
+                                 _dataPanelDC.getData(
+                                    (e) =>
+                                       e.id ==
+                                       $itemElement.getAttribute("webix_l_id")
+                                 )[0][panelObj.PK()]
+                              );
+                              $itemElement.setAttribute("draggable", "true");
+                              $itemElement.addEventListener(
+                                 "dragstart",
+                                 self._fnContentDragStart
+                              );
+                              $itemElement.addEventListener(
+                                 "dragend",
+                                 self._fnContentDragEnd
+                              );
+                           }
+                        });
                      },
                   },
                },
@@ -1486,8 +1549,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       await super.init(AB, accessLevel);
       const settings = this.settings;
       this._resources = await Promise.all(this._resources);
-      this._OrgChart =
-         this._OrgChart ||
+      this._OrgChart ||
          (this._OrgChart = (() => {
             const OrgChart = this._resources[0].default;
             const _oldOnDragStart = OrgChart.prototype._onDragStart;
@@ -1499,29 +1561,36 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          })());
 
       // Preparing for the entity DC and wait for setting a cursor.
-      if (settings.entityDatacollection) {
-         const entityDC =
-            this._entityDC ||
-            (this._entityDC = this.AB.datacollectionByID(
+      const entityDC =
+         (() => {
+            const entityDC = this._entityDC;
+            if (entityDC != null) this._initDC(entityDC);
+            return entityDC;
+         })() ||
+         (this._entityDC = await (async () => {
+            const entityDC = this.AB.datacollectionByID(
                settings.entityDatacollection
-            ));
-         this._initDC(entityDC);
-         await Promise.all([
-            this._waitDCReady(entityDC),
-            new Promise((resolve) => {
-               const CHANGE_CURSOR = "changeCursor";
-               entityDC.off(CHANGE_CURSOR, this._fnRefresh);
-               if (entityDC.getCursor() != null) {
-                  entityDC.on(CHANGE_CURSOR, this._fnRefresh);
-                  resolve();
-               } else
-                  entityDC.once(CHANGE_CURSOR, () => {
-                     entityDC.on(CHANGE_CURSOR, this._fnRefresh);
-                     resolve();
-                  });
-            }),
-         ]);
-      }
+            );
+            if (entityDC != null) {
+               this._initDC(entityDC);
+               await Promise.all([
+                  this._waitDCReady(entityDC),
+                  new Promise((resolve) => {
+                     const CHANGE_CURSOR = "changeCursor";
+                     entityDC.off(CHANGE_CURSOR, this._fnRefresh);
+                     if (entityDC.getCursor() != null) {
+                        entityDC.on(CHANGE_CURSOR, this._fnRefresh);
+                        resolve();
+                     } else
+                        entityDC.once(CHANGE_CURSOR, () => {
+                           entityDC.on(CHANGE_CURSOR, this._fnRefresh);
+                           resolve();
+                        });
+                  }),
+               ]);
+            }
+            return entityDC;
+         })());
 
       // Preparing for the data panel DCs.
       if (settings.showDataPanel === 1) {
@@ -1530,14 +1599,10 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          for (const key in dataPanelDCs) {
             const [, dataPanelDCID] = key.split(".");
             const _dataPanelDC = AB.datacollectionByID(dataPanelDCID);
-            if (
-               _dataPanelDCs.findIndex(
-                  (_dataPanelDC) => _dataPanelDC.id === dataPanelDCID
-               ) < 0
-            ) {
-               this._initDC(_dataPanelDC);
-               _dataPanelDCs.push(_dataPanelDC);
-            }
+            _dataPanelDCs.findIndex(
+               (_dataPanelDC) => _dataPanelDC.id === dataPanelDCID
+            ) < 0 && _dataPanelDCs.push(_dataPanelDC);
+            this._initDC(_dataPanelDC);
          }
       }
 
@@ -1590,16 +1655,16 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                   },
                },
             };
-            if (this._entityDC) {
-               const entityDC = this._entityDC;
+            if (entityDC != null) {
                const entityObjID = entityDC.datasource.id;
                dcSettings.linkDatacollectionID = entityDC.id;
-               dcSettings.linkFieldID = contentObj.connectFields(
+               (dcSettings.linkFieldID = contentObj.connectFields(
                   (f) => f.settings.linkObject === entityObjID
-               )[0]?.id;
+               )[0]?.id) && (dcSettings.linkDatacollectionID = entityDC.id);
             }
             return AB.datacollectionNew(dcSettings);
          })());
+      contentDC.$dc.__prevLinkDcCursor = entityDC?.getCursor()?.id?.toString();
       this._initDC(contentDC);
 
       // Preparing for the content group DC.
@@ -1609,12 +1674,28 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                const contentGroupObjID = contentDC.datasource.fieldByID(
                   settings.contentGroupByField
                ).settings.linkObject;
-               return this.AB.datacollectionNew({
+               const dcSettings = {
+                  datasourceID: contentGroupObjID,
+                  linkDatacollectionID: null,
+                  linkFieldID: null,
+               };
+               if (entityDC != null) {
+                  const entityObjID = entityDC.datasource.id;
+                  dcSettings.linkDatacollectionID = entityDC.id;
+                  (dcSettings.linkFieldID = this.AB.objectByID(
+                     contentGroupObjID
+                  ).connectFields(
+                     (f) => f.settings.linkObject === entityObjID
+                  )[0]?.id) && (dcSettings.linkDatacollectionID = entityDC.id);
+               }
+               const contentGroupDC = this.AB.datacollectionNew({
                   id: `dc.${contentGroupObjID}`,
-                  settings: {
-                     datasourceID: contentGroupObjID,
-                  },
+                  settings: dcSettings,
                });
+               contentGroupDC.$dc.__prevLinkDcCursor = entityDC
+                  ?.getCursor()
+                  ?.id?.toString();
+               return contentGroupDC;
             })())
       );
 
@@ -1623,64 +1704,69 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          settings.contentDisplayedFields
       );
       if (contentDisplayedFieldKeys.length > 0) {
-         const contentID = contentDC.datasource.id;
+         const teamDC = this.datacollection;
+         const teamObjID = teamDC.datasource.id;
+         const contentObjID = contentDC.datasource.id;
          const contentDisplayDCSettings = {
             datasourceID: null,
             linkDatacollectionID: null,
             linkFieldID: null,
             fixSelect: "",
          };
-         let entityObjID = null;
-         if (this._entityDC) {
-            const entityDC = this._entityDC;
-            contentDisplayDCSettings.linkDatacollectionID = entityDC.id;
-            entityObjID = entityDC.datasource.id;
-         }
          const contentDisplayDCs = this._contentDisplayDCs;
          let [, objID] = contentDisplayedFieldKeys.pop().split(".");
          while (contentDisplayedFieldKeys.length > 0) {
-            if (objID === entityObjID) {
-               const entityDC = this._entityDC;
-               const entityDCID = entityDC.id;
-               if (
+            switch (objID) {
+               case teamObjID:
                   contentDisplayDCs.findIndex(
-                     (contentDisplayDC) => contentDisplayDC.id === entityDCID
-                  ) < 0
-               )
-                  contentDisplayDCs.push(entityDC);
-               this._initDC(entityDC);
-            } else if (objID === contentID) {
-               const contentDCID = contentDC.id;
-               if (
+                     (contentDisplayDC) => contentDisplayDC.id === teamObjID
+                  ) < 0 && contentDisplayDCs.push(teamDC);
+                  this._initDC(teamDC);
+                  break;
+               case contentObjID:
                   contentDisplayDCs.findIndex(
-                     (contentDisplayDC) => contentDisplayDC.id === contentDCID
-                  ) < 0
-               )
-                  contentDisplayDCs.push(contentDC);
-               this._initDC(contentDC);
-            } else {
-               const contentDisplayDCID = `dc.${objID}`;
-               this._initDC(
-                  contentDisplayDCs.find(
-                     (contentDisplayDC) =>
-                        contentDisplayDC.id === contentDisplayDCID
-                  ) ||
-                     (() => {
-                        contentDisplayDCSettings.datasourceID = objID;
-                        if (entityObjID)
-                           contentDisplayDCSettings.linkFieldID = AB.objectByID(
-                              objID
-                           ).connectFields(
-                              (f) => f.settings.linkObject === entityObjID
-                           )[0]?.id;
-                        const contentDisplayDC = AB.datacollectionNew({
-                           id: contentDisplayDCID,
-                           settings: contentDisplayDCSettings,
-                        });
-                        contentDisplayDCs.push(contentDisplayDC);
-                        return contentDisplayDC;
-                     })()
-               );
+                     (contentDisplayDC) => contentDisplayDC === contentDC
+                  ) < 0 && contentDisplayDCs.push(contentDC);
+                  this._initDC(contentDC);
+                  break;
+               default:
+                  if (entityDC?.datasource.id === objID) {
+                     contentDisplayDCs.findIndex(
+                        (contentDisplayDC) => contentDisplayDC === entityDC
+                     ) < 0 && contentDisplayDCs.push(entityDC);
+                     this._initDC(entityDC);
+                  } else {
+                     const contentDisplayDCID = `dc.${objID}`;
+                     this._initDC(
+                        contentDisplayDCs.find(
+                           (contentDisplayDC) =>
+                              contentDisplayDC.id === contentDisplayDCID
+                        ) ||
+                           (() => {
+                              contentDisplayDCSettings.datasourceID = objID;
+                              if (entityDC != null) {
+                                 const entityObjID = entityDC.datasource.id;
+                                 (contentDisplayDCSettings.linkFieldID =
+                                    AB.objectByID(objID).connectFields(
+                                       (f) =>
+                                          f.settings.linkObject === entityObjID
+                                    )[0]?.id) &&
+                                    (contentDisplayDCSettings.linkDatacollectionID =
+                                       entityDC.id);
+                              }
+                              const contentDisplayDC = AB.datacollectionNew({
+                                 id: contentDisplayDCID,
+                                 settings: contentDisplayDCSettings,
+                              });
+                              contentDisplayDC.$dc.__prevLinkDcCursor = entityDC
+                                 ?.getCursor()
+                                 ?.id?.toString();
+                              contentDisplayDCs.push(contentDisplayDC);
+                              return contentDisplayDC;
+                           })()
+                     );
+                  }
+                  break;
             }
             [, objID] = contentDisplayedFieldKeys.pop().split(".");
          }
