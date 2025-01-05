@@ -224,11 +224,11 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             // TODO (Guy): The reload DCs error.
             console.error(err);
          }
-         this.ready();
          await this.refresh();
          draggedNodes.forEach(($draggedNode) => {
             $draggedNode.remove();
          });
+         this.ready();
       };
       this._fnCreateNode = async ($node, data) => {
          // remove built in icon
@@ -340,8 +340,8 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             // TODO (Guy): The reload DCs error.
             console.error(err);
          }
-         this.ready();
          await this.refresh();
+         this.ready();
       };
       this._fnPageContentCallback = (
          contentRecords,
@@ -373,27 +373,43 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                resolve
             );
       };
-      this._fnPageContentDisplayCallback = (
-         contentDisplayRecords,
-         isContentDisplayDone,
-         contentDisplayDC,
+      (this._fnPageContentGroupCallback = async (
+         contentGroupRecords,
+         isContentGroupDone,
+         contentGroupDC,
          resolve
       ) => {
-         const contentDC = this._contentDC;
-         this._fnPageContentCallback(
-            contentDC.getData(),
-            true,
-            contentDC,
-            () => {}
-         );
-         if (isContentDisplayDone) resolve();
+         const teamDC = this.datacollection;
+         this._fnPageTeamCallback(teamDC.getData(), true, teamDC, () => {});
+         if (isContentGroupDone) resolve();
          else
             this._callPagingEvent(
-               contentDisplayDC,
-               this._fnPageContentDisplayCallback,
+               contentGroupDC,
+               this._fnPageContentGroupCallback,
                resolve
             );
-      };
+      }),
+         (this._fnPageContentDisplayCallback = (
+            contentDisplayRecords,
+            isContentDisplayDone,
+            contentDisplayDC,
+            resolve
+         ) => {
+            const contentDC = this._contentDC;
+            this._fnPageContentCallback(
+               contentDC.getData(),
+               true,
+               contentDC,
+               () => {}
+            );
+            if (isContentDisplayDone) resolve();
+            else
+               this._callPagingEvent(
+                  contentDisplayDC,
+                  this._fnPageContentDisplayCallback,
+                  resolve
+               );
+         });
       this._fnPageData = async (dc, callback, resolve) => {
          await this._waitDCReady(dc);
          let records = dc.getData();
@@ -434,7 +450,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                await this.teamAddChild(teamRecord, false);
                $teamNode = document.getElementById(teamNodeID);
                if ($teamNode == null) continue;
-            }
+            } else await this.teamEdit(teamRecord, null, false);
             const contentRecords = contentDC.getData(
                (contentRecord) =>
                   teamRecord[contentFieldColumnName].indexOf(
@@ -453,7 +469,35 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             );
       };
       this._fnRefresh = async () => {
+         this.busy();
+         const entityDC = this._entityDC;
+         const teamDC = this.datacollection;
+         const contentDC = this._contentDC;
+         const contentGroupDC = this._contentGroupDC;
+         await Promise.all([
+            teamDC.datacollectionLink != null && this._waitDCPending(teamDC),
+            contentDC.datacollectionLink != null &&
+               this._waitDCPending(contentDC),
+            contentGroupDC.datacollectionLink != null &&
+               this._waitDCPending(contentGroupDC),
+            ...this._contentDisplayDCs
+               .filter(
+                  (contentDisplayDC) =>
+                     contentDisplayDC !== entityDC &&
+                     contentDisplayDC !== teamDC &&
+                     contentDisplayDC !== contentDC &&
+                     contentDisplayDC !== contentGroupDC
+               )
+               .map(
+                  (contentDisplayDC) =>
+                     contentDisplayDC.datacollectionLink != null &&
+                     this._waitDCPending(contentDisplayDC)
+               ),
+         ]);
+         this.__orgchart.remove();
+         this.__orgchart = null;
          await this.refresh();
+         this.ready();
       };
       this._fnShowContentForm = (event) => {
          const contentDC = this._contentDC;
@@ -581,9 +625,9 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                                  })
                               )
                            );
-                           this.hideProgress();
+                           this.refresh();
                            this.enable();
-                           await this.refresh();
+                           this.hideProgress();
                         } catch {
                            // Close popup before response or possily response fail
                         }
@@ -735,9 +779,9 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                               // TODO (Guy): The reload DCs error.
                               console.error(err);
                            }
-                           this.ready();
                            await this.refresh();
                            $contentNode.remove();
+                           this.ready();
                            return;
                         }
                      }
@@ -757,9 +801,9 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                         // TODO (Guy): The reload DCs error.
                         console.error(err);
                      }
-                     this.ready();
                      await this.refresh();
                      $contentNode.remove();
+                     this.ready();
                   });
             },
          });
@@ -914,22 +958,29 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
    }
 
    _addContentRecordToGroup($teamNode, contentRecord) {
-      const contentNodeID = this.contentNodeID(contentRecord.id);
-      let $contentNode = document.getElementById(contentNodeID);
-      while ($contentNode != null) {
-         $contentNode.remove();
-         $contentNode = document.getElementById(contentNodeID);
-      }
+      const contentGroupDC = this._contentGroupDC;
+      const contentGroupDataPK =
+         contentRecord[this.getSettingField("contentGroupByField").columnName];
+      const contentGroupPKField = contentGroupDC.datasource.PK();
+      if (
+         contentGroupDC.getData(
+            (e) => e[contentGroupPKField] == contentGroupDataPK
+         )[0] == null
+      )
+         return;
+      const $groupSection = $teamNode.querySelector(
+         `.team-group-section[data-pk="${contentGroupDataPK}"] > .team-group-content`
+      );
+      if ($groupSection == null) return;
       (async () => {
-         $teamNode
-            .querySelector(
-               `.team-group-section[data-pk="${
-                  contentRecord[
-                     this.getSettingField("contentGroupByField").columnName
-                  ]
-               }"] > .team-group-content`
-            )
-            ?.appendChild(
+         await this._callAfterRender(async () => {
+            const contentNodeID = this.contentNodeID(contentRecord.id);
+            let $contentNode = document.getElementById(contentNodeID);
+            while ($contentNode != null) {
+               $contentNode.remove();
+               $contentNode = document.getElementById(contentNodeID);
+            }
+            $groupSection.appendChild(
                await this._createUIContentRecord(
                   contentRecord,
                   this.settings.strategyColors[
@@ -937,6 +988,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                   ]
                )
             );
+         });
       })();
    }
 
@@ -1191,10 +1243,8 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
    }
 
    _initDC(dc) {
-      if (dc.dataStatus === dc.dataStatusFlag.notInitial) {
-         dc.init();
-         dc.loadData();
-      }
+      dc.init();
+      if (dc.dataStatus === dc.dataStatusFlag.notInitial) dc.loadData();
    }
 
    _pageData() {
@@ -1203,8 +1253,10 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       this._promisePageData = new Promise((resolve) => {
          resolvePageData = resolve;
       });
+      const entityDC = this._entityDC;
       const teamDC = this.datacollection;
       const contentDC = this._contentDC;
+      const contentGroupDC = this._contentGroupDC;
       (async () => {
          try {
             await Promise.all([
@@ -1222,11 +1274,20 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      resolve
                   );
                }),
+               new Promise((resolve) => {
+                  this._callPagingEvent(
+                     contentGroupDC,
+                     this._fnPageContentGroupCallback,
+                     resolve
+                  );
+               }),
                ...this._contentDisplayDCs
                   .filter(
                      (contentDisplayDC) =>
+                        contentDisplayDC !== entityDC &&
                         contentDisplayDC !== teamDC &&
-                        contentDisplayDC !== contentDC
+                        contentDisplayDC !== contentDC &&
+                        contentDisplayDC !== contentGroupDC
                   )
                   .map(
                      (contentDisplayDC) =>
@@ -1281,9 +1342,10 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
    }
 
    async _reloadAllDC() {
-      await this._promisePageData;
+      const entityDC = this._entityDC;
       const teamDC = this.datacollection;
       const contentDC = this._contentDC;
+      const contentGroupDC = this._contentGroupDC;
       await Promise.all([
          this._reloadDCData(teamDC),
          ...this._dataPanelDCs.map((dataPanelDC) =>
@@ -1293,7 +1355,10 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          ...this._contentDisplayDCs
             .filter(
                (contentDisplayDC) =>
-                  contentDisplayDC !== teamDC && contentDisplayDC !== contentDC
+                  contentDisplayDC !== entityDC &&
+                  contentDisplayDC !== teamDC &&
+                  contentDisplayDC !== contentDC &&
+                  contentDisplayDC !== contentGroupDC
             )
             .map((contentDisplayDC) => this._reloadDCData(contentDisplayDC)),
       ]);
@@ -1336,7 +1401,6 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       // On drop update the parent (dropZone) of the node
       if (draggable)
          orgchart.addEventListener("nodedropped.orgchart", this._fnNodeDrop);
-
       if (this.__orgchart != null) {
          const oldOrgchart = this.__orgchart;
          orgchart.dataset.panStart = oldOrgchart.dataset.panStart;
@@ -1481,12 +1545,32 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       };
    }
 
+   async _waitDCPending(dc) {
+      switch (dc.dataStatus) {
+         case dc.dataStatusFlag.notInitial:
+         case dc.dataStatusFlag.initialized:
+            await new Promise((resolve) => {
+               dc.once("initializingData", resolve);
+            });
+            break;
+         default:
+            break;
+      }
+   }
+
    // TODO (Guy): Some DC.waitReady() won't be resolved.
    async _waitDCReady(dc) {
-      if (dc.dataStatus !== dc.dataStatusFlag.initialized)
-         await new Promise((resolve) => {
-            dc.once("initializedData", resolve);
-         });
+      const dataStatusFlag = dc.dataStatusFlag;
+      switch (dc.dataStatus) {
+         case dataStatusFlag.notInitial:
+         case dataStatusFlag.initializing:
+            await new Promise((resolve) => {
+               dc.once("initializedData", resolve);
+            });
+            break;
+         default:
+            break;
+      }
    }
 
    ui() {
@@ -1615,89 +1699,92 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             );
             const contentObjID = contentObj.id;
             const contentFieldFilter = JSON.parse(settings.contentFieldFilter);
-            const dcSettings = {
-               id: `dc.${contentObjID}`,
-               settings: {
-                  datasourceID: contentObjID,
-                  linkDatacollectionID: null,
-                  linkFieldID: null,
-                  objectWorkspace: {
-                     filterConditions: {
-                        glue: "and",
-                        rules: [
-                           // TODO (Guy): Hardcode date start filter.
-                           {
-                              key: contentObj.fieldByID(
-                                 settings.contentFieldDateStart
-                              )?.id,
-                              rule: "is_not_null",
-                              value: "",
-                           },
-                           {
-                              glue: "or",
-                              rules:
-                                 (contentFieldFilter.rules?.length > 0 && [
-                                    contentFieldFilter,
+            const contentDCSettings = {
+               datasourceID: contentObjID,
+               linkDatacollectionID: null,
+               linkFieldID: null,
+               objectWorkspace: {
+                  filterConditions: {
+                     glue: "and",
+                     rules: [
+                        // TODO (Guy): Hardcode date start filter.
+                        {
+                           key: contentObj.fieldByID(
+                              settings.contentFieldDateStart
+                           )?.id,
+                           rule: "is_not_null",
+                           value: "",
+                        },
+                        {
+                           glue: "or",
+                           rules:
+                              (contentFieldFilter.rules?.length > 0 && [
+                                 contentFieldFilter,
 
-                                    // TODO (Guy): Hardcode date end filter.
-                                    {
-                                       key: contentObj.fieldByID(
-                                          settings.contentFieldDateEnd
-                                       )?.id,
-                                       rule: "is_null",
-                                       value: "",
-                                    },
-                                 ]) ||
-                                 [],
-                           },
-                        ],
-                     },
+                                 // TODO (Guy): Hardcode date end filter.
+                                 {
+                                    key: contentObj.fieldByID(
+                                       settings.contentFieldDateEnd
+                                    )?.id,
+                                    rule: "is_null",
+                                    value: "",
+                                 },
+                              ]) ||
+                              [],
+                        },
+                     ],
                   },
                },
             };
             if (entityDC != null) {
                const entityObjID = entityDC.datasource.id;
-               dcSettings.linkDatacollectionID = entityDC.id;
-               (dcSettings.linkFieldID = contentObj.connectFields(
+               (contentDCSettings.linkFieldID = contentObj.connectFields(
                   (f) => f.settings.linkObject === entityObjID
-               )[0]?.id) && (dcSettings.linkDatacollectionID = entityDC.id);
+               )[0]?.id) &&
+                  (contentDCSettings.linkDatacollectionID = entityDC.id);
             }
-            return AB.datacollectionNew(dcSettings);
+            const contentDC = AB.datacollectionNew({
+               id: `dc.${contentObjID}`,
+               settings: contentDCSettings,
+            });
+            contentDC.$dc.__prevLinkDcCursor = entityDC
+               ?.getCursor()
+               ?.id?.toString();
+            this._initDC(contentDC);
+            return contentDC;
          })());
-      contentDC.$dc.__prevLinkDcCursor = entityDC?.getCursor()?.id?.toString();
-      this._initDC(contentDC);
 
       // Preparing for the content group DC.
-      this._initDC(
+      const contentGroupDC =
          this._contentGroupDC ||
-            (this._contentGroupDC = (() => {
-               const contentGroupObjID = contentDC.datasource.fieldByID(
-                  settings.contentGroupByField
-               ).settings.linkObject;
-               const dcSettings = {
-                  datasourceID: contentGroupObjID,
-                  linkDatacollectionID: null,
-                  linkFieldID: null,
-               };
-               if (entityDC != null) {
-                  const entityObjID = entityDC.datasource.id;
-                  dcSettings.linkDatacollectionID = entityDC.id;
-                  (dcSettings.linkFieldID = this.AB.objectByID(
-                     contentGroupObjID
-                  ).connectFields(
-                     (f) => f.settings.linkObject === entityObjID
-                  )[0]?.id) && (dcSettings.linkDatacollectionID = entityDC.id);
-               }
-               const contentGroupDC = this.AB.datacollectionNew({
-                  id: `dc.${contentGroupObjID}`,
-                  settings: dcSettings,
-               });
-               contentGroupDC.$dc.__prevLinkDcCursor = entityDC
-                  ?.getCursor()
-                  ?.id?.toString();
-               return contentGroupDC;
-            })())
-      );
+         (this._contentGroupDC = (() => {
+            const contentGroupObjID = contentDC.datasource.fieldByID(
+               settings.contentGroupByField
+            ).settings.linkObject;
+            const contentGroupDCSettings = {
+               datasourceID: contentGroupObjID,
+               linkDatacollectionID: null,
+               linkFieldID: null,
+            };
+            if (entityDC != null) {
+               const entityObjID = entityDC.datasource.id;
+               (contentGroupDCSettings.linkFieldID = this.AB.objectByID(
+                  contentGroupObjID
+               ).connectFields(
+                  (f) => f.settings.linkObject === entityObjID
+               )[0]?.id) &&
+                  (contentGroupDCSettings.linkDatacollectionID = entityDC.id);
+            }
+            const contentGroupDC = this.AB.datacollectionNew({
+               id: `dc.${contentGroupObjID}`,
+               settings: contentGroupDCSettings,
+            });
+            contentGroupDC.$dc.__prevLinkDcCursor = entityDC
+               ?.getCursor()
+               ?.id?.toString();
+            this._initDC(contentGroupDC);
+            return contentGroupDC;
+         })());
 
       // Prepare display DCs.
       const contentDisplayedFieldKeys = Object.keys(
@@ -1707,6 +1794,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          const teamDC = this.datacollection;
          const teamObjID = teamDC.datasource.id;
          const contentObjID = contentDC.datasource.id;
+         const contentGroupObjID = contentGroupDC.datasource.id;
          const contentDisplayDCSettings = {
             datasourceID: null,
             linkDatacollectionID: null,
@@ -1716,58 +1804,51 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          const contentDisplayDCs = this._contentDisplayDCs;
          let [, objID] = contentDisplayedFieldKeys.pop().split(".");
          while (contentDisplayedFieldKeys.length > 0) {
-            switch (objID) {
-               case teamObjID:
-                  contentDisplayDCs.findIndex(
-                     (contentDisplayDC) => contentDisplayDC.id === teamObjID
-                  ) < 0 && contentDisplayDCs.push(teamDC);
-                  this._initDC(teamDC);
-                  break;
-               case contentObjID:
-                  contentDisplayDCs.findIndex(
-                     (contentDisplayDC) => contentDisplayDC === contentDC
-                  ) < 0 && contentDisplayDCs.push(contentDC);
-                  this._initDC(contentDC);
-                  break;
-               default:
-                  if (entityDC?.datasource.id === objID) {
-                     contentDisplayDCs.findIndex(
-                        (contentDisplayDC) => contentDisplayDC === entityDC
-                     ) < 0 && contentDisplayDCs.push(entityDC);
-                     this._initDC(entityDC);
-                  } else {
-                     const contentDisplayDCID = `dc.${objID}`;
-                     this._initDC(
-                        contentDisplayDCs.find(
-                           (contentDisplayDC) =>
-                              contentDisplayDC.id === contentDisplayDCID
-                        ) ||
-                           (() => {
-                              contentDisplayDCSettings.datasourceID = objID;
-                              if (entityDC != null) {
-                                 const entityObjID = entityDC.datasource.id;
-                                 (contentDisplayDCSettings.linkFieldID =
-                                    AB.objectByID(objID).connectFields(
-                                       (f) =>
-                                          f.settings.linkObject === entityObjID
-                                    )[0]?.id) &&
-                                    (contentDisplayDCSettings.linkDatacollectionID =
-                                       entityDC.id);
-                              }
-                              const contentDisplayDC = AB.datacollectionNew({
-                                 id: contentDisplayDCID,
-                                 settings: contentDisplayDCSettings,
-                              });
-                              contentDisplayDC.$dc.__prevLinkDcCursor = entityDC
-                                 ?.getCursor()
-                                 ?.id?.toString();
-                              contentDisplayDCs.push(contentDisplayDC);
-                              return contentDisplayDC;
-                           })()
-                     );
-                  }
-                  break;
-            }
+            if (
+               contentDisplayDCs.findIndex(
+                  (contentDisplayDC) => contentDisplayDC.datasource.id === objID
+               ) < 0
+            )
+               switch (objID) {
+                  case teamObjID:
+                     this._initDC(teamDC);
+                     contentDisplayDCs.push(teamDC);
+                     break;
+                  case contentObjID:
+                     this._initDC(contentDC);
+                     contentDisplayDCs.push(contentDC);
+                     break;
+                  case contentGroupObjID:
+                     contentDisplayDCs.push(contentGroupDC);
+                     this._initDC(contentGroupDC);
+                     break;
+                  default:
+                     if (entityDC?.datasource.id === objID) {
+                        this._initDC(entityDC);
+                        contentDisplayDCs.push(entityDC);
+                     } else {
+                        contentDisplayDCSettings.datasourceID = objID;
+                        if (entityDC != null) {
+                           const entityObjID = entityDC.datasource.id;
+                           (contentDisplayDCSettings.linkFieldID =
+                              AB.objectByID(objID).connectFields(
+                                 (f) => f.settings.linkObject === entityObjID
+                              )[0]?.id) &&
+                              (contentDisplayDCSettings.linkDatacollectionID =
+                                 entityDC.id);
+                        }
+                        const contentDisplayDC = AB.datacollectionNew({
+                           id: `dc.${objID}`,
+                           settings: contentDisplayDCSettings,
+                        });
+                        contentDisplayDC.$dc.__prevLinkDcCursor = entityDC
+                           ?.getCursor()
+                           ?.id?.toString();
+                        this._initDC(contentDisplayDC);
+                        contentDisplayDCs.push(contentDisplayDC);
+                     }
+                     break;
+               }
             [, objID] = contentDisplayedFieldKeys.pop().split(".");
          }
       }
@@ -1778,12 +1859,12 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       this.busy();
       this.AB.performance.mark("TeamChart.onShow");
       await this._promiseInit;
-      this.ready();
       super.onShow();
       this.AB.performance.mark("TeamChart.load");
       await this.refresh();
       this.AB.performance.measure("TeamChart.load");
       this.AB.performance.measure("TeamChart.onShow");
+      this.ready();
    }
 
    /**
@@ -1794,17 +1875,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       if (dc == null) return;
       const filters = this.__filters;
       const settings = this.settings;
-      await Promise.all([
-         this._waitDCReady(dc),
-         // this._waitDCReady(this._contentDC),
-         // this._waitDCReady(this._contentGroupDC),
-         // ...this._contentDisplayDCs.map(async (_contentDisplayDC) =>
-         //    this._waitDCReady(_contentDisplayDC)
-         // ),
-         // ...this._dataPanelDCs.map(async (_dataPanelDC) =>
-         //    this._waitDCReady(_dataPanelDC)
-         // ),
-      ]);
+      await this._waitDCReady(dc);
       let topNode = dc.getCursor();
       const topNodeColumn = this.getSettingField("topTeam").columnName;
       if (settings.topTeam) {
@@ -1880,7 +1951,6 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
    }
 
    async refresh() {
-      this.busy();
       const ids = this.ids;
       $$(ids.teamFormPopup)?.destructor();
       $$(ids.contentForm)?.destructor();
@@ -1888,13 +1958,15 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       this._showDataPanel();
       this._showOrgChart();
       this._pageData();
-      this.ready();
    }
 
    async filterApply() {
-      $$(this.ids.filterPopup).hide();
-      this.__filters = $$(this.ids.filterForm).getValues();
+      this.busy();
+      const ids = this.ids;
+      $$(ids.filterPopup).hide();
+      this.__filters = $$(ids.filterForm).getValues();
       await this.refresh();
+      this.ready();
    }
 
    filterTeam(filters, team, code, contentFieldData) {
@@ -2039,8 +2111,8 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
    async teamEdit(values, strategy, isServerSideUpdate = true) {
       const strategyLink = this.getSettingField("teamStrategy").columnName;
       const strategyField = this.getSettingField("strategyCode").columnName;
-      const strategyCode = strategy[strategyField];
-      values[strategyLink] = strategy.id;
+      const strategyCode = strategy?.[strategyField];
+      values[strategyLink] = strategy?.id || values[strategyLink];
       delete values[`${strategyLink}__relation`];
       isServerSideUpdate &&
          (await this.datacollection.model
@@ -2051,7 +2123,8 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const nodeID = this.teamNodeID(values.id);
       const node = document.querySelector(`#${nodeID}`);
       const currentStrategy = node.classList?.value?.match(/strategy-\S+/)[0];
-      const newStrategy = `strategy-${strategyCode}`;
+      const newStrategy =
+         (strategyCode && `strategy-${strategyCode}`) || currentStrategy;
       if (currentStrategy !== newStrategy) {
          node.classList?.remove(currentStrategy);
          node.classList?.add(newStrategy);
