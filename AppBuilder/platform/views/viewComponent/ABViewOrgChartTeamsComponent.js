@@ -1,6 +1,7 @@
 const ABViewComponent = require("./ABViewComponent").default;
 const DC_OFFSET = 20;
 const RECORD_LIMIT = 20;
+const TEAM_CHART_MAX_DEPTH = 10; // prevent inifinite loop
 module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
    constructor(baseView, idBase, ids) {
       super(
@@ -460,8 +461,10 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             for (const contentRecord of contentRecords)
                this._addContentRecordToGroup($teamNode, contentRecord);
          }
-         if (isTeamDone) resolve();
-         else
+         if (isTeamDone) {
+            await this.pullData();
+            resolve();
+         } else
             this._callPagingEvent(
                this.datacollection,
                this._fnPageTeamCallback,
@@ -1873,7 +1876,6 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
    async pullData() {
       const dc = this.datacollection;
       if (dc == null) return;
-      const filters = this.__filters;
       const settings = this.settings;
       await this._waitDCReady(dc);
       let topNode = dc.getCursor();
@@ -1883,12 +1885,6 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          topNode = topFromField ? topFromField : topNode;
       }
       if (!topNode) return null;
-      const teamLink = this.getSettingField("teamLink").columnName;
-      const teamName = this.getSettingField("teamName").columnName;
-      const teamInactive = this.getSettingField("teamInactive").columnName;
-      const strategyField = this.getSettingField("teamStrategy").columnName;
-      const strategyCode = this.getSettingField("strategyCode").columnName;
-      const MAX_DEPTH = 10; // prevent inifinite loop
 
       /**
        * Recursive function to prepare child node data
@@ -1896,38 +1892,48 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
        * @param {number} [depth=0] a count of how many times we have recursed
        */
       const pullChildData = (node, depth = 0) => {
-         if (depth >= MAX_DEPTH) return;
+         if (depth >= TEAM_CHART_MAX_DEPTH) return;
          node.children = [];
-         node._rawData[teamLink].forEach((id) => {
-            const childData = dc.getData((e) => e.id == id)[0];
-            // Don't show inactive teams
-            if (
-               !childData ||
-               (filters?.inactive !== 1 && childData[teamInactive])
-            )
-               return;
-            const strategy = childData[`${strategyField}__relation`];
-            const code = strategy?.[strategyCode];
-            const child = {
-               name: childData[teamName],
-               id: this.teamNodeID(id),
-               className: `strategy-${code}`,
-               isInactive: childData[teamInactive],
-               _rawData: childData,
-            };
-
-            child.filteredOut = this.filterTeam(filters, child, code);
-            if (child.name === "External Support")
-               child.className = `strategy-external`;
-            if (childData[teamLink].length > 0) {
-               pullChildData(child, depth + 1);
+         node._rawData[this.getSettingField("teamLink").columnName].forEach(
+            (id) => {
+               const childData = dc.getData((e) => e.id == id)[0];
+               // Don't show inactive teams
+               if (
+                  !childData ||
+                  (this.__filters?.inactive !== 1 &&
+                     childData[this.getSettingField("teamInactive").columnName])
+               )
+                  return;
+               const child = {
+                  name: childData[this.getSettingField("teamName").columnName],
+                  id: this.teamNodeID(id),
+                  className: `strategy-${
+                     childData[
+                        `${
+                           this.getSettingField("teamStrategy").columnName
+                        }__relation`
+                     ]?.[this.getSettingField("strategyCode").columnName]
+                  }`,
+                  isInactive:
+                     childData[this.getSettingField("teamInactive").columnName],
+                  _rawData: childData,
+               };
+               child.filteredOut = this.filterTeam(child);
+               if (child.name === "External Support")
+                  child.className = `strategy-external`;
+               if (
+                  childData[this.getSettingField("teamLink").columnName]
+                     .length > 0
+               ) {
+                  pullChildData(child, depth + 1);
+               }
+               // If this node is filtered we still need it if it has children
+               // that pass
+               if (!child.filteredOut || child.children?.length > 0) {
+                  node.children.push(child);
+               }
             }
-            // If this node is filtered we still need it if it has children
-            // that pass
-            if (!child.filteredOut || child.children?.length > 0) {
-               node.children.push(child);
-            }
-         });
+         );
          if (node.children.length === 0) {
             delete node.children;
          } else {
@@ -1937,16 +1943,19 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             );
          }
       };
-      const topNodeCode = topNode[`${strategyField}__relation`]?.[strategyCode];
       const chartData = (this._chartData = {
          id: this.teamNodeID(topNode.id),
-         name: topNode[teamName] ?? "",
-         className: `strategy-${topNodeCode}`,
-         isInactive: topNode[teamInactive],
+         name: topNode[this.getSettingField("teamName").columnName] ?? "",
+         className: `strategy-${
+            topNode[
+               `${this.getSettingField("teamStrategy").columnName}__relation`
+            ]?.[this.getSettingField("strategyCode").columnName]
+         }`,
+         isInactive: topNode[this.getSettingField("teamInactive").columnName],
          _rawData: topNode,
          filteredOut: false,
       });
-      chartData.filteredOut = this.filterTeam(filters, chartData, topNodeCode);
+      chartData.filteredOut = this.filterTeam(chartData);
       pullChildData(chartData);
    }
 
@@ -1962,40 +1971,162 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
 
    async filterApply() {
       this.busy();
+      await this._promisePageData;
       const ids = this.ids;
       $$(ids.filterPopup).hide();
       this.__filters = $$(ids.filterForm).getValues();
-      await this.refresh();
+      this.__orgchart?.remove();
+      this.__orgchart = null;
+      await this.pullData();
+      this._showOrgChart();
+      await this._callAfterRender(() => {
+         const contentDC = this._contentDC;
+         this._fnPageContentCallback(
+            contentDC.getData(),
+            true,
+            contentDC,
+            () => {}
+         );
+      });
       this.ready();
    }
 
-   filterTeam(filters, team, code, contentFieldData) {
+   filterTeam(team) {
+      const filters = this.__filters;
+      let filter = false;
+      filters.strategy = filters.strategy ?? "";
+      filters.teamName = filters.teamName ?? "";
+
       // Apply filters (match using or)
-      if (filters.strategy || filters.teamName || contentFieldData != null) {
-         let filter = true;
-         if (filters.strategy !== "" && filters.strategy == code) {
+      if (filters.strategy || filters.teamName) {
+         filter = true;
+         if (
+            filters.strategy !== "" &&
+            filters.strategy == team.className.replace("strategy-", "")
+         )
             filter = false;
-         }
          if (
             filters.teamName !== "" &&
             team.name.toLowerCase().includes(filters.teamName.toLowerCase())
-         ) {
-            filter = false;
-         }
-         const contentObjPK = this._contentDC.datasource.PK();
-         if (
-            this._contentDC.getData((contentDataRecord) => {
-               if (Array.isArray(contentFieldData))
-                  return (
-                     contentFieldData.indexOf(contentDataRecord[contentObjPK]) >
-                     -1
-                  );
-               return contentFieldData == contentDataRecord[contentObjPK];
-            }).length > 0
          )
             filter = false;
-         return filter;
+         if (!filter) return filter;
       }
+      const AB = this.AB;
+      const settings = this.settings;
+      const contentDisplayFieldFilters = settings.contentDisplayedFieldFilters;
+      for (const key in contentDisplayFieldFilters) {
+         filters[key] = filters[key] ?? "";
+         if (filters[key] !== "") filter = true;
+      }
+      if (!filter) return filter;
+      const contentField = settings.contentField;
+      const teamObj = this.datacollection.datasource;
+      const contentFieldLinkColumnName = teamObj.connectFields(
+         (connectField) => connectField.id === contentField
+      )[0].fieldLink.columnName;
+      const contentDC = this._contentDC;
+      const contentObj = contentDC.datasource;
+      const contentObjID = contentObj.id;
+      const contentObjPK = contentObj.PK();
+      const teamRecordPK = team._rawData[teamObj.PK()];
+      const contentDisplayedFields = settings.contentDisplayedFields;
+      const contentDisplayedFieldKeys = Object.keys(contentDisplayedFields);
+      const contentDisplayDCs = this._contentDisplayDCs;
+      let currentContentDisplayFieldKey = null;
+      let currentContentDisplayDC = null;
+      let currentContentDisplayObjID = null;
+      let currentContentDisplayObjPK = null;
+      let currentContentDisplayFieldColumnName = null;
+      let currentContentDisplayFilterValue = null;
+      let currentContentDisplayRecords = [];
+      while (contentDisplayedFieldKeys.length > 0) {
+         currentContentDisplayFieldKey = contentDisplayedFieldKeys.pop();
+         currentContentDisplayObjID =
+            currentContentDisplayFieldKey.split(".")[1];
+         currentContentDisplayFilterValue =
+            filters[
+               `${currentContentDisplayFieldKey}.${contentDisplayedFields[currentContentDisplayFieldKey]}.0`
+            ];
+         if (currentContentDisplayFilterValue == null)
+            currentContentDisplayFilterValue =
+               filters[
+                  `${currentContentDisplayFieldKey}.${contentDisplayedFields[currentContentDisplayFieldKey]}.1`
+               ];
+         if (currentContentDisplayFilterValue != null) {
+            if (currentContentDisplayFilterValue === "") continue;
+            currentContentDisplayFilterValue = currentContentDisplayFilterValue
+               .toString()
+               .toLowerCase();
+            currentContentDisplayFieldColumnName = AB.definitionByID(
+               contentDisplayedFields[currentContentDisplayFieldKey]
+            ).columnName;
+            currentContentDisplayDC = contentDisplayDCs.find(
+               (contentDisplayDC) =>
+                  contentDisplayDC.datasource.id === currentContentDisplayObjID
+            );
+            currentContentDisplayObjPK =
+               currentContentDisplayDC.datasource.PK();
+            currentContentDisplayRecords = currentContentDisplayDC
+               .getData(
+                  (contentDisplayRecord) =>
+                     contentDisplayRecord[currentContentDisplayFieldColumnName]
+                        .toString()
+                        .toLowerCase()
+                        .indexOf(currentContentDisplayFilterValue) > -1
+               )
+               .map((contentDisplayRecord) =>
+                  contentDisplayRecord[currentContentDisplayObjPK].toString()
+               );
+         } else if (currentContentDisplayRecords.length > 0) {
+            currentContentDisplayFieldColumnName = AB.definitionByID(
+               contentDisplayedFields[currentContentDisplayFieldKey]
+            ).columnName;
+            currentContentDisplayDC = contentDisplayDCs.find(
+               (contentDisplayDC) =>
+                  contentDisplayDC.datasource.id === currentContentDisplayObjID
+            );
+            currentContentDisplayObjPK =
+               currentContentDisplayDC.datasource.PK();
+            currentContentDisplayRecords = currentContentDisplayDC
+               .getData((contentDisplayRecord) => {
+                  const contentDisplayRecordData =
+                     contentDisplayRecord[currentContentDisplayFieldColumnName];
+                  return Array.isArray(contentDisplayRecordData)
+                     ? contentDisplayRecordData.findIndex(
+                          (e) =>
+                             currentContentDisplayRecords.indexOf(
+                                e.toString()
+                             ) > -1
+                       ) > -1
+                     : currentContentDisplayRecords.indexOf(
+                          contentDisplayRecordData.toString()
+                       ) > -1;
+               })
+               .map((contentDisplayRecord) =>
+                  contentDisplayRecord[currentContentDisplayObjPK].toString()
+               );
+         }
+         if (
+            currentContentDisplayObjID === contentObjID &&
+            currentContentDisplayRecords.length > 0 &&
+            contentDC
+               .getData(
+                  (contentRecord) =>
+                     contentRecord[contentFieldLinkColumnName] == teamRecordPK
+               )
+               .findIndex(
+                  (contentRecord) =>
+                     currentContentDisplayRecords.indexOf(
+                        contentRecord[contentObjPK].toString()
+                     ) > -1
+               ) > -1
+         ) {
+            filter = false;
+            break;
+         }
+      }
+      return filter;
    }
 
    /**
@@ -2040,7 +2171,8 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       if (parent == null) return;
       const strategyLink = this.getSettingField("teamStrategy").columnName;
       const strategyField = this.getSettingField("strategyCode").columnName;
-      const strategyCode = _rawData[`${strategyLink}__relation`][strategyField];
+      const strategyCode =
+         _rawData[`${strategyLink}__relation`]?.[strategyField];
       const hasChild = parent.parentNode.colSpan > 1;
       const newChild = {
          name: values[nameField],
@@ -2113,7 +2245,9 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const strategyField = this.getSettingField("strategyCode").columnName;
       const strategyCode = strategy?.[strategyField];
       values[strategyLink] = strategy?.id || values[strategyLink];
-      delete values[`${strategyLink}__relation`];
+
+      // TODO (Guy): Fix the values later.
+      // delete values[`${strategyLink}__relation`];
       isServerSideUpdate &&
          (await this.datacollection.model
             .update(values.id, values)
