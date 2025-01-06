@@ -10,8 +10,9 @@ webix.i18n.locales["th-TH"] = {
    dateFormat: (date) => {
       if (date == null) return "";
       else if (typeof date == "string") return date;
-
-      const format = webix.Date.dateToStr(`%j/%m/${date.getFullYear() + 543}`);
+      // NOTE: we are ignoring the user set date format and using %d/%m/%Y
+      //       so in ABViewFormDatepickerComponent we have to use %d/%m/%Y
+      const format = webix.Date.dateToStr(`%d/%m/${date.getFullYear() + 543}`);
       return format(date);
    },
    timeFormat: "%G:%i",
