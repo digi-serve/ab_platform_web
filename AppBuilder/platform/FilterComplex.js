@@ -697,13 +697,17 @@ module.exports = class FilterComplex extends FilterComplexCore {
       // Add filter options to Custom index
       const LinkType = `${field?.settings?.linkType}:${field?.settings?.linkViaType}`;
       if (
-         field?.settings?.isCustomFK &&
          // 1:M
-         (LinkType == "one:many" ||
-            // 1:1 isSource = true
-            (LinkType == "one:one" && field?.settings?.isSource))
+         LinkType == "one:many" ||
+         // 1:1 isSource = true
+         (LinkType == "one:one" && field?.settings?.isSource)
       ) {
-         result = (result ?? []).concat(this.uiTextValue(field));
+         result = result ?? [];
+
+         if (field?.settings?.isCustomFK)
+            result = result.concat(this.uiTextValue(field));
+
+         result = result.concat(this.uiQueryFieldValue(field, defaultValue));
       } else if (field?.key != "connectObject") {
          result = (result ?? [])
             .concat(this.uiTextValue(field))
