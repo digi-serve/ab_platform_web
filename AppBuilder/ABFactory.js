@@ -130,6 +130,8 @@ class ABFactory extends ABFactoryCore {
          }
       };
 
+      this.performance = performance;
+
       this.UISettings = UISettings;
 
       this.Validation = {

@@ -69,4 +69,12 @@ module.exports = class ABObjectApi extends ABObjectApiCore {
    async save() {
       return await super.save(true);
    }
+
+   migrateCreate() {
+      return Promise.resolve();
+   }
+
+   migrateDrop() {
+      return Promise.resolve();
+   }
 };
