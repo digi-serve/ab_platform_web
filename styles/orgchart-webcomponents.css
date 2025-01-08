@@ -515,3 +515,11 @@ org-chart .slide-left {
 org-chart.l2r .node.slide-left, org-chart.r2l .node.slide-left {
   left: -40px;
 }
+
+.orgchart-teams-edit-content-confirm-popup {
+  min-width: 450px;
+}
+
+.orgchart-teams-edit-content-confirm-popup .webix_popup_button {
+  padding: 0px 10px;
+}
