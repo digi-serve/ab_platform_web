@@ -262,3 +262,128 @@ org-chart tr.lines .downLine {
    50%   { background-color: #eee; }
    100% { background-color: #ddd}
 }
+
+/* -- DATA PANEL -- */
+.data-panel-button {
+   display: flex;
+   border-radius: 10px;
+   background: #fff;
+   box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+   float: right;
+   padding: 5px;
+   width: 230px;
+   margin-right: 25px;
+}
+
+.data-panel-close {
+   background: #2F27CE;
+   color: #FFF;
+   border-radius: 5px;
+   padding: 4px 5px;
+   float: right;
+}
+
+.data-panel-close:hover {
+   background: #FFF;
+   color: #2F27CE;
+   border: 1px solid #2F27CE;
+}
+
+.data-panel-employee {
+   margin-top: 3px;
+   text-align: center;
+   border-radius: 8px;
+   border: 2px solid #868686;
+   height: 22px;
+   font-family: Jomhuria;
+   font-size: 18px;
+   line-height: 25px;
+}
+
+.data-panel-employee-list .webix_list_item {
+   border-bottom: unset;
+   background: transparent;
+   overflow: auto;
+   max-height: 95%;
+}
+
+.data-panel-open {
+  background: #FFF;
+  color: #2F27CE;
+  border-radius: 5px;
+  padding: 4px;
+  float: right;
+}
+
+.data-panel-open:hover {
+  background: #2F27CE;
+  color: #FFF !important;
+}
+
+.data-panel-popup {
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+  padding: 10px;
+}
+
+.data-panel-tabbar {
+   border: solid black;
+   border-width: 1px 0px 1px 0px !important;
+   padding: 5px;
+}
+
+.data-panel-tabbar .webix_all_tabs {
+   float: left;
+   display: flex;
+   gap: 10px;
+   height: 25px;
+}
+
+.data-panel-tabbar .webix_all_tabs .webix_item_tab {
+   color: #000;
+   border-radius: 7px;
+   background: #FFF;
+   font-family: "Jomhuria", sans-serif;
+   font-size:20px;
+   line-height: normal;
+   box-shadow: none;
+   border: none;
+   display: flex;
+   width: 54px !important;
+   height: 24px;
+   justify-content: center;
+   align-items: center;
+}
+
+.data-panel-tabbar .webix_all_tabs .webix_selected {
+   color: #FFF;
+   background: #000 !important;
+}
+
+.data-panel-tabbar .webix_all_tabs .webix_item_tab:hover {
+   color: #000;
+   background: rgba(0, 0, 0, 0.20) !important;
+   box-shadow: none;
+}
+
+.data-panel-tabbar .webix_all_tabs .webix_item_tab:focus {
+   color: #FFF;
+   background: #222 !important;
+   box-shadow: none;
+}
+
+.data-panel-tabview .webix_multiview {
+   margin-top: 0px !important;
+}
+
+.data-panel-tabview .webix_multiview .webix_list {
+   height: 530px !important;
+}
+
+/* following a comment here: https://docs.webix.com/api__refs__ui.popup.html
+ * so that the popup doesn't close. Not sure if we want to do it this way */
+.webix_modal {
+  width: 0;
+  height: 0;
+}
