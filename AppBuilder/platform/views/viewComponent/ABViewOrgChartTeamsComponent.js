@@ -13,6 +13,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                chartDom: "",
                chartContent: "",
                dataPanel: "",
+               dataPanelPopup: "",
                filterPopup: "",
                filterForm: "",
                contentForm: "",
@@ -1376,8 +1377,19 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       await this._waitDCReady(dc);
    }
 
-   _showDataPanel() {
-      this.AB.Webix.ui(this._uiDataPanel(), $$(this.ids.dataPanel)).show();
+   _showDataPanel(ev) {
+      let $panel = $$(this.ids.dataPanelPopup);
+      if (!$panel) {
+         $panel = this.AB.Webix.ui({
+            id: this.ids.dataPanelPopup,
+            view: "popup",
+            width: 250,
+            body: this._uiDataPanel(),
+            css: "data-panel-popup",
+            modal: true,
+         });
+      }
+      $panel.show(ev.currentTarget, { x: -30, y: -35 });
    }
 
    _showOrgChart() {
@@ -1442,7 +1454,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                header,
                body: {
                   view: "list",
-                  css: { overflow: "auto", "max-height": "85%" },
+                  css: { overflow: "auto", "max-height": "90%" },
                   data: [],
                },
             });
@@ -1453,10 +1465,11 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                body: {
                   view: "list",
                   template: (data) =>
-                     `<div style="text-align: center;">${panelObj.displayData(
+                     `<div class="data-panel-employee">${panelObj.displayData(
                         data
                      )}</div>`,
-                  css: { overflow: "auto", "max-height": "85%" },
+                  borderless: true,
+                  css: "data-panel-employee-list",
                   data: [],
                   on: {
                      async onViewShow() {
@@ -1535,16 +1548,40 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          }
       }
       return {
-         id: this.ids.dataPanel,
-         hidden: true,
-         view: "tabview",
-         width: 450,
-         tabbar: {
-            height: 60,
-            type: "bottom",
-            css: "webix_dark",
-         },
-         cells,
+         height: 600,
+         type: "clean",
+         rows: [
+            {
+               view: "template",
+               borderless: true,
+               template: `<div style="color:#2F27CE;font-family:'Roboto';font-size:17px;font-weight:900">
+                     ${this.label("Staff Assignment")}
+                     <span class="fa fa-compress data-panel-close"></span>
+                  </div>`,
+               height: 35,
+               onClick: {
+                  "data-panel-close": () => {
+                     $$(this.ids.dataPanelPopup).hide();
+                     return false;
+                  },
+               },
+            },
+            {
+               id: this.ids.dataPanel,
+               view: "tabview",
+               css: "data-panel-tabview",
+               width: 250,
+               borderless: true,
+               tabbar: {
+                  height: 25,
+                  // width: 300,
+                  align: "left",
+                  // type: "bottom",
+                  css: "data-panel-tabbar",
+               },
+               cells,
+            },
+         ],
       };
    }
 
@@ -1585,6 +1622,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          {
             id: ids.chartView,
             view: "template",
+            responsive: true,
             template: `<div id="${ids.chartDom}"></div>`,
             css: {
                position: "relative",
@@ -1610,7 +1648,6 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                               },
                            ],
                         },
-                        self._uiDataPanel(),
                      ],
                   }).$view;
                   chartDom.appendChild($chartDomComponents);
@@ -1620,10 +1657,25 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                   $filterButton.innerHTML = `<i class="fa fa-filter"></i> Filter`;
                   $filterButton.classList.add("filter-button");
                   $filterButton.onclick = self._fnShowFilterPopup;
+                  const $dataPanelButton = document.createElement("div");
+                  $dataPanelButton.innerHTML = `<span
+                        class="fa fa-2x fa-users"
+                        style="display:block;color:#2F27CE;font-sizze:17px;">
+                     </span>
+                     <div
+                        class="data-panel-open"
+                        style="color:#2F27CE;font-family:'Roboto';font-size:17px;font-weight:900;width:90%;margin-left:10px;padding:5px;border-radius:10px">
+                           ${self.label("Staff Assignment")}
+                           <span class="fa fa-expand" style="float:right;"></span>
+                     </div>`;
+                  $dataPanelButton.classList.add("data-panel-button");
+                  $dataPanelButton.querySelector(".data-panel-open").onclick = (
+                     ev
+                  ) => self._showDataPanel(ev);
                   $chartDomComponents.children[0].children[0].children[0].append(
-                     $filterButton
+                     $filterButton,
+                     $dataPanelButton
                   );
-                  $$(ids.dataPanel).show();
                },
             },
          },
@@ -1964,7 +2016,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       $$(ids.teamFormPopup)?.destructor();
       $$(ids.contentForm)?.destructor();
       await this.pullData();
-      this._showDataPanel();
+      // this._showDataPanel();
       this._showOrgChart();
       this._pageData();
    }
