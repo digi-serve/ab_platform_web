@@ -1472,6 +1472,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          {
             id: ids.chartView,
             view: "template",
+            responsive: true,
             template: `<div id="${ids.chartDom}"></div>`,
             css: {
                position: "relative",
