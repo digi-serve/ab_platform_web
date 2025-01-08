@@ -40,6 +40,13 @@ function _toInternal(cond, fields = []) {
       };
 
       if (Array.isArray(cond.value)) cond.includes = cond.value;
+      if (
+         cond.rule === "in_query_field" ||
+         cond.rule === "not_in_query_field"
+      ) {
+         cond.includes = cond.value.split(":");
+      }
+
       // else cond.includes = cond.value?.split?.(/,|:/) ?? [];
 
       // if (field?.key == "date" || field?.key == "datetime") {
