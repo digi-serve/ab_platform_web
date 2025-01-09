@@ -537,7 +537,16 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                const fieldName = field.columnName;
 
                // TODO (Guy): Add validators.
-               rules[fieldName] = () => true;
+               let invalidMessage = "";
+               switch (fieldName) {
+                  case contentDateEndFieldColumnName:
+                     invalidMessage = `The ${field.label} must be today or earlier.`;
+                     rules[fieldName] = (value) => value <= new Date();
+                     break;
+                  default:
+                     rules[fieldName] = () => true;
+                     break;
+               }
                const fieldLabel = field.label;
                const settings = field.settings;
                switch (fieldKey) {
@@ -547,6 +556,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                         name: fieldName,
                         label: fieldLabel,
                         labelWidth,
+                        invalidMessage,
                      };
                   case "number":
                      return {
@@ -555,6 +565,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                         label: fieldLabel,
                         labelWidth,
                         type: "number",
+                        invalidMessage,
                      };
                   case "list":
                      return {
@@ -568,6 +579,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                            id: option.id,
                            value: option.text,
                         })),
+                        invalidMessage,
                      };
                   case "user":
                   case "connectObject":
@@ -581,6 +593,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                            label: "Name",
                            disabled: true,
                            labelWidth,
+                           invalidMessage,
                            on: {
                               async onViewShow() {
                                  abWebix.extend(this, abWebix.ProgressBar);
@@ -643,6 +656,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                              label: fieldLabel,
                              disabled: true,
                              labelWidth,
+                             invalidMessage,
                              options: [],
                              on: {
                                 onViewShow,
@@ -655,6 +669,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                              labelWidth,
                              stringResult: false,
                              labelAlign: "left",
+                             invalidMessage,
                              options: [],
                              on: {
                                 onViewShow,
@@ -667,6 +682,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                         name: fieldName,
                         label: fieldLabel,
                         labelWidth,
+                        invalidMessage,
                         timepicker: fieldKey === "datetime",
                      };
                   case "file":
@@ -677,6 +693,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                         name: fieldName,
                         label: fieldLabel,
                         labelWidth,
+                        invalidMessage,
                      };
                   // case "json":
                   // case "LongText":
@@ -688,10 +705,12 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                         name: fieldName,
                         label: fieldLabel,
                         labelWidth,
+                        invalidMessage,
                      };
                }
             }
          );
+         const Webix = AB.Webix;
          contentFormElements.push({
             view: "button",
             value: this.label("Save"),
@@ -717,78 +736,95 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                $contentForm.$view.remove();
                $contentForm.destructor();
                if (!isDataChanged) return;
-               webix
-                  .confirm({
-                     title: "Warning",
-                     ok: "Yes",
-                     cancel: "No",
-                     text: "You are about to confirm. Are you sure?",
-                  })
-                  .then(async () => {
-                     this.busy();
-                     const teamDC = this.datacollection;
-                     const contentDC = this._contentDC;
-                     const dataID = newFormData.id;
-                     const $contentNode = document.getElementById(
-                        this.contentNodeID(dataID)
-                     );
-                     delete newFormData["created_at"];
-                     delete newFormData["updated_at"];
-                     delete newFormData["properties"];
-                     for (const editContentFieldToCreateNew of editContentFieldsToCreateNew) {
-                        const editContentFieldToCreateNewColumnName =
-                           contentObj.fieldByID(
-                              editContentFieldToCreateNew
-                           )?.columnName;
-                        if (
-                           JSON.stringify(
-                              newFormData[
-                                 editContentFieldToCreateNewColumnName
-                              ] ?? ""
-                           ) !==
-                           JSON.stringify(
-                              contentDataRecord[
-                                 editContentFieldToCreateNewColumnName
-                              ] ?? ""
-                           )
-                        ) {
-                           const pendingPromises = [];
-                           const oldData = {};
+               const teamDC = this.datacollection;
+               const contentDC = this._contentDC;
+               const dataID = newFormData.id;
+               const $contentNode = document.getElementById(
+                  this.contentNodeID(dataID)
+               );
+               delete newFormData["created_at"];
+               delete newFormData["updated_at"];
+               delete newFormData["properties"];
+               for (const editContentFieldToCreateNew of editContentFieldsToCreateNew) {
+                  const editContentFieldToCreateNewColumnName =
+                     contentObj.fieldByID(
+                        editContentFieldToCreateNew
+                     )?.columnName;
+                  if (
+                     JSON.stringify(
+                        newFormData[editContentFieldToCreateNewColumnName] ?? ""
+                     ) !==
+                     JSON.stringify(
+                        contentDataRecord[
+                           editContentFieldToCreateNewColumnName
+                        ] ?? ""
+                     )
+                  ) {
+                     Webix.confirm({
+                        title: this.label("Caution: Creating New Assignment"),
+                        ok: this.label("Continue with new assignment"),
+                        cancel: this.label("Cancel"),
+                        text: this.label(
+                           "When you change the Role type or Job title, then the current assignment is closed with the current date and a new assignment is created for this team."
+                        ),
+                        css: "orgchart-teams-edit-content-confirm-popup",
+                     }).then(async () => {
+                        this.busy();
+                        const pendingPromises = [];
+                        const oldData = {};
 
-                           oldData[contentDateEndFieldColumnName] = new Date();
-                           pendingPromises.push(
-                              contentModel.update(dataID, oldData)
-                           );
-                           newFormData[contentDateStartFieldColumnName] =
-                              oldData[contentDateEndFieldColumnName];
-                           delete newFormData["id"];
-                           delete newFormData["uuid"];
-                           delete newFormData[contentDateEndFieldColumnName];
-                           pendingPromises.push(
-                              contentModel.create(newFormData)
-                           );
-                           try {
-                              await Promise.all(pendingPromises);
-                           } catch (err) {
-                              // TODO (Guy): The update data error.
-                              console.error(err);
-                           }
-                           try {
-                              await Promise.all([
-                                 this._reloadDCData(teamDC),
-                                 this._reloadDCData(contentDC),
-                              ]);
-                              // await this._reloadAllDC();
-                           } catch (err) {
-                              // TODO (Guy): The reload DCs error.
-                              console.error(err);
-                           }
-                           await this.refresh();
-                           $contentNode.remove();
-                           this.ready();
-                           return;
+                        oldData[contentDateEndFieldColumnName] = new Date();
+                        pendingPromises.push(
+                           contentModel.update(dataID, oldData)
+                        );
+                        newFormData[contentDateStartFieldColumnName] =
+                           oldData[contentDateEndFieldColumnName];
+                        delete newFormData["id"];
+                        delete newFormData["uuid"];
+                        delete newFormData[contentDateEndFieldColumnName];
+                        pendingPromises.push(contentModel.create(newFormData));
+                        try {
+                           await Promise.all(pendingPromises);
+                        } catch (err) {
+                           // TODO (Guy): The update data error.
+                           console.error(err);
                         }
-                     }
+                        try {
+                           await Promise.all([
+                              this._reloadDCData(teamDC),
+                              this._reloadDCData(contentDC),
+                           ]);
+                           // await this._reloadAllDC();
+                        } catch (err) {
+                           // TODO (Guy): The reload DCs error.
+                           console.error(err);
+                        }
+                        await this.refresh();
+                        $contentNode.remove();
+                        this.ready();
+                     });
+                     return;
+                  }
+               }
+               if (
+                  new Date(newFormData[contentDateEndFieldColumnName]) <=
+                  new Date()
+               ) {
+                  Webix.confirm({
+                     title: this.label("Caution: Ending Current Assignment"),
+                     ok: this.label("Continue with ending this assignment"),
+                     cancel: this.label("Cancel"),
+                     text: [
+                        this.label(
+                           "When you provide an End Date, the current assignment is ended when the date = the current date and the assignment will no longer show on this team."
+                        ),
+                        this.label(
+                           "This will put the team member back into the unassigned list box if they have no other active assignments."
+                        ),
+                     ].join("\n"),
+                     css: "orgchart-teams-edit-content-confirm-popup",
+                  }).then(async () => {
+                     this.busy();
                      try {
                         await contentModel.update(dataID, newFormData);
                      } catch (err) {
@@ -809,9 +845,31 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      $contentNode.remove();
                      this.ready();
                   });
+                  return;
+               }
+               this.busy();
+               try {
+                  await contentModel.update(dataID, newFormData);
+               } catch (err) {
+                  // TODO (Guy): The update data error.
+                  console.error(err);
+               }
+               try {
+                  await Promise.all([
+                     this._reloadDCData(teamDC),
+                     this._reloadDCData(contentDC),
+                  ]);
+                  // await this._reloadAllDC();
+               } catch (err) {
+                  // TODO (Guy): The reload DCs error.
+                  console.error(err);
+               }
+               await this.refresh();
+               $contentNode.remove();
+               this.ready();
             },
          });
-         AB.Webix.ui({
+         Webix.ui({
             view: "popup",
             id: ids.contentForm,
             close: true,
@@ -861,7 +919,9 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             },
          }).show();
          const $contentFormData = $$(ids.contentFormData);
-         $contentFormData.setValues(contentDataRecord);
+         $contentFormData.setValues(
+            this._convertToFormValueByType(structuredClone(contentDataRecord))
+         );
          $contentFormData.show();
       };
       this._fnShowFilterPopup = async (event) => {
@@ -994,6 +1054,33 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             );
          });
       })();
+   }
+
+   _convertToFormValueByType(contentRecord) {
+      const contentAllFields = this._contentDC.datasource.fields();
+      for (const field of contentAllFields) {
+         const columnName = field.columnName;
+         const value = contentRecord[columnName];
+         switch (field.key) {
+            case "boolean":
+               if (value === true) contentRecord[columnName] = 1;
+               else if (value === false) contentRecord[columnName] = 0;
+               else {
+                  const parsedValue = parseInt(value);
+                  contentRecord[columnName] = isNaN(parsedValue)
+                     ? 0
+                     : parsedValue;
+               }
+               break;
+            case "date":
+            case "datetime":
+               contentRecord[columnName] = new Date(value);
+               break;
+            default:
+               break;
+         }
+      }
+      return contentRecord;
    }
 
    async _createUIContentRecord(data, color) {
@@ -1323,22 +1410,80 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
    }
 
    _parseFormValueByType(oldFormData, newFormData) {
-      for (const key in newFormData) {
-         const oldValue = oldFormData[key];
-         const newValue = newFormData[key];
-         switch (typeof oldValue) {
-            case "boolean":
-               if (newValue == 0) newFormData[key] = false;
-               else newFormData[key] = true;
+      const contentAllFields = this._contentDC.datasource.fields();
+      for (const field of contentAllFields) {
+         const fieldKey = field.key;
+         const columnName = field.columnName;
+         const oldValue = oldFormData[columnName];
+         const newValue = newFormData[columnName];
+         switch (fieldKey) {
+            case "date":
+            case "datetime":
+               if (oldValue === undefined && newValue == null)
+                  delete newFormData[columnName];
+               try {
+                  newValue instanceof Date &&
+                     (newFormData[columnName] = newValue.toISOString());
+               } catch {
+                  delete newFormData[columnName];
+               }
                break;
-            case "number":
-               newFormData[key] = parseInt(newValue);
-               break;
-            case "string":
-               newFormData[key] = newValue?.toString();
+            case "connectObject":
+               switch (typeof oldValue) {
+                  case "number":
+                     newFormData[columnName] = parseInt(newValue) || null;
+                     break;
+                  default:
+                     newFormData[columnName] = newValue?.toString() || null;
+                     break;
+               }
                break;
             default:
-               newFormData[key] = newValue;
+               if (newValue == null || newValue === "")
+                  if (oldValue === undefined) {
+                     delete newFormData[columnName];
+                     break;
+                  } else if (oldValue === "") {
+                     newFormData[columnName] = "";
+                     break;
+                  }
+               switch (fieldKey) {
+                  case "boolean":
+                     switch (typeof oldValue) {
+                        case "number":
+                           newFormData[columnName] = newValue;
+                           break;
+                        case "string":
+                           newFormData[columnName] = newValue === 1 ? "1" : "0";
+                           break;
+                        default:
+                           newFormData[columnName] = newValue == 1;
+                           break;
+                     }
+                     break;
+                  case "number":
+                     const paredNewValue = parseInt(newValue);
+                     if (isNaN(parseInt(newValue))) {
+                        if (oldValue === undefined)
+                           delete newFormData[columnName];
+                        else newFormData[columnName] = oldValue;
+                        break;
+                     }
+                     switch (typeof oldValue) {
+                        case "string":
+                           newFormData[columnName] = paredNewValue.toString();
+                           break;
+                        default:
+                           newFormData[columnName] = paredNewValue;
+                           break;
+                     }
+                     break;
+                  case "string":
+                     newFormData[columnName] = newValue?.toString() || "";
+                     break;
+                  default:
+                     break;
+               }
                break;
          }
       }
@@ -2123,12 +2268,12 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                .getData(
                   (contentDisplayRecord) =>
                      contentDisplayRecord[currentContentDisplayFieldColumnName]
-                        .toString()
+                        ?.toString()
                         .toLowerCase()
                         .indexOf(currentContentDisplayFilterValue) > -1
                )
                .map((contentDisplayRecord) =>
-                  contentDisplayRecord[currentContentDisplayObjPK].toString()
+                  contentDisplayRecord[currentContentDisplayObjPK]?.toString()
                );
          } else if (currentContentDisplayRecords.length > 0) {
             currentContentDisplayFieldColumnName = AB.definitionByID(
@@ -2152,7 +2297,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                              ) > -1
                        ) > -1
                      : currentContentDisplayRecords.indexOf(
-                          contentDisplayRecordData.toString()
+                          contentDisplayRecordData?.toString()
                        ) > -1;
                })
                .map((contentDisplayRecord) =>
@@ -2192,13 +2337,15 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
 
    async teamAddChild(values, isServerSideUpdate = true) {
       const entityDC = this._entityDC;
+      const teamDC = this.datacollection;
+      const teamObjID = teamDC.datasource.id;
 
       // Add the entity value
       if (entityDC) {
          const connection =
             isServerSideUpdate &&
             entityDC.datasource.connectFields(
-               (f) => f.settings.linkObject === datacollection.datasource.id
+               (f) => f.settings.linkObject === teamObjID
             )[0];
          if (connection) {
             const entity = entityDC.getCursor();
@@ -2209,9 +2356,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          }
       }
       const _rawData =
-         (isServerSideUpdate &&
-            (await this.datacollection.model.create(values))) ||
-         values;
+         (isServerSideUpdate && (await teamDC.model.create(values))) || values;
       const id = _rawData.id;
       const linkField = this.AB.definitionByID(
          this.getSettingField("teamLink").settings.linkColumn
