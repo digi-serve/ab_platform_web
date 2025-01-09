@@ -364,7 +364,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
 
          // TODO (Guy): Hardcode data panel DCs for Employee.
          $$(this.ids.dataPanel)
-            .getChildViews()[1]
+            ?.getChildViews()[1]
             .getChildViews()
             .forEach(($childView) => $childView.callEvent("onViewShow"));
          if (isContentDone) resolve();
@@ -1535,6 +1535,10 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          });
       }
       $panel.show(ev.currentTarget, { x: -30, y: -35 });
+      $$(this.ids.dataPanel)
+         .getChildViews()[1]
+         .getChildViews()
+         .forEach(($childView) => $childView.callEvent("onViewShow"));
    }
 
    _showOrgChart() {
