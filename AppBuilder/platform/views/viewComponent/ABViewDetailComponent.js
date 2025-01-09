@@ -79,6 +79,12 @@ module.exports = class ABViewDetailComponent extends ABViewContainerComponent {
    }
 
    displayData(rowData = {}) {
+      // make sure we have data to work with.  If null is passed in
+      // then pull current cursor.
+      if (rowData == null) {
+         rowData = this.datacollection.getCursor();
+      }
+
       const views = (this.view.views() || []).sort((a, b) => {
          if (!a?.field?.() || !b?.field?.()) return 0;
 
