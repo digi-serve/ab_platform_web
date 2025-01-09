@@ -498,7 +498,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      this._waitDCPending(contentDisplayDC)
                ),
          ]);
-         this.__orgchart.remove();
+         this.__orgchart?.remove();
          this.__orgchart = null;
          await this.refresh();
          this.ready();
@@ -1546,8 +1546,13 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const AB = this.AB;
       const draggable = settings.draggable === 1;
       const ids = this.ids;
+      const chartData = this._chartData;
+      if (chartData == null) {
+         this.__orgchart = null;
+         return;
+      }
       const orgchart = new this._OrgChart({
-         data: AB.cloneDeep(this._chartData),
+         data: AB.cloneDeep(chartData),
          direction: settings.direction,
          // depth: settings.depth,
          chartContainer: `#${ids.chartDom}`,
@@ -1583,7 +1588,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const contentObjID = this._contentDC?.datasource?.id;
       const cells = [];
       for (const key in dataPanelDCs) {
-         const dataPanelDCID = key.split(".")[1];
+         const [tabIndex, dataPanelDCID] = key.split(".");
 
          // TODO (Guy): Hardcode data panel DCs for Employee.
          // const _dataPanelDC = _dataPanelDCs.find(
@@ -1635,19 +1640,26 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                            _dataPanelDC
                               .getData((panelRecord) =>
                                  panelRecord.isinactive !== "T" &&
-                                 header === "Unassigned"
+                                 tabIndex === "0"
                                     ? contentDC.getData(
                                          (contentRecord) =>
                                             contentRecord[
                                                contentLinkedFieldColumnName
                                             ] == panelRecord.id
                                       )[0] == null
-                                    : contentDC.getData(
+                                    : tabIndex === "1"
+                                    ? contentDC.getData(
                                          (contentRecord) =>
                                             contentRecord[
                                                contentLinkedFieldColumnName
                                             ] == panelRecord.id
                                       )[0] != null
+                                    : _dataPanelDCs
+                                         .find(
+                                            (dataPanelDC) =>
+                                               dataPanelDC.id === dataPanelDCID
+                                         )
+                                         .getData()
                               )
                               .sort((a, b) => {
                                  if (a.firstName < b.firstName) {
@@ -1843,7 +1855,8 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             const _oldOnDragStart = OrgChart.prototype._onDragStart;
             OrgChart.prototype._onDragStart = (event) => {
                event.dataTransfer.setData("isnode", 1);
-               _oldOnDragStart.call(this.__orgchart, event);
+               this.__orgchart != null &&
+                  _oldOnDragStart.call(this.__orgchart, event);
             };
             return OrgChart;
          })());
@@ -2085,7 +2098,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          const topFromField = dc.getData((e) => e[topNodeColumn] == 1)[0];
          topNode = topFromField ? topFromField : topNode;
       }
-      if (!topNode) return null;
+      if (!topNode) return;
 
       /**
        * Recursive function to prepare child node data
