@@ -1631,10 +1631,10 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                         this.clearAll();
                         this.define(
                            "data",
-                           // _dataPanelDC.getData()
                            // TODO (Guy): Hardcode Employee DC.
                            _dataPanelDC
                               .getData((panelRecord) =>
+                                 panelRecord.isinactive !== "T" &&
                                  header === "Unassigned"
                                     ? contentDC.getData(
                                          (contentRecord) =>
