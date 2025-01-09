@@ -217,6 +217,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             console.log(err);
          }
          try {
+            // TODO (Guy): Logic to not reload dcs.
             await Promise.all([
                this._reloadDCData(this.datacollection),
                this._reloadDCData(this._contentDC),
@@ -333,6 +334,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             console.error(err);
          }
          try {
+            // TODO (Guy): Logic to not reload dcs.
             await Promise.all([
                this._reloadDCData(dc),
                this._reloadDCData(this._contentDC),
@@ -416,6 +418,9 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          await this._waitDCReady(dc);
          let records = dc.getData();
          try {
+            // TODO (Guy): Figure out later why the employee dc which is not reloaded lost the data.
+            if (records.length < DC_OFFSET) await dc.loadData();
+            records = dc.getData();
             if (
                records.length < DC_OFFSET ||
                (records.length - DC_OFFSET) % RECORD_LIMIT > 0
@@ -790,6 +795,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                            console.error(err);
                         }
                         try {
+                           // TODO (Guy): Logic to not reload dcs.
                            await Promise.all([
                               this._reloadDCData(teamDC),
                               this._reloadDCData(contentDC),
@@ -832,6 +838,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                         console.error(err);
                      }
                      try {
+                        // TODO (Guy): Logic to not reload dcs.
                         await Promise.all([
                            this._reloadDCData(teamDC),
                            this._reloadDCData(contentDC),
@@ -855,6 +862,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                   console.error(err);
                }
                try {
+                  // TODO (Guy): Logic to not reload dcs.
                   await Promise.all([
                      this._reloadDCData(teamDC),
                      this._reloadDCData(contentDC),
@@ -1634,42 +1642,43 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                         const contentLinkedFieldColumnName =
                            contentLinkedField.columnName;
                         this.clearAll();
+                        debugger;
                         this.define(
                            "data",
                            // TODO (Guy): Hardcode Employee DC.
-                           _dataPanelDC
-                              .getData((panelRecord) =>
-                                 panelRecord.isinactive !== "T" &&
-                                 tabIndex === "0"
-                                    ? contentDC.getData(
-                                         (contentRecord) =>
-                                            contentRecord[
-                                               contentLinkedFieldColumnName
-                                            ] == panelRecord.id
-                                      )[0] == null
-                                    : tabIndex === "1"
-                                    ? contentDC.getData(
-                                         (contentRecord) =>
-                                            contentRecord[
-                                               contentLinkedFieldColumnName
-                                            ] == panelRecord.id
-                                      )[0] != null
-                                    : _dataPanelDCs
-                                         .find(
-                                            (dataPanelDC) =>
-                                               dataPanelDC.id === dataPanelDCID
-                                         )
-                                         .getData()
-                              )
-                              .sort((a, b) => {
-                                 if (a.firstName < b.firstName) {
-                                    return -1;
-                                 }
-                                 if (a.firstName > b.firstName) {
-                                    return 1;
-                                 }
-                                 return 0;
-                              })
+                           (parseInt(tabIndex) < 2
+                              ? _dataPanelDC.getData(
+                                   (panelRecord) =>
+                                      panelRecord.isinactive !== "T" &&
+                                      (tabIndex === "0"
+                                         ? contentDC.getData(
+                                              (contentRecord) =>
+                                                 contentRecord[
+                                                    contentLinkedFieldColumnName
+                                                 ] == panelRecord.id
+                                           )[0] == null
+                                         : contentDC.getData(
+                                              (contentRecord) =>
+                                                 contentRecord[
+                                                    contentLinkedFieldColumnName
+                                                 ] == panelRecord.id
+                                           )[0] != null)
+                                )
+                              : _dataPanelDCs
+                                   .find(
+                                      (dataPanelDC) =>
+                                         dataPanelDC.id === dataPanelDCID
+                                   )
+                                   .getData()
+                           ).sort((a, b) => {
+                              if (a.firstName < b.firstName) {
+                                 return -1;
+                              }
+                              if (a.firstName > b.firstName) {
+                                 return 1;
+                              }
+                              return 0;
+                           })
                         );
                         await self._callAfterRender(() => {
                            const $itemElements =
