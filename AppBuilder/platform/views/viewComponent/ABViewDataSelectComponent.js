@@ -16,7 +16,7 @@ export default class ABViewDataSelectComponent extends ABViewComponent {
    ui() {
       const _ui = super.ui([
          {
-            view: "richselect",
+            view: "combo",
             id: this.ids.select,
             on: {
                onChange: (n, o) => {
@@ -41,7 +41,8 @@ export default class ABViewDataSelectComponent extends ABViewComponent {
       )?.columnName;
       const options = dc
          .getData()
-         .map((o) => ({ id: o.id, value: o[labelField] }));
+         .map((o) => ({ id: o.id, value: o[labelField] }))
+         .sort((a, b) => (a.value > b.value ? 1 : -1));
       const $select = $$(this.ids.select);
       $select.define("options", options);
       $select.refresh();
