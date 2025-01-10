@@ -11,6 +11,7 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
          Object.assign(
             {
                dataview: "",
+               reload: "",
             },
             ids
          )
@@ -25,22 +26,38 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
       this.initDetailComponent();
 
       const ids = this.ids;
+      const L = this.AB.Label();
       const _ui = super.ui([
          {
-            id: ids.dataview,
-            view: "dataview",
-            scroll: "y",
-            sizeToContent: true,
-            css: "borderless transparent",
-            xCount: this.settings.xCount != 1 ? this.settings.xCount : 0,
-            height: this.settings.height,
-            template: (item) => this.itemTemplate(item),
-            on: {
-               onAfterRender: () => {
-                  this.applyClickEvent();
-                  this.addCyAttribute();
+            view: "layout",
+            rows: [
+               {
+                  id: ids.reload,
+                  view: "button",
+                  value: L("New data available. Click to reload."),
+                  css: "webix_primary webix_warn",
+                  hidden: true,
+                  click: (id, event) => {
+                     this.reloadData();
+                  },
                },
-            },
+               {
+                  id: ids.dataview,
+                  view: "dataview",
+                  scroll: "y",
+                  sizeToContent: true,
+                  css: "borderless transparent",
+                  xCount: this.settings.xCount != 1 ? this.settings.xCount : 0,
+                  height: this.settings.height,
+                  template: (item) => this.itemTemplate(item),
+                  on: {
+                     onAfterRender: () => {
+                        this.applyClickEvent();
+                        this.addCyAttribute();
+                     },
+                  },
+               },
+            ],
          },
       ]);
 
@@ -65,6 +82,8 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
       AB.Webix.extend($dataView, AB.Webix.ProgressBar);
       dc.bind($dataView);
 
+      this.initRefreshWarning();
+
       window.addEventListener("resize", () => {
          clearTimeout(this._resizeEvent);
          this._resizeEvent = setTimeout(() => {
@@ -72,6 +91,52 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
             delete this._resizeEvent;
          }, 20);
       });
+   }
+
+   /**
+    * @method initRefreshWarning
+    *
+    */
+   initRefreshWarning() {
+      const dc = this.datacollection;
+      const includeInQuery =
+         (dc?.settings?.objectWorkspace?.filterConditions?.rules ?? []).filter(
+            (r) =>
+               [
+                  "in_query",
+                  "not_in_query",
+                  "in_query_field",
+                  "not_in_query_field",
+               ].includes(r.rule)
+         ).length > 0;
+
+      if (!includeInQuery) return;
+      [
+         "ab.datacollection.create",
+         "ab.datacollection.update",
+         "ab.datacollection.delete",
+      ].forEach((eventKey) => {
+         dc.on(eventKey, (data) => {
+            if (data.objectId == dc.datasource.id)
+               this.showRefreshWarning(data);
+         });
+      });
+   }
+
+   showRefreshWarning() {
+      if (this.__throttleRefreshWarning)
+         clearTimeout(this.__throttleRefreshWarning);
+
+      this.__throttleRefreshWarning = setTimeout(() => {
+         $$(this.ids.reload)?.show();
+      }, 200);
+   }
+
+   reloadData() {
+      const dc = this.datacollection;
+      dc?.reloadData();
+
+      $$(this.ids.reload)?.hide();
    }
 
    onShow() {
