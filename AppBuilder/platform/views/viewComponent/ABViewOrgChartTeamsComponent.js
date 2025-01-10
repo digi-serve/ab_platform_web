@@ -304,7 +304,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             $deleteButton.onclick = () => this.teamDelete(values);
             $buttons.append($deleteButton);
          }
-         if (this.__filters.inactive === 1) {
+         if (this.__filters.inactive == 1) {
             const isInactive = data.isInactive;
             const activeClass = isInactive ? "is-inactive" : "is-active";
             const $active = element("div", `team-button ${activeClass}`);
@@ -1642,7 +1642,6 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                         const contentLinkedFieldColumnName =
                            contentLinkedField.columnName;
                         this.clearAll();
-                        debugger;
                         this.define(
                            "data",
                            // TODO (Guy): Hardcode Employee DC.
@@ -2097,6 +2096,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
     * load the data and format it for display
     */
    async pullData() {
+      this._chartData = null;
       const dc = this.datacollection;
       if (dc == null) return;
       const settings = this.settings;
@@ -2123,7 +2123,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                // Don't show inactive teams
                if (
                   !childData ||
-                  (this.__filters?.inactive !== 1 &&
+                  (this.__filters?.inactive == 0 &&
                      childData[this.getSettingField("teamInactive").columnName])
                )
                   return;
@@ -2381,8 +2381,21 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             values[cName] = entity;
          }
       }
-      const _rawData =
-         (isServerSideUpdate && (await teamDC.model.create(values))) || values;
+      let _rawData;
+      try {
+         _rawData =
+            (isServerSideUpdate && (await teamDC.model.create(values))) ||
+            values;
+      } catch (err) {
+         // TODO (Guy): The update error.
+         console.error(err);
+      }
+      if (
+         this.__filters?.inactive == 0 &&
+         (_rawData == null ||
+            _rawData[this.getSettingField("teamInactive").columnName])
+      )
+         return;
       const id = _rawData.id;
       const linkField = this.AB.definitionByID(
          this.getSettingField("teamLink").settings.linkColumn
@@ -2445,7 +2458,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       return true;
    }
 
-   teamDelete(values) {
+   teamDelete(values, isServerSideUpdate = true) {
       if (!this.teamCanDelete(values)) {
          this.AB.Webix.message({
             text: "This team cannot be deleted",
@@ -2457,7 +2470,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       return this.AB.Webix.confirm({
          text: "This can't be undone, are you sure?",
       }).then(() => {
-         this.datacollection.model.delete(values.id);
+         isServerSideUpdate && this.datacollection.model.delete(values.id);
          const nodeID = this.teamNodeID(values.id);
          this.__orgchart.removeNodes(document.querySelector(`#${nodeID}`));
       });
@@ -2471,12 +2484,13 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
 
       // TODO (Guy): Fix the values later.
       // delete values[`${strategyLink}__relation`];
-      isServerSideUpdate &&
-         (await this.datacollection.model
-            .update(values.id, values)
-            .catch((err) => {
-               //TODO
-            }));
+      try {
+         isServerSideUpdate &&
+            (await this.datacollection.model.update(values.id, values));
+      } catch (err) {
+         // TODO (Guy): the update error
+         console.error(err);
+      }
       const nodeID = this.teamNodeID(values.id);
       const node = document.querySelector(`#${nodeID}`);
       const currentStrategy = node.classList?.value?.match(/strategy-\S+/)[0];
@@ -2487,12 +2501,13 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          node.classList?.add(newStrategy);
       }
 
-      const inactive = this.getSettingField("teamInactive").columnName;
       // Remove inactive node from display, unless the filter setting to show
       // inctive nodes is on.
-      if (this.__filters?.inactive !== 1 && values[inactive] === 1) {
+      if (
+         this.__filters?.inactive == 0 &&
+         values[this.getSettingField("teamInactive").columnName]
+      )
          this.__orgchart.removeNodes(node);
-      }
       const nameCol = this.getSettingField("teamName").columnName;
       node.querySelector(".title").innerHTML = values[nameCol];
    }
