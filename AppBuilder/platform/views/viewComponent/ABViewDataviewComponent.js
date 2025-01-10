@@ -26,7 +26,7 @@ module.exports = class ABViewDataviewComponent extends ABViewComponent {
       this.initDetailComponent();
 
       const ids = this.ids;
-      const L = this.AB.Label();
+      const L = (...params) => (this.AB ?? AB).Multilingual.label(...params);
       const _ui = super.ui([
          {
             view: "layout",
