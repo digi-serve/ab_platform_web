@@ -10,10 +10,13 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          Object.assign(
             {
                chartView: "",
-               chartDom: "",
+               // chartDom: "",
                chartContent: "",
+               chartHeader: "",
                dataPanel: "",
+               dataPanelButton: "",
                dataPanelPopup: "",
+               filterButton: "",
                filterPopup: "",
                filterForm: "",
                contentForm: "",
@@ -1010,7 +1013,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                },
             });
          }
-         $popup.show(event.currentTarget);
+         $popup.show($$(this.ids.filterButton).$view);
       };
 
       // Generate strategy css
@@ -1530,7 +1533,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       await this._waitDCReady(dc);
    }
 
-   _showDataPanel(ev) {
+   _showDataPanel() {
       let $panel = $$(this.ids.dataPanelPopup);
       if (!$panel) {
          $panel = this.AB.Webix.ui({
@@ -1542,7 +1545,16 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             modal: true,
          });
       }
-      $panel.show(ev.currentTarget, { x: -30, y: -35 });
+      const $dpButtonWebix = $$(this.ids.dataPanelButton).$view;
+      const $dpButtonElem = $dpButtonWebix.querySelector(".data-panel-button");
+      // Ensure the popup will stay to the right when resizing
+      if (!this._resizeObserver) {
+         this._resizeObserver = new ResizeObserver(() => {
+            $panel.show($dpButtonElem, { x: -30, y: -35 });
+         });
+      }
+      this._resizeObserver.observe($dpButtonWebix);
+      $panel.show($dpButtonElem, { x: -30, y: -35 });
       $$(this.ids.dataPanel)
          .getChildViews()[1]
          .getChildViews()
@@ -1563,7 +1575,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          data: AB.cloneDeep(chartData),
          direction: settings.direction,
          // depth: settings.depth,
-         chartContainer: `#${ids.chartDom}`,
+         // chartContainer: `#${ids.chartDom}`,
          pan: true, // settings.pan == 1,
          zoom: false, // settings.zoom == 1,
          draggable,
@@ -1584,9 +1596,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          orgchart.setAttribute("style", oldOrgchart.getAttribute("style"));
          oldOrgchart.remove();
       }
-      $$(ids.chartContent).$view.children[0].appendChild(
-         (this.__orgchart = orgchart)
-      );
+      $$(ids.chartContent).$view.appendChild((this.__orgchart = orgchart));
    }
 
    _uiDataPanel() {
@@ -1731,6 +1741,9 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                onClick: {
                   "data-panel-close": () => {
                      $$(this.ids.dataPanelPopup).hide();
+                     this._resizeObserver?.unobserve(
+                        $$(this.ids.dataPanelButton).$view
+                     );
                      return false;
                   },
                },
@@ -1790,63 +1803,59 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const _ui = super.ui([
          {
             id: ids.chartView,
-            view: "template",
+            // view: "template",
             responsive: true,
-            template: `<div id="${ids.chartDom}"></div>`,
-            css: {
-               position: "relative",
-            },
-            on: {
-               onAfterRender() {
-                  Webix.extend(this, Webix.ProgressBar);
-                  const chartDom = document.querySelector(`#${ids.chartDom}`);
-                  chartDom.textContent = "";
-                  chartDom.innerHTML = "";
-                  const $chartDomComponents = AB.Webix.ui({
-                     cols: [
-                        {
-                           rows: [
-                              {
-                                 view: "template",
-                                 height: 50,
-                              },
-                              {
-                                 id: ids.chartContent,
-                                 view: "template",
-                                 scroll: "auto",
-                              },
-                           ],
+            type: "clean",
+            rows: [
+               {
+                  responsive: true,
+                  id: ids.chartHeader,
+                  view: "toolbar",
+                  height: 50,
+                  type: "clean",
+                  cols: [
+                     {
+                        view: "template",
+                        id: this.ids.filterButton,
+                        template: `<button class="filter-button">
+                              <i class="fa fa-filter"></i> ${self.label(
+                                 "Filter"
+                              )}</button>`,
+                        align: "left",
+                        onClick: {
+                           "filter-button": (ev) => self._fnShowFilterPopup(ev),
                         },
-                     ],
-                  }).$view;
-                  chartDom.appendChild($chartDomComponents);
-
-                  // Add the filter button to the UI
-                  const $filterButton = document.createElement("button");
-                  $filterButton.innerHTML = `<i class="fa fa-filter"></i> Filter`;
-                  $filterButton.classList.add("filter-button");
-                  $filterButton.onclick = self._fnShowFilterPopup;
-                  const $dataPanelButton = document.createElement("div");
-                  $dataPanelButton.innerHTML = `<span
-                        class="fa fa-2x fa-users"
-                        style="display:block;color:#2F27CE;font-sizze:17px;">
-                     </span>
-                     <div
-                        class="data-panel-open"
-                        style="color:#2F27CE;font-family:'Roboto';font-size:17px;font-weight:900;width:90%;margin-left:10px;padding:5px;border-radius:10px">
-                           ${self.label("Staff Assignment")}
-                           <span class="fa fa-expand" style="float:right;"></span>
-                     </div>`;
-                  $dataPanelButton.classList.add("data-panel-button");
-                  $dataPanelButton.querySelector(".data-panel-open").onclick = (
-                     ev
-                  ) => self._showDataPanel(ev);
-                  $chartDomComponents.children[0].children[0].children[0].append(
-                     $filterButton,
-                     $dataPanelButton
-                  );
+                     },
+                     {
+                        view: "template",
+                        id: this.ids.dataPanelButton,
+                        template: `<div class="data-panel-button">
+                              <span class="fa fa-2x fa-users"></span>
+                              <div class="data-panel-open">
+                                 ${self.label("Staff Assignment")}
+                                 <span class="fa fa-expand" style="float:right;"></span>
+                              </div>
+                           </div>`,
+                        align: "right",
+                        onClick: {
+                           "data-panel-open": (ev) => self._showDataPanel(ev),
+                        },
+                     },
+                  ],
                },
-            },
+               {
+                  responsive: true,
+                  id: ids.chartContent,
+                  view: "template",
+                  scroll: "auto",
+
+                  on: {
+                     onAfterRender() {
+                        Webix.extend(this, Webix.ProgressBar);
+                     },
+                  },
+               },
+            ],
          },
       ]);
       delete _ui.type;
@@ -2698,27 +2707,27 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
    closest(el, fn) {
       return (
          el &&
-         (fn(el) && el !== document.querySelector(`#${this.ids.chartDom}`)
+         (fn(el) && el !== document.querySelector(`#${this.ids.chartContent}`)
             ? el
             : this.closest(el.parentNode, fn))
       );
    }
 
    busy() {
-      const $chartView = $$(this.ids.chartView);
+      const $chartView = $$(this.ids.chartContent);
       $chartView.disable();
       $chartView.showProgress({ type: "icon" });
    }
 
    ready() {
-      const $chartView = $$(this.ids.chartView);
+      const $chartView = $$(this.ids.chartContent);
       $chartView.enable();
       $chartView.hideProgress();
    }
 };
 
 /**
- * Creates a new HTML element with the given type and classes.
+ * Creates a new HTML element with the given type and classes
  * @param {string} type - The type of the HTML element to create.
  * @param {string} classes - A space-separated list of classes to add to the element.
  * @returns {Element} The newly created HTML element.
