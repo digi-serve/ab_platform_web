@@ -275,6 +275,11 @@ org-chart tr.lines .downLine {
    margin-right: 25px;
 }
 
+.data-panel-button .fa-users {
+   display: block;
+   color: #2F27CE;
+}
+
 .data-panel-close {
    background: #2F27CE;
    color: #FFF;
@@ -310,9 +315,14 @@ org-chart tr.lines .downLine {
 .data-panel-open {
   background: #FFF;
   color: #2F27CE;
-  border-radius: 5px;
-  padding: 4px;
-  float: right;
+  font-family: "Roboto";
+  font-size: 17px;
+  font-weight: 900;
+  border-radius: 10px;
+  float: right !important;
+  width: 90%;
+  padding: 5px;
+  margin-left: 10px;
 }
 
 .data-panel-open:hover {
