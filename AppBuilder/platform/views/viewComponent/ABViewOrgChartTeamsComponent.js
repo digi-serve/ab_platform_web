@@ -1549,7 +1549,11 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const $dpButtonElem = $dpButtonWebix.querySelector(".data-panel-button");
       // Ensure the popup will stay to the right when resizing
       if (!this._resizeObserver) {
-         this._resizeObserver = new ResizeObserver(() => {
+         this._resizeObserver = new ResizeObserver(([e]) => {
+            // Hide the panel when the widget is hidden (ex. switched to another App)
+            if (e.contentRect.width == 0 && e.contentRect.height == 0) {
+               return $panel.hide();
+            }
             $panel.show($dpButtonElem, { x: -30, y: -35 });
          });
       }
