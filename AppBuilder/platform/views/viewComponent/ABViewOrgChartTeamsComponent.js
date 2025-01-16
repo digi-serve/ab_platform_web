@@ -263,7 +263,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             const $group = element("div", "team-group-section");
             $content.appendChild($group);
             const groupStyle = $group.style;
-            groupStyle["minHeight"] = `${225 / contentGroupOptionsLength}px`;
+            groupStyle["minHeight"] = `${325 / contentGroupOptionsLength}px`;
 
             // TODO: should this be a config option
             const groupColor = group.name === "Leader" ? "#003366" : "#DDDDDD";
@@ -301,6 +301,8 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             this.teamForm("Add", { __parentID: dataID });
          };
          $editButton.onclick = () => this.teamForm("Edit", values);
+         $node.querySelector(".title").ondblclick = () =>
+            this.teamForm("Edit", values);
          if (this.teamCanDelete(values)) {
             const $deleteButton = element("div", "team-button");
             $deleteButton.append(element("i", "fa fa-trash"));
@@ -380,7 +382,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                resolve
             );
       };
-      (this._fnPageContentGroupCallback = async (
+      this._fnPageContentGroupCallback = async (
          contentGroupRecords,
          isContentGroupDone,
          contentGroupDC,
@@ -395,28 +397,28 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                this._fnPageContentGroupCallback,
                resolve
             );
-      }),
-         (this._fnPageContentDisplayCallback = (
-            contentDisplayRecords,
-            isContentDisplayDone,
-            contentDisplayDC,
-            resolve
-         ) => {
-            const contentDC = this._contentDC;
-            this._fnPageContentCallback(
-               contentDC.getData(),
-               true,
-               contentDC,
-               () => {}
+      };
+      this._fnPageContentDisplayCallback = (
+         contentDisplayRecords,
+         isContentDisplayDone,
+         contentDisplayDC,
+         resolve
+      ) => {
+         const contentDC = this._contentDC;
+         this._fnPageContentCallback(
+            contentDC.getData(),
+            true,
+            contentDC,
+            () => {}
+         );
+         if (isContentDisplayDone) resolve();
+         else
+            this._callPagingEvent(
+               contentDisplayDC,
+               this._fnPageContentDisplayCallback,
+               resolve
             );
-            if (isContentDisplayDone) resolve();
-            else
-               this._callPagingEvent(
-                  contentDisplayDC,
-                  this._fnPageContentDisplayCallback,
-                  resolve
-               );
-         });
+      };
       this._fnPageData = async (dc, callback, resolve) => {
          await this._waitDCReady(dc);
          let records = dc.getData();
@@ -460,7 +462,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                await this.teamAddChild(teamRecord, false);
                $teamNode = document.getElementById(teamNodeID);
                if ($teamNode == null) continue;
-            } else await this.teamEdit(teamRecord, null, false);
+            } else await this.teamEdit(teamRecord, false);
             const contentRecords = contentDC.getData(
                (contentRecord) =>
                   teamRecord[contentFieldColumnName].indexOf(
@@ -525,7 +527,8 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             "contentFieldDateEnd"
          )?.columnName;
          const contentDataRecord = JSON.parse(
-            event.currentTarget.dataset.source
+            event.currentTarget.dataset.source ||
+               event.currentTarget.parentElement.dataset.source
          );
          const rules = {};
          const labelWidth = 200;
@@ -640,7 +643,6 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                         abWebix.extend(this, abWebix.ProgressBar);
                         this.showProgress({ type: "icon" });
                         try {
-                           // TODO (Guy): Add spinner.
                            this.define(
                               "options",
                               (await fieldLinkObj.model().findAll()).data.map(
@@ -726,24 +728,17 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             click: async () => {
                const $contentFormData = $$(ids.contentFormData);
                if (!$contentFormData.validate()) return;
-               let isDataChanged = false;
                const newFormData = this._parseFormValueByType(
+                  contentObj,
                   contentDataRecord,
                   $contentFormData.getValues()
                );
-               for (const key in newFormData)
-                  if (
-                     JSON.stringify(newFormData[key]) !==
-                     JSON.stringify(contentDataRecord[key])
-                  ) {
-                     isDataChanged = true;
-                     break;
-                  }
                const $contentForm = $$(ids.contentForm);
                $contentForm.blockEvent();
                $contentForm.$view.remove();
                $contentForm.destructor();
-               if (!isDataChanged) return;
+               if (!this._checkDataIsChanged(contentDataRecord, newFormData))
+                  return;
                const teamDC = this.datacollection;
                const contentDC = this._contentDC;
                const dataID = newFormData.id;
@@ -1099,7 +1094,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       $ui.setAttribute("id", this.contentNodeID(data.id));
       $ui.setAttribute("data-source", JSON.stringify(data));
       $ui.style.borderColor = color;
-      $ui.addEventListener("click", this._fnShowContentForm);
+      $ui.addEventListener("dblclick", this._fnShowContentForm);
       if (this.settings.draggable === 1) {
          $ui.setAttribute("draggable", "true");
          $ui.addEventListener("dragstart", this._fnContentDragStart);
@@ -1322,6 +1317,10 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             }
          !isShown && (hardcodedDisplayStyle.display = "none");
       }
+      const $editIcon = element("div", "team-group-record-edit-icon");
+      $editIcon.appendChild(element("i", "fa fa-pencil"));
+      $editIcon.addEventListener("click", this._fnShowContentForm);
+      $ui.appendChild($editIcon);
       return $ui;
    }
 
@@ -1342,6 +1341,14 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
 
    _callPagingEvent(dc, callback, resolve) {
       this.emit("pageData", dc, callback, resolve);
+   }
+
+   _checkDataIsChanged(olaValues, newValues) {
+      // TODO (Guy): Check array in the future.
+      for (const key in newValues)
+         if (JSON.stringify(newValues[key]) !== JSON.stringify(olaValues[key]))
+            return true;
+      return false;
    }
 
    _initDC(dc) {
@@ -1420,12 +1427,12 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       );
    }
 
-   _parseFormValueByType(oldFormData, newFormData) {
-      const contentAllFields = this._contentDC.datasource.fields();
-      for (const field of contentAllFields) {
+   _parseFormValueByType(obj, oldFormData, newFormData) {
+      const allFields = obj.fields();
+      for (const field of allFields) {
          const fieldKey = field.key;
          const columnName = field.columnName;
-         const oldValue = oldFormData[columnName];
+         const oldValue = oldFormData?.[columnName];
          const newValue = newFormData[columnName];
          switch (fieldKey) {
             case "date":
@@ -1440,14 +1447,23 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                }
                break;
             case "connectObject":
-               switch (typeof oldValue) {
-                  case "number":
-                     newFormData[columnName] = parseInt(newValue) || null;
-                     break;
-                  default:
-                     newFormData[columnName] = newValue?.toString() || null;
-                     break;
-               }
+               delete newFormData[`${columnName}__relation`];
+               if (field.linkType() === "one")
+                  switch (typeof oldValue) {
+                     case "number":
+                        newFormData[columnName] = parseInt(newValue) || null;
+                        break;
+                     default:
+                        newFormData[columnName] = newValue?.toString() || null;
+                        if (
+                           oldValue === undefined &&
+                           newFormData[columnName] == null
+                        )
+                           delete newFormData[columnName];
+                        break;
+                  }
+               // TODO (Guy): Many logic in the future. Now we don't have an array data changed.
+               else delete newFormData[columnName];
                break;
             default:
                if (newValue == null || newValue === "")
@@ -2093,6 +2109,16 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       this._resolveInit();
    }
 
+   getChartData(id, chartData = this._chartData) {
+      if (this.teamNodeID(id) === chartData.id) return chartData;
+      if (chartData.children?.length > 0) {
+         for (let child of chartData.children) {
+            child = this.getChartData(id, child);
+            if (child != null) return child;
+         }
+      }
+   }
+
    async onShow() {
       this.busy();
       this.AB.performance.mark("TeamChart.onShow");
@@ -2374,9 +2400,10 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       return this.AB.definitionByID(this.settings[setting]);
    }
 
-   async teamAddChild(values, isServerSideUpdate = true) {
+   async teamAddChild(values, isServerSideUpdate = true, children = []) {
       const entityDC = this._entityDC;
       const teamDC = this.datacollection;
+      const teamObj = teamDC.datasource;
       const teamObjID = teamDC.datasource.id;
 
       // Add the entity value
@@ -2394,14 +2421,16 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             values[cName] = entity;
          }
       }
-      let _rawData;
-      try {
-         _rawData =
-            (isServerSideUpdate && (await teamDC.model.create(values))) ||
-            values;
-      } catch (err) {
-         // TODO (Guy): The update error.
-         console.error(err);
+      let _rawData = values;
+      if (isServerSideUpdate) {
+         this.busy();
+         try {
+            _rawData = await teamDC.model.create(values);
+         } catch (err) {
+            // TODO (Guy): The update error.
+            console.error(err);
+         }
+         this.ready();
       }
       if (
          this.__filters?.inactive == 0 &&
@@ -2409,37 +2438,62 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             _rawData[this.getSettingField("teamInactive").columnName])
       )
          return;
-      const id = _rawData.id;
-      const linkField = this.AB.definitionByID(
-         this.getSettingField("teamLink").settings.linkColumn
-      ).columnName;
-      const nameField = this.getSettingField("teamName").columnName;
       const parent = document.querySelector(
-         `#${this.teamNodeID(values[linkField])}`
+         `#${this.teamNodeID(
+            _rawData[
+               this.AB.definitionByID(
+                  this.getSettingField("teamLink").settings.linkColumn
+               ).columnName
+            ]
+         )}`
       );
       if (parent == null) return;
-      const strategyLink = this.getSettingField("teamStrategy").columnName;
-      const strategyField = this.getSettingField("strategyCode").columnName;
-      const strategyCode =
-         _rawData[`${strategyLink}__relation`]?.[strategyField];
       const hasChild = parent.parentNode.colSpan > 1;
+      const teamID = _rawData.id;
       const newChild = {
-         name: values[nameField],
-         id: this.teamNodeID(id),
+         name: _rawData[this.getSettingField("teamName").columnName],
+         filteredOut: false,
+         isInactive: _rawData[this.getSettingField("teamInactive").columnName],
+         id: this.teamNodeID(teamID),
          relationship: hasChild ? "110" : "100",
-         className: `strategy-${strategyCode}`,
+         className: `strategy-${
+            _rawData[
+               `${this.getSettingField("teamStrategy").columnName}__relation`
+            ]?.[this.getSettingField("strategyCode").columnName]
+         }`,
          _rawData,
       };
+      newChild.filteredOut = this.filterTeam(newChild);
 
       // Need to add differently if the node already has child nodes
-      if (hasChild) {
-         const sibling = this.closest(parent, (el) => el.nodeName === "TABLE")
-            .querySelector(".nodes")
-            .querySelector(".node");
-         this.__orgchart.addSiblings(sibling, { siblings: [newChild] });
-      } else {
-         this.__orgchart.addChildren(parent, { children: [newChild] });
-      }
+      if (hasChild)
+         this.__orgchart.addSiblings(
+            // Sibling
+            this.closest(parent, (el) => el.nodeName === "TABLE")
+               .querySelector(".nodes")
+               .querySelector(".node"),
+            { siblings: [newChild] }
+         );
+      else this.__orgchart.addChildren(parent, { children: [newChild] });
+
+      // TODO(Guy): Render assignment for specific node later.
+      // const contentDC = this._contentDC;
+      // const contentFieldLinkColumnName = teamObj.fieldByID(
+      //    this.settings.contentField
+      // ).fieldLink.columnName;
+      // await this._callAfterRender(async () => {
+      //    this._fnPageContentCallback(
+      //       contentDC.getData((e) => e[contentFieldLinkColumnName] == teamID),
+      //       true,
+      //       contentDC,
+      //       () => {}
+      //    );
+      //    await Promise.all(
+      //       children.map((child) =>
+      //          this.teamAddChild(child._rawData, false, child.children)
+      //       )
+      //    );
+      // });
    }
 
    teamCanInactivate(values) {
@@ -2480,95 +2534,137 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          });
          return;
       }
-      return this.AB.Webix.confirm({
-         text: "This can't be undone, are you sure?",
-      }).then(() => {
-         isServerSideUpdate && this.datacollection.model.delete(values.id);
-         const nodeID = this.teamNodeID(values.id);
-         this.__orgchart.removeNodes(document.querySelector(`#${nodeID}`));
-      });
+      const nodeID = this.teamNodeID(values.id);
+      const $teamNode = document.querySelector(`#${nodeID}`);
+      if ($teamNode.querySelectorAll(".team-group-record").length > 0)
+         this.AB.Webix.alert({
+            text: this.label(
+               "Since there are assignments or teams associated with this team, this action cannot be done until all of its assignments are made inactive"
+            ),
+         });
+      else
+         this.AB.Webix.confirm({
+            text: this.label(
+               "This will permanently remove this team. Click OK to continue or Cancel to not remove the team."
+            ),
+         }).then(() => {
+            isServerSideUpdate && this.datacollection.model.delete(values.id);
+            this.__orgchart.removeNodes(document.querySelector(`#${nodeID}`));
+         });
    }
 
-   async teamEdit(values, strategy, isServerSideUpdate = true) {
-      const strategyLink = this.getSettingField("teamStrategy").columnName;
-      const strategyField = this.getSettingField("strategyCode").columnName;
-      const strategyCode = strategy?.[strategyField];
-      values[strategyLink] = strategy?.id || values[strategyLink];
-
-      // TODO (Guy): Fix the values later.
-      // delete values[`${strategyLink}__relation`];
-      try {
-         isServerSideUpdate &&
-            (await this.datacollection.model.update(values.id, values));
-      } catch (err) {
-         // TODO (Guy): the update error
-         console.error(err);
+   async teamEdit(values, isServerSideUpdate = true) {
+      let _rawData = values;
+      if (isServerSideUpdate) {
+         this.busy();
+         try {
+            _rawData = await this.datacollection.model.update(
+               values.id,
+               values
+            );
+         } catch (err) {
+            // TODO (Guy): the update error
+            console.error(err);
+         }
+         this.ready();
       }
-      const nodeID = this.teamNodeID(values.id);
-      const node = document.querySelector(`#${nodeID}`);
-      const currentStrategy = node.classList?.value?.match(/strategy-\S+/)[0];
-      const newStrategy =
-         (strategyCode && `strategy-${strategyCode}`) || currentStrategy;
-      if (currentStrategy !== newStrategy) {
-         node.classList?.remove(currentStrategy);
-         node.classList?.add(newStrategy);
-      }
+      const $node = document.querySelector(`#${this.teamNodeID(_rawData.id)}`);
 
       // Remove inactive node from display, unless the filter setting to show
       // inctive nodes is on.
       if (
          this.__filters?.inactive == 0 &&
-         values[this.getSettingField("teamInactive").columnName]
-      )
-         this.__orgchart.removeNodes(node);
-      const nameCol = this.getSettingField("teamName").columnName;
-      node.querySelector(".title").innerHTML = values[nameCol];
+         _rawData[this.getSettingField("teamInactive").columnName]
+      ) {
+         this.__orgchart.removeNodes($node);
+         return;
+      }
+      const oldChartData = JSON.parse($node.dataset.source);
+      const linkFieldColumnName = this.datacollection.datasource.fieldByID(
+         this.getSettingField("teamLink").settings.linkColumn
+      ).columnName;
+      if (
+         oldChartData._rawData[linkFieldColumnName] !=
+         _rawData[linkFieldColumnName]
+      ) {
+         // TODO (Guy): Fix refresh the only updated node and those children and assignments later.
+         await this.refresh();
+         // this.__orgchart.removeNodes($node);
+         // this.teamAddChild(
+         //    _rawData,
+         //    false,
+         //    this.getChartData(_rawData.id)?.children
+         // );
+         return;
+      }
+      const currentStrategy = $node.classList?.value?.match(/strategy-\S+/)[0];
+      const strategyCode =
+         _rawData[
+            `${this.getSettingField("teamStrategy").columnName}__relation`
+         ]?.[this.getSettingField("strategyCode").columnName];
+      const newStrategy =
+         (strategyCode && `strategy-${strategyCode}`) || currentStrategy;
+      if (currentStrategy !== newStrategy) {
+         $node.classList?.remove(currentStrategy);
+         $node.classList?.add(newStrategy);
+      }
+      const teamName = _rawData[this.getSettingField("teamName").columnName];
+      $node.querySelector(".title").innerHTML = teamName;
+      const newChartData = {
+         className: newStrategy,
+         filteredOut: false,
+         id: this.teamNodeID(_rawData.id),
+         isInactive: _rawData[this.getSettingField("teamInactive").columnName],
+         name: teamName,
+         relationship: oldChartData.relationship,
+         _rawData,
+      };
+      newChartData.filteredOut = this.filterTeam(newChartData);
+      $node.dataset.source = JSON.stringify(newChartData);
    }
 
    async teamForm(mode, values) {
       let $teamFormPopup = $$(this.ids.teamFormPopup);
-      const inactive = this.getSettingField("teamInactive").columnName;
-      const linkField = this.AB.definitionByID(
-         this.getSettingField("teamLink").settings.linkColumn
-      ).columnName;
       const ids = this.ids;
       if (!$teamFormPopup) {
          const teamObj = this.datacollection.datasource;
          const settings = this.settings;
          const nameField = teamObj.fieldByID(settings.teamName);
+         const linkField = teamObj.fieldByID(
+            this.getSettingField("teamLink").settings.linkColumn
+         );
+         const entityDC = this._entityDC;
+         const entityObjID = entityDC.datasource.id;
+         const entityDCCursorID = entityDC.getCursor().id;
          const strategyField = teamObj.fieldByID(settings.teamStrategy);
          const strategyObj = this.AB.objectByID(
             strategyField.settings.linkObject
          );
-         const entityDC = this._entityDC;
-         const entityLink = strategyObj.connectFields(
-            (f) => f.settings.linkObject === entityDC.datasource.id
-         )[0];
-         const cond = {
+         const teamCond = {
             glue: "and",
             rules: [
                {
-                  key: entityLink.columnName,
-                  value: entityDC.getCursor().id,
+                  key: teamObj.connectFields(
+                     (f) => f.settings.linkObject === entityObjID
+                  )[0].columnName,
+                  value: entityDCCursorID,
                   rule: "equals",
                },
             ],
          };
-         const subCol = this.getSettingField("subStrategy").columnName;
-         this.entitySrategyOptions = await strategyField.getOptions(
-            cond,
-            null,
-            null,
-            null,
-            [subCol]
-         );
-
-         const strategyOptions = this.entitySrategyOptions.map((o) => {
-            return {
-               id: o.id,
-               value: o[`${subCol}__relation`].name,
-            };
-         });
+         const strategyCond = {
+            glue: "and",
+            rules: [
+               {
+                  key: strategyObj.connectFields(
+                     (f) => f.settings.linkObject === entityObjID
+                  )[0].columnName,
+                  value: entityDCCursorID,
+                  rule: "equals",
+               },
+            ],
+         };
+         const subStrategyCol = this.getSettingField("subStrategy").columnName;
          $teamFormPopup = webix.ui({
             view: "popup",
             id: ids.teamFormPopup,
@@ -2599,6 +2695,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                   {
                      view: "form",
                      id: ids.teamForm,
+                     hidden: true,
                      borderless: true,
                      elements: [
                         {
@@ -2611,33 +2708,114 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                            view: "richselect",
                            label: strategyField.label,
                            name: strategyField.columnName,
-                           options: strategyOptions,
+                           options: [],
                            required: true,
+                           on: {
+                              async onViewShow() {
+                                 webix.extend(this, webix.ProgressBar);
+                                 this.showProgress({ type: "icon" });
+                                 try {
+                                    this.disable();
+                                    this.define(
+                                       "options",
+                                       (
+                                          await strategyField.getOptions(
+                                             strategyCond,
+                                             null,
+                                             null,
+                                             null,
+                                             [subStrategyCol]
+                                          )
+                                       ).map((e) => ({
+                                          id: e.id,
+                                          value: e[
+                                             `${subStrategyCol}__relation`
+                                          ].name,
+                                          // value: strategyObj.displayData(e),
+                                       }))
+                                    );
+                                    this.refresh();
+                                    this.enable();
+                                    this.hideProgress();
+                                 } catch {
+                                    // Close popup before response or possily response fail
+                                 }
+                              },
+                           },
+                        },
+                        {
+                           view: "combo",
+                           label: linkField.label,
+                           name: linkField.columnName,
+                           options: [],
+                           required: true,
+                           on: {
+                              async onViewShow() {
+                                 webix.extend(this, webix.ProgressBar);
+                                 this.showProgress({ type: "icon" });
+                                 try {
+                                    this.disable();
+                                    this.define(
+                                       "options",
+                                       (
+                                          await linkField.getOptions(teamCond)
+                                       ).map((e) => ({
+                                          id: e.id,
+                                          value: teamObj.displayData(e),
+                                       }))
+                                    );
+                                    this.refresh();
+                                    this.enable();
+                                    this.hideProgress();
+                                 } catch {
+                                    // Close popup before response or possily response fail
+                                 }
+                              },
+                           },
                         },
                         {
                            view: "switch",
                            id: ids.teamFormInactive,
-                           name: inactive,
+                           name: this.getSettingField("teamInactive")
+                              .columnName,
                            label: "Inactive",
                         },
                         { view: "text", name: "id", hidden: true },
-                        { view: "text", name: linkField, hidden: true },
                         {
                            id: ids.teamFormSubmit,
                            view: "button",
                            value: this.label("Save"),
                            disabled: true,
                            css: "webix_primary",
-                           click: () => {
-                              const values = $$(ids.teamForm).getValues();
-                              const strategy = strategyOptions.find(
-                                 (f) =>
-                                    f.id === values[strategyField.columnName]
-                              );
-                              if (values.id) {
-                                 this.teamEdit(values, strategy);
+                           click: async () => {
+                              let newValues = $$(ids.teamForm).getValues();
+                              if (newValues.id) {
+                                 const $node = document.getElementById(
+                                    this.teamNodeID(newValues.id)
+                                 );
+                                 const oldValues = JSON.parse(
+                                    $node.dataset.source
+                                 )._rawData;
+                                 newValues = this._parseFormValueByType(
+                                    teamObj,
+                                    oldValues,
+                                    newValues
+                                 );
+                                 if (
+                                    !this._checkDataIsChanged(
+                                       oldValues,
+                                       newValues
+                                    )
+                                 )
+                                    return;
+                                 this.teamEdit(newValues);
                               } else {
-                                 this.teamAddChild(values, strategy);
+                                 newValues = this._parseFormValueByType(
+                                    teamObj,
+                                    null,
+                                    newValues
+                                 );
+                                 this.teamAddChild(newValues);
                               }
                               $teamFormPopup.hide();
                            },
@@ -2648,7 +2826,8 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                            const values = $$(ids.teamForm).getValues();
                            const valid =
                               !!values[strategyField.columnName] &&
-                              !!values[nameField.columnName];
+                              !!values[nameField.columnName] &&
+                              !!values[linkField.columnName];
                            const $teamFormSubmit = $$(ids.teamFormSubmit);
                            if (valid) $teamFormSubmit.enable();
                            else $teamFormSubmit.disable();
@@ -2656,6 +2835,14 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      },
                   },
                ],
+            },
+            on: {
+               onShow() {
+                  $$(ids.teamForm).show();
+               },
+               onHide() {
+                  $$(ids.teamForm).hide();
+               },
             },
          });
       }
