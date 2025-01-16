@@ -5,7 +5,7 @@ org-chart .node {
    border: 2px dashed transparent;
    text-align: center;
    justify-content: center;
-   width: 325px !important;
+   width: 450px !important;
    font-family: "Jomhuria", sans-serif;
    font-style: normal;
    font-weight: 200;
@@ -38,7 +38,7 @@ org-chart .node .content {
    position: relative;
    top: -15px;
    width: 100%;
-   min-height: 225px;
+   min-height: 325px;
    border-radius: 0 0 15px 15px;
    display: flex;
    flex-direction: column;
@@ -98,7 +98,7 @@ org-chart tr.lines .downLine {
    flex-direction: row;
    align-items: center;
    justify-content: center;
-   gap: 8%;
+   gap: 5%;
 }
 
 .team-group-record:hover {
@@ -396,4 +396,14 @@ org-chart tr.lines .downLine {
 .webix_modal {
   width: 0;
   height: 0;
+}
+
+org-chart .team-group-record > .team-group-record-edit-icon {
+   cursor: pointer;
+   display: none;
+   padding: 4px;
+}
+
+org-chart .team-group-record:hover > .team-group-record-edit-icon {
+   display: block;
 }
