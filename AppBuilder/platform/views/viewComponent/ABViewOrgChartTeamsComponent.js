@@ -519,9 +519,12 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          const settings = this.settings;
          const editContentFieldsToCreateNew =
             settings.editContentFieldsToCreateNew;
-         const contentDateStartFieldColumnName = this.getSettingField(
-            "contentFieldDateStart"
-         )?.columnName;
+         const contentDateStartField = contentObj.fields(
+            (field) => field.id === settings.contentFieldDateStart
+         )[0];
+         const contentDateStartFieldLabel = contentDateStartField?.label;
+         const contentDateStartFieldColumnName =
+            contentDateStartField?.columnName;
          const contentDateEndFieldColumnName = this.getSettingField(
             "contentFieldDateEnd"
          )?.columnName;
@@ -550,8 +553,12 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                let invalidMessage = "";
                switch (fieldName) {
                   case contentDateEndFieldColumnName:
-                     invalidMessage = `The ${field.label} must be today or earlier.`;
-                     rules[fieldName] = (value) => value <= new Date();
+                     invalidMessage = `The ${field.label} must be later than the ${contentDateStartFieldLabel}.`;
+                     rules[fieldName] = (value) =>
+                        value >
+                        $$(ids.contentFormData).getValues()[
+                           contentDateStartFieldColumnName
+                        ];
                      break;
                   default:
                      rules[fieldName] = () => true;
