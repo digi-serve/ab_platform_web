@@ -933,7 +933,8 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       this._fnShowFilterPopup = async (event) => {
          const contentDisplayedFieldFilters =
             this.settings.contentDisplayedFieldFilters;
-         let $popup = $$(this.ids.filterPopup);
+         const ids = this.ids;
+         let $popup = $$(ids.filterPopup);
          if (!$popup) {
             const strategyID =
                this.getSettingField("teamStrategy").settings.linkObject;
@@ -942,73 +943,158 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             const strategyCodeField = strategyObj.fields(
                (f) => f.id === strategyCodeFieldID
             )[0];
-            const strategyOptions = await strategyCodeField.getOptions();
-
             $popup = webix.ui({
                view: "popup",
                css: "filter-popup",
-               id: this.ids.filterPopup,
+               id: ids.filterPopup,
                body: {
-                  view: "form",
-                  borderless: true,
-                  id: this.ids.filterForm,
-                  elements: [
+                  rows: [
                      {
-                        view: "text",
-                        label: this.label("Team Name"),
-                        labelWidth: 90,
-                        name: "teamName",
-                        clear: true,
-                     },
-                     {
-                        view: "combo",
-                        label: this.label("Strategy"),
-                        labelWidth: 90,
-                        options: strategyOptions.map(fieldToOption),
-                        name: "strategy",
-                        clear: "replace",
-                     },
-                     {
-                        view: "checkbox",
-                        name: "inactive",
-                        labelRight: this.label("Show Inactive Teams"),
-                        labelWidth: 0,
-                     },
-                     ...(() => {
-                        const contentDisplayedFieldFilterViews = [];
-                        for (const contentDisplayedFieldFilterKey in contentDisplayedFieldFilters) {
-                           if (
-                              contentDisplayedFieldFilterKey.split(".")[3] == 1
-                           ) {
-                              contentDisplayedFieldFilterViews.push({
-                                 view: "text",
-                                 label: contentDisplayedFieldFilters[
-                                    contentDisplayedFieldFilterKey
-                                 ],
-                                 labelWidth: 90,
-                                 name: contentDisplayedFieldFilterKey,
-                                 clear: true,
-                              });
-                           }
-                        }
-                        return contentDisplayedFieldFilterViews;
-                     })(),
-                     {
-                        cols: [
-                           {},
+                        view: "form",
+                        borderless: true,
+                        hidden: true,
+                        id: ids.filterForm,
+                        elements: [
                            {
-                              view: "icon",
-                              icon: "fa fa-check",
-                              css: "filter-apply",
-                              click: () => this.filterApply(),
+                              view: "text",
+                              label: this.label("Team Name"),
+                              labelWidth: 100,
+                              name: "teamName",
+                              clear: true,
+                           },
+                           {
+                              view: "combo",
+                              label: this.label("Strategy"),
+                              labelWidth: 100,
+                              options: [],
+                              name: "strategy",
+                              clear: "replace",
+                              on: {
+                                 async onViewShow() {
+                                    webix.extend(this, webix.ProgressBar);
+                                    this.showProgress({ type: "icon" });
+                                    try {
+                                       this.define(
+                                          "options",
+                                          (
+                                             await strategyCodeField.getOptions()
+                                          ).map(fieldToOption)
+                                       );
+                                       this.refresh();
+                                       this.enable();
+                                       this.hideProgress();
+                                    } catch {
+                                       // Close popup before response or possily response fail
+                                    }
+                                 },
+                              },
+                           },
+                           {
+                              view: "checkbox",
+                              name: "inactive",
+                              labelRight: this.label("Show Inactive Teams"),
+                              labelWidth: 0,
+                           },
+                           ...(() => {
+                              const contentDisplayedFieldFilterViews = [];
+                              for (const contentDisplayedFieldFilterKey in contentDisplayedFieldFilters) {
+                                 const [, objID, fieldID, isActive] =
+                                    contentDisplayedFieldFilterKey.split(".");
+                                 if (isActive == 1)
+                                    switch (fieldID) {
+                                       // TODO (Guy): Hardcode for the role type filter.
+                                       case "96dc0d8d-7fb4-4bb1-8b80-a262aae41eed":
+                                          const obj = this.AB.objectByID(objID);
+                                          const model = obj.model();
+                                          const fieldColumnName =
+                                             obj.fieldByID(fieldID).columnName;
+                                          contentDisplayedFieldFilterViews.push(
+                                             {
+                                                view: "combo",
+                                                label: contentDisplayedFieldFilters[
+                                                   contentDisplayedFieldFilterKey
+                                                ],
+                                                labelWidth: 100,
+                                                options: [],
+                                                name: contentDisplayedFieldFilterKey,
+                                                clear: "replace",
+                                                on: {
+                                                   async onViewShow() {
+                                                      webix.extend(
+                                                         this,
+                                                         webix.ProgressBar
+                                                      );
+                                                      this.showProgress({
+                                                         type: "icon",
+                                                      });
+                                                      try {
+                                                         this.define(
+                                                            "options",
+                                                            (
+                                                               await model.findAll()
+                                                            ).data.map((e) => ({
+                                                               id: e[
+                                                                  fieldColumnName
+                                                               ],
+                                                               value: e[
+                                                                  fieldColumnName
+                                                               ],
+                                                            }))
+                                                         );
+                                                         this.refresh();
+                                                         this.enable();
+                                                         this.hideProgress();
+                                                      } catch {
+                                                         // Close popup before response or possily response fail
+                                                      }
+                                                   },
+                                                },
+                                             }
+                                          );
+                                          break;
+                                       default:
+                                          contentDisplayedFieldFilterViews.push(
+                                             {
+                                                view: "text",
+                                                label: contentDisplayedFieldFilters[
+                                                   contentDisplayedFieldFilterKey
+                                                ],
+                                                labelWidth: 100,
+                                                name: contentDisplayedFieldFilterKey,
+                                                clear: true,
+                                             }
+                                          );
+                                          break;
+                                    }
+                              }
+                              return contentDisplayedFieldFilterViews;
+                           })(),
+                           {
+                              cols: [
+                                 {},
+                                 {
+                                    view: "icon",
+                                    icon: "fa fa-check",
+                                    css: "filter-apply",
+                                    click: () => this.filterApply(),
+                                 },
+                              ],
                            },
                         ],
                      },
                   ],
                },
+               on: {
+                  onShow() {
+                     $$(ids.filterForm).show();
+                  },
+                  onHide() {
+                     $$(ids.filterForm).hide();
+                  },
+               },
             });
          }
-         $popup.show($$(this.ids.filterButton).$view);
+         $popup.show($$(ids.filterButton).$view);
       };
 
       // Generate strategy css
