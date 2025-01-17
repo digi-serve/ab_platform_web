@@ -1032,6 +1032,10 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const contentGroupDataPK =
          contentRecord[this.getSettingField("contentGroupByField").columnName];
       const contentGroupPKField = contentGroupDC.datasource.PK();
+
+      // Hide a trash can when there is at least one assignment.
+      const $trashCan = $teamNode.querySelectorAll(".team-button").item(2);
+      $trashCan && ($trashCan.style.display = "none");
       if (
          contentGroupDC.getData(
             (e) => e[contentGroupPKField] == contentGroupDataPK
