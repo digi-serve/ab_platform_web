@@ -1700,10 +1700,16 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                                    )
                                    .getData()
                            ).sort((a, b) => {
-                              if (a.firstName < b.firstName) {
+                              if (
+                                 a.lastName.toLowerCase() <
+                                 b.lastName.toLowerCase()
+                              ) {
                                  return -1;
                               }
-                              if (a.firstName > b.firstName) {
+                              if (
+                                 a.lastName.toLowerCase() >
+                                 b.lastName.toLowerCase()
+                              ) {
                                  return 1;
                               }
                               return 0;
@@ -2201,7 +2207,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          } else {
             // sort children alphaetically
             node.children = node.children.sort((a, b) =>
-               a.name > b.name ? 1 : -1
+               a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1
             );
          }
       };
