@@ -2630,15 +2630,15 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
    }
 
    async teamForm(mode, values) {
-      let $teamFormPopup = $$(this.ids.teamFormPopup);
+      const teamObj = this.datacollection.datasource;
+      const linkField = teamObj.fieldByID(
+         this.getSettingField("teamLink").settings.linkColumn
+      );
       const ids = this.ids;
+      let $teamFormPopup = $$(ids.teamFormPopup);
       if (!$teamFormPopup) {
-         const teamObj = this.datacollection.datasource;
          const settings = this.settings;
          const nameField = teamObj.fieldByID(settings.teamName);
-         const linkField = teamObj.fieldByID(
-            this.getSettingField("teamLink").settings.linkColumn
-         );
          const entityDC = this._entityDC;
          const entityObjID = entityDC.datasource.id;
          const entityDCCursorID = entityDC.getCursor().id;
