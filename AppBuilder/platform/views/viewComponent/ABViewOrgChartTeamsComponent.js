@@ -2520,8 +2520,12 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          )
       )
          return false;
-      // @TODO check for active assignment
-      // if (hasActiveAssignment) return false;
+      if (
+         document
+            .getElementById(this.teamNodeID(values.id))
+            .querySelectorAll(".team-group-record").length > 0
+      )
+         return false;
       return true;
    }
 
