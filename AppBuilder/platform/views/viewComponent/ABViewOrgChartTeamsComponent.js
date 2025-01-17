@@ -25,7 +25,6 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                teamFormPopup: "",
                teamFormSubmit: "",
                teamFormTitle: "",
-               teamFormInactive: "",
             },
             ids
          )
@@ -2725,241 +2724,232 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
 
    async teamForm(mode, values) {
       const teamObj = this.datacollection.datasource;
+      const ids = this.ids;
+      const settings = this.settings;
+      const nameField = teamObj.fieldByID(settings.teamName);
+      const entityDC = this._entityDC;
+      const entityObjID = entityDC.datasource.id;
+      const entityDCCursorID = entityDC.getCursor().id;
+      const strategyField = teamObj.fieldByID(settings.teamStrategy);
+      const strategyObj = this.AB.objectByID(strategyField.settings.linkObject);
       const linkField = teamObj.fieldByID(
          this.getSettingField("teamLink").settings.linkColumn
       );
-      const ids = this.ids;
-      let $teamFormPopup = $$(ids.teamFormPopup);
-      if (!$teamFormPopup) {
-         const settings = this.settings;
-         const nameField = teamObj.fieldByID(settings.teamName);
-         const entityDC = this._entityDC;
-         const entityObjID = entityDC.datasource.id;
-         const entityDCCursorID = entityDC.getCursor().id;
-         const strategyField = teamObj.fieldByID(settings.teamStrategy);
-         const strategyObj = this.AB.objectByID(
-            strategyField.settings.linkObject
-         );
-         const teamCond = {
-            glue: "and",
-            rules: [
+      const linkFieldColumnName = linkField.columnName;
+      const isEditMode = mode === "Edit";
+      const teamCond = {
+         glue: "and",
+         rules: [
+            {
+               key: teamObj.connectFields(
+                  (f) => f.settings.linkObject === entityObjID
+               )[0].columnName,
+               value: entityDCCursorID,
+               rule: "equals",
+            },
+         ],
+      };
+      const strategyCond = {
+         glue: "and",
+         rules: [
+            {
+               key: strategyObj.connectFields(
+                  (f) => f.settings.linkObject === entityObjID
+               )[0].columnName,
+               value: entityDCCursorID,
+               rule: "equals",
+            },
+         ],
+      };
+      const subStrategyCol = this.getSettingField("subStrategy").columnName;
+      const $teamFormPopup = webix.ui({
+         view: "popup",
+         id: ids.teamFormPopup,
+         close: true,
+         position: "center",
+         css: { "border-radius": "10px" },
+         body: {
+            rows: [
                {
-                  key: teamObj.connectFields(
-                     (f) => f.settings.linkObject === entityObjID
-                  )[0].columnName,
-                  value: entityDCCursorID,
-                  rule: "equals",
-               },
-            ],
-         };
-         const strategyCond = {
-            glue: "and",
-            rules: [
-               {
-                  key: strategyObj.connectFields(
-                     (f) => f.settings.linkObject === entityObjID
-                  )[0].columnName,
-                  value: entityDCCursorID,
-                  rule: "equals",
-               },
-            ],
-         };
-         const subStrategyCol = this.getSettingField("subStrategy").columnName;
-         $teamFormPopup = webix.ui({
-            view: "popup",
-            id: ids.teamFormPopup,
-            close: true,
-            position: "center",
-            css: { "border-radius": "10px" },
-            body: {
-               rows: [
-                  {
-                     view: "toolbar",
-                     css: "webix_dark",
-                     cols: [
-                        { width: 5 },
-                        {
-                           id: ids.teamFormTitle,
-                           view: "label",
-                           align: "left",
-                        },
-                        {
-                           view: "icon",
-                           icon: "fa fa-times",
-                           align: "right",
-                           width: 60,
-                           click: () => $teamFormPopup.hide(),
-                        },
-                     ],
-                  },
-                  {
-                     view: "form",
-                     id: ids.teamForm,
-                     hidden: true,
-                     borderless: true,
-                     elements: [
-                        {
-                           view: "text",
-                           label: nameField.label,
-                           name: nameField.columnName,
-                           required: true,
-                        },
-                        {
-                           view: "richselect",
-                           label: strategyField.label,
-                           name: strategyField.columnName,
-                           options: [],
-                           required: true,
-                           on: {
-                              async onViewShow() {
-                                 webix.extend(this, webix.ProgressBar);
-                                 this.showProgress({ type: "icon" });
-                                 try {
-                                    this.disable();
-                                    this.define(
-                                       "options",
-                                       (
-                                          await strategyField.getOptions(
-                                             strategyCond,
-                                             null,
-                                             null,
-                                             null,
-                                             [subStrategyCol]
-                                          )
-                                       ).map((e) => ({
-                                          id: e.id,
-                                          value: e[
-                                             `${subStrategyCol}__relation`
-                                          ].name,
-                                          // value: strategyObj.displayData(e),
-                                       }))
-                                    );
-                                    this.refresh();
-                                    this.enable();
-                                    this.hideProgress();
-                                 } catch {
-                                    // Close popup before response or possily response fail
-                                 }
-                              },
-                           },
-                        },
-                        {
-                           view: "combo",
-                           label: linkField.label,
-                           name: linkField.columnName,
-                           options: [],
-                           required: true,
-                           on: {
-                              async onViewShow() {
-                                 webix.extend(this, webix.ProgressBar);
-                                 this.showProgress({ type: "icon" });
-                                 try {
-                                    this.disable();
-                                    this.define(
-                                       "options",
-                                       (
-                                          await linkField.getOptions(teamCond)
-                                       ).map((e) => ({
-                                          id: e.id,
-                                          value: teamObj.displayData(e),
-                                       }))
-                                    );
-                                    this.refresh();
-                                    this.enable();
-                                    this.hideProgress();
-                                 } catch {
-                                    // Close popup before response or possily response fail
-                                 }
-                              },
-                           },
-                        },
-                        {
-                           view: "switch",
-                           id: ids.teamFormInactive,
-                           name: this.getSettingField("teamInactive")
-                              .columnName,
-                           label: "Inactive",
-                        },
-                        { view: "text", name: "id", hidden: true },
-                        {
-                           id: ids.teamFormSubmit,
-                           view: "button",
-                           value: this.label("Save"),
-                           disabled: true,
-                           css: "webix_primary",
-                           click: async () => {
-                              let newValues = $$(ids.teamForm).getValues();
-                              if (newValues.id) {
-                                 const $node = document.getElementById(
-                                    this.teamNodeID(newValues.id)
-                                 );
-                                 const oldValues = JSON.parse(
-                                    $node.dataset.source
-                                 )._rawData;
-                                 newValues = this._parseFormValueByType(
-                                    teamObj,
-                                    oldValues,
-                                    newValues
-                                 );
-                                 if (
-                                    !this._checkDataIsChanged(
-                                       oldValues,
-                                       newValues
-                                    )
-                                 )
-                                    return;
-                                 this.teamEdit(newValues);
-                              } else {
-                                 newValues = this._parseFormValueByType(
-                                    teamObj,
-                                    null,
-                                    newValues
-                                 );
-                                 this.teamAddChild(newValues);
-                              }
-                              $teamFormPopup.hide();
-                           },
-                        },
-                     ],
-                     on: {
-                        onChange: () => {
-                           const values = $$(ids.teamForm).getValues();
-                           const valid =
-                              !!values[strategyField.columnName] &&
-                              !!values[nameField.columnName] &&
-                              !!values[linkField.columnName];
-                           const $teamFormSubmit = $$(ids.teamFormSubmit);
-                           if (valid) $teamFormSubmit.enable();
-                           else $teamFormSubmit.disable();
+                  view: "toolbar",
+                  css: "webix_dark",
+                  cols: [
+                     { width: 5 },
+                     {
+                        view: "label",
+                        label: `${this.label(mode)} Team`,
+                        align: "left",
+                     },
+                     {
+                        view: "icon",
+                        icon: "fa fa-times",
+                        align: "right",
+                        width: 60,
+                        click: () => {
+                           $teamFormPopup.blockEvent();
+                           $teamFormPopup.$view.remove();
+                           $teamFormPopup.destructor();
                         },
                      },
+                  ],
+               },
+               {
+                  view: "form",
+                  id: ids.teamForm,
+                  hidden: true,
+                  borderless: true,
+                  elements: [
+                     {
+                        view: "text",
+                        label: nameField.label,
+                        name: nameField.columnName,
+                        required: true,
+                     },
+                     {
+                        view: "richselect",
+                        label: strategyField.label,
+                        name: strategyField.columnName,
+                        options: [],
+                        required: true,
+                        on: {
+                           async onViewShow() {
+                              webix.extend(this, webix.ProgressBar);
+                              this.showProgress({ type: "icon" });
+                              try {
+                                 this.disable();
+                                 this.define(
+                                    "options",
+                                    (
+                                       await strategyField.getOptions(
+                                          strategyCond,
+                                          null,
+                                          null,
+                                          null,
+                                          [subStrategyCol]
+                                       )
+                                    ).map((e) => ({
+                                       id: e.id,
+                                       value: e[`${subStrategyCol}__relation`]
+                                          .name,
+                                       // value: strategyObj.displayData(e),
+                                    }))
+                                 );
+                                 this.refresh();
+                                 this.enable();
+                                 this.hideProgress();
+                              } catch {
+                                 // Close popup before response or possily response fail
+                              }
+                           },
+                        },
+                     },
+                     {
+                        view: "combo",
+                        label: linkField.label,
+                        name: linkFieldColumnName,
+                        options: [],
+                        required: true,
+                        on: {
+                           async onViewShow() {
+                              webix.extend(this, webix.ProgressBar);
+                              this.showProgress({ type: "icon" });
+                              try {
+                                 this.disable();
+                                 this.define(
+                                    "options",
+                                    (await linkField.getOptions(teamCond)).map(
+                                       (e) => ({
+                                          id: e.id,
+                                          value: teamObj.displayData(e),
+                                       })
+                                    )
+                                 );
+                                 this.refresh();
+                                 isEditMode && this.enable();
+                                 this.hideProgress();
+                              } catch {
+                                 // Close popup before response or possily response fail
+                              }
+                           },
+                        },
+                     },
+                     {
+                        view: "switch",
+                        disabled: !this.teamCanInactivate(values),
+                        name: this.getSettingField("teamInactive").columnName,
+                        label: "Inactive",
+                     },
+                     { view: "text", name: "id", hidden: true },
+                     {
+                        id: ids.teamFormSubmit,
+                        view: "button",
+                        value: this.label("Save"),
+                        disabled: true,
+                        css: "webix_primary",
+                        click: async () => {
+                           let newValues = $$(ids.teamForm).getValues();
+                           if (newValues.id) {
+                              const $node = document.getElementById(
+                                 this.teamNodeID(newValues.id)
+                              );
+                              const oldValues = JSON.parse(
+                                 $node.dataset.source
+                              )._rawData;
+                              newValues = this._parseFormValueByType(
+                                 teamObj,
+                                 oldValues,
+                                 newValues
+                              );
+                              if (
+                                 !this._checkDataIsChanged(oldValues, newValues)
+                              )
+                                 return;
+                              this.teamEdit(newValues);
+                           } else {
+                              newValues = this._parseFormValueByType(
+                                 teamObj,
+                                 null,
+                                 newValues
+                              );
+                              this.teamAddChild(newValues);
+                           }
+                           $teamFormPopup.blockEvent();
+                           $teamFormPopup.$view.remove();
+                           $teamFormPopup.destructor();
+                        },
+                     },
+                  ],
+                  on: {
+                     onChange: () => {
+                        const values = $$(ids.teamForm).getValues();
+                        let valid =
+                           !!values[strategyField.columnName] &&
+                           !!values[nameField.columnName];
+                        if (isEditMode)
+                           valid = valid && !!values[linkFieldColumnName];
+                        const $teamFormSubmit = $$(ids.teamFormSubmit);
+                        if (valid) $teamFormSubmit.enable();
+                        else $teamFormSubmit.disable();
+                     },
                   },
-               ],
-            },
-            on: {
-               onShow() {
-                  $$(ids.teamForm).show();
                },
-               onHide() {
-                  $$(ids.teamForm).hide();
-               },
+            ],
+         },
+         on: {
+            onShow() {
+               $$(ids.teamForm).show();
             },
-         });
-      }
+            onHide() {
+               this.$view.remove();
+               this.destructor();
+            },
+         },
+      });
       if (values.__parentID) {
-         values[linkField] = values.__parentID;
+         values[linkFieldColumnName] = values.__parentID;
          delete values.__parentID;
       }
-      $$(ids.teamFormTitle).setValue(`${this.label(mode)} Team`);
       $$(ids.teamForm).setValues(values);
-      $$(ids.teamFormSubmit).disable();
-
-      this.teamCanInactivate(values)
-         ? $$(ids.teamFormInactive).enable()
-         : $$(ids.teamFormInactive).disable();
-      if (mode === "Edit") {
-         // Check if we can inactivate
-      }
       $teamFormPopup.show();
    }
 
