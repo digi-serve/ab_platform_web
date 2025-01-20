@@ -130,18 +130,20 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                   contentObj.fieldByID(contentLinkedFieldID).columnName;
                const pendingPromises = [];
                const newDate = new Date();
-               const $contentRecords =
-                  document.getElementsByClassName("team-group-record");
-               for (const $contentRecord of $contentRecords) {
-                  const contentData = JSON.parse($contentRecord.dataset.source);
-                  if (contentData[contentLinkedFieldColumnName] == dataPK) {
-                     contentData[contentDateEndFieldColumnName] = newDate;
-                     pendingPromises.push(
-                        contentModel.update(contentData.id, contentData)
-                     );
-                     draggedNodes.push($contentRecord);
-                  }
-               }
+               // Employee can have multiple assignments, so don't close
+               // existing
+               // const $contentRecords =
+               // document.getElementsByClassName("team-group-record");
+               // for (const $contentRecord of $contentRecords) {
+               //    const contentData = JSON.parse($contentRecord.dataset.source);
+               //    if (contentData[contentLinkedFieldColumnName] == dataPK) {
+               //       contentData[contentDateEndFieldColumnName] = newDate;
+               //       pendingPromises.push(
+               //          contentModel.update(contentData.id, contentData)
+               //       );
+               //       draggedNodes.push($contentRecord);
+               //    }
+               // }
                updatedData = {};
                updatedData[contentDateStartFieldColumnName] = newDate;
                updatedData[contentLinkedFieldColumnName] =
