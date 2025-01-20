@@ -1795,21 +1795,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                                          dataPanelDC.id === dataPanelDCID
                                    )
                                    .getData()
-                           ).sort((a, b) => {
-                              if (
-                                 a.lastName.toLowerCase() <
-                                 b.lastName.toLowerCase()
-                              ) {
-                                 return -1;
-                              }
-                              if (
-                                 a.lastName.toLowerCase() >
-                                 b.lastName.toLowerCase()
-                              ) {
-                                 return 1;
-                              }
-                              return 0;
-                           })
+                           ).sort(sort)
                         );
                         await self._callAfterRender(() => {
                            const $itemElements =
@@ -2302,9 +2288,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             delete node.children;
          } else {
             // sort children alphaetically
-            node.children = node.children.sort((a, b) =>
-               a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1
-            );
+            node.children = node.children.sort(sort);
          }
       };
       const chartData = (this._chartData = {
@@ -2323,14 +2307,23 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       pullChildData(chartData);
    }
 
-   async refresh() {
+   async refresh(force = true) {
       const ids = this.ids;
       $$(ids.teamFormPopup)?.destructor();
       $$(ids.contentForm)?.destructor();
       await this.pullData();
       // this._showDataPanel();
       this._showOrgChart();
-      this._pageData();
+      (force && this._pageData()) ||
+         (await this._callAfterRender(() => {
+            const contentDC = this._contentDC;
+            this._fnPageContentCallback(
+               contentDC.getData(),
+               true,
+               contentDC,
+               () => {}
+            );
+         }));
    }
 
    async filterApply() {
@@ -2341,17 +2334,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       this.__filters = $$(ids.filterForm).getValues();
       this.__orgchart?.remove();
       this.__orgchart = null;
-      await this.pullData();
-      this._showOrgChart();
-      await this._callAfterRender(() => {
-         const contentDC = this._contentDC;
-         this._fnPageContentCallback(
-            contentDC.getData(),
-            true,
-            contentDC,
-            () => {}
-         );
-      });
+      await this.refresh(false);
       this.ready();
    }
 
@@ -2577,6 +2560,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             { siblings: [newChild] }
          );
       else this.__orgchart.addChildren(parent, { children: [newChild] });
+      await this.refresh(false);
 
       // TODO(Guy): Render assignment for specific node later.
       // const contentDC = this._contentDC;
@@ -3031,4 +3015,11 @@ function fieldToOption(f) {
       id: f.id,
       value: f.text,
    };
+}
+
+function sort(a, b) {
+   return (a.lastName ?? a.name).toLowerCase() >
+      (b.lastName ?? b.name).toLowerCase()
+      ? 1
+      : -1;
 }
