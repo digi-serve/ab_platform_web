@@ -2562,7 +2562,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             { siblings: [newChild] }
          );
       else this.__orgchart.addChildren(parent, { children: [newChild] });
-      await this.refresh(false);
+      await this.refresh(isServerSideUpdate);
 
       // TODO(Guy): Render assignment for specific node later.
       // const contentDC = this._contentDC;
@@ -2680,7 +2680,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          _rawData[linkFieldColumnName]
       ) {
          // TODO (Guy): Fix refresh the only updated node and those children and assignments later.
-         await this.refresh();
+         await this.refresh(isServerSideUpdate);
          // this.__orgchart.removeNodes($node);
          // this.teamAddChild(
          //    _rawData,
@@ -2713,6 +2713,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       };
       newChartData.filteredOut = this.filterTeam(newChartData);
       $node.dataset.source = JSON.stringify(newChartData);
+      isServerSideUpdate && await this.refresh(isServerSideUpdate);
    }
 
    async teamForm(mode, values) {
