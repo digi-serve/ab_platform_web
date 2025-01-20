@@ -25,7 +25,6 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                teamFormPopup: "",
                teamFormSubmit: "",
                teamFormTitle: "",
-               teamFormInactive: "",
             },
             ids
          )
@@ -522,9 +521,12 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          const settings = this.settings;
          const editContentFieldsToCreateNew =
             settings.editContentFieldsToCreateNew;
-         const contentDateStartFieldColumnName = this.getSettingField(
-            "contentFieldDateStart"
-         )?.columnName;
+         const contentDateStartField = contentObj.fields(
+            (field) => field.id === settings.contentFieldDateStart
+         )[0];
+         const contentDateStartFieldLabel = contentDateStartField?.label;
+         const contentDateStartFieldColumnName =
+            contentDateStartField?.columnName;
          const contentDateEndFieldColumnName = this.getSettingField(
             "contentFieldDateEnd"
          )?.columnName;
@@ -553,8 +555,12 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                let invalidMessage = "";
                switch (fieldName) {
                   case contentDateEndFieldColumnName:
-                     invalidMessage = `The ${field.label} must be today or earlier.`;
-                     rules[fieldName] = (value) => value <= new Date();
+                     invalidMessage = `The ${field.label} must be later than the ${contentDateStartFieldLabel}.`;
+                     rules[fieldName] = (value) =>
+                        value >
+                        $$(ids.contentFormData).getValues()[
+                           contentDateStartFieldColumnName
+                        ];
                      break;
                   default:
                      rules[fieldName] = () => true;
@@ -935,7 +941,8 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       this._fnShowFilterPopup = async (event) => {
          const contentDisplayedFieldFilters =
             this.settings.contentDisplayedFieldFilters;
-         let $popup = $$(this.ids.filterPopup);
+         const ids = this.ids;
+         let $popup = $$(ids.filterPopup);
          if (!$popup) {
             const strategyID =
                this.getSettingField("teamStrategy").settings.linkObject;
@@ -944,73 +951,158 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             const strategyCodeField = strategyObj.fields(
                (f) => f.id === strategyCodeFieldID
             )[0];
-            const strategyOptions = await strategyCodeField.getOptions();
-
             $popup = webix.ui({
                view: "popup",
                css: "filter-popup",
-               id: this.ids.filterPopup,
+               id: ids.filterPopup,
                body: {
-                  view: "form",
-                  borderless: true,
-                  id: this.ids.filterForm,
-                  elements: [
+                  rows: [
                      {
-                        view: "text",
-                        label: this.label("Team Name"),
-                        labelWidth: 90,
-                        name: "teamName",
-                        clear: true,
-                     },
-                     {
-                        view: "combo",
-                        label: this.label("Strategy"),
-                        labelWidth: 90,
-                        options: strategyOptions.map(fieldToOption),
-                        name: "strategy",
-                        clear: "replace",
-                     },
-                     {
-                        view: "checkbox",
-                        name: "inactive",
-                        labelRight: this.label("Show Inactive Teams"),
-                        labelWidth: 0,
-                     },
-                     ...(() => {
-                        const contentDisplayedFieldFilterViews = [];
-                        for (const contentDisplayedFieldFilterKey in contentDisplayedFieldFilters) {
-                           if (
-                              contentDisplayedFieldFilterKey.split(".")[3] == 1
-                           ) {
-                              contentDisplayedFieldFilterViews.push({
-                                 view: "text",
-                                 label: contentDisplayedFieldFilters[
-                                    contentDisplayedFieldFilterKey
-                                 ],
-                                 labelWidth: 90,
-                                 name: contentDisplayedFieldFilterKey,
-                                 clear: true,
-                              });
-                           }
-                        }
-                        return contentDisplayedFieldFilterViews;
-                     })(),
-                     {
-                        cols: [
-                           {},
+                        view: "form",
+                        borderless: true,
+                        hidden: true,
+                        id: ids.filterForm,
+                        elements: [
                            {
-                              view: "icon",
-                              icon: "fa fa-check",
-                              css: "filter-apply",
-                              click: () => this.filterApply(),
+                              view: "text",
+                              label: this.label("Team Name"),
+                              labelWidth: 100,
+                              name: "teamName",
+                              clear: true,
+                           },
+                           {
+                              view: "combo",
+                              label: this.label("Strategy"),
+                              labelWidth: 100,
+                              options: [],
+                              name: "strategy",
+                              clear: "replace",
+                              on: {
+                                 async onViewShow() {
+                                    webix.extend(this, webix.ProgressBar);
+                                    this.showProgress({ type: "icon" });
+                                    try {
+                                       this.define(
+                                          "options",
+                                          (
+                                             await strategyCodeField.getOptions()
+                                          ).map(fieldToOption)
+                                       );
+                                       this.refresh();
+                                       this.enable();
+                                       this.hideProgress();
+                                    } catch {
+                                       // Close popup before response or possily response fail
+                                    }
+                                 },
+                              },
+                           },
+                           {
+                              view: "checkbox",
+                              name: "inactive",
+                              labelRight: this.label("Show Inactive Teams"),
+                              labelWidth: 0,
+                           },
+                           ...(() => {
+                              const contentDisplayedFieldFilterViews = [];
+                              for (const contentDisplayedFieldFilterKey in contentDisplayedFieldFilters) {
+                                 const [, objID, fieldID, isActive] =
+                                    contentDisplayedFieldFilterKey.split(".");
+                                 if (isActive == 1)
+                                    switch (fieldID) {
+                                       // TODO (Guy): Hardcode for the role type filter.
+                                       case "96dc0d8d-7fb4-4bb1-8b80-a262aae41eed":
+                                          const obj = this.AB.objectByID(objID);
+                                          const model = obj.model();
+                                          const fieldColumnName =
+                                             obj.fieldByID(fieldID).columnName;
+                                          contentDisplayedFieldFilterViews.push(
+                                             {
+                                                view: "combo",
+                                                label: contentDisplayedFieldFilters[
+                                                   contentDisplayedFieldFilterKey
+                                                ],
+                                                labelWidth: 100,
+                                                options: [],
+                                                name: contentDisplayedFieldFilterKey,
+                                                clear: "replace",
+                                                on: {
+                                                   async onViewShow() {
+                                                      webix.extend(
+                                                         this,
+                                                         webix.ProgressBar
+                                                      );
+                                                      this.showProgress({
+                                                         type: "icon",
+                                                      });
+                                                      try {
+                                                         this.define(
+                                                            "options",
+                                                            (
+                                                               await model.findAll()
+                                                            ).data.map((e) => ({
+                                                               id: e[
+                                                                  fieldColumnName
+                                                               ],
+                                                               value: e[
+                                                                  fieldColumnName
+                                                               ],
+                                                            }))
+                                                         );
+                                                         this.refresh();
+                                                         this.enable();
+                                                         this.hideProgress();
+                                                      } catch {
+                                                         // Close popup before response or possily response fail
+                                                      }
+                                                   },
+                                                },
+                                             }
+                                          );
+                                          break;
+                                       default:
+                                          contentDisplayedFieldFilterViews.push(
+                                             {
+                                                view: "text",
+                                                label: contentDisplayedFieldFilters[
+                                                   contentDisplayedFieldFilterKey
+                                                ],
+                                                labelWidth: 100,
+                                                name: contentDisplayedFieldFilterKey,
+                                                clear: true,
+                                             }
+                                          );
+                                          break;
+                                    }
+                              }
+                              return contentDisplayedFieldFilterViews;
+                           })(),
+                           {
+                              cols: [
+                                 {},
+                                 {
+                                    view: "icon",
+                                    icon: "fa fa-check",
+                                    css: "filter-apply",
+                                    click: () => this.filterApply(),
+                                 },
+                              ],
                            },
                         ],
                      },
                   ],
                },
+               on: {
+                  onShow() {
+                     $$(ids.filterForm).show();
+                  },
+                  onHide() {
+                     $$(ids.filterForm).hide();
+                  },
+               },
             });
          }
-         $popup.show($$(this.ids.filterButton).$view);
+         $popup.show($$(ids.filterButton).$view);
       };
 
       // Generate strategy css
@@ -1034,6 +1126,10 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const contentGroupDataPK =
          contentRecord[this.getSettingField("contentGroupByField").columnName];
       const contentGroupPKField = contentGroupDC.datasource.PK();
+
+      // Hide a trash can when there is at least one assignment.
+      const $trashCan = $teamNode.querySelectorAll(".team-button").item(2);
+      $trashCan && ($trashCan.style.display = "none");
       if (
          contentGroupDC.getData(
             (e) => e[contentGroupPKField] == contentGroupDataPK
@@ -1701,15 +1797,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                                          dataPanelDC.id === dataPanelDCID
                                    )
                                    .getData()
-                           ).sort((a, b) => {
-                              if (a.firstName < b.firstName) {
-                                 return -1;
-                              }
-                              if (a.firstName > b.firstName) {
-                                 return 1;
-                              }
-                              return 0;
-                           })
+                           ).sort(sort)
                         );
                         await self._callAfterRender(() => {
                            const $itemElements =
@@ -2202,9 +2290,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             delete node.children;
          } else {
             // sort children alphaetically
-            node.children = node.children.sort((a, b) =>
-               a.name > b.name ? 1 : -1
-            );
+            node.children = node.children.sort(sort);
          }
       };
       const chartData = (this._chartData = {
@@ -2223,14 +2309,23 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       pullChildData(chartData);
    }
 
-   async refresh() {
+   async refresh(force = true) {
       const ids = this.ids;
       $$(ids.teamFormPopup)?.destructor();
       $$(ids.contentForm)?.destructor();
       await this.pullData();
       // this._showDataPanel();
       this._showOrgChart();
-      this._pageData();
+      (force && this._pageData()) ||
+         (await this._callAfterRender(() => {
+            const contentDC = this._contentDC;
+            this._fnPageContentCallback(
+               contentDC.getData(),
+               true,
+               contentDC,
+               () => {}
+            );
+         }));
    }
 
    async filterApply() {
@@ -2241,17 +2336,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       this.__filters = $$(ids.filterForm).getValues();
       this.__orgchart?.remove();
       this.__orgchart = null;
-      await this.pullData();
-      this._showOrgChart();
-      await this._callAfterRender(() => {
-         const contentDC = this._contentDC;
-         this._fnPageContentCallback(
-            contentDC.getData(),
-            true,
-            contentDC,
-            () => {}
-         );
-      });
+      await this.refresh(false);
       this.ready();
    }
 
@@ -2477,6 +2562,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             { siblings: [newChild] }
          );
       else this.__orgchart.addChildren(parent, { children: [newChild] });
+      await this.refresh(false);
 
       // TODO(Guy): Render assignment for specific node later.
       // const contentDC = this._contentDC;
@@ -2512,8 +2598,12 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          )
       )
          return false;
-      // @TODO check for active assignment
-      // if (hasActiveAssignment) return false;
+      if (
+         document
+            .getElementById(this.teamNodeID(values.id))
+            .querySelectorAll(".team-group-record").length > 0
+      )
+         return false;
       return true;
    }
 
@@ -2626,242 +2716,233 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
    }
 
    async teamForm(mode, values) {
-      let $teamFormPopup = $$(this.ids.teamFormPopup);
+      const teamObj = this.datacollection.datasource;
       const ids = this.ids;
-      if (!$teamFormPopup) {
-         const teamObj = this.datacollection.datasource;
-         const settings = this.settings;
-         const nameField = teamObj.fieldByID(settings.teamName);
-         const linkField = teamObj.fieldByID(
-            this.getSettingField("teamLink").settings.linkColumn
-         );
-         const entityDC = this._entityDC;
-         const entityObjID = entityDC.datasource.id;
-         const entityDCCursorID = entityDC.getCursor().id;
-         const strategyField = teamObj.fieldByID(settings.teamStrategy);
-         const strategyObj = this.AB.objectByID(
-            strategyField.settings.linkObject
-         );
-         const teamCond = {
-            glue: "and",
-            rules: [
+      const settings = this.settings;
+      const nameField = teamObj.fieldByID(settings.teamName);
+      const entityDC = this._entityDC;
+      const entityObjID = entityDC.datasource.id;
+      const entityDCCursorID = entityDC.getCursor().id;
+      const strategyField = teamObj.fieldByID(settings.teamStrategy);
+      const strategyObj = this.AB.objectByID(strategyField.settings.linkObject);
+      const linkField = teamObj.fieldByID(
+         this.getSettingField("teamLink").settings.linkColumn
+      );
+      const linkFieldColumnName = linkField.columnName;
+      const isEditMode = mode === "Edit";
+      const teamCond = {
+         glue: "and",
+         rules: [
+            {
+               key: teamObj.connectFields(
+                  (f) => f.settings.linkObject === entityObjID
+               )[0].columnName,
+               value: entityDCCursorID,
+               rule: "equals",
+            },
+         ],
+      };
+      const strategyCond = {
+         glue: "and",
+         rules: [
+            {
+               key: strategyObj.connectFields(
+                  (f) => f.settings.linkObject === entityObjID
+               )[0].columnName,
+               value: entityDCCursorID,
+               rule: "equals",
+            },
+         ],
+      };
+      const subStrategyCol = this.getSettingField("subStrategy").columnName;
+      const $teamFormPopup = webix.ui({
+         view: "popup",
+         id: ids.teamFormPopup,
+         close: true,
+         position: "center",
+         css: { "border-radius": "10px" },
+         body: {
+            rows: [
                {
-                  key: teamObj.connectFields(
-                     (f) => f.settings.linkObject === entityObjID
-                  )[0].columnName,
-                  value: entityDCCursorID,
-                  rule: "equals",
-               },
-            ],
-         };
-         const strategyCond = {
-            glue: "and",
-            rules: [
-               {
-                  key: strategyObj.connectFields(
-                     (f) => f.settings.linkObject === entityObjID
-                  )[0].columnName,
-                  value: entityDCCursorID,
-                  rule: "equals",
-               },
-            ],
-         };
-         const subStrategyCol = this.getSettingField("subStrategy").columnName;
-         $teamFormPopup = webix.ui({
-            view: "popup",
-            id: ids.teamFormPopup,
-            close: true,
-            position: "center",
-            css: { "border-radius": "10px" },
-            body: {
-               rows: [
-                  {
-                     view: "toolbar",
-                     css: "webix_dark",
-                     cols: [
-                        { width: 5 },
-                        {
-                           id: ids.teamFormTitle,
-                           view: "label",
-                           align: "left",
-                        },
-                        {
-                           view: "icon",
-                           icon: "fa fa-times",
-                           align: "right",
-                           width: 60,
-                           click: () => $teamFormPopup.hide(),
-                        },
-                     ],
-                  },
-                  {
-                     view: "form",
-                     id: ids.teamForm,
-                     hidden: true,
-                     borderless: true,
-                     elements: [
-                        {
-                           view: "text",
-                           label: nameField.label,
-                           name: nameField.columnName,
-                           required: true,
-                        },
-                        {
-                           view: "richselect",
-                           label: strategyField.label,
-                           name: strategyField.columnName,
-                           options: [],
-                           required: true,
-                           on: {
-                              async onViewShow() {
-                                 webix.extend(this, webix.ProgressBar);
-                                 this.showProgress({ type: "icon" });
-                                 try {
-                                    this.disable();
-                                    this.define(
-                                       "options",
-                                       (
-                                          await strategyField.getOptions(
-                                             strategyCond,
-                                             null,
-                                             null,
-                                             null,
-                                             [subStrategyCol]
-                                          )
-                                       ).map((e) => ({
-                                          id: e.id,
-                                          value: e[
-                                             `${subStrategyCol}__relation`
-                                          ].name,
-                                          // value: strategyObj.displayData(e),
-                                       }))
-                                    );
-                                    this.refresh();
-                                    this.enable();
-                                    this.hideProgress();
-                                 } catch {
-                                    // Close popup before response or possily response fail
-                                 }
-                              },
-                           },
-                        },
-                        {
-                           view: "combo",
-                           label: linkField.label,
-                           name: linkField.columnName,
-                           options: [],
-                           required: true,
-                           on: {
-                              async onViewShow() {
-                                 webix.extend(this, webix.ProgressBar);
-                                 this.showProgress({ type: "icon" });
-                                 try {
-                                    this.disable();
-                                    this.define(
-                                       "options",
-                                       (
-                                          await linkField.getOptions(teamCond)
-                                       ).map((e) => ({
-                                          id: e.id,
-                                          value: teamObj.displayData(e),
-                                       }))
-                                    );
-                                    this.refresh();
-                                    this.enable();
-                                    this.hideProgress();
-                                 } catch {
-                                    // Close popup before response or possily response fail
-                                 }
-                              },
-                           },
-                        },
-                        {
-                           view: "switch",
-                           id: ids.teamFormInactive,
-                           name: this.getSettingField("teamInactive")
-                              .columnName,
-                           label: "Inactive",
-                        },
-                        { view: "text", name: "id", hidden: true },
-                        {
-                           id: ids.teamFormSubmit,
-                           view: "button",
-                           value: this.label("Save"),
-                           disabled: true,
-                           css: "webix_primary",
-                           click: async () => {
-                              let newValues = $$(ids.teamForm).getValues();
-                              if (newValues.id) {
-                                 const $node = document.getElementById(
-                                    this.teamNodeID(newValues.id)
-                                 );
-                                 const oldValues = JSON.parse(
-                                    $node.dataset.source
-                                 )._rawData;
-                                 newValues = this._parseFormValueByType(
-                                    teamObj,
-                                    oldValues,
-                                    newValues
-                                 );
-                                 if (
-                                    !this._checkDataIsChanged(
-                                       oldValues,
-                                       newValues
-                                    )
-                                 )
-                                    return;
-                                 this.teamEdit(newValues);
-                              } else {
-                                 newValues = this._parseFormValueByType(
-                                    teamObj,
-                                    null,
-                                    newValues
-                                 );
-                                 this.teamAddChild(newValues);
-                              }
-                              $teamFormPopup.hide();
-                           },
-                        },
-                     ],
-                     on: {
-                        onChange: () => {
-                           const values = $$(ids.teamForm).getValues();
-                           const valid =
-                              !!values[strategyField.columnName] &&
-                              !!values[nameField.columnName] &&
-                              !!values[linkField.columnName];
-                           const $teamFormSubmit = $$(ids.teamFormSubmit);
-                           if (valid) $teamFormSubmit.enable();
-                           else $teamFormSubmit.disable();
+                  view: "toolbar",
+                  css: "webix_dark",
+                  cols: [
+                     { width: 5 },
+                     {
+                        view: "label",
+                        label: `${this.label(mode)} Team`,
+                        align: "left",
+                     },
+                     {
+                        view: "icon",
+                        icon: "fa fa-times",
+                        align: "right",
+                        width: 60,
+                        click: () => {
+                           $teamFormPopup.blockEvent();
+                           $teamFormPopup.$view.remove();
+                           $teamFormPopup.destructor();
                         },
                      },
+                  ],
+               },
+               {
+                  view: "form",
+                  id: ids.teamForm,
+                  hidden: true,
+                  borderless: true,
+                  elements: [
+                     {
+                        view: "text",
+                        label: nameField.label,
+                        name: nameField.columnName,
+                        required: true,
+                     },
+                     {
+                        view: "richselect",
+                        label: strategyField.label,
+                        name: strategyField.columnName,
+                        options: [],
+                        required: true,
+                        on: {
+                           async onViewShow() {
+                              webix.extend(this, webix.ProgressBar);
+                              this.showProgress({ type: "icon" });
+                              try {
+                                 this.disable();
+                                 this.define(
+                                    "options",
+                                    (
+                                       await strategyField.getOptions(
+                                          strategyCond,
+                                          null,
+                                          null,
+                                          null,
+                                          [subStrategyCol]
+                                       )
+                                    ).map((e) => ({
+                                       id: e.id,
+                                       value: e[`${subStrategyCol}__relation`]
+                                          .name,
+                                       // value: strategyObj.displayData(e),
+                                    }))
+                                 );
+                                 this.refresh();
+                                 this.enable();
+                                 this.hideProgress();
+                              } catch {
+                                 // Close popup before response or possily response fail
+                              }
+                           },
+                        },
+                     },
+                     {
+                        view: "combo",
+                        label: linkField.label,
+                        name: linkFieldColumnName,
+                        options: [],
+                        required: true,
+                        on: {
+                           async onViewShow() {
+                              webix.extend(this, webix.ProgressBar);
+                              this.showProgress({ type: "icon" });
+                              try {
+                                 this.disable();
+                                 this.define(
+                                    "options",
+                                    (await linkField.getOptions(teamCond)).map(
+                                       (e) => ({
+                                          id: e.id,
+                                          value: teamObj.displayData(e),
+                                       })
+                                    )
+                                 );
+                                 this.refresh();
+                                 isEditMode && this.enable();
+                                 this.hideProgress();
+                              } catch {
+                                 // Close popup before response or possily response fail
+                              }
+                           },
+                        },
+                     },
+                     {
+                        view: "switch",
+                        disabled: !this.teamCanInactivate(values),
+                        name: this.getSettingField("teamInactive").columnName,
+                        label: "Inactive",
+                     },
+                     { view: "text", name: "id", hidden: true },
+                     {
+                        id: ids.teamFormSubmit,
+                        view: "button",
+                        value: this.label("Save"),
+                        disabled: true,
+                        css: "webix_primary",
+                        click: async () => {
+                           let newValues = $$(ids.teamForm).getValues();
+                           if (newValues.id) {
+                              const $node = document.getElementById(
+                                 this.teamNodeID(newValues.id)
+                              );
+                              const oldValues = JSON.parse(
+                                 $node.dataset.source
+                              )._rawData;
+                              newValues = this._parseFormValueByType(
+                                 teamObj,
+                                 oldValues,
+                                 newValues
+                              );
+                              if (
+                                 !this._checkDataIsChanged(oldValues, newValues)
+                              )
+                                 return;
+                              this.teamEdit(newValues);
+                           } else {
+                              newValues = this._parseFormValueByType(
+                                 teamObj,
+                                 null,
+                                 newValues
+                              );
+                              this.teamAddChild(newValues);
+                           }
+                           $teamFormPopup.blockEvent();
+                           $teamFormPopup.$view.remove();
+                           $teamFormPopup.destructor();
+                        },
+                     },
+                  ],
+                  on: {
+                     onChange: () => {
+                        const values = $$(ids.teamForm).getValues();
+                        let valid =
+                           !!values[strategyField.columnName] &&
+                           !!values[nameField.columnName];
+                        if (isEditMode)
+                           valid = valid && !!values[linkFieldColumnName];
+                        const $teamFormSubmit = $$(ids.teamFormSubmit);
+                        if (valid) $teamFormSubmit.enable();
+                        else $teamFormSubmit.disable();
+                     },
                   },
-               ],
-            },
-            on: {
-               onShow() {
-                  $$(ids.teamForm).show();
                },
-               onHide() {
-                  $$(ids.teamForm).hide();
-               },
+            ],
+         },
+         on: {
+            onShow() {
+               $$(ids.teamForm).show();
             },
-         });
-      }
+            onHide() {
+               this.$view.remove();
+               this.destructor();
+            },
+         },
+      });
       if (values.__parentID) {
-         values[linkField] = values.__parentID;
+         values[linkFieldColumnName] = values.__parentID;
          delete values.__parentID;
       }
-      $$(ids.teamFormTitle).setValue(`${this.label(mode)} Team`);
       $$(ids.teamForm).setValues(values);
-      $$(ids.teamFormSubmit).disable();
-
-      this.teamCanInactivate(values)
-         ? $$(ids.teamFormInactive).enable()
-         : $$(ids.teamFormInactive).disable();
-      if (mode === "Edit") {
-         // Check if we can inactivate
-      }
       $teamFormPopup.show();
    }
 
@@ -2936,4 +3017,11 @@ function fieldToOption(f) {
       id: f.id,
       value: f.text,
    };
+}
+
+function sort(a, b) {
+   return (a.lastName ?? a.name).toLowerCase() >
+      (b.lastName ?? b.name).toLowerCase()
+      ? 1
+      : -1;
 }
