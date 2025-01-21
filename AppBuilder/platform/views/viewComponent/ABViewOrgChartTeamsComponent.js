@@ -1811,13 +1811,15 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                                  "data-content-linked-field-id",
                                  contentFieldID
                               );
+                              const dataPanelRecord = _dataPanelDC.getData(
+                                 (e) =>
+                                    e.id ==
+                                    $itemElement.getAttribute("webix_l_id")
+                              )[0];
+                              if (dataPanelRecord == null) continue;
                               $itemElement.setAttribute(
                                  "data-pk",
-                                 _dataPanelDC.getData(
-                                    (e) =>
-                                       e.id ==
-                                       $itemElement.getAttribute("webix_l_id")
-                                 )[0][panelObj.PK()]
+                                 dataPanelRecord[panelObj.PK()]
                               );
                               $itemElement.setAttribute("draggable", "true");
                               $itemElement.addEventListener(
@@ -2713,7 +2715,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       };
       newChartData.filteredOut = this.filterTeam(newChartData);
       $node.dataset.source = JSON.stringify(newChartData);
-      isServerSideUpdate && await this.refresh(isServerSideUpdate);
+      isServerSideUpdate && (await this.refresh(isServerSideUpdate));
    }
 
    async teamForm(mode, values) {
