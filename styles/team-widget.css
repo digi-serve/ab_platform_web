@@ -99,7 +99,7 @@ org-chart tr.lines .downLine {
    flex-direction: row;
    align-items: center;
    justify-content: center;
-   gap: 5%;
+   gap: 2%;
 }
 
 .team-group-record:hover {

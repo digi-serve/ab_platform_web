@@ -115,9 +115,8 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          const $group = event.currentTarget;
          const $content = $group.parentElement;
          const newGroupDataPK = $group.dataset.pk;
-         const newNodeDataPK = JSON.parse(
-            $content.parentElement.dataset.source
-         )._rawData[nodeObjPK];
+         const newNodeDataPK = JSON.parse($content.parentElement.dataset.source)
+            ._rawData[nodeObjPK];
          let {
             source: updatedData,
             pk: dataPK,
@@ -134,9 +133,10 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                // Employee can have multiple assignments but not the same team, so don't close
                // existing
                const $contentRecords =
-               $content.getElementsByClassName("team-group-record");
+                  $content.getElementsByClassName("team-group-record");
                for (const $contentRecord of $contentRecords) {
                   const contentData = JSON.parse($contentRecord.dataset.source);
+                  this._setUpdatedBy(contentObj, contentData);
                   if (contentData[contentLinkedFieldColumnName] == dataPK) {
                      contentData[contentDateEndFieldColumnName] = newDate;
                      pendingPromises.push(
@@ -164,6 +164,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      entityDC.getCursor()
                   );
                }
+               this._setUpdatedBy(contentObj, updatedData);
                pendingPromises.push(
                   contentModel.create(updatedData),
                   (async () => {
@@ -194,6 +195,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                delete updatedData["created_at"];
                delete updatedData["updated_at"];
                delete updatedData["properties"];
+               this._setUpdatedBy(contentObj, updatedData);
                if (dropContentToCreate) {
                   const pendingPromises = [];
 
@@ -334,6 +336,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          ] = JSON.parse(eventDetail.dropZone.dataset.source)._rawData.id;
          const dc = this.datacollection;
          this.busy();
+         this._setUpdatedBy(dc.datasource, dragedRecord);
          try {
             await dc.model.update(dragedRecord.id, dragedRecord);
          } catch (err) {
@@ -757,6 +760,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                delete newFormData["created_at"];
                delete newFormData["updated_at"];
                delete newFormData["properties"];
+               this._setUpdatedBy(contentObj, newFormData);
                for (const editContentFieldToCreateNew of editContentFieldsToCreateNew) {
                   const editContentFieldToCreateNewColumnName =
                      contentObj.fieldByID(
@@ -786,6 +790,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                         const oldData = {};
 
                         oldData[contentDateEndFieldColumnName] = new Date();
+                        this._setUpdatedBy(contentObj, oldData);
                         pendingPromises.push(
                            contentModel.update(dataID, oldData)
                         );
@@ -1202,7 +1207,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          element("div", "display-block"),
          element("div", "display-block display-block-right"),
       ];
-      hardcodedDisplays[1].style.width = "40%";
+      hardcodedDisplays[1].style.width = "50%";
       const $hardcodedSpecialDisplay = element(
          "div",
          "team-group-record-display"
@@ -1655,6 +1660,17 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       dc.clearAll();
       this._initDC(dc);
       await this._waitDCReady(dc);
+   }
+
+   _setUpdatedBy(obj, values) {
+      values[
+         // TODO (Guy): This should be the ABDesigner setting.
+         obj.fields(
+            (field) =>
+               field.columnName.indexOf("_last_upd_by_in_app") > -1 ||
+               field.columnName.indexOf("_update_in_app") > -1
+         )[0].columnName
+      ] = this.AB.Account.email();
    }
 
    _showDataPanel() {
@@ -2503,7 +2519,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const entityDC = this._entityDC;
       const teamDC = this.datacollection;
       const teamObj = teamDC.datasource;
-      const teamObjID = teamDC.datasource.id;
+      const teamObjID = teamObj.id;
 
       // Add the entity value
       if (entityDC) {
@@ -2523,6 +2539,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       let _rawData = values;
       if (isServerSideUpdate) {
          this.busy();
+         this._setUpdatedBy(teamObj, values);
          try {
             _rawData = await teamDC.model.create(values);
          } catch (err) {
@@ -2658,13 +2675,13 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
 
    async teamEdit(values, isServerSideUpdate = true) {
       let _rawData = values;
+      const teamDC = this.datacollection;
+      const teamObj = teamDC.datasource;
       if (isServerSideUpdate) {
          this.busy();
+         this._setUpdatedBy(teamObj, values);
          try {
-            _rawData = await this.datacollection.model.update(
-               values.id,
-               values
-            );
+            _rawData = await teamDC.model.update(values.id, values);
          } catch (err) {
             // TODO (Guy): the update error
             console.error(err);
@@ -2683,7 +2700,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          return;
       }
       const oldChartData = JSON.parse($node.dataset.source);
-      const linkFieldColumnName = this.datacollection.datasource.fieldByID(
+      const linkFieldColumnName = teamObj.fieldByID(
          this.getSettingField("teamLink").settings.linkColumn
       ).columnName;
       if (
