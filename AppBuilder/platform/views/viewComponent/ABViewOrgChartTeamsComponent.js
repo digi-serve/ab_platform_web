@@ -558,9 +558,9 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      invalidMessage = `The ${field.label} must be later than the ${contentDateStartFieldLabel}.`;
                      rules[fieldName] = (value) =>
                         value >
-                        $$(ids.contentFormData).getValues()[
-                           contentDateStartFieldColumnName
-                        ];
+                           $$(ids.contentFormData).getValues()[
+                              contentDateStartFieldColumnName
+                           ] || value == null;
                      break;
                   default:
                      rules[fieldName] = () => true;
