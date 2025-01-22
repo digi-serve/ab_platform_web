@@ -1253,7 +1253,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             continue;
          }
          const $currentDisplay = element("div", "team-group-record-display");
-
+         const displayedFieldColumnName = displayedField.columnName;
          // TODO (Guy): Now we are hardcoding for each display.
          // $rowData.appendChild($currentDisplay);
          switch (currentDisplayIndex) {
@@ -1261,6 +1261,19 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                hardcodedDisplays[0].appendChild($currentDisplay);
                break;
             case 1:
+               let i = 0;
+               while (
+                  currentDataRecords.length > 0 &&
+                  currentDataRecords[i] != null
+               )
+                  if (
+                     currentDataRecords[i][displayedFieldColumnName] == null ||
+                     currentDataRecords[i][displayedFieldColumnName] === ""
+                  )
+                     currentDataRecords.splice(i, 1);
+                  else i++;
+               if (currentDataRecords.length === 0)
+                  hardcodedDisplays[2].style.display = "none";
                hardcodedDisplays[2].appendChild($currentDisplay);
                break;
             case 2:
@@ -1275,7 +1288,6 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                break;
          }
          currentDisplayIndex++;
-         const displayedFieldColumnName = displayedField.columnName;
          const contentDisplayedFieldTypePrefix = `${displayedFieldKey}.${displayedFieldID}`;
          const contentDisplayedFieldMappingDataObj =
             JSON.parse(
