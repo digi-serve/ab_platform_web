@@ -113,9 +113,10 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          if (contentFieldLinkColumnName == null) return;
          this.busy();
          const $group = event.currentTarget;
+         const $content = $group.parentElement;
          const newGroupDataPK = $group.dataset.pk;
          const newNodeDataPK = JSON.parse(
-            $group.parentElement.parentElement.dataset.source
+            $content.parentElement.dataset.source
          )._rawData[nodeObjPK];
          let {
             source: updatedData,
@@ -130,20 +131,20 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                   contentObj.fieldByID(contentLinkedFieldID).columnName;
                const pendingPromises = [];
                const newDate = new Date();
-               // Employee can have multiple assignments, so don't close
+               // Employee can have multiple assignments but not the same team, so don't close
                // existing
-               // const $contentRecords =
-               // document.getElementsByClassName("team-group-record");
-               // for (const $contentRecord of $contentRecords) {
-               //    const contentData = JSON.parse($contentRecord.dataset.source);
-               //    if (contentData[contentLinkedFieldColumnName] == dataPK) {
-               //       contentData[contentDateEndFieldColumnName] = newDate;
-               //       pendingPromises.push(
-               //          contentModel.update(contentData.id, contentData)
-               //       );
-               //       draggedNodes.push($contentRecord);
-               //    }
-               // }
+               const $contentRecords =
+               $content.getElementsByClassName("team-group-record");
+               for (const $contentRecord of $contentRecords) {
+                  const contentData = JSON.parse($contentRecord.dataset.source);
+                  if (contentData[contentLinkedFieldColumnName] == dataPK) {
+                     contentData[contentDateEndFieldColumnName] = newDate;
+                     pendingPromises.push(
+                        contentModel.update(contentData.id, contentData)
+                     );
+                     draggedNodes.push($contentRecord);
+                  }
+               }
                updatedData = {};
                updatedData[contentDateStartFieldColumnName] = newDate;
                updatedData[contentLinkedFieldColumnName] =
