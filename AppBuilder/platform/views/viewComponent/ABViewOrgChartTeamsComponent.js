@@ -1201,6 +1201,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          element("div", "display-block"),
          element("div", "display-block display-block-right"),
       ];
+      hardcodedDisplays[1].style.width = "40%";
       const $hardcodedSpecialDisplay = element(
          "div",
          "team-group-record-display"

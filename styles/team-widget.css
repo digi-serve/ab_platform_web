@@ -88,6 +88,7 @@ org-chart tr.lines .downLine {
 }
 
 .team-group-record {
+   padding: 5px;
    width: 100%;
    border-width: 4px;
    border-style: solid;
