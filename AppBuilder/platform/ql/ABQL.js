@@ -219,7 +219,8 @@ class ABQL extends ABQLCore {
     * @return {obj}
     */
    uiNextRow(id) {
-      const options = this.constructor.NextQLOps.map((op) => {
+      const nextOptions = this.NextQLOps ?? this.constructor.NextQLOps;
+      const options = nextOptions.map((op) => {
          return { id: op.key, value: op.label };
       });
 
@@ -247,7 +248,7 @@ class ABQL extends ABQLCore {
 
                      if (newValue === oldValue) return;
 
-                     const newOP = this.constructor.NextQLOps.find(
+                     const newOP = nextOptions.find(
                         (op) => op.key === newValue
                      );
 
@@ -539,7 +540,7 @@ class ABQL extends ABQLCore {
                         }
                      }
                   ]);
-                  
+
                }); */
             }
 
