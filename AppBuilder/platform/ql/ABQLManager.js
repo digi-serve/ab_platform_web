@@ -144,7 +144,7 @@ const ABQLManager = {
 
             const nextRow = parseCurrent(
                rows,
-               currOP.constructor.NextQLOps,
+               currOP.NextQLOps ?? currOP.constructor.NextQLOps,
                currOP
             );
 
