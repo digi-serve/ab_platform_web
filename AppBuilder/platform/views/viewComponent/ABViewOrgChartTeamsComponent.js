@@ -130,6 +130,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                   contentObj.fieldByID(contentLinkedFieldID).columnName;
                const pendingPromises = [];
                const newDate = new Date();
+
                // Employee can have multiple assignments but not the same team, so don't close
                // existing
                const $contentRecords =
@@ -181,6 +182,25 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                await Promise.all(pendingPromises);
             } else {
                updatedData = JSON.parse(updatedData);
+               const $contentRecords =
+                  $content.getElementsByClassName("team-group-record");
+               const dataPanelDCs = this._dataPanelDCs;
+               for (const dataPanelDC of dataPanelDCs) {
+                  const dataPanelLinkedFieldColumnName =
+                     dataPanelDC.datasource.connectFields(
+                        (connectField) =>
+                           connectField.datasourceLink === contentObj
+                     )[0].columnName;
+                  for (const $contentRecord of $contentRecords)
+                     if (
+                        JSON.parse($contentRecord.dataset.source)[
+                           dataPanelLinkedFieldColumnName
+                        ] == updatedData[dataPanelLinkedFieldColumnName]
+                     ) {
+                        this.ready();
+                        return;
+                     }
+               }
 
                // This is move form another team node
                // Move the child node to the target
