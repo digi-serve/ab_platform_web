@@ -196,9 +196,12 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                         $contentRecord.dataset.source
                      );
                      if (
-                        updatedData.id != contentRecord.id &&
-                        contentRecord[dataPanelLinkedFieldColumnName] ==
-                           updatedData[dataPanelLinkedFieldColumnName]
+                        (updatedData.id != contentRecord.id &&
+                           contentRecord[dataPanelLinkedFieldColumnName] ==
+                              updatedData[dataPanelLinkedFieldColumnName]) ||
+                        (updatedData.id == contentRecord.id &&
+                           updatedData[contentGroupByFieldColumnName] ==
+                              $group.dataset.pk)
                      ) {
                         this.ready();
                         return;
@@ -211,13 +214,6 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                const $draggedNode = document.querySelector(
                   `#${this.contentNodeID(updatedData.id)}`
                );
-               if (
-                  updatedData[contentGroupByFieldColumnName] ==
-                  $group.dataset.pk
-               ) {
-                  this.ready();
-                  return;
-               }
                $draggedNode.parentNode.removeChild($draggedNode);
                $group
                   .querySelector(".team-group-content")
