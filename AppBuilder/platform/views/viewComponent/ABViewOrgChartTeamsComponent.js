@@ -191,15 +191,19 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                         (connectField) =>
                            connectField.datasourceLink === contentObj
                      )[0].columnName;
-                  for (const $contentRecord of $contentRecords)
+                  for (const $contentRecord of $contentRecords) {
+                     const contentRecord = JSON.parse(
+                        $contentRecord.dataset.source
+                     );
                      if (
-                        JSON.parse($contentRecord.dataset.source)[
-                           dataPanelLinkedFieldColumnName
-                        ] == updatedData[dataPanelLinkedFieldColumnName]
+                        updatedData.id != contentRecord.id &&
+                        contentRecord[dataPanelLinkedFieldColumnName] ==
+                           updatedData[dataPanelLinkedFieldColumnName]
                      ) {
                         this.ready();
                         return;
                      }
+                  }
                }
 
                // This is move form another team node
@@ -207,6 +211,13 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                const $draggedNode = document.querySelector(
                   `#${this.contentNodeID(updatedData.id)}`
                );
+               if (
+                  updatedData[contentGroupByFieldColumnName] ==
+                  $group.dataset.pk
+               ) {
+                  this.ready();
+                  return;
+               }
                $draggedNode.parentNode.removeChild($draggedNode);
                $group
                   .querySelector(".team-group-content")
