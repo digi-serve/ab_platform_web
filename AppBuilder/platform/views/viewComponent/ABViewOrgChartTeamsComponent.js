@@ -1417,6 +1417,11 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      )
                   );
                }
+
+               // TODO (Guy): Hardcode limit text.
+               if (currentDisplayIndex - 1 === 1)
+                  $currentDisplay.textContent =
+                     $currentDisplay.textContent.slice(0, 35);
                break;
          }
          currentField = null;
