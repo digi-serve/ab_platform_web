@@ -2798,18 +2798,6 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             },
          ],
       };
-      const strategyCond = {
-         glue: "and",
-         rules: [
-            {
-               key: strategyObj.connectFields(
-                  (f) => f.settings.linkObject === entityObjID
-               )[0].columnName,
-               value: entityDCCursorID,
-               rule: "equals",
-            },
-         ],
-      };
       const subStrategyCol = this.getSettingField("subStrategy").columnName;
       const $teamFormPopup = webix.ui({
          view: "popup",
@@ -2870,7 +2858,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                                     "options",
                                     (
                                        await strategyField.getOptions(
-                                          strategyCond,
+                                          null,
                                           null,
                                           null,
                                           null,
