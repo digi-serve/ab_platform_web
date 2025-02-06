@@ -22,7 +22,9 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                contentForm: "",
                contentFormData: "",
                teamForm: "",
+               teamFormCode: "",
                teamFormPopup: "",
+               teamFormStrategy: "",
                teamFormSubmit: "",
                teamFormTitle: "",
             },
@@ -977,13 +979,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          const ids = this.ids;
          let $popup = $$(ids.filterPopup);
          if (!$popup) {
-            const strategyID =
-               this.getSettingField("teamStrategy").settings.linkObject;
-            const strategyObj = this.AB.objectByID(strategyID);
-            const strategyCodeFieldID = this.getSettingField("strategyCode").id;
-            const strategyCodeField = strategyObj.fields(
-               (f) => f.id === strategyCodeFieldID
-            )[0];
+            const self = this;
             $popup = webix.ui({
                view: "popup",
                css: "filter-popup",
@@ -1017,9 +1013,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                                     try {
                                        this.define(
                                           "options",
-                                          (
-                                             await strategyCodeField.getOptions()
-                                          ).map(fieldToOption)
+                                          await self.strategyCodeOptions()
                                        );
                                        this.refresh();
                                        this.enable();
@@ -2780,7 +2774,6 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
       const entityObjID = entityDC.datasource.id;
       const entityDCCursorID = entityDC.getCursor().id;
       const strategyField = teamObj.fieldByID(settings.teamStrategy);
-      const strategyObj = this.AB.objectByID(strategyField.settings.linkObject);
       const linkField = teamObj.fieldByID(
          this.getSettingField("teamLink").settings.linkColumn
       );
@@ -2798,12 +2791,14 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             },
          ],
       };
-      const subStrategyCol = this.getSettingField("subStrategy").columnName;
+      const self = this;
+      const labelWidth = 110;
       const $teamFormPopup = webix.ui({
          view: "popup",
          id: ids.teamFormPopup,
          close: true,
          position: "center",
+         width: 400,
          css: { "border-radius": "10px" },
          body: {
             rows: [
@@ -2839,13 +2834,17 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      {
                         view: "text",
                         label: nameField.label,
+                        labelWidth,
                         name: nameField.columnName,
                         required: true,
                      },
                      {
                         view: "richselect",
-                        label: strategyField.label,
-                        name: strategyField.columnName,
+                        label: this.label("Strategy"),
+                        labelWidth,
+                        id: this.ids.teamFormCode,
+                        // no name because we don't actually save this, it's
+                        // used to filter strategyField options
                         options: [],
                         required: true,
                         on: {
@@ -2856,23 +2855,52 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                                  this.disable();
                                  this.define(
                                     "options",
-                                    (
-                                       await strategyField.getOptions(
-                                          null,
-                                          null,
-                                          null,
-                                          null,
-                                          [subStrategyCol]
-                                       )
-                                    ).map((e) => ({
-                                       id: e.id,
-                                       value: e[`${subStrategyCol}__relation`]
-                                          .name,
-                                       // value: strategyObj.displayData(e),
-                                    }))
+                                    await self.strategyCodeOptions()
                                  );
                                  this.refresh();
                                  this.enable();
+                                 this.hideProgress();
+                              } catch {
+                                 // Close popup before response or possily response fail
+                              }
+                           },
+                           async onChange(code, previous) {
+                              if (code === previous) return;
+                              const opts = await self.strategyOptions(code);
+                              const $strategyField = $$(
+                                 self.ids.teamFormStrategy
+                              );
+                              $strategyField.define?.("options", opts);
+                              $strategyField.refresh();
+                              $strategyField.enable();
+                           },
+                        },
+                     },
+                     {
+                        view: "richselect",
+                        label: this.label("Sub Strategy"),
+                        labelWidth,
+                        name: strategyField.columnName,
+                        id: this.ids.teamFormStrategy,
+                        options: [],
+                        required: true,
+                        on: {
+                           async onViewShow() {
+                              webix.extend(this, webix.ProgressBar);
+                              this.showProgress({ type: "icon" });
+                              try {
+                                 this.disable();
+                                 const value = this.getValue();
+                                 if (value) {
+                                    const { code } = (
+                                       await self.strategyOptions()
+                                    ).find((o) => o.id === value);
+                                    const options = self.strategyOptions(code);
+                                    $$(self.ids.teamFormCode).setValue(code);
+                                    this.define("options", options);
+                                    this.refresh();
+                                    this.enable();
+                                 }
                                  this.hideProgress();
                               } catch {
                                  // Close popup before response or possily response fail
@@ -2883,6 +2911,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      {
                         view: "combo",
                         label: linkField.label,
+                        labelWidth,
                         name: linkFieldColumnName,
                         options: [],
                         required: true,
@@ -2998,6 +3027,58 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
     */
    contentNodeID(id) {
       return `contentnode_${id}`;
+   }
+
+   /**
+    * Get valid drop down option for strategyCode
+    * @returns {array}
+    */
+   async strategyCodeOptions() {
+      // These shouldn't change often so cache them to prevent extra requests
+      // to NetSuite
+      if (!this._strategyCodeOpts) {
+         const strategyID =
+            this.getSettingField("teamStrategy").settings.linkObject;
+         const strategyObj = this.AB.objectByID(strategyID);
+         const strategyCodeFieldID = this.getSettingField("strategyCode").id;
+         const strategyCodeField = strategyObj.fields(
+            (f) => f.id === strategyCodeFieldID
+         )[0];
+
+         const opts = await strategyCodeField.getOptions();
+         this._strategyCodeOpts = opts.map(fieldToOption).sort();
+      }
+      return this._strategyCodeOpts;
+   }
+
+   /**
+    * Get valid drop down option for teamStrategy based on strategyCode
+    * @param {string} code the id of a strategyCod
+    * @returns {array}
+    */
+   async strategyOptions(code) {
+      // These shouldn't change often so cache instead of querying Netsuite each
+      // time
+      if (!this._strategyOpts) {
+         const teamObj = this.datacollection.datasource;
+         const strategyField = teamObj.fieldByID(this.settings.teamStrategy);
+         const subStrategyCol = this.getSettingField("subStrategy").columnName;
+         const strategyCodeCol =
+            this.getSettingField("strategyCode").columnName;
+         const opts = await strategyField.getOptions(null, null, null, null, [
+            subStrategyCol,
+         ]);
+         this._strategyOpts = opts
+            .map((e) => ({
+               id: e.id,
+               value: e[`${subStrategyCol}__relation`].name,
+               code: e[strategyCodeCol],
+            }))
+            .sort();
+      }
+      return code
+         ? this._strategyOpts.filter((o) => o.code === code)
+         : this._strategyOpts;
    }
 
    /**
