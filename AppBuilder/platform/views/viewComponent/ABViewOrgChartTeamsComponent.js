@@ -123,6 +123,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
             contentLinkedFieldID,
          } = JSON.parse(dataTransfer.getData("text/plain"));
          const draggedNodes = [];
+         let isRefreshed = true;
          try {
             if (!updatedData) {
                // This is a drop from Employee list (new assignment)
@@ -135,50 +136,80 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                // existing
                const $contentRecords =
                   $content.getElementsByClassName("team-group-record");
+               let isUpdated = false;
                for (const $contentRecord of $contentRecords) {
                   const contentData = JSON.parse($contentRecord.dataset.source);
-                  this._setUpdatedBy(contentObj, contentData);
                   if (contentData[contentLinkedFieldColumnName] == dataPK) {
+                     this._setUpdatedBy(contentObj, contentData);
+                     if (!isUpdated) {
+                        if (
+                           contentData[contentGroupByFieldColumnName] ==
+                           newGroupDataPK
+                        ) {
+                           isRefreshed = false;
+                           isUpdated = true;
+                           continue;
+                        } else if (
+                           this._isLessThanDay(
+                              new Date(
+                                 contentData[contentDateStartFieldColumnName]
+                              )
+                           )
+                        ) {
+                           contentData[contentGroupByFieldColumnName] =
+                              this._parseDataPK(newGroupDataPK);
+                           pendingPromises.push(
+                              contentModel.update(contentData.id, contentData)
+                           );
+                           draggedNodes.push($contentRecord);
+                           isRefreshed = true;
+                           isUpdated = true;
+                           continue;
+                        }
+                     }
                      contentData[contentDateEndFieldColumnName] = newDate;
                      pendingPromises.push(
                         contentModel.update(contentData.id, contentData)
                      );
                      draggedNodes.push($contentRecord);
+                     isRefreshed = true;
                   }
                }
-               updatedData = {};
-               updatedData[contentDateStartFieldColumnName] = newDate;
-               updatedData[contentLinkedFieldColumnName] =
-                  this._parseDataPK(dataPK);
-               updatedData[contentFieldLinkColumnName] =
-                  this._parseDataPK(newNodeDataPK);
-               updatedData[contentGroupByFieldColumnName] =
-                  this._parseDataPK(newGroupDataPK);
-               const entityDC = this._entityDC;
-               if (entityDC) {
-                  const entityLink = entityDC.datasource.connectFields(
-                     (f) => f.settings.linkObject === contentObj.id
-                  )[0].id;
-                  const entityCol =
-                     this.AB.definitionByID(entityLink).columnName;
-                  updatedData[entityCol] = this._parseDataPK(
-                     entityDC.getCursor()
+               if (!isUpdated) {
+                  updatedData = {};
+                  updatedData[contentDateStartFieldColumnName] = newDate;
+                  updatedData[contentLinkedFieldColumnName] =
+                     this._parseDataPK(dataPK);
+                  updatedData[contentFieldLinkColumnName] =
+                     this._parseDataPK(newNodeDataPK);
+                  updatedData[contentGroupByFieldColumnName] =
+                     this._parseDataPK(newGroupDataPK);
+                  const entityDC = this._entityDC;
+                  if (entityDC) {
+                     const entityLink = entityDC.datasource.connectFields(
+                        (f) => f.settings.linkObject === contentObj.id
+                     )[0].id;
+                     const entityCol =
+                        this.AB.definitionByID(entityLink).columnName;
+                     updatedData[entityCol] = this._parseDataPK(
+                        entityDC.getCursor()
+                     );
+                  }
+                  this._setUpdatedBy(contentObj, updatedData);
+                  pendingPromises.push(
+                     contentModel.create(updatedData),
+                     (async () => {
+                        const $draggedNode = await this._createUIContentRecord(
+                           updatedData,
+                           "grey"
+                        );
+                        $group
+                           .querySelector(".team-group-content")
+                           .appendChild($draggedNode);
+                        draggedNodes.push($draggedNode);
+                     })()
                   );
                }
-               this._setUpdatedBy(contentObj, updatedData);
-               pendingPromises.push(
-                  contentModel.create(updatedData),
-                  (async () => {
-                     const $draggedNode = await this._createUIContentRecord(
-                        updatedData,
-                        "grey"
-                     );
-                     $group
-                        .querySelector(".team-group-content")
-                        .appendChild($draggedNode);
-                     draggedNodes.push($draggedNode);
-                  })()
-               );
                await Promise.all(pendingPromises);
             } else {
                updatedData = JSON.parse(updatedData);
@@ -223,7 +254,17 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                delete updatedData["updated_at"];
                delete updatedData["properties"];
                this._setUpdatedBy(contentObj, updatedData);
-               if (dropContentToCreate) {
+               if (
+                  !dropContentToCreate ||
+                  (updatedData[contentFieldLinkColumnName] == newNodeDataPK &&
+                     this._isLessThanDay(
+                        new Date(updatedData[contentDateStartFieldColumnName])
+                     ))
+               ) {
+                  updatedData[contentFieldLinkColumnName] = newNodeDataPK;
+                  updatedData[contentGroupByFieldColumnName] = newGroupDataPK;
+                  await contentModel.update(updatedData.id, updatedData);
+               } else {
                   const pendingPromises = [];
 
                   // TODO (Guy): Force update Date End with a current date.
@@ -240,15 +281,15 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                   updatedData[contentGroupByFieldColumnName] = newGroupDataPK;
                   pendingPromises.push(contentModel.create(updatedData));
                   await Promise.all(pendingPromises);
-               } else {
-                  updatedData[contentFieldLinkColumnName] = newNodeDataPK;
-                  updatedData[contentGroupByFieldColumnName] = newGroupDataPK;
-                  await contentModel.update(updatedData.id, updatedData);
                }
             }
          } catch (err) {
             // TODO (Guy): The update data error.
             console.log(err);
+         }
+         if (!isRefreshed) {
+            this.ready();
+            return;
          }
          try {
             // TODO (Guy): Logic to not reload dcs.
@@ -1494,6 +1535,10 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          if (JSON.stringify(newValues[key]) !== JSON.stringify(olaValues[key]))
             return true;
       return false;
+   }
+
+   _isLessThanDay(date) {
+      return Math.abs(new Date() - date) / 36e5 < 24;
    }
 
    _initDC(dc) {
