@@ -831,21 +831,42 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                delete newFormData["updated_at"];
                delete newFormData["properties"];
                this._setUpdatedBy(contentObj, newFormData);
-               for (const editContentFieldToCreateNew of editContentFieldsToCreateNew) {
-                  const editContentFieldToCreateNewColumnName =
-                     contentObj.fieldByID(
-                        editContentFieldToCreateNew
-                     )?.columnName;
-                  if (
-                     JSON.stringify(
-                        newFormData[editContentFieldToCreateNewColumnName] ?? ""
-                     ) !==
-                     JSON.stringify(
+               if (
+                  !this._isLessThanDay(
+                     new Date(
+                        contentDataRecord[contentDateStartFieldColumnName]
+                     )
+                  )
+               ) {
+                  let isCreated = false;
+                  for (const editContentFieldToCreateNew of editContentFieldsToCreateNew) {
+                     const editContentFieldToCreateNewColumnName =
+                        contentObj.fieldByID(
+                           editContentFieldToCreateNew
+                        )?.columnName;
+                     if (
+                        !isCreated &&
                         contentDataRecord[
                            editContentFieldToCreateNewColumnName
-                        ] ?? ""
-                     )
-                  ) {
+                        ] != null &&
+                        contentDataRecord[
+                           editContentFieldToCreateNewColumnName
+                        ] !== "" &&
+                        JSON.stringify(
+                           newFormData[editContentFieldToCreateNewColumnName] ??
+                              ""
+                        ) !==
+                           JSON.stringify(
+                              contentDataRecord[
+                                 editContentFieldToCreateNewColumnName
+                              ]
+                           )
+                     ) {
+                        isCreated = true;
+                        break;
+                     }
+                  }
+                  if (isCreated) {
                      Webix.confirm({
                         title: this.label("Caution: Creating New Assignment"),
                         ok: this.label("Continue with new assignment"),
