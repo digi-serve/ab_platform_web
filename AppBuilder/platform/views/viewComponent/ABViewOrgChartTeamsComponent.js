@@ -161,7 +161,14 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                            contentData[contentGroupByFieldColumnName] =
                               this._parseDataPK(newGroupDataPK);
                            pendingPromises.push(
-                              contentModel.update(contentData.id, contentData)
+                              contentModel.update(
+                                 contentData.id,
+                                 this._parseFormValueByType(
+                                    contentObj,
+                                    contentData,
+                                    contentData
+                                 )
+                              )
                            );
                            draggedNodes.push($contentRecord);
                            isRefreshed = true;
@@ -171,7 +178,14 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                      }
                      contentData[contentDateEndFieldColumnName] = newDate;
                      pendingPromises.push(
-                        contentModel.update(contentData.id, contentData)
+                        contentModel.update(
+                           contentData.id,
+                           this._parseFormValueByType(
+                              contentObj,
+                              contentData,
+                              contentData
+                           )
+                        )
                      );
                      draggedNodes.push($contentRecord);
                      isRefreshed = true;
@@ -199,7 +213,13 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                   }
                   this._setUpdatedBy(contentObj, updatedData);
                   pendingPromises.push(
-                     contentModel.create(updatedData),
+                     contentModel.create(
+                        this._parseFormValueByType(
+                           contentObj,
+                           updatedData,
+                           updatedData
+                        )
+                     ),
                      (async () => {
                         const $draggedNode = await this._createUIContentRecord(
                            updatedData,
@@ -265,14 +285,28 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                ) {
                   updatedData[contentFieldLinkColumnName] = newNodeDataPK;
                   updatedData[contentGroupByFieldColumnName] = newGroupDataPK;
-                  await contentModel.update(updatedData.id, updatedData);
+                  await contentModel.update(
+                     updatedData.id,
+                     this._parseFormValueByType(
+                        contentObj,
+                        updatedData,
+                        updatedData
+                     )
+                  );
                } else {
                   const pendingPromises = [];
 
                   // TODO (Guy): Force update Date End with a current date.
                   updatedData[contentDateEndFieldColumnName] = new Date();
                   pendingPromises.push(
-                     contentModel.update(updatedData.id, updatedData)
+                     contentModel.update(
+                        updatedData.id,
+                        this._parseFormValueByType(
+                           contentObj,
+                           updatedData,
+                           updatedData
+                        )
+                     )
                   );
                   updatedData[contentDateStartFieldColumnName] =
                      updatedData[contentDateEndFieldColumnName];
@@ -281,7 +315,15 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                   delete updatedData[contentDateEndFieldColumnName];
                   updatedData[contentFieldLinkColumnName] = newNodeDataPK;
                   updatedData[contentGroupByFieldColumnName] = newGroupDataPK;
-                  pendingPromises.push(contentModel.create(updatedData));
+                  pendingPromises.push(
+                     contentModel.create(
+                        this._parseFormValueByType(
+                           contentObj,
+                           updatedData,
+                           updatedData
+                        )
+                     )
+                  );
                   await Promise.all(pendingPromises);
                }
             }
@@ -773,6 +815,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                         view: "datepicker",
                         name: fieldName,
                         label: fieldLabel,
+                        stringResult: true,
                         labelWidth,
                         invalidMessage,
                         timepicker: fieldKey === "datetime",
@@ -1641,6 +1684,22 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
          const newValue = newFormData[columnName];
          switch (fieldKey) {
             case "date":
+               if (oldValue === undefined && newValue == null)
+                  delete newFormData[columnName];
+               else {
+                  newFormData[columnName] = new Date(newValue);
+                  if (isNaN(newFormData[columnName]))
+                     delete newFormData[columnName];
+                  else
+                     newFormData[columnName] = `${newFormData[
+                        columnName
+                     ].getFullYear()}-${String(
+                        newFormData[columnName].getMonth() + 1
+                     ).padStart(2, "0")}-${String(
+                        newFormData[columnName].getDate()
+                     ).padStart(2, "0")}`;
+               }
+               break;
             case "datetime":
                if (oldValue === undefined && newValue == null)
                   delete newFormData[columnName];
@@ -1653,20 +1712,22 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                break;
             case "connectObject":
                delete newFormData[`${columnName}__relation`];
-               if (field.linkType() === "one")
-                  switch (typeof oldValue) {
-                     case "number":
-                        newFormData[columnName] = parseInt(newValue) || null;
-                        break;
-                     default:
-                        newFormData[columnName] = newValue?.toString() || null;
-                        if (
-                           oldValue === undefined &&
-                           newFormData[columnName] == null
-                        )
-                           delete newFormData[columnName];
-                        break;
-                  }
+               if (field.linkType() === "one") {
+                  if (oldValue === undefined && newFormData[columnName] == null)
+                     delete newFormData[columnName];
+                  else
+                     switch (typeof oldValue) {
+                        case "number":
+                           newFormData[columnName] = parseInt(newValue) || null;
+                           break;
+                        case "string":
+                           newFormData[columnName] =
+                              newValue?.toString() || null;
+                           break;
+                        default:
+                           break;
+                     }
+               }
                // TODO (Guy): Many logic in the future. Now we don't have an array data changed.
                else delete newFormData[columnName];
                break;
@@ -3043,12 +3104,13 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                                  return;
                               this.teamEdit(newValues);
                            } else {
-                              newValues = this._parseFormValueByType(
-                                 teamObj,
-                                 null,
-                                 newValues
+                              this.teamAddChild(
+                                 this._parseFormValueByType(
+                                    teamObj,
+                                    null,
+                                    newValues
+                                 )
                               );
-                              this.teamAddChild(newValues);
                            }
                            $teamFormPopup.blockEvent();
                            $teamFormPopup.$view.remove();
