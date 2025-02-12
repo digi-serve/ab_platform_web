@@ -676,7 +676,9 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                         value >
                            $$(ids.contentFormData).getValues()[
                               contentDateStartFieldColumnName
-                           ] || value === "" || value == null;
+                           ] ||
+                        value === "" ||
+                        value == null;
                      break;
                   default:
                      rules[fieldName] = () => true;
@@ -2424,15 +2426,22 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
        * @param {object} node the current node
        * @param {number} [depth=0] a count of how many times we have recursed
        */
+      const teamLinkDef = this.getSettingField("teamLink");
+      const teamLinkDefColumnName = teamLinkDef.columnName;
+      const teamLinkedColumnDefColumnName = this.AB.definitionByID(
+         teamLinkDef.settings.linkColumn
+      ).columnName;
       const pullChildData = (node, depth = 0) => {
          if (depth >= TEAM_CHART_MAX_DEPTH) return;
          node.children = [];
          node._rawData[this.getSettingField("teamLink").columnName].forEach(
             (id) => {
                const childData = dc.getData((e) => e.id == id)[0];
+
                // Don't show inactive teams
                if (
                   !childData ||
+                  childData[teamLinkedColumnDefColumnName] == id ||
                   (this.__filters?.inactive == 0 &&
                      childData[this.getSettingField("teamInactive").columnName])
                )
@@ -2454,10 +2463,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                child.filteredOut = this.filterTeam(child);
                if (child.name === "External Support")
                   child.className = `strategy-external`;
-               if (
-                  childData[this.getSettingField("teamLink").columnName]
-                     .length > 0
-               ) {
+               if (childData[teamLinkDefColumnName].length > 0) {
                   pullChildData(child, depth + 1);
                }
                // If this node is filtered we still need it if it has children
