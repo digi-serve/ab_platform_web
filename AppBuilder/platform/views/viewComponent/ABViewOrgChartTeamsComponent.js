@@ -676,7 +676,7 @@ module.exports = class ABViewOrgChartTeamsComponent extends ABViewComponent {
                         value >
                            $$(ids.contentFormData).getValues()[
                               contentDateStartFieldColumnName
-                           ] || value == null;
+                           ] || value === "" || value == null;
                      break;
                   default:
                      rules[fieldName] = () => true;
