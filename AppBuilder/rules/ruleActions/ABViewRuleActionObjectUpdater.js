@@ -931,7 +931,7 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
 
          // in the case of a connected Field, we use op.value to get the
          // datacollection, and find it's currently selected value:
-         if (field.isConnection || op.valueType == "exist") {
+         if ((field.isConnection && !field.isUser) || op.valueType == "exist") {
             // NOTE: 30 May 2018 :current decision from Ric is to limit this
             // to only handle 1:x connections where we update the current obj
             // with the PK of the value from the DC.
@@ -944,7 +944,10 @@ module.exports = class ABViewRuleActionObjectUpdater extends ABViewRuleAction {
             const dataCollection = this.currentForm.AB.datacollectionByID(
                op.value
             );
-            if (!dataCollection) return;
+            if (!dataCollection) {
+               isUpdated = false;
+               return;
+            }
 
             // we don't want to mess with the dataView directly since it might
             // be used by other parts of the system and this refresh might reset
