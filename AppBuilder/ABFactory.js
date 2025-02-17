@@ -37,6 +37,7 @@ import Tenant from "../resources/Tenant.js";
 // Tenant: manages the Tenant information of the current instance
 
 import UISettings from "./uiSettings/config.js";
+import ABViewComponent from "./platform/views/viewComponent/ABViewComponent.js";
 // UISettings: detailed settings for our common UI elements
 
 class ABValidator {
@@ -113,6 +114,7 @@ class ABFactory extends ABFactoryCore {
       this.Class.FilterComplex = FilterComplex;
       this.Class.ABViewManager = ABViewManager;
       this.Class.SortPopup = SortPopup;
+      this.Class.ABViewComponent = ABViewComponent;
 
       // Temp placeholders until Resources are implemented:
       this.Analytics = {
@@ -129,6 +131,8 @@ class ABFactory extends ABFactoryCore {
             return Promise.resolve();
          }
       };
+
+      this.performance = performance;
 
       this.UISettings = UISettings;
 
