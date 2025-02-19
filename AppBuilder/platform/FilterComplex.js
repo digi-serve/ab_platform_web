@@ -40,15 +40,22 @@ function _toInternal(cond, fields = []) {
       };
 
       if (Array.isArray(cond.value)) cond.includes = cond.value;
-      else cond.includes = cond.value?.split?.(/,|:/) ?? [];
-
-      if (field?.key == "date" || field?.key == "datetime") {
-         cond.condition.filter = cond.condition.filter
-            ? AB.rules.toDate(cond.condition.filter)
-            : null;
-
-         cond.includes = cond.includes.map((v) => AB.rules.toDate(v));
+      if (
+         cond.rule === "in_query_field" ||
+         cond.rule === "not_in_query_field"
+      ) {
+         cond.includes = cond.value.split(":");
       }
+
+      // else cond.includes = cond.value?.split?.(/,|:/) ?? [];
+
+      // if (field?.key == "date" || field?.key == "datetime") {
+      //    cond.condition.filter = cond.condition.filter
+      //       ? AB.rules.toDate(cond.condition.filter)
+      //       : null;
+      //
+      //    cond.includes = cond.includes.map((v) => AB.rules.toDate(v));
+      // }
 
       delete cond.key;
       delete cond.rule;
@@ -87,7 +94,7 @@ function _toExternal(cond, fields = []) {
       cond.rule = cond.condition.type;
 
       let values =
-         cond.includes.map((v) => (v instanceof Date ? v.toISOString() : v)) ??
+         cond.includes?.map((v) => (v instanceof Date ? v.toISOString() : v)) ??
          [];
 
       // Convert multi-values to a string
@@ -112,8 +119,13 @@ function _toExternal(cond, fields = []) {
          cond.value = values
             .map((v) => {
                // Convert date format
-               if (field && (field.key === "date" || field.key === "datetime"))
+               if (
+                  field &&
+                  (field.key === "date" || field.key === "datetime") &&
+                  cond.rule != "last_days"
+               ) {
                   return field.exportValue(new Date(v));
+               }
                return v;
             })
             .join(",");
@@ -378,6 +390,59 @@ module.exports = class FilterComplex extends FilterComplexCore {
                   // value
                   break;
 
+               case "in_data_collection":
+               case "not_in_data_collection":
+                  // a value needs to exist
+                  if (!cond.value || cond.value == "") {
+                     isComplete = false;
+                  }
+                  // and it needs to reference a valid DC
+                  if (isComplete) {
+                     let dc = this.AB.datacollectionByID(cond.value);
+                     if (!dc) {
+                        isComplete = false;
+                     }
+                  }
+                  break;
+
+               case "in_query":
+               case "not_in_query":
+                  // a value needs to exist
+                  if (!cond.value || cond.value == "") {
+                     isComplete = false;
+                  }
+                  // and it needs to reference a valid query
+                  if (isComplete) {
+                     let query = this.AB.queryByID(cond.value);
+                     if (!query) {
+                        isComplete = false;
+                     }
+                  }
+                  break;
+
+               case "in_query_field":
+               case "not_in_query_field":
+                  // a value needs to exist
+                  if (!cond.value || cond.value == "") {
+                     isComplete = false;
+                  }
+                  // and it needs to reference a valid query
+                  if (isComplete) {
+                     let queryId = cond.value.split(":")[0],
+                        fieldId = cond.value.split(":")[1];
+                     let query = this.AB.queryByID(queryId);
+                     if (!query) {
+                        isComplete = false;
+                     } else {
+                        // and a valid field
+                        let field = query.fieldByID(fieldId);
+                        if (!field) {
+                           isComplete = false;
+                        }
+                     }
+                  }
+                  break;
+
                default:
                   // The rest do need a .value
                   if (!cond.value || cond.value == "") {
@@ -452,6 +517,11 @@ module.exports = class FilterComplex extends FilterComplexCore {
 
    fieldsLoad(fields = [], object = null) {
       super.fieldsLoad(fields, object);
+      // Format date types
+      fields.forEach((f) => {
+         if (f.type === "date")
+            f.format = (v) => this.AB.Webix.il8n.dateFormatStr(v);
+      });
       this.uiInit();
    }
 
@@ -496,7 +566,7 @@ module.exports = class FilterComplex extends FilterComplexCore {
          const rule = _this._fnBaseGetValue.call(this);
          if (!rule) {
             // Not sure if its a problem, so report in case it is.
-            this.AB.notify.developer(new Error("No rule found"), {
+            _this.AB.notify.developer(new Error("No rule found"), {
                context: "No rule from $filterView.GetValue()",
             });
             return;
@@ -639,13 +709,17 @@ module.exports = class FilterComplex extends FilterComplexCore {
       // Add filter options to Custom index
       const LinkType = `${field?.settings?.linkType}:${field?.settings?.linkViaType}`;
       if (
-         field?.settings?.isCustomFK &&
          // 1:M
-         (LinkType == "one:many" ||
-            // 1:1 isSource = true
-            (LinkType == "one:one" && field?.settings?.isSource))
+         LinkType == "one:many" ||
+         // 1:1 isSource = true
+         (LinkType == "one:one" && field?.settings?.isSource)
       ) {
-         result = (result ?? []).concat(this.uiTextValue(field));
+         result = result ?? [];
+
+         if (field?.settings?.isCustomFK)
+            result = result.concat(this.uiTextValue(field));
+
+         result = result.concat(this.uiQueryFieldValue(field, defaultValue));
       } else if (field?.key != "connectObject") {
          result = (result ?? [])
             .concat(this.uiTextValue(field))

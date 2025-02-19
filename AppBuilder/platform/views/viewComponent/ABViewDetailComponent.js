@@ -31,7 +31,7 @@ module.exports = class ABViewDetailComponent extends ABViewContainerComponent {
       try {
          const dataCy = `Detail ${baseView.name?.split(".")[0]} ${baseView.id}`;
 
-         $$(this.ids.component).$view.setAttribute("data-cy", dataCy);
+         $$(this.ids.component)?.$view.setAttribute("data-cy", dataCy);
       } catch (e) {
          console.warn("Problem setting data-cy", e);
       }
@@ -79,6 +79,12 @@ module.exports = class ABViewDetailComponent extends ABViewContainerComponent {
    }
 
    displayData(rowData = {}) {
+      // make sure we have data to work with.  If null is passed in
+      // then pull current cursor.
+      if (rowData == null) {
+         rowData = this.datacollection.getCursor();
+      }
+
       const views = (this.view.views() || []).sort((a, b) => {
          if (!a?.field?.() || !b?.field?.()) return 0;
 

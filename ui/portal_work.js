@@ -290,7 +290,7 @@ class PortalWork extends ClassUI {
                a.isWebApp &&
                a.isAccessibleForRoles(this.AB.Account.rolesAll() ?? [])
          ) || []
-      ).concat(this.AB.plugins() || []);
+      ).concat(this.AB.plugins().filter((p) => p.pages) || []);
 
       // Build out our Navigation Side Bar Menu with our available
       // ABApplications
@@ -578,7 +578,7 @@ class PortalWork extends ClassUI {
       const allPlaceholders = [];
 
       for (let i = 0; i < allApplications.length; i++) {
-         const pages = allApplications[i].pages() || [];
+         const pages = allApplications[i].pages?.() || [];
 
          for (let j = 0; j < pages.length; j++) {
             if (pages[j].getUserAccess?.() === 0) continue;
@@ -641,7 +641,7 @@ class PortalWork extends ClassUI {
       // Step 5: initialize the remaining Pages
       //
       for (let i = 0; i < allApplications.length; i++) {
-         const pages = allApplications[i].pages() || [];
+         const pages = allApplications[i].pages?.() || [];
 
          for (let j = 0; j < pages.length; j++) {
             if (pages[j].getUserAccess?.() === 0) continue;
