@@ -1007,6 +1007,57 @@ class ABFactory extends ABFactoryCore {
    isString(...params) {
       return _.isString(params);
    }
+
+   async scriptLoad(url) {
+      await new Promise((resolve, reject) => {
+         var cb = () => resolve();
+         // Adding the script tag to the head as suggested before
+         const head = document.head;
+         const script = document.createElement("script");
+         script.type = "text/javascript";
+         script.src = url;
+
+         // Then bind the event to the callback function.
+         // There are several events for cross browser compatibility.
+         script.onreadystatechange = cb;
+         script.onload = cb;
+         script.onerror = () => {
+            reject(
+               new Error(
+                  `Preloader:ScriptLoad(): Error loading script (${url})`
+               )
+            );
+         };
+         // Fire the loading
+         head.appendChild(script);
+      });
+   }
+
+   async scriptLoadAll(urls) {
+      urls = urls.filter((u) => u);
+      await Promise.all(urls.map((url) => this.scriptLoad(url)));
+   }
+
+   async cssLoad(url) {
+      await new Promise((resolve, reject) => {
+         const head = document.head;
+         const link = document.createElement("link");
+         link.rel = "stylesheet";
+         link.href = url;
+
+         link.onload = () => resolve();
+         link.onerror = () => {
+            reject(new Error(`Error loading CSS file (${url})`));
+         };
+
+         head.appendChild(link);
+      });
+   }
+
+   async cssLoadAll(urls) {
+      urls = urls.filter((u) => u);
+      await Promise.all(urls.map((url) => this.cssLoad(url)));
+   }
 }
 
 export default ABFactory;
