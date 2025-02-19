@@ -160,7 +160,9 @@ module.exports = class ABField extends ABFieldCore {
       // NOTE: our .migrateXXX() routines expect the object to currently exist
       // in the DB before we perform the DB operations.  So we need to
       // .migrateDrop()  before we actually .objectDestroy() this.
-      await this.migrateDrop();
+      if (!this.object.isAPI) {
+         await this.migrateDrop();
+      }
 
       // the server still references an ABField in relationship to it's
       // ABObject, so we need to destroy the Field 1st, then remove it
@@ -231,7 +233,7 @@ module.exports = class ABField extends ABFieldCore {
       // but not connectObject fields:
       // ABFieldConnect.migrateXXX() gets called from the UI popupNewDataField
       // in order to handle the timings of the 2 fields that need to be created
-      if (!this.isConnection && !skipMigrate) {
+      if (!this.isConnection && !skipMigrate && !this.object.isAPI) {
          const fnMigrate = isAdd ? this.migrateCreate() : this.migrateUpdate();
          await fnMigrate;
       }
