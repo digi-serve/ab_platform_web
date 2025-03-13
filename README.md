@@ -24,3 +24,9 @@ Anything between those 2 lines will be used as release notes when creating a ver
  - The version will be updated in `package.json`
  - A new tag and release will be created on GitHub
  - A Workflow in `AppBuilder Service Web` will be triggered to build a new Image.
+
+### Custom built docker image
+ - Your changes exist locally, since you're `build` or `watch`ing them
+ - Those changes end up in `/web`
+ - Push those changes to a new branch on `AppBuilder Service Web`
+ - Follow the directions in that repo for building a [custom image](https://github.com/digi-serve/ab_service_web/actions/workflows/docker-build-custom.yml)
