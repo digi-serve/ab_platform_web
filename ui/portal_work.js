@@ -7,6 +7,7 @@ import PortalWorkUserProfileWindow from "./portal_work_user_profile_window.js";
 import PortalWorkUserSwitcheroo from "./portal_work_user_switcheroo.js";
 import PortalWorkUserQRWindow from "./portal_work_user_qr_window.js";
 import PortalWorkUserMobileQR from "./portal_work_user_mobile_qr.js";
+import PortalWorkTaskUserForm from "./portal_work_task_user_form.js";
 import PortalAccessLevelManager from "./portal_access_level_manager.js";
 import TranslationTool from "./portal_translation_tool.js";
 import TutorialManager from "./portal_tutorial_manager.js";
@@ -277,6 +278,7 @@ class PortalWork extends ClassUI {
 
       allInits.push(PortalWorkUserProfileWindow.init(this.AB));
       allInits.push(PortalWorkUserSwitcheroo.init(this.AB));
+      PortalWorkTaskUserForm.init(this.AB);
 
       // {hash}  { ABViewPage.id : ClassUIPage() }
       // track each of the page containers (instances of ClassUIPage) that

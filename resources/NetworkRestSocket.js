@@ -19,6 +19,7 @@ const listSocketEvents = [
    "ab.datacollection.delete",
    "ab.inbox.create",
    "ab.inbox.update",
+   "ab.task.userform",
    // "ab.object.update",
 ];
 // {array}
