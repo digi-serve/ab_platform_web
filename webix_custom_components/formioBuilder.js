@@ -44,6 +44,8 @@ export default class ABCustomFormBuilderBuilder extends ABLazyCustomComponent {
     * @returns {Object} custom webix ui
     */
    ui() {
+      const _this = this;
+
       return {
          name: this.key,
          defaults: {
@@ -52,10 +54,20 @@ export default class ABCustomFormBuilderBuilder extends ABLazyCustomComponent {
             autofit: true,
          },
          $init: async function (config) {
-            const comp = this.parseDataFields(config.dataFields);
+            let comp, defaultComponent;
+
+            if (config.dataFields) {
+               comp = this.parseDataFields(config.dataFields);
+               defaultComponent = comp.approveButton.schema;
+            } else {
+               comp = _this.inputComponents();
+               defaultComponent = comp.saveButton.schema;
+            }
+
             const formComponents = config.formComponents
                ? config.formComponents
-               : { components: [comp.approveButton.schema] };
+               : { components: [defaultComponent] };
+
             try {
                this.builder = new this.FormBuilder(this.$view, formComponents, {
                   noDefaultSubmitButton: true,
@@ -85,7 +97,7 @@ export default class ABCustomFormBuilderBuilder extends ABLazyCustomComponent {
          },
          // set up a function that can be called to request the form schema
          getFormData: function () {
-            return this.builder.schema;
+            return this.builder.schema ?? this.builder.form;
          },
          // Pass functions into the Webix component to be use in $init
          label: this.label,
@@ -104,7 +116,7 @@ export default class ABCustomFormBuilderBuilder extends ABLazyCustomComponent {
     */
    parseDataFields(fields) {
       const components = {};
-      fields.forEach(({ field, key, label }) => {
+      fields?.forEach(({ field, key, label }) => {
          if (!field) return;
 
          const schema = {
@@ -259,5 +271,50 @@ export default class ABCustomFormBuilderBuilder extends ABLazyCustomComponent {
          },
       };
       return components;
+   }
+
+   inputComponents() {
+      return {
+         textbox: {
+            title: "Textbox",
+            key: "YOUR_KEY",
+            icon: "font",
+            schema: {
+               type: "textfield",
+               key: "YOUR_KEY",
+               label: "[YOUR LABEL]",
+               placeholder: "Enter your information.",
+               input: true,
+            },
+         },
+         textarea: {
+            title: "Textarea",
+            key: "YOUR_KEY",
+            icon: "bold",
+            schema: {
+               type: "textarea",
+               key: "YOUR_KEY",
+               label: "[YOUR LABEL]",
+               placeholder: "Enter your information.",
+            },
+         },
+         saveButton: {
+            title: "Submit Button",
+            key: "submit",
+            icon: "check-square",
+            schema: {
+               label: "Submit",
+               type: "button",
+               key: "submit",
+               event: "submit",
+               block: true,
+               size: "lg",
+               input: false,
+               leftIcon: "fa fa-check-square",
+               action: "event",
+               theme: "success",
+            },
+         },
+      };
    }
 }

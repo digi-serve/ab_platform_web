@@ -49,6 +49,7 @@ module.exports = class ABCustomFormIOPreview extends ABLazyCustomComponent {
             // }
 
             const form = new Form(component.$view, formComponents);
+            component._formio = form;
             // readOnly: true
             // sanitizeConfig: {
             //     addTags: ["a", "label", "img", "i"],
