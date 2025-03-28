@@ -85,7 +85,8 @@ export default class ABCustomFormBuilderBuilder extends ABLazyCustomComponent {
          },
          // set up a function that can be called to request the form schema
          getFormData: function () {
-            return this.builder.schema;
+            if (this.builder.schema) return this.builder.schema;
+            return this.builder.instance.schema;
          },
          // Pass functions into the Webix component to be use in $init
          label: this.label,

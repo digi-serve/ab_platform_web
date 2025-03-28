@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from "uuid";
 import performance from "../utils/performance";
 import FilterComplex from "./platform/FilterComplex";
 import SortPopup from "./platform/views/ABViewGridPopupSortFields";
+import Papa from "papaparse";
 
 //
 // Our Common Resources
@@ -1057,6 +1058,17 @@ class ABFactory extends ABFactoryCore {
    async cssLoadAll(urls) {
       urls = urls.filter((u) => u);
       await Promise.all(urls.map((url) => this.cssLoad(url)));
+   }
+
+   csvToJson(csvData) {
+      return Papa.parse(csvData, {
+         header: true,
+         skipEmptyLines: true,
+      });
+   }
+
+   jsonToCsv(jsonData) {
+      return Papa.unparse(jsonData);
    }
 }
 

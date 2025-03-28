@@ -329,7 +329,7 @@ class NetworkRest extends EventEmitter {
                            null
                         );
                      }
-                     return reject(packet.data);
+                     return reject(packet.message ?? packet.data);
                   } else {
                      // unknown/unexpected error:
                      var error = new Error(

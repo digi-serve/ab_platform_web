@@ -1495,7 +1495,7 @@ export default class ABViewGridComponent extends ABViewComponent {
             //       }
             //    });
          } else validator.updateGrid(editor.row, $DataTable);
-      } else $DataTable.clearSelection();
+      } else $DataTable?.clearSelection();
 
       return false;
 
@@ -1733,7 +1733,8 @@ export default class ABViewGridComponent extends ABViewComponent {
          columnHeaders = ab.cloneDeep(this.settings.columnConfig);
 
       // if that is empty for some reason, rebuild from our CurrentObject
-      if (columnHeaders.length === 0) columnHeaders = objColumnHeaders;
+      if (!columnHeaders || columnHeaders.length === 0)
+         columnHeaders = objColumnHeaders;
 
       // sanity check:
       // columnHeaders can't contain a column that doesn't exist in objColumHeaders:

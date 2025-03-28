@@ -157,6 +157,11 @@ class NetworkRestSocket extends NetworkRest {
       // Pass the io.socket.on(*) events to our AB factory.
       listSocketEvents.forEach((ev) => {
          io.socket.on(ev, (data) => {
+            // data should be in the format:
+            // {
+            //    objectId: {uuid},
+            //    data: {object}
+            // }
             socketDataLog(this.AB, ev, data);
 
             // ensure we only process a network update 1x
@@ -172,8 +177,25 @@ class NetworkRestSocket extends NetworkRest {
                if (values) {
                   let obj = this.AB.objectByID(data.objectId);
                   if (obj) {
-                     let model = obj.model();
                      if (ev != "ab.datacollection.delete") {
+                        // if data is packed, then unpack it
+                        let model = obj.model();
+                        if (model.isCsvPacked(values)) {
+                           let lengthPacked = data.__length;
+                           delete data.__length;
+                           values = model.csvUnpack(values);
+                           data.data = values.data;
+                           let lengthUnpacked = JSON.stringify(data).length;
+                           data.__length = lengthUnpacked;
+                           data.__lengthPacked = lengthPacked;
+                           console.log(
+                              `CSV Pack: ${lengthUnpacked} -> ${lengthPacked} (${(
+                                 (lengthPacked / lengthUnpacked) *
+                                 100
+                              ).toFixed(2)}%)`
+                           );
+                        }
+
                         let jobID = this.AB.jobID();
                         performance.mark(`${ev}:normalization`, {
                            op: "function",
