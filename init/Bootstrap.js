@@ -139,8 +139,21 @@ class Bootstrap extends EventEmitter {
          // If no user and tenant isn't using local auth start
          // the external auth workflow:
          if (tenantConfig.authType !== "login") {
-            window.location.assign("/auth/login");
-            return;
+            // window.location.assign("/auth/login");
+            if (tenantConfig.authType == "cas") {
+               const urlParams = new URLSearchParams(window.location.search);
+               if (!urlParams.has("ticket")) {
+                  const CAS_SERVER = "https://signin.l2d.biz/cas";
+                  const SERVICE_URL = encodeURIComponent(
+                     window.location.origin + "/"
+                  );
+                  // const SERVICE_URL = "";
+                  window.location.assign(
+                     `${CAS_SERVER}/login?service=${SERVICE_URL}`
+                  );
+                  return;
+               }
+            }
          }
          // Keep going if the tenant is using local auth
       }

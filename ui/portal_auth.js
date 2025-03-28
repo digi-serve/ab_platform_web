@@ -33,6 +33,10 @@ class PortalAuth extends ClassUI {
             this.ActivePortal = PortalAuthLogin;
             break;
 
+         case "cas":
+            this.ActivePortal = PortalAuthLogin;
+            break;
+
          case "passwordless":
             break;
 
