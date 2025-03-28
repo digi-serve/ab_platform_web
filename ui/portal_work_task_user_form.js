@@ -9,9 +9,6 @@ class PortalWorkTaskUserForm extends ClassUI {
 
    ui() {
       const ids = this.ids;
-      const L = (...params) => {
-         return this.label(...params);
-      };
 
       return {
          id: ids.component,
@@ -52,22 +49,41 @@ class PortalWorkTaskUserForm extends ClassUI {
       };
    }
 
-   uiFormIO(formComponents = { components: [] }) {
+   uiFormIO(
+      processId,
+      taskId,
+      instanceId,
+      formComponents = { components: [] }
+   ) {
       const ids = this.ids;
+      const _this = this;
 
       return {
          id: ids.formIO,
          view: "formiopreview",
+         processId,
+         taskId,
+         instanceId,
          formComponents: formComponents,
-         onButton: function (value) {
-            // self.processItem(id, task, value);
+         onButton: function () {
+            _this.submitData(this.processId, this.taskId, this.instanceId);
          },
       };
    }
 
-   refreshFormIO(formComponents = { components: [] }) {
+   refreshFormIO(
+      processId,
+      taskId,
+      instanceId,
+      formComponents = { components: [] }
+   ) {
       const ids = this.ids;
-      const formIoDef = this.uiFormIO(formComponents);
+      const formIoDef = this.uiFormIO(
+         processId,
+         taskId,
+         instanceId,
+         formComponents
+      );
 
       this.AB.Webix.ui(formIoDef, $$(ids.formIO));
    }
@@ -79,7 +95,12 @@ class PortalWorkTaskUserForm extends ClassUI {
       this.AB.custom.formiopreview.init();
       this.AB.Webix.ui(ui);
       this.AB.on("ab.task.userform", (data) => {
-         this.refreshFormIO(data.formio);
+         this.refreshFormIO(
+            data.processId,
+            data.taskId,
+            data.instanceId,
+            data.formio
+         );
          this.show();
       });
    }
@@ -92,6 +113,22 @@ class PortalWorkTaskUserForm extends ClassUI {
    hide() {
       const $popup = $$(this.ids.component);
       $popup?.hide();
+   }
+
+   submitData(processID, taskID, instanceID) {
+      const ids = this.ids;
+      const values = $$(ids.formIO)?._formio?.instance?.data ?? null;
+      if (!values) return;
+
+      this.AB.Network.post({
+         url: `/process/userform/${processID}/${taskID}`,
+         data: {
+            instanceID,
+            values,
+         },
+      });
+
+      this.hide();
    }
 }
 
