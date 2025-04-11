@@ -98,6 +98,16 @@ module.exports = class ABModel extends ABModelCore {
             return;
          }
 
+         // String Results
+         if (typeof data === "string") {
+            // if we have a string, then we are expecting a json object
+            try {
+               data = JSON.parse(data);
+            } catch (e) {
+               // if we can't parse the string, then just return it as is.
+            }
+         }
+
          // let jobID = this.AB.jobID();
          // console.log(`${jobID} : normalization begin`);
          // let timeFrom = performance.now();
