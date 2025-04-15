@@ -329,10 +329,14 @@ class NetworkRest extends EventEmitter {
                            null
                         );
                      }
-                     return reject(packet.data);
+                     let error = new Error(packet.message ?? packet.data);
+                     error.response = packet;
+                     error.text = packet.message;
+                     error.url = `${params.method} ${params.url}`;
+                     return reject(error);
                   } else {
                      // unknown/unexpected error:
-                     var error = new Error(
+                     let error = new Error(
                         `${err.status} ${err.statusText || err.message}: ${
                            params.method
                         } ${params.url}`
