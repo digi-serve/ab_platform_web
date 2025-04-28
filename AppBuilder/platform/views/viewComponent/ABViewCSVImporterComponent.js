@@ -1,3 +1,4 @@
+const ABFieldUser = require("../../dataFields/ABFieldUser");
 const ABViewComponent = require("./ABViewComponent").default;
 const CSVImporter = require("../../CSVImporter");
 
@@ -785,7 +786,9 @@ module.exports = class ABViewCSVImporterComponent extends ABViewComponent {
 
             if (f.datasourceLink) {
                linkFieldOptions = f.datasourceLink
-                  .fields((fld) => !fld.isConnection)
+                  .fields(
+                     (fld) => !fld.isConnection || fld instanceof ABFieldUser
+                  )
                   .map((fld) => {
                      return {
                         id: fld.id,
@@ -1564,11 +1567,16 @@ module.exports = class ABViewCSVImporterComponent extends ABViewComponent {
                   const data = list.data || list;
 
                   (data || []).forEach((row) => {
-                     // store in hash[field.id] = { 'searchKey' : "uuid" }
+                     if (row[f.searchField.columnName] == null) return;
+
+                     // store in hash[field.id] = { 'searchKey' : { "objectPK": uuid, "indexKey": any } }
+                     const storeKeys = {};
+                     storeKeys[connectObject.PK()] = row[connectObject.PK()];
+                     storeKeys[linkIdKey] = row[linkIdKey];
 
                      hashLookups[connectField.id][
                         row[f.searchField.columnName]
-                     ] = row[linkIdKey];
+                     ] = storeKeys;
                   });
                } catch (err) {
                   console.error(err);
