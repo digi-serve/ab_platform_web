@@ -1,3 +1,4 @@
+const ABFieldUser = require("../../dataFields/ABFieldUser");
 const ABViewComponent = require("./ABViewComponent").default;
 const CSVImporter = require("../../CSVImporter");
 
@@ -785,7 +786,9 @@ module.exports = class ABViewCSVImporterComponent extends ABViewComponent {
 
             if (f.datasourceLink) {
                linkFieldOptions = f.datasourceLink
-                  .fields((fld) => !fld.isConnection)
+                  .fields(
+                     (fld) => !fld.isConnection || fld instanceof ABFieldUser
+                  )
                   .map((fld) => {
                      return {
                         id: fld.id,
@@ -1538,6 +1541,7 @@ module.exports = class ABViewCSVImporterComponent extends ABViewComponent {
 
          (connectedFields || []).forEach((f) => {
             const connectField = f.field;
+            const linkType = `${connectField.settings.linkType}:${connectField.settings.linkViaType}`;
             // const searchWord = newRowData[f.columnIndex];
             const connectObject = connectField.datasourceLink;
 
@@ -1564,11 +1568,21 @@ module.exports = class ABViewCSVImporterComponent extends ABViewComponent {
                   const data = list.data || list;
 
                   (data || []).forEach((row) => {
-                     // store in hash[field.id] = { 'searchKey' : "uuid" }
+                     if (row[f.searchField.columnName] == null) return;
+
+                     // store in hash[field.id] = { 'searchKey' : { "objectPK": uuid, "indexKey": any } }
+                     let storeKeys;
+                     if (linkType == "many:many" || linkType == "many:one") {
+                        storeKeys = {};
+                        storeKeys[connectObject.PK()] = row[connectObject.PK()];
+                        storeKeys[linkIdKey] = row[linkIdKey];
+                     } else if (linkType == "one:many") {
+                        storeKeys = row[linkIdKey];
+                     }
 
                      hashLookups[connectField.id][
                         row[f.searchField.columnName]
-                     ] = row[linkIdKey];
+                     ] = storeKeys;
                   });
                } catch (err) {
                   console.error(err);
