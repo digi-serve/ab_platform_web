@@ -1541,6 +1541,7 @@ module.exports = class ABViewCSVImporterComponent extends ABViewComponent {
 
          (connectedFields || []).forEach((f) => {
             const connectField = f.field;
+            const linkType = `${connectField.settings.linkType}:${connectField.settings.linkViaType}`;
             // const searchWord = newRowData[f.columnIndex];
             const connectObject = connectField.datasourceLink;
 
@@ -1570,9 +1571,14 @@ module.exports = class ABViewCSVImporterComponent extends ABViewComponent {
                      if (row[f.searchField.columnName] == null) return;
 
                      // store in hash[field.id] = { 'searchKey' : { "objectPK": uuid, "indexKey": any } }
-                     const storeKeys = {};
-                     storeKeys[connectObject.PK()] = row[connectObject.PK()];
-                     storeKeys[linkIdKey] = row[linkIdKey];
+                     let storeKeys;
+                     if (linkType == "many:many" || linkType == "many:one") {
+                        storeKeys = {};
+                        storeKeys[connectObject.PK()] = row[connectObject.PK()];
+                        storeKeys[linkIdKey] = row[linkIdKey];
+                     } else if (linkType == "one:many") {
+                        storeKeys = row[linkIdKey];
+                     }
 
                      hashLookups[connectField.id][
                         row[f.searchField.columnName]
