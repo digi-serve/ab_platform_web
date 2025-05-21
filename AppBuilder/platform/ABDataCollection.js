@@ -436,7 +436,10 @@ module.exports = class ABDataCollection extends ABDataCollectionCore {
                (start, count) => {
                   if (start < 0) start = 0;
 
-                  let key = `${start}-${count}`;
+                  // since the where clause can change if we are following
+                  // another cursor, include the where as part of the key:
+                  let [where] = this.getWhereClause(start, 0);
+                  let key = `${JSON.stringify(where)}-${start}-${count}`;
                   if (this.blacklistLoadData[key]) {
                      return false;
                   }
