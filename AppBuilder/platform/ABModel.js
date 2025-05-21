@@ -110,7 +110,25 @@ module.exports = class ABModel extends ABModelCore {
             if (this.isCsvPacked(data)) {
                let lengthPacked = JSON.stringify(data).length;
                data = this.csvUnpack(data);
-               let lengthUnpacked = JSON.stringify(data).length;
+
+               // JOHNNY: getting "RangeError: Invalid string length"
+               // when data.data is too large. So we are just going
+               // to .stringify() the rows individually and count the
+               // length of each one.
+
+               let lengthUnpacked = 0;
+               for (var d = 0; d < data.data.length; d++) {
+                  lengthUnpacked += JSON.stringify(data.data[d]).length;
+               }
+
+               Object.keys(data)
+                  .filter((k) => k != "data")
+                  .map((k) => {
+                     lengthUnpacked += `${k}:${data[k]},`.length;
+                  });
+
+               lengthUnpacked += 5; // for the brackets
+
                console.log(
                   `CSV Pack: ${lengthUnpacked} -> ${lengthPacked} (${(
                      (lengthPacked / lengthUnpacked) *
