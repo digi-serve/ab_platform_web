@@ -5,6 +5,12 @@ module.exports = class ABDataCollection extends ABDataCollectionCore {
    constructor(attributes, AB) {
       super(attributes, AB);
       this.setMaxListeners(0);
+      this.blacklistLoadData = {};
+      // { key : ?? }
+      // keep track of previous loadData() calls that might not
+      // have fully completed yet. We don't want to get in a
+      // race condition where we keep trying to load the same frame
+      // over and over again.
    }
 
    /**
@@ -134,6 +140,7 @@ module.exports = class ABDataCollection extends ABDataCollectionCore {
    }
 
    loadData(start, limit = 20) {
+      console.log(`loadData: ${start}, ${limit}`);
       return super.loadData(start, limit).catch((err) => {
          // hideProgressOfComponents() is a platform specific action.
          this.hideProgressOfComponents();
@@ -429,8 +436,19 @@ module.exports = class ABDataCollection extends ABDataCollectionCore {
                (start, count) => {
                   if (start < 0) start = 0;
 
+                  // since the where clause can change if we are following
+                  // another cursor, include the where as part of the key:
+                  let [where] = this.getWhereClause(start, 0);
+                  let key = `${JSON.stringify(where)}-${start}-${count}`;
+                  if (this.blacklistLoadData[key]) {
+                     return false;
+                  }
+                  this.blacklistLoadData[key] = true;
                   // load more data to the data collection
-                  this.loadData(start, count);
+                  this.loadData(start, count).finally(() => {
+                     // remove from blacklist
+                     delete this.blacklistLoadData[key];
+                  });
 
                   return false; // <-- prevent the default "onDataRequest"
                }
