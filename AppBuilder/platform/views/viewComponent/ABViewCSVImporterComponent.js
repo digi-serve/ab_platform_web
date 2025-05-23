@@ -17,6 +17,7 @@ module.exports = class ABViewCSVImporterComponent extends ABViewComponent {
                uploadFileList: "",
                separatedBy: "",
                headerOnFirstLine: "",
+               keys: "",
                columnList: "",
 
                search: "",
@@ -148,6 +149,27 @@ module.exports = class ABViewCSVImporterComponent extends ABViewComponent {
                                  this.populateColumnList();
                               },
                            },
+                        },
+                        {
+                           cols: [
+                              {
+                                 id: ids.keys,
+                                 view: "multiselect",
+                                 label: this.label("Keys"),
+                                 options: [],
+                                 labelWidth: 140,
+                                 disabled: true,
+                              },
+                              {
+                                 view: "icon",
+                                 icon: "fa fa-info-circle",
+                                 align: "left",
+                                 disabled: false,
+                                 tooltip: this.label(
+                                    "Specifying keys will update existing records if matching keys are found; otherwise, new records will be inserted."
+                                 ),
+                              },
+                           ],
                         },
                      ],
                   },
@@ -439,6 +461,7 @@ module.exports = class ABViewCSVImporterComponent extends ABViewComponent {
       this.AB.Webix.ui([], $$(ids.columnList));
 
       $$(ids.headerOnFirstLine).disable();
+      $$(ids.keys).disable();
       $$(ids.importButton).disable();
 
       $$(ids.search).setValue("");
@@ -529,9 +552,11 @@ module.exports = class ABViewCSVImporterComponent extends ABViewComponent {
 
       // read CSV file
       const $headerOnFirstLine = $$(ids.headerOnFirstLine);
+      const $keys = $$(ids.keys);
       const $importButton = $$(ids.importButton);
 
       $headerOnFirstLine.enable();
+      $keys.enable();
       $importButton.enable();
 
       this._dataRows = await csvImporter.getDataRows(
@@ -664,6 +689,7 @@ module.exports = class ABViewCSVImporterComponent extends ABViewComponent {
                onChange: function () {
                   self.toggleLinkFields(this);
                   self.loadDataToGrid();
+                  self.refreshKeysOption();
                },
             },
          };
@@ -831,6 +857,7 @@ module.exports = class ABViewCSVImporterComponent extends ABViewComponent {
       });
       abWebix.ui(uiColumns, $columnList);
 
+      this.refreshKeysOption();
       this.loadDataToGrid();
    }
 
@@ -867,6 +894,23 @@ module.exports = class ABViewCSVImporterComponent extends ABViewComponent {
       }
 
       return false;
+   }
+
+   refreshKeysOption() {
+      const ids = this.ids;
+
+      // populate Keys option
+      const matchFields = this.getMatchFields();
+      const $keys = $$(ids.keys);
+      $keys.define({
+         options: matchFields.map((f) => {
+            const fld = f.field;
+            return {
+               id: fld.id,
+               value: fld.label,
+            };
+         }),
+      });
    }
 
    loadDataToGrid() {
@@ -1309,6 +1353,13 @@ module.exports = class ABViewCSVImporterComponent extends ABViewComponent {
          position: 0.0001,
       });
 
+      // Get keys of records
+      const $keys = $$(ids.keys);
+      const keys = $keys.getValue().split(",");
+      const keyColumnNames = keys
+         .map((key) => currentObject.fieldByID(key)?.columnName)
+         .filter((colName) => colName);
+
       // get richselect components
       const matchFields = this.getMatchFields();
 
@@ -1651,6 +1702,7 @@ module.exports = class ABViewCSVImporterComponent extends ABViewComponent {
                   try {
                      const result = await objModel.batchCreate({
                         batch: newRowsData,
+                        keyColumnNames,
                      });
                      const resultErrors = result.errors;
 
