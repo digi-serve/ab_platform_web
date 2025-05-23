@@ -98,44 +98,56 @@ module.exports = class ABModel extends ABModelCore {
             return;
          }
 
+         if (this.isCsvPacked(data)) {
+            let lengthPacked = JSON.stringify(data).length;
+            data = this.csvUnpack(data);
+
+            // JOHNNY: getting "RangeError: Invalid string length"
+            // when data.data is too large. So we are just going
+            // to .stringify() the rows individually and count the
+            // length of each one.
+
+            let lengthUnpacked = 0;
+            if (Array.isArray(data.data)) {
+               for (var d = 0; d < data.data.length; d++) {
+                  lengthUnpacked += JSON.stringify(data.data[d]).length;
+               }
+            } else {
+               lengthUnpacked += JSON.stringify(data.data).length;
+            }
+
+            Object.keys(data)
+               .filter((k) => k != "data")
+               .map((k) => {
+                  lengthUnpacked += `${k}:${data[k]},`.length;
+               });
+
+            lengthUnpacked += 5; // for the brackets
+
+            console.log(
+               `CSV Pack: ${lengthUnpacked} -> ${lengthPacked} (${(
+                  (lengthPacked / lengthUnpacked) *
+                  100
+               ).toFixed(2)}%)`
+            );
+         }
+
          // let jobID = this.AB.jobID();
          // console.log(`${jobID} : normalization begin`);
          // let timeFrom = performance.now();
          if (key) {
             // on "update" & "create" we want to normalizeData()
             if (key.indexOf("delete") == -1) {
+               // on anything with a key, we shouldn't have data.data
+               data = data.data || data;
+
                this.normalizeData(data);
+            } else {
+               // triggers to ab.datacollection.delete need to send the .id
+               // of the item deleted:
+               data = data.data || context.id;
             }
          } else {
-            if (this.isCsvPacked(data)) {
-               let lengthPacked = JSON.stringify(data).length;
-               data = this.csvUnpack(data);
-
-               // JOHNNY: getting "RangeError: Invalid string length"
-               // when data.data is too large. So we are just going
-               // to .stringify() the rows individually and count the
-               // length of each one.
-
-               let lengthUnpacked = 0;
-               for (var d = 0; d < data.data.length; d++) {
-                  lengthUnpacked += JSON.stringify(data.data[d]).length;
-               }
-
-               Object.keys(data)
-                  .filter((k) => k != "data")
-                  .map((k) => {
-                     lengthUnpacked += `${k}:${data[k]},`.length;
-                  });
-
-               lengthUnpacked += 5; // for the brackets
-
-               console.log(
-                  `CSV Pack: ${lengthUnpacked} -> ${lengthPacked} (${(
-                     (lengthPacked / lengthUnpacked) *
-                     100
-                  ).toFixed(2)}%)`
-               );
-            }
             // on a findAll we normalize data.data
             this.normalizeData(data.data);
          }

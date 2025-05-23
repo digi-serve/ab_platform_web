@@ -222,7 +222,12 @@ class NetworkRest extends EventEmitter {
          if (this.AB.Account.authToken) {
             params.headers.Authorization = this.AB.Account.authToken;
          }
-         params.headers["Content-type"] = "application/json";
+         // Fix: don't set content-type if passed in data is a FormData object.
+         if (
+            Object.prototype.toString.call(params.data) !== "[object FormData]"
+         ) {
+            params.headers["Content-type"] = "application/json";
+         }
 
          var tenantID = this.AB.Tenant.id();
          if (tenantID) {

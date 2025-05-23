@@ -248,7 +248,7 @@ class Network extends EventEmitter {
     */
    isNetworkConnected() {
       // if this is a Web Client and using sails.socket.io
-      if (io && io.socket && io.socket.isConnected) {
+      if (typeof io != "undefined" && io.socket && io.socket.isConnected) {
          return io.socket.isConnected();
       }
 
