@@ -504,11 +504,16 @@ class PortalWork extends ClassUI {
       const queryParams = new URLSearchParams(window.location.search);
       if (queryParams.has("app") && queryParams.has("page")) {
          const appID = queryParams.get("app");
-         this.AppState = {
-            lastSelectedApp: appID,
-            lastPages: {},
-         };
-         this.AppState.lastPages[appID] = queryParams.get("page");
+         // Check its a real appID to address: https://github.com/digi-serve/ab_platform_web/security/code-scanning/630
+         if (!this.AB.applicationByID(appID)) {
+            console.error(`Trying to Navigate to unknown app ${appID}`);
+         } else {
+            this.AppState = {
+               lastSelectedApp: appID,
+               lastPages: {},
+            };
+            this.AppState.lastPages[appID] = queryParams.get("page");
+         }
       }
 
       // 1.2 Load the last app / page from storage
