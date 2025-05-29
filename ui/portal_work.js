@@ -492,8 +492,30 @@ class PortalWork extends ClassUI {
       //
       // Step 1: prepare the AppState so we can determine which options
       // should be pre selected.
-      //
-      const AppState = (await this.AB.Storage.get(this.storageKey)) ?? {
+
+      /**
+       * @typedef {Object} AppState
+       * @property {string} lastSelectedApp ABApplication.id of the last App selected,
+       * @property {Object} lastPages a lookup of all the last selected Pages for each Application {hash}  { ABApplication.id : ABPage.id }
+       */
+
+      // 1.1 Check for App & Page secified on the route (query params /?app=...&page=...)
+      // Ref: https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
+      const queryParams = new URLSearchParams(window.location.search);
+      if (queryParams.has("app") && queryParams.has("page")) {
+         const appID = queryParams.get("app");
+         this.AppState = {
+            lastSelectedApp: appID,
+            lastPages: {},
+         };
+         this.AppState.lastPages[appID] = queryParams.get("page");
+      }
+
+      // 1.2 Load the last app / page from storage
+      this.AppState =
+         this.AppState ?? (await this.AB.Storage.get(this.storageKey));
+      // 1.3 Create a new AppState
+      this.AppState = this.AppState ?? {
          lastSelectedApp: null,
          // {string}  the ABApplication.id of the last App selected
 
@@ -501,8 +523,6 @@ class PortalWork extends ClassUI {
          // {hash}  { ABApplication.id : ABPage.id }
          // a lookup of all the last selected Pages for each Application
       };
-
-      this.AppState = AppState;
 
       // set default selected App if not already set
       // just choose the 1st App in the list (must have pages that we have
