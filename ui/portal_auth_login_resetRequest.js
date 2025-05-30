@@ -91,7 +91,8 @@ class PortalAuthLoginResetRequest extends ClassUI {
                                              ),
                                              validateEvent: "blur",
                                              attributes: {
-                                                "data-cy": "portal_reset_request_email",
+                                                "data-cy":
+                                                   "portal_reset_request_email",
                                              },
                                           },
                                           {
@@ -142,7 +143,9 @@ class PortalAuthLoginResetRequest extends ClassUI {
                                                    },
                                                    on: {
                                                       onAfterRender() {
-                                                         ClassUI.CYPRESS_REF(this);
+                                                         ClassUI.CYPRESS_REF(
+                                                            this
+                                                         );
                                                       },
                                                    },
                                                 },
