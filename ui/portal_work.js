@@ -503,16 +503,17 @@ class PortalWork extends ClassUI {
       // Ref: https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
       const queryParams = new URLSearchParams(window.location.search);
       if (queryParams.has("app") && queryParams.has("page")) {
-         const appID = queryParams.get("app");
+         const appParam = queryParams.get("app");
          // Check its a real appID to address: https://github.com/digi-serve/ab_platform_web/security/code-scanning/630
-         if (!this.AB.applicationByID(appID)) {
-            console.error(`Trying to Navigate to unknown app ${appID}`);
+         const app = this.AB.applicationByID(appParam);
+         if (!app) {
+            console.error(`Trying to Navigate to unknown app ${appParam}`);
          } else {
             this.AppState = {
-               lastSelectedApp: appID,
+               lastSelectedApp: app.id,
                lastPages: {},
             };
-            this.AppState.lastPages[appID] = queryParams.get("page");
+            this.AppState.lastPages[app.id] = queryParams.get("page");
          }
       }
 
