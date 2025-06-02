@@ -492,8 +492,36 @@ class PortalWork extends ClassUI {
       //
       // Step 1: prepare the AppState so we can determine which options
       // should be pre selected.
-      //
-      const AppState = (await this.AB.Storage.get(this.storageKey)) ?? {
+
+      /**
+       * @typedef {Object} AppState
+       * @property {string} lastSelectedApp ABApplication.id of the last App selected,
+       * @property {Object} lastPages a lookup of all the last selected Pages for each Application {hash}  { ABApplication.id : ABPage.id }
+       */
+
+      // 1.1 Check for App & Page secified on the route (query params /?app=...&page=...)
+      // Ref: https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
+      const queryParams = new URLSearchParams(window.location.search);
+      if (queryParams.has("app") && queryParams.has("page")) {
+         const appParam = queryParams.get("app");
+         // Check its a real appID to address: https://github.com/digi-serve/ab_platform_web/security/code-scanning/630
+         const app = this.AB.applicationByID(appParam);
+         if (!app) {
+            console.error(`Trying to Navigate to unknown app ${appParam}`);
+         } else {
+            this.AppState = {
+               lastSelectedApp: app.id,
+               lastPages: {},
+            };
+            this.AppState.lastPages[app.id] = queryParams.get("page");
+         }
+      }
+
+      // 1.2 Load the last app / page from storage
+      this.AppState =
+         this.AppState ?? (await this.AB.Storage.get(this.storageKey));
+      // 1.3 Create a new AppState
+      this.AppState = this.AppState ?? {
          lastSelectedApp: null,
          // {string}  the ABApplication.id of the last App selected
 
@@ -501,8 +529,6 @@ class PortalWork extends ClassUI {
          // {hash}  { ABApplication.id : ABPage.id }
          // a lookup of all the last selected Pages for each Application
       };
-
-      this.AppState = AppState;
 
       // set default selected App if not already set
       // just choose the 1st App in the list (must have pages that we have
