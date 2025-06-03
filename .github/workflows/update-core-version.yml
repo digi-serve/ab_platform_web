@@ -2,13 +2,16 @@ name: "Update Core Version"
 run-name: Update core to ${{ github.event.client_payload.version }}
 on:
   repository_dispatch:
-    type: [core_new_version]
+    types: [core_new_version]
+permissions:
+  # Needed for Update Sub Repo Job
+  contents: write
 jobs:
   call-update-sub:
     name: Update
     uses: digi-serve/.github/.github/workflows/update-sub-repo.yml@master
     secrets: 
-      TOKEN:  ${{ secrets.PAT }}
+      TOKEN:  ${{ secrets.GITHUB_TOKEN }}
     with:
       repository: digi-serve/appbuilder_class_core
       short_name: core
@@ -49,16 +52,17 @@ jobs:
       tag: v${{ needs.call-bump-version.outputs.new_version }}
       body: "- core updated to v${{ github.event.client_payload.version }}"
 
-  call-dispatch-runtime-update:
-    name: Dipsatch AB Runtime Update
+  call-dispatch-web-update:
     needs: [ call-merge-release, call-bump-version ]
-    uses: ./.github/workflows/dispatch-web-update.yml
+    uses: digi-serve/.github/.github/workflows/dispatch-web-update.yml@master
     with:
+      dispatch_repos: '["ab_service_web"]'
+      dispatch_type: "web_new_version"
       type: patch
       version: ${{ needs.call-bump-version.outputs.new_version }}
-      repo: ab_platform_web
+      app_id: ${{ vars.GS_DEV_APP_ID }}
     secrets:
-      TOKEN: ${{ secrets.PAT }}
+      app_token: ${{ secrets.GS_DEV_APP_PK }}
 
   call-open-pr-fail:
     name: Tests Failed

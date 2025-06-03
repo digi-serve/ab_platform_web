@@ -22,12 +22,12 @@ jobs:
                - branch: master
                  webpack: update
       steps:
-         - uses: actions/checkout@v3
+         - uses: actions/checkout@v4
            with:
               path: ab_platform_web
               submodules: true
               ref: ${{ inputs.ref }}
-         - uses: actions/checkout@v3
+         - uses: actions/checkout@v4
            with:
               path: web
               repository: digi-serve/ab_service_web
@@ -51,7 +51,7 @@ jobs:
               repository: digi-serve/ab_service_web
 
          - name: Check out kitchen-sink tests
-           uses: actions/checkout@v2
+           uses: actions/checkout@v4
            with:
               repository: digi-serve/kitchensink_app
               path: ab/test/e2e/cypress/e2e/kitchensink_app

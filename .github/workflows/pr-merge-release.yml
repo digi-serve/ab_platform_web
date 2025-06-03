@@ -31,13 +31,14 @@ jobs:
     needs: [call-bump-version]
     with:
       tag: v${{ needs.call-bump-version.outputs.new_version }}
-  dispatch-web-update:
-    name: Dipsatch Web Service Update
+  call-dispatch-web-update:
     needs: [ call-bump-version, call-get-label ]
-    uses: ./.github/workflows/dispatch-web-update.yml
+    uses: digi-serve/.github/.github/workflows/dispatch-web-update.yml@master
     with:
+      dispatch_repos: '["ab_service_web"]'
+      dispatch_type: "web_new_version"
       type: ${{ needs.call-get-label.outputs.label }}
       version: ${{ needs.call-bump-version.outputs.new_version }}
-      repo: ab_platform_web
+      app_id: ${{ vars.GS_DEV_APP_ID }}
     secrets:
-      TOKEN: ${{ secrets.PAT }}
+      app_token: ${{ secrets.GS_DEV_APP_PK }}
