@@ -33,7 +33,7 @@ jobs:
       tag: v${{ needs.call-bump-version.outputs.new_version }}
   call-dispatch-web-update:
     needs: [ call-bump-version, call-get-label ]
-    uses: digi-serve/.github/.github/workflows/dispatch-web-update.yml@master
+    uses: digi-serve/.github/.github/workflows/dispatch-update.yml@master
     with:
       dispatch_repos: '["ab_service_web"]'
       dispatch_type: "web_new_version"
