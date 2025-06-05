@@ -1,7 +1,7 @@
 import { EventEmitter } from "events";
 
-class ClassUI extends EventEmitter {
-   constructor(base, ids) {
+export default class ClassUI extends EventEmitter {
+   constructor(base, ids, AB = null) {
       super();
 
       this.ids = {};
@@ -56,6 +56,10 @@ class ClassUI extends EventEmitter {
 
       // and make sure there is a .component set:
       this.ids.component = this.ids.component || base;
+
+      if (AB) {
+         this.AB = AB;
+      }
    }
 
    /**
@@ -160,5 +164,3 @@ class ClassUI extends EventEmitter {
       return this.WARNING_ICON.replace("pulseLight", "pulseDark");
    }
 }
-
-export default ClassUI;
