@@ -75,7 +75,7 @@ module.exports = class ABProcess extends ABProcessCore {
     * @return {Promise}
     *						.resolve( {this} )
     */
-   save() {
+   save(skipElements = false) {
       // if this is an update:
       // if (this.id) {
       // 	return ABDefinition.update(this.id, this.toDefinition());
@@ -86,10 +86,12 @@ module.exports = class ABProcess extends ABProcessCore {
 
       // make sure all our tasks have save()ed.
       var allSaves = [];
-      var allTasks = this.elements();
-      allTasks.forEach((t) => {
-         allSaves.push(t.save());
-      });
+      if (!skipElements) {
+         var allTasks = this.elements();
+         allTasks.forEach((t) => {
+            allSaves.push(t.save());
+         });
+      }
       return Promise.all(allSaves).then(() => {
          // now we can save our Process definition
          return this.toDefinition()
@@ -122,7 +124,7 @@ module.exports = class ABProcess extends ABProcessCore {
                });
 
                if (needSave) {
-                  return this.save();
+                  return this.save(true);
                }
             });
       });

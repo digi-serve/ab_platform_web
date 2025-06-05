@@ -17,6 +17,7 @@ module.exports = class CalculateTask extends CalculateTaskCore {
       if (this.formulaText) {
          const hash = {};
          (this.process.processDataFields(this) || []).forEach((item) => {
+            if (!item) return;
             hash[`{${item.label}}`] = item;
          });
 

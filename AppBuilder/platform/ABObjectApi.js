@@ -57,6 +57,10 @@ module.exports = class ABObjectApi extends ABObjectApiCore {
       await this.save();
    }
 
+   fromValues(values) {
+      super.fromValues(values)
+   }
+
    /**
     * @method save()
     *
