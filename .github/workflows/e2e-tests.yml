@@ -30,7 +30,7 @@ jobs:
          - uses: actions/checkout@v4
            with:
               path: web
-              repository: digi-serve/ab_service_web
+              repository: CruGlobal/ab_service_web
               token: ${{ secrets.GITHUB_TOKEN }}
               ref: ${{ matrix.branch }}
 
@@ -44,16 +44,16 @@ jobs:
          # webpack expects the folder to be called "web" ab-install action expects "ab_service_web"
          - run: mv web ab_service_web
 
-         - uses: digi-serve/ab-install-action@v1
+         - uses: CruGlobal/ab-install-action@v1
            with:
               port: 8080
               folder: ab
-              repository: digi-serve/ab_service_web
+              repository: CruGlobal/ab_service_web
 
          - name: Check out kitchen-sink tests
            uses: actions/checkout@v4
            with:
-              repository: digi-serve/kitchensink_app
+              repository: CruGlobal/kitchensink_app
               path: ab/test/e2e/cypress/e2e/kitchensink_app
 
          # These next steps are to save our ablogs to file

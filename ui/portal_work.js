@@ -504,7 +504,7 @@ class PortalWork extends ClassUI {
       const queryParams = new URLSearchParams(window.location.search);
       if (queryParams.has("app") && queryParams.has("page")) {
          const appParam = queryParams.get("app");
-         // Check its a real appID to address: https://github.com/digi-serve/ab_platform_web/security/code-scanning/630
+         // Check its a real appID to address: https://github.com/CruGlobal/ab_platform_web/security/code-scanning/630
          const app = this.AB.applicationByID(appParam);
          if (!app) {
             console.error(`Trying to Navigate to unknown app ${appParam}`);

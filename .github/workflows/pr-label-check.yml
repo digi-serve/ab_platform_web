@@ -6,4 +6,4 @@ on:
 jobs:
   call-check-pr:
     name: Check
-    uses: digi-serve/.github/.github/workflows/check-pr-release-label.yml@master
+    uses: CruGlobal/.github/.github/workflows/check-pr-release-label.yml@master
