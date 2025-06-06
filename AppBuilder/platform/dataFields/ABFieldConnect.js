@@ -154,8 +154,16 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          },
 
          // Support partial matches
-         filter: ({ value }, search) =>
-            (value ?? "").toLowerCase().includes((search ?? "").toLowerCase()),
+         filter: function ({ value }, search) {
+            if (this._largeOptions) {
+               field.getAndPopulateOptions(this, { search }, field);
+               return true;
+            } else {
+               return (value ?? "")
+                  .toLowerCase()
+                  .includes((search ?? "").toLowerCase());
+            }
+         },
       };
 
       if (multiselect) {
@@ -244,7 +252,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
     *
     * @return {Promise}
     */
-   async getOptions(whereClause, term, sort, editor, populate = false) {
+   async getOptions(whereClause, term, sort, editor) {
       const theEditor = editor;
 
       if (theEditor) {
@@ -358,6 +366,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          }
 
          const storageID = this.getStorageID(where);
+         const OPTION_ITEM_LIMIT = 100;
 
          Promise.resolve()
             .then(async () => {
@@ -383,7 +392,8 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                   return linkedModel.findAll({
                      where: where,
                      sort: sort,
-                     populate,
+                     populate: false,
+                     limit: OPTION_ITEM_LIMIT,
                   });
                };
 
@@ -440,6 +450,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                         where: whereRels,
                         sort: sortRels,
                         populate: false,
+                        limit: OPTION_ITEM_LIMIT,
                      });
                   };
                }
@@ -458,6 +469,12 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                      opt.text = linkedObj.displayData(opt);
                      opt.value = opt.text;
                   });
+
+                  // If the number of available options exceeds the threshold, set a flag to indicate that the dataset is large.
+                  // so that we can handle this in the editor.
+                  // This is to prevent performance issues with large datasets.
+                  editor._largeOptions =
+                     results[0].total_count > OPTION_ITEM_LIMIT;
 
                   // 8/10/2023 - We are not actually using this (see line 338) - If we need to store
                   // user data in local storage we should encrypt it.
@@ -665,7 +682,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       return new Promise((resolve, reject) => {
          this.getOptions(
             combineFilters,
-            "",
+            options?.search ?? "",
             options?.sort ?? "",
             theEditor
          ).then(async (data) => {
