@@ -369,15 +369,26 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          // Searching for a term
          term = term || "";
          if (term != null && term != "") {
+            const termCond = {
+               glue: "or",
+               rules: [],
+            };
             linkedObj.fields().forEach((f) => {
-               if (f.key != "string" && f.key != "LongText") return;
+               if (
+                  f.key != "string" &&
+                  f.key != "LongText" &&
+                  f.key != "AutoIndex"
+               )
+                  return;
 
-               where.rules.push({
+               termCond.rules.push({
                   key: f.id,
                   rule: "contains",
                   value: term,
                });
             });
+
+            where.rules.push(termCond);
          }
 
          Promise.resolve()
