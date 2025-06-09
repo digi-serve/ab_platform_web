@@ -155,7 +155,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
          // Support partial matches
          filter: function ({ value }, search) {
-            if (this._largeOptions) {
+            if (field._largeOptions) {
                field.getAndPopulateOptions(this, { search }, field);
                return true;
             } else {
@@ -268,7 +268,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
             theEditor._getOptionsResolve = resolve;
             theEditor._getOptionsThrottle = setTimeout(() => {
                resolve(true);
-            }, 100);
+            }, 350);
          });
          if (!theEditor._timeToPullData) return;
       }
@@ -304,8 +304,6 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          if (!where.glue) where.glue = "and";
 
          if (!where.rules) where.rules = [];
-
-         term = term || "";
 
          // check if linked object value is not define, should return a empty array
          if (!this.settings.linkObject) return [];
@@ -367,6 +365,20 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
 
          const storageID = this.getStorageID(where);
          const OPTION_ITEM_LIMIT = 100;
+
+         // Searching for a term
+         term = term || "";
+         if (term != null && term != "") {
+            linkedObj.fields().forEach((f) => {
+               if (f.key != "string" && f.key != "LongText") return;
+
+               where.rules.push({
+                  key: f.id,
+                  rule: "contains",
+                  value: term,
+               });
+            });
+         }
 
          Promise.resolve()
             .then(async () => {
@@ -473,7 +485,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                   // If the number of available options exceeds the threshold, set a flag to indicate that the dataset is large.
                   // so that we can handle this in the editor.
                   // This is to prevent performance issues with large datasets.
-                  editor._largeOptions =
+                  this._largeOptions =
                      results[0].total_count > OPTION_ITEM_LIMIT;
 
                   // 8/10/2023 - We are not actually using this (see line 338) - If we need to store

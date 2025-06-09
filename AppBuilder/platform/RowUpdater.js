@@ -409,6 +409,17 @@ class RowUpdater extends ClassUI {
          case "connectObject":
          case "user":
             inputView = inputView.rows[0].rows[0];
+            inputView.suggest.filter = function ({ value }, search) {
+               if (field._largeOptions) {
+                  field.getAndPopulateOptions(this, { search }, field);
+                  return true;
+               } else {
+                  return (value ?? "")
+                     .toLowerCase()
+                     .includes((search ?? "").toLowerCase());
+               }
+            };
+
             inputView.suggest.body.data =
                (await field.getOptions()).map((e) => {
                   return {
