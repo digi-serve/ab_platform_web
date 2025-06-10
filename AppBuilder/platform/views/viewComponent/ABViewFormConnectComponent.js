@@ -98,8 +98,17 @@ module.exports = class ABViewFormConnectComponent extends (
             },
          },
          // Support partial matches
-         filter: ({ value }, search) =>
-            value.toLowerCase().includes(search.toLowerCase()),
+         filter: function ({ value }, search) {
+            if (field._largeOptions && this._search != search) {
+               this._search = search;
+               field.getAndPopulateOptions(this, { search }, field);
+               return true;
+            } else {
+               return (value ?? "")
+                  .toLowerCase()
+                  .includes((search ?? "").toLowerCase());
+            }
+         },
       };
 
       _ui.onClick = {
