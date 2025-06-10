@@ -149,13 +149,15 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
       config.suggest = {
          on: {
             onBeforeShow: function () {
+               this._search = null; // reset search
                field.openOptions(this);
             },
          },
 
          // Support partial matches
          filter: function ({ value }, search) {
-            if (field._largeOptions) {
+            if (field._largeOptions && this._search != search) {
+               this._search = search;
                field.getAndPopulateOptions(this, { search }, field);
                return true;
             } else {
@@ -496,8 +498,9 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                   // If the number of available options exceeds the threshold, set a flag to indicate that the dataset is large.
                   // so that we can handle this in the editor.
                   // This is to prevent performance issues with large datasets.
-                  this._largeOptions =
-                     results[0].total_count > OPTION_ITEM_LIMIT;
+                  if (this._largeOptions == null)
+                     this._largeOptions =
+                        results[0].total_count > OPTION_ITEM_LIMIT;
 
                   // 8/10/2023 - We are not actually using this (see line 338) - If we need to store
                   // user data in local storage we should encrypt it.
