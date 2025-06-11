@@ -9,6 +9,14 @@ module.exports = class ABModelAPINetsuite extends ABModel {
    ///
    /// Instance Methods
    ///
+   async create(values) {
+      const newVals = await super.create(values);
+      this.AB.emit("ab.datacollection.create", {
+         objectId: this.object.id,
+         data: newVals,
+      });
+      return newVals;
+   }
 
    /**
     * @method normalizeData()
