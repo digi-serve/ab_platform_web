@@ -366,7 +366,7 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
          }
 
          const storageID = this.getStorageID(where);
-         const OPTION_ITEM_LIMIT = 100;
+         const OPTION_ITEM_LIMIT = 50;
 
          // Searching for a term
          term = term || "";
@@ -434,7 +434,8 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                // if we are looking at a field in a form we look at linkViaOneValues
                // if we are looking at a grid we are editing we look at theEditor?.config?.value
                if (
-                  this?.settings?.linkViaType == "one" &&
+                  (this?.settings?.linkViaType == "one" ||
+                     this._largeOptions) &&
                   (this?.linkViaOneValues || theEditor?.config?.value)
                ) {
                   let values = "";
@@ -469,6 +470,22 @@ module.exports = class ABFieldConnect extends ABFieldConnectCore {
                         rule: "equals",
                         value: v,
                      });
+
+                     if (this.indexField) {
+                        whereRels.rules.push({
+                           key: this.indexField.id,
+                           rule: "equals",
+                           value: v,
+                        });
+                     }
+
+                     if (this.indexField2) {
+                        whereRels.rules.push({
+                           key: this.indexField2.id,
+                           rule: "equals",
+                           value: v,
+                        });
+                     }
                   });
                   selected = function () {
                      return linkedModel.findAll({

@@ -167,8 +167,9 @@ module.exports = class ABViewFormComponent extends ABViewComponent {
                linkViaOneConnection.forEach((f) => {
                   const field = f.field();
                   if (
-                     field?.settings?.linkViaType == "one" &&
-                     field?.linkViaOneValues
+                     (field?.settings?.linkViaType == "one" &&
+                        field?.linkViaOneValues) ||
+                     field?._largeOptions
                   ) {
                      delete field.linkViaOneValues;
                      const relationVals =

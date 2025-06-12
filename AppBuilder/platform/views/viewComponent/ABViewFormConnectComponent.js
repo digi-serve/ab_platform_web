@@ -236,10 +236,21 @@ module.exports = class ABViewFormConnectComponent extends (
 
       // Q: if we don't have a $formItem, is any of the rest valid?
       if ($formItem) {
+         const prepedVals = selectedValues.join
+            ? selectedValues.join()
+            : selectedValues;
+
+         $formItem.blockEvent();
+         $formItem.setValue(prepedVals);
+         $formItem.unblockEvent();
+
          // for xxx->one connections we need to populate again before setting
          // values because we need to use the selected values to add options
          // to the UI
-         if (this?.field?.settings?.linkViaType == "one") {
+         if (
+            this?.field?.settings?.linkViaType == "one" ||
+            this?.field?._largeOptions
+         ) {
             this.busy();
             await field.getAndPopulateOptions(
                $formItem,
@@ -250,17 +261,8 @@ module.exports = class ABViewFormConnectComponent extends (
             this.ready();
          }
 
-         $formItem.blockEvent();
-
          // store the user's selected option in local storage.
          field.saveSelect(selectedValues);
-
-         const prepedVals = selectedValues.join
-            ? selectedValues.join()
-            : selectedValues;
-
-         $formItem.setValue(prepedVals);
-         $formItem.unblockEvent();
       }
    }
 
