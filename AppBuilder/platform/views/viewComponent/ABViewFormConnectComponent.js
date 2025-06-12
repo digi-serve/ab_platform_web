@@ -29,6 +29,7 @@ module.exports = class ABViewFormConnectComponent extends (
    }
 
    ui() {
+      const _this = this;
       const field = this.field;
       const baseView = this.view;
       const form = baseView.parentFormComponent();
@@ -101,7 +102,7 @@ module.exports = class ABViewFormConnectComponent extends (
          filter: function ({ value }, search) {
             if (field._largeOptions && this._search != search) {
                this._search = search;
-               field.getAndPopulateOptions(this, { search }, field);
+               _this._refreshOptions(search);
                return true;
             } else {
                return (value ?? "")
@@ -252,18 +253,45 @@ module.exports = class ABViewFormConnectComponent extends (
             this?.field?._largeOptions
          ) {
             this.busy();
-            await field.getAndPopulateOptions(
-               $formItem,
-               baseView.options,
-               field,
-               baseView.parentFormComponent()
-            );
+            await this._refreshOptions();
             this.ready();
          }
 
          // store the user's selected option in local storage.
          field.saveSelect(selectedValues);
       }
+   }
+
+   _timeout(ms) {
+      return new Promise(resolve => {
+         this.__throttleRefreshOption = setTimeout(() => {
+            delete this.__throttleRefreshOption;
+            resolve();
+         }, ms);
+      });
+   }
+
+   async _refreshOptions(search) {
+      if (this.__throttleRefreshOption)
+         clearTimeout(this.__throttleRefreshOption);
+
+      await this._timeout(200);
+
+      const field = this.field;
+      const idFormItem = this.ids.formItem;
+      const baseView = this.view;
+      let options = baseView.options ?? {};
+      if (search) {
+         options = this.AB.cloneDeep(options);
+         options.search = search;
+      }
+
+      return await field.getAndPopulateOptions(
+         $$(idFormItem),
+         options,
+         field,
+         baseView.parentFormComponent()
+      );
    }
 
    async init(AB, options) {
@@ -322,12 +350,7 @@ module.exports = class ABViewFormConnectComponent extends (
       // Refresh option list
       this.busy();
       field.clearStorage(this.view.settings.filterConditions);
-      const data = await field.getAndPopulateOptions(
-         $formItem,
-         this.view.options,
-         field,
-         this.view.parentFormComponent()
-      );
+      const data = await this._refreshOptions();
       this.ready();
 
       // field.once("option.data", (data) => {
@@ -592,12 +615,7 @@ module.exports = class ABViewFormConnectComponent extends (
                               this.label("Select items")
                            );
                            this.busy();
-                           await field.getAndPopulateOptions(
-                              $node,
-                              baseView.options,
-                              field,
-                              baseView.parentFormComponent()
-                           );
+                           await this._refreshOptions();
                            this.ready();
                         } else {
                            $node.define("disabled", true);
@@ -650,13 +668,7 @@ module.exports = class ABViewFormConnectComponent extends (
 
       this.busy();
       try {
-         await field.getAndPopulateOptions(
-            // $node,
-            $formItem,
-            baseView.options,
-            field,
-            baseView.parentFormComponent()
-         );
+         await this._refreshOptions();
       } catch (err) {
          this.AB.notify.developer(err, {
             context:
